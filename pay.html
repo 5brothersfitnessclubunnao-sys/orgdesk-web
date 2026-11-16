@@ -1,86 +1,572 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Pay Fee</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b0b0d">
-<link rel="stylesheet" href="ui.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Yash Fitness Club - Fees Portal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="core.js"></script>
-<script src="templates.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;}
+
+body{
+  background: linear-gradient(rgba(10, 10, 10, 0.88), rgba(10, 10, 10, 0.94)), url('owner.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.main-card{
+  background: rgba(18, 16, 5, 0.92);
+  border: 2px solid #ffcc00;
+  border-radius: 18px;
+  max-width: 520px;
+  width: 100%;
+  padding: 16px;
+  box-shadow: 0 0 30px rgba(255,204,0,0.25);
+  margin-bottom: 20px;
+  backdrop-filter: blur(8px);
+}
+
+.header{text-align:center;border-bottom:2px dashed #ffcc00;padding-bottom:10px;margin-bottom:12px;position:relative;}
+.header h1{color:#ffcc00;font-size:20px;letter-spacing:1px;font-weight:900;}
+.tagline{color:#e6c300;font-size:10px;font-weight:700;margin-top:4px;background:rgba(255,204,0,0.12);display:inline-block;padding:2px 8px;border-radius:10px;}
+
+.nav-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.tab-btn{background:#181818;border:1.5px solid #444;color:#bbb;padding:9px 4px;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;}
+.tab-btn.active{background:#ffcc00;color:#000;border-color:#ffcc00;}
+
+.field-group{margin-bottom:10px;position:relative;}
+label{display:block;font-size:11px;color:#ddd;margin-bottom:3px;font-weight:600;}
+label span{color:#ff3333;}
+input, select, textarea{width:100%;background:#181818;border:1.5px solid #444;color:#fff;padding:9px;border-radius:8px;font-size:12px;outline:none;}
+input:focus, select:focus, textarea:focus{border-color:#ffcc00;background:#141414;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.box-panel{background:#141414;border:1.5px solid #333;border-radius:10px;padding:11px;margin-bottom:11px;}
+.btn-submit{width:100%;background:#25D366;color:#000;border:none;padding:12px;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;margin-top:10px;}
+.btn-admin{background:#ffcc00;color:#000;border:none;padding:6px 12px;border-radius:6px;font-weight:bold;font-size:11px;cursor:pointer;}
+.late-warning{background:rgba(255,0,0,0.18);border:1.5px solid #ff3333;color:#ff6666;padding:8px;border-radius:8px;margin-bottom:10px;font-size:12px;font-weight:bold;display:none;text-align:center;}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #181818;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+.checkbox-container input {
+  width: 16px;
+  height: 16px;
+  accent-color: #ffcc00;
+  cursor: pointer;
+}
+.checkbox-container span {
+  font-size: 11px;
+  color: #ffcc00;
+  font-weight: bold;
+}
+
+table{width:100%;border-collapse:collapse;font-size:11px;text-align:left;}
+th, td{padding:8px 5px;border-bottom:1px solid #333;vertical-align:middle;}
+th{color:#ffcc00;}
+
+.pagination-bar{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px dashed #444;}
+.page-btn{background:#222;border:1px solid #ffcc00;color:#ffcc00;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;}
+.page-btn:disabled{border-color:#555;color:#666;cursor:not-allowed;}
+
+#receiptModal, #upiPayModal, #hurrayModal, #addMemberModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:99999;justify-content:center;align-items:flex-start;padding:12px;overflow-y:auto;}
+.receipt-wrapper{max-width:420px;width:100%;margin:15px auto;position:relative;}
+.receipt-card{background:#fff;color:#000;border-radius:12px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden;}
+.receipt-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%) rotate(-30deg);font-size:26px;font-weight:900;color:rgba(0, 0, 0, 0.06);white-space:nowrap;pointer-events:none;text-transform:uppercase;letter-spacing:2px;z-index:1;}
+.receipt-header{text-align:center;border-bottom:2px dashed #000;padding-bottom:6px;margin-bottom:6px;position:relative;z-index:2;}
+.r-row{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;border-bottom:1px dotted #ccc;padding-bottom:2px;position:relative;z-index:2;}
+.action-btns{display:flex;gap:6px;margin-top:8px;}
+.dl-btn{flex:1;background:#000;color:#ffcc00;border:none;padding:10px;border-radius:6px;font-weight:bold;cursor:pointer;}
+.wa-btn{flex:1;background:#25D366;color:#fff;border:none;padding:10px;border-radius:6px;font-weight:bold;cursor:pointer;}
+
+.sug-box{display:none;position:absolute;left:0;width:calc(200% + 8px);top:100%;z-index:60;background:#181818;border:1.5px solid #ffcc00;border-radius:8px;max-height:230px;overflow:auto;padding:6px;box-shadow:0 8px 20px rgba(0,0,0,.7);}
+.sug-item{background:#222;border:1px solid #444;border-radius:6px;padding:8px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;}
+.sug-item:active{background:#333;}
+.lock-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#181818;border:1.5px solid #444;border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:11px;font-weight:700;color:#ffcc00;}
+.lock-bar.open{border-color:#00ff99;color:#00ff99;}
+.lock-bar button{background:transparent;border:1.5px solid #ffcc00;color:#ffcc00;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.lock-bar.open button{border-color:#00ff99;color:#00ff99;}
+.is-locked{background:#111 !important;color:#aaa !important;cursor:not-allowed;opacity:.85;}
+
+#feesWelcomeModal {
+  display: flex; position: fixed; inset: 0; z-index: 999999;
+  background: #000; justify-content: center; align-items: center;
+  padding: 0; margin: 0; width: 100vw; height: 100vh; height: 100dvh;
+}
+#feesWelcomeModal .welcome-inner {
+  width: 100%; height: 100%; max-width: none; max-height: none;
+  border-radius: 0; border: none;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 24px 20px;
+  background: radial-gradient(ellipse at 50% 30%, #2a2200 0%, #0a0a0a 55%, #000 100%);
+}
+.welcome-icon { font-size: 64px; margin-bottom: 12px; }
+.welcome-title { color: #ffcc00; font-size: clamp(22px, 6vw, 36px); font-weight: 900; line-height: 1.25; margin: 0 0 10px; text-align: center; }
+.welcome-sub { color: #00ff99; font-size: clamp(14px, 3.5vw, 18px); font-weight: bold; margin: 0 0 8px; text-align: center; }
+.welcome-btn {
+  width: min(320px, 90%); margin-top: 28px; background: #ffcc00; color: #000;
+  border: none; padding: 16px 20px; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer;
+}
+
+.receipt-footer-stamp{display:flex;justify-content:space-between;align-items:flex-end;margin-top:12px;padding-top:8px;border-top:1px dashed #000;position:relative;z-index:2;}
+.receipt-sign-box{text-align:left;}
+.receipt-sign-img{height:46px;width:auto;max-width:150px;object-fit:contain;display:block;}
+.receipt-owner-txt{font-size:9px;color:#333;line-height:1.3;margin-top:2px;}
+.receipt-owner-txt strong{display:block;font-size:10px;color:#000;}
+.receipt-stamp-box{width:70px;height:70px;}
+.receipt-stamp-img{width:70px;height:70px;object-fit:cover;border-radius:50%;opacity:.85;}
+.discount-locked { opacity: 0.55; pointer-events: none; }
+</style>
 </head>
-<body style="padding-bottom:30px">
-<div class="top"><img id="oLogo" class="logo hide" alt=""><b id="oName">Pay Fee</b></div>
-<div class="wrap" id="root"><div class="card ctr mut">Loading…</div></div>
+<body>
+
+<div id="feesWelcomeModal">
+  <div class="welcome-inner">
+    <div class="welcome-icon">🏋️‍♂️</div>
+    <div style="background:#ffcc00;color:#000;font-size:11px;font-weight:900;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:12px;">OFFICIAL PORTAL</div>
+    <h1 class="welcome-title">Welcome To<br>Yash Fitness Club</h1>
+    <p class="welcome-sub">आपका Yash Fitness Club में स्वागत है</p>
+    <p style="color:#aaa;font-size:13px;text-align:center;line-height:1.5;margin:0;">
+      उमराव खेड़ा, अकरमपुर, उन्नाव<br>फीस जमा · रसीद · रजिस्टर
+    </p>
+    <button type="button" class="welcome-btn" onclick="closeFeesWelcome()">✔ आगे बढ़ें</button>
+  </div>
+</div>
+
+<div class="main-card">
+  <div class="header">
+    <div style="background:#ffcc00;color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius:10px;display:inline-block;margin-bottom:4px;">OFFICIAL PORTAL</div>
+    <h1>Yash Fitness Club</h1>
+    <div class="tagline">उमराव खेड़ा, अकरमपुर, उन्नाव | Ph: 9140417259</div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="tab-btn active" id="tabBtnFee" onclick="showFeeTab()">🏋️ केवल जिम फीस</div>
+    <div class="tab-btn" id="tabBtnAdmin" onclick="openAdminRecords()">📋 रजिस्टर व रिकॉर्ड्स</div>
+  </div>
+
+  <div id="sectionFees">
+    <div class="field-group">
+      <label>🔍 सदस्य खोजें (Live Auto Search - नाम / मोबाइल)</label>
+      <input type="text" id="feeSearchInput" oninput="handleAutoSearch()" placeholder="टाइप करें (उदा. lala, 9936, ravi)...">
+    </div>
+
+    <div id="searchResultCard" style="display:none; background:#181818; border:1.5px solid #ffcc00; border-radius:10px; padding:12px; margin-bottom:12px;"></div>
+    <div id="lateWarningBox" class="late-warning"></div>
+
+    <form id="formGymFee" onsubmit="handleInitialSubmit(event)">
+      <div class="lock-bar" id="lockBar">
+        <span id="lockText">🔒 प्लान, फीस और जॉइनिंग सुरक्षित हैं</span>
+        <button type="button" id="btnAdminUnlock" onclick="toggleAdminUnlock()">🔓 Admin Unlock</button>
+      </div>
+      <div class="row">
+        <div class="field-group">
+          <label>सदस्य का नाम <span>*</span></label>
+          <input type="text" id="mFeeName" required placeholder="पूरा नाम" autocomplete="off" oninput="onIdentityInput('name')">
+          <div class="sug-box" id="sugName"></div>
+        </div>
+        <div class="field-group">
+          <label>पिता का नाम</label>
+          <input type="text" id="mFeeFather" placeholder="पिता का नाम">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>मोबाइल नंबर <span>*</span></label>
+          <input type="tel" id="mFeePhone" required placeholder="10 अंक मोबाइल" autocomplete="off" oninput="onIdentityInput('phone')">
+          <div class="sug-box" id="sugPhone"></div>
+        </div>
+        <div class="field-group">
+          <label>श्रेणी (Member Category) <span>*</span></label>
+          <select id="feeCategory" onchange="updatePlanPrices()">
+            <option value="student">विद्यार्थी (Student)</option>
+            <option value="job" selected>नौकरी / व्यापार (Job / Business)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>प्लान चुनें (Plan Duration) <span>*</span></label>
+          <select id="feeDuration" onchange="calculateFinalAmount()"></select>
+        </div>
+        <div class="field-group">
+          <label>प्लान शुल्क (₹) <span>*</span></label>
+          <input type="number" id="mFeeAmount" readonly style="color:#00ff99; font-weight:bold;">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>जमा फीस (Manual Paid ₹) <span>*</span></label>
+          <input type="number" id="mFeePaidAmount" required oninput="handlePaidAmountChange()" style="color:#ffcc00; font-weight:bold;">
+        </div>
+        <div class="field-group">
+          <label>भुगतान माध्यम <span>*</span></label>
+          <select id="paymentMethod">
+            <option value="online">📱 ऑनलाइन (UPI / QR / Apps)</option>
+            <option value="cash">💵 नकद (Cash - Admin Verified)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="checkbox-container">
+          <input type="checkbox" id="chkSpecialDiscount" onchange="handlePaidAmountChange()">
+          <span>कम राशि को "विशेष छूट (Special Discount)" में माफ करें?</span>
+        </label>
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>जॉइनिंग तिथि (Joining Date) [🔒 केवल एडमिन]</label>
+          <input type="date" id="mFeeJoinDate" readonly class="is-locked" title="यह केवल एडमिन द्वारा बदली जा सकती है" onclick="if(!this.readOnly && this.showPicker) this.showPicker()">
+        </div>
+        <div class="field-group">
+          <label>अंतिम भुगतान तिथि (Previous Payment)</label>
+          <input type="date" id="mFeePrevPaidDate" readonly onchange="checkLateStatus()" onclick="if(!this.readOnly && this.showPicker) this.showPicker()">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>आज की भुगतान तिथि <span>*</span></label>
+        <input type="date" id="mFeePaidDate" onchange="checkLateStatus()" onclick="this.showPicker()">
+      </div>
+
+      <div class="box-panel" style="border:1.5px dashed #ffcc00;background:rgba(255,204,0,0.03);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <b style="font-size:11px;color:#ffcc00;">🤝 रेफरल छूट (-₹100 प्रति भाई):</b>
+          <button type="button" onclick="toggleRefInputBox()" style="background:#ffcc00;color:#000;border:none;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:bold;cursor:pointer;">+ नया भाई जोड़ें</button>
+        </div>
+
+        <div id="refInputForm" style="display:none;background:#202020;padding:8px;border-radius:6px;margin-bottom:8px;border:1px solid #444;">
+          <div class="row">
+            <input type="text" id="refInName" placeholder="रेफरल का नाम" style="padding:6px;font-size:11px;">
+            <input type="tel" id="refInPhone" placeholder="रेफरल मोबाइल" style="padding:6px;font-size:11px;">
+          </div>
+          <button type="button" onclick="submitManualReferral()" style="background:#00ff99;color:#000;border:none;padding:6px;border-radius:4px;font-weight:bold;width:100%;margin-top:6px;font-size:10px;cursor:pointer;">सेव करें व ₹100 छूट घटाएं</button>
+        </div>
+
+        <div id="refTagsContainer" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+        <div id="refDiscountText" style="font-size:10px;color:#00ff99;font-weight:bold;margin-top:5px;display:none;"></div>
+      </div>
+
+      <button type="submit" class="btn-submit">💳 भुगतान आगे बढ़ाएं (Proceed to Pay)</button>
+    </form>
+  </div>
+
+  <div id="sectionAdmin" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:8px;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button type="button" onclick="showFeeTab()" style="background:#333; color:#ffcc00; border:1px solid #ffcc00; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:11px; cursor:pointer;">⬅️ Back</button>
+        <div>
+          <h3 style="color:#ffcc00; font-size:12px; margin:0;">🔒 मास्टर रजिस्टर</h3>
+          <span id="adminMonthTitle" style="font-size:10px; color:#aaa; font-weight:bold;"></span>
+        </div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button type="button" onclick="openAddMemberModal()" style="background:#25D366; color:#000; border:none; padding:5px 8px; border-radius:6px; font-weight:bold; font-size:11px; cursor:pointer;">+ नया सदस्य</button>
+        <button type="button" onclick="cleanDuplicateMembers()" style="background:#ff6600; color:#000; border:none; padding:5px 8px; border-radius:6px; font-weight:bold; font-size:11px; cursor:pointer;">🧹 डुप्लिकेट साफ</button>
+        <button type="button" class="btn-admin" onclick="downloadCSV()">📥 Excel</button>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>तारीख</th>
+            <th>सदस्य</th>
+            <th>स्थिति</th>
+            <th>माध्यम</th>
+            <th>स्टूडेंट ID</th>
+            <th>ऐक्शन</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="pagination-bar">
+      <button type="button" class="page-btn" id="prevPageBtn" onclick="changeAdminPage(-1)">⬅️ Previous</button>
+      <span id="pageInfoText" style="font-size:11px; color:#ffcc00; font-weight:bold;">Page 1 of 1</span>
+      <button type="button" class="page-btn" id="nextPageBtn" onclick="changeAdminPage(1)">Next ➡️</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANUAL ADD MEMBER MODAL -->
+<div id="addMemberModal">
+  <div class="receipt-wrapper" style="background:#181818; padding:16px; border-radius:12px; border:2px solid #ffcc00;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:6px;">
+      <h3 style="color:#ffcc00; font-size:14px; margin:0;">➕ नया सदस्य जोड़ें (Admin)</h3>
+      <button type="button" onclick="closeAddMemberModal()" style="background:#ff3333; color:#fff; border:none; padding:2px 7px; border-radius:4px; font-weight:bold; cursor:pointer;">✕</button>
+    </div>
+    
+    <form id="formManualAdd" onsubmit="handleManualAddSubmit(event)">
+      <div class="row">
+        <div class="field-group">
+          <label>सदस्य का नाम <span>*</span></label>
+          <input type="text" id="addName" required placeholder="पूरा नाम">
+        </div>
+        <div class="field-group">
+          <label>पिता का नाम</label>
+          <input type="text" id="addFather" placeholder="पिता का नाम">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>मोबाइल नंबर <span>*</span></label>
+          <input type="tel" id="addPhone" required placeholder="10 अंक मोबाइल">
+        </div>
+        <div class="field-group">
+          <label>इमरजेंसी मोबाइल नंबर</label>
+          <input type="tel" id="addEmergency" placeholder="इमरजेंसी संपर्क">
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>घर का पता (Address)</label>
+        <input type="text" id="addAddress" placeholder="पूरा पता...">
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>श्रेणी (Category) <span>*</span></label>
+          <select id="addCategory" onchange="updateAddModalPlans()">
+            <option value="job">नौकरी / व्यापार (Job / Business)</option>
+            <option value="student">विद्यार्थी (Student)</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>प्लान व अवधि <span>*</span></label>
+          <select id="addPlanDuration"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label>जॉइनिंग तिथि <span>*</span></label>
+          <input type="date" id="addJoinDate" required onclick="this.showPicker()">
+        </div>
+        <div class="field-group">
+          <label>शुरुआती फीस स्थिति</label>
+          <select id="addFeeStatus">
+            <option value="Paid">✅ Paid (फीस जमा)</option>
+            <option value="Pending">🔴 Pending (बाकी)</option>
+          </select>
+        </div>
+      </div>
+
+            <button type="submit" style="width:100%; background:#25D366; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; margin-top:8px; cursor:pointer;">💾 रजिस्टर में हमेशा के लिए जोड़ें</button>
+      <button type="button" onclick="closeAddMemberModal()" style="width:100%; background:#333; color:#fff; border:none; padding:7px; border-radius:6px; margin-top:6px; cursor:pointer;">रद्द करें (Cancel)</button>
+    </form>
+  </div>
+</div>
+
+<!-- UPI CONFIRMATION MODAL -->
+<div id="upiPayModal">
+  <div class="receipt-wrapper" style="background:#181818; padding:16px; border-radius:12px; border:2px solid #ffcc00; text-align:center;">
+    <div style="display:flex; justify-content:flex-start; margin-bottom:8px;">
+      <button type="button" onclick="closeUpiModal()" style="background:#333; color:#ffcc00; border:1px solid #ffcc00; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">⬅️ Back</button>
+    </div>
+    <h3 style="color:#ffcc00; margin-bottom:8px;">📱 ऑनलाइन भुगतान करें</h3>
+    <p style="font-size:12px; color:#ccc; margin-bottom:10px;">कृपया नीचे बटन दबाकर UPI से फीस जमा करें।</p>
+    <div style="background:#222; padding:10px; border-radius:8px; margin-bottom:12px;">
+      <b style="color:#00ff99; font-size:16px;" id="onlinePayAmountText">₹500</b>
+    </div>
+    <button type="button" onclick="openUpiApp()" style="width:100%; background:#ffcc00; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px; cursor:pointer; margin-bottom:12px;">🚀 UPI App खोलें (GPay / PhonePe / Paytm)</button>
+    
+    <div style="border-top:1px dashed #444; padding-top:12px; text-align:left;">
+      <label style="font-size:11px; color:#ffcc00;">पेमेंट के बाद UTR / Ref No दर्ज करें (Slip Unlock के लिए): <span>*</span></label>
+      <input type="text" id="upiRefNumber" placeholder="12 अंक UTR / UPI Ref No..." style="margin-top:4px;">
+      <button type="button" onclick="confirmOnlinePayment()" style="width:100%; background:#25D366; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; margin-top:8px; cursor:pointer;">✅ पेमेंट हो गया, रसीद बनाएं</button>
+      <button type="button" onclick="closeUpiModal()" style="width:100%; background:#333; color:#fff; border:none; padding:8px; border-radius:6px; margin-top:6px; cursor:pointer;">रद्द करें (Cancel)</button>
+    </div>
+  </div>
+</div>
+
+<!-- CELEBRATORY HURRAY SUCCESS POPUP -->
+<div id="hurrayModal">
+  <div class="receipt-wrapper" style="background:#141414; border:2px solid #25D366; border-radius:16px; padding:20px; text-align:center; box-shadow:0 0 35px rgba(37,211,102,0.35); margin-top:50px;">
+    <div style="font-size:45px; margin-bottom:6px;">🎉💪🔥</div>
+    <h2 style="color:#25D366; font-size:20px; font-weight:900; margin-bottom:6px;">HURRAY! PAYMENT SUCCESSFUL!</h2>
+    <h3 style="color:#ffcc00; font-size:15px; font-weight:800; margin-bottom:10px;">Thanks So Much For Payment</h3>
+    <div style="background:#1e1e1e; border:1px dashed #ffcc00; border-radius:8px; padding:10px; margin-bottom:14px;">
+      <p style="font-size:13px; color:#fff; font-weight:bold; margin-bottom:4px;">Yash Fitness Club</p>
+      <p style="font-size:11px; color:#aaa;">आपकी सदस्यता सक्रिय कर दी गई है। हार्ड वर्क और रिजल्ट्स जारी रखें!</p>
+    </div>
+    <button type="button" onclick="proceedToReceiptFromHurray()" style="width:100%; background:#25D366; color:#000; border:none; padding:11px; border-radius:8px; font-weight:900; font-size:13px; cursor:pointer;">📄 रसीद देखें व डाउनलोड करें ➡️</button>
+  </div>
+</div>
+
+<!-- OFFICIAL RECEIPT MODAL -->
+<div id="receiptModal">
+  <div class="receipt-wrapper">
+    <div style="display:flex; justify-content:flex-start; margin-bottom:8px;" data-html2canvas-ignore="true">
+      <button type="button" onclick="closeBillModalAndReset()" style="background:#333; color:#ffcc00; border:1px solid #ffcc00; padding:5px 10px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">⬅️ Back to Portal</button>
+    </div>
+
+    <div id="printablePages">
+      <div class="receipt-card">
+        <div class="receipt-watermark">Yash Fitness Club</div>
+
+        <div class="receipt-header">
+          <div style="background:#ffcc00; color:#000; font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px; display:inline-block;">PAGE 1 : OFFICIAL INVOICE</div>
+          <h2 style="font-size:16px; margin-top:4px; font-weight:900;">Yash Fitness Club</h2>
+          <div style="font-size:10px; font-weight:bold; color:#555; margin-top:2px;">"100% असली और असरदार रिजल्ट"</div>
+          <p style="font-size:10px; color:#777; margin-top:2px;">उमराव खेड़ा, अकरमपुर, उन्नाव | Ph: 9140417259</p>
+        </div>
+
+        <div class="r-row"><span>Bill ID:</span><b id="billId" style="color:#b37400;"></b></div>
+        <div class="r-row"><span>प्रकार:</span><b id="rMode" style="color:#000;"></b></div>
+        <div class="r-row"><span>जॉइनिंग तारीख:</span><b id="rJoinDate"></b></div>
+        <div class="r-row"><span>भुगतान तारीख:</span><b id="billDate"></b></div>
+        <div class="r-row"><span>विलंब स्थिति:</span><b id="rLateStatus"></b></div>
+        <div class="r-row"><span>सदस्य:</span><b id="rName"></b></div>
+        <div class="r-row" id="rFatherRow"><span>पिता का नाम:</span><b id="rFather"></b></div>
+        <div class="r-row"><span>मोबाइल:</span><b id="rPhone"></b></div>
+        <div class="r-row"><span>श्रेणी व प्लान:</span><b id="rPlanDetails"></b></div>
+        <div class="r-row" id="rDiscountRow" style="display:none; color:#b45309;"><span>विशेष छूट:</span><b id="rDiscount"></b></div>
+        <div class="r-row"><span>जमा फीस:</span><b id="rGymFee" style="color:green; font-size:13px;"></b></div>
+        <div class="r-row"><span>बकाया राशि:</span><b id="rDueFee" style="color:#ff3333;"></b></div>
+        <div class="r-row"><span>वैधता / अगला भुगतान:</span><b id="rValidTill" style="color:#b37400;"></b></div>
+        <div class="receipt-footer-stamp">
+          <div class="receipt-sign-box">
+            <img src="https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg" alt="Signature" crossorigin="anonymous" class="receipt-sign-img">
+            <div class="receipt-owner-txt">
+              <strong>Saurabh Singh Chandel</strong>
+              Owner<br>Yash Fitness Club
+            </div>
+          </div>
+          <div class="receipt-stamp-box">
+            <img src="https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg" alt="Authorized Stamp" crossorigin="anonymous" class="receipt-stamp-img">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-btns" data-html2canvas-ignore="true">
+      <button type="button" class="dl-btn" id="dlBtn" onclick="downloadImageAndPDF()">📥 Image & PDF Download</button>
+      <button type="button" class="wa-btn" id="waBtn">📲 WhatsApp</button>
+    </div>
+    <button type="button" onclick="closeBillModalAndReset()" style="width:100%; background:#333; color:#fff; border:none; padding:9px; border-radius:6px; margin-top:8px; cursor:pointer;" data-html2canvas-ignore="true">बंद करें (Reset)</button>
+  </div>
+</div>
+
 <script>
-(function () {
-  if (!window.G || !G.ok) return;
-  var oid = G.qs("o").toLowerCase(), mid = G.qs("m"), $ = function (id) { return document.getElementById(id); }, root = $("root");
-  var org, tpl, card, shot = null, busy = false;
-  function msg(icon, title, text, extra) { root.innerHTML = '<div class="card ctr"><div style="font-size:44px">' + icon + "</div><h2>" + G.esc(title) + '</h2><p class="mut">' + G.esc(text) + "</p>" + (extra || "") + "</div>"; }
-  if (!oid || !mid) return msg("⚠️", "Link incomplete", "Please open this page from your digital card.");
-  var base = G.db.collection("orgs").doc(oid);
-  Promise.all([base.get(), base.collection("cards").doc(mid).get()]).then(function (r) {
-    if (!r[0].exists) return msg("⚠️", "Organisation not found", "This link is not valid.");
-    org = r[0].data(); tpl = ORG_TEMPLATES[org.type] || ORG_TEMPLATES.gym; G.theme(org);
-    $("oName").textContent = org.name || "Pay Fee"; document.title = (org.name || "") + " — Pay fee";
-    if (G.img(org.logo)) { $("oLogo").src = org.logo; $("oLogo").classList.remove("hide"); }
-    G.pwa();
-    if (!r[1].exists || r[1].data().status !== "active") return msg("⏳", "Not available", "Fee payment opens after your application is approved.");
-    card = r[1].data(); draw();
-  }).catch(function () { msg("⚠️", "Unable to load", "Please check your internet connection and try again."); });
+const ADMIN_PIN = "5555";
+const firebaseConfig = {
+  apiKey: "AIzaSyA9z1gXZDB3W0lJxyHV9x2vWeb0Ees7z-g",
+  authDomain: "brother-s-fitness-club.firebaseapp.com",
+  projectId: "brother-s-fitness-club",
+  storageBucket: "brother-s-fitness-club.firebasestorage.app",
+  messagingSenderId: "781489019006",
+  appId: "1:781489019006:web:4a230698f2195e7208202f"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-  function plans() { var cs = Array.isArray(org.cats) && org.cats.length; return (org.plans || []).filter(function (p) { return !cs || !p.cat || p.cat === card.catId; }); }
-  function sel() { var s = $("plan"); return s ? plans().filter(function (p) { return p.id === s.value; })[0] : null; }
-  function credit(p) { return p ? Math.max(0, Math.min(G.num(card.refCredit), G.num(p.price))) : 0; }
+function getMasterList() {
+  let masterSaved = JSON.parse(localStorage.getItem("bbf_master_records_v4") || "[]");
+  let bfcSaved = JSON.parse(localStorage.getItem("YASH_FITNESS_MEMBERS") || "[]");
+  let combined = [...masterSaved, ...bfcSaved];
+  let uniqueMap = new Map();
+  combined.forEach((m, idx) => {
+    if (!m.id) m.id = "m" + (m.phone || "x") + "_" + idx;
+    let key = (m.phone && m.phone.length > 5) ? (m.phone.trim() + "|" + (m.name || "").trim().toLowerCase()) : m.id.toString();
+    if (!uniqueMap.has(key)) uniqueMap.set(key, m);
+  });
+  return Array.from(uniqueMap.values());
+}
 
-  function draw() {
-    var ps = plans(); if (!ps.length) return msg("⚠️", "No plans available", "Please contact " + (org.name || "the organisation") + ".");
-    var left = G.daysLeft(card.expiry);
-    root.innerHTML = '<h2>Pay / Renew fee</h2><div class="card"><div class="kv"><span>' + G.esc(tpl.memberWord) + '</span><b>' + G.esc(card.name) + '</b></div><div class="kv"><span>ID</span><b>' + G.esc(card.code) + '</b></div><div class="kv"><span>Current plan</span><b>' + G.esc(card.planName || "—") + '</b></div><div class="kv"><span>Valid till</span><b>' + G.esc(G.fmt(card.expiry)) + (left != null && left < 0 ? " (expired)" : "") + "</b></div></div>" +
-      '<div class="card"><label>' + G.esc(tpl.planLabel) + '</label><select id="plan"><option value="">— Select —</option>' + ps.map(function (p) { return '<option value="' + G.esc(p.id) + '">' + G.esc(p.name) + " — " + G.esc(G.money(p.price)) + "</option>"; }).join("") + '</select>' +
-      '<div id="sum" style="margin-top:10px"></div><div id="upiRow" class="hide" style="margin:10px 0"><a class="btn sec" id="upiBtn" href="#">📲 Pay by UPI</a><div class="sub" id="upiNote" style="margin-top:6px"></div></div></div>' +
-      '<div class="card"><div class="sub" style="margin-bottom:6px">After paying, enter the UTR number <b>or</b> attach a screenshot (one is enough).</div><label>UTR / Transaction ID</label><input class="inp" id="utr" maxlength="30" autocomplete="off">' +
-      '<div class="slot"><div class="lbl" style="margin:0 0 6px">Payment screenshot</div><img class="imgbox hide" id="shotImg" alt=""><div class="sub" id="shotSt"></div><div class="acts"><button type="button" class="btn sec sm" id="shotPick">📁 Choose screenshot</button><button type="button" class="btn bad sm hide fit" id="shotDel" style="flex:0 0 auto">Remove</button></div><input type="file" accept="image/*" class="hide" id="shotIn"></div>' +
-      '<div class="err" id="perr" style="margin-top:8px"></div><button class="btn ok" id="send" style="margin-top:10px">✅ I have paid — send to ' + G.esc(org.name || "organisation") + '</button></div>' +
-      '<a class="btn sec" href="' + G.esc(G.link("card.html", { o: oid, m: mid })) + '">← Back to my card</a>';
-    $("plan").onchange = sum; sum();
-    $("shotPick").onclick = function () { $("shotIn").click(); };
-    $("shotDel").onclick = function () { shot = null; paintShot(); };
-    $("shotIn").onchange = function () {
-      var f = this.files && this.files[0]; this.value = ""; if (!f) return;
-      $("shotSt").textContent = "⏳ Preparing image…";
-      G.compress(f, 900, 1600, 110000).then(function (u) { shot = u || null; paintShot(); if (!u) $("shotSt").textContent = "This image could not be read. Please choose another."; });
-    };
-    $("send").onclick = send;
-  }
-  function paintShot() { var im = $("shotImg"); if (shot) { im.src = shot; im.classList.remove("hide"); $("shotSt").textContent = "✅ Added"; $("shotDel").classList.remove("hide"); } else { im.classList.add("hide"); im.removeAttribute("src"); $("shotSt").textContent = ""; $("shotDel").classList.add("hide"); } }
-  function sum() {
-    var p = sel(), c = credit(p), net = p ? G.num(p.price) - c : 0;
-    $("sum").innerHTML = p ? '<div class="kv"><span>Plan fee</span><b>' + G.esc(G.money(p.price)) + "</b></div>" + (c ? '<div class="kv"><span>Referral credit</span><b>− ' + G.esc(G.money(c)) + "</b></div>" : "") + '<div class="kv"><span>You pay</span><b style="font-size:18px">' + G.esc(G.money(net)) + "</b></div>" : "";
-    if (org.upiId && p && net > 0) { $("upiRow").classList.remove("hide"); $("upiBtn").href = "upi://pay?pa=" + encodeURIComponent(org.upiId) + "&pn=" + encodeURIComponent(org.name || "Organisation") + "&am=" + net + "&cu=INR"; $("upiNote").textContent = "Pays " + G.money(net) + " to " + org.upiId; }
-    else $("upiRow").classList.add("hide");
-  }
-  function send() {
-    if (busy) return; var p = sel(), e = $("perr"), utr = $("utr").value.trim(); e.textContent = "";
-    if (!p) { e.textContent = "Please select a plan."; return; }
-    var c = credit(p), net = G.num(p.price) - c;
-    if (!(net > 0)) { e.textContent = "Nothing to pay for this plan. Please contact the organisation."; return; }
-    if (utr && !/^[A-Za-z0-9]{6,30}$/.test(utr)) { e.textContent = "Enter a valid UTR (letters and digits only)."; return; }
-    if (!utr && !shot) { e.textContent = "Enter the UTR number or attach a payment screenshot."; return; }
-    busy = true; $("send").disabled = true; $("send").textContent = "⏳ Sending…";
-    var id = base.collection("payreqs").doc().id;
-    var req = { memberId: mid, name: card.name, code: card.code || "", planId: p.id, planName: p.name, amount: net, credit: c, utr: utr, status: "pending", createdAt: G.FV.serverTimestamp(), hasShot: !!shot };
-    (shot ? base.collection("payfiles").doc(id).set({ shot: shot }) : Promise.resolve()).then(function () { return base.collection("payreqs").doc(id).set(req); }).then(function () {
-      msg("✅", "Sent for confirmation", (org.name || "The organisation") + " will check your payment and renew your membership. Your card will show the new validity once it is confirmed.", '<a class="btn" style="margin-top:12px" href="' + G.esc(G.link("card.html", { o: oid, m: mid })) + '">Back to my card</a>');
-    }).catch(function (er) { console.error(er); busy = false; $("send").disabled = false; $("send").textContent = "✅ I have paid — send to " + (org.name || "organisation"); e.textContent = "Could not send. Check your internet and try again" + (er && er.code ? " (" + er.code + ")" : "") + "."; });
-  }
-})();
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("mFeePaidDate").value = new Date().toISOString().split('T')[0];
+  document.getElementById("mFeePrevPaidDate").value = new Date().toISOString().split('T')[0];
+  updatePlanPrices();
+  initFormState();
+});
+
+function updatePlanPrices() {
+  const cat = document.getElementById("feeCategory").value;
+  const dur = document.getElementById("feeDuration");
+  dur.innerHTML = cat === "student" ? '<option value="300" data-months="1">1 महीना - ₹300</option><option value="900" data-months="3">3 महीने - ₹900</option>' : '<option value="500" data-months="1">1 महीना - ₹500</option><option value="1200" data-months="3">3 महीने - ₹1,200</option>';
+  calculateFinalAmount();
+}
+
+function calculateFinalAmount() {
+  const dur = document.getElementById("feeDuration");
+  const base = parseFloat(dur.value) || 0;
+  document.getElementById("mFeeAmount").value = base;
+  document.getElementById("mFeePaidAmount").value = base;
+}
+
+function searchMembers(q) {
+  q = (q || "").trim().toLowerCase();
+  if (!q) return [];
+  return getMasterList().filter(m => (m.name && m.name.toLowerCase().includes(q)) || (m.phone && m.phone.includes(q)));
+}
+
+function suggestionHTML(matches) {
+  if (!matches.length) return `<div style="color:#ff6666; font-size:11px; padding:6px;">कोई सदस्य नहीं मिला।</div>`;
+  let html = '';
+  matches.slice(0, 5).forEach(m => {
+    html += `<div style="background:#222; padding:8px; margin-bottom:5px; border-radius:6px; cursor:pointer;" onclick="selectMember('${m.id}')"><b>${m.name}</b> (${m.phone})</div>`;
+  });
+  return html;
+}
+
+function handleAutoSearch() {
+  const q = document.getElementById("feeSearchInput").value.trim();
+  const card = document.getElementById("searchResultCard");
+  if (!q) { card.style.display = "none"; return; }
+  card.innerHTML = suggestionHTML(searchMembers(q));
+  card.style.display = "block";
+}
+
+function selectMember(id) {
+  const m = getMasterList().find(x => x.id.toString() === id.toString());
+  if (!m) return;
+  selectedMember = m;
+  document.getElementById("mFeeName").value = m.name || "";
+  document.getElementById("mFeePhone").value = m.phone || "";
+  document.getElementById("searchResultCard").style.display = "none";
+}
+
+function closeFeesWelcome() { document.getElementById("feesWelcomeModal").style.display = "none"; }
+function showFeeTab() { document.getElementById("sectionFees").style.display = "block"; document.getElementById("sectionAdmin").style.display = "none"; }
+function openAdminRecords() {
+  if (prompt("🔒 Admin PIN:") === ADMIN_PIN) {
+    document.getElementById("sectionFees").style.display = "none";
+    document.getElementById("sectionAdmin").style.display = "block";
+    renderAdminTable();
+  } else alert("गलत PIN!");
+}
+function renderAdminTable() {
+  const tbody = document.getElementById("adminTableBody");
+  tbody.innerHTML = "";
+  getMasterList().forEach(m => {
+    tbody.innerHTML += `<tr><td><b>${m.name}</b></td><td>${m.phone}</td><td>${m.status || 'Paid'}</td></tr>`;
+  });
+}
+function closeBillModalAndReset() { document.getElementById("receiptModal").style.display = "none"; }
 </script>
 </body>
 </html>
