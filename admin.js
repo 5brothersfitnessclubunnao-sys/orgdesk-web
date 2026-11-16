@@ -136,7 +136,7 @@
     if (m.status === "pending") acts = '<button class="btn ok" data-a="approvef" data-id="' + esc(m.id) + '">✔ Approve & generate receipt</button><button class="btn bad" style="margin-top:8px" data-a="denyf" data-id="' + esc(m.id) + '">✖ Deny application</button>';
     else if (m.status === "denied") acts = '<div class="kv"><span>Reason</span><b>' + esc(m.denyReason || "—") + '</b></div><button class="btn sec" style="margin-top:8px" data-a="reopen" data-id="' + esc(m.id) + '">↩ Re-open application</button>';
     else acts = '<button class="btn" data-a="renewf" data-id="' + esc(m.id) + '">💳 Collect fee / Renew</button><div class="row" style="margin-top:8px"><a class="btn sec" target="_blank" rel="noopener" href="' + esc(G.wa(m.phone, "Hello " + m.name + ", this is " + S.org.name + ".")) + '">WhatsApp</a><button class="btn sec" data-a="copy" data-v="' + esc(G.link("card.html", { o: S.orgId, m: m.id })) + '">Copy card link</button></div><h3>Payment history</h3><div id="hist" class="card mut">Loading…</div>';
-    $("dbody").innerHTML = body + acts;
+    $("dbody").innerHTML = body + acts + '<button class="btn sec" style="margin-top:8px" data-a="prnt" data-id="' + esc(m.id) + '">🖨 Print admission form</button>';
     base().collection("files").doc(id).get().then(function (s) {
       var f = s.exists ? s.data() : {}, h = "";
       tplSlots().forEach(function (sl) { if (G.img(f[sl.key])) h += '<div class="slot"><div class="lbl" style="margin:0 0 6px">' + esc(sl.label) + (sl.key === "idFront" && f.idType ? " — " + esc(f.idType) : "") + '</div><img class="imgbox" src="' + f[sl.key] + '" alt=""></div>'; });
@@ -151,6 +151,13 @@
     });
   }
   function tplSlots() { return S.tpl.docSlots; }
+  A.prnt = function (el) {
+    var m = find(el.getAttribute("data-id")); if (!m) return;
+    var b = el; b.disabled = true; var old = b.textContent; b.textContent = "Preparing form…";
+    base().collection("files").doc(m.id).get().then(function (s) { return s.exists ? s.data() : {}; }, function () { return {}; }).then(function (f) {
+      b.disabled = false; b.textContent = old; AF.open(S.org, S.tpl, m, f, S.ou && S.ou.name);
+    });
+  };
 
   /* ================= approve / deny ================= */
   function catName(id) { var c = (S.org.cats || []).filter(function (x) { return x.id === id; })[0]; return c ? c.name : ""; }
@@ -319,11 +326,11 @@
   function settings() {
     var o = S.org, t = S.tpl, join = G.link("join.html", { o: S.orgId });
     var h = "<h2>Settings</h2>" +
-      '<div class="card"><h3 style="margin-top:0">Organisation profile</h3><label>Name</label><input class="inp" id="sn" maxlength="80" value="' + esc(o.name) + '"><label>Phone</label><input class="inp" id="sp" type="tel" maxlength="10" value="' + esc(o.phone) + '"><label>Address</label><textarea class="inp" id="sa" maxlength="200">' + esc(o.address) + '</textarea><label>UPI ID</label><input class="inp" id="su" maxlength="60" value="' + esc(o.upiId || "") + '"><div class="grid2"><div><label>Brand colour</label><input class="inp" id="sc" type="color" value="' + esc(o.color || "#ffcc00") + '" style="padding:4px;height:44px"></div><div><label>Receipt prefix</label><input class="inp" id="sr" maxlength="5" value="' + esc(o.receiptPrefix || "RC") + '"></div></div><label>Logo</label><input class="inp" type="file" id="sl" accept="image/*"><label>Notice shown on member cards</label><textarea class="inp" id="sno" maxlength="300" placeholder="e.g. Gym closed on Sunday">' + esc(o.notice || "") + "</textarea></div>" +
+      '<div class="card"><h3 style="margin-top:0">Organisation profile</h3><label>Name</label><input class="inp" id="sn" maxlength="80" value="' + esc(o.name) + '"><label>Phone</label><input class="inp" id="sp" type="tel" maxlength="10" value="' + esc(o.phone) + '"><label>Address</label><textarea class="inp" id="sa" maxlength="200">' + esc(o.address) + '</textarea><label>UPI ID</label><input class="inp" id="su" maxlength="60" value="' + esc(o.upiId || "") + '"><div class="grid2"><div><label>Brand colour</label><input class="inp" id="sc" type="color" value="' + esc(o.color || "#ffcc00") + '" style="padding:4px;height:44px"></div><div><label>Receipt prefix</label><input class="inp" id="sr" maxlength="5" value="' + esc(o.receiptPrefix || "RC") + '"></div></div><label>Logo</label><input class="inp" type="file" id="sl" accept="image/*"><label>Owner stamp / signature (printed on admission form, optional)</label><input class="inp" type="file" id="sst" accept="image/*"><label>Notice shown on member cards</label><textarea class="inp" id="sno" maxlength="300" placeholder="e.g. Gym closed on Sunday">' + esc(o.notice || "") + "</textarea></div>" +
       '<div class="card"><h3 style="margin-top:0">' + esc(t.planLabel) + 's</h3><div id="splans">' + (o.plans || []).map(planRow).join("") + '</div><button class="btn sec sm" data-a="addp">+ Add plan</button></div>' +
       '<div class="card"><h3 style="margin-top:0">Member categories <span class="sub">(optional)</span></h3><div class="sub" style="margin-bottom:8px">Example: Student, Job seeker, Job / Business. Each plan can then be assigned to one category, and applicants only see plans of their category. Save once after adding categories, then assign them to plans above.</div><div id="scats">' + (o.cats || []).map(catRow).join("") + '</div><button class="btn sec sm" data-a="addc">+ Add category</button></div>' +
       '<div class="card"><h3 style="margin-top:0">Referral credit <span class="sub">(optional)</span></h3><label class="chk" style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input type="checkbox" id="sref" style="width:auto"' + (o.referral && o.referral.on ? " checked" : "") + '> When a member refers a new member, give the referrer fee credit</label><label>Credit per referral (₹)</label><input class="inp" id="srefamt" type="number" min="1" value="' + esc(o.referral && o.referral.amount || "") + '"><div class="sub">The credit is added when the referred member is approved, and is used automatically on the referrer\'s next fee payment.</div></div>' +
-      '<div class="card"><h3 style="margin-top:0">' + esc(t.groupsLabel) + '</h3><div id="sgroups">' + (o.groups || []).map(groupRow).join("") + '</div><button class="btn sec sm" data-a="addg">+ Add ' + esc(t.groupLabel.toLowerCase()) + '</button></div>' +
+      '<div class="card"><h3 style="margin-top:0">' + esc(t.groupsLabel) + '</h3><div id="sgroups">' + (o.groups || []).map(groupRow).join("") + '</div><button class="btn sec sm" data-a="addg">+ Add ' + esc(t.groupLabel.toLowerCase()) + '</button>' + (t.id === "gym" ? ' <button class="btn sec sm" data-a="addslots">+ Add standard 30-minute slots</button><div class="sub" style="margin-top:6px">Morning 05:00–11:00 AM and evening 04:00–11:00 PM, one batch per 30 minutes. Existing batches are kept; you can delete the ones you do not run.</div>' : "") + '</div>' +
       '<div class="card"><h3 style="margin-top:0">Terms & conditions (version ' + (o.termsVersion || 1) + ')</h3><textarea class="inp" id="st" style="min-height:260px" maxlength="6000">' + esc(o.terms) + '</textarea><div class="sub">Saving changed terms creates a new version. Earlier applications keep the version they accepted.</div></div>' +
       '<div class="err" id="serr"></div><button class="btn ok" data-a="saveset">Save settings</button>' +
       '<div class="card" style="margin-top:14px"><h3 style="margin-top:0">Links</h3><div class="kv"><span>Admission form</span><button class="btn sec sm" data-a="copy" data-v="' + esc(join) + '">Copy</button></div></div>' +
@@ -338,6 +345,12 @@
   A.addc = function () { $("scats").insertAdjacentHTML("beforeend", catRow({ name: "", note: "" })); };
   function groupRow(g) { return '<div class="trow g" data-id="' + esc(g.id || "") + '"><input class="inp" data-k="name" value="' + esc(g.name) + '" maxlength="60"><input class="inp" data-k="time" value="' + esc(g.time || "") + '" maxlength="40" placeholder="Timing (optional)"><button class="xbtn" data-a="delrow">×</button></div>'; }
   A.addp = function () { $("splans").insertAdjacentHTML("beforeend", planRow({ name: "", months: 1, price: "" })); };
+  A.addslots = function () {
+    var have = {}; rows("sgroups").forEach(function (g) { have[g.name] = 1; });
+    var add = (window.ORG_GYM_SLOTS ? window.ORG_GYM_SLOTS() : []).filter(function (s) { return !have[s.name]; });
+    add.forEach(function (s) { $("sgroups").insertAdjacentHTML("beforeend", groupRow(s)); });
+    G.toast(add.length ? add.length + " slots added — press Save settings" : "All standard slots already exist");
+  };
   A.addg = function () { $("sgroups").insertAdjacentHTML("beforeend", groupRow({ name: "", time: "" })); };
   A.delrow = function (el) { el.parentNode.remove(); };
   function rows(id) { return [].map.call($(id).children, function (r) { var o = { id: r.getAttribute("data-id") || G.rid(6) }; [].forEach.call(r.querySelectorAll("[data-k]"), function (i) { o[i.getAttribute("data-k")] = i.value.trim(); }); return o; }); }
@@ -355,8 +368,8 @@
     if (terms.length < 20) { e.textContent = "Terms cannot be empty."; return; }
     var upd = { name: $("sn").value.trim(), phone: $("sp").value.trim(), address: $("sa").value.trim(), upiId: $("su").value.trim(), color: $("sc").value, receiptPrefix: ($("sr").value.trim() || "RC").toUpperCase(), notice: $("sno").value.trim(), plans: plans, groups: groups, terms: terms, cats: cats, referral: { on: refOn, amount: refOn ? refAmt : 0 } };
     if (terms !== S.org.terms) upd.termsVersion = (S.org.termsVersion || 1) + 1;
-    var lf = $("sl").files && $("sl").files[0];
-    var go = function (logo) { if (logo) upd.logo = logo; return base().update(upd).then(function () { Object.assign(S.org, upd); G.theme(S.org); G.toast("Settings saved"); shell(); S.tab = "set"; render(); }); };
+    var lf = $("sl").files && $("sl").files[0], sf = $("sst").files && $("sst").files[0];
+    var go = function (logo) { if (logo) upd.logo = logo; return (sf ? G.compress(sf, 300, 300, 40000) : Promise.resolve("")).then(function (st) { if (st) upd.stamp = st; return base().update(upd).then(function () { Object.assign(S.org, upd); G.theme(S.org); G.toast("Settings saved"); shell(); S.tab = "set"; render(); }); }); };
     (lf ? G.compress(lf, 200, 200, 40000) : Promise.resolve("")).then(go).catch(function (er) { e.textContent = G.firebaseError(er); });
   };
 

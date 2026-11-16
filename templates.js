@@ -32,6 +32,16 @@
 
   var T = window.ORG_TEMPLATES = {};
 
+  /* Gym batches run in 30-minute shifts: morning 05:00–11:00 AM, evening 04:00–11:00 PM (every shift is a separate batch). */
+  function gymSlots() {
+    function t(mins) { var h = Math.floor(mins / 60), m = mins % 60, ap = h >= 12 ? "PM" : "AM", h12 = h % 12 === 0 ? 12 : h % 12; return (h12 < 10 ? "0" : "") + h12 + ":" + (m < 10 ? "0" : "") + m + " " + ap; }
+    var out = [], a;
+    for (a = 5 * 60; a < 11 * 60; a += 30) out.push({ name: t(a) + " – " + t(a + 30), time: "Morning" });
+    for (a = 16 * 60; a < 23 * 60; a += 30) out.push({ name: t(a) + " – " + t(a + 30), time: "Evening" });
+    return out;
+  }
+  window.ORG_GYM_SLOTS = gymSlots;
+
   /* ===================================== GYM ===================================== */
   T.gym = {
     id: "gym", name: "Gym / Fitness Club", icon: "🏋️", blurb: "Members, trainers, batches, fee plans, diet and supplement store",
@@ -41,7 +51,7 @@
       { name: "Monthly", months: 1, price: "" }, { name: "Quarterly", months: 3, price: "" },
       { name: "Half-Yearly", months: 6, price: "" }, { name: "Yearly", months: 12, price: "" }
     ],
-    defaultGroups: [{ name: "Morning", time: "05:00 AM – 09:00 AM" }, { name: "Evening", time: "05:00 PM – 09:00 PM" }],
+    defaultGroups: gymSlots(),
     docIdTypes: docIds,
     docSlots: [
       { key: "photo", label: "Member Photograph", hi: "सदस्य की फोटो", req: 1, w: 480, h: 600, len: 60000, camera: "user" },
