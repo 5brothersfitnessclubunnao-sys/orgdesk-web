@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Admission Form & Admin Desk</title>
+<title>Yash Fitness Club - Admission Form</title>
 <link rel="stylesheet" href="ui.css">
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -17,7 +17,6 @@
   body { background: var(--bg); color: var(--tx); font-family: Arial, sans-serif; margin: 0; padding: 15px; padding-bottom: 40px; }
   .admin-panel-box { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
   .search-input { width: 100%; background: #0b0b0d; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
-  .btn-action { background: var(--ac); color: #000; border: none; border-radius: 8px; padding: 10px 16px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 8px; width: 100%; }
   .member-row { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
   .tag-pending { background: rgba(231, 76, 60, 0.15); color: var(--err); border: 1px solid var(--err); font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
   .tag-ok { background: rgba(46, 204, 113, 0.15); color: var(--ok); border: 1px solid var(--ok); font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
@@ -25,7 +24,10 @@
 </head>
 <body>
 
-<div id="top" class="logo hide" style="text-align:center; margin-bottom: 15px;"><b id="oName">Admission Form & Control Desk</b></div>
+<div style="text-align:center; margin-bottom: 15px;">
+  <h2 style="color:var(--ac); margin:0;">👑 Yash Fitness Club</h2>
+  <p style="color:var(--mut); font-size:12px; margin:4px 0 0;">उमराव खेड़ा, अकरमपुर, उन्नाव</p>
+</div>
 
 <!-- ADVANCED ADMIN REJOINING & PHOTO/ID PENDING CHECKER PANEL -->
 <div class="admin-panel-box">
@@ -41,129 +43,127 @@
     <button onclick="filterByStatus('active')" style="flex:1; background:rgba(46,204,113,0.2); color:var(--ok); border:1px solid var(--ok); padding:8px; border-radius:6px; font-size:12px; cursor:pointer;">✅ मंजूर (Approved)</button>
   </div>
 
-  <div id="adminSearchResults" style="margin-top: 15px; max-height: 300px; overflow-y: auto;"></div>
+  <div id="adminSearchResults" style="margin-top: 15px; max-height: 250px; overflow-y: auto;"></div>
 </div>
 
-<div id="root"><div class="card ctr">Loading Form...</div></div>
+<!-- DIRECT ADMISSION FORM CONTAINER -->
+<div class="admin-panel-box">
+  <h3 style="color:var(--ac); font-size:15px; margin-bottom:12px;">📝 नया एडमिशन फॉर्म (Admission Form)</h3>
+  <form id="admissionForm" onsubmit="handleAdmissionSubmit(event)">
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px; color:#ddd; font-weight:600;">सदस्य का पूरा नाम *</label>
+      <input type="text" id="admName" required placeholder="पूरा नाम..." style="width:100%; background:#0b0b0d; border:1px solid var(--border); color:#fff; padding:10px; border-radius:8px; margin-top:4px;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px; color:#ddd; font-weight:600;">पिता का नाम</label>
+      <input type="text" id="admFather" placeholder="पिता का नाम..." style="width:100%; background:#0b0b0d; border:1px solid var(--border); color:#fff; padding:10px; border-radius:8px; margin-top:4px;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px; color:#ddd; font-weight:600;">मोबाइल नंबर *</label>
+      <input type="tel" id="admPhone" required placeholder="10 अंक मोबाइल नंबर..." style="width:100%; background:#0b0b0d; border:1px solid var(--border); color:#fff; padding:10px; border-radius:8px; margin-top:4px;">
+    </div>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px; color:#ddd; font-weight:600;">प्लान श्रेणी (Category) *</label>
+      <select id="admCategory" style="width:100%; background:#0b0b0d; border:1px solid var(--border); color:#fff; padding:10px; border-radius:8px; margin-top:4px;">
+        <option value="job">नौकरी / व्यापार (Monthly - ₹500)</option>
+        <option value="student">विद्यार्थी (Student - ₹300)</option>
+      </select>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px; color:#ddd; font-weight:600;">जॉइनिंग तिथि *</label>
+      <input type="date" id="admJoinDate" required style="width:100%; background:#0b0b0d; border:1px solid var(--border); color:#fff; padding:10px; border-radius:8px; margin-top:4px;">
+    </div>
+    <button type="submit" style="width:100%; background:var(--ok); color:#000; border:none; padding:12px; border-radius:8px; font-weight:bold; font-size:14px; cursor:pointer;">💾 एडमिशन सबमिट करें</button>
+  </form>
+</div>
 
 <script>
-  (function () {
-    "use strict";
-    if (window.G && window.G.ok) return;
+  let allOrgMembers = [];
 
-    var aid = (G.qs("o") || "").toLowerCase(), org = null, tpl = null, s = function (id) { return document.getElementById(id); };
-    function fail(msg) { s("root").innerHTML = '<div class="card ctr"><b style="color:var(--err)">' + msg + '</b></div>'; }
+  window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("admJoinDate").value = new Date().toISOString().split('T')[0];
+    loadMembersData();
+  });
 
-    if (!aid) { fail("Error: Organisation ID missing in URL link."); return; }
+  function loadMembersData() {
+    try {
+      let saved = JSON.parse(localStorage.getItem("YASH_FITNESS_MEMBERS") || "[]");
+      allOrgMembers = saved;
+      renderAdminList(allOrgMembers);
+    } catch(e) {}
+  }
 
-    G.db.collection("orgs").doc(aid).get().then(function (doc) {
-      if (!doc.exists) { fail("Organisation not found in database."); return; }
-      org = doc.data();
-      tpl = G.T[org.type];
-      if (!tpl) { fail("Template configuration missing."); return; }
-      
-      if (org.logo) { s("oLogo").src = org.logo; s("oLogo").classList.remove("hide"); }
-      s("oName").textContent = org.name || "Admission Form";
-      
-      s("root").innerHTML = '';
-      var box = document.createElement("div");
-      s("root").appendChild(box);
-      if (G.mut && box, tpl, org, onSubmit) {
-        G.mut(box, tpl, org, onSubmit);
-      }
-      loadOrgMembersForAdmin(aid);
-    }).catch(function (err) {
-      fail("Network error connecting to database.");
+  function filterMembers(query) {
+    const q = query.toLowerCase();
+    const filtered = allOrgMembers.filter(m => 
+      (m.name && m.name.toLowerCase().includes(q)) || 
+      (m.phone && m.phone.includes(q))
+    );
+    renderAdminList(filtered);
+  }
+
+  function filterByStatus(type) {
+    if (type === 'pending_photo') {
+      renderAdminList(allOrgMembers.filter(m => !m.idSubmitted || m.status === 'Pending'));
+    } else if (type === 'active') {
+      renderAdminList(allOrgMembers.filter(m => m.status === 'Paid' || m.status === 'active'));
+    } else {
+      renderAdminList(allOrgMembers);
+    }
+  }
+
+  function renderAdminList(list) {
+    const container = document.getElementById('adminSearchResults');
+    if (!list || list.length === 0) {
+      container.innerHTML = '<div style="color:var(--mut); font-size:12px; text-align:center; padding:8px;">कोई पुराना रिकॉर्ड नहीं मिला।</div>';
+      return;
+    }
+    let html = '';
+    list.slice(0, 10).forEach(m => {
+      const isPaid = (m.status === 'Paid' || m.manualStatus === 'Paid');
+      html += `<div class="member-row">
+        <div>
+          <b style="color:var(--ac); font-size:13px;">${m.name}</b> <small style="color:var(--mut);">(${m.phone})</small><br>
+          <span style="font-size:11px; color:#aaa;">Status: <b style="color:${isPaid ? 'var(--ok)' : 'var(--err)'};">${isPaid ? 'Paid' : 'Pending'}</b></span>
+        </div>
+        <button onclick="quickDelete('${m.id || m.phone}')" style="background:var(--err); color:#fff; border:none; padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer;">Del</button>
+      </div>`;
     });
+    container.innerHTML = html;
+  }
 
-    function onSubmit(p) {
-      var base = G.db.collection("orgs").doc(aid), id = base.collection("members").doc().id;
-      return base.collection("files").doc(id).set(p.files).then(function () {
-        return base.collection("members").doc(id).set({
-          name: p.name, phone: p.phone, planName: p.planName, joinDate: p.joinDate,
-          expiry: p.expiry, batchName: p.batchName, status: "pending", photoUploaded: !!p.files.photo, idUploaded: !!p.files.idProof, createdAt: G.FV.serverTimestamp()
-        });
-      }).then(function () {
-        var link = G.link("card.html?o=" + aid + "&id=" + id);
-        s("root").innerHTML = '<div class="card ctr"><div style="font-size:38px">🎉</div><h2>Application Submitted!</h2><p class="mut">Awaiting admin approval. Your digital receipt & member card link is ready:</p><input type="text" readonly value="' + G.esc(link) + '" style="width:100%;padding:10px;background:#0b0b0d;color:#ffcc00;border:1px solid #2c2c35;border-radius:6px;text-align:center;margin:10px 0;"><a class="btn" style="display:block;background:var(--ac);color:#000;text-decoration:none;padding:12px;border-radius:8px;font-weight:bold;" href="' + G.esc(link) + '">View Member Card & Status →</a><button class="btn" id="cpy" style="background:#333;color:#fff;margin-top:10px;">Copy Link</button></div>';
-        s("cpy").onclick = function () { try { navigator.clipboard.writeText(link); G.toast("Link copied!"); } catch (e) {} };
-        window.scrollTo(0, 0);
-      }).catch(function (e) { alert("Could not submit: " + e.message); });
+  function handleAdmissionSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById("admName").value.trim();
+    const father = document.getElementById("admFather").value.trim() || "-";
+    const phone = document.getElementById("admPhone").value.trim();
+    const type = document.getElementById("admCategory").value;
+    const joinDate = document.getElementById("admJoinDate").value;
+
+    let saved = JSON.parse(localStorage.getItem("YASH_FITNESS_MEMBERS") || "[]");
+    saved.push({
+      id: Date.now(),
+      name, father, phone, type, joinDate,
+      status: "Pending",
+      payMode: "Cash",
+      amount: type === 'student' ? 300 : 500
+    });
+    localStorage.setItem("YASH_FITNESS_MEMBERS", JSON.stringify(saved));
+    
+    alert(`🎉 बधाई हो! "${name}" का एडमिशन सफलतापूर्वक हो गया है।`);
+    document.getElementById("admissionForm").reset();
+    document.getElementById("admJoinDate").value = new Date().toISOString().split('T')[0];
+    loadMembersData();
+  }
+
+  window.quickDelete = function(identifier) {
+    if (confirm("क्या आप इस सदस्य को हटाना चाहते हैं?")) {
+      let saved = JSON.parse(localStorage.getItem("YASH_FITNESS_MEMBERS") || "[]");
+      saved = saved.filter(x => (x.id && x.id.toString() !== identifier.toString()) && (x.phone && x.phone.toString() !== identifier.toString()));
+      localStorage.setItem("YASH_FITNESS_MEMBERS", JSON.stringify(saved));
+      loadMembersData();
     }
-
-    let allOrgMembers = [];
-    function loadOrgMembersForAdmin(orgId) {
-      G.db.collection("orgs").doc(orgId).collection("members").onSnapshot(snapshot => {
-        allOrgMembers = [];
-        snapshot.forEach(doc => {
-          let data = doc.data();
-          data.docId = doc.id;
-          allOrgMembers.push(data);
-        });
-        renderAdminList(allOrgMembers);
-      });
-    }
-
-    window.filterMembers = function(query) {
-      const q = query.toLowerCase();
-      const filtered = allOrgMembers.filter(m => 
-        (m.name && m.name.toLowerCase().includes(q)) || 
-        (m.phone && m.phone.includes(q))
-      );
-      renderAdminList(filtered);
-    }
-
-    window.filterByStatus = function(type) {
-      if (type === 'pending_photo') {
-        renderAdminList(allOrgMembers.filter(m => !m.photoUploaded || !m.idUploaded || m.status === 'pending'));
-      } else if (type === 'active') {
-        renderAdminList(allOrgMembers.filter(m => m.status === 'active'));
-      } else {
-        renderAdminList(allOrgMembers);
-      }
-    }
-
-    function renderAdminList(list) {
-      const container = document.getElementById('adminSearchResults');
-      if (!list || list.length === 0) {
-        container.innerHTML = '<div style="color:var(--mut); font-size:13px; text-align:center; padding:10px;">कोई रिकॉर्ड नहीं मिला।</div>';
-        return;
-      }
-      let html = '';
-      list.slice(0, 10).forEach(m => {
-        const hasPhotoId = m.photoUploaded && m.idUploaded;
-        const statusBadge = hasPhotoId ? '<span class="tag-ok">📸 Photo+ID OK</span>' : '<span class="tag-pending">⚠️ Photo/ID बाकी</span>';
-        const approvalBadge = m.status === 'active' ? '<span style="color:var(--ok); font-size:12px;">✅ मंजूर</span>' : '<span style="color:var(--err); font-size:12px;">⏳ पेंडिंग</span>';
-
-        html += `<div class="member-row">
-          <div>
-            <b style="color:var(--ac); font-size:14px;">${m.name || 'Unknown'}</b> <small style="color:var(--mut);">(${m.phone || 'No Phone'})</small><br>
-            <span style="font-size:12px; color:#aaa;">Plan: ${m.planName || 'Monthly'} | ${approvalBadge} | ${statusBadge}</span>
-          </div>
-          <div style="display:flex; gap:5px;">
-            <a href="card.html?o=${aid}&id=${m.docId}" target="_blank" style="background:#3b9eff; color:#fff; padding:6px 10px; border-radius:6px; font-size:12px; text-decoration:none; font-weight:bold;">ID देखें</a>
-            <button onclick="quickApprove('${m.docId}')" style="background:var(--ok); color:#fff; border:none; padding:6px 10px; border-radius:6px; font-size:12px; cursor:pointer; font-weight:bold;">Approve</button>
-            <button onclick="quickDelete('${m.docId}')" style="background:var(--err); color:#fff; border:none; padding:6px 10px; border-radius:6px; font-size:12px; cursor:pointer;">Del</button>
-          </div>
-        </div>`;
-      });
-      container.innerHTML = html;
-    }
-
-    window.quickApprove = function(memberId) {
-      G.db.collection("orgs").doc(aid).collection("members").doc(memberId).update({ status: 'active' }).then(() => {
-        alert('सफलता! सदस्य मंजूर हो गया है।');
-      });
-    }
-
-    window.quickDelete = function(memberId) {
-      if (confirm('क्या आप इस सदस्य को डिलीट करना चाहते हैं?')) {
-        G.db.collection("orgs").doc(aid).collection("members").doc(memberId).delete().then(() => {
-          alert('सदस्य डिलीट कर दिया गया है।');
-        });
-      }
-    }
-  })();
+  }
 </script>
 
 </body>
