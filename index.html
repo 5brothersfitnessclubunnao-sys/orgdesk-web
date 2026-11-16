@@ -5,11 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Universal Bulk Data Import - Admin</title>
 <link rel="stylesheet" href="ui.css">
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="core.js"></script>
 <style>
   :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; }
   body { font-family: Arial, sans-serif; background: var(--bg); color: var(--tx); margin: 0; padding: 20px; }
@@ -34,7 +29,7 @@
 <div class="container">
   <div class="card">
     <h2>📁 Universal Bulk Data Import (Excel / CSV / TXT / PDF)</h2>
-    <p>पुराना डेटा किसी भी फॉर्मेट में हो (Excel, CSV या PDF), यहाँ अपलोड करें। सिस्टम अपने आप डेटा को रीड करके सीधे <b>Members Portal</b> और डेटाबेस में सिंक कर देगा।</p>
+    <p>पुराना डेटा किसी भी फॉर्मेट में हो (Excel, CSV या PDF), यहाँ अपलोड करें। सिस्टम अपने आप डेटा को रीड करके सीधे <b>Members Portal</b> में जोड़ देगा।</p>
     
     <div class="file-drop" onclick="document.getElementById('importFile').click()">
       <span style="font-size: 36px;">📂</span><br><br>
@@ -66,15 +61,13 @@
         <tbody id="previewBody"></tbody>
       </table>
     </div>
-    <button class="btn" onclick="confirmImport()" style="background: var(--ok); color: #fff;">🚀 Confirm & Sync to Database</button>
+    <button class="btn" onclick="confirmImport()" style="background: var(--ok); color: #fff;">🚀 Confirm & Sync to Members Portal</button>
   </div>
 </div>
 
 <script>
   (function () {
     "use strict";
-    if (!window.G || !G.ok) return;
-
     let parsedData = [];
 
     document.getElementById('importFile').addEventListener('change', function(e) {
@@ -84,15 +77,8 @@
       const fileName = file.name.toLowerCase();
       const reader = new FileReader();
 
-      if (fileName.endsWith('.csv') || fileName.endsWith('.txt') || fileName.endsWith('.pdf')) {
-        reader.onload = function(evt) { parseTextData(evt.target.result); };
-        reader.readAsText(file);
-      } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
-        alert('Excel (.xlsx) फाइल के लिए कृपया फाइल को CSV फॉर्मेट में सेव करके अपलोड करें ताकि तुरंत और सटीक डेटा रीड हो सके।');
-      } else {
-        reader.onload = function(evt) { parseTextData(evt.target.result); };
-        reader.readAsText(file);
-      }
+      reader.onload = function(evt) { parseTextData(evt.target.result); };
+      reader.readAsText(file);
     });
 
     function parseTextData(text) {
@@ -114,12 +100,14 @@
         const row = lines[i].split(delimiter).map(val => val.trim().replace(/^"|"$/g, ''));
         if (row.length >= 2) {
           parsedData.push({
+            id: "MB" + Math.floor(1000 + Math.random() * 9000),
             name: row[0] || 'Unknown',
-            mobile: row[1] || '',
-            plan: row[2] || 'Monthly',
+            phone: row[1] || '',
+            planName: row[2] || 'Monthly',
             joinDate: row[3] || new Date().toISOString().split('T')[0],
-            expiry: row[4] || '',
-            batch: row[5] || ''
+            expiry: row[4] || new Date(Date.now() + 30*86400000).toISOString().split('T')[0],
+            batchName: row[5] || 'Morning',
+            status: 'active'
           });
         }
       }
@@ -137,14 +125,14 @@
       
       parsedData.slice(0, 15).forEach(item => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${G.esc(item.name)}</td><td>${G.esc(item.mobile)}</td><td>${G.esc(item.plan)}</td><td>${G.esc(item.joinDate)}</td><td>${G.esc(item.expiry)}</td><td>${G.esc(item.batch)}</td>`;
+        tr.innerHTML = `<td>${item.name}</td><td>${item.phone}</td><td>${item.planName}</td><td>${item.joinDate}</td><td>${item.expiry}</td><td>${item.batchName}</td>`;
         tbody.appendChild(tr);
       });
 
       document.getElementById('previewCard').style.display = 'block';
       const sb = document.getElementById('statusBox');
       sb.style.display = 'block';
-      sb.innerHTML = `✅ कुल <b>${parsedData.length}</b> रिकॉर्ड सफलतापर्वक पढ़ लिए गए हैं। नीचे दिए गए बटन से डेटा डेटाबेस में सिंक करें।`;
+      sb.innerHTML = `✅ कुल <b>${parsedData.length}</b> रिकॉर्ड सफलतापर्वक पढ़ लिए गए हैं। नीचे दिए गए बटन से डेटा सिंक करें।`;
     }
 
     window.confirmImport = function() {
@@ -153,55 +141,34 @@
         return;
       }
 
-      if (!confirm('क्या आप सुनिश्चित हैं कि आप ' + parsedData.length + ' सदस्यों का डेटा डेटाबेस में सिंक करना चाहते हैं?')) {
+      if (!confirm('क्या आप सुनिश्चित हैं कि आप ' + parsedData.length + ' सदस्यों का डेटा जोड़ना चाहते हैं?')) {
         return;
       }
 
-      const oid = (G.qs("o") || "").trim() || localStorage.getItem("od_org") || "";
-      if (!oid) {
-        alert('Error: Organisation ID नहीं मिली। कृपया एडमिन पैनल से लॉगिन करें।');
-        return;
-      }
+      try {
+        // Fetch existing members from localStorage if any, or push directly
+        let existingMembers = [];
+        try {
+          existingMembers = JSON.parse(localStorage.getItem('org_members') || '[]');
+        } catch(e) {}
 
-      const sb = document.getElementById('statusBox');
-      sb.style.display = 'block';
-      sb.innerHTML = '⏳ डेटाबेस में सेव हो रहा है, कृपया प्रतीक्षा करें...';
+        const combined = parsedData.concat(existingMembers);
+        localStorage.setItem('org_members', JSON.stringify(combined));
 
-      const batch = G.db.batch();
-      const colRef = G.db.collection("orgs").doc(oid).collection("cards");
-
-      parsedData.forEach(item => {
-        const docRef = colRef.doc();
-        const memberData = {
-          name: item.name || "Unknown",
-          phone: item.mobile || "",
-          planName: item.plan || "Monthly",
-          joinDate: item.joinDate || new Date().toISOString().split('T')[0],
-          expiry: item.expiry || "",
-          batchName: item.batch || "",
-          status: "active",
-          createdAt: G.FV.serverTimestamp(),
-          imported: true
-        };
-        batch.set(docRef, memberData);
-      });
-
-      batch.commit().then(() => {
-        alert('सफलता! ' + parsedData.length + ' सदस्यों का डेटा मेंबर रजिस्टर में जोड़ दिया गया है।');
+        alert('सफलता! ' + parsedData.length + ' सदस्यों का डेटा जोड़ दिया गया है।');
         document.getElementById('previewCard').style.display = 'none';
-        sb.innerHTML = '🎉 सभी डेटा सफलतापर्वक Members Portal में सिंक हो चुका है!';
+        document.getElementById('statusBox').innerHTML = '🎉 सभी डेटा सफलतापूर्वक Members Portal में जोड़ दिया गया है!';
+        
         setTimeout(() => {
           location.href = "admin.html#mem";
-        }, 1500);
-      }).catch(error => {
-        console.error("Import error: ", error);
-        alert('डेटा सिंक करने में एरर आया: ' + error.message);
-        sb.innerHTML = '❌ सिंक विफल रहा। कृपया इंटरनेट कनेक्शन जांचें।';
-      });
+        }, 1200);
+      } catch(err) {
+        alert('डेटा सेव करने में एरर आया: ' + err.message);
+      }
     };
 
     window.downloadSample = function() {
-      const csvContent = "Name,Mobile,Plan,Joining Date,Expiry Date,Batch\nRahul Singh,9876543210,Monthly,2026-01-01,2026-02-01,06:00 AM – 06:30 AM\nAmit Kumar,9123456789,Quarterly,2026-01-05,2026-04-05,07:00 AM – 07:30 AM";
+      const csvContent = "Name,Mobile,Plan,Joining Date,Expiry Date,Batch\nRahul Singh,9876543210,Monthly,2026-01-01,2026-02-01,Morning\nAmit Kumar,9123456789,Quarterly,2026-01-05,2026-04-05,Evening";
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
