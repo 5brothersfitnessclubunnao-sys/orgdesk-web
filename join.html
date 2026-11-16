@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admission Form</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="stylesheet" href="ui.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="core.js"></script>
+<script src="templates.js"></script>
+<script src="form.js"></script>
+</head>
+<body style="padding-bottom:30px">
+<div class="top"><img id="oLogo" class="logo hide" alt=""><b id="oName">Admission Form</b></div>
+<div class="wrap" id="root"><div class="card ctr mut">Loading…</div></div>
+<script>
+(function () {
+  if (!window.G || !G.ok) return;
+  var oid = G.qs("o").toLowerCase(), org = null, tpl = null, $ = function (id) { return document.getElementById(id); };
+  function fail(msg) { $("root").innerHTML = '<div class="card ctr"><h2>Unable to open the form</h2><p class="mut">' + G.esc(msg) + "</p></div>"; }
+  if (!oid) return fail("This link is incomplete. Please ask the organisation for the correct admission link.");
+  G.db.collection("orgs").doc(oid).get().then(function (s) {
+    if (!s.exists) return fail("This organisation could not be found. Please check the link.");
+    org = s.data() || {}; tpl = ORG_TEMPLATES[org.type];
+    if (!tpl) return fail("This organisation's form is not available.");
+    start();
+  }).catch(function () { fail("Network or server problem. Please try again in a few minutes."); });
+
+  function start() {
+    G.theme(org); document.title = (org.name || "Organisation") + " — Admission";
+    $("oName").textContent = org.name || "Admission Form";
+    if (G.img(org.logo)) { $("oLogo").src = org.logo; $("oLogo").classList.remove("hide"); }
+    var m = document.createElement("div");
+    m.innerHTML = '<h2>' + G.esc(tpl.memberWord) + ' Admission Form</h2><p class="mut">Please fill in all details accurately. Fields marked <span class="req">*</span> are mandatory.</p>';
+    $("root").innerHTML = ""; $("root").appendChild(m); var box = document.createElement("div"); $("root").appendChild(box);
+    OF.mount(box, tpl, org, { onSubmit: submit });
+    G.pwa();
+  }
+
+  function submit(p) {
+    var base = G.db.collection("orgs").doc(oid), id = base.collection("members").doc().id;
+    return base.collection("files").doc(id).set(p.files).then(function () { return base.collection("members").doc(id).set(p.doc); }).then(function () {
+      try { localStorage.setItem("org_last", JSON.stringify({ o: oid, m: id })); } catch (e) {}
+      var link = G.link("card.html", { o: oid, m: id });
+      $("root").innerHTML = '<div class="card ctr"><div style="font-size:48px">✅</div><h2>Application submitted</h2><p>Thank you, <b>' + G.esc(p.doc.name) + '</b>. Your application has been received by ' + G.esc(org.name) + ' and is awaiting verification.</p>' +
+        '<p class="mut" style="margin-top:10px">After approval, your digital ' + G.esc(tpl.memberWord.toLowerCase()) + ' card will be available at the link below. Please save it.</p>' +
+        '<a class="btn" style="margin-top:14px" href="' + G.esc(link) + '">View my card / status</a><button class="btn sec" style="margin-top:8px" id="cpy">Copy link</button></div>';
+      $("cpy").onclick = function () { try { navigator.clipboard.writeText(link); G.toast("Link copied"); } catch (e) { prompt("Copy this link:", link); } };
+      window.scrollTo(0, 0);
+    }).catch(function (e) { console.error(e); throw new Error("Could not submit. Check your internet and try again" + (e && e.code ? " (" + e.code + ")" : "") + "."); });
+  }
+})();
+</script>
+</body>
+</html>
