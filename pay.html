@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pay Fee</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="stylesheet" href="ui.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="core.js"></script>
+<script src="templates.js"></script>
+</head>
+<body style="padding-bottom:30px">
+<div class="top"><img id="oLogo" class="logo hide" alt=""><b id="oName">Pay Fee</b></div>
+<div class="wrap" id="root"><div class="card ctr mut">Loading…</div></div>
+<script>
+(function () {
+  if (!window.G || !G.ok) return;
+  var oid = G.qs("o").toLowerCase(), mid = G.qs("m"), $ = function (id) { return document.getElementById(id); }, root = $("root");
+  var org, tpl, card, shot = null, busy = false;
+  function msg(icon, title, text, extra) { root.innerHTML = '<div class="card ctr"><div style="font-size:44px">' + icon + "</div><h2>" + G.esc(title) + '</h2><p class="mut">' + G.esc(text) + "</p>" + (extra || "") + "</div>"; }
+  if (!oid || !mid) return msg("⚠️", "Link incomplete", "Please open this page from your digital card.");
+  var base = G.db.collection("orgs").doc(oid);
+  Promise.all([base.get(), base.collection("cards").doc(mid).get()]).then(function (r) {
+    if (!r[0].exists) return msg("⚠️", "Organisation not found", "This link is not valid.");
+    org = r[0].data(); tpl = ORG_TEMPLATES[org.type] || ORG_TEMPLATES.gym; G.theme(org);
+    $("oName").textContent = org.name || "Pay Fee"; document.title = (org.name || "") + " — Pay fee";
+    if (G.img(org.logo)) { $("oLogo").src = org.logo; $("oLogo").classList.remove("hide"); }
+    G.pwa();
+    if (!r[1].exists || r[1].data().status !== "active") return msg("⏳", "Not available", "Fee payment opens after your application is approved.");
+    card = r[1].data(); draw();
+  }).catch(function () { msg("⚠️", "Unable to load", "Please check your internet connection and try again."); });
+
+  function plans() { var cs = Array.isArray(org.cats) && org.cats.length; return (org.plans || []).filter(function (p) { return !cs || !p.cat || p.cat === card.catId; }); }
+  function sel() { var s = $("plan"); return s ? plans().filter(function (p) { return p.id === s.value; })[0] : null; }
+  function credit(p) { return p ? Math.max(0, Math.min(G.num(card.refCredit), G.num(p.price))) : 0; }
+
+  function draw() {
+    var ps = plans(); if (!ps.length) return msg("⚠️", "No plans available", "Please contact " + (org.name || "the organisation") + ".");
+    var left = G.daysLeft(card.expiry);
+    root.innerHTML = '<h2>Pay / Renew fee</h2><div class="card"><div class="kv"><span>' + G.esc(tpl.memberWord) + '</span><b>' + G.esc(card.name) + '</b></div><div class="kv"><span>ID</span><b>' + G.esc(card.code) + '</b></div><div class="kv"><span>Current plan</span><b>' + G.esc(card.planName || "—") + '</b></div><div class="kv"><span>Valid till</span><b>' + G.esc(G.fmt(card.expiry)) + (left != null && left < 0 ? " (expired)" : "") + "</b></div></div>" +
+      '<div class="card"><label>' + G.esc(tpl.planLabel) + '</label><select id="plan"><option value="">— Select —</option>' + ps.map(function (p) { return '<option value="' + G.esc(p.id) + '">' + G.esc(p.name) + " — " + G.esc(G.money(p.price)) + "</option>"; }).join("") + '</select>' +
+      '<div id="sum" style="margin-top:10px"></div><div id="upiRow" class="hide" style="margin:10px 0"><a class="btn sec" id="upiBtn" href="#">📲 Pay by UPI</a><div class="sub" id="upiNote" style="margin-top:6px"></div></div></div>' +
+      '<div class="card"><div class="sub" style="margin-bottom:6px">After paying, enter the UTR number <b>or</b> attach a screenshot (one is enough).</div><label>UTR / Transaction ID</label><input class="inp" id="utr" maxlength="30" autocomplete="off">' +
+      '<div class="slot"><div class="lbl" style="margin:0 0 6px">Payment screenshot</div><img class="imgbox hide" id="shotImg" alt=""><div class="sub" id="shotSt"></div><div class="acts"><button type="button" class="btn sec sm" id="shotPick">📁 Choose screenshot</button><button type="button" class="btn bad sm hide fit" id="shotDel" style="flex:0 0 auto">Remove</button></div><input type="file" accept="image/*" class="hide" id="shotIn"></div>' +
+      '<div class="err" id="perr" style="margin-top:8px"></div><button class="btn ok" id="send" style="margin-top:10px">✅ I have paid — send to ' + G.esc(org.name || "organisation") + '</button></div>' +
+      '<a class="btn sec" href="' + G.esc(G.link("card.html", { o: oid, m: mid })) + '">← Back to my card</a>';
+    $("plan").onchange = sum; sum();
+    $("shotPick").onclick = function () { $("shotIn").click(); };
+    $("shotDel").onclick = function () { shot = null; paintShot(); };
+    $("shotIn").onchange = function () {
+      var f = this.files && this.files[0]; this.value = ""; if (!f) return;
+      $("shotSt").textContent = "⏳ Preparing image…";
+      G.compress(f, 900, 1600, 110000).then(function (u) { shot = u || null; paintShot(); if (!u) $("shotSt").textContent = "This image could not be read. Please choose another."; });
+    };
+    $("send").onclick = send;
+  }
+  function paintShot() { var im = $("shotImg"); if (shot) { im.src = shot; im.classList.remove("hide"); $("shotSt").textContent = "✅ Added"; $("shotDel").classList.remove("hide"); } else { im.classList.add("hide"); im.removeAttribute("src"); $("shotSt").textContent = ""; $("shotDel").classList.add("hide"); } }
+  function sum() {
+    var p = sel(), c = credit(p), net = p ? G.num(p.price) - c : 0;
+    $("sum").innerHTML = p ? '<div class="kv"><span>Plan fee</span><b>' + G.esc(G.money(p.price)) + "</b></div>" + (c ? '<div class="kv"><span>Referral credit</span><b>− ' + G.esc(G.money(c)) + "</b></div>" : "") + '<div class="kv"><span>You pay</span><b style="font-size:18px">' + G.esc(G.money(net)) + "</b></div>" : "";
+    if (org.upiId && p && net > 0) { $("upiRow").classList.remove("hide"); $("upiBtn").href = "upi://pay?pa=" + encodeURIComponent(org.upiId) + "&pn=" + encodeURIComponent(org.name || "Organisation") + "&am=" + net + "&cu=INR"; $("upiNote").textContent = "Pays " + G.money(net) + " to " + org.upiId; }
+    else $("upiRow").classList.add("hide");
+  }
+  function send() {
+    if (busy) return; var p = sel(), e = $("perr"), utr = $("utr").value.trim(); e.textContent = "";
+    if (!p) { e.textContent = "Please select a plan."; return; }
+    var c = credit(p), net = G.num(p.price) - c;
+    if (!(net > 0)) { e.textContent = "Nothing to pay for this plan. Please contact the organisation."; return; }
+    if (utr && !/^[A-Za-z0-9]{6,30}$/.test(utr)) { e.textContent = "Enter a valid UTR (letters and digits only)."; return; }
+    if (!utr && !shot) { e.textContent = "Enter the UTR number or attach a payment screenshot."; return; }
+    busy = true; $("send").disabled = true; $("send").textContent = "⏳ Sending…";
+    var id = base.collection("payreqs").doc().id;
+    var req = { memberId: mid, name: card.name, code: card.code || "", planId: p.id, planName: p.name, amount: net, credit: c, utr: utr, status: "pending", createdAt: G.FV.serverTimestamp(), hasShot: !!shot };
+    (shot ? base.collection("payfiles").doc(id).set({ shot: shot }) : Promise.resolve()).then(function () { return base.collection("payreqs").doc(id).set(req); }).then(function () {
+      msg("✅", "Sent for confirmation", (org.name || "The organisation") + " will check your payment and renew your membership. Your card will show the new validity once it is confirmed.", '<a class="btn" style="margin-top:12px" href="' + G.esc(G.link("card.html", { o: oid, m: mid })) + '">Back to my card</a>');
+    }).catch(function (er) { console.error(er); busy = false; $("send").disabled = false; $("send").textContent = "✅ I have paid — send to " + (org.name || "organisation"); e.textContent = "Could not send. Check your internet and try again" + (er && er.code ? " (" + er.code + ")" : "") + "."; });
+  }
+})();
+</script>
+</body>
+</html>

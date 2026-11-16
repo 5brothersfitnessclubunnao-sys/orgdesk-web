@@ -57,7 +57,7 @@
       x.fillStyle = "#000"; x.font = "bold 20px Arial"; x.fillText("TOTAL RECEIVED", 54, y + 33); x.textAlign = "right"; x.font = "bold 26px Arial"; x.fillText("₹ " + G.num(p.amount).toLocaleString("en-IN"), W - 54, y + 36); x.textAlign = "left";
       y += 82; x.fillStyle = "#444"; x.font = "italic 15px Arial";
       wrap(x, "Rupees " + R.words(p.amount) + " only", W - 80, "italic 15px Arial").forEach(function (l) { x.fillText(l, 40, y); y += 20; });
-      y += 14; row("Payment mode", p.mode); if (p.utr) row("Transaction ID", p.utr); row("Received by", p.byName || "Administration");
+      y += 14; row("Payment mode", p.mode); if (p.credit) row("Referral credit used", "₹" + p.credit); if (p.utr) row("Transaction ID", p.utr); row("Received by", p.byName || "Administration");
 
       y = Math.max(y + 30, 800);
       x.strokeStyle = "#999"; x.beginPath(); x.moveTo(W - 260, y); x.lineTo(W - 40, y); x.stroke();

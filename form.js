@@ -17,6 +17,14 @@
   OF.mount = function (root, tpl, org, opts) {
     var files = {}, sig = { drawn: false }, step = 0, busy = false;
     var plans = Array.isArray(org.plans) ? org.plans : [], groups = Array.isArray(org.groups) ? org.groups : [];
+    var cats = (Array.isArray(org.cats) ? org.cats : []).filter(function (c) { return c && c.id && c.name; }), lastCat = "";
+    var refOn = !!(org.referral && org.referral.on);
+    var PAYSLOT = { key: "payShot", label: "Payment screenshot (optional)", hi: "भुगतान का स्क्रीनशॉट", req: 0, w: 900, h: 1600, len: 110000, camera: "environment" };
+    function plansFor(cid) { return plans.filter(function (p) { return !cats.length || !p.cat || p.cat === cid; }); }
+    function planOptionsHtml(cid) {
+      if (cats.length && !cid) return '<option value="">— Select category first —</option>';
+      return '<option value="">— Select —</option>' + plansFor(cid).map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.name) + " — " + esc(G.money(p.price)) + "</option>"; }).join("");
+    }
     var steps = tpl.sections.map(function (s) { return { id: s.id, title: s.title, hi: s.hi, kind: "fields", sec: s }; });
     steps.push({ id: "admission", title: "Admission Details", hi: "प्रवेश विवरण", kind: "admission" });
     steps.push({ id: "documents", title: "Photograph & Documents", hi: "फोटो एवं दस्तावेज़", kind: "docs" });
@@ -72,7 +80,9 @@
       if (st.kind === "admission") {
         var h = "";
         if (groups.length) h += '<div class="field"><label class="flab" for="grp">' + lbl(tpl.groupLabel, "", 1) + '</label><select id="grp"><option value="">— Select —</option>' + groups.map(function (g) { return '<option value="' + esc(g.id) + '">' + esc(g.name) + (g.time ? " (" + esc(g.time) + ")" : "") + "</option>"; }).join("") + '</select><div class="err" data-err="grp"></div></div>';
-        if (plans.length) h += '<div class="field"><label class="flab" for="plan">' + lbl(tpl.planLabel, "", 1) + '</label><select id="plan"><option value="">— Select —</option>' + plans.map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.name) + " — " + esc(G.money(p.price)) + "</option>"; }).join("") + '</select><div class="err" data-err="plan"></div></div>';
+        if (cats.length) h += '<div class="field"><label class="flab" for="cat">' + lbl("Category", "श्रेणी", 1) + '</label><select id="cat"><option value="">— Select —</option>' + cats.map(function (c) { return '<option value="' + esc(c.id) + '">' + esc(c.name) + "</option>"; }).join("") + '</select><div class="sub" id="catNote" style="color:var(--warn)"></div><div class="err" data-err="cat"></div></div>';
+        if (plans.length) h += '<div class="field"><label class="flab" for="plan">' + lbl(tpl.planLabel, "", 1) + '</label><select id="plan">' + planOptionsHtml("") + '</select><div class="err" data-err="plan"></div></div>';
+        if (refOn) h += '<div class="field"><label class="flab" for="refBy">' + lbl("Referred by — member's mobile number (optional)", "रेफर करने वाले सदस्य का मोबाइल") + '</label><input class="inp" id="refBy" inputmode="numeric" maxlength="10" autocomplete="off"><div class="err" data-err="refBy"></div></div>';
         h += '<div class="field"><label class="flab" for="joinDate">' + lbl("Joining / Admission Date", "प्रवेश की तिथि", 1) + '</label><input class="inp" type="date" id="joinDate" value="' + G.today() + '"><div class="err" data-err="joinDate"></div></div>';
         return h;
       }
@@ -88,7 +98,7 @@
         return '<p class="mut">You may pay the fee at the counter. If you have already paid by UPI, enter the transaction reference (UTR) below so that the payment can be verified.</p>' +
           '<div id="upiRow" class="hide" style="margin:10px 0"><a class="btn sec" id="upiBtn" href="#">📲 Pay by UPI</a><div class="sub" style="margin-top:6px" id="upiNote"></div></div>' +
           '<div class="kv"><span>Selected plan</span><b id="payPlan">—</b></div><div class="kv"><span>Fee</span><b id="payAmt">—</b></div>' +
-          '<div class="field"><label class="flab" for="utr">' + lbl("UTR / Transaction ID (if paid online)", "") + '</label><input class="inp" id="utr" maxlength="30" autocomplete="off"><div class="err" data-err="utr"></div></div>';
+          '<div class="field"><label class="flab" for="utr">' + lbl("UTR / Transaction ID (if paid online)", "") + '</label><input class="inp" id="utr" maxlength="30" autocomplete="off"><div class="err" data-err="utr"></div></div>' + slotHtml(PAYSLOT);
       }
       // terms
       return '<div class="terms" id="termsBox"></div>' +
@@ -126,6 +136,11 @@
     function selGroup() { var s = $("grp"); return s ? groups.filter(function (g) { return g.id === s.value; })[0] : null; }
 
     function refresh() {
+      var cs = $("cat");
+      if (cs && cs.value !== lastCat) {
+        lastCat = cs.value; var pl = $("plan"); if (pl) pl.innerHTML = planOptionsHtml(lastCat);
+        var cc = cats.filter(function (c) { return c.id === lastCat; })[0], nt = $("catNote"); if (nt) nt.textContent = cc && cc.note ? cc.note : "";
+      }
       var v = getVals();
       allFields(tpl).forEach(function (f) {
         var w = root.querySelector('.field[data-fid="' + f.id + '"]'); if (!w) return;
@@ -170,7 +185,7 @@
     root.addEventListener("change", function (e) {
       var t = e.target; if (!t.getAttribute || !t.getAttribute("data-in")) return;
       var slot = t.closest(".slot"), key = slot.getAttribute("data-slot"), f = t.files && t.files[0];
-      var spec = tpl.docSlots.filter(function (s) { return s.key === key; })[0];
+      var spec = tpl.docSlots.filter(function (s) { return s.key === key; })[0] || PAYSLOT;
       t.value = ""; if (!f) return;
       files[key] = { pending: true }; paintSlot(slot);
       G.compress(f, spec.w, spec.h, spec.len).then(function (u) {
@@ -220,7 +235,9 @@
           if (f.id === "dob") { var a = G.age(val); if (!G.parse(val) || a === "" || a < 3 || a > 99) return bad(f.id, "Enter a valid date of birth"); }
         });
       } else if (st.kind === "admission") {
-        ["grp", "plan", "joinDate"].forEach(function (k) { setErr(k, ""); });
+        ["grp", "cat", "plan", "refBy", "joinDate"].forEach(function (k) { setErr(k, ""); });
+        if (cats.length && !($("cat") || {}).value) bad("cat", "Please select your category");
+        if (refOn && $("refBy") && $("refBy").value.trim() && !/^[6-9]\d{9}$/.test($("refBy").value.trim())) bad("refBy", "Enter a valid 10-digit mobile number or leave it empty");
         if (groups.length && !selGroup()) bad("grp", "Please select " + tpl.groupLabel.toLowerCase());
         if (plans.length && !selPlan()) bad("plan", "Please select " + tpl.planLabel.toLowerCase());
         if (!G.parse($("joinDate").value)) bad("joinDate", "Please choose a valid date");
@@ -280,6 +297,9 @@
       if (data.sameAddr && data.address) data.curAddress = data.address;
       var needG = tpl.consent === "always" || (v.age !== "" && v.age < 18);
       if (needG) data.guardianConsent = true;
+      var cs = $("cat"), cc = cs && cs.value ? cats.filter(function (c) { return c.id === cs.value; })[0] : null;
+      if (cc) { data.catId = cc.id; data.catName = cc.name; }
+      var rb = $("refBy") ? $("refBy").value.trim() : ""; if (rb) data.referredBy = rb;
       var doc = {
         name: top.name, phone: top.phone, kind: tpl.id, data: data,
         planId: p ? p.id : "", planName: p ? p.name : "", planPrice: p ? G.num(p.price) : 0, planMonths: p ? G.num(p.months) : 0,
@@ -289,6 +309,7 @@
       };
       var fd = { idType: ($("idType") || {}).value || "" };
       tpl.docSlots.forEach(function (s) { if (files[s.key] && files[s.key].url) fd[s.key] = files[s.key].url; });
+      if (files.payShot && files.payShot.url) fd.payShot = files.payShot.url;
       var sg = sig.get(); if (sg) fd.sign = sg;
       if (!fd.idType) delete fd.idType;
       return { doc: doc, files: fd };

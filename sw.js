@@ -1,6 +1,6 @@
 /* Small service worker: lets the card be installed and keeps the last page shell available offline. Data is always live. */
-var C = "orgdesk-v1";
-var SHELL = ["./card.html", "./join.html", "./admin.html", "./setup.html", "./ui.css", "./core.js", "./templates.js", "./form.js", "./receipt.js", "./admin.js", "./firebase-config.js", "./manifest.json"];
+var C = "orgdesk-v2";
+var SHELL = ["./card.html", "./pay.html", "./join.html", "./admin.html", "./setup.html", "./ui.css", "./core.js", "./templates.js", "./form.js", "./receipt.js", "./admin.js", "./firebase-config.js", "./manifest.json"];
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(C).then(function (c) { return Promise.all(SHELL.map(function (u) { return c.add(u).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));
 });

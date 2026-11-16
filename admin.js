@@ -2,7 +2,7 @@
 (function () {
   "use strict";
   if (!window.G || !G.ok) return;
-  var S = { tab: "home", members: [], todayPay: [], q: "", filter: "", rf: G.today(), rt: G.today(), pays: [] }, A = {};
+  var S = { tab: "home", members: [], todayPay: [], reqs: [], q: "", filter: "", rf: G.today(), rt: G.today(), pays: [] }, A = {};
   var app = document.getElementById("app"), esc = G.esc;
   var unsubs = [];
   var $ = function (id) { return document.getElementById(id); };
@@ -36,6 +36,7 @@
         S.org = o.data(); S.tpl = ORG_TEMPLATES[S.org.type]; G.theme(S.org);
         shell();
         unsubs.push(base().collection("members").onSnapshot(function (q) { S.members = q.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); }); render(true); }, function () { G.toast("Could not load members"); }));
+        unsubs.push(base().collection("payreqs").where("status", "==", "pending").onSnapshot(function (q) { S.reqs = q.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); }); render(true); }, function () {}));
         unsubs.push(base().collection("payments").where("date", "==", G.today()).onSnapshot(function (q) { S.todayPay = q.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); }); render(true); }));
       });
     }).catch(function () { app.innerHTML = '<div class="wrap"><div class="card ctr"><h2>Unable to load</h2><p class="mut">Please check your connection and reload.</p></div></div>'; });
@@ -52,7 +53,7 @@
   function pendingCount() { return S.members.filter(function (m) { return m.status === "pending"; }).length; }
   function drawTabs() {
     var pc = pendingCount();
-    $("tabs").innerHTML = TABS.map(function (t) { return '<button data-a="tab" data-v="' + t[0] + '" class="' + (S.tab === t[0] ? "on" : "") + '"><i>' + t[1] + "</i>" + t[2] + (t[0] === "adm" && pc ? ' <span class="chip warn">' + pc + "</span>" : "") + "</button>"; }).join("");
+    $("tabs").innerHTML = TABS.map(function (t) { return '<button data-a="tab" data-v="' + t[0] + '" class="' + (S.tab === t[0] ? "on" : "") + '"><i>' + t[1] + "</i>" + t[2] + (t[0] === "adm" && pc ? ' <span class="chip warn">' + pc + "</span>" : "") + (t[0] === "rec" && S.reqs.length ? ' <span class="chip warn">' + S.reqs.length + "</span>" : "") + "</button>"; }).join("");
   }
   var rt;
   function render(soft) {
@@ -83,6 +84,7 @@
     function tile(n, l, c) { return '<div class="stat ' + (c || "") + '"><b>' + n + "</b><span>" + l + "</span></div>"; }
     var h = '<h2>Today at a glance</h2><div class="grid2">' + tile(st.active + st.expiring, "Active " + S.tpl.membersWord.toLowerCase(), "ok") + tile(st.pending, "Applications awaiting verification", st.pending ? "warn" : "") +
       tile(st.expiring, "Expiring within 7 days", "warn") + tile(st.expired, "Expired", "bad") + tile(adToday, "Admissions today") + tile(G.money(tot), "Fees collected today") + "</div>";
+    if (S.reqs.length) h += '<div class="card" style="border-color:var(--warn)"><b>' + S.reqs.length + ' online payment(s) awaiting your confirmation</b><button class="btn sm" style="margin-top:8px" data-a="tab" data-v="rec">Review now</button></div>';
     h += '<h3>Collection by staff (today)</h3><div class="card">' + (Object.keys(by).length ? Object.keys(by).map(function (k) { return '<div class="kv"><span>' + esc(k) + "</span><b>" + G.money(by[k]) + "</b></div>"; }).join("") : '<p class="mut">No collection recorded yet today.</p>') + "</div>";
     if (Object.keys(mode).length) h += '<div class="card">' + Object.keys(mode).map(function (k) { return '<div class="kv"><span>' + esc(k) + "</span><b>" + G.money(mode[k]) + "</b></div>"; }).join("") + "</div>";
     h += '<h3>Admission link</h3><div class="card"><div class="ro" style="word-break:break-all;font-size:13px">' + esc(join) + '</div><div class="row" style="margin-top:8px"><button class="btn sec" data-a="copy" data-v="' + esc(join) + '">Copy link</button><a class="btn sec" target="_blank" rel="noopener" href="' + esc("https://wa.me/?text=" + encodeURIComponent("Apply for admission at " + S.org.name + ": " + join)) + '">Share on WhatsApp</a></div></div>';
@@ -127,7 +129,7 @@
     var st = mstate(m), head = '<h2 style="margin-right:40px">' + esc(m.name) + "</h2><p>" + chip(st, m) + ' <span class="sub">' + esc(m.code || "") + "</span></p>";
     modal(head + '<div class="card ctr mut" id="dfiles">Loading documents…</div><div id="dbody"></div>');
     var body = "";
-    body += kvSheet("Membership", [[S.tpl.planLabel, m.planName || "—"], [S.tpl.groupLabel, m.batchName || "—"], ["Joining date", G.fmt(m.joinDate)]].concat(m.status === "active" ? [["Valid from", G.fmt(m.startDate)], ["Valid till", G.fmt(m.expiry)], ["Total paid", G.money(m.paid)], ["Fee due", G.money(m.due)]] : [["Plan fee", G.money(m.planPrice)], ["Applied on", G.fmtTs(m.createdAt)], ["UTR given", m.utr || "—"]]));
+    body += kvSheet("Membership", [[S.tpl.planLabel, m.planName || "—"]].concat(extraRows(m), [[S.tpl.groupLabel, m.batchName || "—"], ["Joining date", G.fmt(m.joinDate)]]).concat(m.status === "active" ? [["Valid from", G.fmt(m.startDate)], ["Valid till", G.fmt(m.expiry)], ["Total paid", G.money(m.paid)], ["Fee due", G.money(m.due)]] : [["Plan fee", G.money(m.planPrice)], ["Applied on", G.fmtTs(m.createdAt)], ["UTR given", m.utr || "—"]]));
     OF.sections(S.tpl, m).forEach(function (s) { body += kvSheet(s.title, s.rows); });
     var acts = "";
     if (m.status === "pending") acts = '<button class="btn ok" data-a="approvef" data-id="' + esc(m.id) + '">✔ Approve & generate receipt</button><button class="btn bad" style="margin-top:8px" data-a="denyf" data-id="' + esc(m.id) + '">✖ Deny application</button>';
@@ -137,6 +139,7 @@
     base().collection("files").doc(id).get().then(function (s) {
       var f = s.exists ? s.data() : {}, h = "";
       tplSlots().forEach(function (sl) { if (G.img(f[sl.key])) h += '<div class="slot"><div class="lbl" style="margin:0 0 6px">' + esc(sl.label) + (sl.key === "idFront" && f.idType ? " — " + esc(f.idType) : "") + '</div><img class="imgbox" src="' + f[sl.key] + '" alt=""></div>'; });
+      if (G.img(f.payShot)) h += '<div class="slot"><div class="lbl" style="margin:0 0 6px">Payment screenshot' + (m.utr ? " — UTR " + esc(m.utr) : "") + '</div><img class="imgbox" src="' + f.payShot + '" alt=""></div>';
       if (G.img(f.sign)) h += '<div class="slot"><div class="lbl" style="margin:0 0 6px">Signature (' + esc(m.signName || "") + ')</div><img class="imgbox" style="background:#fff" src="' + f.sign + '" alt=""></div>';
       var el = $("dfiles"); if (el) { el.className = ""; el.innerHTML = h || '<p class="mut">No documents attached.</p>'; }
     }).catch(function () { var el = $("dfiles"); if (el) el.textContent = "Could not load documents."; });
@@ -149,7 +152,15 @@
   function tplSlots() { return S.tpl.docSlots; }
 
   /* ================= approve / deny ================= */
-  function planOpts(sel) { return (S.org.plans || []).map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === sel ? " selected" : "") + ">" + esc(p.name) + " — " + esc(G.money(p.price)) + "</option>"; }).join(""); }
+  function catName(id) { var c = (S.org.cats || []).filter(function (x) { return x.id === id; })[0]; return c ? c.name : ""; }
+  function planOpts(sel) { return (S.org.plans || []).map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === sel ? " selected" : "") + ">" + (p.cat && catName(p.cat) ? esc(catName(p.cat)) + " · " : "") + esc(p.name) + " — " + esc(G.money(p.price)) + "</option>"; }).join(""); }
+  function extraRows(m) {
+    var d = m.data || {}, r = [];
+    if (d.catName) r.push(["Category", d.catName]);
+    if (d.referredBy) r.push(["Referred by (mobile)", d.referredBy]);
+    if (G.num(m.refCredit) > 0) r.push(["Referral credit available", G.money(m.refCredit)]);
+    return r;
+  }
   var MODES = ["Cash", "UPI", "Online / Card", "Bank Transfer", "Cheque"];
   function payFields(def) {
     return '<label>Payment mode</label><select id="pmode">' + MODES.map(function (x) { return "<option>" + x + "</option>"; }).join("") + '</select><label>Transaction ID / reference (if any)</label><input class="inp" id="putr" maxlength="30" value="' + esc(def.utr || "") + '"><div class="err" id="perr"></div>';
@@ -162,39 +173,56 @@
       '<div class="sub">Enter 0 to approve without payment — the fee will be marked as due.</div>' + payFields(m) + '<button class="btn ok" id="pgo" style="margin-top:12px" data-a="approve" data-id="' + esc(m.id) + '">Approve & generate receipt</button>');
     $("pplan").onchange = function () { var p = (S.org.plans || []).filter(function (x) { return x.id === $("pplan").value; })[0]; if (p) $("pamt").value = p.price; };
   };
-  function readPay() {
+  function readPay(m) {
     var plan = (S.org.plans || []).filter(function (p) { return p.id === $("pplan").value; })[0], amt = Number($("pamt").value), start = $("pstart") ? $("pstart").value : G.today();
     if (!plan) { $("perr").textContent = "Select a plan."; return null; }
     if (!G.parse(start)) { $("perr").textContent = "Choose a valid start date."; return null; }
     if (!isFinite(amt) || amt < 0 || amt > 10000000) { $("perr").textContent = "Enter a valid amount."; return null; }
-    return { plan: plan, amount: Math.round(amt), start: start, mode: $("pmode").value, utr: $("putr").value.trim() };
+    var cb = $("pcred"), credit = cb && cb.checked && m ? Math.min(G.num(m.refCredit), G.num(plan.price)) : 0;
+    return { plan: plan, amount: Math.round(amt), start: start, mode: $("pmode").value, utr: $("putr").value.trim(), credit: credit };
   }
   function txFee(m, f, type) {
     var b = base(), mRef = b.collection("members").doc(m.id), cRef = b.collection("cards").doc(m.id), pRef = b.collection("payments").doc(), seq = b.collection("counters").doc("seq");
-    var months = G.num(f.plan.months) || 1, expiry = G.endDate(f.start, months), out = {};
+    var months = G.num(f.plan.months) || 1, expiry = G.endDate(f.start, months), out = {}, rf = S.org.referral || {}, ref = null;
+    if (type === "admission" && rf.on && G.num(rf.amount) > 0 && m.data && m.data.referredBy) {
+      ref = S.members.filter(function (x) { return x.status === "active" && x.id !== m.id && G.ph10(x.phone) === G.ph10(m.data.referredBy); })[0] || null;
+    }
     return G.db.runTransaction(function (tx) {
       return tx.get(seq).then(function (sd) {
-        var q = sd.exists ? sd.data() : { member: 0, receipt: 0 }, isNew = type === "admission";
-        var code = isNew ? (S.org.codePrefix || S.tpl.codePrefix) + G.pad(q.member + 1, 4) : m.code;
-        var rno = f.amount > 0 ? (S.org.receiptPrefix || "RC") + "-" + G.pad(q.receipt + 1, 5) : "";
-        tx.set(seq, { member: q.member + (isNew ? 1 : 0), receipt: q.receipt + (f.amount > 0 ? 1 : 0) });
-        var mu = { status: "active", code: code, startDate: f.start, expiry: expiry, expiryTs: G.endTs(expiry), planId: f.plan.id, planName: f.plan.name, planPrice: G.num(f.plan.price), planMonths: months,
-          paid: G.num(m.paid) + f.amount, due: Math.max(0, G.num(f.plan.price) - f.amount) };
-        if (isNew) { mu.approvedDate = G.today(); mu.approvedBy = S.user.uid; mu.approvedByName = S.ou.name || ""; } else mu.lastRenewed = G.today();
-        tx.update(mRef, mu);
-        var cu = { name: m.name, code: code, status: "active", planName: f.plan.name, batchName: m.batchName || "", expiry: expiry, expiryTs: G.endTs(expiry) };
-        if (f.thumb) cu.thumb = f.thumb;
-        tx.set(cRef, cu, { merge: true });
-        if (f.amount > 0) {
-          var pay = { memberId: m.id, name: m.name, code: code, phone: m.phone, batchName: m.batchName || "", amount: f.amount, mode: f.mode, utr: f.utr, receiptNo: rno, type: type, planName: f.plan.name, from: f.start, to: expiry, date: G.today(), ts: G.FV.serverTimestamp(), by: S.user.uid, byName: S.ou.name || "Admin" };
-          tx.set(pRef, pay); out.pay = pay;
-        }
-        out.code = code; out.expiry = expiry;
+        return (ref ? tx.get(b.collection("members").doc(ref.id)) : Promise.resolve(null)).then(function (rd) {
+          var q = sd.exists ? sd.data() : { member: 0, receipt: 0 }, isNew = type === "admission";
+          var code = isNew ? (S.org.codePrefix || S.tpl.codePrefix) + G.pad(q.member + 1, 4) : m.code;
+          var rno = f.amount > 0 ? (S.org.receiptPrefix || "RC") + "-" + G.pad(q.receipt + 1, 5) : "";
+          var used = Math.max(0, Math.min(G.num(f.credit), G.num(m.refCredit)));
+          tx.set(seq, { member: q.member + (isNew ? 1 : 0), receipt: q.receipt + (f.amount > 0 ? 1 : 0) });
+          var mu = { status: "active", code: code, startDate: f.start, expiry: expiry, expiryTs: G.endTs(expiry), planId: f.plan.id, planName: f.plan.name, planPrice: G.num(f.plan.price), planMonths: months,
+            paid: G.num(m.paid) + f.amount, due: Math.max(0, G.num(f.plan.price) - f.amount - used) };
+          if (isNew) { mu.approvedDate = G.today(); mu.approvedBy = S.user.uid; mu.approvedByName = S.ou.name || ""; } else mu.lastRenewed = G.today();
+          if (used > 0) mu.refCredit = G.num(m.refCredit) - used;
+          tx.update(mRef, mu);
+          var cu = { name: m.name, code: code, status: "active", planName: f.plan.name, batchName: m.batchName || "", expiry: expiry, expiryTs: G.endTs(expiry) };
+          if (m.data && m.data.catId) cu.catId = m.data.catId;
+          if (used > 0) cu.refCredit = mu.refCredit;
+          if (f.thumb) cu.thumb = f.thumb;
+          tx.set(cRef, cu, { merge: true });
+          if (f.amount > 0) {
+            var pay = { memberId: m.id, name: m.name, code: code, phone: m.phone, batchName: m.batchName || "", amount: f.amount, mode: f.mode, utr: f.utr, receiptNo: rno, type: type, planName: f.plan.name, from: f.start, to: expiry, date: G.today(), ts: G.FV.serverTimestamp(), by: S.user.uid, byName: S.ou.name || "Admin" };
+            if (used > 0) pay.credit = used;
+            tx.set(pRef, pay); out.pay = pay;
+          }
+          if (ref && rd && rd.exists) {
+            var nc = G.num(rd.data().refCredit) + G.num(rf.amount);
+            tx.update(b.collection("members").doc(ref.id), { refCredit: nc });
+            tx.set(b.collection("cards").doc(ref.id), { refCredit: nc }, { merge: true });
+            out.refName = ref.name;
+          }
+          out.code = code; out.expiry = expiry;
+        });
       });
     }).then(function () { return out; });
   }
   A.approve = function (el) {
-    var m = find(el.getAttribute("data-id")), f = readPay(); if (!m || !f) return;
+    var m = find(el.getAttribute("data-id")), f = readPay(m); if (!m || !f) return;
     var b = $("pgo"); b.disabled = true; b.textContent = "Please wait…";
     base().collection("files").doc(m.id).get().then(function (s) { return G.thumb(s.exists ? s.data().photo : "", 120, 0.6); }).then(function (th) { f.thumb = th; return txFee(m, f, "admission"); }).then(function (out) {
       G.toast("Approved — " + out.code);
@@ -222,12 +250,13 @@
     var start = G.daysLeft(m.expiry) != null && G.daysLeft(m.expiry) >= 0 ? G.addDays(m.expiry, 1) : G.today();
     var plan = (S.org.plans || []).filter(function (p) { return p.id === m.planId; })[0] || (S.org.plans || [])[0];
     modal('<h2 style="margin-right:40px">Collect fee / Renew</h2><p class="mut">' + esc(m.name) + " · valid till " + esc(G.fmt(m.expiry)) + '</p><label>' + esc(S.tpl.planLabel) + '</label><select id="pplan">' + planOpts(plan && plan.id) + '</select>' +
-      '<label>New period starts</label><input class="inp" type="date" id="pstart" value="' + start + '"><label>Amount received (₹)</label><input class="inp" type="number" id="pamt" min="1" value="' + esc(plan ? plan.price : "") + '">' + payFields({}) +
+      '<label>New period starts</label><input class="inp" type="date" id="pstart" value="' + start + '"><label>Amount received (₹)</label><input class="inp" type="number" id="pamt" min="1" value="' + esc(plan ? Math.max(0, G.num(plan.price) - Math.min(G.num(m.refCredit), G.num(plan.price))) : "") + '">' + (G.num(m.refCredit) > 0 ? '<label class="chk" style="display:flex;gap:8px;align-items:center;color:var(--tx);margin-top:8px"><input type="checkbox" id="pcred" checked style="width:auto"> Use referral credit (' + esc(G.money(m.refCredit)) + " available)</label>" : "") + payFields({}) +
       '<button class="btn ok" id="pgo" style="margin-top:12px" data-a="renew" data-id="' + esc(m.id) + '">Receive fee & generate receipt</button>');
-    $("pplan").onchange = function () { var p = (S.org.plans || []).filter(function (x) { return x.id === $("pplan").value; })[0]; if (p) $("pamt").value = p.price; };
+    function recalc() { var p = (S.org.plans || []).filter(function (x) { return x.id === $("pplan").value; })[0]; if (!p) return; var cb = $("pcred"); $("pamt").value = Math.max(0, G.num(p.price) - (cb && cb.checked ? Math.min(G.num(m.refCredit), G.num(p.price)) : 0)); }
+    $("pplan").onchange = recalc; if ($("pcred")) $("pcred").onchange = recalc;
   };
   A.renew = function (el) {
-    var m = find(el.getAttribute("data-id")), f = readPay(); if (!m || !f) return;
+    var m = find(el.getAttribute("data-id")), f = readPay(m); if (!m || !f) return;
     if (f.amount <= 0) { $("perr").textContent = "Enter the amount received."; return; }
     var b = $("pgo"); b.disabled = true; b.textContent = "Please wait…";
     txFee(m, f, "renewal").then(function (out) { G.toast("Fee received"); showReceipt(out.pay, Object.assign({}, m, { code: out.code })); }).catch(function (e) { b.disabled = false; b.textContent = "Receive fee & generate receipt"; $("perr").textContent = G.firebaseError(e); });
@@ -249,7 +278,8 @@
     showReceipt(p, m);
   };
   function receipts() {
-    $("view").innerHTML = '<h2>Receipts & collection</h2><div class="card"><div class="grid2"><div><label>From</label><input class="inp" type="date" id="rf" value="' + S.rf + '"></div><div><label>To</label><input class="inp" type="date" id="rt" value="' + S.rt + '"></div></div></div><div id="rlist" class="card mut">Loading…</div>';
+    var rq = S.reqs.length ? '<div class="card" style="border-color:var(--warn)"><h3 style="margin-top:0">Online payments awaiting confirmation (' + S.reqs.length + ')</h3>' + S.reqs.map(function (r) { return '<div class="li" data-a="reqopen" data-id="' + esc(r.id) + '"><div class="m"><b>' + esc(r.name) + " · " + G.money(r.amount) + "</b><small>" + esc((r.planName || "") + " · " + G.fmtTs(r.createdAt)) + '</small></div><span class="chip warn">Review</span></div>'; }).join("") + "</div>" : "";
+    $("view").innerHTML = '<h2>Receipts & collection</h2>' + rq + '<div class="card"><div class="grid2"><div><label>From</label><input class="inp" type="date" id="rf" value="' + S.rf + '"></div><div><label>To</label><input class="inp" type="date" id="rt" value="' + S.rt + '"></div></div></div><div id="rlist" class="card mut">Loading…</div>';
     $("rf").onchange = $("rt").onchange = function () { S.rf = $("rf").value; S.rt = $("rt").value; receipts(); };
     if (!G.parse(S.rf) || !G.parse(S.rt)) return;
     base().collection("payments").where("date", ">=", S.rf).where("date", "<=", S.rt).get().then(function (q) {
@@ -260,12 +290,38 @@
     }).catch(function () { var el = $("rlist"); if (el) el.textContent = "Could not load receipts."; });
   }
 
+  /* ================= online payment requests (member Pay page) ================= */
+  A.reqopen = function (el) {
+    var r = S.reqs.filter(function (x) { return x.id === el.getAttribute("data-id"); })[0]; if (!r) return;
+    var m = find(r.memberId);
+    modal('<h2 style="margin-right:40px">Confirm online payment</h2>' + kvSheet("Request", [["Name", r.name], ["ID", r.code || (m && m.code) || "—"], [S.tpl.planLabel, r.planName || "—"], ["Amount to receive", G.money(r.amount)], ["Referral credit used", G.money(r.credit || 0)], ["UTR / reference", r.utr || "—"], ["Sent", G.fmtTs(r.createdAt)]]) +
+      '<div class="card ctr mut" id="rshot">' + (r.hasShot ? "Loading screenshot…" : "No screenshot attached.") + '</div><div class="sub">Check the amount and UTR in your bank/UPI app before confirming.</div><div class="err" id="perr"></div>' +
+      '<button class="btn ok" id="pgo" style="margin-top:10px" data-a="reqok" data-id="' + esc(r.id) + '">✔ Payment received — confirm & make receipt</button><button class="btn bad" style="margin-top:8px" data-a="reqno" data-id="' + esc(r.id) + '">✖ Not received — reject</button>');
+    if (r.hasShot) base().collection("payfiles").doc(r.id).get().then(function (s) { var b = $("rshot"); if (!b) return; var u = s.exists ? s.data().shot : ""; if (G.img(u)) { b.className = ""; b.innerHTML = '<img class="imgbox" src="' + u + '" alt="Payment screenshot">'; } else b.textContent = "Screenshot could not be loaded."; });
+  };
+  A.reqok = function (el) {
+    var r = S.reqs.filter(function (x) { return x.id === el.getAttribute("data-id"); })[0], m = r && find(r.memberId), plan = r && (S.org.plans || []).filter(function (p) { return p.id === r.planId; })[0];
+    if (!r || !m) return; if (!plan) { $("perr").textContent = "This plan no longer exists in Settings."; return; }
+    var b = $("pgo"); b.disabled = true; b.textContent = "Please wait…";
+    var start = G.daysLeft(m.expiry) != null && G.daysLeft(m.expiry) >= 0 ? G.addDays(m.expiry, 1) : G.today();
+    txFee(m, { plan: plan, amount: Math.round(G.num(r.amount)), start: start, mode: "UPI", utr: r.utr || "", credit: G.num(r.credit) }, "renewal").then(function (out) {
+      return base().collection("payreqs").doc(r.id).update({ status: "confirmed", confirmedDate: G.today(), receiptNo: out.pay ? out.pay.receiptNo : "" }).then(function () { return out; });
+    }).then(function (out) { G.toast("Payment confirmed"); if (out.pay) showReceipt(out.pay, Object.assign({}, m, { code: out.code })); else closeModal(); })
+      .catch(function (e) { console.error(e); b.disabled = false; b.textContent = "✔ Payment received — confirm & make receipt"; $("perr").textContent = G.firebaseError(e); });
+  };
+  A.reqno = function (el) {
+    var id = el.getAttribute("data-id");
+    base().collection("payreqs").doc(id).update({ status: "rejected", rejectedDate: G.today() }).then(function () { G.toast("Rejected"); closeModal(); }).catch(function (e) { $("perr").textContent = G.firebaseError(e); });
+  };
+
   /* ================= settings ================= */
   function settings() {
     var o = S.org, t = S.tpl, join = G.link("join.html", { o: S.orgId });
     var h = "<h2>Settings</h2>" +
       '<div class="card"><h3 style="margin-top:0">Organisation profile</h3><label>Name</label><input class="inp" id="sn" maxlength="80" value="' + esc(o.name) + '"><label>Phone</label><input class="inp" id="sp" type="tel" maxlength="10" value="' + esc(o.phone) + '"><label>Address</label><textarea class="inp" id="sa" maxlength="200">' + esc(o.address) + '</textarea><label>UPI ID</label><input class="inp" id="su" maxlength="60" value="' + esc(o.upiId || "") + '"><div class="grid2"><div><label>Brand colour</label><input class="inp" id="sc" type="color" value="' + esc(o.color || "#ffcc00") + '" style="padding:4px;height:44px"></div><div><label>Receipt prefix</label><input class="inp" id="sr" maxlength="5" value="' + esc(o.receiptPrefix || "RC") + '"></div></div><label>Logo</label><input class="inp" type="file" id="sl" accept="image/*"><label>Notice shown on member cards</label><textarea class="inp" id="sno" maxlength="300" placeholder="e.g. Gym closed on Sunday">' + esc(o.notice || "") + "</textarea></div>" +
       '<div class="card"><h3 style="margin-top:0">' + esc(t.planLabel) + 's</h3><div id="splans">' + (o.plans || []).map(planRow).join("") + '</div><button class="btn sec sm" data-a="addp">+ Add plan</button></div>' +
+      '<div class="card"><h3 style="margin-top:0">Member categories <span class="sub">(optional)</span></h3><div class="sub" style="margin-bottom:8px">Example: Student, Job seeker, Job / Business. Each plan can then be assigned to one category, and applicants only see plans of their category. Save once after adding categories, then assign them to plans above.</div><div id="scats">' + (o.cats || []).map(catRow).join("") + '</div><button class="btn sec sm" data-a="addc">+ Add category</button></div>' +
+      '<div class="card"><h3 style="margin-top:0">Referral credit <span class="sub">(optional)</span></h3><label class="chk" style="display:flex;gap:8px;align-items:center;color:var(--tx)"><input type="checkbox" id="sref" style="width:auto"' + (o.referral && o.referral.on ? " checked" : "") + '> When a member refers a new member, give the referrer fee credit</label><label>Credit per referral (₹)</label><input class="inp" id="srefamt" type="number" min="1" value="' + esc(o.referral && o.referral.amount || "") + '"><div class="sub">The credit is added when the referred member is approved, and is used automatically on the referrer\'s next fee payment.</div></div>' +
       '<div class="card"><h3 style="margin-top:0">' + esc(t.groupsLabel) + '</h3><div id="sgroups">' + (o.groups || []).map(groupRow).join("") + '</div><button class="btn sec sm" data-a="addg">+ Add ' + esc(t.groupLabel.toLowerCase()) + '</button></div>' +
       '<div class="card"><h3 style="margin-top:0">Terms & conditions (version ' + (o.termsVersion || 1) + ')</h3><textarea class="inp" id="st" style="min-height:260px" maxlength="6000">' + esc(o.terms) + '</textarea><div class="sub">Saving changed terms creates a new version. Earlier applications keep the version they accepted.</div></div>' +
       '<div class="err" id="serr"></div><button class="btn ok" data-a="saveset">Save settings</button>' +
@@ -273,7 +329,12 @@
       '<button class="btn bad" style="margin-top:6px" data-a="logout">Sign out</button><p class="ctr mut" style="margin:14px 0">' + esc(G.app.name) + " · Organisation ID: " + esc(S.orgId) + "</p>";
     $("view").innerHTML = h;
   }
-  function planRow(p) { return '<div class="trow" data-id="' + esc(p.id || "") + '"><input class="inp" data-k="name" value="' + esc(p.name) + '" maxlength="60"><input class="inp" data-k="months" type="number" min="1" value="' + esc(p.months) + '"><input class="inp" data-k="price" type="number" min="0" value="' + esc(p.price) + '"><button class="xbtn" data-a="delrow">×</button></div>'; }
+  function planRow(p) {
+    var cs = S.org.cats || [], sel = cs.length ? '<select class="inp" data-k="cat" style="grid-column:1/-1"><option value="">All categories</option>' + cs.map(function (c) { return '<option value="' + esc(c.id) + '"' + (c.id === p.cat ? " selected" : "") + ">" + esc(c.name) + " only</option>"; }).join("") + "</select>" : "";
+    return '<div class="trow" data-id="' + esc(p.id || "") + '"><input class="inp" data-k="name" value="' + esc(p.name) + '" maxlength="60"><input class="inp" data-k="months" type="number" min="1" value="' + esc(p.months) + '"><input class="inp" data-k="price" type="number" min="0" value="' + esc(p.price) + '"><button class="xbtn" data-a="delrow">×</button>' + sel + "</div>";
+  }
+  function catRow(c) { return '<div class="trow g" data-id="' + esc(c.id || "") + '"><input class="inp" data-k="name" value="' + esc(c.name) + '" maxlength="40" placeholder="Category name"><input class="inp" data-k="note" value="' + esc(c.note || "") + '" maxlength="160" placeholder="Note shown to applicant (optional)"><button class="xbtn" data-a="delrow">×</button></div>'; }
+  A.addc = function () { $("scats").insertAdjacentHTML("beforeend", catRow({ name: "", note: "" })); };
   function groupRow(g) { return '<div class="trow g" data-id="' + esc(g.id || "") + '"><input class="inp" data-k="name" value="' + esc(g.name) + '" maxlength="60"><input class="inp" data-k="time" value="' + esc(g.time || "") + '" maxlength="40" placeholder="Timing (optional)"><button class="xbtn" data-a="delrow">×</button></div>'; }
   A.addp = function () { $("splans").insertAdjacentHTML("beforeend", planRow({ name: "", months: 1, price: "" })); };
   A.addg = function () { $("sgroups").insertAdjacentHTML("beforeend", groupRow({ name: "", time: "" })); };
@@ -282,13 +343,16 @@
   A.saveset = function () {
     var e = $("serr"); e.textContent = "";
     var plans = rows("splans"), groups = rows("sgroups"), terms = $("st").value.trim();
+    var cats = rows("scats").filter(function (c) { return c.name; }); cats.forEach(function (c) { if (!c.note) delete c.note; });
+    var refOn = $("sref").checked, refAmt = Math.round(Number($("srefamt").value));
+    if (refOn && !(refAmt >= 1)) { e.textContent = "Enter the referral credit amount, or switch referral off."; return; }
     if ($("sn").value.trim().length < 3) { e.textContent = "Enter the organisation name."; return; }
     if (!/^[6-9]\d{9}$/.test($("sp").value.trim())) { e.textContent = "Enter a valid 10-digit phone number."; return; }
     if (!plans.length) { e.textContent = "Keep at least one plan."; return; }
-    for (var i = 0; i < plans.length; i++) { var p = plans[i]; p.months = Math.round(Number(p.months)); p.price = Number(p.price); if (!p.name || !(p.months >= 1) || !(p.price > 0)) { e.textContent = "Each plan needs a name, months and a fee above zero."; return; } }
+    for (var i = 0; i < plans.length; i++) { var p = plans[i]; p.months = Math.round(Number(p.months)); p.price = Number(p.price); if (!p.cat || !cats.some(function (c) { return c.id === p.cat; })) delete p.cat; if (!p.name || !(p.months >= 1) || !(p.price > 0)) { e.textContent = "Each plan needs a name, months and a fee above zero."; return; } }
     for (var j = 0; j < groups.length; j++) { if (!groups[j].name) { e.textContent = "Each " + S.tpl.groupLabel.toLowerCase() + " needs a name."; return; } if (!groups[j].time) delete groups[j].time; }
     if (terms.length < 20) { e.textContent = "Terms cannot be empty."; return; }
-    var upd = { name: $("sn").value.trim(), phone: $("sp").value.trim(), address: $("sa").value.trim(), upiId: $("su").value.trim(), color: $("sc").value, receiptPrefix: ($("sr").value.trim() || "RC").toUpperCase(), notice: $("sno").value.trim(), plans: plans, groups: groups, terms: terms };
+    var upd = { name: $("sn").value.trim(), phone: $("sp").value.trim(), address: $("sa").value.trim(), upiId: $("su").value.trim(), color: $("sc").value, receiptPrefix: ($("sr").value.trim() || "RC").toUpperCase(), notice: $("sno").value.trim(), plans: plans, groups: groups, terms: terms, cats: cats, referral: { on: refOn, amount: refOn ? refAmt : 0 } };
     if (terms !== S.org.terms) upd.termsVersion = (S.org.termsVersion || 1) + 1;
     var lf = $("sl").files && $("sl").files[0];
     var go = function (logo) { if (logo) upd.logo = logo; return base().update(upd).then(function () { Object.assign(S.org, upd); G.theme(S.org); G.toast("Settings saved"); shell(); S.tab = "set"; render(); }); };

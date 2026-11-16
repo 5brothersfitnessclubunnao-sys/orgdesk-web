@@ -49,6 +49,7 @@
     if (org.notice) h += '<div class="card"><h3 style="margin-top:0">Notice</h3><p>' + G.esc(org.notice) + "</p></div>";
     if (!expired) h += '<button class="btn ok" id="att" style="margin-top:6px">✔ Mark my attendance</button><div class="sub ctr" id="attMsg" style="margin-top:8px"></div>';
     else if (org.phone) h += '<a class="btn" href="tel:' + G.esc(G.ph10(org.phone)) + '">📞 Call ' + G.esc(org.name) + " to renew</a>";
+    h += '<a class="btn' + (expired ? "" : " sec") + '" style="margin-top:8px" href="' + G.esc(G.link("pay.html", { o: oid, m: mid })) + '">💳 Pay / Renew fee' + (G.num(c.refCredit) > 0 ? " (credit " + G.esc(G.money(c.refCredit)) + ")" : "") + "</a>";
     root.innerHTML = h;
     var b = $("att"); if (!b) return;
     var key = "att_" + G.today() + "_" + mid, m = $("attMsg");

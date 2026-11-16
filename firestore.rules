@@ -63,7 +63,8 @@ service cloud.firestore {
       match /files/{id} {
         allow get, list: if isStaff(o);
         allow create: if isStaff(o) || (
-          request.resource.data.keys().hasOnly(['photo','idFront','idBack','doc1','doc2','doc3','doc4','sign','idType'])
+          request.resource.data.keys().hasOnly(['photo','idFront','idBack','doc1','doc2','doc3','doc4','sign','idType','payShot'])
+          && (!('payShot' in request.resource.data) || str(request.resource.data.payShot, 150000))
           && (!('photo' in request.resource.data)   || str(request.resource.data.photo, 90000))
           && (!('idFront' in request.resource.data) || str(request.resource.data.idFront, 150000))
           && (!('idBack' in request.resource.data)  || str(request.resource.data.idBack, 150000))
@@ -96,6 +97,22 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/orgs/$(o)/cards/$(request.resource.data.memberId)).data.expiryTs > request.time;
       }
 
+      // online fee requests from the member's Pay page: staff confirm them; the member can only create a pending request
+      match /payreqs/{id} {
+        allow read, update, delete: if isStaff(o);
+        allow create: if isStaff(o) || (
+          request.resource.data.keys().hasOnly(['memberId','name','code','planId','planName','amount','credit','utr','status','createdAt','hasShot'])
+          && request.resource.data.status == 'pending'
+          && request.resource.data.createdAt == request.time
+          && str(request.resource.data.name, 80) && str(request.resource.data.utr, 30)
+          && request.resource.data.amount is number && request.resource.data.amount > 0 && request.resource.data.amount < 10000000
+          && exists(/databases/$(database)/documents/orgs/$(o)/cards/$(request.resource.data.memberId))
+          && get(/databases/$(database)/documents/orgs/$(o)/cards/$(request.resource.data.memberId)).data.status == 'active');
+      }
+      match /payfiles/{id} {
+        allow read, update, delete: if isStaff(o);
+        allow create: if isStaff(o) || (request.resource.data.keys().hasOnly(['shot']) && str(request.resource.data.shot, 150000));
+      }
       match /payments/{pid}  { allow read, write: if isStaff(o); }
       match /counters/{cid}  { allow read, write: if isStaff(o); }
 
