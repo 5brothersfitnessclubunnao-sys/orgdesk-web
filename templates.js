@@ -69,6 +69,7 @@
         F("date", "dob", "Date of Birth", "जन्म तिथि", { req: 1, half: 1 }),
         F("computed", "age", "Age", "उम्र", { calc: "age", half: 1 }),
         F("tel", "phone", "Mobile Number", "मोबाइल नंबर", { req: 1, pattern: "phone10", max: 10, key: "phone" }),
+        F("tel", "phone2", "Alternate Mobile (optional)", "दूसरा मोबाइल नंबर (वैकल्पिक)", { pattern: "phone10", max: 10 }),
         F("email", "email", "Email (optional)", "ईमेल (वैकल्पिक)", { pattern: "email", max: 80 }),
         F("text", "occupation", "Occupation (optional)", "व्यवसाय (वैकल्पिक)", { max: 60, half: 1 }),
         F("select", "bloodGroup", "Blood Group (optional)", "ब्लड ग्रुप", { opts: BLOOD, half: 1 })
@@ -84,12 +85,21 @@
         F("textarea", "conditionsNote", "Details of condition / medication", "बीमारी / दवा का विवरण", { max: 300,
           showIf: function (v) { var c = v.conditions || []; return c.length > 0 && c.indexOf("None") < 0; },
           reqWhen: function (v) { var c = v.conditions || []; return c.length > 0 && c.indexOf("None") < 0; } }),
+        F("radio", "chestPain", "Do you get chest pain, dizziness or breathlessness during exercise?", "क्या व्यायाम में सीने में दर्द, चक्कर या सांस फूलने की समस्या होती है?", { req: 1, opts: ["No", "Yes"] }),
+        F("textarea", "chestPainNote", "Please give details", "कृपया विवरण दें", { max: 300, showIf: function (v) { return v.chestPain === "Yes"; }, reqWhen: function (v) { return v.chestPain === "Yes"; } }),
         F("radio", "medication", "Do you take any regular medicine?", "क्या आप कोई नियमित दवा ले रहे हैं?", { req: 1, opts: ["No", "Yes"] }),
         F("radio", "doctorRestricted", "Has a doctor advised you NOT to exercise?", "क्या डॉक्टर ने व्यायाम से मना किया है?", { req: 1, opts: ["No", "Yes"] }),
         F("radio", "supplements", "Do you currently take any supplements?", "क्या आप कोई सप्लीमेंट लेते हैं?", { opts: ["No", "Yes"] }),
         F("select", "experience", "Gym experience (optional)", "जिम का अनुभव (वैकल्पिक)", { opts: ["Beginner (new)", "Intermediate (1-3 yrs)", "Advanced (3+ yrs)"], half: 1 }),
         F("select", "source", "How did you hear about us? (optional)", "हमारे बारे में कैसे पता चला? (वैकल्पिक)", { opts: ["Friend / Member", "Social media", "Banner / Poster", "Walk-in", "Other"], half: 1 }),
-        F("radio", "ptInterest", "Interested in personal training / diet plan?", "पर्सनल ट्रेनिंग / डाइट प्लान में रुचि?", { opts: ["No", "Yes"] })
+        F("radio", "ptInterest", "Interested in personal training / diet plan?", "पर्सनल ट्रेनिंग / डाइट प्लान में रुचि?", { opts: ["No", "Yes"] }),
+        F("number", "mChest", "Chest (cm) — at joining, optional", "छाती (सेमी) — वैकल्पिक", { min: 30, max: 200, half: 1 }),
+        F("number", "mWaist", "Waist (cm) — optional", "कमर (सेमी) — वैकल्पिक", { min: 30, max: 200, half: 1 }),
+        F("number", "mShoulder", "Shoulder (cm) — optional", "कंधा (सेमी) — वैकल्पिक", { min: 30, max: 200, half: 1 }),
+        F("number", "mBiceps", "Biceps (cm) — optional", "बाइसेप्स (सेमी) — वैकल्पिक", { min: 10, max: 100, half: 1 }),
+        F("number", "mForearm", "Forearm (cm) — optional", "फोरआर्म (सेमी) — वैकल्पिक", { min: 10, max: 100, half: 1 }),
+        F("check", "consentWhatsapp", "I agree to receive fee reminders and updates on WhatsApp / SMS", "मैं फीस रिमाइंडर और अपडेट WhatsApp / SMS पर पाने के लिए सहमत हूँ"),
+        F("check", "consentPhoto", "I allow the gym to use my photo for my member card and records", "मैं सदस्य कार्ड और रिकॉर्ड के लिए अपनी फोटो के उपयोग की अनुमति देता/देती हूँ")
       ] }
     ],
     terms:
