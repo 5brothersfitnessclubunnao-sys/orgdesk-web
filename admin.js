@@ -2,7 +2,8 @@
 (function () {
   "use strict";
   if (!window.G || !G.ok) return;
-  var S = { tab: "home", members: [], todayPay: [], reqs: [], q: "", filter: "", rf: G.today(), rt: G.today(), pays: [] }, A = {};
+  var S = { tab: (function () { var h = (location.hash || "").slice(1); return ["home", "adm", "mem", "rec", "set"].indexOf(h) >= 0 ? h : "home"; })(), members: [], todayPay: [], reqs: [], q: "", filter: "", rf: G.today(), rt: G.today(), pays: [] }, A = {};
+  S.filter = S.tab === "adm" ? "pending" : (S.tab === "mem" ? "all" : "");
   var app = document.getElementById("app"), esc = G.esc;
   var unsubs = [];
   var $ = function (id) { return document.getElementById(id); };
@@ -46,7 +47,7 @@
   /* ================= shell ================= */
   var TABS = [["home", "🏠", "Home"], ["adm", "📝", "Admissions"], ["mem", "👥", "Members"], ["rec", "🧾", "Receipts"], ["set", "⚙️", "Settings"]];
   function shell() {
-    app.innerHTML = '<div class="top"><img id="tl" class="logo hide" alt=""><b>' + esc(S.org.name) + '</b><span class="chip">' + esc(S.tpl.name) + '</span></div><div class="wrap" id="view"></div><div class="tabs" id="tabs"></div><div id="mroot"></div>';
+    app.innerHTML = '<div class="top"><a href="index.html" style="font-size:22px;text-decoration:none;color:var(--ac)" aria-label="Menu">⬅</a><img id="tl" class="logo hide" alt=""><b>' + esc(S.org.name) + '</b><span class="chip">' + esc(S.tpl.name) + '</span></div><div class="wrap" id="view"></div><div class="tabs" id="tabs"></div><div id="mroot"></div>';
     if (G.img(S.org.logo)) { $("tl").src = S.org.logo; $("tl").classList.remove("hide"); }
     drawTabs(); render();
   }
