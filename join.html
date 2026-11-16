@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Admission Form</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b0b0d">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Admission Form & Admin Desk</title>
 <link rel="stylesheet" href="ui.css">
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -14,47 +12,159 @@
 <script src="core.js"></script>
 <script src="templates.js"></script>
 <script src="form.js"></script>
+<style>
+  :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; --err: #e74c3c; }
+  body { background: var(--bg); color: var(--tx); font-family: Arial, sans-serif; margin: 0; padding: 15px; padding-bottom: 40px; }
+  .admin-panel-box { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .search-input { width: 100%; background: #0b0b0d; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
+  .btn-action { background: var(--ac); color: #000; border: none; border-radius: 8px; padding: 10px 16px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 8px; width: 100%; }
+  .member-row { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .tag-pending { background: rgba(231, 76, 60, 0.15); color: var(--err); border: 1px solid var(--err); font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+  .tag-ok { background: rgba(46, 204, 113, 0.15); color: var(--ok); border: 1px solid var(--ok); font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+</style>
 </head>
-<body style="padding-bottom:30px">
-<div class="top"><img id="oLogo" class="logo hide" alt=""><b id="oName">Admission Form</b></div>
-<div class="wrap" id="root"><div class="card ctr mut">Loading…</div></div>
+<body>
+
+<div id="top" class="logo hide" style="text-align:center; margin-bottom: 15px;"><b id="oName">Admission Form & Control Desk</b></div>
+
+<!-- ADVANCED ADMIN REJOINING & PHOTO/ID PENDING CHECKER PANEL -->
+<div class="admin-panel-box">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+    <span style="font-size: 20px;">🔍</span>
+    <b style="color: var(--ac); font-size: 15px;">सदस्य खोजें, Photo/ID Pending चेक करें & Edit/Approve करें</b>
+  </div>
+  <input type="text" id="adminSearchBox" class="search-input" placeholder="नाम, मोबाइल नंबर या ID से खोजें..." oninput="filterMembers(this.value)">
+  
+  <div style="display: flex; gap: 8px; margin-top: 10px;">
+    <button onclick="filterByStatus('all')" style="flex:1; background:#333; color:#fff; border:none; padding:8px; border-radius:6px; font-size:12px; cursor:pointer;">सभी</button>
+    <button onclick="filterByStatus('pending_photo')" style="flex:1; background:rgba(231,76,60,0.2); color:var(--err); border:1px solid var(--err); padding:8px; border-radius:6px; font-size:12px; cursor:pointer;">⚠️ Photo/ID बाकी</button>
+    <button onclick="filterByStatus('active')" style="flex:1; background:rgba(46,204,113,0.2); color:var(--ok); border:1px solid var(--ok); padding:8px; border-radius:6px; font-size:12px; cursor:pointer;">✅ मंजूर (Approved)</button>
+  </div>
+
+  <div id="adminSearchResults" style="margin-top: 15px; max-height: 300px; overflow-y: auto;"></div>
+</div>
+
+<div id="root"><div class="card ctr">Loading Form...</div></div>
+
 <script>
-(function () {
-  if (!window.G || !G.ok) return;
-  var oid = G.qs("o").toLowerCase(), org = null, tpl = null, $ = function (id) { return document.getElementById(id); };
-  function fail(msg) { $("root").innerHTML = '<div class="card ctr"><h2>Unable to open the form</h2><p class="mut">' + G.esc(msg) + "</p></div>"; }
-  if (!oid) return fail("This link is incomplete. Please ask the organisation for the correct admission link.");
-  G.db.collection("orgs").doc(oid).get().then(function (s) {
-    if (!s.exists) return fail("This organisation could not be found. Please check the link.");
-    org = s.data() || {}; tpl = ORG_TEMPLATES[org.type];
-    if (!tpl) return fail("This organisation's form is not available.");
-    start();
-  }).catch(function () { fail("Network or server problem. Please try again in a few minutes."); });
+  (function () {
+    "use strict";
+    if (window.G && window.G.ok) return;
 
-  function start() {
-    G.theme(org); document.title = (org.name || "Organisation") + " — Admission";
-    $("oName").textContent = org.name || "Admission Form";
-    if (G.img(org.logo)) { $("oLogo").src = org.logo; $("oLogo").classList.remove("hide"); }
-    var m = document.createElement("div");
-    m.innerHTML = '<h2>' + G.esc(tpl.memberWord) + ' Admission Form</h2><p class="mut">Please fill in all details accurately. Fields marked <span class="req">*</span> are mandatory.</p>';
-    $("root").innerHTML = ""; $("root").appendChild(m); var box = document.createElement("div"); $("root").appendChild(box);
-    OF.mount(box, tpl, org, { onSubmit: submit });
-    G.pwa();
-  }
+    var aid = (G.qs("o") || "").toLowerCase(), org = null, tpl = null, s = function (id) { return document.getElementById(id); };
+    function fail(msg) { s("root").innerHTML = '<div class="card ctr"><b style="color:var(--err)">' + msg + '</b></div>'; }
 
-  function submit(p) {
-    var base = G.db.collection("orgs").doc(oid), id = base.collection("members").doc().id;
-    return base.collection("files").doc(id).set(p.files).then(function () { return base.collection("members").doc(id).set(p.doc); }).then(function () {
-      try { localStorage.setItem("org_last", JSON.stringify({ o: oid, m: id })); } catch (e) {}
-      var link = G.link("card.html", { o: oid, m: id });
-      $("root").innerHTML = '<div class="card ctr"><div style="font-size:48px">✅</div><h2>Application submitted</h2><p>Thank you, <b>' + G.esc(p.doc.name) + '</b>. Your application has been received by ' + G.esc(org.name) + ' and is awaiting verification.</p>' +
-        '<p class="mut" style="margin-top:10px">After approval, your digital ' + G.esc(tpl.memberWord.toLowerCase()) + ' card will be available at the link below. Please save it.</p>' +
-        '<a class="btn" style="margin-top:14px" href="' + G.esc(link) + '">View my card / status</a><button class="btn sec" style="margin-top:8px" id="cpy">Copy link</button></div>';
-      $("cpy").onclick = function () { try { navigator.clipboard.writeText(link); G.toast("Link copied"); } catch (e) { prompt("Copy this link:", link); } };
-      window.scrollTo(0, 0);
-    }).catch(function (e) { console.error(e); throw new Error("Could not submit. Check your internet and try again" + (e && e.code ? " (" + e.code + ")" : "") + "."); });
-  }
-})();
+    if (!aid) { fail("Error: Organisation ID missing in URL link."); return; }
+
+    G.db.collection("orgs").doc(aid).get().then(function (doc) {
+      if (!doc.exists) { fail("Organisation not found in database."); return; }
+      org = doc.data();
+      tpl = G.T[org.type];
+      if (!tpl) { fail("Template configuration missing."); return; }
+      
+      if (org.logo) { s("oLogo").src = org.logo; s("oLogo").classList.remove("hide"); }
+      s("oName").textContent = org.name || "Admission Form";
+      
+      s("root").innerHTML = '';
+      var box = document.createElement("div");
+      s("root").appendChild(box);
+      if (G.mut && box, tpl, org, onSubmit) {
+        G.mut(box, tpl, org, onSubmit);
+      }
+      loadOrgMembersForAdmin(aid);
+    }).catch(function (err) {
+      fail("Network error connecting to database.");
+    });
+
+    function onSubmit(p) {
+      var base = G.db.collection("orgs").doc(aid), id = base.collection("members").doc().id;
+      return base.collection("files").doc(id).set(p.files).then(function () {
+        return base.collection("members").doc(id).set({
+          name: p.name, phone: p.phone, planName: p.planName, joinDate: p.joinDate,
+          expiry: p.expiry, batchName: p.batchName, status: "pending", photoUploaded: !!p.files.photo, idUploaded: !!p.files.idProof, createdAt: G.FV.serverTimestamp()
+        });
+      }).then(function () {
+        var link = G.link("card.html?o=" + aid + "&id=" + id);
+        s("root").innerHTML = '<div class="card ctr"><div style="font-size:38px">🎉</div><h2>Application Submitted!</h2><p class="mut">Awaiting admin approval. Your digital receipt & member card link is ready:</p><input type="text" readonly value="' + G.esc(link) + '" style="width:100%;padding:10px;background:#0b0b0d;color:#ffcc00;border:1px solid #2c2c35;border-radius:6px;text-align:center;margin:10px 0;"><a class="btn" style="display:block;background:var(--ac);color:#000;text-decoration:none;padding:12px;border-radius:8px;font-weight:bold;" href="' + G.esc(link) + '">View Member Card & Status →</a><button class="btn" id="cpy" style="background:#333;color:#fff;margin-top:10px;">Copy Link</button></div>';
+        s("cpy").onclick = function () { try { navigator.clipboard.writeText(link); G.toast("Link copied!"); } catch (e) {} };
+        window.scrollTo(0, 0);
+      }).catch(function (e) { alert("Could not submit: " + e.message); });
+    }
+
+    let allOrgMembers = [];
+    function loadOrgMembersForAdmin(orgId) {
+      G.db.collection("orgs").doc(orgId).collection("members").onSnapshot(snapshot => {
+        allOrgMembers = [];
+        snapshot.forEach(doc => {
+          let data = doc.data();
+          data.docId = doc.id;
+          allOrgMembers.push(data);
+        });
+        renderAdminList(allOrgMembers);
+      });
+    }
+
+    window.filterMembers = function(query) {
+      const q = query.toLowerCase();
+      const filtered = allOrgMembers.filter(m => 
+        (m.name && m.name.toLowerCase().includes(q)) || 
+        (m.phone && m.phone.includes(q))
+      );
+      renderAdminList(filtered);
+    }
+
+    window.filterByStatus = function(type) {
+      if (type === 'pending_photo') {
+        renderAdminList(allOrgMembers.filter(m => !m.photoUploaded || !m.idUploaded || m.status === 'pending'));
+      } else if (type === 'active') {
+        renderAdminList(allOrgMembers.filter(m => m.status === 'active'));
+      } else {
+        renderAdminList(allOrgMembers);
+      }
+    }
+
+    function renderAdminList(list) {
+      const container = document.getElementById('adminSearchResults');
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div style="color:var(--mut); font-size:13px; text-align:center; padding:10px;">कोई रिकॉर्ड नहीं मिला।</div>';
+        return;
+      }
+      let html = '';
+      list.slice(0, 10).forEach(m => {
+        const hasPhotoId = m.photoUploaded && m.idUploaded;
+        const statusBadge = hasPhotoId ? '<span class="tag-ok">📸 Photo+ID OK</span>' : '<span class="tag-pending">⚠️ Photo/ID बाकी</span>';
+        const approvalBadge = m.status === 'active' ? '<span style="color:var(--ok); font-size:12px;">✅ मंजूर</span>' : '<span style="color:var(--err); font-size:12px;">⏳ पेंडिंग</span>';
+
+        html += `<div class="member-row">
+          <div>
+            <b style="color:var(--ac); font-size:14px;">${m.name || 'Unknown'}</b> <small style="color:var(--mut);">(${m.phone || 'No Phone'})</small><br>
+            <span style="font-size:12px; color:#aaa;">Plan: ${m.planName || 'Monthly'} | ${approvalBadge} | ${statusBadge}</span>
+          </div>
+          <div style="display:flex; gap:5px;">
+            <a href="card.html?o=${aid}&id=${m.docId}" target="_blank" style="background:#3b9eff; color:#fff; padding:6px 10px; border-radius:6px; font-size:12px; text-decoration:none; font-weight:bold;">ID देखें</a>
+            <button onclick="quickApprove('${m.docId}')" style="background:var(--ok); color:#fff; border:none; padding:6px 10px; border-radius:6px; font-size:12px; cursor:pointer; font-weight:bold;">Approve</button>
+            <button onclick="quickDelete('${m.docId}')" style="background:var(--err); color:#fff; border:none; padding:6px 10px; border-radius:6px; font-size:12px; cursor:pointer;">Del</button>
+          </div>
+        </div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    window.quickApprove = function(memberId) {
+      G.db.collection("orgs").doc(aid).collection("members").doc(memberId).update({ status: 'active' }).then(() => {
+        alert('सफलता! सदस्य मंजूर हो गया है।');
+      });
+    }
+
+    window.quickDelete = function(memberId) {
+      if (confirm('क्या आप इस सदस्य को डिलीट करना चाहते हैं?')) {
+        G.db.collection("orgs").doc(aid).collection("members").doc(memberId).delete().then(() => {
+          alert('सदस्य डिलीट कर दिया गया है।');
+        });
+      }
+    }
+  })();
 </script>
+
 </body>
 </html>
