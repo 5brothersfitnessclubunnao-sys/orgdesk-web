@@ -84,17 +84,20 @@
         F("textarea", "conditionsNote", "Details of condition / medication", "बीमारी / दवा का विवरण", { max: 300,
           showIf: function (v) { var c = v.conditions || []; return c.length > 0 && c.indexOf("None") < 0; },
           reqWhen: function (v) { var c = v.conditions || []; return c.length > 0 && c.indexOf("None") < 0; } }),
-        F("radio", "supplements", "Do you currently take any supplements?", "क्या आप कोई सप्लीमेंट लेते हैं?", { opts: ["No", "Yes"] })
+        F("radio", "medication", "Do you take any regular medicine?", "क्या आप कोई नियमित दवा ले रहे हैं?", { req: 1, opts: ["No", "Yes"] }),
+        F("radio", "doctorRestricted", "Has a doctor advised you NOT to exercise?", "क्या डॉक्टर ने व्यायाम से मना किया है?", { req: 1, opts: ["No", "Yes"] }),
+        F("radio", "supplements", "Do you currently take any supplements?", "क्या आप कोई सप्लीमेंट लेते हैं?", { opts: ["No", "Yes"] }),
+        F("select", "experience", "Gym experience (optional)", "जिम का अनुभव (वैकल्पिक)", { opts: ["Beginner (new)", "Intermediate (1-3 yrs)", "Advanced (3+ yrs)"], half: 1 }),
+        F("select", "source", "How did you hear about us? (optional)", "हमारे बारे में कैसे पता चला? (वैकल्पिक)", { opts: ["Friend / Member", "Social media", "Banner / Poster", "Walk-in", "Other"], half: 1 }),
+        F("radio", "ptInterest", "Interested in personal training / diet plan?", "पर्सनल ट्रेनिंग / डाइट प्लान में रुचि?", { opts: ["No", "Yes"] })
       ] }
     ],
     terms:
-"TERMS & CONDITIONS\n\n" +
-"1. Fees & Membership\n- All fees are payable in advance and are non-refundable and non-transferable.\n- Membership starts on the joining date shown on the receipt and runs for the purchased period. It cannot be paused unless approved in writing by the management.\n- Renewal after the expiry date may attract a late fee as decided by the management.\n\n" +
-"2. Attendance & Conduct\n- Members must mark attendance on every visit.\n- Proper sportswear and footwear are compulsory. Equipment must be used responsibly and wiped after use.\n- Abusive language, misbehaviour, or damage to property may lead to cancellation of membership without refund.\n\n" +
-"3. Health Declaration\n- I confirm that the health information given in this form is true and complete.\n- I understand that exercise involves physical risk. I will consult a doctor if required and stop immediately if I feel unwell. The management and trainers are not liable for any injury or illness arising from training.\n\n" +
-"4. Personal Belongings\n- The management is not responsible for any loss of personal belongings.\n\n" +
-"5. Discontinuation\n- To discontinue, the member must inform the management in person. Unused days are not refunded.\n\n" +
-"6. General\n- The management may revise timings, rules and fees with notice.\n- I consent to my photograph and ID being stored for membership verification and attendance."
+"नियम, शर्तें एवं दायित्व पत्र (Terms, Rules & Waiver)\n\n" +
+"1. फीस एवं उपस्थिति नियम (FEES POLICY - STRICT):\n- शिक्षा संस्थानों की तरह यह भी एक अभ्यास संस्थान है। यदि आप महीने में 1 दिन भी आते हैं, तो भी पूरे 1 महीने की पूरी फीस देय होगी।\n- अनुपस्थिति के आधार पर फीस में कोई छूट या रिफंड नहीं मिलेगा। फीस गैर-वापसी योग्य (Non-Refundable) है।\n\n" +
+"2. जिम छोड़ने की प्रक्रिया (EXIT POLICY):\n- यदि जिम छोड़ना है, तो महीना पूरा होते ही तुरंत जिम आना बंद कर दें। बिना फीस दिए नया महीना शुरू करने पर प्रबंधन सख्त कदम उठाएगा।\n\n" +
+"3. जिम अनुशासन एवं व्यवस्था (DISCIPLINE):\n- जिम के अंदर साफ इनडोर जूते व पर्सनल तौलिया लाना अनिवार्य है। उपकरण पटकना मना है।\n- गुटका, तंबाकू, धूम्रपान या शराब जिम में पूर्णतः प्रतिबंधित है। कीमती सामान की सुरक्षा स्वयं करें।\n\n" +
+"4. स्वास्थ्य जोखिम एवं दायित्व मुक्ति (WAIVER):\n- भारी वजन उठाने में होने वाले खिंचाव या चोट की जिम्मेदारी स्वयं सदस्य की होगी। प्रबंधन कानूनी रूप से जिम्मेदार नहीं होगा।\n- मैंने अपनी स्वास्थ्य जानकारी सही और पूरी दी है। मैं अपने फोटो व पहचान पत्र के सदस्यता सत्यापन और उपस्थिति हेतु उपयोग की सहमति देता/देती हूँ."
   };
 
   /* ===================================== SCHOOL ===================================== */
