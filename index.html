@@ -1,183 +1,168 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Universal Bulk Data Import - Admin</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>OrgDesk</title>
+<meta name="theme-color" content="#0b0b0b">
+<link rel="manifest" href="manifest-app.json">
+<link rel="icon" href="icon-192.png">
 <link rel="stylesheet" href="ui.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="core.js"></script>
+<script src="templates.js"></script>
 <style>
-  :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; }
-  body { font-family: Arial, sans-serif; background: var(--bg); color: var(--tx); margin: 0; padding: 20px; }
-  .container { max-width: 850px; margin: 0 auto; }
-  .card { background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-  h2 { margin-top: 0; color: var(--ac); font-size: 22px; }
-  p, label { font-size: 14px; color: var(--mut); }
-  .btn { background: var(--ac); color: #000; border: none; border-radius: 8px; padding: 12px 20px; font-weight: bold; font-size: 15px; cursor: pointer; width: 100%; margin-top: 12px; transition: 0.2s; }
-  .btn:hover { filter: brightness(1.1); }
-  .file-drop { border: 2px dashed var(--border); border-radius: 8px; padding: 30px; text-align: center; background: rgba(255,255,255,0.02); margin: 15px 0; cursor: pointer; }
-  .file-drop:hover { border-color: var(--ac); }
-  input[type="file"] { display: none; }
-  .status-box { margin-top: 15px; padding: 12px; border-radius: 8px; background: rgba(46, 204, 113, 0.1); border: 1px solid var(--ok); color: var(--ok); font-size: 14px; display: none; }
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-  th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
-  th { background: rgba(255,255,255,0.05); color: var(--ac); }
-  .sample-link { color: var(--ac); text-decoration: underline; cursor: pointer; font-size: 13px; display: inline-block; margin-top: 8px; }
+  body{background:#0b0b0b;padding:12px 12px 36px}
+  .hm{max-width:560px;margin:0 auto}
+  .banner{border:2.5px solid var(--ac);border-radius:22px;padding:20px 14px;text-align:center;margin-bottom:16px;background:linear-gradient(160deg,#241c00,#0f0c00);user-select:none;-webkit-user-select:none;cursor:pointer}
+  .banner h1{font-size:26px;line-height:1.2;color:var(--ac);text-transform:uppercase;font-weight:900;letter-spacing:.3px}
+  .banner .lg{width:54px;height:54px;border-radius:12px;object-fit:cover;vertical-align:middle;margin-right:6px}
+  .banner .ad{color:#cfcfcf;font-size:14px;margin-top:6px}
+  .banner .wl{color:var(--ac);font-weight:800;font-size:17px;margin-top:10px}
+  .sess{display:flex;justify-content:space-between;align-items:center;margin:0 2px 12px;font-size:14px;color:#cfcfcf}
+  .sess button{background:transparent;border:1.5px solid var(--ac);color:var(--ac);border-radius:10px;padding:8px 14px;font-weight:700;font-size:14px}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tile{--c:#ffcc00;position:relative;display:block;text-decoration:none;text-align:center;color:var(--c);background:#141414;background:color-mix(in srgb,var(--c) 9%,#0b0b0b);border:2.5px solid var(--c);border-radius:22px;padding:20px 8px 16px;min-height:150px;font-family:inherit;width:100%;cursor:pointer}
+  .tile.full{grid-column:1/-1;min-height:0;display:flex;align-items:center;justify-content:center;gap:14px;text-align:left;padding:18px 12px}
+  .tile .ic{font-size:50px;line-height:1.1;display:block}
+  .tile.full .ic{font-size:44px}
+  .tile .t{display:block;font-size:20px;font-weight:900;margin-top:8px;line-height:1.15}
+  .tile .s{display:block;font-size:13.5px;color:#a8a8a8;margin-top:5px}
+  .tile.soon{opacity:.55}
+  .tile .soonTag{position:absolute;top:8px;right:10px;font-size:10px;font-weight:800;background:#222;color:#bbb;border-radius:8px;padding:2px 7px;letter-spacing:.4px}
+  .foot{text-align:center;color:#6f6f6f;font-size:14px;margin-top:22px}
+  .hint{color:#8a8a8a;font-size:12.5px;text-align:center;margin-top:10px}
 </style>
 </head>
 <body>
-
-<div class="container">
-  <div class="card">
-    <h2>📁 Universal Bulk Data Import (Excel / CSV / TXT / PDF)</h2>
-    <p>पुराना डेटा किसी भी फॉर्मेट में हो (Excel, CSV या PDF), यहाँ अपलोड करें। सिस्टम अपने आप डेटा को रीड करके सीधे <b>Members Portal</b> में जोड़ देगा।</p>
-    
-    <div class="file-drop" onclick="document.getElementById('importFile').click()">
-      <span style="font-size: 36px;">📂</span><br><br>
-      <b>Click to upload any file (.xlsx, .csv, .txt, .pdf)</b><br>
-      <small style="color: var(--mut);">फाइल यहाँ चुनें या ड्रॉप करें</small>
-      <input type="file" id="importFile" accept=".csv, .txt, .xlsx, .xls, .pdf">
-    </div>
-
-    <a class="sample-link" onclick="downloadSample()">📥 नमूना (Sample CSV) डाउनलोड करें</a>
-    <br><a class="sample-link" href="admin.html#mem" style="color: #3b9eff; margin-top: 10px; display: inline-block;">← Members Portal पर वापस जाएं</a>
-
-    <div id="statusBox" class="status-box"></div>
-  </div>
-
-  <div class="card" id="previewCard" style="display: none;">
-    <h2>📋 Uploaded Data Preview</h2>
-    <div style="overflow-x: auto;">
-      <table id="previewTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Mobile</th>
-            <th>Plan</th>
-            <th>Joining Date</th>
-            <th>Expiry Date</th>
-            <th>Batch</th>
-          </tr>
-        </thead>
-        <tbody id="previewBody"></tbody>
-      </table>
-    </div>
-    <button class="btn" onclick="confirmImport()" style="background: var(--ok); color: #fff;">🚀 Confirm & Sync to Members Portal</button>
-  </div>
-</div>
-
+<div class="hm" id="app"><div class="card ctr mut" style="margin-top:40px">Loading…</div></div>
+<div id="mroot"></div>
 <script>
-  (function () {
-    "use strict";
-    let parsedData = [];
+(function () {
+  "use strict";
+  if (!window.G || !G.ok) return;
+  var esc = G.esc, app = document.getElementById("app"), mroot = document.getElementById("mroot");
+  var $ = function (id) { return document.getElementById(id); };
+  var ST = { oid: "", org: null, user: null, ownerOrg: "", admin: false, ready: false };
+  var taps = 0, tapT = null;
 
-    document.getElementById('importFile').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
+  function lsGet(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  ST.oid = (G.qs("o") || "").trim() || lsGet("od_org");
 
-      const fileName = file.name.toLowerCase();
-      const reader = new FileReader();
+  /* ---------- tiles ---------- */
+  function savedCard() {
+    try { var l = JSON.parse(lsGet("org_card") || lsGet("org_last") || "null"); if (l && l.o === ST.oid && l.m) return l; } catch (e) {}
+    return null;
+  }
+  function memberTiles(w) {
+    return [
+      { ic: "✅", t: "Attendance", s: "हाजिरी / Mark today", c: "#22ff66", go: function () { var l = savedCard(); if (l) location.href = "card.html?o=" + encodeURIComponent(l.o) + "&m=" + encodeURIComponent(l.m); else G.toast("Apna " + w + " card kholein (admission ke baad mila link)"); } },
+      { ic: "🛒", t: "Supplement Store", s: "Products / Shop", c: "#b46cff", soon: 1 },
+      { ic: "💳", t: "Pay / UPI & Fees", s: "फीस भरें / रसीद", c: "#ff5c6c", full: 1, go: function () { var l = savedCard(); if (l) location.href = "pay.html?o=" + encodeURIComponent(l.o) + "&m=" + encodeURIComponent(l.m); else G.toast("Apna " + w + " card kholein (admission ke baad mila link)"); } }
+    ];
+  }
+  function adminTiles(w, ws) {
+    var o = encodeURIComponent(ST.oid);
+    var L = function (u) { return function () { location.href = u; }; };
+    return [
+      { ic: "📝", t: "Admission Form", s: "🔒 नया " + w + " / फॉर्म", c: "#ffcc00", go: L("join.html?o=" + o) },
+      { ic: "👥", t: ws + " Portal", s: "🔒 Renew · Edit", c: "#3b9eff", go: L("admin.html#mem") },
+      { ic: "✅", t: "Attendance", s: "हाजिरी / In-Out", c: "#22ff66", soon: 1 },
+      { ic: "📊", t: "Master", s: "🔒 Admin dashboard", c: "#ff9900", go: L("admin.html#home") },
+      { ic: "🕒", t: "Approvals", s: "🔒 Approve / Deny", c: "#ff5c8a", go: L("admin.html#adm") },
+      { ic: "🧾", t: "Receipts", s: "🔒 Online pay · Bills", c: "#22d3ee", go: L("admin.html#rec") },
+      { ic: "💰", t: "Dues", s: "🔒 Pending · WhatsApp", c: "#ff5c6c", go: L("admin.html#due") },
+      { ic: "📈", t: "Reports", s: "🔒 Collection · Export", c: "#22ff66", go: L("admin.html#rec") },
+      { ic: "🛒", t: "Supplement Store", s: "Products / Shop", c: "#b46cff", soon: 1 },
+      { ic: "📦", t: "Store Orders", s: "🔒 Approve / Ship", c: "#b46cff", soon: 1 },
+      { ic: "🖼️", t: "Store Admin", s: "🔒 Photo + Price", c: "#22d3ee", soon: 1 },
+      { ic: "🔑", t: "Product Verify", s: "Code check", c: "#22ff66", soon: 1 },
+      { ic: "🥗", t: "Health & Diet", s: "BMI & Diet Chart", c: "#ff9900", soon: 1 },
+      { ic: "🧾", t: "Diet Orders", s: "🔒 Approve UTR", c: "#ff5c8a", soon: 1 },
+      { ic: "⚙️", t: "Settings", s: "🔒 Plans · Terms · Profile", c: "#ffcc00", full: 1, go: L("admin.html#set") }
+    ];
+  }
 
-      reader.onload = function(evt) { parseTextData(evt.target.result); };
-      reader.readAsText(file);
+  /* ---------- screens ---------- */
+  function tileHtml(t, i) {
+    return '<button type="button" class="tile' + (t.full ? " full" : "") + (t.soon ? " soon" : "") + '" style="--c:' + t.c + '" data-i="' + i + '">' +
+      (t.soon ? '<span class="soonTag">SOON</span>' : "") + '<span class="ic">' + t.ic + '</span><span><span class="t">' + esc(t.t) + '</span><span class="s">' + esc(t.s) + "</span></span></button>";
+  }
+  function draw() {
+    var org = ST.org;
+    if (!org) return;
+    var tpl = (window.ORG_TEMPLATES || {})[org.type] || {};
+    var w = tpl.memberWord || "Member", ws = tpl.membersWord || "Members";
+    if (ST.admin) mroot.innerHTML = "";
+    var tiles = ST.admin ? adminTiles(w, ws) : memberTiles(w);
+    var icon = { gym: "👑", school: "🏫", college: "🎓" }[org.type] || "🏢";
+    var logo = G.img(org.logo);
+    var line = [org.address, org.phone].filter(Boolean).map(esc).join(" · ");
+    app.innerHTML =
+      '<div class="banner" id="bn"><h1>' + (logo ? '<img class="lg" src="' + logo + '" alt="">' : icon + " ") + esc(org.name) + "</h1>" +
+      (line ? '<div class="ad">' + line + "</div>" : "") +
+      '<div class="wl">' + (ST.admin ? "मुख्य मेनू (Admin)" : "आपका स्वागत है") + "</div></div>" +
+      (ST.admin ? '<div class="sess"><span>✅ Admin session active</span><button type="button" id="lo">Logout</button></div>' : "") +
+      '<div class="tiles">' + tiles.map(tileHtml).join("") + "</div>" +
+      '<div class="foot">' + esc(org.name) + " · Welcome</div>";
+    G.theme(org);
+    Array.prototype.forEach.call(app.querySelectorAll(".tile"), function (b) {
+      b.onclick = function () { var t = tiles[+b.getAttribute("data-i")]; if (t.soon) G.toast("Ye module abhi ban raha hai"); else if (t.go) t.go(); };
     });
-
-    function parseTextData(text) {
-      const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-      if (lines.length < 1) {
-        alert('फाइल खाली है या रीड नहीं हो पाई।');
-        return;
-      }
-
-      const delimiter = lines[0].includes('\t') ? '\t' : (lines[0].includes(',') ? ',' : ' ');
-      parsedData = [];
-
-      let startIdx = 0;
-      if (lines[0].toLowerCase().includes('name') || lines[0].toLowerCase().includes('mobile')) {
-        startIdx = 1;
-      }
-
-      for (let i = startIdx; i < lines.length; i++) {
-        const row = lines[i].split(delimiter).map(val => val.trim().replace(/^"|"$/g, ''));
-        if (row.length >= 2) {
-          parsedData.push({
-            id: "MB" + Math.floor(1000 + Math.random() * 9000),
-            name: row[0] || 'Unknown',
-            phone: row[1] || '',
-            planName: row[2] || 'Monthly',
-            joinDate: row[3] || new Date().toISOString().split('T')[0],
-            expiry: row[4] || new Date(Date.now() + 30*86400000).toISOString().split('T')[0],
-            batchName: row[5] || 'Morning',
-            status: 'active'
-          });
-        }
-      }
-
-      if (parsedData.length > 0) {
-        showPreview();
-      } else {
-        alert('फाइल से कोई वैध रिकॉर्ड नहीं मिल पाया। कृपया सैंपल फॉर्मेट का उपयोग करें।');
-      }
-    }
-
-    function showPreview() {
-      const tbody = document.getElementById('previewBody');
-      tbody.innerHTML = '';
-      
-      parsedData.slice(0, 15).forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${item.name}</td><td>${item.phone}</td><td>${item.planName}</td><td>${item.joinDate}</td><td>${item.expiry}</td><td>${item.batchName}</td>`;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById('previewCard').style.display = 'block';
-      const sb = document.getElementById('statusBox');
-      sb.style.display = 'block';
-      sb.innerHTML = `✅ कुल <b>${parsedData.length}</b> रिकॉर्ड सफलतापर्वक पढ़ लिए गए हैं। नीचे दिए गए बटन से डेटा सिंक करें।`;
-    }
-
-    window.confirmImport = function() {
-      if (!parsedData || parsedData.length === 0) {
-        alert('अपलोड करने के लिए कोई डेटा नहीं है।');
-        return;
-      }
-
-      if (!confirm('क्या आप सुनिश्चित हैं कि आप ' + parsedData.length + ' सदस्यों का डेटा जोड़ना चाहते हैं?')) {
-        return;
-      }
-
-      try {
-        // Fetch existing members from localStorage if any, or push directly
-        let existingMembers = [];
-        try {
-          existingMembers = JSON.parse(localStorage.getItem('org_members') || '[]');
-        } catch(e) {}
-
-        const combined = parsedData.concat(existingMembers);
-        localStorage.setItem('org_members', JSON.stringify(combined));
-
-        alert('सफलता! ' + parsedData.length + ' सदस्यों का डेटा जोड़ दिया गया है।');
-        document.getElementById('previewCard').style.display = 'none';
-        document.getElementById('statusBox').innerHTML = '🎉 सभी डेटा सफलतापूर्वक Members Portal में जोड़ दिया गया है!';
-        
-        setTimeout(() => {
-          location.href = "admin.html#mem";
-        }, 1200);
-      } catch(err) {
-        alert('डेटा सेव करने में एरर आया: ' + err.message);
-      }
+    $("bn").onclick = function () {
+      if (ST.admin) return;
+      taps++; clearTimeout(tapT); tapT = setTimeout(function () { taps = 0; }, 2500);
+      if (taps >= 5) { taps = 0; loginModal(); }
     };
+    if ($("lo")) $("lo").onclick = function () { G.auth.signOut(); };
+  }
+  function noOrg() {
+    app.innerHTML = '<div class="banner" style="cursor:default"><h1>OrgDesk</h1><div class="wl">Organisation nahi mili</div></div>' +
+      '<div class="tiles"><a class="tile" style="--c:#ffcc00" href="admin.html"><span class="ic">🔒</span><span class="t">Admin Sign in</span><span class="s">Apna email / password</span></a>' +
+      '<a class="tile" style="--c:#22ff66" href="setup.html"><span class="ic">🏢</span><span class="t">New Setup</span><span class="s">Nayi organisation banayein</span></a></div>' +
+      '<p class="hint">Link me <b>?o=organisation-id</b> lagakar kholein, ya admin sign in karein.</p>';
+  }
 
-    window.downloadSample = function() {
-      const csvContent = "Name,Mobile,Plan,Joining Date,Expiry Date,Batch\nRahul Singh,9876543210,Monthly,2026-01-01,2026-02-01,Morning\nAmit Kumar,9123456789,Quarterly,2026-01-05,2026-04-05,Evening";
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'gym_members_sample.csv';
-      a.click();
+  function loginModal(msg) {
+    mroot.innerHTML = '<div style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;display:flex;align-items:center;justify-content:center;padding:16px"><div class="card" style="max-width:380px;width:100%;border:2px solid var(--ac)">' +
+      '<h2 style="color:var(--ac)">🔒 Admin Login</h2><label>Email</label><input class="inp" id="em" type="email" autocomplete="username"><label>Password</label><input class="inp" id="pw" type="password" autocomplete="current-password">' +
+      '<div class="err" id="lerr" style="margin-top:8px;min-height:18px">' + esc(msg || "") + '</div>' +
+      '<button class="btn" id="lgo" style="margin-top:8px">Sign in</button><button class="btn sec" id="lcl" style="margin-top:8px">Cancel</button></div></div>';
+    $("lcl").onclick = function () { mroot.innerHTML = ""; };
+    $("lgo").onclick = function () {
+      var b = $("lgo"); b.disabled = true; b.textContent = "Signing in…";
+      G.auth.signInWithEmailAndPassword($("em").value.trim(), $("pw").value).then(function () { mroot.innerHTML = ""; }).catch(function (e) { b.disabled = false; b.textContent = "Sign in"; $("lerr").textContent = G.firebaseError(e); });
     };
-  })();
+    $("pw").onkeydown = function (e) { if (e.key === "Enter") $("lgo").click(); };
+  }
+
+  /* ---------- boot ---------- */
+  function loadOrg() {
+    if (!ST.oid) return noOrg();
+    G.db.collection("orgs").doc(ST.oid).get().then(function (s) {
+      if (!s.exists) { lsSet("od_org", ""); return noOrg(); }
+      ST.org = s.data(); lsSet("od_org", ST.oid);
+      ST.admin = !!(ST.user && ST.ownerOrg === ST.oid);
+      draw();
+    }).catch(function () { app.innerHTML = '<div class="card ctr" style="margin-top:40px"><h2>Unable to load</h2><p class="mut">Internet check karke dobara kholein.</p></div>'; });
+  }
+  G.auth.onAuthStateChanged(function (u) {
+    ST.user = u || null; ST.ownerOrg = "";
+    if (!u) { if (ST.ready) { ST.admin = false; return draw(); } ST.ready = true; return loadOrg(); }
+    G.db.collection("users").doc(u.uid).get().then(function (s) {
+      var d = s.exists ? s.data() : null;
+      if (d && d.role === "owner") ST.ownerOrg = d.orgId;
+      if (!ST.oid && ST.ownerOrg) ST.oid = ST.ownerOrg;
+      if (ST.oid && ST.ownerOrg && ST.ownerOrg !== ST.oid && mroot.innerHTML) { G.auth.signOut(); return loginModal("Ye account is organisation ka nahi hai."); }
+      if (ST.ready && ST.org) { ST.admin = !!(ST.ownerOrg && ST.ownerOrg === ST.oid); draw(); } else { ST.ready = true; loadOrg(); }
+    }).catch(function () { if (!ST.ready) { ST.ready = true; loadOrg(); } });
+  });
+  G.pwa();
+})();
 </script>
-
 </body>
 </html>
