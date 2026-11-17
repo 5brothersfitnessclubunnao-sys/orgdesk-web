@@ -17,15 +17,15 @@
 (function (global) {
   "use strict";
 
-  var FB_CFG = {
-    apiKey: "AIzaSyA9z1gXZDB3W0lJxyHV9x2vWeb0Ees7z-g",
-    authDomain: "brother-s-fitness-club.firebaseapp.com",
-    projectId: "brother-s-fitness-club",
-    storageBucket: "brother-s-fitness-club.firebasestorage.app",
-    messagingSenderId: "781489019006",
-    appId: "1:781489019006:web:4a230698f2195e7208202f"
+    var FB_CFG = {
+    apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
+    authDomain: "bfc-gym-215ae.firebaseapp.com",
+    projectId: "bfc-gym-215ae",
+    storageBucket: "bfc-gym-215ae.firebasestorage.app",
+    messagingSenderId: "886920088571",
+    appId: "1:886920088571:web:c4bc478d246a2700b0d95e"
   };
-
+  
   // Deploy ke din (Rules lagate waqt) true kar do: tab sirf wahi login "admin" maana jayega jiska uid admins collection me ho
   var REQUIRE_ADMIN_DOC = false;
 
