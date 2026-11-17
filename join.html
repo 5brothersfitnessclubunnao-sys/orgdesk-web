@@ -15,7 +15,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     window.__esc = function(v){ return String(v==null?"":v).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] }); };
-    window.__csv = function(v){ var s = String(v==null?"":v).replace(/"/g,'""'); return /^[=+\-@	]/.test(s) ? "'"+s : s; };
+    window.__csv = function(v){ var s = String(v==null?"":v).replace(/"/g,'""'); return /^[=+\-@	
+]/.test(s) ? "'"+s : s; };
   </script>
   <script>
     const firebaseConfig = {
@@ -456,7 +457,28 @@
 let currentLang = 'hi';
 let selectedFitnessLevel = 'Beginner';
 let dynamicOrgData = { name: "5 Brother's Fitness Club", address: "Umrao Khera, Akrampur, Unnao", phone: "9140417259" };
-let adminSettings = JSON.parse(localStorage.getItem('admission_admin_settings') || 'null') || { fees: [], batches: [], reqEmergency: true, reqHealth: true };
+let defaultSettings = {
+  fees: [
+    { name: 'Regular - 1 Month', amount: '500' },
+    { name: 'Regular - 3 Months', amount: '1200' },
+    { name: 'Regular - 6 Months', amount: '2000' },
+    { name: 'Regular - 12 Months', amount: '3500' },
+    { name: 'Student - 1 Month', amount: '300' }
+  ],
+  batches: [
+    { shift: 'Morning', start: '06:00', end: '08:00', label: '🌅 Morning 06:00 AM - 08:00 AM' },
+    { shift: 'Afternoon', start: '12:00', end: '14:00', label: '☀️ Afternoon 12:00 PM - 02:00 PM' },
+    { shift: 'Evening', start: '17:00', end: '19:00', label: '🌇 Evening 05:00 PM - 07:00 PM' }
+  ],
+  reqEmergency: true,
+  reqHealth: true
+};
+
+let adminSettings = JSON.parse(localStorage.getItem('admission_admin_settings') || 'null');
+if (!adminSettings || !Array.isArray(adminSettings.fees) || adminSettings.fees.length === 0 || !Array.isArray(adminSettings.batches) || adminSettings.batches.length === 0) {
+  adminSettings = defaultSettings;
+}
+
 const SHIFT_ORDER = { Morning: 0, Afternoon: 1, Evening: 2 };
 const SHIFT_LABEL = { Morning: '🌅 Morning', Afternoon: '☀️ Afternoon', Evening: '🌇 Evening' };
 const SHIFT_DEFAULT = { Morning: ['06:00', '08:00'], Afternoon: ['12:00', '14:00'], Evening: ['17:00', '19:00'] };
@@ -472,8 +494,9 @@ function fmt12(t) {
 
 function normalizeSettings(cfg) {
   cfg = cfg || {};
-  cfg.fees = Array.isArray(cfg.fees) ? cfg.fees : [];
-  cfg.batches = (Array.isArray(cfg.batches) ? cfg.batches : []).map(b => {
+  cfg.fees = Array.isArray(cfg.fees) && cfg.fees.length ? cfg.fees : defaultSettings.fees;
+  cfg.batches = Array.isArray(cfg.batches) && cfg.batches.length ? cfg.batches : defaultSettings.batches;
+  cfg.batches = cfg.batches.map(b => {
     if (b && typeof b === 'object' && b.label) return b;
     const label = String(b || '').trim();
     if (!label) return null;
@@ -484,18 +507,10 @@ function normalizeSettings(cfg) {
   return cfg;
 }
 
-const DEFAULT_FEE_NAMES = ['1 Month', '3 Months', '6 Months', '12 Months'];
-const DEFAULT_AMOUNTS = { '1 Month': 500, '3 Months': 1200, '6 Months': 2000, '12 Months': 3500 };
 function ensureDefaultFees() {
-  const custom = adminSettings.fees.filter(f => !DEFAULT_FEE_NAMES.includes(f.name));
-  const defs = DEFAULT_FEE_NAMES.map(n => {
-    let existing = adminSettings.fees.find(f => f.name === n);
-    if (!existing || existing.amount === '' || existing.amount == null) {
-      return { name: n, amount: DEFAULT_AMOUNTS[n] };
-    }
-    return existing;
-  });
-  adminSettings.fees = defs.concat(custom);
+  if (!Array.isArray(adminSettings.fees) || adminSettings.fees.length === 0) {
+    adminSettings.fees = defaultSettings.fees;
+  }
 }
 function liveFees() { return adminSettings.fees.filter(f => f.name && f.amount !== '' && f.amount != null); }
 function catOf(f) { return f.name.includes(' - ') ? f.name.split(' - ')[0] : 'Regular'; }
