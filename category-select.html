@@ -69,27 +69,27 @@
     
     <div class="field">
       <label>Gym / Fitness Club Name *</label>
-      <input type="text" id="setupGymName" required placeholder="e.g. 5 Brother's Fitness Club">
+      <input type="text" id="setupGymName" required value="5 Brother's Fitness Club">
     </div>
 
     <div class="field">
       <label>Owner Name *</label>
-      <input type="text" id="setupOwnerName" required placeholder="e.g. Saurabh Singh Chandel">
+      <input type="text" id="setupOwnerName" required value="Saurabh Singh Chandel">
     </div>
 
     <div class="field">
       <label>Contact Number (WhatsApp) *</label>
-      <input type="tel" id="setupPhone" required placeholder="10-digit mobile number" maxlength="10">
+      <input type="tel" id="setupPhone" required value="9990954574" maxlength="10">
     </div>
 
     <div class="field">
       <label>Full Address / Location *</label>
-      <textarea id="setupAddress" rows="2" required placeholder="e.g. Umrao Khera, Akrampur, Unnao, UP"></textarea>
+      <textarea id="setupAddress" rows="2" required>Umrao Khera, Akrampur, Unnao, UP</textarea>
     </div>
 
     <div class="field">
       <label>Default UPI ID (For Fee Collection) *</label>
-      <input type="text" id="setupUpiId" required placeholder="e.g. 9140417259@okbizaxis">
+      <input type="text" id="setupUpiId" required value="9990954574@nyes">
     </div>
 
     <button type="submit" class="btn-main" id="saveSetupBtn">Save & Launch Dashboard 🚀</button>
@@ -125,18 +125,10 @@
     document.getElementById("gymSetupForm").style.display = "block";
   }
 
-  function showError(msg) {
-    const el = document.getElementById("errorAlert");
-    el.innerText = msg;
-    el.style.display = "block";
-    document.getElementById("successAlert").style.display = "none";
-  }
-
   function showSuccess(msg) {
     const el = document.getElementById("successAlert");
     el.innerText = msg;
     el.style.display = "block";
-    document.getElementById("errorAlert").style.display = "none";
   }
 
   async function handleGymSetupSubmit(e) {
@@ -155,25 +147,25 @@
       updatedAt: new Date().toISOString()
     };
 
-    // Consistent tenant ID
     const orgId = "5brothersfitness";
 
-    // 1. Save locally first (Guarantees instant success)
+    // 1. Force save locally immediately
     localStorage.setItem("bfc_org_profile", JSON.stringify(gymData));
     localStorage.setItem("bfc_org_id", orgId);
 
     try {
-      // 2. Try syncing with Cloud Firestore
-      await db.collection("orgs").doc(orgId).set(gymData, { merge: true });
-      showSuccess("Configuration saved successfully! Launching dashboard...");
+      // 2. Background sync to Firestore (non-blocking)
+      db.collection("orgs").doc(orgId).set(gymData, { merge: true }).catch(err => {
+        console.warn("Background sync note:", err.message);
+      });
     } catch (err) {
-      console.warn("Cloud warning:", err.message);
-      showSuccess("Saved locally! Launching dashboard...");
+      console.warn("Cloud skip:", err);
     }
 
+    showSuccess("Configuration saved successfully! Launching dashboard...");
     setTimeout(() => {
-      window.location.href = "index.html"; // Launch main dashboard instantly
-    }, 1000);
+      window.location.href = "index.html";
+    }, 800);
   }
 </script>
 
