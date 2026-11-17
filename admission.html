@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Gym Admission Form</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <style>
+    :root { --gold: #ffcc00; --bg: #070707; --card: #121212; --border: #242424; --green: #00ff66; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: #fff; padding: 12px; max-width: 520px; margin: 0 auto; min-height: 100vh; }
+    .nav-bar { display: flex; justify-content: space-between; align-items: center; background: #111; border: 1px solid var(--gold); padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; }
+    .btn-home { background: var(--gold); color: #000; text-decoration: none; font-weight: bold; font-size: 11px; padding: 6px 12px; border-radius: 6px; }
+    
+    .card { background: var(--card); border: 1.5px solid var(--gold); border-radius: 14px; padding: 16px; box-shadow: 0 4px 20px rgba(255,204,0,0.15); margin-bottom: 14px; }
+    .club-header { text-align: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 14px; }
+    .club-title { color: var(--gold); font-size: 18px; font-weight: 900; text-transform: uppercase; }
+    .club-sub { color: #888; font-size: 11px; margin-top: 2px; }
+
+    .section-box { border-left: 3px solid var(--gold); padding-left: 8px; font-size: 13px; font-weight: bold; color: var(--gold); margin: 16px 0 10px; }
+    .form-group { margin-bottom: 10px; }
+    label { display: block; font-size: 11px; color: #aaa; margin-bottom: 4px; }
+    input, select, textarea { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 9px 12px; border-radius: 8px; font-size: 12px; outline: none; }
+    input:focus, select:focus { border-color: var(--gold); }
+    
+    .btn-primary { width: 100%; background: var(--gold); color: #000; font-weight: 900; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; text-transform: uppercase; margin-top: 10px; }
+    .btn-secondary { background: #222; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; flex: 1; }
+    
+    .upload-box { background: #181818; border: 1px dashed #444; border-radius: 8px; padding: 10px; text-align: center; margin-bottom: 8px; }
+    .preview-img { max-height: 120px; width: auto; display: block; margin: 6px auto 0; border-radius: 6px; border: 1px solid var(--gold); }
+    .flex-row { display: flex; gap: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="nav-bar">
+    <a href="app.html" class="btn-home">⬅️ होम मेन्यू (Home)</a>
+    <span style="color: var(--gold); font-size: 11px; font-weight: bold;" id="headerGymName">UNIVERSAL GYM PORTAL</span>
+  </div>
+
+  <div class="card">
+    <div class="club-header">
+      <h2 class="club-title" id="formGymTitle">Fitness Club Admission</h2>
+      <p class="club-sub" id="formGymAddress">Professional Gym Management System</p>
+      <div style="display:inline-block; margin-top:6px; background:#222; border:1px solid var(--gold); color:var(--gold); font-size:10px; font-weight:bold; padding:2px 10px; border-radius:12px;">
+        UNIVERSAL ADMISSION FORM
+      </div>
+    </div>
+
+    <!-- Step 1: Membership & Plan -->
+    <div id="step1">
+      <div class="section-box">1. सदस्यता योजना और बैच (Membership & Plan)</div>
+      
+      <div class="form-group">
+        <label>📅 प्रवेश तिथि (Joining Date) *</label>
+        <input type="date" id="admDate">
+      </div>
+
+      <div class="form-group">
+        <label>मेम्बरशिप प्लान (Plan Duration) *</label>
+        <select id="admPlan" onchange="updateFeeCalculation()">
+          <option value="1|500">1 महीना (Monthly) - ₹500</option>
+          <option value="3|1400">3 महीने (Quarterly) - ₹1400</option>
+          <option value="6|2600">6 महीने (Half Yearly) - ₹2600</option>
+          <option value="12|4800">1 वर्ष (Annual) - ₹4800</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>बैच समय स्लॉट (Time Slot) *</label>
+        <select id="admSlot">
+          <option value="06:00 AM - 07:00 AM">Morning: 06:00 AM - 07:00 AM</option>
+          <option value="07:00 AM - 08:00 AM">Morning: 07:00 AM - 08:00 AM</option>
+          <option value="06:30 PM - 07:30 PM">Evening: 06:30 PM - 07:30 PM</option>
+          <option value="07:30 PM - 08:30 PM">Evening: 07:30 PM - 08:30 PM</option>
+        </select>
+      </div>
+
+      <div style="background:#141414; border:1.5px solid var(--green); padding:10px; border-radius:8px; text-align:center; margin:14px 0;">
+        <span style="font-size:11px; color:#aaa;">कुल देय फीस (Total Fee):</span>
+        <span id="feeDisplay" style="font-size:20px; font-weight:900; color:var(--green);">₹500</span>
+      </div>
+
+      <button type="button" class="btn-primary" onclick="nextStep(2)">व्यक्तिगत विवरण पर जाएं ➔</button>
+    </div>
+
+    <!-- Step 2: Personal & Emergency Details -->
+    <div id="step2" style="display:none;">
+      <div class="section-box">2. व्यक्तिगत एवं आपातकालीन विवरण (Personal & Emergency)</div>
+
+      <div class="form-group">
+        <label>पूरा नाम (Full Name) *</label>
+        <input type="text" id="memberName" placeholder="उदा. राहुल सिंह">
+      </div>
+
+      <div class="flex-row">
+        <div class="form-group" style="flex:1;">
+          <label>मोबाइल नंबर (WhatsApp) *</label>
+          <input type="tel" id="memberPhone" maxlength="10" placeholder="10 अंक मोबाइल">
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label>आयु (Age) *</label>
+          <input type="number" id="memberAge" placeholder="उदा. 22">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>🏠 पूरा पता / गांव / मोहल्ला *</label>
+        <input type="text" id="memberAddress" placeholder="पता दर्ज करें">
+      </div>
+
+      <div style="background:#161616; border:1px solid #333; border-radius:8px; padding:10px; margin:10px 0;">
+        <label style="color:var(--gold); font-weight:bold; margin-bottom:6px; display:block;">🚨 आपातकालीन संपर्क (Emergency Contact)</label>
+        <div class="flex-row" style="margin-bottom:8px;">
+          <input type="text" id="emergName" placeholder="परिवार के सदस्य का नाम" style="flex:1;">
+          <input type="text" id="emergRelation" placeholder="रिश्ता (पिता/भाई)" style="flex:1;">
+        </div>
+        <input type="tel" id="emergPhone" maxlength="10" placeholder="परिवार का मोबाइल नंबर">
+      </div>
+
+      <div class="flex-row">
+        <button type="button" class="btn-secondary" onclick="nextStep(1)">⬅ पीछे</button>
+        <button type="button" class="btn-primary" style="margin-top:0; flex:2;" onclick="nextStep(3)">स्वास्थ्य विवरण पर जाएं ➔</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Health & Fitness Details -->
+    <div id="step3" style="display:none;">
+      <div class="section-box">3. स्वास्थ्य एवं फिटनेस विवरण (Health & Fitness)</div>
+
+      <div class="flex-row">
+        <div class="form-group" style="flex:1;"><label>ऊंचाई (cm)</label><input type="number" id="memberHeight" placeholder="170"></div>
+        <div class="form-group" style="flex:1;"><label>वजन (kg)</label><input type="number" id="memberWeight" placeholder="65"></div>
+        <div class="form-group" style="flex:1;"><label>फिटनेस लक्ष्य</label>
+          <select id="fitnessGoal">
+            <option value="Muscle Building">Muscle Building</option>
+            <option value="Fat Loss">Fat Loss</option>
+            <option value="Weight Gain">Weight Gain</option>
+            <option value="General Fitness">General Fitness</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>मेडिकल हिस्ट्री, चोट, बीमारी या एलर्जी (यदि कोई हो):</label>
+        <textarea id="medicalHistory" rows="2" placeholder="उदा. बीपी, शुगर, पुरानी चोट... या 'Fit' लिखें"></textarea>
+      </div>
+
+      <!-- Dual Photo & Document Upload Option -->
+      <div class="form-group">
+        <label style="color:var(--gold); font-weight:bold;">📸 सदस्य फोटो और आईडी प्रूफ (Live Camera या Gallery)</label>
+        
+        <div class="upload-box">
+          <label>सदस्य की फोटो (Member Photo)</label>
+          <div class="flex-row" style="margin-top:4px;">
+            <input type="file" id="memberPhotoLive" accept="image/*" capture="user" style="display:none;" onchange="previewImage(this, 'photoPrev')">
+            <input type="file" id="memberPhotoGal" accept="image/*" style="display:none;" onchange="previewImage(this, 'photoPrev')">
+            <button type="button" class="btn-secondary" onclick="document.getElementById('memberPhotoLive').click()">📷 Live Camera</button>
+            <button type="button" class="btn-secondary" onclick="document.getElementById('memberPhotoGal').click()">🖼️ Gallery</button>
+          </div>
+          <img id="photoPrev" class="preview-img" style="display:none;">
+        </div>
+
+        <div class="upload-box">
+          <label>पहचान पत्र (ID Proof - Aadhaar आदि)</label>
+          <div class="flex-row" style="margin-top:4px;">
+            <input type="file" id="memberIdLive" accept="image/*" capture="environment" style="display:none;" onchange="previewImage(this, 'idPrev')">
+            <input type="file" id="memberIdGal" accept="image/*" style="display:none;" onchange="previewImage(this, 'idPrev')">
+            <button type="button" class="btn-secondary" onclick="document.getElementById('memberIdLive').click()">📷 Live Camera</button>
+            <button type="button" class="btn-secondary" onclick="document.getElementById('memberIdGal').click()">🖼️ Gallery</button>
+          </div>
+          <img id="idPrev" class="preview-img" style="display:none;">
+        </div>
+      </div>
+
+      <div style="background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:10px; font-size:11px;">
+        <label style="display:flex; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="termsCheck" checked>
+          <span>नियम व शर्तें (Terms & Conditions) और स्वास्थ्य घोषणा स्वीकार करता हूँ।</span>
+        </label>
+      </div>
+
+      <div class="flex-row">
+        <button type="button" class="btn-secondary" onclick="nextStep(2)">⬅ पीछे</button>
+        <button type="button" class="btn-primary" style="margin-top:0; flex:2;" onclick="submitAdmission()">फॉर्म सबमिट करें और WhatsApp भेजें ✔</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function nextStep(step) {
+      document.getElementById('step1').style.display = (step === 1) ? 'block' : 'none';
+      document.getElementById('step2').style.display = (step === 2) ? 'block' : 'none';
+      document.getElementById('step3').style.display = (step === 3) ? 'block' : 'none';
+      window.scrollTo(0,0);
+    }
+
+    function updateFeeCalculation() {
+      const planVal = document.getElementById('admPlan').value.split('|');
+      document.getElementById('feeDisplay').innerText = '₹' + planVal[1];
+    }
+
+    function previewImage(input, previewId) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.getElementById(previewId);
+          img.src = e.target.result;
+          img.style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function submitAdmission() {
+      const name = document.getElementById('memberName').value.trim();
+      const phone = document.getElementById('memberPhone').value.trim();
+      if (!name || phone.length !== 10) {
+        alert('कृपया सही नाम और 10 अंकों का मोबाइल नंबर दर्ज करें!');
+        nextStep(2);
+        return;
+      }
+
+      const planInfo = document.getElementById('admPlan').value.split('|');
+      const fee = planInfo[1];
+      const slot = document.getElementById('admSlot').value;
+      const goal = document.getElementById('fitnessGoal').value;
+
+      // WhatsApp Direct Sending to Customer
+      const waText = `*🏋️‍♂️ GYM ADMISSION CONFIRMATION*%0A%0Aनमस्ते *${encodeURIComponent(name)}* जी,%0Aआपका एडमिशन सफलतापूर्वक हो गया है!%0A%0A📦 प्लान: ${planInfo[0]} माह (फीस: ₹${fee})%0A⏰ बैच स्लॉट: ${encodeURIComponent(slot)}%0A🎯 फिटनेस लक्ष्य: ${encodeURIComponent(goal)}%0A%0Aहमसे जुड़ने के लिए धन्यवाद!`;
+      
+      alert('✅ फॉर्म सफलतापूर्क सबमिट हो गया!');
+      window.open(`https://wa.me/91${phone}?text=${waText}`, '_blank');
+    }
+
+    // Dynamic Gym Header loader (Multi-tenant check if available)
+    window.onload = function() {
+      document.getElementById('admDate').value = new Date().toISOString().split('T')[0];
+    };
+  </script>
+</body>
+</html>
