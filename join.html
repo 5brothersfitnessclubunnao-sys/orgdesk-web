@@ -494,15 +494,18 @@ function fmt12(t) {
 
 function normalizeSettings(cfg) {
   cfg = cfg || {};
-  cfg.fees = Array.isArray(cfg.fees) && cfg.fees.length ? cfg.fees : defaultSettings.fees;
-  cfg.batches = Array.isArray(cfg.batches) && cfg.batches.length ? cfg.batches : defaultSettings.batches;
-  cfg.batches = cfg.batches.map(b => {
+  let rawFees = Array.isArray(cfg.fees) ? cfg.fees.filter(f => f && f.name && f.amount !== '' && f.amount != null) : [];
+  cfg.fees = rawFees.length ? rawFees : defaultSettings.fees;
+  
+  let rawBatches = Array.isArray(cfg.batches) ? cfg.batches.filter(Boolean) : [];
+  cfg.batches = rawBatches.map(b => {
     if (b && typeof b === 'object' && b.label) return b;
     const label = String(b || '').trim();
     if (!label) return null;
     const shift = /even|शाम/i.test(label) ? 'Evening' : /after|दोपहर/i.test(label) ? 'Afternoon' : 'Morning';
     return { shift, start: '', end: '', label };
   }).filter(Boolean);
+  if (!cfg.batches.length) cfg.batches = defaultSettings.batches;
   cfg.batches.sort((a, b) => (SHIFT_ORDER[a.shift] - SHIFT_ORDER[b.shift]) || String(a.start).localeCompare(String(b.start)));
   return cfg;
 }
@@ -512,7 +515,13 @@ function ensureDefaultFees() {
     adminSettings.fees = defaultSettings.fees;
   }
 }
-function liveFees() { return adminSettings.fees.filter(f => f.name && f.amount !== '' && f.amount != null); }
+function liveFees() { 
+  let valid = adminSettings.fees.filter(f => f.name && f.amount !== '' && f.amount != null && !isNaN(Number(f.amount)));
+  if (!valid.length) {
+    return defaultSettings.fees;
+  }
+  return valid; 
+}
 function catOf(f) { return f.name.includes(' - ') ? f.name.split(' - ')[0] : 'Regular'; }
 adminSettings = normalizeSettings(adminSettings);
 ensureDefaultFees();
