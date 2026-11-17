@@ -983,16 +983,6 @@ function planTypeFromCategory(cat) {
   if (/poor|गरीब/i.test(c)) return 'poor';
   return 'job';
 }
-function calculateExpiryDate(joinDateStr, months) {
-  try {
-    const d = new Date(joinDateStr || Date.now());
-    d.setMonth(d.getMonth() + Number(months || 1));
-    return d.toISOString().slice(0, 10);
-  } catch (e) {
-    return joinDateStr;
-  }
-}
-
 function monthsFromPlanName(name) {
   const m = String(name || '').match(/(\d+)\s*(month|mahina|महीन)/i);
   return m ? parseInt(m[1], 10) : 1;
@@ -1033,7 +1023,7 @@ async function submitAdmissionForm() {
     dob: $('admDobInput').value || '', age: $('admAge').value || '',
     type: planTypeFromCategory(feeName.includes(' - ') ? feeName.split(' - ')[0] : ''),
     planBase: feeAmt, planMonths: months, planName: feeName, admPlan: true,
-    joinDate, expiryDate: calculateExpiryDate(joinDate, months), status: 'Pending', manualStatus: 'Pending', fees: 'Pending',
+    joinDate, status: 'Pending', manualStatus: 'Pending', fees: 'Pending',
     payMode: '', amount: 0, lastPaid: '', dueAmount: feeAmt, advance: 0, dueV: 2,
     admissionPayMode: $('paymentMode').value, admissionUtr: $('upiUtrInput').value.trim(),
     batch: $('admSlotSelect').value, attendanceId: window.__admQr || ('ORGDESK-ATTENDANCE-' + name + '-' + phone + '-' + window.__admId),
