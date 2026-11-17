@@ -88,6 +88,13 @@
     <p class="admin-note">यहाँ से सेट की गई फीस, बैच और नियम दुनिया में कहीं से भी फॉर्म खोलने पर लागू होंगे।</p>
     
     <div style="background:#18181f; padding:10px; border-radius:8px; margin-bottom:10px;">
+      <label style="color:var(--ac); margin-bottom:6px;">🏢 आपकी जिम का नाम और विवरण (Gym Branding)</label>
+      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">जिम का नाम (Gym Name)</label><input type="text" id="cfgGymName" placeholder="उदा. 5 Brother's Fitness Club"></div>
+      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">पता (Address)</label><input type="text" id="cfgGymAddress" placeholder="उदा. Umrao Khera, Akrampur, Unnao"></div>
+      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">फोन नंबर (Phone)</label><input type="tel" id="cfgGymPhone" placeholder="उदा. 9140417259"></div>
+    </div>
+    
+    <div style="background:#18181f; padding:10px; border-radius:8px; margin-bottom:10px;">
       <label style="color:var(--ac); margin-bottom:6px;">📌 फॉर्म आवश्यकताएँ (Form Field Controls)</label>
       <div style="display:flex; flex-direction:column; gap:6px; font-size:11.5px;">
         <label><input type="checkbox" id="cfgReqEmergency" checked onchange="saveFormConfig()"> आपातकालीन संपर्क (Emergency Contact) अनिवार्य करें</label>
@@ -675,6 +682,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("admDateInput").value = new Date().toISOString().split("T")[0];
   renderAdminSettings();
   renderMemberOptions();
+  applyDynamicBranding();
   updateGuardianLabel();
 
   try {
@@ -715,6 +723,25 @@ async function toggleAdminPanel() {
 function saveFormConfig() {
   adminSettings.reqEmergency = document.getElementById('cfgReqEmergency').checked;
   adminSettings.reqHealth = document.getElementById('cfgReqHealth').checked;
+  adminSettings.gymName = document.getElementById('cfgGymName').value.trim() || "5 Brother's Fitness Club";
+  adminSettings.gymAddress = document.getElementById('cfgGymAddress').value.trim() || "Umrao Khera, Akrampur, Unnao";
+  adminSettings.gymPhone = document.getElementById('cfgGymPhone').value.trim() || "9140417259";
+}
+
+function applyDynamicBranding() {
+  const name = adminSettings.gymName || dynamicOrgData.name || "5 Brother's Fitness Club";
+  const addr = adminSettings.gymAddress || dynamicOrgData.address || "Umrao Khera, Akrampur, Unnao";
+  const ph = adminSettings.gymPhone || dynamicOrgData.phone || "9140417259";
+
+  document.getElementById("orgTopHeader").innerText = name.toUpperCase();
+  document.getElementById("orgNameHeader").innerText = name.toUpperCase();
+  document.getElementById("orgDetailsHeader").innerText = addr + (ph ? " | Ph: " + ph : "");
+
+  // Also update receipt card title & details
+  const rcTitle = document.querySelector('#printableReceiptArea div:first-child');
+  if (rcTitle) rcTitle.textContent = name.toUpperCase();
+  const rcSub = document.querySelector('#printableReceiptArea div:nth-child(2)');
+  if (rcSub) rcSub.textContent = addr + (ph ? " | Ph: " + ph : "");
 }
 
 function renderAdminSettings() {
@@ -723,6 +750,9 @@ function renderAdminSettings() {
   const batchList = document.getElementById('batchSettingsList');
   document.getElementById('cfgReqEmergency').checked = !!adminSettings.reqEmergency;
   document.getElementById('cfgReqHealth').checked = !!adminSettings.reqHealth;
+  document.getElementById('cfgGymName').value = adminSettings.gymName || "5 Brother's Fitness Club";
+  document.getElementById('cfgGymAddress').value = adminSettings.gymAddress || "Umrao Khera, Akrampur, Unnao";
+  document.getElementById('cfgGymPhone').value = adminSettings.gymPhone || "9140417259";
 
   feeList.innerHTML = '<div style="font-size:11px;color:#ccc;margin-bottom:4px;">सिर्फ़ रकम (₹) भरें:</div>' + adminSettings.fees.map((f, i) => {
     const def = DEFAULT_FEE_NAMES.includes(f.name);
@@ -983,6 +1013,16 @@ function planTypeFromCategory(cat) {
   if (/poor|गरीब/i.test(c)) return 'poor';
   return 'job';
 }
+function calculateExpiryDate(joinDateStr, months) {
+  try {
+    const d = new Date(joinDateStr || Date.now());
+    d.setMonth(d.getMonth() + Number(months || 1));
+    return d.toISOString().slice(0, 10);
+  } catch (e) {
+    return joinDateStr;
+  }
+}
+
 function monthsFromPlanName(name) {
   const m = String(name || '').match(/(\d+)\s*(month|mahina|महीन)/i);
   return m ? parseInt(m[1], 10) : 1;
@@ -1023,7 +1063,7 @@ async function submitAdmissionForm() {
     dob: $('admDobInput').value || '', age: $('admAge').value || '',
     type: planTypeFromCategory(feeName.includes(' - ') ? feeName.split(' - ')[0] : ''),
     planBase: feeAmt, planMonths: months, planName: feeName, admPlan: true,
-    joinDate, status: 'Pending', manualStatus: 'Pending', fees: 'Pending',
+    joinDate, expiryDate: calculateExpiryDate(joinDate, months), status: 'Pending', manualStatus: 'Pending', fees: 'Pending',
     payMode: '', amount: 0, lastPaid: '', dueAmount: feeAmt, advance: 0, dueV: 2,
     admissionPayMode: $('paymentMode').value, admissionUtr: $('upiUtrInput').value.trim(),
     batch: $('admSlotSelect').value, attendanceId: window.__admQr || ('ORGDESK-ATTENDANCE-' + name + '-' + phone + '-' + window.__admId),
