@@ -392,9 +392,16 @@ function normalizeSettings(cfg) {
   return cfg;
 }
 const DEFAULT_FEE_NAMES = ['1 Month', '3 Months', '6 Months', '12 Months'];
+const DEFAULT_AMOUNTS = { '1 Month': 500, '3 Months': 1200, '6 Months': 2000, '12 Months': 3500 };
 function ensureDefaultFees() {
   const custom = adminSettings.fees.filter(f => !DEFAULT_FEE_NAMES.includes(f.name));
-  const defs = DEFAULT_FEE_NAMES.map(n => adminSettings.fees.find(f => f.name === n) || { name: n, amount: '' });
+  const defs = DEFAULT_FEE_NAMES.map(n => {
+    let existing = adminSettings.fees.find(f => f.name === n);
+    if (!existing || existing.amount === '' || existing.amount == null) {
+      return { name: n, amount: DEFAULT_AMOUNTS[n] };
+    }
+    return existing;
+  });
   adminSettings.fees = defs.concat(custom);
 }
 function liveFees() { return adminSettings.fees.filter(f => f.name && f.amount !== '' && f.amount != null); }
@@ -516,30 +523,24 @@ window.addEventListener("DOMContentLoaded", async () => {
   renderAdminSettings();
   renderMemberOptions();
 
-  // Dynamic Organization / Gym Branding fetcher from Firestore/LocalStorage
+  // Fetch Global Settings from Firestore (5brothersfitness)
   try {
-    const orgId = new URLSearchParams(window.location.search).get("o") || localStorage.getItem("od_org") || "";
-    if (orgId && typeof db !== "undefined") {
-      const doc = await db.collection("orgs").doc(orgId).get();
+    if (typeof db !== "undefined") {
+      const doc = await db.collection("orgs").doc("5brothersfitness").get();
       if (doc.exists) {
-        dynamicOrgData = doc.data();
-      }
-    } else {
-      const cached = localStorage.getItem("org_last");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed) dynamicOrgData = parsed;
+        const data = doc.data();
+        dynamicOrgData = data;
+        if (data.admissionSettings) {
+          adminSettings = normalizeSettings(data.admissionSettings);
+          ensureDefaultFees();
+          renderAdminSettings();
+          renderMemberOptions();
+        }
       }
     }
-  } catch (e) {}
-
-  try {
-    const cs = dynamicOrgData && dynamicOrgData.admissionSettings;
-    if (cs && ((cs.fees && cs.fees.length) || (cs.batches && cs.batches.length))) {
-      adminSettings = normalizeSettings(cs);
-      renderAdminSettings(); renderMemberOptions();
-    }
-  } catch (e) {}
+  } catch (e) {
+    console.warn("Cloud fetch settings warning:", e);
+  }
   document.getElementById("orgTopHeader").innerText = (dynamicOrgData.name || "ORGDESK").toUpperCase();
   document.getElementById("orgNameHeader").innerText = (dynamicOrgData.name || "UNIVERSAL ADMISSION FORM").toUpperCase();
   document.getElementById("orgDetailsHeader").innerText = (dynamicOrgData.address || "Pan-India Digital Registration") + (dynamicOrgData.phone ? " | Ph: " + dynamicOrgData.phone : "");
@@ -604,17 +605,13 @@ async function persistSettings(msg) {
   renderAdminSettings(); renderMemberOptions();
   const st = document.getElementById('batchStatus');
   if (st) st.textContent = msg || '';
-  // Member ke phone tak pahunchane ke liye cloud me bhi rakho (rules allow kare to)
   try {
-    const orgId = new URLSearchParams(window.location.search).get('o') || localStorage.getItem('od_org') || '';
-    if (orgId && typeof db !== 'undefined') {
-      await db.collection('orgs').doc(orgId).set({ admissionSettings: adminSettings }, { merge: true });
-      if (st) st.textContent = (msg || '') + '  ☁️ Cloud me save';
-    } else if (st) {
-      st.textContent = (msg || '') + '  (sirf is phone me save — org link ?o=... se kholo to sabko dikhega)';
+    if (typeof db !== 'undefined') {
+      await db.collection('orgs').doc('5brothersfitness').set({ admissionSettings: adminSettings, name: "5 Brother's Fitness Club" }, { merge: true });
+      if (st) st.textContent = (msg || '') + '  ☁️ Cloud par Global Save हो गया (दुनिया में कहीं भी दिखेगा)!';
     }
   } catch (e) {
-    if (st) st.textContent = (msg || '') + '  ⚠️ Cloud save nahi hua: ' + (e && (e.code || e.message) ? (e.code || '') + ' ' + (e.message || '') : 'unknown error');
+    if (st) st.textContent = (msg || '') + '  ⚠️ Cloud save warning: ' + (e && (e.message || e));
   }
 }
 
