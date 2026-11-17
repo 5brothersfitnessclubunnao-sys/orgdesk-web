@@ -376,49 +376,64 @@
 
     const memberId = "MEM_" + Date.now();
     const totalFee = parseInt(document.getElementById("admFeeInput").value || "0", 10);
+    
+    // Multi-tenant Org ID matching firestore.rules structure
+    const orgId = localStorage.getItem("bfc_org_id") || localStorage.getItem("orgId") || "5brothersfitness";
 
     const memberData = {
       id: memberId,
-      code: "MEM-" + String(memberId).slice(-6),
       name: document.getElementById("admFullName").value.trim(),
-      parentName: document.getElementById("admParentName").value.trim(),
-      dob: document.getElementById("admDob").value,
-      age: document.getElementById("admAge").value,
-      gender: document.getElementById("admGender").value,
       phone: document.getElementById("admPhone").value.trim(),
-      pincode: document.getElementById("admPincode").value.trim(),
-      locality: document.getElementById("admLocalitySelect").value,
-      addressDetail: document.getElementById("admAddressDetail").value.trim(),
+      kind: "gym",
+      planName: document.getElementById("admPlanCategory").value,
+      planPrice: totalFee,
+      planMonths: 1,
       joinDate: document.getElementById("admJoiningDate").value,
-      slot: document.getElementById("admTimeSlot").value,
-      plan: document.getElementById("admPlanCategory").value,
+      status: "pending",
+      termsAccepted: true,
+      termsVersion: "1.0",
+      signName: document.getElementById("admTypedSign").value.trim() || document.getElementById("admFullName").value.trim(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      hasFiles: true,
+      data: {
+        parentName: document.getElementById("admParentName").value.trim(),
+        dob: document.getElementById("admDob").value,
+        age: document.getElementById("admAge").value,
+        gender: document.getElementById("admGender").value,
+        pincode: document.getElementById("admPincode").value.trim(),
+        locality: document.getElementById("admLocalitySelect").value,
+        addressDetail: document.getElementById("admAddressDetail").value.trim(),
+        slot: document.getElementById("admTimeSlot").value,
         totalFee: totalFee,
-        paidFee: document.getElementById("admPaymentMode").value === "Online" ? totalFee : 0,
-        dueFee: document.getElementById("admPaymentMode").value === "Online" ? 0 : totalFee,
         payMode: document.getElementById("admPaymentMode").value,
-        utrRef: document.getElementById("admUtrRef") ? document.getElementById("admUtrRef").value.trim() : "N/A",
-        status: document.getElementById("admPaymentMode").value === "Online" ? "Paid" : "Pending",
-        createdAt: new Date().toISOString()
-      };
-
-      try {
-        // Save to Firestore cloud database
-        await db.collection("members").doc(memberId).set(memberData, { merge: true });
-
-        // Save locally
-        let list = JSON.parse(localStorage.getItem("bfc_members") || "[]");
-        list.unshift(memberData);
-        localStorage.setItem("bfc_members", JSON.stringify(list));
-
-        alert("✅ Admission registered and synced successfully!");
-        window.location.href = "index.html";
-      } catch (err) {
-        alert("Error saving admission: " + err.message);
-        btn.disabled = false;
-        btn.innerText = "Submit Admission Form 🚀";
+        utr: document.getElementById("admUtrRef") ? document.getElementById("admUtrRef").value.trim() : "N/A"
       }
+    };
+
+    try {
+      const orgRef = db.collection("orgs").doc(orgId);
+      const orgSnap = await orgRef.get();
+      if (!orgSnap.exists) {
+        await orgRef.set({ name: orgId, type: "gym", createdAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+      }
+
+      // Save matching multi-tenant rules: orgs/{o}/members/{id}
+      await orgRef.collection("members").doc(memberId).set(memberData, { merge: true });
+
+      // Save locally as backup
+      let list = JSON.parse(localStorage.getItem("bfc_members") || "[]");
+      list.unshift(memberData);
+      localStorage.setItem("bfc_members", JSON.stringify(list));
+
+      alert("✅ Admission registered successfully under tenant rules!");
+      window.location.href = "index.html";
+    } catch (err) {
+      alert("Error saving admission: " + err.message);
+      btn.disabled = false;
+      btn.innerText = "Submit Admission Form 🚀";
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>
