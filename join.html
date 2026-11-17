@@ -474,8 +474,16 @@ let defaultSettings = {
   reqHealth: true
 };
 
-let adminSettings = JSON.parse(localStorage.getItem('admission_admin_settings') || 'null');
-if (!adminSettings || !Array.isArray(adminSettings.fees) || adminSettings.fees.length === 0 || !Array.isArray(adminSettings.batches) || adminSettings.batches.length === 0) {
+let adminSettings = defaultSettings;
+try {
+  let saved = JSON.parse(localStorage.getItem('admission_admin_settings') || 'null');
+  if (saved && typeof saved === 'object') {
+    if (Array.isArray(saved.fees) && saved.fees.length > 0) adminSettings.fees = saved.fees;
+    if (Array.isArray(saved.batches) && saved.batches.length > 0) adminSettings.batches = saved.batches;
+    if (saved.reqEmergency !== undefined) adminSettings.reqEmergency = saved.reqEmergency;
+    if (saved.reqHealth !== undefined) adminSettings.reqHealth = saved.reqHealth;
+  }
+} catch (e) {
   adminSettings = defaultSettings;
 }
 
@@ -486,43 +494,63 @@ let builderShift = 'Morning';
 
 function fmt12(t) {
   if (!t) return '';
-  const [h, m] = t.split(':').map(Number);
-  const ap = h >= 12 ? 'PM' : 'AM';
-  const hh = ((h + 11) % 12) + 1;
-  return String(hh).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' ' + ap;
+  try {
+    const [h, m] = String(t).split(':').map(Number);
+    const ap = h >= 12 ? 'PM' : 'AM';
+    const hh = ((h + 11) % 12) + 1;
+    return String(hh).padStart(2, '0') + ':' + String(m || 0).padStart(2, '0') + ' ' + ap;
+  } catch (e) { return t; }
 }
 
 function normalizeSettings(cfg) {
-  cfg = cfg || {};
-  let rawFees = Array.isArray(cfg.fees) ? cfg.fees.filter(f => f && f.name && f.amount !== '' && f.amount != null) : [];
-  cfg.fees = rawFees.length ? rawFees : defaultSettings.fees;
-  
-  let rawBatches = Array.isArray(cfg.batches) ? cfg.batches.filter(Boolean) : [];
-  cfg.batches = rawBatches.map(b => {
-    if (b && typeof b === 'object' && b.label) return b;
-    const label = String(b || '').trim();
-    if (!label) return null;
-    const shift = /even|शाम/i.test(label) ? 'Evening' : /after|दोपहर/i.test(label) ? 'Afternoon' : 'Morning';
-    return { shift, start: '', end: '', label };
-  }).filter(Boolean);
-  if (!cfg.batches.length) cfg.batches = defaultSettings.batches;
-  cfg.batches.sort((a, b) => (SHIFT_ORDER[a.shift] - SHIFT_ORDER[b.shift]) || String(a.start).localeCompare(String(b.start)));
-  return cfg;
+  try {
+    cfg = cfg || {};
+    let rawFees = Array.isArray(cfg.fees) ? cfg.fees.filter(f => f && f.name && f.amount !== '' && f.amount != null) : [];
+    cfg.fees = rawFees.length ? rawFees : defaultSettings.fees;
+    
+    let rawBatches = Array.isArray(cfg.batches) ? cfg.batches.filter(Boolean) : [];
+    cfg.batches = rawBatches.map(b => {
+      if (b && typeof b === 'object' && b.label) return b;
+      const label = String(b || '').trim();
+      if (!label) return null;
+      const shift = /even|शाम/i.test(label) ? 'Evening' : /after|दोपहर/i.test(label) ? 'Afternoon' : 'Morning';
+      return { shift, start: '', end: '', label };
+    }).filter(Boolean);
+    if (!cfg.batches.length) cfg.batches = defaultSettings.batches;
+    cfg.batches.sort((a, b) => (SHIFT_ORDER[a.shift] || 0) - (SHIFT_ORDER[b.shift] || 0) || String(a.start || '').localeCompare(String(b.start || '')));
+    cfg.reqEmergency = cfg.reqEmergency !== false;
+    cfg.reqHealth = cfg.reqHealth !== false;
+    return cfg;
+  } catch (e) {
+    return defaultSettings;
+  }
 }
 
 function ensureDefaultFees() {
-  if (!Array.isArray(adminSettings.fees) || adminSettings.fees.length === 0) {
-    adminSettings.fees = defaultSettings.fees;
+  if (!adminSettings || !Array.isArray(adminSettings.fees) || adminSettings.fees.length === 0) {
+    adminSettings = normalizeSettings(adminSettings);
   }
 }
+
 function liveFees() { 
-  let valid = adminSettings.fees.filter(f => f.name && f.amount !== '' && f.amount != null && !isNaN(Number(f.amount)));
-  if (!valid.length) {
+  try {
+    let valid = (adminSettings && Array.isArray(adminSettings.fees)) ? adminSettings.fees.filter(f => f && f.name && f.amount !== '' && f.amount != null) : [];
+    if (!valid.length) return defaultSettings.fees;
+    return valid; 
+  } catch (e) {
     return defaultSettings.fees;
   }
-  return valid; 
 }
-function catOf(f) { return f.name.includes(' - ') ? f.name.split(' - ')[0] : 'Regular'; }
+
+function catOf(f) { 
+  try {
+    if (!f || !f.name) return 'Regular';
+    return String(f.name).includes(' - ') ? String(f.name).split(' - ')[0] : 'Regular';
+  } catch (e) {
+    return 'Regular';
+  }
+}
+
 adminSettings = normalizeSettings(adminSettings);
 ensureDefaultFees();
 
@@ -759,35 +787,52 @@ function saveAdminSettings() {
 }
 
 function renderMemberOptions() {
-  const cat = document.getElementById('admCategorySelect');
-  cat.innerHTML = '';
-  const categories = [...new Set(liveFees().map(catOf))];
-  const catField = cat.closest('.field');
-  const single = categories.length <= 1;
-  if (catField) { catField.style.display = single ? 'none' : ''; if (catField.parentElement) catField.parentElement.style.gridTemplateColumns = single ? '1fr' : ''; }
-  categories.forEach(name => { const o = document.createElement('option'); o.value = name; o.textContent = name; cat.appendChild(o); });
-  updatePlanDurations();
-  const slot = document.getElementById('admSlotSelect');
-  slot.innerHTML = '';
-  const ph = document.createElement('option'); ph.value = ''; ph.textContent = '-- Batch चुनें --'; slot.appendChild(ph);
-  ['Morning', 'Afternoon', 'Evening'].forEach(sh => {
-    const items = adminSettings.batches.filter(b => b.shift === sh);
-    if (!items.length) return;
-    const g = document.createElement('optgroup'); g.label = SHIFT_LABEL[sh];
-    items.forEach(b => { const o = document.createElement('option'); o.value = b.label; o.textContent = b.label; g.appendChild(o); });
-    slot.appendChild(g);
-  });
-  document.getElementById('batchEmptyMessage').style.display = adminSettings.batches.length ? 'none' : 'block';
+  try {
+    const cat = document.getElementById('admCategorySelect');
+    if (!cat) return;
+    cat.innerHTML = '';
+    const lFees = liveFees();
+    const categories = [...new Set(lFees.map(catOf))];
+    const catField = cat.closest('.field');
+    const single = categories.length <= 1;
+    if (catField) { catField.style.display = single ? 'none' : ''; if (catField.parentElement) catField.parentElement.style.gridTemplateColumns = single ? '1fr' : ''; }
+    categories.forEach(name => { const o = document.createElement('option'); o.value = name; o.textContent = name; cat.appendChild(o); });
+    updatePlanDurations();
+    const slot = document.getElementById('admSlotSelect');
+    if (slot) {
+      slot.innerHTML = '';
+      const ph = document.createElement('option'); ph.value = ''; ph.textContent = '-- Batch चुनें --'; slot.appendChild(ph);
+      ['Morning', 'Afternoon', 'Evening'].forEach(sh => {
+        const items = (adminSettings && Array.isArray(adminSettings.batches)) ? adminSettings.batches.filter(b => b && b.shift === sh) : [];
+        if (!items.length) return;
+        const g = document.createElement('optgroup'); g.label = SHIFT_LABEL[sh] || sh;
+        items.forEach(b => { const o = document.createElement('option'); o.value = b.label; o.textContent = b.label; g.appendChild(o); });
+        slot.appendChild(g);
+      });
+      const bm = document.getElementById('batchEmptyMessage');
+      if (bm) bm.style.display = (adminSettings && Array.isArray(adminSettings.batches) && adminSettings.batches.length) ? 'none' : 'block';
+    }
+  } catch (e) {
+    console.error("renderMemberOptions error:", e);
+  }
 }
 
+
+
 function updatePlanDurations() {
-  const cat = document.getElementById('admCategorySelect').value;
-  const dur = document.getElementById('admDurationSelect');
-  dur.innerHTML = '';
-  liveFees().filter(f => catOf(f) === cat).forEach((f, i) => {
-    const o = document.createElement('option'); o.value = `${f.name}|${f.amount}|${i}`; o.textContent = `${f.name} - ₹${f.amount}`; dur.appendChild(o);
-  });
-  calculateAdmissionFee();
+  try {
+    const catEl = document.getElementById('admCategorySelect');
+    const dur = document.getElementById('admDurationSelect');
+    if (!dur) return;
+    const cat = catEl ? catEl.value : '';
+    dur.innerHTML = '';
+    liveFees().filter(f => catOf(f) === cat || !cat).forEach((f, i) => {
+      const o = document.createElement('option'); o.value = `${f.name}|${f.amount}|${i}`; o.textContent = `${f.name} - ₹${f.amount}`; dur.appendChild(o);
+    });
+    calculateAdmissionFee();
+  } catch (e) {
+    console.error("updatePlanDurations error:", e);
+  }
 }
 
 function calculateAdmissionFee() {
