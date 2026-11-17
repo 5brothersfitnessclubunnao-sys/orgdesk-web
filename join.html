@@ -827,6 +827,7 @@ function renderMemberOptions() {
     const single = categories.length <= 1;
     if (catField) { catField.style.display = single ? 'none' : ''; if (catField.parentElement) catField.parentElement.style.gridTemplateColumns = single ? '1fr' : ''; }
     categories.forEach(name => { const o = document.createElement('option'); o.value = name; o.textContent = name; cat.appendChild(o); });
+    if (categories.length > 0) cat.value = categories[0];
     updatePlanDurations();
     const slot = document.getElementById('admSlotSelect');
     if (slot) {
