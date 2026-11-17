@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Universal Digital Admission Form</title>
+  <title>5 Brother's Fitness Club - Universal Digital Admission Form</title>
   <!-- Firebase App & Firestore SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -11,9 +11,12 @@
   <script src="auth-gate.js" data-mode="ondemand"></script>
   <script src="tg-notify.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     window.__esc = function(v){ return String(v==null?"":v).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] }); };
-    window.__csv = function(v){ var s = String(v==null?"":v).replace(/"/g,'""'); return /^[=+\-@\t\r]/.test(s) ? "'"+s : s; };
+    window.__csv = function(v){ var s = String(v==null?"":v).replace(/"/g,'""'); return /^[=+\-@	
+]/.test(s) ? "'"+s : s; };
   </script>
   <script>
     const firebaseConfig = {
@@ -62,18 +65,12 @@
     .shift-tab.sel { background:rgba(255,204,0,0.15); border-color:var(--ac); color:var(--ac); }
     .batch-item { display:flex; align-items:center; justify-content:space-between; gap:8px; background:#111; border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin:6px 0; font-size:12px; color:#fff; }
     .batch-item b { color:var(--ac); }
-    #resultScreen { display:none; position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:200; overflow-y:auto; padding:12px; }
-    #resultScreen.open { display:block; }
-    .res-box { max-width:520px; margin:0 auto; background:var(--card); border:2px solid var(--ok); border-radius:16px; padding:14px; box-sizing:border-box; }
-    .res-btn { display:block; width:100%; border:0; border-radius:10px; padding:12px; margin:7px 0; font-weight:900; font-size:13px; cursor:pointer; text-align:center; text-decoration:none; box-sizing:border-box; }
-    .res-btn.main { background:var(--ok); color:#000; }
-    .res-btn.owner { background:#25d366; color:#000; }
-    .res-btn.alt { background:#2b2b33; color:#fff; border:1px solid var(--border); }
-    .res-btn.edit { background:#1f3350; color:#fff; }
-    .res-btn.appr { background:var(--ac); color:#000; }
-    .res-btn.del { background:#512027; color:#ffb3b3; border:1px solid #a8414d; }
-    .res-prev img { width:100%; border-radius:8px; margin:6px 0; border:1px solid var(--border); background:#fff; }
-    .res-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    
+    /* Receipt Modal */
+    #receiptModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:999999; justify-content:center; align-items:flex-start; padding:12px; overflow-y:auto; }
+    .receipt-card { background:#fff; color:#000; border-radius:12px; padding:16px; width:100%; max-width:440px; margin:20px auto; position:relative; box-shadow:0 0 30px rgba(0,0,0,0.8); }
+    .receipt-header { text-align:center; border-bottom:2px dashed #000; padding-bottom:8px; margin-bottom:10px; }
+    .r-row { display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:5px; border-bottom:1px dotted #ccc; padding-bottom:3px; }
   </style>
 </head>
 <body>
@@ -85,10 +82,19 @@
 </div>
 
 <div style="max-width:520px; margin:0 auto;">
-  <button type="button" class="admin-toggle" onclick="toggleAdminPanel()">⚙️ Admin Settings — फीस और बैच manage करें</button>
+  <button type="button" class="admin-toggle" onclick="toggleAdminPanel()">⚙️ Admin Settings — फीस, बैच और फॉर्म आवश्यकताएँ manage करें</button>
   <div id="adminPanel" class="admin-panel">
-    <h3>Admin Settings</h3>
-    <p class="admin-note">यह settings इसी browser में सुरक्षित रहेंगी। Member को वही फीस और batches दिखेंगे जो admin यहाँ save करेगा। कोई default फीस नहीं रखी गई है।</p>
+    <h3>Admin Settings (Global Cloud Sync)</h3>
+    <p class="admin-note">यहाँ से सेट की गई फीस, बैच और नियम दुनिया में कहीं से भी फॉर्म खोलने पर लागू होंगे।</p>
+    
+    <div style="background:#18181f; padding:10px; border-radius:8px; margin-bottom:10px;">
+      <label style="color:var(--ac); margin-bottom:6px;">📌 फॉर्म आवश्यकताएँ (Form Field Controls)</label>
+      <div style="display:flex; flex-direction:column; gap:6px; font-size:11.5px;">
+        <label><input type="checkbox" id="cfgReqEmergency" checked onchange="saveFormConfig()"> आपातकालीन संपर्क (Emergency Contact) अनिवार्य करें</label>
+        <label><input type="checkbox" id="cfgReqHealth" onchange="saveFormConfig()"> स्वास्थ्य घोषणा (Health Screening PAR-Q) अनिवार्य करें</label>
+      </div>
+    </div>
+
     <div id="feeSettingsList"></div>
     <button type="button" class="small-btn" onclick="addFeeSetting()">+ Fee option जोड़ें</button>
     <hr style="border:0;border-top:1px solid var(--border);margin:12px 0;">
@@ -110,16 +116,7 @@
     <div style="font-size:11px; color:#ccc; margin-bottom:4px;">अभी के Batches:</div>
     <div id="batchSettingsList"></div>
     <div id="batchStatus" style="font-size:11px; color:var(--ok); margin:6px 0;"></div>
-    <hr style="border:0;border-top:1px solid var(--border);margin:12px 0;">
-    <h3>🔒 Form rules (अनिवार्य / वैकल्पिक)</h3>
-    <label style="display:flex;gap:8px;align-items:center;font-size:12px;margin:6px 0;"><input type="checkbox" id="ruleEmerg" style="width:auto;"> आपातकालीन संपर्क अनिवार्य रखें</label>
-    <label style="display:flex;gap:8px;align-items:center;font-size:12px;margin:6px 0;"><input type="checkbox" id="ruleHealth" style="width:auto;"> स्वास्थ्य घोषणा (Health declaration) अनिवार्य रखें</label>
-    <div class="admin-note">18 साल से कम उम्र में आपातकालीन संपर्क हमेशा अनिवार्य रहेगा।</div>
-    <h3>📜 Terms &amp; Conditions (आपके संस्थान के)</h3>
-    <textarea id="termsText" rows="10" placeholder="खाली छोड़ें तो standard नियम दिखेंगे। हर नियम का शीर्षक '1. ...' से शुरू करें और बिंदु '- ' से।"></textarea>
-    <label style="margin-top:8px;">कानूनी चेतावनी की पंक्ति (वैकल्पिक, मोटे अक्षरों में छपेगी)</label>
-    <input type="text" id="legalNoteText" placeholder="उदा. सत्यता: गलत जानकारी मिलने पर सदस्यता रद्द होगी">
-    <button type="button" class="btn-main" style="margin-top:10px;" onclick="saveAdminSettings()">Save Fee Settings</button>
+    <button type="button" class="btn-main" style="margin-top:10px;" onclick="saveAdminSettings()">Save All Settings ☁️</button>
     <div id="adminSaveStatus" style="font-size:11px;color:var(--ok);margin-top:7px;"></div>
   </div>
 </div>
@@ -131,24 +128,13 @@
   </div>
 
   <div style="text-align:center; border-bottom:1.5px dashed var(--border); padding-bottom:8px; margin-bottom:12px;">
-    <h2 style="color:var(--ac); margin:0; font-size:16px;" id="orgNameHeader">UNIVERSAL ADMISSION FORM</h2>
-    <p style="color:var(--mut); font-size:10.5px; margin:3px 0 0;" id="orgDetailsHeader">Pan-India Digital Registration</p>
+    <h2 style="color:var(--ac); margin:0; font-size:16px;" id="orgNameHeader">5 BROTHER'S FITNESS CLUB</h2>
+    <p style="color:var(--mut); font-size:10.5px; margin:3px 0 0;" id="orgDetailsHeader">Umrao Khera, Akrampur, Unnao | Digital Registration</p>
   </div>
 
   <!-- STEP 1: PLAN & BATCH -->
   <div id="stepBox1" class="step-box active">
     <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:10px;" id="tStep1">1. Plan, Batch & Joining Date</div>
-    <div class="field">
-      <label>✍️ फॉर्म कौन भर रहा है? (Filled by)</label>
-      <div class="tap-grid" style="grid-template-columns:1fr 1fr;">
-        <div class="tap-card selected" id="fbMember" onclick="setFilledBy('member', this)">👤 सदस्य खुद</div>
-        <div class="tap-card" id="fbStaff" onclick="setFilledBy('staff', this)">🧑‍💼 स्टाफ भर रहा है</div>
-      </div>
-    </div>
-    <div class="field" id="staffNameBox" style="display:none;">
-      <label>स्टाफ का नाम (Staff name) *</label>
-      <input type="text" id="staffName" placeholder="जो फॉर्म भर रहा है उसका नाम">
-    </div>
     
     <div class="field">
       <label id="lblJoinDate">📅 प्रवेश तिथि (Joining Date) *</label>
@@ -186,30 +172,29 @@
     
     <div class="field">
       <label id="lblFullName">सदस्य का पूरा नाम (Full Name) *</label>
-      <input type="text" id="admFullName" placeholder="उदा. राहुल सिंह">
+      <input type="text" id="admFullName" placeholder="उदा. राहुल सिंह / प्रिया सिंह">
     </div>
 
-    <div class="field">
-      <label id="lblGender">लिंग (Gender) *</label>
-      <div class="tap-grid">
-        <div class="tap-card" onclick="pickGender('Male', this)">👨 पुरुष<br><span style="font-size:9px; font-weight:normal;">Male</span></div>
-        <div class="tap-card" onclick="pickGender('Female', this)">👩 महिला<br><span style="font-size:9px; font-weight:normal;">Female</span></div>
-        <div class="tap-card" onclick="pickGender('Other', this)">अन्य<br><span style="font-size:9px; font-weight:normal;">Other</span></div>
+    <div class="row">
+      <div class="field">
+        <label>लिंग (Gender) *</label>
+        <select id="admGender" onchange="updateGuardianLabel()">
+          <option value="Male">पुरुष (Male)</option>
+          <option value="Female">महिला (Female)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>वैवाहिक स्थिति (Marital Status)</label>
+        <select id="admMarital" onchange="updateGuardianLabel()">
+          <option value="Unmarried" selected>अविवाहित (Unmarried)</option>
+          <option value="Married">विवाहित (Married)</option>
+        </select>
       </div>
     </div>
 
-    <div class="field" id="maritalBox" style="display:none;">
-      <label>वैवाहिक स्थिति (Marital Status) *</label>
-      <div class="tap-grid" style="grid-template-columns:1fr 1fr;">
-        <div class="tap-card" onclick="pickMarital('Single', this)">अविवाहित<br><span style="font-size:9px; font-weight:normal;">Single</span></div>
-        <div class="tap-card" onclick="pickMarital('Married', this)">विवाहित<br><span style="font-size:9px; font-weight:normal;">Married</span></div>
-      </div>
-    </div>
-
     <div class="field">
-      <label id="lblParentName">पिता का नाम (Father's Name) *</label>
+      <label id="lblGuardianName">पिता / माता का नाम (Father / Mother Name) *</label>
       <input type="text" id="admParentName" placeholder="उदा. श्री राम सिंह">
-      <div id="parentHint" style="font-size:10px;color:var(--mut);margin-top:3px;">विवाहित महिला के लिए पति का नाम भरें।</div>
     </div>
 
     <div class="row">
@@ -228,18 +213,19 @@
       <input type="tel" id="admPhone" maxlength="10" placeholder="10 अंक मोबाइल">
     </div>
 
-    <div id="under18Box" style="display:none; background:#2a1200; border:1px solid #ff9900; padding:8px; border-radius:6px; font-size:11px; color:#ffcc00; margin-bottom:10px;">
-      ⚠️ 18 वर्ष से कम आयु: माता-पिता/अभिभावक का नाम और मोबाइल नंबर देना अनिवार्य है। हल्की एक्सरसाइज की अनुमति है।
+    <div class="row">
+      <div class="field">
+        <label>🆘 आपातकालीन संपर्क नाम (Emergency Contact Name)</label>
+        <input type="text" id="admEmergencyName" placeholder="रिश्तेदार का नाम">
+      </div>
+      <div class="field">
+        <label>🆘 आपातकालीन मोबाइल (Emergency Phone)</label>
+        <input type="tel" id="admEmergencyPhone" maxlength="10" placeholder="10 अंक मोबाइल">
+      </div>
     </div>
 
-    <div id="emergBox" style="background:#1a0d0d; border:1px solid #a8414d; border-radius:10px; padding:10px; margin-bottom:12px;">
-      <div style="color:#ff8a8a; font-weight:800; font-size:12px; margin-bottom:2px;">🚨 आपातकालीन संपर्क <span id="emergReqTag">*</span></div>
-      <div style="font-size:10px; color:var(--mut); margin-bottom:8px;">केवल परिवार / रिश्तेदार / अभिभावक का नंबर दें।</div>
-      <div class="field"><label>संपर्क व्यक्ति का नाम (Contact Name)</label><input type="text" id="emergName" placeholder="उदा. श्री राम सिंह"></div>
-      <div class="row">
-        <div class="field"><label>संबंध (Relation)</label><input type="text" id="emergRelation" placeholder="Father / Mother / Husband"></div>
-        <div class="field"><label>मोबाइल (Mobile)</label><input type="tel" id="emergPhone" maxlength="10" placeholder="10 अंक"></div>
-      </div>
+    <div id="under18Box" style="display:none; background:#2a1200; border:1px solid #ff9900; padding:8px; border-radius:6px; font-size:11px; color:#ffcc00; margin-bottom:10px;">
+      ⚠️ 18 वर्ष से कम आयु: माता-पिता/अभिभावक का नाम और मोबाइल नंबर देना अनिवार्य है।
     </div>
 
     <div class="row">
@@ -320,6 +306,12 @@
   <!-- STEP 4: HEALTH SCREENING & PAR-Q -->
   <div id="stepBox4" class="step-box">
     <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:8px;" id="tStep4">4. Health Screening (PAR-Q 7 Questions)</div>
+    
+    <!-- Data Privacy Notice (Flaw 4) -->
+    <div style="background:#0a1a12; border:1px solid var(--ok); padding:8px; border-radius:8px; margin-bottom:10px; font-size:10.5px; color:#8dffb0;">
+      🔒 <b>Data Privacy Notice:</b> मेडिकल जानकारी, आपातकालीन संपर्क, फोटो और पहचान-पत्र संवेदनशील डेटा हैं। इन्हें केवल अधिकृत एडमिन/स्टाफ को देखने की सख्त अनुमति है।
+    </div>
+
     <p style="font-size:10px; color:var(--mut); margin-bottom:10px;" id="lblParQSub">निम्नलिखित 7 में से किसी भी बात पर "हाँ" होने पर एडमिन पैनल में "Doctor Consultation Required" की चेतावनी दिखेगी।</p>
 
     <div id="parqQuestionsList" style="font-size:11px; display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
@@ -332,16 +324,6 @@
       <label><input type="checkbox" class="parq-q" value="Injury / Surgery"> 7. क्या पिछले 1 साल में कोई बड़ी सर्जरी या गंभीर चोट लगी है?</label>
     </div>
 
-    <div class="row">
-      <div class="field"><label>ऊंचाई (Height, cm)</label><input type="number" id="admHeight" placeholder="165"></div>
-      <div class="field"><label>वज़न (Weight, kg)</label><input type="number" id="admWeight" placeholder="60"></div>
-    </div>
-    <div class="row">
-      <div class="field"><label>ब्लड ग्रुप (Blood Group)</label>
-        <select id="admBlood"><option value="">N/A</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select></div>
-      <div class="field"><label>अन्य बीमारी / दवा (वैकल्पिक)</label><input type="text" id="admHealthNote" placeholder="यदि कोई हो"></div>
-    </div>
-    <div style="background:#10161c; border:1px solid #2a4a66; border-radius:8px; padding:8px; font-size:10.5px; color:#9fc4e8; margin-bottom:10px;">🔒 आपकी मेडिकल जानकारी, आपातकालीन संपर्क, फोटो और पहचान-पत्र <b>संवेदनशील डेटा</b> हैं। इन्हें केवल अधिकृत मालिक / स्टाफ ही देख सकते हैं।</div>
     <div class="field" style="background:#111; padding:8px; border-radius:8px; border:1px solid var(--border);">
       <label id="lblSupp">💊 सप्लीमेंट इतिहास (Supplement History)</label>
       <select id="admSupplement" onchange="toggleSuppBox()">
@@ -415,74 +397,96 @@
       <input type="text" id="upiUtrInput" placeholder="उदा. 427192837465">
     </div>
 
-    <div style="background:#111; border:1px solid var(--ac); border-radius:8px; padding:8px; margin-bottom:10px;">
-      <div style="color:var(--ac); font-weight:800; font-size:12px; margin-bottom:6px;">📜 नियम एवं शर्तें (Terms &amp; Conditions) — <span id="termsOrgName"></span></div>
-      <div id="termsBox" style="max-height:200px; overflow-y:auto; background:#0b0b0d; border:1px solid var(--border); border-radius:6px; padding:8px; font-size:11px; line-height:1.55; color:#ddd;"></div>
-      <div style="font-size:10px; color:var(--mut); margin-top:4px;">⬆ पूरा पढ़ने के लिए ऊपर-नीचे स्क्रॉल करें।</div>
+    <!-- Legal Terms & Conditions Box (Flaw 2) -->
+    <div style="background:#18181f; border:1px solid var(--ac); border-radius:8px; padding:10px; margin-bottom:10px; font-size:10.5px; color:#ccc; max-height:120px; overflow-y:auto;">
+      <b style="color:var(--ac);">📜 Legal & Consent Terms & Conditions:</b><br>
+      1. सभी प्रकार की फीस <b>Non-Refundable (वापस नहीं होगी)</b> है।<br>
+      2. जिम परिसर में अनुशासनहीनता या किसी भी प्रकार की क्षति पर सदस्यता तुरंत रद्द की जा सकती है।<br>
+      3. जिम में वर्कआउट के दौरान किसी भी शारीरिक चोट या दुर्घटना के लिए सदस्य स्वयं जिम्मेदार होगा।<br>
+      4. सभी नियम 5 Brother's Fitness Club के प्रबंधन के अधीन हैं।
     </div>
 
-    <div style="background:#261200; border:1px solid #ff9900; padding:8px; border-radius:8px; margin-bottom:12px; font-size:10.5px; color:#eee; display:flex; flex-direction:column; gap:8px;">
+    <div style="background:#261200; border:1px solid #ff9900; padding:8px; border-radius:8px; margin-bottom:12px; font-size:10.5px; color:#eee;">
       <label style="display:flex; align-items:flex-start; gap:6px; cursor:pointer;">
-        <input type="checkbox" id="rulesAgreedCheck" style="width:auto;">
-        <span id="lblLegalText">"मैंने ऊपर लिखे सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी पढ़ ली है और मैं सहमत हूँ।" *</span>
-      </label>
-      <label style="display:flex; align-items:flex-start; gap:6px; cursor:pointer;">
-        <input type="checkbox" id="healthAgreedCheck" style="width:auto;">
-        <span id="lblHealthText">🩺 <b>स्वास्थ्य घोषणा:</b> मैंने अपनी स्वास्थ्य जानकारी सही और पूरी दी है। मैं समझता/समझती हूँ कि व्यायाम में शारीरिक जोखिम होता है और चोट की जिम्मेदारी मेरी स्वयं की होगी। <span id="healthReqTag">*</span></span>
-      </label>
-      <label style="display:flex; align-items:flex-start; gap:6px; cursor:pointer;">
-        <input type="checkbox" id="emergAgreedCheck" style="width:auto;">
-        <span id="lblEmergText">🚑 <b>आपातकालीन सहमति:</b> आपातकाल में प्रबंधन मुझे प्राथमिक चिकित्सा / नज़दीकी अस्पताल ले जा सके, इसकी मैं सहमति देता/देती हूँ। <span id="emergAgreeTag">*</span></span>
-      </label>
-      <label style="display:flex; align-items:flex-start; gap:6px; cursor:pointer;">
-        <input type="checkbox" id="dataAgreedCheck" style="width:auto;">
-        <span>🔒 मैं अपनी फोटो और पहचान-पत्र के सदस्यता सत्यापन व उपस्थिति हेतु उपयोग की सहमति देता/देती हूँ। *</span>
+        <input type="checkbox" id="rulesAgreedCheck">
+        <span id="lblLegalText">"मैंने जिम के सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी को पढ़कर फॉर्म स्वीकार किया है।" *</span>
       </label>
     </div>
 
     <div style="display:flex; gap:8px;">
       <button type="button" class="btn-sec" onclick="goToStep(5)" id="btnBack6">⬅ पीछे</button>
-      <button type="button" class="btn-main" style="margin-top:0; flex:2; background:var(--ok); color:#000;" onclick="submitAdmissionForm()" id="btnSubmitForm">🚀 फॉर्म सबमिट करें व PDF पाएँ</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2; background:var(--ok); color:#000;" onclick="submitAdmissionForm()" id="btnSubmitForm">🚀 फॉर्म सबमिट करें व डिजिटल रसीद देखें</button>
     </div>
   </div>
 
 </div>
 
-<!-- RESULT SCREEN: shown right after submit -->
-<div id="resultScreen">
-  <div class="res-box">
-    <div style="text-align:center;">
-      <div style="font-size:34px;">🎉</div>
-      <h2 style="color:var(--ok);margin:4px 0;font-size:17px;" id="resTitle">एडमिशन फॉर्म तैयार!</h2>
-      <div style="font-size:11px;color:var(--mut);" id="resSub"></div>
+<!-- INSTANT ADMISSION RECEIPT MODAL (Flaw 5) -->
+<div id="receiptModal">
+  <div class="receipt-card" id="printableReceiptArea">
+    <div style="text-align:center; font-size:20px; font-weight:900; color:#000;">5 BROTHER'S FITNESS CLUB</div>
+    <div style="text-align:center; font-size:10px; color:#555; margin-bottom:8px;">Umrao Khera, Akrampur, Unnao | Ph: 9140417259</div>
+    <div class="receipt-header">
+      <div style="background:#ffcc00; color:#000; font-size:9.5px; font-weight:900; padding:2px 6px; border-radius:10px; display:inline-block;">OFFICIAL ADMISSION CARD & RECEIPT</div>
     </div>
-    <div id="resBusy" style="text-align:center;color:var(--ac);padding:14px;font-size:12px;">⏳ आपका फॉर्म (PDF व फोटो) बन रहा है…</div>
-    <div id="resActions" style="display:none;">
-      <button type="button" class="res-btn main" onclick="shareMemberCopy()">📤 WhatsApp / Share करें (PDF)</button>
-      <button type="button" class="res-btn owner" id="btnToOwner" style="display:none;" onclick="sendToOwner()">📨 Owner को भेजें</button>
-      <div class="res-grid">
-        <button type="button" class="res-btn alt" onclick="downloadPdf()">⬇ PDF</button>
-        <button type="button" class="res-btn alt" onclick="downloadImage()">🖼 फोटो (Image)</button>
-        <button type="button" class="res-btn alt" onclick="downloadQr()">🔐 QR डाउनलोड</button>
-        <button type="button" class="res-btn alt" onclick="printForm()">🖨 Print</button>
-      </div>
-      <div class="res-grid">
-        <button type="button" class="res-btn edit" onclick="editAdmission()">✏️ Edit</button>
-        <button type="button" class="res-btn appr" onclick="approveAdmission()">✅ Approve</button>
-      </div>
-      <button type="button" class="res-btn del" onclick="deleteAdmission()">🗑 Delete</button>
-      <button type="button" class="res-btn alt" onclick="location.reload()">➕ नया फॉर्म भरें</button>
+
+    <div class="r-row"><span>Admission ID:</span><b id="rcId"></b></div>
+    <div class="r-row"><span>Date:</span><b id="rcDate"></b></div>
+    <div class="r-row"><span>Member Name:</span><b id="rcName"></b></div>
+    <div class="r-row" id="rcGuardianRow"><span>Guardian/Spouse:</span><b id="rcGuardian"></b></div>
+    <div class="r-row"><span>Mobile:</span><b id="rcPhone"></b></div>
+    <div class="r-row"><span>Emergency:</span><b id="rcEmergency"></b></div>
+    <div class="r-row"><span>Plan & Fee:</span><b id="rcPlan"></b></div>
+    <div class="r-row"><span>Batch:</span><b id="rcBatch"></b></div>
+
+    <div style="text-align:center; margin-top:12px; border-top:1px dashed #000; padding-top:10px;">
+      <div id="rcQrBox" style="display:inline-block; background:#fff; padding:4px;"></div>
+      <div style="font-size:9.5px; color:#333; margin-top:4px;">Unique Attendance QR Code</div>
     </div>
-    <div class="res-prev" id="resPrev"></div>
-    <div id="resMsg" style="font-size:11px;color:var(--ok);text-align:center;margin-top:6px;"></div>
+  </div>
+
+  <div style="max-width:440px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:8px;" data-html2canvas-ignore="true">
+    <button type="button" onclick="downloadReceiptImage()" style="background:#ffcc00; color:#000; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">📥 रसीद इमेज डाउनलोड करें</button>
+    <button type="button" onclick="sendReceiptToCustomerWhatsApp()" style="background:#25D366; color:#fff; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">📲 ग्राहक को WhatsApp पर भेजें</button>
+    <button type="button" onclick="sendReceiptToOwnerWhatsApp()" style="background:#3b82f6; color:#fff; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">👑 Send to Owner (स्टाफ द्वारा एडमिशन पर)</button>
+    <button type="button" onclick="finishAdmissionDone()" style="background:#333; color:#fff; font-weight:bold; padding:10px; border:none; border-radius:8px; cursor:pointer;">✔ पूर्ण करें (Done & Refresh)</button>
   </div>
 </div>
 
 <script>
 let currentLang = 'hi';
 let selectedFitnessLevel = 'Beginner';
-let dynamicOrgData = { name: "OrgDesk Portal", address: "Pan-India Digital Registration", phone: "" };
-let adminSettings = JSON.parse(localStorage.getItem('admission_admin_settings') || 'null') || { fees: [], batches: [] };
+let dynamicOrgData = { name: "5 Brother's Fitness Club", address: "Umrao Khera, Akrampur, Unnao", phone: "9140417259" };
+let defaultSettings = {
+  fees: [
+    { name: 'Regular - 1 Month', amount: '500' },
+    { name: 'Regular - 3 Months', amount: '1200' },
+    { name: 'Regular - 6 Months', amount: '2000' },
+    { name: 'Regular - 12 Months', amount: '3500' },
+    { name: 'Student - 1 Month', amount: '300' }
+  ],
+  batches: [
+    { shift: 'Morning', start: '06:00', end: '08:00', label: '🌅 Morning 06:00 AM - 08:00 AM' },
+    { shift: 'Afternoon', start: '12:00', end: '14:00', label: '☀️ Afternoon 12:00 PM - 02:00 PM' },
+    { shift: 'Evening', start: '17:00', end: '19:00', label: '🌇 Evening 05:00 PM - 07:00 PM' }
+  ],
+  reqEmergency: true,
+  reqHealth: true
+};
+
+let adminSettings = defaultSettings;
+try {
+  let saved = JSON.parse(localStorage.getItem('admission_admin_settings') || 'null');
+  if (saved && typeof saved === 'object') {
+    if (Array.isArray(saved.fees) && saved.fees.length > 0) adminSettings.fees = saved.fees;
+    if (Array.isArray(saved.batches) && saved.batches.length > 0) adminSettings.batches = saved.batches;
+    if (saved.reqEmergency !== undefined) adminSettings.reqEmergency = saved.reqEmergency;
+    if (saved.reqHealth !== undefined) adminSettings.reqHealth = saved.reqHealth;
+  }
+} catch (e) {
+  adminSettings = defaultSettings;
+}
+
 const SHIFT_ORDER = { Morning: 0, Afternoon: 1, Evening: 2 };
 const SHIFT_LABEL = { Morning: '🌅 Morning', Afternoon: '☀️ Afternoon', Evening: '🌇 Evening' };
 const SHIFT_DEFAULT = { Morning: ['06:00', '08:00'], Afternoon: ['12:00', '14:00'], Evening: ['17:00', '19:00'] };
@@ -490,45 +494,76 @@ let builderShift = 'Morning';
 
 function fmt12(t) {
   if (!t) return '';
-  const [h, m] = t.split(':').map(Number);
-  const ap = h >= 12 ? 'PM' : 'AM';
-  const hh = ((h + 11) % 12) + 1;
-  return String(hh).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' ' + ap;
+  try {
+    const [h, m] = String(t).split(':').map(Number);
+    const ap = h >= 12 ? 'PM' : 'AM';
+    const hh = ((h + 11) % 12) + 1;
+    return String(hh).padStart(2, '0') + ':' + String(m || 0).padStart(2, '0') + ' ' + ap;
+  } catch (e) { return t; }
 }
-// purane (sirf text) batches ko bhi naye format me badal do
+
 function normalizeSettings(cfg) {
-  cfg = cfg || {};
-  cfg.fees = Array.isArray(cfg.fees) ? cfg.fees : [];
-  cfg.rules = Object.assign({ emergencyRequired: true, healthRequired: true }, cfg.rules || {});
-  cfg.terms = typeof cfg.terms === 'string' ? cfg.terms : '';
-  cfg.legalNote = typeof cfg.legalNote === 'string' ? cfg.legalNote : '';
-  cfg.batches = (Array.isArray(cfg.batches) ? cfg.batches : []).map(b => {
-    if (b && typeof b === 'object' && b.label) return b;
-    const label = String(b || '').trim();
-    if (!label) return null;
-    const shift = /even|शाम/i.test(label) ? 'Evening' : /after|दोपहर/i.test(label) ? 'Afternoon' : 'Morning';
-    return { shift, start: '', end: '', label };
-  }).filter(Boolean);
-  cfg.batches.sort((a, b) => (SHIFT_ORDER[a.shift] - SHIFT_ORDER[b.shift]) || String(a.start).localeCompare(String(b.start)));
-  return cfg;
+  try {
+    cfg = cfg || {};
+    let rawFees = Array.isArray(cfg.fees) ? cfg.fees.filter(f => f && f.name && f.amount !== '' && f.amount != null) : [];
+    cfg.fees = rawFees.length ? rawFees : defaultSettings.fees;
+    
+    let rawBatches = Array.isArray(cfg.batches) ? cfg.batches.filter(Boolean) : [];
+    cfg.batches = rawBatches.map(b => {
+      if (b && typeof b === 'object' && b.label) return b;
+      const label = String(b || '').trim();
+      if (!label) return null;
+      const shift = /even|शाम/i.test(label) ? 'Evening' : /after|दोपहर/i.test(label) ? 'Afternoon' : 'Morning';
+      return { shift, start: '', end: '', label };
+    }).filter(Boolean);
+    if (!cfg.batches.length) cfg.batches = defaultSettings.batches;
+    cfg.batches.sort((a, b) => (SHIFT_ORDER[a.shift] || 0) - (SHIFT_ORDER[b.shift] || 0) || String(a.start || '').localeCompare(String(b.start || '')));
+    cfg.reqEmergency = cfg.reqEmergency !== false;
+    cfg.reqHealth = cfg.reqHealth !== false;
+    return cfg;
+  } catch (e) {
+    return defaultSettings;
+  }
 }
-const DEFAULT_FEE_NAMES = ['1 Month', '3 Months', '6 Months', '12 Months'];
-const DEFAULT_AMOUNTS = { '1 Month': 500, '3 Months': 1200, '6 Months': 2000, '12 Months': 3500 };
+
 function ensureDefaultFees() {
-  const custom = adminSettings.fees.filter(f => !DEFAULT_FEE_NAMES.includes(f.name));
-  const defs = DEFAULT_FEE_NAMES.map(n => {
-    let existing = adminSettings.fees.find(f => f.name === n);
-    if (!existing || existing.amount === '' || existing.amount == null) {
-      return { name: n, amount: DEFAULT_AMOUNTS[n] };
-    }
-    return existing;
-  });
-  adminSettings.fees = defs.concat(custom);
+  if (!adminSettings || !Array.isArray(adminSettings.fees) || adminSettings.fees.length === 0) {
+    adminSettings = normalizeSettings(adminSettings);
+  }
 }
-function liveFees() { return adminSettings.fees.filter(f => f.name && f.amount !== '' && f.amount != null); }
-function catOf(f) { return f.name.includes(' - ') ? f.name.split(' - ')[0] : 'Regular'; }
+
+function liveFees() { 
+  try {
+    let valid = (adminSettings && Array.isArray(adminSettings.fees)) ? adminSettings.fees.filter(f => f && f.name && f.amount !== '' && f.amount != null) : [];
+    if (!valid.length) return defaultSettings.fees;
+    return valid; 
+  } catch (e) {
+    return defaultSettings.fees;
+  }
+}
+
+function catOf(f) { 
+  try {
+    if (!f || !f.name) return 'Regular';
+    return String(f.name).includes(' - ') ? String(f.name).split(' - ')[0] : 'Regular';
+  } catch (e) {
+    return 'Regular';
+  }
+}
+
 adminSettings = normalizeSettings(adminSettings);
 ensureDefaultFees();
+
+function updateGuardianLabel() {
+  const gender = document.getElementById('admGender').value;
+  const marital = document.getElementById('admMarital').value;
+  const lbl = document.getElementById('lblGuardianName');
+  if (gender === 'Female' && marital === 'Married') {
+    lbl.textContent = "पति का नाम (Husband Name) *";
+  } else {
+    lbl.textContent = "पिता / माता का नाम (Father / Mother Name) *";
+  }
+}
 
 const TRANSLATIONS = {
   hi: {
@@ -541,7 +576,7 @@ const TRANSLATIONS = {
     btnNext1: "अगला (Next ➔)",
     tStep2: "2. व्यक्तिगत एवं आपातकालीन विवरण",
     lblFullName: "सदस्य का पूरा नाम (Full Name) *",
-    lblParentName: "पिता / माता का नाम (Parent Name) *",
+    lblGuardianName: "पिता / माता का नाम (Father / Mother Name) *",
     lblDob: "जन्म तिथि (DOB)",
     lblAge: "आयु (Age) *",
     lblPhone: "मोबाइल नंबर (WhatsApp) *",
@@ -558,7 +593,6 @@ const TRANSLATIONS = {
     btnBack3: "⬅ पीछे",
     btnNext3: "स्वास्थ्य स्क्रीन (Next ➔)",
     tStep4: "4. स्वास्थ्य एवं PAR-Q (7 सवाल)",
-    lblParQSub: "निम्नलिखित 7 में से किसी भी बात पर 'हाँ' होने पर एडमिन पैनल में 'Doctor Consultation Required' की चेतावनी दिखेगी।",
     lblSupp: "💊 सप्लीमेंट इतिहास (Supplement History)",
     btnBack4: "⬅ पीछे",
     btnNext4: "दस्तावेज़ व QR (Next ➔)",
@@ -574,9 +608,9 @@ const TRANSLATIONS = {
     lblSummaryTitle: "📌 एडमिशन सारांश:",
     lblPayMode: "भुगतान माध्यम (Payment Mode) *",
     lblUtr: "🔗 UTR / UPI Reference Number (12 Digit) *",
-    lblLegalText: "\"मैंने ऊपर लिखे सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी पढ़ ली है और मैं सहमत हूँ।\" *",
+    lblLegalText: ""मैंने जिम के सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी को पढ़कर फॉर्म स्वीकार किया है।" *",
     btnBack6: "⬅ पीछे",
-    btnSubmitForm: "🚀 फॉर्म सबमिट करें व PDF पाएँ"
+    btnSubmitForm: "🚀 फॉर्म सबमिट करें व डिजिटल रसीद देखें"
   },
   en: {
     tStep1: "1. Plan, Batch & Joining Date",
@@ -588,7 +622,7 @@ const TRANSLATIONS = {
     btnNext1: "Next (➔)",
     tStep2: "2. Personal & Emergency Details",
     lblFullName: "Full Name *",
-    lblParentName: "Parent Name *",
+    lblGuardianName: "Father / Mother Name *",
     lblDob: "Date of Birth (DOB)",
     lblAge: "Age *",
     lblPhone: "Mobile Number (WhatsApp) *",
@@ -605,7 +639,6 @@ const TRANSLATIONS = {
     btnBack3: "⬅ Back",
     btnNext3: "Health Screening (Next ➔)",
     tStep4: "4. Health & PAR-Q (7 Questions)",
-    lblParQSub: "If any of the 7 questions is checked 'Yes', an admin alert 'Doctor Consultation Required' will be flagged.",
     lblSupp: "💊 Supplement History",
     btnBack4: "⬅ Back",
     btnNext4: "Documents & QR (Next ➔)",
@@ -621,9 +654,9 @@ const TRANSLATIONS = {
     lblSummaryTitle: "📌 Admission Summary:",
     lblPayMode: "Payment Mode *",
     lblUtr: "🔗 UTR / UPI Reference Number (12 Digit) *",
-    lblLegalText: "\"I have read all gym rules, non-refundable fee policy, and strict legal warnings before submitting this form.\" *",
+    lblLegalText: ""I have read all gym rules, non-refundable fee policy, and strict legal warnings before submitting this form." *",
     btnBack6: "⬅ Back",
-    btnSubmitForm: "🚀 Submit Form & Get PDF"
+    btnSubmitForm: "🚀 Submit Form & View Receipt"
   }
 };
 
@@ -631,29 +664,31 @@ function setLanguage(lang) {
   currentLang = lang;
   document.getElementById('langHiBtn').className = lang === 'hi' ? 'lang-btn active' : 'lang-btn';
   document.getElementById('langEnBtn').className = lang === 'en' ? 'lang-btn active' : 'lang-btn';
-  
   const t = TRANSLATIONS[lang];
   for (let key in t) {
     const el = document.getElementById(key);
     if (el) el.innerText = t[key];
   }
-  updateParentLabel();
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("admDateInput").value = new Date().toISOString().split("T")[0];
   renderAdminSettings();
   renderMemberOptions();
+  updateGuardianLabel();
 
-  // Fetch Global Settings from Firestore (5brothersfitness)
   try {
     if (typeof db !== "undefined") {
-      const doc = await db.collection("orgs").doc(ORG_ID).get();
+      const doc = await db.collection("orgs").doc("5brothersfitness").get();
       if (doc.exists) {
         const data = doc.data();
         dynamicOrgData = data;
         if (data.admissionSettings) {
           adminSettings = normalizeSettings(data.admissionSettings);
+          if (data.admissionSettings.reqEmergency !== undefined) adminSettings.reqEmergency = data.admissionSettings.reqEmergency;
+          if (data.admissionSettings.reqHealth !== undefined) adminSettings.reqHealth = data.admissionSettings.reqHealth;
+          document.getElementById('cfgReqEmergency').checked = !!adminSettings.reqEmergency;
+          document.getElementById('cfgReqHealth').checked = !!adminSettings.reqHealth;
           ensureDefaultFees();
           renderAdminSettings();
           renderMemberOptions();
@@ -663,30 +698,37 @@ window.addEventListener("DOMContentLoaded", async () => {
   } catch (e) {
     console.warn("Cloud fetch settings warning:", e);
   }
-  document.getElementById("orgTopHeader").innerText = (dynamicOrgData.name || "ORGDESK").toUpperCase();
-  document.getElementById("orgNameHeader").innerText = (dynamicOrgData.name || "UNIVERSAL ADMISSION FORM").toUpperCase();
-  document.getElementById("orgDetailsHeader").innerText = (dynamicOrgData.address || "Pan-India Digital Registration") + (dynamicOrgData.phone ? " | Ph: " + dynamicOrgData.phone : "");
-  applyRuleTags(); updateParentLabel();
+  document.getElementById("orgTopHeader").innerText = (dynamicOrgData.name || "5 BROTHER'S FITNESS CLUB").toUpperCase();
+  document.getElementById("orgNameHeader").innerText = (dynamicOrgData.name || "5 BROTHER'S FITNESS CLUB").toUpperCase();
+  document.getElementById("orgDetailsHeader").innerText = (dynamicOrgData.address || "Umrao Khera, Akrampur, Unnao") + (dynamicOrgData.phone ? " | Ph: " + dynamicOrgData.phone : "");
 });
 
 async function toggleAdminPanel() {
   const panel = document.getElementById('adminPanel');
   if (!panel.classList.contains('open') && typeof bfcLogin === 'function') {
-    const ok = await bfcLogin();      // sirf owner/admin hi settings khol sake
+    const ok = await bfcLogin();
     if (!ok) return;
   }
   panel.classList.toggle('open');
+}
+
+function saveFormConfig() {
+  adminSettings.reqEmergency = document.getElementById('cfgReqEmergency').checked;
+  adminSettings.reqHealth = document.getElementById('cfgReqHealth').checked;
 }
 
 function renderAdminSettings() {
   ensureDefaultFees();
   const feeList = document.getElementById('feeSettingsList');
   const batchList = document.getElementById('batchSettingsList');
-  feeList.innerHTML = '<div style="font-size:11px;color:#ccc;margin-bottom:4px;">सिर्फ़ रकम (₹) भरें — खाली रकम वाला plan member को नहीं दिखेगा:</div>' + adminSettings.fees.map((f, i) => {
+  document.getElementById('cfgReqEmergency').checked = !!adminSettings.reqEmergency;
+  document.getElementById('cfgReqHealth').checked = !!adminSettings.reqHealth;
+
+  feeList.innerHTML = '<div style="font-size:11px;color:#ccc;margin-bottom:4px;">सिर्फ़ रकम (₹) भरें:</div>' + adminSettings.fees.map((f, i) => {
     const def = DEFAULT_FEE_NAMES.includes(f.name);
     return `
     <div class="settings-row fee-row">
-      <input data-fee-name="${i}" value="${escapeAttr(f.name)}" ${def ? 'readonly style="color:var(--ac);font-weight:800;"' : ''} placeholder="Plan / अवधि (जैसे Student - 1 Month)">
+      <input data-fee-name="${i}" value="${escapeAttr(f.name)}" ${def ? 'readonly style="color:var(--ac);font-weight:800;"' : ''} placeholder="Plan">
       <input data-fee-amount="${i}" type="number" min="0" step="1" value="${f.amount ?? ''}" placeholder="Fee ₹">
       ${def ? '<span></span>' : `<button type="button" class="danger-btn" onclick="removeFeeSetting(${i})">Delete</button>`}
     </div>`; }).join('');
@@ -694,9 +736,7 @@ function renderAdminSettings() {
     <div class="batch-item">
       <span>${(SHIFT_LABEL[b.shift] || '').split(' ')[0]} <b>${escapeAttr(b.label)}</b></span>
       <button type="button" class="danger-btn" onclick="removeBatchSetting(${i})">🗑 Delete</button>
-    </div>`).join('') : '<div class="empty-state">अभी कोई batch नहीं है। ऊपर Shift और Time चुनकर Add करें।</div>';
-  const rr = adminSettings.rules || {};
-  if (byId('ruleEmerg')) { byId('ruleEmerg').checked = rr.emergencyRequired !== false; byId('ruleHealth').checked = rr.healthRequired !== false; byId('termsText').value = adminSettings.terms || ''; byId('legalNoteText').value = adminSettings.legalNote || ''; }
+    </div>`).join('') : '<div class="empty-state">अभी कोई batch नहीं है।</div>';
 }
 
 function escapeAttr(v) { return String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
@@ -712,7 +752,6 @@ function addBatchFromBuilder() {
   const start = document.getElementById('bStart').value;
   const end = document.getElementById('bEnd').value;
   if (!start || !end) { alert('⏰ Start aur End time dono chuniye.'); return; }
-  if (end <= start) { alert('⏰ End time, Start time se baad ka hona chahiye.'); return; }
   const label = SHIFT_LABEL[builderShift].replace(/^\S+\s/, '') + ' ' + fmt12(start) + ' - ' + fmt12(end);
   if (adminSettings.batches.some(b => b.label === label)) { alert('Ye batch pehle se added hai.'); return; }
   adminSettings.batches.push({ shift: builderShift, start, end, label });
@@ -720,20 +759,19 @@ function addBatchFromBuilder() {
   persistSettings('Batch add ho gaya ✅');
 }
 function removeBatchSetting(i) {
-  const b = adminSettings.batches[i];
-  if (!b || !confirm('Delete karein?\n' + b.label)) return;
   adminSettings.batches.splice(i, 1);
   persistSettings('Batch delete ho gaya 🗑️');
 }
 async function persistSettings(msg) {
+  saveFormConfig();
   localStorage.setItem('admission_admin_settings', JSON.stringify(adminSettings));
   renderAdminSettings(); renderMemberOptions();
   const st = document.getElementById('batchStatus');
   if (st) st.textContent = msg || '';
   try {
     if (typeof db !== 'undefined') {
-      await db.collection('orgs').doc(ORG_ID).set(ORG_ID === '5brothersfitness' ? { admissionSettings: adminSettings, name: "5 Brother's Fitness Club" } : { admissionSettings: adminSettings }, { merge: true });
-      if (st) st.textContent = (msg || '') + '  ☁️ Cloud par Global Save हो गया (दुनिया में कहीं भी दिखेगा)!';
+      await db.collection('orgs').doc('5brothersfitness').set({ admissionSettings: adminSettings, name: "5 Brother's Fitness Club" }, { merge: true });
+      if (st) st.textContent = (msg || '') + '  ☁️ Cloud par Global Save हो गया!';
     }
   } catch (e) {
     if (st) st.textContent = (msg || '') + '  ⚠️ Cloud save warning: ' + (e && (e.message || e));
@@ -744,43 +782,57 @@ function saveAdminSettings() {
   adminSettings.fees = [...document.querySelectorAll('[data-fee-name]')].map((el, i) => ({
     name: el.value.trim(), amount: document.querySelector(`[data-fee-amount="${i}"]`).value
   })).filter(f => f.name && f.amount !== '');
-  adminSettings.rules = { emergencyRequired: byId('ruleEmerg').checked, healthRequired: byId('ruleHealth').checked };
-  adminSettings.terms = byId('termsText').value.trim();
-  adminSettings.legalNote = byId('legalNoteText').value.trim();
-  persistSettings('');
-  document.getElementById('adminSaveStatus').textContent = 'Settings saved. Member form updated.';
+  persistSettings('Settings saved successfully! ☁️');
+  document.getElementById('adminSaveStatus').textContent = 'Global settings updated.';
 }
 
 function renderMemberOptions() {
-  const cat = document.getElementById('admCategorySelect');
-  cat.innerHTML = '';
-  const categories = [...new Set(liveFees().map(catOf))];
-  const catField = cat.closest('.field');
-  const single = categories.length <= 1;
-  if (catField) { catField.style.display = single ? 'none' : ''; if (catField.parentElement) catField.parentElement.style.gridTemplateColumns = single ? '1fr' : ''; }
-  categories.forEach(name => { const o = document.createElement('option'); o.value = name; o.textContent = name; cat.appendChild(o); });
-  updatePlanDurations();
-  const slot = document.getElementById('admSlotSelect');
-  slot.innerHTML = '';
-  const ph = document.createElement('option'); ph.value = ''; ph.textContent = '-- Batch चुनें --'; slot.appendChild(ph);
-  ['Morning', 'Afternoon', 'Evening'].forEach(sh => {
-    const items = adminSettings.batches.filter(b => b.shift === sh);
-    if (!items.length) return;
-    const g = document.createElement('optgroup'); g.label = SHIFT_LABEL[sh];
-    items.forEach(b => { const o = document.createElement('option'); o.value = b.label; o.textContent = b.label; g.appendChild(o); });
-    slot.appendChild(g);
-  });
-  document.getElementById('batchEmptyMessage').style.display = adminSettings.batches.length ? 'none' : 'block';
+  try {
+    const cat = document.getElementById('admCategorySelect');
+    if (!cat) return;
+    cat.innerHTML = '';
+    const lFees = liveFees();
+    const categories = [...new Set(lFees.map(catOf))];
+    const catField = cat.closest('.field');
+    const single = categories.length <= 1;
+    if (catField) { catField.style.display = single ? 'none' : ''; if (catField.parentElement) catField.parentElement.style.gridTemplateColumns = single ? '1fr' : ''; }
+    categories.forEach(name => { const o = document.createElement('option'); o.value = name; o.textContent = name; cat.appendChild(o); });
+    updatePlanDurations();
+    const slot = document.getElementById('admSlotSelect');
+    if (slot) {
+      slot.innerHTML = '';
+      const ph = document.createElement('option'); ph.value = ''; ph.textContent = '-- Batch चुनें --'; slot.appendChild(ph);
+      ['Morning', 'Afternoon', 'Evening'].forEach(sh => {
+        const items = (adminSettings && Array.isArray(adminSettings.batches)) ? adminSettings.batches.filter(b => b && b.shift === sh) : [];
+        if (!items.length) return;
+        const g = document.createElement('optgroup'); g.label = SHIFT_LABEL[sh] || sh;
+        items.forEach(b => { const o = document.createElement('option'); o.value = b.label; o.textContent = b.label; g.appendChild(o); });
+        slot.appendChild(g);
+      });
+      const bm = document.getElementById('batchEmptyMessage');
+      if (bm) bm.style.display = (adminSettings && Array.isArray(adminSettings.batches) && adminSettings.batches.length) ? 'none' : 'block';
+    }
+  } catch (e) {
+    console.error("renderMemberOptions error:", e);
+  }
 }
 
+
+
 function updatePlanDurations() {
-  const cat = document.getElementById('admCategorySelect').value;
-  const dur = document.getElementById('admDurationSelect');
-  dur.innerHTML = '';
-  liveFees().filter(f => catOf(f) === cat).forEach((f, i) => {
-    const o = document.createElement('option'); o.value = `${f.name}|${f.amount}|${i}`; o.textContent = `${f.name} - ₹${f.amount}`; dur.appendChild(o);
-  });
-  calculateAdmissionFee();
+  try {
+    const catEl = document.getElementById('admCategorySelect');
+    const dur = document.getElementById('admDurationSelect');
+    if (!dur) return;
+    const cat = catEl ? catEl.value : '';
+    dur.innerHTML = '';
+    liveFees().filter(f => catOf(f) === cat || !cat).forEach((f, i) => {
+      const o = document.createElement('option'); o.value = `${f.name}|${f.amount}|${i}`; o.textContent = `${f.name} - ₹${f.amount}`; dur.appendChild(o);
+    });
+    calculateAdmissionFee();
+  } catch (e) {
+    console.error("updatePlanDurations error:", e);
+  }
 }
 
 function calculateAdmissionFee() {
@@ -791,7 +843,7 @@ function calculateAdmissionFee() {
 
 function selectLevel(lvl, el) {
   selectedFitnessLevel = lvl;
-  el.parentNode.querySelectorAll('.tap-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.tap-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   document.getElementById('fitLevelInput').value = lvl;
 }
@@ -804,7 +856,6 @@ function toggleSuppBox() {
 function checkUnder18() {
   const age = parseInt(document.getElementById('admAge').value, 10);
   document.getElementById('under18Box').style.display = (!isNaN(age) && age > 0 && age < 18) ? 'block' : 'none';
-  applyRuleTags();
 }
 
 function autoCalculateAgeFromDob() {
@@ -816,7 +867,6 @@ function autoCalculateAgeFromDob() {
   checkUnder18();
 }
 
-// UNIVERSAL PINCODE FETCHER
 async function fetchUniversalPincode() {
   const pin = document.getElementById('memberPincode').value.trim();
   const dd = document.getElementById('unnaoAreaDropdown');
@@ -852,20 +902,6 @@ function searchUniversalAreas() {
 }
 
 function previewImage(input, previewId) {
-  if (input.id === 'memberPhotoFile' || input.id === 'memberIdFile') {
-    const isPhoto = input.id === 'memberPhotoFile', key = isPhoto ? '__photoData' : '__idData';
-    window[key] = ''; window[isPhoto ? '__photoKept' : '__idKept'] = false;
-    let st = document.getElementById(input.id + 'St');
-    if (!st) { st = document.createElement('div'); st.id = input.id + 'St'; st.style.cssText = 'font-size:11px;margin-top:4px;font-weight:bold'; input.parentNode.appendChild(st); }
-    if (input.files && input.files[0]) {
-      st.style.color = '#ffcc00'; st.textContent = '⏳ फोटो तैयार हो रही है…';
-      fileToDataUrl(input.files[0], isPhoto ? 320 : 800, isPhoto ? 0.7 : 0.6).then(u => {
-        window[key] = u;
-        if (u) { st.style.color = '#00ff66'; st.textContent = '✅ फोटो तैयार है'; }
-        else { st.style.color = '#ff6666'; st.textContent = '⚠️ फोटो पढ़ नहीं पाई — कोई दूसरी फोटो चुनें (JPG/PNG)'; }
-      });
-    } else st.textContent = '';
-  }
   if (input.files && input.files[0]) {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -882,297 +918,64 @@ function togglePayMode() {
   document.getElementById('onlineTray').style.display = mode === 'Online' ? 'block' : 'none';
 }
 
+function goToStep(step) {
+  if (step >= 2 && !document.getElementById('admDurationSelect').value) {
+    alert('Admin ne abhi fee set nahi ki hai. Pehle Admin Settings me fee save karein.'); step = 1;
+  } else if (step >= 2 && !document.getElementById('admSlotSelect').value) {
+    alert('⏰ कृपया अपना Batch (Morning / Evening) चुनें!'); step = 1;
+  } else if (step >= 3 && !document.getElementById('admFullName').value.trim()) {
+    alert('कृपया पूरा नाम भरें!'); step = 2;
+  } else if (step >= 3 && adminSettings.reqEmergency && !document.getElementById('admEmergencyPhone').value.trim()) {
+    alert('कृपया आपातकालीन संपर्क (Emergency Phone) नंबर भरें!'); step = 2;
+  }
+  if (step === 6) {
+    const name = document.getElementById('admFullName').value.trim() || "Member";
+    const phone = document.getElementById('admPhone').value.trim() || "000";
+    document.getElementById('qrcode').innerHTML = "";
+    if (!window.__admId) window.__admId = 'adm' + Date.now();
+    window.__admQr = `ORGDESK-ATTENDANCE-${name}-${phone}-${window.__admId}`;
+    new QRCode(document.getElementById("qrcode"), {
+      text: window.__admQr,
+      width: 120,
+      height: 120
+    });
+
+    const sumHtml = `
+      <b>नाम:</b> ${name}<br>
+      <b>मोबाइल:</b> ${phone}<br>
+      <b>प्लान फीस:</b> ${document.getElementById('admFeeDisplay').innerText}<br>
+      <b>बैच समय:</b> ${document.getElementById('admSlotSelect').value}<br>
+      <b>फिटनेस स्तर:</b> ${selectedFitnessLevel}
+    `;
+    document.getElementById('summaryContent').innerHTML = sumHtml;
+  }
+
+  [1,2,3,4,5,6].forEach(i => {
+    document.getElementById(`stepBox${i}`).className = (i === step) ? "step-box active" : "step-box";
+  });
+}
+
 function fileToDataUrl(file, maxW, q) {
   return new Promise(res => {
     if (!file) return res('');
-    const draw = (src, w, h) => {
-      try {
-        const sc = Math.min(1, maxW / w), c = document.createElement('canvas');
-        c.width = Math.max(1, Math.round(w * sc)); c.height = Math.max(1, Math.round(h * sc));
-        c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
-        const u = c.toDataURL('image/jpeg', q); return (u && u.length > 200) ? u : '';
-      } catch (e) { return ''; }
+    const r = new FileReader();
+    r.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const sc = Math.min(1, maxW / img.width);
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', q));
+      };
+      img.onerror = () => res('');
+      img.src = e.target.result;
     };
-    const viaRaw = () => res('');   // undecodable (e.g. HEIC / corrupt) -> report, never save garbage
-    const viaBitmap = () => {
-      if (!window.createImageBitmap) return viaRaw();
-      createImageBitmap(file).then(b => { const u = draw(b, b.width, b.height); u ? res(u) : viaRaw(); }).catch(viaRaw);
-    };
-    const u = URL.createObjectURL(file), im = new Image();
-    im.onload = () => { const d = draw(im, im.naturalWidth || im.width, im.naturalHeight || im.height); URL.revokeObjectURL(u); d ? res(d) : viaBitmap(); };
-    im.onerror = () => { URL.revokeObjectURL(u); viaBitmap(); };
-    im.src = u;
+    r.onerror = () => res('');
+    r.readAsDataURL(file);
   });
 }
-/* ===================== NEW: org id, rules, gender, emergency, filled-by ===================== */
-const ORG_ID = (new URLSearchParams(location.search).get('o') || '5brothersfitness').trim();
-const byId = id => document.getElementById(id);
-let selectedGender = '', selectedMarital = '', filledBy = 'member';
-const DEFAULT_RULES = { emergencyRequired: true, healthRequired: true };
-const DEFAULT_TERMS =
-"1. फीस एवं उपस्थिति नियम (FEES POLICY - STRICT):\n- शिक्षा संस्थानों की तरह यह भी एक अभ्यास संस्थान है। यदि आप महीने में 1 दिन भी आते हैं, तो भी पूरे 1 महीने की पूरी फीस देय होगी।\n- अनुपस्थिति के आधार पर फीस में कोई छूट या रिफंड नहीं मिलेगा। फीस गैर-वापसी योग्य (Non-Refundable) है।\n\n" +
-"2. जिम छोड़ने की प्रक्रिया (EXIT POLICY):\n- यदि जिम छोड़ना है, तो महीना पूरा होते ही तुरंत जिम आना बंद कर दें। बिना फीस दिए नया महीना शुरू करने पर प्रबंधन सख्त कदम उठाएगा।\n\n" +
-"3. जिम अनुशासन एवं व्यवस्था (DISCIPLINE):\n- जिम के अंदर साफ इनडोर जूते व पर्सनल तौलिया लाना अनिवार्य है। उपकरण पटकना मना है।\n- गुटका, तंबाकू, धूम्रपान या शराब जिम में पूर्णतः प्रतिबंधित है। कीमती सामान की सुरक्षा स्वयं करें।\n\n" +
-"4. स्वास्थ्य जोखिम एवं दायित्व मुक्ति (WAIVER):\n- भारी वजन उठाने में होने वाले खिंचाव या चोट की जिम्मेदारी स्वयं सदस्य की होगी। प्रबंधन कानूनी रूप से जिम्मेदार नहीं होगा।\n- मैंने अपनी स्वास्थ्य जानकारी सही और पूरी दी है। मैं अपने फोटो व पहचान पत्र के सदस्यता सत्यापन और उपस्थिति हेतु उपयोग की सहमति देता/देती हूँ।";
-function rules() { return Object.assign({}, DEFAULT_RULES, adminSettings.rules || {}); }
-function termsText() { return (adminSettings.terms || dynamicOrgData.terms || DEFAULT_TERMS); }
-function orgName() { return dynamicOrgData.name || 'ORGANISATION'; }
-function ageNow() { return parseInt(byId('admAge').value, 10) || 0; }
-function emergencyNeeded() { const a = ageNow(); return rules().emergencyRequired || (a > 0 && a < 18); }
 
-function setFilledBy(v, el) {
-  filledBy = v;
-  el.parentNode.querySelectorAll('.tap-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  byId('staffNameBox').style.display = v === 'staff' ? 'block' : 'none';
-}
-function pickGender(g, el) {
-  selectedGender = g;
-  el.parentNode.querySelectorAll('.tap-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  byId('maritalBox').style.display = g === 'Female' ? 'block' : 'none';
-  if (g !== 'Female') { selectedMarital = ''; byId('maritalBox').querySelectorAll('.tap-card').forEach(c => c.classList.remove('selected')); }
-  updateParentLabel();
-}
-function pickMarital(m, el) {
-  selectedMarital = m;
-  el.parentNode.querySelectorAll('.tap-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  updateParentLabel();
-}
-function isHusband() { return selectedGender === 'Female' && selectedMarital === 'Married'; }
-function updateParentLabel() {
-  const h = isHusband();
-  byId('lblParentName').textContent = h ? "पति का नाम (Husband's Name) *" : "पिता का नाम (Father's Name) *";
-  byId('admParentName').placeholder = h ? 'उदा. श्री राहुल सिंह' : 'उदा. श्री राम सिंह';
-  byId('parentHint').textContent = h ? 'विवाहित महिला: पति का नाम भरें।' : (selectedGender === 'Female' ? 'अविवाहित महिला: पिता का नाम भरें।' : 'पिता का नाम भरें।');
-}
-function applyRuleTags() {
-  const r = rules();
-  byId('healthReqTag').textContent = r.healthRequired ? '*' : '(वैकल्पिक)';
-  byId('emergAgreeTag').textContent = emergencyNeeded() ? '*' : '(वैकल्पिक)';
-  byId('emergReqTag').textContent = emergencyNeeded() ? '*' : '(वैकल्पिक)';
-}
-function termsToHtml(text, esc) {
-  let out = '';
-  String(text || '').split(/\r?\n/).forEach(ln => {
-    const t = ln.trim(); if (!t) return;
-    if (/^\d+[.)]\s/.test(t)) out += '<div class="th">' + esc(t) + '</div>';
-    else if (/^[-•*]\s*/.test(t)) out += '<div class="tb">• ' + esc(t.replace(/^[-•*]\s*/, '')) + '</div>';
-    else out += '<div class="tp">' + esc(t) + '</div>';
-  });
-  return out;
-}
-function paintTermsBox() {
-  byId('termsOrgName').textContent = orgName();
-  byId('termsBox').innerHTML = termsToHtml(termsText(), window.__esc).replace(/class="th"/g, 'style="font-weight:800;color:#ffcc00;margin:8px 0 2px;"').replace(/class="tb"/g, 'style="padding-left:10px;margin:2px 0;"').replace(/class="tp"/g, 'style="margin:3px 0;"');
-}
-function genMemberId() {
-  if (window.__memberId) return window.__memberId;
-  const pre = (orgName().split(/\s+/).map(w => (w.match(/[A-Za-z0-9]/) || [''])[0]).join('').toUpperCase().slice(0, 5)) || 'MB';
-  const used = ['bbf_master_records_v4', '5BFC_MEMBERS', '5bfc_admissions'].flatMap(k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } }).map(m => m && m.memberId);
-  let id; do { id = pre + '-' + String(Math.floor(100000 + Math.random() * 900000)); } while (used.includes(id));
-  return (window.__memberId = id);
-}
-
-/* ===================== step navigation with validation ===================== */
-function validateUpTo(step) {
-  const v = id => byId(id).value.trim();
-  if (step >= 2 && !byId('admDurationSelect').value) { alert('Admin ने अभी फीस set नहीं की है। पहले Admin Settings में fee save करें।'); return 1; }
-  if (step >= 2 && !byId('admSlotSelect').value) { alert('⏰ कृपया अपना Batch (Morning / Evening) चुनें!'); return 1; }
-  if (step >= 2 && filledBy === 'staff' && !v('staffName')) { alert('कृपया स्टाफ का नाम भरें!'); return 1; }
-  if (step >= 3) {
-    if (!v('admFullName')) { alert('कृपया पूरा नाम भरें!'); return 2; }
-    if (!selectedGender) { alert('कृपया लिंग (पुरुष / महिला / अन्य) चुनें!'); return 2; }
-    if (selectedGender === 'Female' && !selectedMarital) { alert('कृपया वैवाहिक स्थिति चुनें!'); return 2; }
-    if (!v('admParentName')) { alert(isHusband() ? 'कृपया पति का नाम भरें!' : 'कृपया पिता का नाम भरें!'); return 2; }
-    if (!/^\d{10}$/.test(v('admPhone'))) { alert('कृपया 10 अंक का सही मोबाइल नंबर भरें!'); return 2; }
-    if (!(ageNow() > 0)) { alert('कृपया आयु (Age) भरें!'); return 2; }
-    const en = v('emergName'), er = v('emergRelation'), ep = v('emergPhone');
-    if (emergencyNeeded() && (!en || !er || !/^\d{10}$/.test(ep))) { alert('🚨 आपातकालीन संपर्क का नाम, संबंध और 10 अंक का मोबाइल भरना अनिवार्य है।'); return 2; }
-    if (!emergencyNeeded() && (en || er || ep) && (!en || !/^\d{10}$/.test(ep))) { alert('आपातकालीन संपर्क भर रहे हैं तो नाम और सही 10 अंक का मोबाइल दोनों भरें।'); return 2; }
-    if (ep && ep === v('admPhone')) { alert('आपातकालीन नंबर सदस्य के अपने नंबर से अलग होना चाहिए।'); return 2; }
-  }
-  if (step >= 6) {
-    if (!byId('memberPhotoFile').files[0] && !window.__photoKept) { alert('📸 कृपया सदस्य की फोटो लगाएँ!'); return 5; }
-    if (!byId('memberIdFile').files[0] && !window.__idKept) { alert('🪪 कृपया पहचान पत्र (Aadhaar/ID) की फोटो लगाएँ!'); return 5; }
-    if (!v('memberSignName')) { alert('✍️ कृपया हस्ताक्षर के रूप में अपना पूरा नाम लिखें!'); return 5; }
-  }
-  return step;
-}
-function goToStep(step) {
-  step = validateUpTo(step);
-  if (step === 6) {
-    const name = byId('admFullName').value.trim() || 'Member';
-    const phone = byId('admPhone').value.trim() || '000';
-    byId('qrcode').innerHTML = '';
-    if (!window.__admId) window.__admId = 'adm' + Date.now();
-    window.__admQr = `ORGDESK-ATTENDANCE-${name}-${phone}-${window.__admId}`;
-    new QRCode(byId('qrcode'), { text: window.__admQr, width: 120, height: 120 });
-    const E = window.__esc;
-    byId('summaryContent').innerHTML = `
-      <b>Member ID:</b> ${E(genMemberId())}<br>
-      <b>नाम:</b> ${E(name)}<br>
-      <b>${isHusband() ? 'पति' : 'पिता'}:</b> ${E(byId('admParentName').value.trim())}<br>
-      <b>मोबाइल:</b> ${E(phone)}<br>
-      <b>प्लान फीस:</b> ${E(byId('admFeeDisplay').innerText)}<br>
-      <b>बैच समय:</b> ${E(byId('admSlotSelect').value)}<br>
-      <b>फिटनेस स्तर:</b> ${E(selectedFitnessLevel)}`;
-    paintTermsBox(); applyRuleTags();
-  }
-  [1, 2, 3, 4, 5, 6].forEach(i => { byId('stepBox' + i).className = (i === step) ? 'step-box active' : 'step-box'; });
-  window.scrollTo(0, 0);
-}
-
-/* ===================== printable form (2 pages) built from the saved record ===================== */
-const FORM_CSS = `
-.pg{width:794px;height:1123px;box-sizing:border-box;background:#fff;color:#000;font:12px/1.4 'Noto Sans Devanagari','Nirmala UI',Arial,Helvetica,sans-serif;padding:22px 26px;border:2px solid #000;position:relative;overflow:hidden}
-.pg *{box-sizing:border-box}
-.pg .hd{display:flex;align-items:flex-start;gap:10px}.pg .hd .t{flex:1;text-align:center}.pg .hd h1{margin:0;font-size:23px;text-transform:uppercase}.pg .hd p{margin:2px 0 0;font-size:11px;color:#333}
-.pg .ph{width:112px;height:140px;object-fit:cover;border:2px solid #000;display:block}.pg .ph.none{display:flex;align-items:center;justify-content:center;font-size:11px;color:#777}
-.pg .h{font-weight:700;font-size:13px;border-bottom:1.5px solid #555;margin:11px 0 6px;padding-bottom:2px}
-.pg .inf{font-size:11px;color:#333;margin:2px 0}.pg .inf b{color:#000}
-.pg .ln{display:flex;gap:16px;margin:7px 0;align-items:baseline}
-.pg .fl{display:flex;align-items:baseline;gap:4px;min-width:0}.pg .fl i{font-style:normal;color:#444;font-size:10.5px;white-space:nowrap}
-.pg .fl b{flex:1;border-bottom:1px dotted #000;padding:0 4px 1px;font-size:13px;min-height:16px;word-break:break-word}
-.pg .emg{border:1px solid #000;background:#fafafa;padding:5px 8px;margin:9px 0 4px}.pg .emg b.t{font-size:11.5px}.pg .note{font-size:10.5px;color:#333;margin-top:2px}
-.pg .chk{font-size:11px;margin:5px 0;line-height:1.75}.pg .chk .lb{color:#444}.pg .cb{white-space:nowrap;margin-right:6px}
-.pg .cons{font-size:11.5px;margin:4px 0}
-.pg .row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:12px}
-.pg .sgt{font:italic 22px 'Brush Script MT','Segoe Script',Georgia,serif;padding:4px 8px 0;border-bottom:1px dotted #000;min-width:230px}
-.pg .lbl{font-size:11px;font-weight:700}
-.pg .qr{width:84px;height:84px;display:block}
-.pg .th{font-weight:700;font-size:11.5px;margin:8px 0 2px}.pg .tb{font-size:10.8px;padding-left:12px;margin:2px 0}.pg .tp{font-size:10.8px;margin:3px 0}
-.pg .ttl{text-align:center;font-weight:700;font-size:14px;margin:4px 0 2px}
-.pg .legal{border:1px solid #000;background:#fafafa;padding:6px 8px;margin-top:10px}.pg .legal .q{font-style:italic;font-size:10.8px;margin:3px 0}
-.pg .ofc{border:1.5px solid #000;padding:6px 8px;margin-top:10px}.pg .ofc h3{margin:0 0 4px;font-size:11.5px;text-decoration:underline}
-.pg table.ms{width:100%;border-collapse:collapse;margin-top:6px}.pg table.ms th,.pg table.ms td{border:1px solid #000;padding:6px 2px;font-size:10.5px;text-align:center}.pg table.ms th{background:#eee}
-.pg .ft{position:absolute;left:26px;right:26px;bottom:18px;display:flex;justify-content:space-between;border-top:1.5px dotted #666;padding-top:6px;font-size:10px;color:#444}
-`;
-const GOAL_HI = { 'Muscle Building': 'मसल बिल्डिंग / साइज', 'Weight Loss': 'वज़न घटाना', 'General Fitness': 'सामान्य फिटनेस' };
-const PARQ_HI = { 'Heart Condition': 'दिल की बीमारी', 'Chest Pain': 'सीने में दर्द', 'Dizziness': 'चक्कर / बेहोशी', 'Bone / Joint Issue': 'हड्डी / जोड़ की समस्या', 'Blood Pressure Meds': 'बीपी / दिल की दवा', 'Other Medical Reason': 'अन्य चिकित्सीय कारण', 'Injury / Surgery': 'सर्जरी / चोट (1 साल)' };
-const GENDER_HI = { Male: 'पुरुष (M)', Female: 'महिला (F)', Other: 'अन्य' };
-
-function buildFormPages(rec, qrUrl) {
-  const E = window.__esc;
-  const L = (label, val, fx) => `<span class="fl" style="flex:${fx || 1}"><i>${E(label)}:</i><b>${E(val == null ? '' : val)}</b></span>`;
-  const R = (...a) => `<div class="ln">${a.join('')}</div>`;
-  const H = t => `<div class="h">${E(t)}</div>`;
-  const CB = (on, label) => `<span class="cb">[${on ? '✓' : '&#160;&#160;'}] ${E(label)}</span>`;
-  const org = dynamicOrgData || {}, oname = orgName();
-  const husband = rec.parentRelation === 'Husband';
-  const photo = rec.memberPhoto ? `<img class="ph" src="${rec.memberPhoto}"/>` : '<div class="ph none">PHOTO</div>';
-  const phone = /^\d{10}$/.test(rec.phone) ? '+91 ' + rec.phone : rec.phone;
-  const dob = rec.dob ? rec.dob + (rec.age ? ' / ' + rec.age + ' yrs' : '') : (rec.age ? rec.age + ' yrs' : '');
-  const when = new Date(rec.admittedAt).toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Asia/Kolkata' });
-  const parq = rec.parq || [];
-  const dateOnly = (rec.joinDate || rec.admittedAt || '').slice(0, 10);
-  const sub = 'सदस्य पंजीकरण एवं स्वास्थ्य विवरण (Membership Registration Form)';
-  const sign = `<div class="sgt">${E(rec.signName || rec.name)}</div>`;
-  const decl = org.declaration || (`मैंने ${oname} के सभी नियमों, फीस पॉलिसी और कानूनी चेतावनी को भली-भांति पढ़ व समझ लिया है। यदि मैं फीस बकाया छोड़कर जाता/जाती हूँ, तो प्रबंधन को मेरे विरुद्ध कानूनी कार्रवाई करने की पूर्ण अनुमति है।`);
-
-  const p1 = `<div class="pg"><div class="hd"><div class="t"><h1>${E(oname)}</h1><p>${E(sub)}</p>${org.address || org.phone ? `<p>${E([org.address, org.phone ? 'Ph: ' + org.phone : ''].filter(Boolean).join(' | '))}</p>` : ''}</div>${photo}</div>` +
-    H('1. व्यक्तिगत विवरण (Personal Details)') +
-    `<div class="inf">Member ID: <b>${E(rec.memberId)}</b> &#160;|&#160; जॉइनिंग: <b>${E(rec.joinDate)}</b></div>` +
-    `<div class="inf">फॉर्म भरा गया: <b>${E(when)} (IST)</b></div>` +
-    `<div class="inf">प्लान: <b>${E(rec.planName)}</b> &#160;|&#160; बैच: <b>${E(rec.batch)}</b> &#160;|&#160; भुगतान: <b>${E(rec.admissionPayMode)}${rec.admissionUtr ? ' (UTR ' + E(rec.admissionUtr) + ')' : ''}</b></div>` +
-    `<div class="inf">फीस: <b>₹${E(rec.planBase)}</b> &#160;|&#160; जमा: <b>₹0</b> &#160;|&#160; बकाया: <b>₹${E(rec.dueAmount)}</b></div>` +
-    R(L('पूरा नाम (Full Name)', rec.name, 1)) +
-    R(L(husband ? "पति का नाम (Husband's Name)" : "पिता का नाम (Father's Name)", rec.parentName, 1)) +
-    R(L('जन्म तिथि / आयु (DOB / Age)', dob, 1.3), L('लिंग (M/F)', GENDER_HI[rec.gender] || rec.gender, 1) , rec.gender === 'Female' ? L('स्थिति', rec.marital === 'Married' ? 'विवाहित' : 'अविवाहित', 0.8) : '') +
-    R(L('मोबाइल नंबर (Mobile)', phone, 1)) +
-    R(L('पूरा पता (Address)', rec.address, 1)) +
-    `<div class="emg"><b class="t">🚨 आपातकालीन संपर्क — केवल परिवार/रिश्तेदार का नंबर</b>` +
-    R(L('संपर्क व्यक्ति का नाम', rec.emergencyName, 1.4), L('संबंध', rec.emergencyRelation, 1)) + R(L('मोबाइल नंबर', rec.emergencyPhone, 1)) + `</div>` +
-    H('2. स्वास्थ्य एवं फिटनेस विवरण (Health Details)') +
-    R(L('ऊंचाई (सेमी)', rec.height, 1), L('वज़न (किलो)', rec.weight, 1), L('ब्लड ग्रुप', rec.bloodGroup || 'N/A', 1)) +
-    `<div class="chk"><span class="lb">फिटनेस लक्ष्य:</span> ${Object.keys(GOAL_HI).map(k => CB(rec.goal === k, GOAL_HI[k])).join(' ')}</div>` +
-    `<div class="chk"><span class="lb">स्वास्थ्य स्थिति (यदि लागू हो तो टिक करें):</span><br/>${CB(!parq.length, 'कोई समस्या नहीं (Fit)')} ${Object.keys(PARQ_HI).map(k => CB(parq.includes(k), PARQ_HI[k])).join(' ')}</div>` +
-    (rec.healthNote ? R(L('अन्य बीमारी / दवा', rec.healthNote, 1)) : '') +
-    `<div class="chk"><span class="lb">सप्लीमेंट लेते हैं?</span> ${CB(rec.supplement === 'Yes', 'हाँ')} ${CB(rec.supplement !== 'Yes', 'नहीं')}${rec.supplementName ? ' (' + E(rec.supplementName) + ')' : ''}</div>` +
-    R(L('फिटनेस स्तर', rec.fitnessLevel, 1), L('हफ्ते में दिन', rec.daysPerWeek, 1), L('खान-पान', rec.diet, 1)) +
-    H('3. आपातकालीन सहमति एवं घोषणा') +
-    `<div class="cons">मैं जिम परिसर में किसी भी आपातकालीन स्थिति में प्राथमिक चिकित्सा या नज़दीकी अस्पताल ले जाने हेतु जिम प्रबंधन को पूर्ण सहमति देता/देती हूँ। मैंने अपनी स्वास्थ्य जानकारी सही और पूरी दी है।</div>` +
-    `<div class="row"><div><div class="lbl">सदस्य के हस्ताक्षर:</div>${sign}</div><div style="text-align:right">${L('दिनांक', dateOnly, 1)}</div></div>` +
-    `<div class="row" style="position:absolute;left:26px;right:26px;bottom:44px;"><div style="display:flex;gap:10px;align-items:flex-end;">${qrUrl ? `<img class="qr" src="${qrUrl}"/>` : ''}<div class="note">यूनिक QR (उपस्थिति)<br/><b>${E(rec.memberId)}</b></div></div><div class="note" style="text-align:right">अधिकृत मुहर / Authorised Stamp<br/><br/>__________________</div></div>` +
-    `<div class="ft"><span>${E(oname)}</span><span>Application ID: ${E(rec.id)}</span></div></div>`;
-
-  const p2 = `<div class="pg"><div class="ttl" style="font-size:17px;text-transform:uppercase">${E(oname)}</div><div class="ttl">नियम, शर्तें एवं दायित्व पत्र (Terms, Rules &amp; Waiver)</div>` +
-    termsToHtml(termsText(), E) +
-    `<div class="legal"><div class="lbl">कानूनी चेतावनी एवं घोषणा (Legal Declaration &amp; Warning):</div>${org.legalNote || (adminSettings.legalNote) ? `<div class="lbl" style="margin-top:2px">${E(adminSettings.legalNote || org.legalNote)}</div>` : ''}<div class="q">"${E(decl)}"</div>` +
-    R(L('सदस्य का नाम', rec.name, 1.6), L('दिनांक', dateOnly, 1)) +
-    `<div class="row" style="margin-top:6px"><div><div class="note">सदस्य के हस्ताक्षर:</div>${sign}</div></div></div>` +
-    `<div class="ofc"><h3>केवल कार्यालय उपयोग हेतु (OFFICE USE ONLY)</h3>` +
-    R(L('Form Received By', rec.filledBy === 'staff' ? rec.staffName + ' (Staff)' : 'सदस्य (स्वयं)', 1.4), L('Batch', rec.batch, 1.2)) +
-    R(L('Amount Received ₹', '', 1), L('Date & Sign', '', 1)) +
-    `<div class="lbl" style="margin-top:8px;font-size:10.5px">BODY MEASUREMENTS &amp; MONTHLY PROGRESS RECORD</div><table class="ms"><tr><th>Stage</th><th>Chest</th><th>Waist</th><th>Shoulder</th><th>Biceps</th><th>Forearm</th><th>Weight</th></tr><tr><td>Initial</td><td></td><td></td><td></td><td></td><td></td><td>${E(rec.weight || '')}</td></tr><tr><td>Current</td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table></div>` +
-    `<div class="ft"><span>${E(oname)}</span><span>Member ID: ${E(rec.memberId)}</span></div></div>`;
-  return [p1, p2];
-}
-
-/* ===================== HTML -> image (no library) -> JPEG -> hand-made PDF ===================== */
-function htmlToCanvas(html, w, h, scale) {
-  return new Promise((resolve, reject) => {
-    const doc = document.implementation.createHTMLDocument('');
-    doc.body.innerHTML = `<div id="w"><style>${FORM_CSS}</style>${html}</div>`;
-    const xml = new XMLSerializer().serializeToString(doc.getElementById('w'));
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><foreignObject x="0" y="0" width="${w}" height="${h}">${xml}</foreignObject></svg>`;
-    const img = new Image();
-    img.onload = () => {
-      try {
-        const c = document.createElement('canvas'); c.width = w * scale; c.height = h * scale;
-        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
-        x.drawImage(img, 0, 0, c.width, c.height);
-        resolve(c);
-      } catch (e) { reject(e); }
-    };
-    img.onerror = () => reject(new Error('form render failed'));
-    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  });
-}
-function dataUrlBytes(u) { const b = atob(u.split(',')[1]), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
-function latin(s) { const a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i) & 255; return a; }
-function buildPdf(jpegs, pxW, pxH) {
-  const chunks = [], offs = []; let pos = 0;
-  const add = x => { const u = typeof x === 'string' ? latin(x) : x; chunks.push(u); pos += u.length; };
-  const start = n => { offs[n] = pos; add(n + ' 0 obj\n'); };
-  add('%PDF-1.4\n');
-  start(1); add('<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
-  start(2); add(`<< /Type /Pages /Kids [${jpegs.map((_, i) => (3 + i * 3) + ' 0 R').join(' ')}] /Count ${jpegs.length} >>\nendobj\n`);
-  jpegs.forEach((j, i) => {
-    const p = 3 + i * 3, c = p + 1, im = p + 2, cs = `q 595.28 0 0 841.89 0 0 cm /Im${i} Do Q`;
-    start(p); add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im${i} ${im} 0 R >> >> /Contents ${c} 0 R >>\nendobj\n`);
-    start(c); add(`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream\nendobj\n`);
-    start(im); add(`<< /Type /XObject /Subtype /Image /Width ${pxW} /Height ${pxH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${j.length} >>\nstream\n`); add(j); add('\nendstream\nendobj\n');
-  });
-  const total = 3 + jpegs.length * 3, xref = pos;
-  let x = `xref\n0 ${total}\n0000000000 65535 f \n`;
-  for (let n = 1; n < total; n++) x += String(offs[n]).padStart(10, '0') + ' 00000 n \n';
-  add(x); add(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
-  return new Blob(chunks, { type: 'application/pdf' });
-}
-async function generateFiles(rec) {
-  const qrEl = document.querySelector('#qrcode canvas') || document.querySelector('#qrcode img');
-  let qrUrl = ''; try { qrUrl = qrEl ? (qrEl.toDataURL ? qrEl.toDataURL('image/png') : qrEl.src) : ''; } catch (e) {}
-  window.__qrUrl = qrUrl;
-  const pages = buildFormPages(rec, qrUrl), W = 794, H = 1123, S = 2;
-  const canvases = [];
-  for (const p of pages) canvases.push(await htmlToCanvas(p, W, H, S));
-  const jpgUrls = canvases.map(c => c.toDataURL('image/jpeg', 0.88));
-  const tall = document.createElement('canvas'); tall.width = W * S; tall.height = H * S * canvases.length;
-  const tx = tall.getContext('2d'); tx.fillStyle = '#fff'; tx.fillRect(0, 0, tall.width, tall.height);
-  canvases.forEach((c, i) => tx.drawImage(c, 0, i * H * S));
-  const safe = (rec.name || 'member').replace(/[^\wऀ-ॿ]+/g, '_');
-  window.__files = {
-    base: 'Admission-' + safe + '-' + rec.memberId,
-    pdf: buildPdf(jpgUrls.map(dataUrlBytes), W * S, H * S),
-    img: await new Promise(r => tall.toBlob(r, 'image/jpeg', 0.88)),
-    pages: jpgUrls,
-    html: '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title>' + window.__esc(rec.name) + '</title><style>@page{size:A4;margin:0}body{margin:0}img{width:100%;display:block;page-break-after:always}</style></head><body>' + jpgUrls.map(u => '<img src="' + u + '">').join('') + '<script>setTimeout(function(){window.print()},400)<\/script></body></html>'
-  };
-}
-
-/* ===================== submit -> save -> instant PDF / image ===================== */
 function planTypeFromCategory(cat) {
   const c = String(cat || '');
   if (/student|विद्यार्थी/i.test(c)) return 'student';
@@ -1180,181 +983,159 @@ function planTypeFromCategory(cat) {
   if (/poor|गरीब/i.test(c)) return 'poor';
   return 'job';
 }
+function calculateExpiryDate(joinDateStr, months) {
+  try {
+    const d = new Date(joinDateStr || Date.now());
+    d.setMonth(d.getMonth() + Number(months || 1));
+    return d.toISOString().slice(0, 10);
+  } catch (e) {
+    return joinDateStr;
+  }
+}
+
 function monthsFromPlanName(name) {
   const m = String(name || '').match(/(\d+)\s*(month|mahina|महीन)/i);
   return m ? parseInt(m[1], 10) : 1;
 }
-const LS_KEYS = ['5bfc_admissions', '5BFC_MEMBERS'];
-function lsRead(k) { try { const a = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-function lsUpsert(r) { LS_KEYS.forEach(k => { const arr = lsRead(k).filter(x => String(x.id) !== String(r.id)); arr.push(r); localStorage.setItem(k, JSON.stringify(arr)); }); }
-function lsRemove(id) { LS_KEYS.forEach(k => { try { localStorage.setItem(k, JSON.stringify(lsRead(k).filter(x => String(x.id) !== String(id)))); } catch (e) {} }); }
-function hashStr(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return 'T' + (h >>> 0).toString(16); }
+
+let lastSubmittedRecord = null;
 
 async function submitAdmissionForm() {
-  const v = id => byId(id).value.trim();
-  const back = validateUpTo(6);
-  if (back !== 6) { goToStep(back); return; }
-  if (byId('paymentMode').value === 'Online' && !v('upiUtrInput')) { alert('कृपया UTR / UPI Reference Number भरें!'); return; }
-  if (!byId('rulesAgreedCheck').checked) { alert('कृपया नियम व शर्तें (Legal Consent) चेकबॉक्स पर टिक करें!'); return; }
-  if (rules().healthRequired && !byId('healthAgreedCheck').checked) { alert('कृपया स्वास्थ्य घोषणा पर टिक करें!'); return; }
-  if (emergencyNeeded() && !byId('emergAgreedCheck').checked) { alert('कृपया आपातकालीन सहमति पर टिक करें!'); return; }
-  if (!byId('dataAgreedCheck').checked) { alert('कृपया फोटो / पहचान-पत्र उपयोग की सहमति पर टिक करें!'); return; }
+  const $ = id => document.getElementById(id);
+  if (!$('admDurationSelect').value || !$('admSlotSelect').value) { alert('Fee ya batch select nahi hai.'); goToStep(1); return; }
+  const name = $('admFullName').value.trim();
+  const phone = $('admPhone').value.trim();
+  if (!name) { alert('कृपया पूरा नाम भरें!'); goToStep(2); return; }
+  if (!/^\d{10}$/.test(phone)) { alert('कृपया 10 अंक का सही मोबाइल नंबर भरें!'); goToStep(2); return; }
+  if (adminSettings.reqEmergency && !$('admEmergencyPhone').value.trim()) { alert('कृपया आपातकालीन संपर्क मोबाइल भरें!'); goToStep(2); return; }
+  if ($('paymentMode').value === 'Online' && !$('upiUtrInput').value.trim()) { alert('कृपया UTR / UPI Reference Number भरें!'); return; }
+  if (!$('rulesAgreedCheck').checked) { alert('कृपया नियम व शर्तें (Legal Consent) चेकबॉक्स पर टिक करें!'); return; }
 
-  const name = v('admFullName'), phone = v('admPhone');
-  const existing = ['bbf_master_records_v4', '5BFC_MEMBERS', '5bfc_admissions'].flatMap(k => lsRead(k));
-  if (existing.some(m => m && String(m.id) !== String(window.__admId) && String(m.phone || '').trim() === phone && String(m.name || '').trim().toLowerCase() === name.toLowerCase())) {
-    if (!confirm('⚠️ ' + name + ' (' + phone + ') पहले से जुड़ा है। फिर भी दोबारा add करें?')) return;
-  }
-  const btn = byId('btnSubmitForm');
-  btn.disabled = true; btn.textContent = 'Saving...';
+  const btn = document.querySelector('#stepBox6 button[onclick*="submitAdmissionForm"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
 
-  const [feeName, feeAmtRaw] = byId('admDurationSelect').value.split('|');
+  const [feeName, feeAmtRaw] = $('admDurationSelect').value.split('|');
   const feeAmt = Number(feeAmtRaw) || 0;
-  const joinDate = byId('admDateInput').value || new Date().toISOString().slice(0, 10);
-  const photo = window.__photoData || await fileToDataUrl(byId('memberPhotoFile').files[0], 320, 0.7);
-  const idImg = window.__idData || await fileToDataUrl(byId('memberIdFile').files[0], 800, 0.6);
-  if (!photo && !window.__photoKept) { alert('📸 सदस्य की फोटो पढ़ नहीं पाई। कृपया फोटो दोबारा चुनें (कैमरा या गैलरी से)।'); goToStep(5); return; }
-  if (!idImg && !window.__idKept) { alert('🪪 पहचान पत्र की फोटो पढ़ नहीं पाई। कृपया दोबारा चुनें।'); goToStep(5); return; }
+  const months = monthsFromPlanName(feeName);
+  const joinDate = $('admDateInput').value || new Date().toISOString().slice(0, 10);
+  const photo = await fileToDataUrl($('memberPhotoFile').files[0], 320, 0.7);
+  const idImg = await fileToDataUrl($('memberIdFile').files[0], 800, 0.6);
   if (!window.__admId) window.__admId = 'adm' + Date.now();
-  const area = v('unnaoAreaInput'), pin = v('memberPincode');
-  const husband = isHusband();
-  const parentName = v('admParentName');
-  const eName = v('emergName'), eRel = v('emergRelation'), ePh = v('emergPhone');
-  const tText = termsText();
+  const area = $('unnaoAreaInput').value.trim();
+  const pin = $('memberPincode').value.trim();
 
   const rec = {
-    id: window.__admId, memberId: genMemberId(),
-    name, gender: selectedGender, marital: selectedMarital,
-    parentRelation: husband ? 'Husband' : 'Father', parentName,
-    father: husband ? '' : parentName, husband: husband ? parentName : '',
-    phone,
-    emergencyName: eName, emergencyRelation: eRel, emergencyPhone: ePh,
-    emergency: eName ? `${eName} (${eRel}) ${ePh}` : '',
+    id: window.__admId,
+    name, gender: $('admGender').value, marital: $('admMarital').value,
+    guardian: $('admParentName').value.trim(), parentName: $('admParentName').value.trim(),
+    phone, emergencyName: $('admEmergencyName').value.trim(), emergencyPhone: $('admEmergencyPhone').value.trim(),
     address: (area + (pin ? ' - ' + pin : '')).trim(),
-    dob: v('admDobInput'), age: v('admAge'),
-    height: v('admHeight'), weight: v('admWeight'), bloodGroup: byId('admBlood').value, healthNote: v('admHealthNote'),
+    dob: $('admDobInput').value || '', age: $('admAge').value || '',
     type: planTypeFromCategory(feeName.includes(' - ') ? feeName.split(' - ')[0] : ''),
-    planBase: feeAmt, planMonths: monthsFromPlanName(feeName), planName: feeName, admPlan: true,
-    joinDate, status: 'Pending', manualStatus: 'Pending', fees: 'Pending',
+    planBase: feeAmt, planMonths: months, planName: feeName, admPlan: true,
+    joinDate, expiryDate: calculateExpiryDate(joinDate, months), status: 'Pending', manualStatus: 'Pending', fees: 'Pending',
     payMode: '', amount: 0, lastPaid: '', dueAmount: feeAmt, advance: 0, dueV: 2,
-    admissionPayMode: byId('paymentMode').value, admissionUtr: v('upiUtrInput'),
-    batch: byId('admSlotSelect').value, attendanceId: window.__admQr || ('ORGDESK-ATTENDANCE-' + name + '-' + phone + '-' + window.__admId),
-    fitnessLevel: selectedFitnessLevel, prevGym: byId('fitPrevGym').value, daysPerWeek: byId('fitDays').value,
-    diet: byId('fitDiet').value, goal: byId('fitGoal').value,
+    admissionPayMode: $('paymentMode').value, admissionUtr: $('upiUtrInput').value.trim(),
+    batch: $('admSlotSelect').value, attendanceId: window.__admQr || ('ORGDESK-ATTENDANCE-' + name + '-' + phone + '-' + window.__admId),
+    fitnessLevel: selectedFitnessLevel, prevGym: $('fitPrevGym').value, daysPerWeek: $('fitDays').value,
+    diet: $('fitDiet').value, goal: $('fitGoal').value,
     parq: [...document.querySelectorAll('.parq-q:checked')].map(c => c.value),
-    supplement: byId('admSupplement').value, supplementName: v('admSuppName'),
-    signName: v('memberSignName'),
-    termsAccepted: true, termsVersion: hashStr(tText), healthDeclared: byId('healthAgreedCheck').checked, emergencyConsent: byId('emergAgreedCheck').checked, dataConsent: true,
-    filledBy, staffName: filledBy === 'staff' ? v('staffName') : '',
-    approved: false,
+    supplement: $('admSupplement').value, supplementName: $('admSuppName').value.trim(),
+    signName: $('memberSignName').value.trim(),
     memberPhoto: photo, memberIdImg: idImg,
-    idSubmitted: !!idImg, source: 'admission_form', orgId: ORG_ID, admittedAt: window.__admittedAt || (window.__admittedAt = new Date().toISOString())
+    idSubmitted: !!idImg, source: 'admission_form', admittedAt: new Date().toISOString()
   };
-  window.__rec = rec;
+
+  lastSubmittedRecord = rec;
 
   let savedLocal = false;
-  try { lsUpsert(rec); savedLocal = true; }
-  catch (e) { try { lsUpsert(Object.assign({}, rec, { memberPhoto: '', memberIdImg: '' })); savedLocal = true; } catch (e2) {} }
-  let cloudMsg = '';
+  const putLocal = r => ['5bfc_admissions', '5BFC_MEMBERS'].forEach(k => {
+    let arr = []; try { arr = JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) {}
+    if (!Array.isArray(arr)) arr = [];
+    arr = arr.filter(x => String(x.id) !== String(r.id));
+    arr.push(r);
+    localStorage.setItem(k, JSON.stringify(arr));
+  });
+  try { putLocal(rec); savedLocal = true; }
+  catch (e) { try { const slim = Object.assign({}, rec, { memberPhoto: '', memberIdImg: '' }); putLocal(slim); savedLocal = true; } catch (e2) {} }
+
   try {
     if (typeof db !== 'undefined') {
-      await db.collection('admissions').doc(rec.id).set(Object.assign({}, rec, { memberPhoto: '', memberIdImg: '', imported: false }));
-      cloudMsg = '☁️ Cloud में भी save हो गया।';
+      const cloudRec = Object.assign({}, rec, { memberPhoto: '', memberIdImg: '', imported: false });
+      await db.collection('admissions').doc(rec.id).set(cloudRec);
     }
-  } catch (e) { cloudMsg = '⚠️ Cloud में save नहीं हुआ (' + (e.code || e.message || 'error') + ') — सिर्फ इसी फोन में save है।'; }
-  btn.disabled = false; btn.textContent = window.__editing ? '🚀 अपडेट सेव करें' : '🚀 फॉर्म सबमिट करें व PDF पाएँ';
-  if (!savedLocal) { alert('❌ Save नहीं हो पाया (फोन की memory full)। फोटो हटाकर दोबारा try करें।'); return; }
-  showResult(rec, cloudMsg);
+  } catch (e) {}
+
+  if (btn) { btn.disabled = false; btn.textContent = '🚀 Submit Form & View Receipt'; }
+  openReceiptModal(rec);
 }
 
-/* ===================== result screen + actions ===================== */
-async function showResult(rec, cloudMsg) {
-  const rs = byId('resultScreen'); rs.classList.add('open'); rs.scrollTop = 0;
-  byId('resBusy').style.display = 'block'; byId('resActions').style.display = 'none'; byId('resPrev').innerHTML = '';
-  byId('resTitle').textContent = window.__editing ? 'अपडेट हो गया!' : 'एडमिशन फॉर्म तैयार!';
-  byId('resSub').textContent = rec.name + ' · ' + rec.memberId + ' · ' + rec.planName;
-  byId('resMsg').textContent = cloudMsg || '';
-  byId('btnToOwner').style.display = rec.filledBy === 'staff' ? 'block' : 'none';
-  try {
-    await generateFiles(rec);
-    byId('resPrev').innerHTML = window.__files.pages.map(u => '<img src="' + u + '" alt="form page"/>').join('');
-    byId('resActions').style.display = 'block';
-  } catch (e) {
-    console.error(e);
-    byId('resMsg').style.color = '#ff9090';
-    byId('resMsg').textContent = '⚠️ PDF नहीं बन पाया (' + (e.message || e) + '). Print बटन से दोबारा कोशिश करें।';
-    byId('resActions').style.display = 'block';
-  }
-  byId('resBusy').style.display = 'none';
-}
-function saveBlob(blob, name) {
-  const u = URL.createObjectURL(blob), a = document.createElement('a');
-  a.href = u; a.download = name; document.body.appendChild(a); a.click();
-  setTimeout(() => { URL.revokeObjectURL(u); a.remove(); }, 1500);
-}
-function downloadPdf() { if (window.__files) saveBlob(window.__files.pdf, window.__files.base + '.pdf'); }
-function downloadImage() { if (window.__files) saveBlob(window.__files.img, window.__files.base + '.jpg'); }
-function downloadQr() {
-  if (!window.__qrUrl) { alert('QR उपलब्ध नहीं है।'); return; }
-  const a = document.createElement('a'); a.href = window.__qrUrl; a.download = 'QR-' + (window.__rec.memberId || 'member') + '.png'; document.body.appendChild(a); a.click(); a.remove();
-}
-function printForm() {
-  if (!window.__files) return;
-  const w = window.open('', '_blank'); if (!w) { alert('Pop-up allow करें।'); return; }
-  w.document.open(); w.document.write(window.__files.html); w.document.close();
-}
-async function shareFiles(files, text, title) {
-  try {
-    if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files, text, title }); return true; }
-  } catch (e) { if (e && e.name === 'AbortError') return true; }
-  return false;
-}
-function summaryText(rec) {
-  return `${orgName()} — ${rec.filledBy === 'staff' ? 'नया एडमिशन (स्टाफ द्वारा)' : 'एडमिशन फॉर्म'}\nनाम: ${rec.name}\nMember ID: ${rec.memberId}\nमोबाइल: ${rec.phone}\nप्लान: ${rec.planName} (₹${rec.planBase})\nबैच: ${rec.batch}` + (rec.filledBy === 'staff' ? `\nभरने वाला स्टाफ: ${rec.staffName}` : '');
-}
-async function shareMemberCopy() {
-  const rec = window.__rec, f = window.__files; if (!f) return;
-  const file = new File([f.pdf], f.base + '.pdf', { type: 'application/pdf' });
-  if (await shareFiles([file], summaryText(rec), orgName())) return;
-  downloadPdf();
-  window.open('https://wa.me/91' + rec.phone + '?text=' + encodeURIComponent(summaryText(rec) + '\n\n(फॉर्म PDF डाउनलोड हो गया है — इसे यहाँ attach करके भेजें)'), '_blank');
-}
-function ownerPhone() { const d = String(dynamicOrgData.phone || '').replace(/\D/g, ''); return d.length >= 10 ? d.slice(-10) : ''; }
-async function sendToOwner() {
-  const rec = window.__rec, f = window.__files; if (!f) return;
-  const file = new File([f.pdf], f.base + '.pdf', { type: 'application/pdf' });
-  if (await shareFiles([file], summaryText(rec), orgName())) return;
-  downloadPdf();
-  const op = ownerPhone();
-  window.open('https://wa.me/' + (op ? '91' + op : '') + '?text=' + encodeURIComponent(summaryText(rec) + '\n\n(फॉर्म PDF डाउनलोड हो गया है — इसे यहाँ attach करके भेजें)'), '_blank');
-}
-function editAdmission() {
-  window.__editing = true;
-  byId('resultScreen').classList.remove('open');
-  byId('btnSubmitForm').textContent = '🚀 अपडेट सेव करें';
-  goToStep(1);
-}
-async function approveAdmission() {
-  const rec = window.__rec; if (!rec) return;
-  if (typeof bfcLogin === 'function') { const ok = await bfcLogin(); if (!ok) return; }
-  rec.approved = true; rec.approvedAt = new Date().toISOString();
-  try { lsUpsert(rec); } catch (e) {}
-  let msg = '✅ Approve हो गया।';
-  try { if (typeof db !== 'undefined') await db.collection('admissions').doc(rec.id).set({ approved: true, approvedAt: rec.approvedAt }, { merge: true }); }
-  catch (e) { msg += ' (Cloud update नहीं हुआ: ' + (e.code || e.message) + ')'; }
-  byId('resMsg').style.color = 'var(--ok)'; byId('resMsg').textContent = msg;
-  try { await generateFiles(rec); } catch (e) {}
-}
-async function deleteAdmission() {
-  const rec = window.__rec; if (!rec) return;
-  if (rec.approved && typeof bfcLogin === 'function') { const ok = await bfcLogin(); if (!ok) return; }
-  if (!confirm('🗑 क्या आप ' + rec.name + ' का यह एडमिशन फॉर्म डिलीट करना चाहते हैं?')) return;
-  lsRemove(rec.id);
-  let msg = 'डिलीट हो गया।';
-  try { if (typeof db !== 'undefined') await db.collection('admissions').doc(rec.id).delete(); } catch (e) { msg += '\n(Cloud से हटाना नहीं हो पाया: ' + (e.code || e.message) + ')'; }
-  alert(msg); location.reload();
+function openReceiptModal(rec) {
+  document.getElementById('rcId').textContent = rec.id;
+  document.getElementById('rcDate').textContent = rec.joinDate;
+  document.getElementById('rcName').textContent = rec.name;
+  document.getElementById('rcGuardian').textContent = rec.guardian + (rec.marital === 'Married' && rec.gender === 'Female' ? ' (पति)' : '');
+  document.getElementById('rcPhone').textContent = rec.phone;
+  document.getElementById('rcEmergency').textContent = (rec.emergencyName ? rec.emergencyName + ' - ' : '') + rec.emergencyPhone;
+  document.getElementById('rcPlan').textContent = rec.planName + ' (₹' + rec.planBase + ' - ' + rec.status + ')';
+  document.getElementById('rcBatch').textContent = rec.batch;
+
+  const qb = document.getElementById('rcQrBox');
+  qb.innerHTML = '';
+  new QRCode(qb, { text: rec.attendanceId, width: 100, height: 100 });
+
+  document.getElementById('receiptModal').style.display = 'flex';
 }
 
+function downloadReceiptImage() {
+  const card = document.getElementById('printableReceiptArea');
+  html2canvas(card, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'Admission_Card_' + (lastSubmittedRecord ? lastSubmittedRecord.name : 'Member') + '.png';
+    a.click();
+  });
+}
+
+function sendReceiptToCustomerWhatsApp() {
+  if (!lastSubmittedRecord) return;
+  const r = lastSubmittedRecord;
+  const txt = `🏋️ *5 BROTHER'S FITNESS CLUB*
+*Official Admission Card*
+━━━━━━━━━━━━━━━━━━━━
+👤 *नाम:* ${r.name}
+📞 *मोबाइल:* ${r.phone}
+📦 *प्लान:* ${r.planName} (₹${r.planBase})
+⏰ *बैच:* ${r.batch}
+📅 *जॉइनिंग:* ${r.joinDate}
+🆔 *Member ID:* ${r.attendanceId}
+━━━━━━━━━━━━━━━━━━━━
+📍 उमराव खेड़ा, अकरमपुर, उन्नाव`;
+  window.open(`https://wa.me/91${r.phone}?text=` + encodeURIComponent(txt), '_blank');
+}
+
+function sendReceiptToOwnerWhatsApp() {
+  if (!lastSubmittedRecord) return;
+  const r = lastSubmittedRecord;
+  const txt = `🔔 *New Member Admission (Staff Alert)*
+━━━━━━━━━━━━━━━━━━━━
+👤 *नाम:* ${r.name}
+👫 *लिंग/वैवाहिक:* ${r.gender} / ${r.marital}
+🛡️ *अभिभावक/पति:* ${r.guardian}
+📞 *मोबाइल:* ${r.phone}
+🆘 *आपातकालीन:* ${r.emergencyName} (${r.emergencyPhone})
+📦 *प्लान:* ${r.planName} (₹${r.planBase})
+⏰ *बैच:* ${r.batch}
+📅 *जॉइनिंग:* ${r.joinDate}
+━━━━━━━━━━━━━━━━━━━━
+📍 5 Brother's Fitness Club, Unnao`;
+  window.open(`https://wa.me/919990954574?text=` + encodeURIComponent(txt), '_blank');
+}
+
+function finishAdmissionDone() {
+  document.getElementById('receiptModal').style.display = 'none';
+  location.reload();
+}
 </script>
 </body>
 </html>
