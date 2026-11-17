@@ -1,14 +1,5 @@
-/* Small service worker: lets the card be installed and keeps the last page shell available offline. Data is always live. */
-var C = "orgdesk-v6";
-var SHELL = ["./index.html", "./manifest-app.json", "./card.html", "./pay.html", "./join.html", "./admin.html", "./setup.html", "./ui.css", "./core.js", "./templates.js", "./form.js", "./admform.js", "./receipt.js", "./admin.js", "./firebase-config.js", "./manifest.json"];
-self.addEventListener("install", function (e) {
-  e.waitUntil(caches.open(C).then(function (c) { return Promise.all(SHELL.map(function (u) { return c.add(u).catch(function () {}); })); }).then(function () { return self.skipWaiting(); }));
-});
-self.addEventListener("activate", function (e) {
-  e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k !== C; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); }));
-});
-self.addEventListener("fetch", function (e) {
-  var r = e.request;
-  if (r.method !== "GET" || new URL(r.url).origin !== location.origin) return;
-  e.respondWith(fetch(r).then(function (res) { var cp = res.clone(); caches.open(C).then(function (c) { c.put(r, cp); }).catch(function () {}); return res; }).catch(function () { return caches.match(r, { ignoreSearch: true }); }));
-});
+const C="gym-manager-v2",FILES=["./","index.html","join.html","manifest.json","icon-192.png","icon-512.png"];
+self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(FILES)));self.skipWaiting()});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))));self.clients.claim()});
+self.addEventListener("fetch",e=>{const u=new URL(e.request.url);if(e.request.method!=="GET"||u.origin!==location.origin)return;
+e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(C).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match("index.html"))))});
