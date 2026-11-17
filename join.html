@@ -88,6 +88,13 @@
     <p class="admin-note">यहाँ से सेट की गई फीस, बैच और नियम दुनिया में कहीं से भी फॉर्म खोलने पर लागू होंगे।</p>
     
     <div style="background:#18181f; padding:10px; border-radius:8px; margin-bottom:10px;">
+      <label style="color:var(--ac); margin-bottom:6px;">🏢 आपकी जिम का नाम और विवरण (Gym Branding)</label>
+      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">जिम का नाम (Gym Name)</label><input type="text" id="cfgGymName" placeholder="उदा. 5 Brother's Fitness Club"></div>
+      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">पता (Address)</label><input type="text" id="cfgGymAddress" placeholder="उदा. Umrao Khera, Akrampur, Unnao"></div>
+      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">फोन नंबर (Phone)</label><input type="tel" id="cfgGymPhone" placeholder="उदा. 9140417259"></div>
+    </div>
+    
+    <div style="background:#18181f; padding:10px; border-radius:8px; margin-bottom:10px;">
       <label style="color:var(--ac); margin-bottom:6px;">📌 फॉर्म आवश्यकताएँ (Form Field Controls)</label>
       <div style="display:flex; flex-direction:column; gap:6px; font-size:11.5px;">
         <label><input type="checkbox" id="cfgReqEmergency" checked onchange="saveFormConfig()"> आपातकालीन संपर्क (Emergency Contact) अनिवार्य करें</label>
@@ -457,6 +464,7 @@
 let currentLang = 'hi';
 let selectedFitnessLevel = 'Beginner';
 let dynamicOrgData = { name: "5 Brother's Fitness Club", address: "Umrao Khera, Akrampur, Unnao", phone: "9140417259" };
+
 let defaultSettings = {
   fees: [
     { name: 'Regular - 1 Month', amount: '500' },
@@ -471,7 +479,10 @@ let defaultSettings = {
     { shift: 'Evening', start: '17:00', end: '19:00', label: '🌇 Evening 05:00 PM - 07:00 PM' }
   ],
   reqEmergency: true,
-  reqHealth: true
+  reqHealth: true,
+  gymName: "5 Brother's Fitness Club",
+  gymAddress: "Umrao Khera, Akrampur, Unnao",
+  gymPhone: "9140417259"
 };
 
 let adminSettings = defaultSettings;
@@ -482,11 +493,15 @@ try {
     if (Array.isArray(saved.batches) && saved.batches.length > 0) adminSettings.batches = saved.batches;
     if (saved.reqEmergency !== undefined) adminSettings.reqEmergency = saved.reqEmergency;
     if (saved.reqHealth !== undefined) adminSettings.reqHealth = saved.reqHealth;
+    if (saved.gymName) adminSettings.gymName = saved.gymName;
+    if (saved.gymAddress) adminSettings.gymAddress = saved.gymAddress;
+    if (saved.gymPhone) adminSettings.gymPhone = saved.gymPhone;
   }
 } catch (e) {
   adminSettings = defaultSettings;
 }
 
+const DEFAULT_FEE_NAMES = ['Regular - 1 Month', 'Regular - 3 Months', 'Regular - 6 Months', 'Regular - 12 Months', 'Student - 1 Month'];
 const SHIFT_ORDER = { Morning: 0, Afternoon: 1, Evening: 2 };
 const SHIFT_LABEL = { Morning: '🌅 Morning', Afternoon: '☀️ Afternoon', Evening: '🌇 Evening' };
 const SHIFT_DEFAULT = { Morning: ['06:00', '08:00'], Afternoon: ['12:00', '14:00'], Evening: ['17:00', '19:00'] };
@@ -520,6 +535,9 @@ function normalizeSettings(cfg) {
     cfg.batches.sort((a, b) => (SHIFT_ORDER[a.shift] || 0) - (SHIFT_ORDER[b.shift] || 0) || String(a.start || '').localeCompare(String(b.start || '')));
     cfg.reqEmergency = cfg.reqEmergency !== false;
     cfg.reqHealth = cfg.reqHealth !== false;
+    cfg.gymName = cfg.gymName || defaultSettings.gymName;
+    cfg.gymAddress = cfg.gymAddress || defaultSettings.gymAddress;
+    cfg.gymPhone = cfg.gymPhone || defaultSettings.gymPhone;
     return cfg;
   } catch (e) {
     return defaultSettings;
@@ -553,17 +571,6 @@ function catOf(f) {
 
 adminSettings = normalizeSettings(adminSettings);
 ensureDefaultFees();
-
-function updateGuardianLabel() {
-  const gender = document.getElementById('admGender').value;
-  const marital = document.getElementById('admMarital').value;
-  const lbl = document.getElementById('lblGuardianName');
-  if (gender === 'Female' && marital === 'Married') {
-    lbl.textContent = "पति का नाम (Husband Name) *";
-  } else {
-    lbl.textContent = "पिता / माता का नाम (Father / Mother Name) *";
-  }
-}
 
 const TRANSLATIONS = {
   hi: {
@@ -675,6 +682,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("admDateInput").value = new Date().toISOString().split("T")[0];
   renderAdminSettings();
   renderMemberOptions();
+  applyDynamicBranding();
   updateGuardianLabel();
 
   try {
@@ -715,6 +723,25 @@ async function toggleAdminPanel() {
 function saveFormConfig() {
   adminSettings.reqEmergency = document.getElementById('cfgReqEmergency').checked;
   adminSettings.reqHealth = document.getElementById('cfgReqHealth').checked;
+  adminSettings.gymName = document.getElementById('cfgGymName').value.trim() || "5 Brother's Fitness Club";
+  adminSettings.gymAddress = document.getElementById('cfgGymAddress').value.trim() || "Umrao Khera, Akrampur, Unnao";
+  adminSettings.gymPhone = document.getElementById('cfgGymPhone').value.trim() || "9140417259";
+}
+
+function applyDynamicBranding() {
+  const name = adminSettings.gymName || dynamicOrgData.name || "5 Brother's Fitness Club";
+  const addr = adminSettings.gymAddress || dynamicOrgData.address || "Umrao Khera, Akrampur, Unnao";
+  const ph = adminSettings.gymPhone || dynamicOrgData.phone || "9140417259";
+
+  document.getElementById("orgTopHeader").innerText = name.toUpperCase();
+  document.getElementById("orgNameHeader").innerText = name.toUpperCase();
+  document.getElementById("orgDetailsHeader").innerText = addr + (ph ? " | Ph: " + ph : "");
+
+  // Also update receipt card title & details
+  const rcTitle = document.querySelector('#printableReceiptArea div:first-child');
+  if (rcTitle) rcTitle.textContent = name.toUpperCase();
+  const rcSub = document.querySelector('#printableReceiptArea div:nth-child(2)');
+  if (rcSub) rcSub.textContent = addr + (ph ? " | Ph: " + ph : "");
 }
 
 function renderAdminSettings() {
@@ -723,6 +750,9 @@ function renderAdminSettings() {
   const batchList = document.getElementById('batchSettingsList');
   document.getElementById('cfgReqEmergency').checked = !!adminSettings.reqEmergency;
   document.getElementById('cfgReqHealth').checked = !!adminSettings.reqHealth;
+  document.getElementById('cfgGymName').value = adminSettings.gymName || "5 Brother's Fitness Club";
+  document.getElementById('cfgGymAddress').value = adminSettings.gymAddress || "Umrao Khera, Akrampur, Unnao";
+  document.getElementById('cfgGymPhone').value = adminSettings.gymPhone || "9140417259";
 
   feeList.innerHTML = '<div style="font-size:11px;color:#ccc;margin-bottom:4px;">सिर्फ़ रकम (₹) भरें:</div>' + adminSettings.fees.map((f, i) => {
     const def = DEFAULT_FEE_NAMES.includes(f.name);
@@ -797,6 +827,7 @@ function renderMemberOptions() {
     const single = categories.length <= 1;
     if (catField) { catField.style.display = single ? 'none' : ''; if (catField.parentElement) catField.parentElement.style.gridTemplateColumns = single ? '1fr' : ''; }
     categories.forEach(name => { const o = document.createElement('option'); o.value = name; o.textContent = name; cat.appendChild(o); });
+    if (categories.length > 0) cat.value = categories[0];
     updatePlanDurations();
     const slot = document.getElementById('admSlotSelect');
     if (slot) {
