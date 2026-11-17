@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Set up your organisation</title>
+<meta name="theme-color" content="#0b0b0d">
+<link rel="stylesheet" href="ui.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="core.js"></script>
+<script src="templates.js"></script>
+</head>
+<body style="padding-bottom:30px">
+<div class="top"><b id="brand">Setup</b><a href="admin.html" class="sub">Already registered? Sign in</a></div>
+<div class="wrap" id="root"></div>
+<script>
+(function () {
+  if (!window.G || !G.ok) return;
+  document.getElementById("brand").textContent = G.app.name + " — Setup";
+  var S = { step: 0, type: "", name: "", id: "", idOk: false, phone: "", address: "", upi: "", color: "#ffcc00", logo: "", plans: [], groups: [], terms: "", owner: "", email: "", pass: "" };
+  var STEPS = ["Organisation type", "Organisation details", "Fees & " + "groups", "Terms & conditions", "Admin account"];
+  var root = document.getElementById("root"), $ = function (id) { return document.getElementById(id); };
+  var tpl = function () { return ORG_TEMPLATES[S.type]; };
+
+  function bar() { return '<div class="steps">' + STEPS.map(function (s, i) { return '<i class="' + (i <= S.step ? "on" : "") + '"></i>'; }).join("") + '</div><div class="sub">Step ' + (S.step + 1) + " of " + STEPS.length + " — " + STEPS[S.step] + "</div>"; }
+  function nav(nextLbl) { return '<div class="row" style="margin-top:14px">' + (S.step > 0 ? '<button class="btn sec" id="bk">← Back</button>' : "") + '<button class="btn" id="nx">' + (nextLbl || "Continue →") + "</button></div>"; }
+  function err(msg) { var e = $("err"); if (e) { e.textContent = msg || ""; if (msg) e.scrollIntoView({ behavior: "smooth", block: "center" }); } return !msg; }
+
+  function view() {
+    var h = '<div class="hero"><div class="bigtitle">' + (S.step === 0 ? "Let's set up your organisation" : STEPS[S.step]) + '</div><p class="mut">' + (S.step === 0 ? "It takes about ten minutes. Choose your organisation type — all forms, fields, documents and terms will be prepared for you automatically." : "") + "</p></div>" + bar() + '<div class="card" style="margin-top:12px">';
+    if (S.step === 0) {
+      h += '<div class="pick">' + ORG_TYPES.map(function (k) { var t = ORG_TEMPLATES[k]; return '<div class="opt2 ' + (S.type === k ? "on" : "") + '" data-type="' + k + '"><span class="i">' + t.icon + "</span><div><b>" + G.esc(t.name) + '</b><span class="sub">' + G.esc(t.blurb) + "</span></div></div>"; }).join("") + "</div>";
+    } else if (S.step === 1) {
+      h += '<label>Organisation name <span class="req">*</span></label><input class="inp" id="name" maxlength="80" value="' + G.esc(S.name) + '">' +
+        '<label>Organisation ID (used in your links) <span class="req">*</span></label><input class="inp" id="oid" maxlength="30" value="' + G.esc(S.id) + '" autocapitalize="none"><div class="sub" id="oidMsg"></div>' +
+        '<label>Contact phone <span class="req">*</span></label><input class="inp" id="phone" type="tel" inputmode="numeric" maxlength="10" value="' + G.esc(S.phone) + '">' +
+        '<label>Address <span class="req">*</span></label><textarea class="inp" id="addr" maxlength="200">' + G.esc(S.address) + '</textarea>' +
+        '<label>UPI ID for fee collection (optional)</label><input class="inp" id="upi" maxlength="60" value="' + G.esc(S.upi) + '" placeholder="name@bank">' +
+        '<div class="grid2"><div><label>Brand colour</label><input class="inp" id="color" type="color" value="' + G.esc(S.color) + '" style="padding:4px;height:44px"></div><div><label>Logo (optional)</label><input class="inp" id="logo" type="file" accept="image/*"></div></div>' +
+        (G.img(S.logo) ? '<img src="' + S.logo + '" style="width:64px;height:64px;border-radius:12px;margin-top:8px;object-fit:cover">' : "");
+    } else if (S.step === 2) {
+      var t = tpl();
+      h += '<p class="mut">' + G.esc(t.planLabel) + 's — set the name, duration (months) and fee. You can change these later in Settings.</p>' +
+        '<div class="sub" style="display:grid;grid-template-columns:1.6fr 70px 90px 34px;gap:6px;margin:8px 0 4px"><span>Name</span><span>Months</span><span>Fee (₹)</span><span></span></div><div id="plans">' +
+        S.plans.map(function (p, i) { return '<div class="trow"><input class="inp" data-p="name" data-i="' + i + '" value="' + G.esc(p.name) + '" maxlength="60"><input class="inp" data-p="months" data-i="' + i + '" type="number" min="1" max="60" value="' + G.esc(p.months) + '"><input class="inp" data-p="price" data-i="' + i + '" type="number" min="0" value="' + G.esc(p.price) + '"><button class="xbtn" data-delp="' + i + '">×</button></div>'; }).join("") + '</div><button class="btn sec sm" id="addp" style="margin-top:4px">+ Add plan</button>' +
+        '<h3>' + G.esc(t.groupsLabel) + '</h3><p class="mut">' + (S.type === "gym" ? "Batch timings, e.g. Morning / Evening." : S.type === "school" ? "Classes you admit students into." : "Courses you offer.") + '</p><div id="groups">' +
+        S.groups.map(function (g, i) { return '<div class="trow g"><input class="inp" data-g="name" data-i="' + i + '" value="' + G.esc(g.name) + '" maxlength="60"><input class="inp" data-g="time" data-i="' + i + '" value="' + G.esc(g.time || "") + '" maxlength="40" placeholder="Timing (optional)"><button class="xbtn" data-delg="' + i + '">×</button></div>'; }).join("") + '</div><button class="btn sec sm" id="addg" style="margin-top:4px">+ Add ' + G.esc(t.groupLabel.toLowerCase()) + "</button>";
+    } else if (S.step === 3) {
+      h += '<p class="mut">These terms appear on every admission form and receipt. Edit them to match your rules — you can change them any time in Settings.</p><textarea class="inp" id="terms" style="min-height:300px" maxlength="6000">' + G.esc(S.terms) + "</textarea>";
+    } else {
+      h += '<p class="mut">This account has full access to your organisation. Use a strong password.</p>' +
+        '<label>Your name <span class="req">*</span></label><input class="inp" id="owner" maxlength="60" value="' + G.esc(S.owner) + '">' +
+        '<label>Email <span class="req">*</span></label><input class="inp" id="email" type="email" value="' + G.esc(S.email) + '" autocomplete="username">' +
+        '<label>Password (minimum 8 characters) <span class="req">*</span></label><input class="inp" id="pass" type="password" autocomplete="new-password">';
+    }
+    h += '<div class="err" id="err" style="margin-top:8px"></div>' + nav(S.step === 4 ? "Create my organisation" : "") + "</div>";
+    root.innerHTML = h; wire(); window.scrollTo(0, 0);
+  }
+
+  var idTimer;
+  function checkId() {
+    var v = G.slug($("oid").value); S.id = v; S.idOk = false;
+    var m = $("oidMsg"); if (v.length < 3) { m.textContent = "Use at least 3 letters or numbers."; return; }
+    m.textContent = "Checking…";
+    clearTimeout(idTimer);
+    idTimer = setTimeout(function () {
+      G.db.collection("orgs").doc(v).get().then(function (s) { if (S.id !== v) return; S.idOk = !s.exists; m.textContent = s.exists ? "✖ This ID is already taken. Please choose another." : "✔ Available — your link will contain \"" + v + "\""; m.style.color = s.exists ? "var(--bad)" : "var(--ok)"; }).catch(function () { m.textContent = "Could not check availability."; });
+    }, 350);
+  }
+
+  function wire() {
+    if ($("bk")) $("bk").onclick = function () { save(); S.step--; view(); };
+    $("nx").onclick = next;
+    [].forEach.call(root.querySelectorAll("[data-type]"), function (e) { e.onclick = function () { S.type = e.getAttribute("data-type"); var t = tpl(); S.plans = t.defaultPlans.map(function (p) { return { name: p.name, months: p.months, price: p.price }; }); S.groups = t.defaultGroups.map(function (g) { return { name: g.name, time: g.time || "" }; }); S.terms = t.terms; view(); }; });
+    if (S.step === 1) {
+      $("name").oninput = function () { if (!S.id || S.id === G.slug(S.name)) { $("oid").value = G.slug($("name").value); } S.name = $("name").value; checkId(); };
+      $("oid").oninput = checkId; if (S.id) checkId();
+      $("logo").onchange = function () { var f = $("logo").files[0]; if (!f) return; G.compress(f, 200, 200, 40000).then(function (u) { if (u) { S.logo = u; save(); view(); } else err("This image could not be read. Please choose another."); }); };
+    }
+    if (S.step === 2) {
+      root.oninput = function (e) { var t = e.target, i = +t.getAttribute("data-i"); if (t.getAttribute("data-p")) S.plans[i][t.getAttribute("data-p")] = t.value; if (t.getAttribute("data-g")) S.groups[i][t.getAttribute("data-g")] = t.value; };
+      root.onclick = function (e) {
+        var t = e.target;
+        if (t.getAttribute("data-delp") != null) { S.plans.splice(+t.getAttribute("data-delp"), 1); view(); }
+        if (t.getAttribute("data-delg") != null) { S.groups.splice(+t.getAttribute("data-delg"), 1); view(); }
+        if (t.id === "addp") { S.plans.push({ name: "", months: 1, price: "" }); view(); }
+        if (t.id === "addg") { S.groups.push({ name: "", time: "" }); view(); }
+      };
+    } else root.oninput = root.onclick = null;
+  }
+  function save() {
+    if (S.step === 1 && $("name")) { S.name = $("name").value.trim(); S.id = G.slug($("oid").value); S.phone = $("phone").value.trim(); S.address = $("addr").value.trim(); S.upi = $("upi").value.trim(); S.color = $("color").value; }
+    if (S.step === 3 && $("terms")) S.terms = $("terms").value;
+    if (S.step === 4 && $("owner")) { S.owner = $("owner").value.trim(); S.email = $("email").value.trim(); }
+  }
+  function next() {
+    save();
+    if (S.step === 0) { if (!S.type) return err("Please choose your organisation type."); }
+    if (S.step === 1) {
+      if (S.name.length < 3) return err("Enter your organisation name.");
+      if (S.id.length < 3) return err("Enter an organisation ID of at least 3 characters.");
+      if (!S.idOk) return err("Please choose an available organisation ID.");
+      if (!/^[6-9]\d{9}$/.test(S.phone)) return err("Enter a valid 10-digit contact number.");
+      if (S.address.length < 5) return err("Enter your address.");
+      if (S.upi && !/^[\w.\-]{2,}@[\w.\-]{2,}$/.test(S.upi)) return err("UPI ID looks invalid. Example: name@bank");
+    }
+    if (S.step === 2) {
+      if (!S.plans.length) return err("Add at least one plan.");
+      for (var i = 0; i < S.plans.length; i++) { var p = S.plans[i]; if (!String(p.name).trim() || !(Number(p.months) >= 1) || !(Number(p.price) > 0)) return err("Every plan needs a name, duration in months and a fee greater than zero."); }
+      for (var j = 0; j < S.groups.length; j++) if (!String(S.groups[j].name).trim()) return err("Every " + tpl().groupLabel.toLowerCase() + " needs a name — or remove the empty row.");
+    }
+    if (S.step === 3 && S.terms.trim().length < 20) return err("Please add your terms and conditions.");
+    if (S.step === 4) return create();
+    S.step++; view();
+  }
+
+  function create() {
+    if (S.owner.length < 2) return err("Enter your name.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(S.email)) return err("Enter a valid email address.");
+    S.pass = $("pass").value; if (S.pass.length < 8) return err("Password must be at least 8 characters.");
+    err(""); var b = $("nx"); b.disabled = true; b.textContent = "Creating…";
+    var cred = null;
+    G.auth.createUserWithEmailAndPassword(S.email, S.pass).then(function (c) {
+      cred = c; var uid = c.user.uid, t = tpl();
+      var org = {
+        name: S.name, type: S.type, ownerUid: uid, phone: S.phone, address: S.address, color: S.color, upiId: S.upi,
+        plans: S.plans.map(function (p) { return { id: G.rid(6), name: String(p.name).trim(), months: Math.round(Number(p.months)), price: Number(p.price) }; }),
+        groups: S.groups.map(function (g) { var o = { id: G.rid(6), name: String(g.name).trim() }; if (String(g.time || "").trim()) o.time = String(g.time).trim(); return o; }),
+        terms: S.terms.trim(), termsHi: t.termsHi || "", formLang: "both", langSwitch: true, termsVersion: 1, notice: "", receiptPrefix: "RC", codePrefix: t.codePrefix, createdAt: G.FV.serverTimestamp()
+      };
+      if (G.img(S.logo)) org.logo = S.logo;
+      var batch = G.db.batch();
+      batch.set(G.db.collection("orgs").doc(S.id), org);
+      batch.set(G.db.collection("users").doc(uid), { orgId: S.id, role: "owner", name: S.owner });
+      return batch.commit();
+    }).then(done).catch(function (e) {
+      if (cred && cred.user && cred.user.delete) { try { cred.user.delete(); } catch (x) {} }
+      b.disabled = false; b.textContent = "Create my organisation"; err(G.firebaseError(e));
+    });
+  }
+
+  function done() {
+    var t = tpl(), join = G.link("join.html", { o: S.id }), adm = G.link("admin.html", {});
+    root.innerHTML = '<div class="card ctr" style="margin-top:20px"><div style="font-size:48px">🎉</div><div class="bigtitle">' + G.esc(S.name) + ' is ready</div><p class="mut">Your ' + G.esc(t.name.toLowerCase()) + " has been set up. Share the admission link with " + G.esc(t.membersWord.toLowerCase()) + " — new applications will appear in your admin panel for verification.</p></div>" +
+      '<div class="card"><h3 style="margin-top:0">Admission link</h3><div class="ro" style="word-break:break-all;font-size:13px">' + G.esc(join) + '</div><div class="row" style="margin-top:8px"><button class="btn sec" id="c1">Copy link</button><a class="btn sec" target="_blank" rel="noopener" href="' + G.esc("https://wa.me/?text=" + encodeURIComponent("Apply for admission at " + S.name + ": " + join)) + '">Share on WhatsApp</a></div></div>' +
+      '<a class="btn" href="admin.html">Open Admin Panel →</a>';
+    $("c1").onclick = function () { try { navigator.clipboard.writeText(join); G.toast("Link copied"); } catch (e) { prompt("Copy this link:", join); } };
+    window.scrollTo(0, 0);
+  }
+  view();
+})();
+</script>
+</body>
+</html>

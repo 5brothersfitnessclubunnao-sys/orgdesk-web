@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Member Card</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b0b0d">
+<link rel="stylesheet" href="ui.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="core.js"></script>
+<script src="templates.js"></script>
+</head>
+<body style="padding-bottom:30px">
+<div class="top"><img id="oLogo" class="logo hide" alt=""><b id="oName">Member Card</b><button class="btn sm hide" id="installBtn" style="width:auto" onclick="G.install()">Install</button></div>
+<div class="wrap" id="root"><div class="card ctr mut">Loading…</div></div>
+<script>
+(function () {
+  if (!window.G || !G.ok) return;
+  var oid = G.qs("o").toLowerCase(), mid = G.qs("m"), $ = function (id) { return document.getElementById(id); }, root = $("root");
+  if (!oid || !mid) { try { var l = JSON.parse(localStorage.getItem("org_card") || localStorage.getItem("org_last") || "null"); if (l && l.o && l.m) { oid = l.o; mid = l.m; } } catch (e) {} }
+  function msg(icon, title, text, extra) { root.innerHTML = '<div class="card ctr"><div style="font-size:44px">' + icon + "</div><h2>" + G.esc(title) + '</h2><p class="mut">' + G.esc(text) + "</p>" + (extra || "") + "</div>"; }
+  if (!oid || !mid) return msg("⚠️", "Card not found", "Please open the card link you received after submitting your application.");
+  var base = G.db.collection("orgs").doc(oid);
+  Promise.all([base.get(), base.collection("cards").doc(mid).get()]).then(function (r) {
+    if (!r[0].exists) return msg("⚠️", "Organisation not found", "This link is not valid.");
+    var org = r[0].data(), tpl = ORG_TEMPLATES[org.type] || ORG_TEMPLATES.gym; G.theme(org);
+    $("oName").textContent = org.name || "Member Card"; document.title = (org.name || "") + " — " + tpl.memberWord + " Card";
+    if (G.img(org.logo)) { $("oLogo").src = org.logo; $("oLogo").classList.remove("hide"); }
+    try { localStorage.setItem("org_card", JSON.stringify({ o: oid, m: mid })); } catch (e) {}
+    G.pwa();
+    if (!r[1].exists) return msg("⏳", "Application under review", "Your application has been received and is awaiting verification by " + (org.name || "the organisation") + ". Please check back later.", '<button class="btn sec" style="margin-top:12px" onclick="location.reload()">Refresh status</button>');
+    var c = r[1].data();
+    if (c.status === "denied") return msg("✖", "Application not approved", c.reason || "Please contact the organisation for details.");
+    show(org, tpl, c);
+  }).catch(function () { msg("⚠️", "Unable to load", "Please check your internet connection and try again."); });
+
+  function show(org, tpl, c) {
+    var left = G.daysLeft(c.expiry), expired = left != null && left < 0, soon = !expired && left != null && left <= 7;
+    var chip = expired ? '<span class="chip bad">EXPIRED</span>' : soon ? '<span class="chip warn">EXPIRING</span>' : '<span class="chip ok">ACTIVE</span>';
+    var h = '<div class="idcard"><div class="st">' + chip + '</div><div style="display:flex;gap:14px;align-items:center;margin-top:18px">' +
+      (G.img(c.thumb) ? '<img class="ph" alt="" src="' + c.thumb + '">' : '<div class="ph" style="display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--ac)">' + G.esc((c.name || "?").charAt(0)) + "</div>") +
+      '<div style="min-width:0"><div class="sub">' + G.esc(tpl.memberWord.toUpperCase()) + ' CARD</div><div style="font-size:20px;font-weight:800;word-break:break-word">' + G.esc(c.name) + '</div><div style="color:var(--ac);font-weight:800;letter-spacing:1px">' + G.esc(c.code) + "</div></div></div>" +
+      '<div style="margin-top:14px"><div class="kv"><span>' + G.esc(tpl.planLabel) + "</span><b>" + G.esc(c.planName) + "</b></div>" + (c.batchName ? '<div class="kv"><span>' + G.esc(tpl.groupLabel) + "</span><b>" + G.esc(c.batchName) + "</b></div>" : "") + '<div class="kv"><span>Valid till</span><b>' + G.esc(G.fmt(c.expiry)) + "</b></div></div></div>";
+    h += '<div class="card" style="margin-top:12px"><div class="kv" style="border:0"><span>Validity</span><b>' + (expired ? "Expired " + Math.abs(left) + " day(s) ago — please renew" : left + " day(s) remaining") + "</b></div></div>";
+    if (org.notice) h += '<div class="card"><h3 style="margin-top:0">Notice</h3><p>' + G.esc(org.notice) + "</p></div>";
+    if (!expired) h += '<button class="btn ok" id="att" style="margin-top:6px">✔ Mark my attendance</button><div class="sub ctr" id="attMsg" style="margin-top:8px"></div>';
+    else if (org.phone) h += '<a class="btn" href="tel:' + G.esc(G.ph10(org.phone)) + '">📞 Call ' + G.esc(org.name) + " to renew</a>";
+    h += '<a class="btn' + (expired ? "" : " sec") + '" style="margin-top:8px" href="' + G.esc(G.link("pay.html", { o: oid, m: mid })) + '">💳 Pay / Renew fee' + (G.num(c.refCredit) > 0 ? " (credit " + G.esc(G.money(c.refCredit)) + ")" : "") + "</a>";
+    root.innerHTML = h;
+    var b = $("att"); if (!b) return;
+    var key = "att_" + G.today() + "_" + mid, m = $("attMsg");
+    try { if (localStorage.getItem(key)) { b.disabled = true; m.textContent = "Attendance already marked today."; } } catch (e) {}
+    b.onclick = function () {
+      b.disabled = true; b.textContent = "Marking…";
+      var d = new Date(), t = (d.getHours() < 10 ? "0" : "") + d.getHours() + ":" + (d.getMinutes() < 10 ? "0" : "") + d.getMinutes();
+      base.collection("attendance").doc(G.today() + "_" + mid).set({ memberId: mid, name: c.name, date: G.today(), time: t, ts: G.FV.serverTimestamp(), batch: c.batchName || "", by: "member" }).then(function () {
+        try { localStorage.setItem(key, "1"); } catch (e) {} b.textContent = "✔ Attendance marked"; m.textContent = "Marked at " + t + ".";
+      }).catch(function () { b.disabled = false; b.textContent = "✔ Mark my attendance"; m.textContent = "Could not mark attendance. It may already be marked for today, or your membership is not active."; });
+    };
+  }
+})();
+</script>
+</body>
+</html>
