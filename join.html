@@ -852,6 +852,20 @@ function searchUniversalAreas() {
 }
 
 function previewImage(input, previewId) {
+  if (input.id === 'memberPhotoFile' || input.id === 'memberIdFile') {
+    const isPhoto = input.id === 'memberPhotoFile', key = isPhoto ? '__photoData' : '__idData';
+    window[key] = ''; window[isPhoto ? '__photoKept' : '__idKept'] = false;
+    let st = document.getElementById(input.id + 'St');
+    if (!st) { st = document.createElement('div'); st.id = input.id + 'St'; st.style.cssText = 'font-size:11px;margin-top:4px;font-weight:bold'; input.parentNode.appendChild(st); }
+    if (input.files && input.files[0]) {
+      st.style.color = '#ffcc00'; st.textContent = '⏳ फोटो तैयार हो रही है…';
+      fileToDataUrl(input.files[0], isPhoto ? 320 : 800, isPhoto ? 0.7 : 0.6).then(u => {
+        window[key] = u;
+        if (u) { st.style.color = '#00ff66'; st.textContent = '✅ फोटो तैयार है'; }
+        else { st.style.color = '#ff6666'; st.textContent = '⚠️ फोटो पढ़ नहीं पाई — कोई दूसरी फोटो चुनें (JPG/PNG)'; }
+      });
+    } else st.textContent = '';
+  }
   if (input.files && input.files[0]) {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -871,21 +885,23 @@ function togglePayMode() {
 function fileToDataUrl(file, maxW, q) {
   return new Promise(res => {
     if (!file) return res('');
-    const r = new FileReader();
-    r.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        const sc = Math.min(1, maxW / img.width);
-        const c = document.createElement('canvas');
-        c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        res(c.toDataURL('image/jpeg', q));
-      };
-      img.onerror = () => res('');
-      img.src = e.target.result;
+    const draw = (src, w, h) => {
+      try {
+        const sc = Math.min(1, maxW / w), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(w * sc)); c.height = Math.max(1, Math.round(h * sc));
+        c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+        const u = c.toDataURL('image/jpeg', q); return (u && u.length > 200) ? u : '';
+      } catch (e) { return ''; }
     };
-    r.onerror = () => res('');
-    r.readAsDataURL(file);
+    const viaRaw = () => res('');   // undecodable (e.g. HEIC / corrupt) -> report, never save garbage
+    const viaBitmap = () => {
+      if (!window.createImageBitmap) return viaRaw();
+      createImageBitmap(file).then(b => { const u = draw(b, b.width, b.height); u ? res(u) : viaRaw(); }).catch(viaRaw);
+    };
+    const u = URL.createObjectURL(file), im = new Image();
+    im.onload = () => { const d = draw(im, im.naturalWidth || im.width, im.naturalHeight || im.height); URL.revokeObjectURL(u); d ? res(d) : viaBitmap(); };
+    im.onerror = () => { URL.revokeObjectURL(u); viaBitmap(); };
+    im.src = u;
   });
 }
 /* ===================== NEW: org id, rules, gender, emergency, filled-by ===================== */
@@ -1195,8 +1211,10 @@ async function submitAdmissionForm() {
   const [feeName, feeAmtRaw] = byId('admDurationSelect').value.split('|');
   const feeAmt = Number(feeAmtRaw) || 0;
   const joinDate = byId('admDateInput').value || new Date().toISOString().slice(0, 10);
-  const photo = await fileToDataUrl(byId('memberPhotoFile').files[0], 320, 0.7);
-  const idImg = await fileToDataUrl(byId('memberIdFile').files[0], 800, 0.6);
+  const photo = window.__photoData || await fileToDataUrl(byId('memberPhotoFile').files[0], 320, 0.7);
+  const idImg = window.__idData || await fileToDataUrl(byId('memberIdFile').files[0], 800, 0.6);
+  if (!photo && !window.__photoKept) { alert('📸 सदस्य की फोटो पढ़ नहीं पाई। कृपया फोटो दोबारा चुनें (कैमरा या गैलरी से)।'); goToStep(5); return; }
+  if (!idImg && !window.__idKept) { alert('🪪 पहचान पत्र की फोटो पढ़ नहीं पाई। कृपया दोबारा चुनें।'); goToStep(5); return; }
   if (!window.__admId) window.__admId = 'adm' + Date.now();
   const area = v('unnaoAreaInput'), pin = v('memberPincode');
   const husband = isHusband();
