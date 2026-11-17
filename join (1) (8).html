@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 Brother's Fitness Club - Universal Digital Admission Form</title>
+  <!-- Firebase App & Firestore SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="auth-gate.js" data-mode="ondemand"></script>
+  <script src="tg-notify.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    window.__esc = function(v){ return String(v==null?"":v).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] }); };
+    window.__csv = function(v){ var s = String(v==null?"":v).replace(/"/g,'""'); return /^[=+\-@	
+]/.test(s) ? "'"+s : s; };
+  </script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
+      authDomain: "bfc-gym-215ae.firebaseapp.com",
+      projectId: "bfc-gym-215ae",
+      storageBucket: "bfc-gym-215ae.firebasestorage.app",
+      messagingSenderId: "886920088571",
+      appId: "1:886920088571:web:c4bc478d246a2700b0d95e"
+    };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.firestore();
+  </script>
+  <style>
+    :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; --err: #e74c3c; }
+    body { background: var(--bg); color: var(--tx); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 12px; }
+    .box { max-width: 520px; margin: 0 auto; background: var(--card); border: 2px solid var(--ac); border-radius: 16px; padding: 16px; box-sizing: border-box; box-shadow: 0 0 25px rgba(255,204,0,0.15); }
+    .step-box { display: none; margin-top: 10px; }
+    .step-box.active { display: block; }
+    .field { margin-bottom: 12px; }
+    label { display: block; font-size: 11px; color: #ccc; margin-bottom: 4px; font-weight: 600; }
+    input, select, textarea { width: 100%; background: #0b0b0d; border: 1.5px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; box-sizing: border-box; outline: none; }
+    input:focus, select:focus { border-color: var(--ac); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px; }
+    .tap-card { background: #111; border: 1.5px solid var(--border); color: #aaa; padding: 12px 6px; text-align: center; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .tap-card.selected { background: rgba(255,204,0,0.15); border-color: var(--ac); color: var(--ac); }
+    .btn-main { width: 100%; background: var(--ac); color: #000; font-weight: 900; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; margin-top: 10px; }
+    .btn-sec { background: #333; color: #fff; font-weight: bold; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; }
+    .lang-bar { display: flex; justify-content: flex-end; gap: 6px; margin-bottom: 8px; }
+    .lang-btn { background: #222; border: 1px solid var(--border); color: #aaa; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; }
+    .lang-btn.active { background: var(--ac); color: #000; border-color: var(--ac); }
+    .admin-toggle { display:block; width:100%; background:#202025; color:var(--ac); border:1px solid var(--border); padding:9px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:800; margin:10px 0; }
+    .admin-panel { display:none; background:#101014; border:1px solid var(--ac); border-radius:10px; padding:10px; margin-bottom:12px; }
+    .admin-panel.open { display:block; }
+    .admin-panel h3 { color:var(--ac); font-size:13px; margin:0 0 8px; }
+    .admin-note { color:var(--mut); font-size:10px; line-height:1.4; margin:0 0 10px; }
+    .settings-row { display:grid; grid-template-columns:1.2fr .8fr auto; gap:6px; align-items:center; margin:6px 0; }
+    .settings-row input { padding:8px; font-size:11px; }
+    .danger-btn { background:#512027; color:#ffb3b3; border:1px solid #a8414d; border-radius:6px; padding:7px 8px; cursor:pointer; font-size:11px; }
+    .small-btn { background:var(--ac); color:#000; border:0; border-radius:6px; padding:8px 10px; cursor:pointer; font-weight:800; font-size:11px; }
+    .empty-state { color:var(--mut); font-size:11px; padding:8px 0; }
+    .batch-builder { background:#0b0b0d; border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:10px; }
+    .shift-tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px; }
+    .shift-tab { background:#111; border:1.5px solid var(--border); color:#aaa; padding:9px 4px; text-align:center; border-radius:8px; font-size:11.5px; font-weight:800; cursor:pointer; }
+    .shift-tab.sel { background:rgba(255,204,0,0.15); border-color:var(--ac); color:var(--ac); }
+    .batch-item { display:flex; align-items:center; justify-content:space-between; gap:8px; background:#111; border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin:6px 0; font-size:12px; color:#fff; }
+    .batch-item b { color:var(--ac); }
+    
+    /* Receipt Modal */
+    #receiptModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:999999; justify-content:center; align-items:flex-start; padding:12px; overflow-y:auto; }
+    .receipt-card { background:#fff; color:#000; border-radius:12px; padding:16px; width:100%; max-width:440px; margin:20px auto; position:relative; box-shadow:0 0 30px rgba(0,0,0,0.8); }
+    .receipt-header { text-align:center; border-bottom:2px dashed #000; padding-bottom:8px; margin-bottom:10px; }
+    .r-row { display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:5px; border-bottom:1px dotted #ccc; padding-bottom:3px; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div style="max-width:520px; margin:0 auto 10px; display:flex; justify-content:space-between; align-items:center; background:#111; border:1px solid var(--ac); padding:10px 14px; border-radius:8px;">
+  <a href="index.html" style="background:var(--ac); color:#000; text-decoration:none; font-weight:bold; font-size:12px; padding:6px 12px; border-radius:6px;">⬅️ Home</a>
+  <span style="color:var(--ac); font-size:12px; font-weight:900;" id="orgTopHeader">ORGDESK PORTAL</span>
+</div>
+
+<div style="max-width:520px; margin:0 auto;">
+  <button type="button" class="admin-toggle" onclick="toggleAdminPanel()">⚙️ Admin Settings — फीस, बैच और फॉर्म आवश्यकताएँ manage करें</button>
+  <div id="adminPanel" class="admin-panel">
+    <h3>Admin Settings (Global Cloud Sync)</h3>
+    <p class="admin-note">यहाँ से सेट की गई फीस, बैच और नियम दुनिया में कहीं से भी फॉर्म खोलने पर लागू होंगे।</p>
+    
+    <div style="background:#18181f; padding:10px; border-radius:8px; margin-bottom:10px;">
+      <label style="color:var(--ac); margin-bottom:6px;">📌 फॉर्म आवश्यकताएँ (Form Field Controls)</label>
+      <div style="display:flex; flex-direction:column; gap:6px; font-size:11.5px;">
+        <label><input type="checkbox" id="cfgReqEmergency" checked onchange="saveFormConfig()"> आपातकालीन संपर्क (Emergency Contact) अनिवार्य करें</label>
+        <label><input type="checkbox" id="cfgReqHealth" onchange="saveFormConfig()"> स्वास्थ्य घोषणा (Health Screening PAR-Q) अनिवार्य करें</label>
+      </div>
+    </div>
+
+    <div id="feeSettingsList"></div>
+    <button type="button" class="small-btn" onclick="addFeeSetting()">+ Fee option जोड़ें</button>
+    <hr style="border:0;border-top:1px solid var(--border);margin:12px 0;">
+    <h3>⏰ Batch timings</h3>
+    <div class="batch-builder">
+      <label>1) Shift चुनें</label>
+      <div class="shift-tabs">
+        <div class="shift-tab sel" id="shiftTabMorning" onclick="pickShift('Morning')">🌅 Morning<br><span style="font-weight:400;font-size:10px;">सुबह</span></div>
+        <div class="shift-tab" id="shiftTabAfternoon" onclick="pickShift('Afternoon')">☀️ Afternoon<br><span style="font-weight:400;font-size:10px;">दोपहर</span></div>
+        <div class="shift-tab" id="shiftTabEvening" onclick="pickShift('Evening')">🌇 Evening<br><span style="font-weight:400;font-size:10px;">शाम</span></div>
+      </div>
+      <label>2) Time चुनें</label>
+      <div class="row">
+        <div class="field" style="margin-bottom:8px;"><label style="color:#888;">से (Start)</label><input type="time" id="bStart" value="06:00"></div>
+        <div class="field" style="margin-bottom:8px;"><label style="color:#888;">तक (End)</label><input type="time" id="bEnd" value="08:00"></div>
+      </div>
+      <button type="button" class="small-btn" style="width:100%; padding:10px;" onclick="addBatchFromBuilder()">➕ Batch Add करें</button>
+    </div>
+    <div style="font-size:11px; color:#ccc; margin-bottom:4px;">अभी के Batches:</div>
+    <div id="batchSettingsList"></div>
+    <div id="batchStatus" style="font-size:11px; color:var(--ok); margin:6px 0;"></div>
+    <button type="button" class="btn-main" style="margin-top:10px;" onclick="saveAdminSettings()">Save All Settings ☁️</button>
+    <div id="adminSaveStatus" style="font-size:11px;color:var(--ok);margin-top:7px;"></div>
+  </div>
+</div>
+
+<div class="box">
+  <div class="lang-bar">
+    <button type="button" class="lang-btn active" id="langHiBtn" onclick="setLanguage('hi')">हिंदी (Devanagari)</button>
+    <button type="button" class="lang-btn" id="langEnBtn" onclick="setLanguage('en')">English</button>
+  </div>
+
+  <div style="text-align:center; border-bottom:1.5px dashed var(--border); padding-bottom:8px; margin-bottom:12px;">
+    <h2 style="color:var(--ac); margin:0; font-size:16px;" id="orgNameHeader">5 BROTHER'S FITNESS CLUB</h2>
+    <p style="color:var(--mut); font-size:10.5px; margin:3px 0 0;" id="orgDetailsHeader">Umrao Khera, Akrampur, Unnao | Digital Registration</p>
+  </div>
+
+  <!-- STEP 1: PLAN & BATCH -->
+  <div id="stepBox1" class="step-box active">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:10px;" id="tStep1">1. Plan, Batch & Joining Date</div>
+    
+    <div class="field">
+      <label id="lblJoinDate">📅 प्रवेश तिथि (Joining Date) *</label>
+      <input type="date" id="admDateInput">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblCategory">श्रेणी (Category) *</label>
+        <select id="admCategorySelect" onchange="updatePlanDurations()"></select>
+      </div>
+      <div class="field">
+        <label id="lblDuration">अवधि (Duration) *</label>
+        <select id="admDurationSelect" onchange="calculateAdmissionFee()"></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="lblBatch">⏰ बैच समय स्लॉट (Batch Timing) *</label>
+      <select id="admSlotSelect"></select>
+      <div id="batchEmptyMessage" class="empty-state" style="display:none;">Admin ने अभी कोई batch add नहीं किया है।</div>
+    </div>
+
+    <div style="background:#111; border:1px solid var(--ok); padding:8px; border-radius:8px; text-align:center; margin-bottom:12px;">
+      <span style="font-size:10.5px; color:#aaa;" id="lblTotalFee">कुल देय फीस:</span>
+      <span id="admFeeDisplay" style="font-size:20px; font-weight:bold; color:var(--ok);">Admin तय करेगा</span>
+    </div>
+
+    <button type="button" class="btn-main" onclick="goToStep(2)" id="btnNext1">अगला (Next ➔)</button>
+  </div>
+
+  <!-- STEP 2: PERSONAL & EMERGENCY -->
+  <div id="stepBox2" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:10px;" id="tStep2">2. Personal & Emergency Details</div>
+    
+    <div class="field">
+      <label id="lblFullName">सदस्य का पूरा नाम (Full Name) *</label>
+      <input type="text" id="admFullName" placeholder="उदा. राहुल सिंह / प्रिया सिंह">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>लिंग (Gender) *</label>
+        <select id="admGender" onchange="updateGuardianLabel()">
+          <option value="Male">पुरुष (Male)</option>
+          <option value="Female">महिला (Female)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>वैवाहिक स्थिति (Marital Status)</label>
+        <select id="admMarital" onchange="updateGuardianLabel()">
+          <option value="Unmarried" selected>अविवाहित (Unmarried)</option>
+          <option value="Married">विवाहित (Married)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="lblGuardianName">पिता / माता का नाम (Father / Mother Name) *</label>
+      <input type="text" id="admParentName" placeholder="उदा. श्री राम सिंह">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblDob">जन्म तिथि (DOB)</label>
+        <input type="date" id="admDobInput" onchange="autoCalculateAgeFromDob()">
+      </div>
+      <div class="field">
+        <label id="lblAge">आयु (Age) *</label>
+        <input type="number" id="admAge" oninput="checkUnder18()" placeholder="20">
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="lblPhone">मोबाइल नंबर (WhatsApp) *</label>
+      <input type="tel" id="admPhone" maxlength="10" placeholder="10 अंक मोबाइल">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>🆘 आपातकालीन संपर्क नाम (Emergency Contact Name)</label>
+        <input type="text" id="admEmergencyName" placeholder="रिश्तेदार का नाम">
+      </div>
+      <div class="field">
+        <label>🆘 आपातकालीन मोबाइल (Emergency Phone)</label>
+        <input type="tel" id="admEmergencyPhone" maxlength="10" placeholder="10 अंक मोबाइल">
+      </div>
+    </div>
+
+    <div id="under18Box" style="display:none; background:#2a1200; border:1px solid #ff9900; padding:8px; border-radius:6px; font-size:11px; color:#ffcc00; margin-bottom:10px;">
+      ⚠️ 18 वर्ष से कम आयु: माता-पिता/अभिभावक का नाम और मोबाइल नंबर देना अनिवार्य है।
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblPin">📮 पिनकोड (PAN-INDIA Pin)</label>
+        <input type="text" id="memberPincode" oninput="fetchUniversalPincode()" maxlength="6" placeholder="209862">
+      </div>
+      <div class="field" style="position:relative;">
+        <label id="lblArea">📍 गाँव / शहर / क्षेत्र *</label>
+        <input type="text" id="unnaoAreaInput" oninput="searchUniversalAreas()" placeholder="क्षेत्र खोजें...">
+        <div id="unnaoAreaDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; background:#181818; border:1px solid var(--ac); max-height:180px; overflow-y:auto; z-index:99; border-radius:6px; padding:4px;"></div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(1)" id="btnBack2">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2;" onclick="goToStep(3)" id="btnNext2">फिटनेस प्रोफाइल (Next ➔)</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: FITNESS EXPERIENCE & PROFILE -->
+  <div id="stepBox3" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:10px;" id="tStep3">3. Fitness Level & Profile</div>
+
+    <div class="field">
+      <label id="lblLevel">फिटनेस स्तर (Fitness Level) *</label>
+      <div class="tap-grid">
+        <div class="tap-card selected" onclick="selectLevel('Beginner', this)">Beginner<br><span style="font-size:9px; font-weight:normal;">नया / शुरुआत</span></div>
+        <div class="tap-card" onclick="selectLevel('Intermediate', this)">Intermediate<br><span style="font-size:9px; font-weight:normal;">मध्यम</span></div>
+        <div class="tap-card" onclick="selectLevel('Advanced', this)">Advanced<br><span style="font-size:9px; font-weight:normal;">प्रो / भारी</span></div>
+      </div>
+      <input type="hidden" id="fitLevelInput" value="Beginner">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblPrevGym">पहिले जिम किया है? (Previous Gym)</label>
+        <select id="fitPrevGym">
+          <option value="No">नहीं (No)</option>
+          <option value="Yes">हाँ (Yes)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="lblDaysPerWeek">हफ्ते में कितने दिन आ सकते हैं?</label>
+        <select id="fitDays">
+          <option value="3 Days">3 Days / Week</option>
+          <option value="5 Days" selected>5 Days / Week</option>
+          <option value="6 Days">6 Days / Week</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblDietType">खान-पान (Diet Type)</label>
+        <select id="fitDiet">
+          <option value="Vegetarian" selected>शाकाहारी (Veg)</option>
+          <option value="Non-Vegetarian">मांसाहारी (Non-Veg)</option>
+          <option value="Eggiterian">एगेटिरियन (Egg)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="lblGoal">मुख्य लक्ष्य (Primary Goal)</label>
+        <select id="fitGoal">
+          <option value="Muscle Building" selected>मसल्बिल्डिंग / साइज</option>
+          <option value="Weight Loss">वजन घटाना (Fat Loss)</option>
+          <option value="General Fitness">सामान्य फिटनेस</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(2)" id="btnBack3">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2;" onclick="goToStep(4)" id="btnNext3">स्वास्थ्य स्क्रीन (Next ➔)</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: HEALTH SCREENING & PAR-Q -->
+  <div id="stepBox4" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:8px;" id="tStep4">4. Health Screening (PAR-Q 7 Questions)</div>
+    
+    <!-- Data Privacy Notice (Flaw 4) -->
+    <div style="background:#0a1a12; border:1px solid var(--ok); padding:8px; border-radius:8px; margin-bottom:10px; font-size:10.5px; color:#8dffb0;">
+      🔒 <b>Data Privacy Notice:</b> मेडिकल जानकारी, आपातकालीन संपर्क, फोटो और पहचान-पत्र संवेदनशील डेटा हैं। इन्हें केवल अधिकृत एडमिन/स्टाफ को देखने की सख्त अनुमति है।
+    </div>
+
+    <p style="font-size:10px; color:var(--mut); margin-bottom:10px;" id="lblParQSub">निम्नलिखित 7 में से किसी भी बात पर "हाँ" होने पर एडमिन पैनल में "Doctor Consultation Required" की चेतावनी दिखेगी।</p>
+
+    <div id="parqQuestionsList" style="font-size:11px; display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+      <label><input type="checkbox" class="parq-q" value="Heart Condition"> 1. क्या डॉक्टर ने कभी कहा है कि आपको दिल की बीमारी है?</label>
+      <label><input type="checkbox" class="parq-q" value="Chest Pain"> 2. क्या फिजिकल एक्टिविटी करते वक्त सीने में दर्द होता है?</label>
+      <label><input type="checkbox" class="parq-q" value="Dizziness"> 3. क्या कभी चक्कर आने से बेहोश हुए हैं या संतुलन बिगड़ा है?</label>
+      <label><input type="checkbox" class="parq-q" value="Bone / Joint Issue"> 4. क्या हड्डी या जोड़ की समस्या है जो एक्सरसाइज से बढ़ सकती है?</label>
+      <label><input type="checkbox" class="parq-q" value="Blood Pressure Meds"> 5. क्या डॉक्टर अभी ब्लड प्रेशर या दिल की दवा दे रहे हैं?</label>
+      <label><input type="checkbox" class="parq-q" value="Other Medical Reason"> 6. क्या कोई अन्य कारण है जिससे आपको भारी एक्सरसाइज नहीं करनी चाहिए?</label>
+      <label><input type="checkbox" class="parq-q" value="Injury / Surgery"> 7. क्या पिछले 1 साल में कोई बड़ी सर्जरी या गंभीर चोट लगी है?</label>
+    </div>
+
+    <div class="field" style="background:#111; padding:8px; border-radius:8px; border:1px solid var(--border);">
+      <label id="lblSupp">💊 सप्लीमेंट इतिहास (Supplement History)</label>
+      <select id="admSupplement" onchange="toggleSuppBox()">
+        <option value="No" selected>कोई सप्लीमेंट नहीं लिया / ले रहे</option>
+        <option value="Yes">हाँ, सप्लीमेंट लिया है / ले रहे हैं</option>
+      </select>
+      <div id="suppDetailBox" style="display:none; margin-top:6px;">
+        <input type="text" id="admSuppName" placeholder="कौन सा प्रोडक्ट / ब्रांड ले रहे हैं? (उदा. Whey Protein)">
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(3)" id="btnBack4">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2;" onclick="goToStep(5)" id="btnNext4">दस्तावेज़ व QR (Next ➔)</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: DOCUMENTS, PHOTO & UNIQUE QR CODE -->
+  <div id="stepBox5" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:10px;" id="tStep5">5. Photo, ID & Unique QR Code</div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblPhoto">📸 सदस्य फोटो (Selfie/Photo) *</label>
+        <input type="file" id="memberPhotoFile" accept="image/*" onchange="previewImage(this, 'photoPreview')">
+        <img id="photoPreview" style="display:none; width:100%; max-height:100px; object-fit:cover; margin-top:4px; border-radius:6px;">
+      </div>
+      <div class="field">
+        <label id="lblIdProof">🪪 पहचान पत्र (Aadhaar/ID) *</label>
+        <input type="file" id="memberIdFile" accept="image/*" onchange="previewImage(this, 'idPreview')">
+        <img id="idPreview" style="display:none; width:100%; max-height:100px; object-fit:cover; margin-top:4px; border-radius:6px;">
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="lblSign">✍️ हस्ताक्षर या टाइप किया नाम *</label>
+      <input type="text" id="memberSignName" placeholder="यहाँ अपना पूरा नाम लिखें">
+    </div>
+
+    <div style="background:#111; border:1px dashed var(--ac); padding:10px; border-radius:8px; text-align:center; margin-bottom:12px;">
+      <div style="font-size:11px; color:var(--ac); font-weight:bold; margin-bottom:4px;" id="lblQrInfo">🔐 Unique Attendance QR Code Generator</div>
+      <div id="qrcode" style="display:inline-block; background:#fff; padding:6px; border-radius:6px;"></div>
+      <div style="font-size:10px; color:#aaa; margin-top:4px;" id="lblQrSub">यह QR कोड फॉर्म जमा होने पर आपके नाम से सेव होगा।</div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(4)" id="btnBack5">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2;" onclick="goToStep(6)" id="btnNext5">समीक्षा व भुगतान (Next ➔)</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: SUMMARY, CONSENT & PAYMENT -->
+  <div id="stepBox6" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:8px;" id="tStep6">6. Review, Consent & Payment</div>
+
+    <div style="background:#111; border:1px solid var(--border); padding:10px; border-radius:8px; font-size:11px; line-height:1.5; margin-bottom:10px;">
+      <b style="color:var(--ac);" id="lblSummaryTitle">📌 एडमिशन सारांश:</b>
+      <div id="summaryContent" style="color:#ddd; margin-top:4px;"></div>
+    </div>
+
+    <div class="field">
+      <label id="lblPayMode">भुगतान माध्यम (Payment Mode) *</label>
+      <select id="paymentMode" onchange="togglePayMode()">
+        <option value="Cash">💵 नकद (Cash)</option>
+        <option value="Online">📱 ऑनलाइन UPI (GPay / PhonePe)</option>
+      </select>
+    </div>
+
+    <div id="onlineTray" style="display:none; margin-bottom:10px;">
+      <label id="lblUtr">🔗 UTR / UPI Reference Number (12 Digit) *</label>
+      <input type="text" id="upiUtrInput" placeholder="उदा. 427192837465">
+    </div>
+
+    <!-- Legal Terms & Conditions Box (Flaw 2) -->
+    <div style="background:#18181f; border:1px solid var(--ac); border-radius:8px; padding:10px; margin-bottom:10px; font-size:10.5px; color:#ccc; max-height:120px; overflow-y:auto;">
+      <b style="color:var(--ac);">📜 Legal & Consent Terms & Conditions:</b><br>
+      1. सभी प्रकार की फीस <b>Non-Refundable (वापस नहीं होगी)</b> है।<br>
+      2. जिम परिसर में अनुशासनहीनता या किसी भी प्रकार की क्षति पर सदस्यता तुरंत रद्द की जा सकती है।<br>
+      3. जिम में वर्कआउट के दौरान किसी भी शारीरिक चोट या दुर्घटना के लिए सदस्य स्वयं जिम्मेदार होगा।<br>
+      4. सभी नियम 5 Brother's Fitness Club के प्रबंधन के अधीन हैं।
+    </div>
+
+    <div style="background:#261200; border:1px solid #ff9900; padding:8px; border-radius:8px; margin-bottom:12px; font-size:10.5px; color:#eee;">
+      <label style="display:flex; align-items:flex-start; gap:6px; cursor:pointer;">
+        <input type="checkbox" id="rulesAgreedCheck">
+        <span id="lblLegalText">"मैंने जिम के सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी को पढ़कर फॉर्म स्वीकार किया है।" *</span>
+      </label>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(5)" id="btnBack6">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2; background:var(--ok); color:#000;" onclick="submitAdmissionForm()" id="btnSubmitForm">🚀 फॉर्म सबमिट करें व डिजिटल रसीद देखें</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- INSTANT ADMISSION RECEIPT MODAL (Flaw 5) -->
+<div id="receiptModal">
+  <div class="receipt-card" id="printableReceiptArea">
+    <div style="text-align:center; font-size:20px; font-weight:900; color:#000;">5 BROTHER'S FITNESS CLUB</div>
+    <div style="text-align:center; font-size:10px; color:#555; margin-bottom:8px;">Umrao Khera, Akrampur, Unnao | Ph: 9140417259</div>
+    <div class="receipt-header">
+      <div style="background:#ffcc00; color:#000; font-size:9.5px; font-weight:900; padding:2px 6px; border-radius:10px; display:inline-block;">OFFICIAL ADMISSION CARD & RECEIPT</div>
+    </div>
+
+    <div class="r-row"><span>Admission ID:</span><b id="rcId"></b></div>
+    <div class="r-row"><span>Date:</span><b id="rcDate"></b></div>
+    <div class="r-row"><span>Member Name:</span><b id="rcName"></b></div>
+    <div class="r-row" id="rcGuardianRow"><span>Guardian/Spouse:</span><b id="rcGuardian"></b></div>
+    <div class="r-row"><span>Mobile:</span><b id="rcPhone"></b></div>
+    <div class="r-row"><span>Emergency:</span><b id="rcEmergency"></b></div>
+    <div class="r-row"><span>Plan & Fee:</span><b id="rcPlan"></b></div>
+    <div class="r-row"><span>Batch:</span><b id="rcBatch"></b></div>
+
+    <div style="text-align:center; margin-top:12px; border-top:1px dashed #000; padding-top:10px;">
+      <div id="rcQrBox" style="display:inline-block; background:#fff; padding:4px;"></div>
+      <div style="font-size:9.5px; color:#333; margin-top:4px;">Unique Attendance QR Code</div>
+    </div>
+  </div>
+
+  <div style="max-width:440px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:8px;" data-html2canvas-ignore="true">
+    <button type="button" onclick="downloadReceiptImage()" style="background:#ffcc00; color:#000; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">📥 रसीद इमेज डाउनलोड करें</button>
+    <button type="button" onclick="sendReceiptToCustomerWhatsApp()" style="background:#25D366; color:#fff; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">📲 ग्राहक को WhatsApp पर भेजें</button>
+    <button type="button" onclick="sendReceiptToOwnerWhatsApp()" style="background:#3b82f6; color:#fff; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">👑 Send to Owner (स्टाफ द्वारा एडमिशन पर)</button>
+    <button type="button" onclick="finishAdmissionDone()" style="background:#333; color:#fff; font-weight:bold; padding:10px; border:none; border-radius:8px; cursor:pointer;">✔ पूर्ण करें (Done & Refresh)</button>
+  </div>
+</div>
+
+<script>
+let currentLang = 'hi';
+let selectedFitnessLevel = 'Beginner';
+let dynamicOrgData = { name: "5 Brother's Fitness Club", address: "Umrao Khera, Akrampur, Unnao", phone: "9140417259" };
+let defaultSettings = {
+  fees: [
+    { name: 'Regular - 1 Month', amount: '500' },
+    { name: 'Regular - 3 Months', amount: '1200' },
+    { name: 'Regular - 6 Months', amount: '2000' },
+    { name: 'Regular - 12 Months', amount: '3500' },
+    { name: 'Student - 1 Month', amount: '300' }
+  ],
+  batches: [
+    { shift: 'Morning', start: '06:00', end: '08:00', label: '🌅 Morning 06:00 AM - 08:00 AM' },
+    { shift: 'Afternoon', start: '12:00', end: '14:00', label: '☀️ Afternoon 12:00 PM - 02:00 PM' },
+    { shift: 'Evening', start: '17:00', end: '19:00', label: '🌇 Evening 05:00 PM - 07:00 PM' }
+  ],
+  reqEmergency: true,
+  reqHealth: true
+};
+
+let adminSettings = defaultSettings;
+try {
+  let saved = JSON.parse(localStorage.getItem('admission_admin_settings') || 'null');
+  if (saved && typeof saved === 'object') {
+    if (Array.isArray(saved.fees) && saved.fees.length > 0) adminSettings.fees = saved.fees;
+    if (Array.isArray(saved.batches) && saved.batches.length > 0) adminSettings.batches = saved.batches;
+    if (saved.reqEmergency !== undefined) adminSettings.reqEmergency = saved.reqEmergency;
+    if (saved.reqHealth !== undefined) adminSettings.reqHealth = saved.reqHealth;
+  }
+} catch (e) {
+  adminSettings = defaultSettings;
+}
+
+const SHIFT_ORDER = { Morning: 0, Afternoon: 1, Evening: 2 };
+const SHIFT_LABEL = { Morning: '🌅 Morning', Afternoon: '☀️ Afternoon', Evening: '🌇 Evening' };
+const SHIFT_DEFAULT = { Morning: ['06:00', '08:00'], Afternoon: ['12:00', '14:00'], Evening: ['17:00', '19:00'] };
+let builderShift = 'Morning';
+
+function fmt12(t) {
+  if (!t) return '';
+  try {
+    const [h, m] = String(t).split(':').map(Number);
+    const ap = h >= 12 ? 'PM' : 'AM';
+    const hh = ((h + 11) % 12) + 1;
+    return String(hh).padStart(2, '0') + ':' + String(m || 0).padStart(2, '0') + ' ' + ap;
+  } catch (e) { return t; }
+}
+
+function normalizeSettings(cfg) {
+  try {
+    cfg = cfg || {};
+    let rawFees = Array.isArray(cfg.fees) ? cfg.fees.filter(f => f && f.name && f.amount !== '' && f.amount != null) : [];
+    cfg.fees = rawFees.length ? rawFees : defaultSettings.fees;
+    
+    let rawBatches = Array.isArray(cfg.batches) ? cfg.batches.filter(Boolean) : [];
+    cfg.batches = rawBatches.map(b => {
+      if (b && typeof b === 'object' && b.label) return b;
+      const label = String(b || '').trim();
+      if (!label) return null;
+      const shift = /even|शाम/i.test(label) ? 'Evening' : /after|दोपहर/i.test(label) ? 'Afternoon' : 'Morning';
+      return { shift, start: '', end: '', label };
+    }).filter(Boolean);
+    if (!cfg.batches.length) cfg.batches = defaultSettings.batches;
+    cfg.batches.sort((a, b) => (SHIFT_ORDER[a.shift] || 0) - (SHIFT_ORDER[b.shift] || 0) || String(a.start || '').localeCompare(String(b.start || '')));
+    cfg.reqEmergency = cfg.reqEmergency !== false;
+    cfg.reqHealth = cfg.reqHealth !== false;
+    return cfg;
+  } catch (e) {
+    return defaultSettings;
+  }
+}
+
+function ensureDefaultFees() {
+  if (!adminSettings || !Array.isArray(adminSettings.fees) || adminSettings.fees.length === 0) {
+    adminSettings = normalizeSettings(adminSettings);
+  }
+}
+
+function liveFees() { 
+  try {
+    let valid = (adminSettings && Array.isArray(adminSettings.fees)) ? adminSettings.fees.filter(f => f && f.name && f.amount !== '' && f.amount != null) : [];
+    if (!valid.length) return defaultSettings.fees;
+    return valid; 
+  } catch (e) {
+    return defaultSettings.fees;
+  }
+}
+
+function catOf(f) { 
+  try {
+    if (!f || !f.name) return 'Regular';
+    return String(f.name).includes(' - ') ? String(f.name).split(' - ')[0] : 'Regular';
+  } catch (e) {
+    return 'Regular';
+  }
+}
+
+adminSettings = normalizeSettings(adminSettings);
+ensureDefaultFees();
+
+function updateGuardianLabel() {
+  const gender = document.getElementById('admGender').value;
+  const marital = document.getElementById('admMarital').value;
+  const lbl = document.getElementById('lblGuardianName');
+  if (gender === 'Female' && marital === 'Married') {
+    lbl.textContent = "पति का नाम (Husband Name) *";
+  } else {
+    lbl.textContent = "पिता / माता का नाम (Father / Mother Name) *";
+  }
+}
+
+const TRANSLATIONS = {
+  hi: {
+    tStep1: "1. प्लान, बैच एवं प्रवेश तिथि",
+    lblJoinDate: "📅 प्रवेश तिथि (Joining Date) *",
+    lblCategory: "श्रेणी (Category) *",
+    lblDuration: "अवधि (Duration) *",
+    lblBatch: "⏰ बैच समय स्लॉट (Batch Timing) *",
+    lblTotalFee: "कुल देय फीस:",
+    btnNext1: "अगला (Next ➔)",
+    tStep2: "2. व्यक्तिगत एवं आपातकालीन विवरण",
+    lblFullName: "सदस्य का पूरा नाम (Full Name) *",
+    lblGuardianName: "पिता / माता का नाम (Father / Mother Name) *",
+    lblDob: "जन्म तिथि (DOB)",
+    lblAge: "आयु (Age) *",
+    lblPhone: "मोबाइल नंबर (WhatsApp) *",
+    lblPin: "📮 पिनकोड (PAN-INDIA Pin)",
+    lblArea: "📍 गाँव / शहर / क्षेत्र *",
+    btnBack2: "⬅ पीछे",
+    btnNext2: "फिटनेस प्रोफाइल (Next ➔)",
+    tStep3: "3. फिटनेस स्तर एवं प्रोफाइल",
+    lblLevel: "फिटनेस स्तर (Fitness Level) *",
+    lblPrevGym: "पहिले जिम किया है? (Previous Gym)",
+    lblDaysPerWeek: "हफ्ते में कितने दिन आ सकते हैं?",
+    lblDietType: "खान-पान (Diet Type)",
+    lblGoal: "मुख्य लक्ष्य (Primary Goal)",
+    btnBack3: "⬅ पीछे",
+    btnNext3: "स्वास्थ्य स्क्रीन (Next ➔)",
+    tStep4: "4. स्वास्थ्य एवं PAR-Q (7 सवाल)",
+    lblSupp: "💊 सप्लीमेंट इतिहास (Supplement History)",
+    btnBack4: "⬅ पीछे",
+    btnNext4: "दस्तावेज़ व QR (Next ➔)",
+    tStep5: "5. फोटो, आईडी और यूनिक QR कोड",
+    lblPhoto: "📸 सदस्य फोटो (Selfie/Photo) *",
+    lblIdProof: "🪪 पहचान पत्र (Aadhaar/ID) *",
+    lblSign: "✍️ हस्ताक्षर या टाइप किया नाम *",
+    lblQrInfo: "🔐 Unique Attendance QR Code Generator",
+    lblQrSub: "यह QR कोड फॉर्म जमा होने पर आपके नाम से सेव होगा।",
+    btnBack5: "⬅ पीछे",
+    btnNext5: "समीक्षा व भुगतान (Next ➔)",
+    tStep6: "6. समीक्षा, सहमति व भुगतान",
+    lblSummaryTitle: "📌 एडमिशन सारांश:",
+    lblPayMode: "भुगतान माध्यम (Payment Mode) *",
+    lblUtr: "🔗 UTR / UPI Reference Number (12 Digit) *",
+    lblLegalText: ""मैंने जिम के सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी को पढ़कर फॉर्म स्वीकार किया है।" *",
+    btnBack6: "⬅ पीछे",
+    btnSubmitForm: "🚀 फॉर्म सबमिट करें व डिजिटल रसीद देखें"
+  },
+  en: {
+    tStep1: "1. Plan, Batch & Joining Date",
+    lblJoinDate: "📅 Joining Date *",
+    lblCategory: "Category *",
+    lblDuration: "Duration *",
+    lblBatch: "⏰ Batch Time Slot *",
+    lblTotalFee: "Total Payable Fee:",
+    btnNext1: "Next (➔)",
+    tStep2: "2. Personal & Emergency Details",
+    lblFullName: "Full Name *",
+    lblGuardianName: "Father / Mother Name *",
+    lblDob: "Date of Birth (DOB)",
+    lblAge: "Age *",
+    lblPhone: "Mobile Number (WhatsApp) *",
+    lblPin: "📮 Pincode (PAN-INDIA Pin)",
+    lblArea: "📍 Village / City / Area *",
+    btnBack2: "⬅ Back",
+    btnNext2: "Fitness Profile (Next ➔)",
+    tStep3: "3. Fitness Level & Profile",
+    lblLevel: "Fitness Level *",
+    lblPrevGym: "Previous Gym Experience?",
+    lblDaysPerWeek: "Days per week you can attend?",
+    lblDietType: "Diet Type",
+    lblGoal: "Primary Goal",
+    btnBack3: "⬅ Back",
+    btnNext3: "Health Screening (Next ➔)",
+    tStep4: "4. Health & PAR-Q (7 Questions)",
+    lblSupp: "💊 Supplement History",
+    btnBack4: "⬅ Back",
+    btnNext4: "Documents & QR (Next ➔)",
+    tStep5: "5. Photo, ID & Unique QR Code",
+    lblPhoto: "📸 Member Photo *",
+    lblIdProof: "🪪 ID Proof (Aadhaar/ID) *",
+    lblSign: "✍️ Signature / Typed Name *",
+    lblQrInfo: "🔐 Unique Attendance QR Code Generator",
+    lblQrSub: "This QR code will be saved with your name upon submission.",
+    btnBack5: "⬅ Back",
+    btnNext5: "Review & Payment (Next ➔)",
+    tStep6: "6. Review, Consent & Payment",
+    lblSummaryTitle: "📌 Admission Summary:",
+    lblPayMode: "Payment Mode *",
+    lblUtr: "🔗 UTR / UPI Reference Number (12 Digit) *",
+    lblLegalText: ""I have read all gym rules, non-refundable fee policy, and strict legal warnings before submitting this form." *",
+    btnBack6: "⬅ Back",
+    btnSubmitForm: "🚀 Submit Form & View Receipt"
+  }
+};
+
+function setLanguage(lang) {
+  currentLang = lang;
+  document.getElementById('langHiBtn').className = lang === 'hi' ? 'lang-btn active' : 'lang-btn';
+  document.getElementById('langEnBtn').className = lang === 'en' ? 'lang-btn active' : 'lang-btn';
+  const t = TRANSLATIONS[lang];
+  for (let key in t) {
+    const el = document.getElementById(key);
+    if (el) el.innerText = t[key];
+  }
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("admDateInput").value = new Date().toISOString().split("T")[0];
+  renderAdminSettings();
+  renderMemberOptions();
+  updateGuardianLabel();
+
+  try {
+    if (typeof db !== "undefined") {
+      const doc = await db.collection("orgs").doc("5brothersfitness").get();
+      if (doc.exists) {
+        const data = doc.data();
+        dynamicOrgData = data;
+        if (data.admissionSettings) {
+          adminSettings = normalizeSettings(data.admissionSettings);
+          if (data.admissionSettings.reqEmergency !== undefined) adminSettings.reqEmergency = data.admissionSettings.reqEmergency;
+          if (data.admissionSettings.reqHealth !== undefined) adminSettings.reqHealth = data.admissionSettings.reqHealth;
+          document.getElementById('cfgReqEmergency').checked = !!adminSettings.reqEmergency;
+          document.getElementById('cfgReqHealth').checked = !!adminSettings.reqHealth;
+          ensureDefaultFees();
+          renderAdminSettings();
+          renderMemberOptions();
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Cloud fetch settings warning:", e);
+  }
+  document.getElementById("orgTopHeader").innerText = (dynamicOrgData.name || "5 BROTHER'S FITNESS CLUB").toUpperCase();
+  document.getElementById("orgNameHeader").innerText = (dynamicOrgData.name || "5 BROTHER'S FITNESS CLUB").toUpperCase();
+  document.getElementById("orgDetailsHeader").innerText = (dynamicOrgData.address || "Umrao Khera, Akrampur, Unnao") + (dynamicOrgData.phone ? " | Ph: " + dynamicOrgData.phone : "");
+});
+
+async function toggleAdminPanel() {
+  const panel = document.getElementById('adminPanel');
+  if (!panel.classList.contains('open') && typeof bfcLogin === 'function') {
+    const ok = await bfcLogin();
+    if (!ok) return;
+  }
+  panel.classList.toggle('open');
+}
+
+function saveFormConfig() {
+  adminSettings.reqEmergency = document.getElementById('cfgReqEmergency').checked;
+  adminSettings.reqHealth = document.getElementById('cfgReqHealth').checked;
+}
+
+function renderAdminSettings() {
+  ensureDefaultFees();
+  const feeList = document.getElementById('feeSettingsList');
+  const batchList = document.getElementById('batchSettingsList');
+  document.getElementById('cfgReqEmergency').checked = !!adminSettings.reqEmergency;
+  document.getElementById('cfgReqHealth').checked = !!adminSettings.reqHealth;
+
+  feeList.innerHTML = '<div style="font-size:11px;color:#ccc;margin-bottom:4px;">सिर्फ़ रकम (₹) भरें:</div>' + adminSettings.fees.map((f, i) => {
+    const def = DEFAULT_FEE_NAMES.includes(f.name);
+    return `
+    <div class="settings-row fee-row">
+      <input data-fee-name="${i}" value="${escapeAttr(f.name)}" ${def ? 'readonly style="color:var(--ac);font-weight:800;"' : ''} placeholder="Plan">
+      <input data-fee-amount="${i}" type="number" min="0" step="1" value="${f.amount ?? ''}" placeholder="Fee ₹">
+      ${def ? '<span></span>' : `<button type="button" class="danger-btn" onclick="removeFeeSetting(${i})">Delete</button>`}
+    </div>`; }).join('');
+  batchList.innerHTML = adminSettings.batches.length ? adminSettings.batches.map((b, i) => `
+    <div class="batch-item">
+      <span>${(SHIFT_LABEL[b.shift] || '').split(' ')[0]} <b>${escapeAttr(b.label)}</b></span>
+      <button type="button" class="danger-btn" onclick="removeBatchSetting(${i})">🗑 Delete</button>
+    </div>`).join('') : '<div class="empty-state">अभी कोई batch नहीं है।</div>';
+}
+
+function escapeAttr(v) { return String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function addFeeSetting() { adminSettings.fees.push({ name: '', amount: '' }); renderAdminSettings(); }
+function removeFeeSetting(i) { adminSettings.fees.splice(i, 1); renderAdminSettings(); }
+function pickShift(shift) {
+  builderShift = shift;
+  ['Morning', 'Afternoon', 'Evening'].forEach(k => document.getElementById('shiftTab' + k).classList.toggle('sel', k === shift));
+  document.getElementById('bStart').value = SHIFT_DEFAULT[shift][0];
+  document.getElementById('bEnd').value = SHIFT_DEFAULT[shift][1];
+}
+function addBatchFromBuilder() {
+  const start = document.getElementById('bStart').value;
+  const end = document.getElementById('bEnd').value;
+  if (!start || !end) { alert('⏰ Start aur End time dono chuniye.'); return; }
+  const label = SHIFT_LABEL[builderShift].replace(/^\S+\s/, '') + ' ' + fmt12(start) + ' - ' + fmt12(end);
+  if (adminSettings.batches.some(b => b.label === label)) { alert('Ye batch pehle se added hai.'); return; }
+  adminSettings.batches.push({ shift: builderShift, start, end, label });
+  adminSettings = normalizeSettings(adminSettings);
+  persistSettings('Batch add ho gaya ✅');
+}
+function removeBatchSetting(i) {
+  adminSettings.batches.splice(i, 1);
+  persistSettings('Batch delete ho gaya 🗑️');
+}
+async function persistSettings(msg) {
+  saveFormConfig();
+  localStorage.setItem('admission_admin_settings', JSON.stringify(adminSettings));
+  renderAdminSettings(); renderMemberOptions();
+  const st = document.getElementById('batchStatus');
+  if (st) st.textContent = msg || '';
+  try {
+    if (typeof db !== 'undefined') {
+      await db.collection('orgs').doc('5brothersfitness').set({ admissionSettings: adminSettings, name: "5 Brother's Fitness Club" }, { merge: true });
+      if (st) st.textContent = (msg || '') + '  ☁️ Cloud par Global Save हो गया!';
+    }
+  } catch (e) {
+    if (st) st.textContent = (msg || '') + '  ⚠️ Cloud save warning: ' + (e && (e.message || e));
+  }
+}
+
+function saveAdminSettings() {
+  adminSettings.fees = [...document.querySelectorAll('[data-fee-name]')].map((el, i) => ({
+    name: el.value.trim(), amount: document.querySelector(`[data-fee-amount="${i}"]`).value
+  })).filter(f => f.name && f.amount !== '');
+  persistSettings('Settings saved successfully! ☁️');
+  document.getElementById('adminSaveStatus').textContent = 'Global settings updated.';
+}
+
+function renderMemberOptions() {
+  try {
+    const cat = document.getElementById('admCategorySelect');
+    if (!cat) return;
+    cat.innerHTML = '';
+    const lFees = liveFees();
+    const categories = [...new Set(lFees.map(catOf))];
+    const catField = cat.closest('.field');
+    const single = categories.length <= 1;
+    if (catField) { catField.style.display = single ? 'none' : ''; if (catField.parentElement) catField.parentElement.style.gridTemplateColumns = single ? '1fr' : ''; }
+    categories.forEach(name => { const o = document.createElement('option'); o.value = name; o.textContent = name; cat.appendChild(o); });
+    updatePlanDurations();
+    const slot = document.getElementById('admSlotSelect');
+    if (slot) {
+      slot.innerHTML = '';
+      const ph = document.createElement('option'); ph.value = ''; ph.textContent = '-- Batch चुनें --'; slot.appendChild(ph);
+      ['Morning', 'Afternoon', 'Evening'].forEach(sh => {
+        const items = (adminSettings && Array.isArray(adminSettings.batches)) ? adminSettings.batches.filter(b => b && b.shift === sh) : [];
+        if (!items.length) return;
+        const g = document.createElement('optgroup'); g.label = SHIFT_LABEL[sh] || sh;
+        items.forEach(b => { const o = document.createElement('option'); o.value = b.label; o.textContent = b.label; g.appendChild(o); });
+        slot.appendChild(g);
+      });
+      const bm = document.getElementById('batchEmptyMessage');
+      if (bm) bm.style.display = (adminSettings && Array.isArray(adminSettings.batches) && adminSettings.batches.length) ? 'none' : 'block';
+    }
+  } catch (e) {
+    console.error("renderMemberOptions error:", e);
+  }
+}
+
+
+
+function updatePlanDurations() {
+  try {
+    const catEl = document.getElementById('admCategorySelect');
+    const dur = document.getElementById('admDurationSelect');
+    if (!dur) return;
+    const cat = catEl ? catEl.value : '';
+    dur.innerHTML = '';
+    liveFees().filter(f => catOf(f) === cat || !cat).forEach((f, i) => {
+      const o = document.createElement('option'); o.value = `${f.name}|${f.amount}|${i}`; o.textContent = `${f.name} - ₹${f.amount}`; dur.appendChild(o);
+    });
+    calculateAdmissionFee();
+  } catch (e) {
+    console.error("updatePlanDurations error:", e);
+  }
+}
+
+function calculateAdmissionFee() {
+  const val = document.getElementById('admDurationSelect').value;
+  const display = document.getElementById('admFeeDisplay');
+  display.textContent = val ? `₹${val.split('|')[1]}` : 'Admin तय करेगा';
+}
+
+function selectLevel(lvl, el) {
+  selectedFitnessLevel = lvl;
+  document.querySelectorAll('.tap-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('fitLevelInput').value = lvl;
+}
+
+function toggleSuppBox() {
+  const v = document.getElementById('admSupplement').value;
+  document.getElementById('suppDetailBox').style.display = v === 'Yes' ? 'block' : 'none';
+}
+
+function checkUnder18() {
+  const age = parseInt(document.getElementById('admAge').value, 10);
+  document.getElementById('under18Box').style.display = (!isNaN(age) && age > 0 && age < 18) ? 'block' : 'none';
+}
+
+function autoCalculateAgeFromDob() {
+  const dob = document.getElementById('admDobInput').value;
+  if (!dob) return;
+  const diff = Date.now() - new Date(dob).getTime();
+  const age = Math.abs(new Date(diff).getUTCFullYear() - 1970);
+  document.getElementById('admAge').value = age;
+  checkUnder18();
+}
+
+async function fetchUniversalPincode() {
+  const pin = document.getElementById('memberPincode').value.trim();
+  const dd = document.getElementById('unnaoAreaDropdown');
+  if (pin.length !== 6) return;
+  try {
+    dd.innerHTML = '<div style="padding:6px; color:var(--ac); font-size:11px;">Loading areas...</div>';
+    dd.style.display = 'block';
+    const res = await fetch('https://api.postalpincode.in/pincode/' + pin);
+    const data = await res.json();
+    dd.innerHTML = '';
+    if (data && data[0] && data[0].Status === 'Success') {
+      data[0].PostOffice.forEach(po => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding:8px; font-size:11px; border-bottom:1px solid #333; cursor:pointer;';
+        item.textContent = `📍 ${po.Name} (${po.District}, ${po.State}) - ${pin}`;
+        item.onclick = () => {
+          document.getElementById('unnaoAreaInput').value = `${po.Name}, ${po.District} - ${pin}`;
+          dd.style.display = 'none';
+        };
+        dd.appendChild(item);
+      });
+      dd.style.display = 'block';
+    }
+  } catch(e) { dd.style.display = 'none'; }
+}
+
+function searchUniversalAreas() {
+  const q = document.getElementById('unnaoAreaInput').value.trim();
+  const dd = document.getElementById('unnaoAreaDropdown');
+  if (q.length < 2) { dd.style.display = 'none'; return; }
+  dd.innerHTML = `<div style="padding:8px; font-size:11px; color:var(--ac); cursor:pointer;" onclick="document.getElementById('unnaoAreaDropdown').style.display='none'">✔ Set: ${q}</div>`;
+  dd.style.display = 'block';
+}
+
+function previewImage(input, previewId) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById(previewId);
+      img.src = e.target.result;
+      img.style.display = 'block';
+    }
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function togglePayMode() {
+  const mode = document.getElementById('paymentMode').value;
+  document.getElementById('onlineTray').style.display = mode === 'Online' ? 'block' : 'none';
+}
+
+function goToStep(step) {
+  if (step >= 2 && !document.getElementById('admDurationSelect').value) {
+    alert('Admin ne abhi fee set nahi ki hai. Pehle Admin Settings me fee save karein.'); step = 1;
+  } else if (step >= 2 && !document.getElementById('admSlotSelect').value) {
+    alert('⏰ कृपया अपना Batch (Morning / Evening) चुनें!'); step = 1;
+  } else if (step >= 3 && !document.getElementById('admFullName').value.trim()) {
+    alert('कृपया पूरा नाम भरें!'); step = 2;
+  } else if (step >= 3 && adminSettings.reqEmergency && !document.getElementById('admEmergencyPhone').value.trim()) {
+    alert('कृपया आपातकालीन संपर्क (Emergency Phone) नंबर भरें!'); step = 2;
+  }
+  if (step === 6) {
+    const name = document.getElementById('admFullName').value.trim() || "Member";
+    const phone = document.getElementById('admPhone').value.trim() || "000";
+    document.getElementById('qrcode').innerHTML = "";
+    if (!window.__admId) window.__admId = 'adm' + Date.now();
+    window.__admQr = `ORGDESK-ATTENDANCE-${name}-${phone}-${window.__admId}`;
+    new QRCode(document.getElementById("qrcode"), {
+      text: window.__admQr,
+      width: 120,
+      height: 120
+    });
+
+    const sumHtml = `
+      <b>नाम:</b> ${name}<br>
+      <b>मोबाइल:</b> ${phone}<br>
+      <b>प्लान फीस:</b> ${document.getElementById('admFeeDisplay').innerText}<br>
+      <b>बैच समय:</b> ${document.getElementById('admSlotSelect').value}<br>
+      <b>फिटनेस स्तर:</b> ${selectedFitnessLevel}
+    `;
+    document.getElementById('summaryContent').innerHTML = sumHtml;
+  }
+
+  [1,2,3,4,5,6].forEach(i => {
+    document.getElementById(`stepBox${i}`).className = (i === step) ? "step-box active" : "step-box";
+  });
+}
+
+function fileToDataUrl(file, maxW, q) {
+  return new Promise(res => {
+    if (!file) return res('');
+    const r = new FileReader();
+    r.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const sc = Math.min(1, maxW / img.width);
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', q));
+      };
+      img.onerror = () => res('');
+      img.src = e.target.result;
+    };
+    r.onerror = () => res('');
+    r.readAsDataURL(file);
+  });
+}
+
+function planTypeFromCategory(cat) {
+  const c = String(cat || '');
+  if (/student|विद्यार्थी/i.test(c)) return 'student';
+  if (/seeker|बेरोजगार/i.test(c)) return 'seeker';
+  if (/poor|गरीब/i.test(c)) return 'poor';
+  return 'job';
+}
+function calculateExpiryDate(joinDateStr, months) {
+  try {
+    const d = new Date(joinDateStr || Date.now());
+    d.setMonth(d.getMonth() + Number(months || 1));
+    return d.toISOString().slice(0, 10);
+  } catch (e) {
+    return joinDateStr;
+  }
+}
+
+function monthsFromPlanName(name) {
+  const m = String(name || '').match(/(\d+)\s*(month|mahina|महीन)/i);
+  return m ? parseInt(m[1], 10) : 1;
+}
+
+let lastSubmittedRecord = null;
+
+async function submitAdmissionForm() {
+  const $ = id => document.getElementById(id);
+  if (!$('admDurationSelect').value || !$('admSlotSelect').value) { alert('Fee ya batch select nahi hai.'); goToStep(1); return; }
+  const name = $('admFullName').value.trim();
+  const phone = $('admPhone').value.trim();
+  if (!name) { alert('कृपया पूरा नाम भरें!'); goToStep(2); return; }
+  if (!/^\d{10}$/.test(phone)) { alert('कृपया 10 अंक का सही मोबाइल नंबर भरें!'); goToStep(2); return; }
+  if (adminSettings.reqEmergency && !$('admEmergencyPhone').value.trim()) { alert('कृपया आपातकालीन संपर्क मोबाइल भरें!'); goToStep(2); return; }
+  if ($('paymentMode').value === 'Online' && !$('upiUtrInput').value.trim()) { alert('कृपया UTR / UPI Reference Number भरें!'); return; }
+  if (!$('rulesAgreedCheck').checked) { alert('कृपया नियम व शर्तें (Legal Consent) चेकबॉक्स पर टिक करें!'); return; }
+
+  const btn = document.querySelector('#stepBox6 button[onclick*="submitAdmissionForm"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
+  const [feeName, feeAmtRaw] = $('admDurationSelect').value.split('|');
+  const feeAmt = Number(feeAmtRaw) || 0;
+  const months = monthsFromPlanName(feeName);
+  const joinDate = $('admDateInput').value || new Date().toISOString().slice(0, 10);
+  const photo = await fileToDataUrl($('memberPhotoFile').files[0], 320, 0.7);
+  const idImg = await fileToDataUrl($('memberIdFile').files[0], 800, 0.6);
+  if (!window.__admId) window.__admId = 'adm' + Date.now();
+  const area = $('unnaoAreaInput').value.trim();
+  const pin = $('memberPincode').value.trim();
+
+  const rec = {
+    id: window.__admId,
+    name, gender: $('admGender').value, marital: $('admMarital').value,
+    guardian: $('admParentName').value.trim(), parentName: $('admParentName').value.trim(),
+    phone, emergencyName: $('admEmergencyName').value.trim(), emergencyPhone: $('admEmergencyPhone').value.trim(),
+    address: (area + (pin ? ' - ' + pin : '')).trim(),
+    dob: $('admDobInput').value || '', age: $('admAge').value || '',
+    type: planTypeFromCategory(feeName.includes(' - ') ? feeName.split(' - ')[0] : ''),
+    planBase: feeAmt, planMonths: months, planName: feeName, admPlan: true,
+    joinDate, expiryDate: calculateExpiryDate(joinDate, months), status: 'Pending', manualStatus: 'Pending', fees: 'Pending',
+    payMode: '', amount: 0, lastPaid: '', dueAmount: feeAmt, advance: 0, dueV: 2,
+    admissionPayMode: $('paymentMode').value, admissionUtr: $('upiUtrInput').value.trim(),
+    batch: $('admSlotSelect').value, attendanceId: window.__admQr || ('ORGDESK-ATTENDANCE-' + name + '-' + phone + '-' + window.__admId),
+    fitnessLevel: selectedFitnessLevel, prevGym: $('fitPrevGym').value, daysPerWeek: $('fitDays').value,
+    diet: $('fitDiet').value, goal: $('fitGoal').value,
+    parq: [...document.querySelectorAll('.parq-q:checked')].map(c => c.value),
+    supplement: $('admSupplement').value, supplementName: $('admSuppName').value.trim(),
+    signName: $('memberSignName').value.trim(),
+    memberPhoto: photo, memberIdImg: idImg,
+    idSubmitted: !!idImg, source: 'admission_form', admittedAt: new Date().toISOString()
+  };
+
+  lastSubmittedRecord = rec;
+
+  let savedLocal = false;
+  const putLocal = r => ['5bfc_admissions', '5BFC_MEMBERS'].forEach(k => {
+    let arr = []; try { arr = JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) {}
+    if (!Array.isArray(arr)) arr = [];
+    arr = arr.filter(x => String(x.id) !== String(r.id));
+    arr.push(r);
+    localStorage.setItem(k, JSON.stringify(arr));
+  });
+  try { putLocal(rec); savedLocal = true; }
+  catch (e) { try { const slim = Object.assign({}, rec, { memberPhoto: '', memberIdImg: '' }); putLocal(slim); savedLocal = true; } catch (e2) {} }
+
+  try {
+    if (typeof db !== 'undefined') {
+      const cloudRec = Object.assign({}, rec, { memberPhoto: '', memberIdImg: '', imported: false });
+      await db.collection('admissions').doc(rec.id).set(cloudRec);
+    }
+  } catch (e) {}
+
+  if (btn) { btn.disabled = false; btn.textContent = '🚀 Submit Form & View Receipt'; }
+  openReceiptModal(rec);
+}
+
+function openReceiptModal(rec) {
+  document.getElementById('rcId').textContent = rec.id;
+  document.getElementById('rcDate').textContent = rec.joinDate;
+  document.getElementById('rcName').textContent = rec.name;
+  document.getElementById('rcGuardian').textContent = rec.guardian + (rec.marital === 'Married' && rec.gender === 'Female' ? ' (पति)' : '');
+  document.getElementById('rcPhone').textContent = rec.phone;
+  document.getElementById('rcEmergency').textContent = (rec.emergencyName ? rec.emergencyName + ' - ' : '') + rec.emergencyPhone;
+  document.getElementById('rcPlan').textContent = rec.planName + ' (₹' + rec.planBase + ' - ' + rec.status + ')';
+  document.getElementById('rcBatch').textContent = rec.batch;
+
+  const qb = document.getElementById('rcQrBox');
+  qb.innerHTML = '';
+  new QRCode(qb, { text: rec.attendanceId, width: 100, height: 100 });
+
+  document.getElementById('receiptModal').style.display = 'flex';
+}
+
+function downloadReceiptImage() {
+  const card = document.getElementById('printableReceiptArea');
+  html2canvas(card, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'Admission_Card_' + (lastSubmittedRecord ? lastSubmittedRecord.name : 'Member') + '.png';
+    a.click();
+  });
+}
+
+function sendReceiptToCustomerWhatsApp() {
+  if (!lastSubmittedRecord) return;
+  const r = lastSubmittedRecord;
+  const txt = `🏋️ *5 BROTHER'S FITNESS CLUB*
+*Official Admission Card*
+━━━━━━━━━━━━━━━━━━━━
+👤 *नाम:* ${r.name}
+📞 *मोबाइल:* ${r.phone}
+📦 *प्लान:* ${r.planName} (₹${r.planBase})
+⏰ *बैच:* ${r.batch}
+📅 *जॉइनिंग:* ${r.joinDate}
+🆔 *Member ID:* ${r.attendanceId}
+━━━━━━━━━━━━━━━━━━━━
+📍 उमराव खेड़ा, अकरमपुर, उन्नाव`;
+  window.open(`https://wa.me/91${r.phone}?text=` + encodeURIComponent(txt), '_blank');
+}
+
+function sendReceiptToOwnerWhatsApp() {
+  if (!lastSubmittedRecord) return;
+  const r = lastSubmittedRecord;
+  const txt = `🔔 *New Member Admission (Staff Alert)*
+━━━━━━━━━━━━━━━━━━━━
+👤 *नाम:* ${r.name}
+👫 *लिंग/वैवाहिक:* ${r.gender} / ${r.marital}
+🛡️ *अभिभावक/पति:* ${r.guardian}
+📞 *मोबाइल:* ${r.phone}
+🆘 *आपातकालीन:* ${r.emergencyName} (${r.emergencyPhone})
+📦 *प्लान:* ${r.planName} (₹${r.planBase})
+⏰ *बैच:* ${r.batch}
+📅 *जॉइनिंग:* ${r.joinDate}
+━━━━━━━━━━━━━━━━━━━━
+📍 5 Brother's Fitness Club, Unnao`;
+  window.open(`https://wa.me/919990954574?text=` + encodeURIComponent(txt), '_blank');
+}
+
+function finishAdmissionDone() {
+  document.getElementById('receiptModal').style.display = 'none';
+  location.reload();
+}
+</script>
+</body>
+</html>
