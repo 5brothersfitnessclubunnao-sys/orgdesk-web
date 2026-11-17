@@ -1,87 +1,609 @@
-<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admission Form</title>
-<style>
-:root{--bg:#0e0d0b;--card:#1a1814;--line:#322d22;--gold:#f5b700;--ok:#3ddc84;--bad:#ff5c5c;--tx:#f4efe4;--mu:#a49b86}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif;padding-bottom:30px}
-.w{max-width:560px;margin:0 auto;padding:12px}.c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
-label{display:block;color:var(--mu);font-size:13px;margin-top:8px}input,select,textarea{width:100%;padding:11px;margin:4px 0;background:#100f0c;color:var(--tx);border:1px solid var(--line);border-radius:8px;font:inherit}
-.ck{display:flex;gap:8px;align-items:center;color:var(--tx);font-size:14px}.ck input{width:auto;margin:0}
-button{background:var(--gold);color:#111;border:0;border-radius:8px;padding:11px 14px;font-weight:700;font:inherit;font-weight:700;cursor:pointer}button.g{background:#26221a;color:var(--tx);border:1px solid var(--line)}
-.r{display:flex;gap:8px}.r>*{flex:1}.hd{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);border-bottom:2px solid var(--gold)}
-.hd img{width:42px;height:42px;border-radius:8px;object-fit:cover}.hd b{flex:1}.dots{display:flex;gap:4px;margin:10px 0}.dots i{flex:1;height:5px;border-radius:3px;background:var(--line)}.dots i.on{background:var(--gold)}
-h2{color:var(--gold);font-size:17px;margin:6px 0}img.pv{max-width:100%;max-height:200px;border-radius:8px;margin:6px 0}
-.sig{font:34px "Brush Script MT","Segoe Script","Lucida Handwriting",cursive;color:#fff;border-bottom:2px solid var(--gold);padding:8px 4px;min-height:56px}
-pre{white-space:pre-wrap;font:13px/1.5 inherit;color:var(--tx);margin:4px 0}.mu{color:var(--mu);font-size:13px}.big{font-size:22px;font-weight:800;color:var(--gold)}
-#pr{display:none}@media print{body>*:not(#pr){display:none!important}#pr{display:block!important;background:#fff;color:#000;padding:16px;font:14px/1.5 sans-serif}#pr td{padding:4px 8px;border:1px solid #999}#pr table{border-collapse:collapse;width:100%}}
-</style>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script></head>
-<body><div id="app"><div class="w mu">Loading…</div></div><div id="pr"></div>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Digital Admission Form</title>
+  <!-- Firebase App & Firestore SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="auth-gate.js" data-mode="ondemand"></script>
+  <script src="tg-notify.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    window.__esc = function(v){ return String(v==null?"":v).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] }); };
+    window.__csv = function(v){ var s = String(v==null?"":v).replace(/"/g,'""'); return /^[=+\-@\t\r]/.test(s) ? "'"+s : s; };
+  </script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9z1gXZDB3W0lJxyHV9x2vWeb0Ees7z-g",
+      authDomain: "brother-s-fitness-club.firebaseapp.com",
+      projectId: "brother-s-fitness-club",
+      storageBucket: "brother-s-fitness-club.firebasestorage.app",
+      messagingSenderId: "781489019006",
+      appId: "1:781489019006:web:4a230698f2195e7208202f"
+    };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.firestore();
+  </script>
+  <style>
+    :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; --err: #e74c3c; }
+    body { background: var(--bg); color: var(--tx); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 12px; }
+    .box { max-width: 520px; margin: 0 auto; background: var(--card); border: 2px solid var(--ac); border-radius: 16px; padding: 16px; box-sizing: border-box; box-shadow: 0 0 25px rgba(255,204,0,0.15); }
+    .step-box { display: none; margin-top: 10px; }
+    .step-box.active { display: block; }
+    .field { margin-bottom: 12px; }
+    label { display: block; font-size: 11px; color: #ccc; margin-bottom: 4px; font-weight: 600; }
+    input, select, textarea { width: 100%; background: #0b0b0d; border: 1.5px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; box-sizing: border-box; outline: none; }
+    input:focus, select:focus { border-color: var(--ac); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px; }
+    .tap-card { background: #111; border: 1.5px solid var(--border); color: #aaa; padding: 12px 6px; text-align: center; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .tap-card.selected { background: rgba(255,204,0,0.15); border-color: var(--ac); color: var(--ac); }
+    .btn-main { width: 100%; background: var(--ac); color: #000; font-weight: 900; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; margin-top: 10px; }
+    .btn-sec { background: #333; color: #fff; font-weight: bold; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; }
+    .lang-bar { display: flex; justify-content: flex-end; gap: 6px; margin-bottom: 8px; }
+    .lang-btn { background: #222; border: 1px solid var(--border); color: #aaa; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; cursor: pointer; }
+    .lang-btn.active { background: var(--ac); color: #000; border-color: var(--ac); }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div style="max-width:520px; margin:0 auto 10px; display:flex; justify-content:space-between; align-items:center; background:#111; border:1px solid var(--ac); padding:10px 14px; border-radius:8px;">
+  <a href="index.html" style="background:var(--ac); color:#000; text-decoration:none; font-weight:bold; font-size:12px; padding:6px 12px; border-radius:6px;">⬅️ Home</a>
+  <span style="color:var(--ac); font-size:12px; font-weight:900;" id="orgTopHeader">ORGDESK PORTAL</span>
+</div>
+
+<div class="box">
+  <div class="lang-bar">
+    <button type="button" class="lang-btn active" id="langHiBtn" onclick="setLanguage('hi')">हिंदी (Devanagari)</button>
+    <button type="button" class="lang-btn" id="langEnBtn" onclick="setLanguage('en')">English</button>
+  </div>
+
+  <div style="text-align:center; border-bottom:1.5px dashed var(--border); padding-bottom:8px; margin-bottom:12px;">
+    <h2 style="color:var(--ac); margin:0; font-size:16px;" id="orgNameHeader">UNIVERSAL ADMISSION FORM</h2>
+    <p style="color:var(--mut); font-size:10.5px; margin:3px 0 0;" id="orgDetailsHeader">Pan-India Digital Registration</p>
+  </div>
+
+  <!-- STEP 1: PLAN & BATCH -->
+  <div id="stepBox1" class="step-box active">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:10px;" id="tStep1">1. Plan, Batch & Joining Date</div>
+    
+    <div class="field">
+      <label id="lblJoinDate">📅 प्रवेश तिथि (Joining Date) *</label>
+      <input type="date" id="admDateInput">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblCategory">श्रेणी (Category) *</label>
+        <select id="admCategorySelect" onchange="updatePlanDurations()">
+          <option value="general" selected>General Fitness (₹500)</option>
+          <option value="student">Student Offer (₹300)</option>
+          <option value="job">Job Seeker / Youth (₹400)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="lblDuration">अवधि (Duration) *</label>
+        <select id="admDurationSelect" onchange="calculateAdmissionFee()">
+          <option value="1M|500|30" selected>1 Month - ₹500</option>
+          <option value="3M|1400|90">3 Months - ₹1400</option>
+          <option value="6M|2600|180">6 Months - ₹2600</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="lblBatch">⏰ बैच समय स्लॉट (Batch Timing) *</label>
+      <select id="admSlotSelect">
+        <optgroup label="Morning Shift">
+          <option value="05:00 AM - 06:00 AM">05:00 AM - 06:00 AM</option>
+          <option value="06:00 AM - 07:00 AM" selected>06:00 AM - 07:00 AM</option>
+          <option value="07:00 AM - 08:00 AM">07:00 AM - 08:00 AM</option>
+        </optgroup>
+        <optgroup label="Evening Shift">
+          <option value="05:30 PM - 06:30 PM">05:30 PM - 06:30 PM</option>
+          <option value="06:30 PM - 07:30 PM">06:30 PM - 07:30 PM</option>
+          <option value="07:30 PM - 08:30 PM">07:30 PM - 08:30 PM</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div style="background:#111; border:1px solid var(--ok); padding:8px; border-radius:8px; text-align:center; margin-bottom:12px;">
+      <span style="font-size:10.5px; color:#aaa;" id="lblTotalFee">कुल देय फीस:</span>
+      <span id="admFeeDisplay" style="font-size:20px; font-weight:bold; color:var(--ok);">₹500</span>
+    </div>
+
+    <button type="button" class="btn-main" onclick="goToStep(2)" id="btnNext1">अगला (Next ➔)</button>
+  </div>
+
+  <!-- STEP 2: PERSONAL & EMERGENCY -->
+  <div id="stepBox2" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:10px;" id="tStep2">2. Personal & Emergency Details</div>
+    
+    <div class="field">
+      <label id="lblFullName">सदस्य का पूरा नाम (Full Name) *</label>
+      <input type="text" id="admFullName" placeholder="उदा. राहुल सिंह">
+    </div>
+
+    <div class="field">
+      <label id="lblParentName">पिता / माता का नाम (Parent Name) *</label>
+      <input type="text" id="admParentName" placeholder="उदा. श्री राम सिंह">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblDob">जन्म तिथि (DOB)</label>
+        <input type="date" id="admDobInput" onchange="autoCalculateAgeFromDob()">
+      </div>
+      <div class="field">
+        <label id="lblAge">आयु (Age) *</label>
+        <input type="number" id="admAge" oninput="checkUnder18()" placeholder="20">
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="lblPhone">मोबाइल नंबर (WhatsApp) *</label>
+      <input type="tel" id="admPhone" maxlength="10" placeholder="10 अंक मोबाइल">
+    </div>
+
+    <div id="under18Box" style="display:none; background:#2a1200; border:1px solid #ff9900; padding:8px; border-radius:6px; font-size:11px; color:#ffcc00; margin-bottom:10px;">
+      ⚠️ 18 वर्ष से कम आयु: माता-पिता/अभिभावक का नाम और मोबाइल नंबर देना अनिवार्य है। हल्की एक्सरसाइज की अनुमति है।
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblPin">📮 पिनकोड (PAN-INDIA Pin)</label>
+        <input type="text" id="memberPincode" oninput="fetchUniversalPincode()" maxlength="6" placeholder="209862">
+      </div>
+      <div class="field" style="position:relative;">
+        <label id="lblArea">📍 गाँव / शहर / क्षेत्र *</label>
+        <input type="text" id="unnaoAreaInput" oninput="searchUniversalAreas()" placeholder="क्षेत्र खोजें...">
+        <div id="unnaoAreaDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; background:#181818; border:1px solid var(--ac); max-height:180px; overflow-y:auto; z-index:99; border-radius:6px; padding:4px;"></div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(1)" id="btnBack2">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2;" onclick="goToStep(3)" id="btnNext2">फिटनेस प्रोफाइल (Next ➔)</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: FITNESS EXPERIENCE & PROFILE -->
+  <div id="stepBox3" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:10px;" id="tStep3">3. Fitness Level & Profile</div>
+
+    <div class="field">
+      <label id="lblLevel">फिटनेस स्तर (Fitness Level) *</label>
+      <div class="tap-grid">
+        <div class="tap-card selected" onclick="selectLevel('Beginner', this)">Beginner<br><span style="font-size:9px; font-weight:normal;">नया / शुरुआत</span></div>
+        <div class="tap-card" onclick="selectLevel('Intermediate', this)">Intermediate<br><span style="font-size:9px; font-weight:normal;">मध्यम</span></div>
+        <div class="tap-card" onclick="selectLevel('Advanced', this)">Advanced<br><span style="font-size:9px; font-weight:normal;">प्रो / भारी</span></div>
+      </div>
+      <input type="hidden" id="fitLevelInput" value="Beginner">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblPrevGym">पहिले जिम किया है? (Previous Gym)</label>
+        <select id="fitPrevGym">
+          <option value="No">नहीं (No)</option>
+          <option value="Yes">हाँ (Yes)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="lblDaysPerWeek">हफ्ते में कितने दिन आ सकते हैं?</label>
+        <select id="fitDays">
+          <option value="3 Days">3 Days / Week</option>
+          <option value="5 Days" selected>5 Days / Week</option>
+          <option value="6 Days">6 Days / Week</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblDietType">खान-पान (Diet Type)</label>
+        <select id="fitDiet">
+          <option value="Vegetarian" selected>शाकाहारी (Veg)</option>
+          <option value="Non-Vegetarian">मांसाहारी (Non-Veg)</option>
+          <option value="Eggiterian">एगेटिरियन (Egg)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="lblGoal">मुख्य लक्ष्य (Primary Goal)</label>
+        <select id="fitGoal">
+          <option value="Muscle Building" selected>मसल्बिल्डिंग / साइज</option>
+          <option value="Weight Loss">वजन घटाना (Fat Loss)</option>
+          <option value="General Fitness">सामान्य फिटनेस</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(2)" id="btnBack3">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2;" onclick="goToStep(4)" id="btnNext3">स्वास्थ्य स्क्रीन (Next ➔)</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: HEALTH SCREENING & PAR-Q -->
+  <div id="stepBox4" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:8px;" id="tStep4">4. Health Screening (PAR-Q 7 Questions)</div>
+    <p style="font-size:10px; color:var(--mut); margin-bottom:10px;" id="lblParQSub">निम्नलिखित 7 में से किसी भी बात पर "हाँ" होने पर एडमिन पैनल में "Doctor Consultation Required" की चेतावनी दिखेगी।</p>
+
+    <div id="parqQuestionsList" style="font-size:11px; display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+      <label><input type="checkbox" class="parq-q" value="Heart Condition"> 1. क्या डॉक्टर ने कभी कहा है कि आपको दिल की बीमारी है?</label>
+      <label><input type="checkbox" class="parq-q" value="Chest Pain"> 2. क्या फिजिकल एक्टिविटी करते वक्त सीने में दर्द होता है?</label>
+      <label><input type="checkbox" class="parq-q" value="Dizziness"> 3. क्या कभी चक्कर आने से बेहोश हुए हैं या संतुलन बिगड़ा है?</label>
+      <label><input type="checkbox" class="parq-q" value="Bone / Joint Issue"> 4. क्या हड्डी या जोड़ की समस्या है जो एक्सरसाइज से बढ़ सकती है?</label>
+      <label><input type="checkbox" class="parq-q" value="Blood Pressure Meds"> 5. क्या डॉक्टर अभी ब्लड प्रेशर या दिल की दवा दे रहे हैं?</label>
+      <label><input type="checkbox" class="parq-q" value="Other Medical Reason"> 6. क्या कोई अन्य कारण है जिससे आपको भारी एक्सरसाइज नहीं करनी चाहिए?</label>
+      <label><input type="checkbox" class="parq-q" value="Injury / Surgery"> 7. क्या पिछले 1 साल में कोई बड़ी सर्जरी या गंभीर चोट लगी है?</label>
+    </div>
+
+    <div class="field" style="background:#111; padding:8px; border-radius:8px; border:1px solid var(--border);">
+      <label id="lblSupp">💊 सप्लीमेंट इतिहास (Supplement History)</label>
+      <select id="admSupplement" onchange="toggleSuppBox()">
+        <option value="No" selected>कोई सप्लीमेंट नहीं लिया / ले रहे</option>
+        <option value="Yes">हाँ, सप्लीमेंट लिया है / ले रहे हैं</option>
+      </select>
+      <div id="suppDetailBox" style="display:none; margin-top:6px;">
+        <input type="text" id="admSuppName" placeholder="कौन सा प्रोडक्ट / ब्रांड ले रहे हैं? (उदा. Whey Protein)">
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(3)" id="btnBack4">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2;" onclick="goToStep(5)" id="btnNext4">दस्तावेज़ व QR (Next ➔)</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: DOCUMENTS, PHOTO & UNIQUE QR CODE -->
+  <div id="stepBox5" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:10px;" id="tStep5">5. Photo, ID & Unique QR Code</div>
+
+    <div class="row">
+      <div class="field">
+        <label id="lblPhoto">📸 सदस्य फोटो (Selfie/Photo) *</label>
+        <input type="file" id="memberPhotoFile" accept="image/*" onchange="previewImage(this, 'photoPreview')">
+        <img id="photoPreview" style="display:none; width:100%; max-height:100px; object-fit:cover; margin-top:4px; border-radius:6px;">
+      </div>
+      <div class="field">
+        <label id="lblIdProof">🪪 पहचान पत्र (Aadhaar/ID) *</label>
+        <input type="file" id="memberIdFile" accept="image/*" onchange="previewImage(this, 'idPreview')">
+        <img id="idPreview" style="display:none; width:100%; max-height:100px; object-fit:cover; margin-top:4px; border-radius:6px;">
+      </div>
+    </div>
+
+    <div class="field">
+      <label id="lblSign">✍️ हस्ताक्षर या टाइप किया नाम *</label>
+      <input type="text" id="memberSignName" placeholder="यहाँ अपना पूरा नाम लिखें">
+    </div>
+
+    <div style="background:#111; border:1px dashed var(--ac); padding:10px; border-radius:8px; text-align:center; margin-bottom:12px;">
+      <div style="font-size:11px; color:var(--ac); font-weight:bold; margin-bottom:4px;" id="lblQrInfo">🔐 Unique Attendance QR Code Generator</div>
+      <div id="qrcode" style="display:inline-block; background:#fff; padding:6px; border-radius:6px;"></div>
+      <div style="font-size:10px; color:#aaa; margin-top:4px;" id="lblQrSub">यह QR कोड फॉर्म जमा होने पर आपके नाम से सेव होगा।</div>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(4)" id="btnBack5">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2;" onclick="goToStep(6)" id="btnNext5">समीक्षा व भुगतान (Next ➔)</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: SUMMARY, CONSENT & PAYMENT -->
+  <div id="stepBox6" class="step-box">
+    <div style="color:var(--ac); font-weight:bold; font-size:12.5px; margin-bottom:8px;" id="tStep6">6. Review, Consent & Payment</div>
+
+    <div style="background:#111; border:1px solid var(--border); padding:10px; border-radius:8px; font-size:11px; line-height:1.5; margin-bottom:10px;">
+      <b style="color:var(--ac);" id="lblSummaryTitle">📌 एडमिशन सारांश:</b>
+      <div id="summaryContent" style="color:#ddd; margin-top:4px;"></div>
+    </div>
+
+    <div class="field">
+      <label id="lblPayMode">भुगतान माध्यम (Payment Mode) *</label>
+      <select id="paymentMode" onchange="togglePayMode()">
+        <option value="Cash">💵 नकद (Cash)</option>
+        <option value="Online">📱 ऑनलाइन UPI (GPay / PhonePe)</option>
+      </select>
+    </div>
+
+    <div id="onlineTray" style="display:none; margin-bottom:10px;">
+      <label id="lblUtr">🔗 UTR / UPI Reference Number (12 Digit) *</label>
+      <input type="text" id="upiUtrInput" placeholder="उदा. 427192837465">
+    </div>
+
+    <div style="background:#261200; border:1px solid #ff9900; padding:8px; border-radius:8px; margin-bottom:12px; font-size:10.5px; color:#eee;">
+      <label style="display:flex; align-items:flex-start; gap:6px; cursor:pointer;">
+        <input type="checkbox" id="rulesAgreedCheck">
+        <span id="lblLegalText">"मैंने जिम के सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी को पढ़कर फॉर्म सबमिट कर रहा हूँ।" *</span>
+      </label>
+    </div>
+
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="btn-sec" onclick="goToStep(5)" id="btnBack6">⬅ पीछे</button>
+      <button type="button" class="btn-main" style="margin-top:0; flex:2; background:var(--ok); color:#000;" onclick="submitAdmissionForm()" id="btnSubmitForm">🚀 फॉर्म सबमिट करें व QR डाउनलोड करें</button>
+    </div>
+  </div>
+
+</div>
+
 <script>
-firebase.initializeApp({apiKey:"AIzaSyC5gfHQbzq67Bzk5K03vy3w3B4FnyC0oLs",authDomain:"gym-manager-app-76650.firebaseapp.com",projectId:"gym-manager-app-76650",storageBucket:"gym-manager-app-76650.firebasestorage.app",messagingSenderId:"837291846592",appId:"1:837291846592:web:2c4a81d694e0d643b8b625"});
-const auth=firebase.auth(),db=firebase.firestore(),$=s=>document.querySelector(s),A=$('#app');
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
-const addM=(d,m)=>{const x=new Date(d);x.setMonth(x.getMonth()+m);return x.toISOString().slice(0,10)};
-const DEF={plans:[{n:'1 महीना',m:1,f:500},{n:'3 महीने',m:3,f:1400},{n:'6 महीने',m:6,f:2600},{n:'1 साल',m:12,f:4500}],slots:['Morning','Evening','Full Day'],cats:['Regular','Student','Couple / Family','Personal Training'],
-terms:'1. एक बार जमा हुई फीस वापस नहीं होगी।\n2. जिम के नियम और समय का पालन करना ज़रूरी है।\n3. वर्कआउट के दौरान किसी चोट की ज़िम्मेदारी सदस्य की स्वयं की होगी।\n4. जिम के सामान को नुकसान होने पर भरपाई करनी होगी।\n5. फॉर्म में दी गई सारी जानकारी सही है।'};
-let U,G={},C=DEF,F={joined:today(),plan:0,mode:'Cash'},P={},st=0,cfgOpen=false,last=null;
-const STEPS=['प्लान','विवरण','स्वास्थ्य','नियम','भुगतान'],col=n=>db.collection('gyms').doc(U.uid).collection(n);
-const V=id=>esc(F[id]??'');
-const I=(id,l,t='text',x='')=>`<label>${l}</label><input id="${id}" type="${t}" value="${V(id)}" ${x}>`;
-const S=(id,l,o)=>`<label>${l}</label><select id="${id}">${o.map(x=>{const v=Array.isArray(x)?x[0]:x,t=Array.isArray(x)?x[1]:x;return`<option value="${esc(v)}" ${String(F[id]??'')===String(v)?'selected':''}>${esc(t)}</option>`}).join('')}</select>`;
-const K=(id,l)=>`<label class="ck"><input type="checkbox" id="${id}" ${F[id]?'checked':''}> ${l}</label>`;
-const IMG=(k,l,q)=>`<label>${l}${q?' *':''}</label><img class="pv" id="p_${k}" src="${P[k]||''}" style="display:${P[k]?'block':'none'}"><div class="r"><button class="g" onclick="pick('${k}',1)">📷 Live</button><button class="g" onclick="pick('${k}',0)">🖼️ Gallery</button></div>`;
-function collect(){document.querySelectorAll('#v [id]').forEach(e=>{if(e.tagName=='INPUT'||e.tagName=='SELECT'||e.tagName=='TEXTAREA')F[e.id]=e.type=='checkbox'?e.checked:e.value})}
-// ---------- photo: chunte hi chhota karke rakho ----------
-function rs(file,mw,mh,cb){const fin=(s,w0,h0,cl)=>{let o='';try{let w=w0,h=h0;if(w>mw||h>mh){const r=Math.min(mw/w,mh/h);w=Math.round(w*r);h=Math.round(h*r)}const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(s,0,0,w,h);o=c.toDataURL('image/jpeg',.72)}catch(e){}try{cl&&cl()}catch(e){}return o};
- const raw=()=>{const r=new FileReader();r.onload=e=>cb(e.target.result);r.onerror=()=>cb('');r.readAsDataURL(file)};
- const img=()=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const o=fin(i,i.naturalWidth,i.naturalHeight,()=>URL.revokeObjectURL(u));o?cb(o):raw()};i.onerror=()=>raw();i.src=u};
- window.createImageBitmap?createImageBitmap(file,{imageOrientation:'from-image'}).then(b=>{const o=fin(b,b.width,b.height,()=>b.close());o?cb(o):img()}).catch(img):img()}
-function pick(k,live){const i=document.createElement('input');i.type='file';i.accept='image/*';if(live)i.capture=k=='photo'?'user':'environment';
- i.onchange=()=>{const f=i.files[0];if(!f)return;rs(f,k=='photo'?480:800,k=='photo'?640:800,u=>{if(!u)return alert('यह फोटो पढ़ी नहीं गई, दूसरी चुनें।');P[k]=u;const e=$('#p_'+k);e.src=u;e.style.display='block'})};i.click()}
-// ---------- screens ----------
-function draw(){const body=[plan,pers,hlth,rules,pay][st]();
- A.innerHTML=`<div class="hd">${G.logo?`<img src="${G.logo}">`:'🏋️'}<b>${esc(G.name||'Gym')}<div class="mu">${esc(G.addr||'')}</div></b><button class="g" onclick="location.href='index.html'">🏠</button><button class="g" onclick="cfgOpen=!cfgOpen;draw()">⚙</button></div>
- <div class="w">${cfgOpen?cfgV():''}<div class="dots">${STEPS.map((x,i)=>`<i class="${i<=st?'on':''}"></i>`).join('')}</div><h2>${st+1}/5 · ${STEPS[st]}</h2><div class="c" id="v">${body}</div>
- <div class="r">${st?`<button class="g" onclick="nav(-1)">⬅ पीछे</button>`:''}${st<4?`<button onclick="nav(1)">आगे ➔</button>`:`<button id="go" onclick="submit()">✅ फॉर्म जमा करें</button>`}</div></div>`;
- if(st==4)calc()}
-const plan=()=>`<h2>नई सदस्यता</h2>${I('joined','📅 प्रवेश तिथि *','date')}${S('cat','मेम्बरशिप श्रेणी',C.cats)}${S('slot','बैच / समय',C.slots)}${S('plan','योजना अवधि (Plan)',C.plans.map((p,i)=>[i,`${p.n} — ₹${p.f}`]))}`;
-const pers=()=>`${I('name','पूरा नाम (Full Name) *')}${I('father','पिता / माता / पति का नाम *')}${I('dob','जन्म तिथि (DOB)','date','onchange="agef()"')}${I('age','आयु (Age)','number')}${S('gender','लिंग',['पुरुष','महिला','अन्य'])}${I('occ','व्यवसाय (Occupation)')}${I('phone','मोबाइल नंबर (WhatsApp) *','tel','maxlength=10')}${I('pin','पिनकोड','tel')}${I('addr','पूरा पता / गांव / मोहल्ला *')}${I('emn','आपातकालीन संपर्क का नाम')}${I('emp','आपातकालीन संपर्क नंबर','tel')}${IMG('photo','सदस्य की फोटो',1)}${IMG('idf','ID (आगे का भाग)')}${IMG('idb','ID (पीछे का भाग)')}`;
-const hlth=()=>`${I('ht','ऊंचाई (सेमी)','number')}${I('wt','वजन (किग्रा)','number')}${S('bg','ब्लड ग्रुप',['पता नहीं','A+','A-','B+','B-','O+','O-','AB+','AB-'])}${S('goal','लक्ष्य (Goal)',['फिटनेस','वजन घटाना','वजन बढ़ाना / मसल','स्ट्रेंथ','अन्य'])}<label>स्वास्थ्य समस्या</label>${[['h0','✅ कोई समस्या नहीं (Fit)'],['h1','हाई / लो बीपी'],['h2','शुगर (Diabetes)'],['h3','दिल की बीमारी'],['h4','अस्थमा / सांस'],['h5','कमर / घुटने का दर्द'],['h6','पुरानी चोट / ऑपरेशन']].map(x=>K(x[0],x[1])).join('')}${I('hx','अन्य बीमारी / दवा (अगर कोई)')}<hr style="border-color:var(--line)">${K('hdec','मैंने स्वास्थ्य घोषणा पढ़ ली है; जानकारी सही है। *')}`;
-const rules=()=>{if(F.sign==null||F.signAuto!==F.name){F.sign=F.name||'';F.signAuto=F.name}return`<pre>${esc(C.terms)}</pre>${K('agree','मैंने सभी नियम व शर्तें पढ़कर स्वीकार की हैं *')}<label>हस्ताक्षर (नाम से अपने आप भरा — चाहें तो बदलें)</label><input id="sign" value="${V('sign')}" oninput="$('#sg').textContent=this.value"><div class="sig" id="sg">${V('sign')}</div><div class="mu">दिनांक: ${today()} · सदस्य: ${V('name')}</div>`};
-const pay=()=>{const p=C.plans[+F.plan||0];if(F.fe!==F.plan){F.fe=F.plan;F.fee=p.f;F.disc=0;F.paid=p.f}
- return`<div class="mu">${esc(p.n)} · ${F.joined} से ${addM(F.joined,p.m)} तक</div>${I('fee','प्लान फीस ₹','number','oninput="calc()"')}${I('disc','छूट (Discount) ₹','number','oninput="calc()"')}<div class="c r"><div><div class="mu">देय राशि</div><div class="big" id="net"></div></div><div><div class="mu">बकाया</div><div class="big" id="due"></div></div></div>${I('paid','अभी जमा राशि ₹','number','oninput="calc()"')}${S('mode','भुगतान का तरीका',['Cash','Google Pay','PhonePe','Paytm','Other UPI','Card']).replace('<select','<select onchange="calc()"')}<div id="ut">${I('utr','UTR / UPI Reference नंबर')}</div><div id="pm">${I('promise','बकाया कब जमा करेंगे? (तारीख) *','date')}</div>`};
-function calc(){const f=+$('#fee').value||0,d=+$('#disc').value||0,n=Math.max(0,f-d),p=Math.min(n,+$('#paid').value||0);$('#net').textContent='₹'+n;$('#due').textContent='₹'+(n-p);$('#due').style.color=n-p?'var(--bad)':'var(--ok)';$('#ut').style.display=$('#mode').value=='Cash'?'none':'block';$('#pm').style.display=n-p>0?'block':'none'}
-function agef(){const d=$('#dob').value;if(d){const a=Math.floor((Date.now()-new Date(d))/31557600000);$('#age').value=a>0?a:''}}
-function nav(d){collect();if(d>0){const m=[];
-  if(st==1){if(!F.name)m.push('नाम');if(!F.father)m.push('पिता का नाम');if(!/^\d{10}$/.test(F.phone||''))m.push('10 अंक का मोबाइल');if(!F.addr)m.push('पता');if(!P.photo)m.push('सदस्य की फोटो')}
-  if(st==2&&!F.hdec)m.push('स्वास्थ्य घोषणा पर टिक');if(st==3&&!F.agree)m.push('नियमों पर टिक');
-  if(m.length)return alert('ये भरना ज़रूरी है: '+m.join(', '))}
- st+=d;draw();scrollTo(0,0)}
-// ---------- submit ----------
-async function nextReg(){const ref=db.collection('gyms').doc(U.uid),n=await db.runTransaction(async t=>{const x=(((await t.get(ref)).data()||{}).regSeq||0)+1;t.set(ref,{regSeq:x},{merge:true});return x});return((G.name||'').replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()||'GYM')+'-'+String(n).padStart(4,'0')}
-async function submit(){collect();const b=$('#go');
- const pl=C.plans[+F.plan||0],net=Math.max(0,(+F.fee||0)-(+F.disc||0)),paid=Math.min(net,+F.paid||0),due=net-paid;
- if(due>0&&!F.promise)return alert('बकाया है — जमा करने की तारीख डालिए');
- b.disabled=true;b.textContent='⏳ सेव हो रहा है…';
- try{const ex=(await col('members').where('phone','==',F.phone).limit(1).get()).docs[0];let mid,reg,till;
-  if(ex){const o=ex.data();if(!confirm(o.name+' पहले से सदस्य है। Renew / Rejoin करें?')){b.disabled=false;b.textContent='✅ फॉर्म जमा करें';return}
-   mid=ex.id;reg=o.reg||'';till=addM(o.validTill>F.joined?o.validTill:F.joined,pl.m);await col('members').doc(mid).set({validTill:till,plan:pl.m,fee:+F.fee,slot:F.slot,cat:F.cat,renewed:today(),due,promise:F.promise||''},{merge:true})}
-  else{reg=await nextReg();till=addM(F.joined,pl.m);const r=col('members').doc();mid=r.id;const h=['h0','h1','h2','h3','h4','h5','h6'].filter(k=>F[k]).map(k=>$?['Fit','BP','Sugar','Heart','Asthma','Back/Knee','Injury'][+k[1]]:'');
-   await r.set({name:F.name,phone:F.phone,father:F.father,joined:F.joined,plan:pl.m,validTill:till,fee:+F.fee,slot:F.slot,reg,cat:F.cat,gender:F.gender,dob:F.dob||'',age:+F.age||0,occ:F.occ||'',pin:F.pin||'',addr:F.addr,emn:F.emn||'',emp:F.emp||'',blood:F.bg,height:+F.ht||0,weight:+F.wt||0,health:h,healthNote:F.hx||'',goal:F.goal,sign:F.sign||F.name,agreed:true,due,promise:F.promise||'',created:today()});
-   await col('photos').doc(mid).set({photo:P.photo||'',idf:P.idf||'',idb:P.idb||''})}
-  if(paid>0)await col('fees').add({date:today(),mid,name:F.name,amt:paid,mode:F.mode,utr:F.utr||''});
-  last={reg,till,pl,net,paid,due,f:{...F},ph:P.photo||''};done()}
- catch(e){alert('सेव नहीं हुआ: '+e.message);b.disabled=false;b.textContent='✅ फॉर्म जमा करें'}}
-function done(){const l=last;A.innerHTML=`<div class="w"><div class="c" style="text-align:center"><h2>🎉 धन्यवाद!</h2><div class="big">${esc(l.reg)}</div><p>${esc(l.f.name)} का एडमिशन हो गया।<br><span class="mu">वैधता: ${l.till} तक</span></p><p class="mu">यह सदस्य अपने आप Members, Attendance और Fees Register में जुड़ गया।</p><button style="width:100%" onclick="prn()">🖨️ फॉर्म / रसीद प्रिंट (PDF)</button><br><br><button class="g" style="width:100%" onclick="F={joined:today(),plan:0,mode:'Cash'};P={};st=0;draw()">➕ नया फॉर्म</button><br><br><button class="g" style="width:100%" onclick="location.href='index.html'">🏠 Home</button></div></div>`}
-function prn(){const l=last,f=l.f,r=(a,b)=>`<tr><td><b>${a}</b></td><td>${esc(b)}</td></tr>`;
- $('#pr').innerHTML=`<h2 style="margin:0">${esc(G.name)}</h2><div>${esc(G.addr||'')} ${esc(G.phone||'')}</div><h3>सदस्यता फॉर्म / रसीद — ${esc(l.reg)}</h3>${l.ph?`<img src="${l.ph}" style="float:right;width:110px;border:1px solid #999">`:''}<table>${r('नाम',f.name)+r('पिता/माता/पति',f.father)+r('मोबाइल',f.phone)+r('जन्म तिथि / आयु',(f.dob||'-')+' / '+(f.age||'-'))+r('पता',f.addr)+r('श्रेणी / बैच',f.cat+' / '+f.slot)+r('प्लान',l.pl.n+' ('+f.joined+' से '+l.till+')')+r('ब्लड ग्रुप / लक्ष्य',f.bg+' / '+f.goal)+r('फीस / छूट',`₹${f.fee} / ₹${f.disc||0}`)+r('जमा / बकाया',`₹${l.paid} (${f.mode}${f.utr?' '+f.utr:''}) / ₹${l.due}`)}</table><pre style="color:#000">${esc(C.terms)}</pre><p>सदस्य के हस्ताक्षर: <span style="font:30px cursive">${esc(f.sign||f.name)}</span> &nbsp; दिनांक: ${today()}</p><p>अधिकृत हस्ताक्षर: ____________</p>`;print()}
-// ---------- gym settings (plans / slots / terms) ----------
-const cfgV=()=>`<div class="c"><b>⚙ जिम सेटिंग</b><label>प्लान (हर लाइन: नाम, महीने, फीस)</label><textarea id="cp" rows="5">${esc(C.plans.map(p=>p.n+', '+p.m+', '+p.f).join('\n'))}</textarea><label>बैच (comma से)</label><input id="cs" value="${esc(C.slots.join(', '))}"><label>श्रेणियां (comma से)</label><input id="cc" value="${esc(C.cats.join(', '))}"><label>नियम व शर्तें</label><textarea id="ct" rows="6">${esc(C.terms)}</textarea><button style="width:100%;margin-top:8px" onclick="saveCfg()">सेव करें</button></div>`;
-async function saveCfg(){const pl=$('#cp').value.split('\n').map(x=>x.split(',')).filter(x=>x.length>=3).map(x=>({n:x[0].trim(),m:+x[1]||1,f:+x[2]||0}));if(!pl.length)return alert('कम से कम एक प्लान लिखें: नाम, महीने, फीस');
- const sp=s=>s.split(',').map(x=>x.trim()).filter(Boolean);C={plans:pl,slots:sp($('#cs').value),cats:sp($('#cc').value),terms:$('#ct').value};
- try{await db.collection('gyms').doc(U.uid).set({cfg:C},{merge:true});cfgOpen=false;F.plan=0;F.fe=null;draw()}catch(e){alert(e.message)}}
-auth.onAuthStateChanged(async u=>{if(!u){location.href='index.html';return}U=u;
- try{G=(await db.collection('gyms').doc(u.uid).get()).data()||{};C=Object.assign({},DEF,G.cfg||{});draw()}catch(e){A.innerHTML='<div class="w"><div class="c" style="color:var(--bad)">'+esc(e.message)+'</div><button onclick="location.reload()">दोबारा</button></div>'}});
-</script></body></html>
+let currentLang = 'hi';
+let selectedFitnessLevel = 'Beginner';
+let dynamicOrgData = { name: "OrgDesk Portal", address: "Pan-India Digital Registration", phone: "" };
+
+const TRANSLATIONS = {
+  hi: {
+    tStep1: "1. प्लान, बैच एवं प्रवेश तिथि",
+    lblJoinDate: "📅 प्रवेश तिथि (Joining Date) *",
+    lblCategory: "श्रेणी (Category) *",
+    lblDuration: "अवधि (Duration) *",
+    lblBatch: "⏰ बैच समय स्लॉट (Batch Timing) *",
+    lblTotalFee: "कुल देय फीस:",
+    btnNext1: "अगला (Next ➔)",
+    tStep2: "2. व्यक्तिगत एवं आपातकालीन विवरण",
+    lblFullName: "सदस्य का पूरा नाम (Full Name) *",
+    lblParentName: "पिता / माता का नाम (Parent Name) *",
+    lblDob: "जन्म तिथि (DOB)",
+    lblAge: "आयु (Age) *",
+    lblPhone: "मोबाइल नंबर (WhatsApp) *",
+    lblPin: "📮 पिनकोड (PAN-INDIA Pin)",
+    lblArea: "📍 गाँव / शहर / क्षेत्र *",
+    btnBack2: "⬅ पीछे",
+    btnNext2: "फिटनेस प्रोफाइल (Next ➔)",
+    tStep3: "3. फिटनेस स्तर एवं प्रोफाइल",
+    lblLevel: "फिटनेस स्तर (Fitness Level) *",
+    lblPrevGym: "पहिले जिम किया है? (Previous Gym)",
+    lblDaysPerWeek: "हफ्ते में कितने दिन आ सकते हैं?",
+    lblDietType: "खान-पान (Diet Type)",
+    lblGoal: "मुख्य लक्ष्य (Primary Goal)",
+    btnBack3: "⬅ पीछे",
+    btnNext3: "स्वास्थ्य स्क्रीन (Next ➔)",
+    tStep4: "4. स्वास्थ्य एवं PAR-Q (7 सवाल)",
+    lblParQSub: "निम्नलिखित 7 में से किसी भी बात पर 'हाँ' होने पर एडमिन पैनल में 'Doctor Consultation Required' की चेतावनी दिखेगी।",
+    lblSupp: "💊 सप्लीमेंट इतिहास (Supplement History)",
+    btnBack4: "⬅ पीछे",
+    btnNext4: "दस्तावेज़ व QR (Next ➔)",
+    tStep5: "5. फोटो, आईडी और यूनिक QR कोड",
+    lblPhoto: "📸 सदस्य फोटो (Selfie/Photo) *",
+    lblIdProof: "🪪 पहचान पत्र (Aadhaar/ID) *",
+    lblSign: "✍️ हस्ताक्षर या टाइप किया नाम *",
+    lblQrInfo: "🔐 Unique Attendance QR Code Generator",
+    lblQrSub: "यह QR कोड फॉर्म जमा होने पर आपके नाम से सेव होगा।",
+    btnBack5: "⬅ पीछे",
+    btnNext5: "समीक्षा व भुगतान (Next ➔)",
+    tStep6: "6. समीक्षा, सहमति व भुगतान",
+    lblSummaryTitle: "📌 एडमिशन सारांश:",
+    lblPayMode: "भुगतान माध्यम (Payment Mode) *",
+    lblUtr: "🔗 UTR / UPI Reference Number (12 Digit) *",
+    lblLegalText: "\"मैंने जिम के सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी को पढ़कर फॉर्म सबमिट कर रहा हूँ।\" *",
+    btnBack6: "⬅ पीछे",
+    btnSubmitForm: "🚀 फॉर्म सबमिट करें व QR डाउनलोड करें"
+  },
+  en: {
+    tStep1: "1. Plan, Batch & Joining Date",
+    lblJoinDate: "📅 Joining Date *",
+    lblCategory: "Category *",
+    lblDuration: "Duration *",
+    lblBatch: "⏰ Batch Time Slot *",
+    lblTotalFee: "Total Payable Fee:",
+    btnNext1: "Next (➔)",
+    tStep2: "2. Personal & Emergency Details",
+    lblFullName: "Full Name *",
+    lblParentName: "Parent Name *",
+    lblDob: "Date of Birth (DOB)",
+    lblAge: "Age *",
+    lblPhone: "Mobile Number (WhatsApp) *",
+    lblPin: "📮 Pincode (PAN-INDIA Pin)",
+    lblArea: "📍 Village / City / Area *",
+    btnBack2: "⬅ Back",
+    btnNext2: "Fitness Profile (Next ➔)",
+    tStep3: "3. Fitness Level & Profile",
+    lblLevel: "Fitness Level *",
+    lblPrevGym: "Previous Gym Experience?",
+    lblDaysPerWeek: "Days per week you can attend?",
+    lblDietType: "Diet Type",
+    lblGoal: "Primary Goal",
+    btnBack3: "⬅ Back",
+    btnNext3: "Health Screening (Next ➔)",
+    tStep4: "4. Health & PAR-Q (7 Questions)",
+    lblParQSub: "If any of the 7 questions is checked 'Yes', an admin alert 'Doctor Consultation Required' will be flagged.",
+    lblSupp: "💊 Supplement History",
+    btnBack4: "⬅ Back",
+    btnNext4: "Documents & QR (Next ➔)",
+    tStep5: "5. Photo, ID & Unique QR Code",
+    lblPhoto: "📸 Member Photo *",
+    lblIdProof: "🪪 ID Proof (Aadhaar/ID) *",
+    lblSign: "✍️ Signature / Typed Name *",
+    lblQrInfo: "🔐 Unique Attendance QR Code Generator",
+    lblQrSub: "This QR code will be saved with your name upon submission.",
+    btnBack5: "⬅ Back",
+    btnNext5: "Review & Payment (Next ➔)",
+    tStep6: "6. Review, Consent & Payment",
+    lblSummaryTitle: "📌 Admission Summary:",
+    lblPayMode: "Payment Mode *",
+    lblUtr: "🔗 UTR / UPI Reference Number (12 Digit) *",
+    lblLegalText: "\"I have read all gym rules, non-refundable fee policy, and strict legal warnings before submitting this form.\" *",
+    btnBack6: "⬅ Back",
+    btnSubmitForm: "🚀 Submit Form & Download QR"
+  }
+};
+
+function setLanguage(lang) {
+  currentLang = lang;
+  document.getElementById('langHiBtn').className = lang === 'hi' ? 'lang-btn active' : 'lang-btn';
+  document.getElementById('langEnBtn').className = lang === 'en' ? 'lang-btn active' : 'lang-btn';
+  
+  const t = TRANSLATIONS[lang];
+  for (let key in t) {
+    const el = document.getElementById(key);
+    if (el) el.innerText = t[key];
+  }
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("admDateInput").value = new Date().toISOString().split("T")[0];
+  updatePlanDurations();
+
+  // Dynamic Organization / Gym Branding fetcher from Firestore/LocalStorage
+  try {
+    const orgId = new URLSearchParams(window.location.search).get("o") || localStorage.getItem("od_org") || "";
+    if (orgId && typeof db !== "undefined") {
+      const doc = await db.collection("orgs").doc(orgId).get();
+      if (doc.exists) {
+        dynamicOrgData = doc.data();
+      }
+    } else {
+      const cached = localStorage.getItem("org_last");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed) dynamicOrgData = parsed;
+      }
+    }
+  } catch (e) {}
+
+  document.getElementById("orgTopHeader").innerText = (dynamicOrgData.name || "ORGDESK").toUpperCase();
+  document.getElementById("orgNameHeader").innerText = (dynamicOrgData.name || "UNIVERSAL ADMISSION FORM").toUpperCase();
+  document.getElementById("orgDetailsHeader").innerText = (dynamicOrgData.address || "Pan-India Digital Registration") + (dynamicOrgData.phone ? " | Ph: " + dynamicOrgData.phone : "");
+});
+
+function updatePlanDurations() {
+  const cat = document.getElementById("admCategorySelect").value;
+  const dur = document.getElementById("admDurationSelect");
+  dur.innerHTML = '';
+  if (cat === "student") {
+    dur.innerHTML = '<option value="1M|300|30" selected>1 Month - ₹300</option><option value="3M|850|90">3 Months - ₹850</option>';
+  } else if (cat === "job") {
+    dur.innerHTML = '<option value="1M|400|30" selected>1 Month - ₹400</option>';
+  } else {
+    dur.innerHTML = '<option value="1M|500|30" selected>1 Month - ₹500</option><option value="3M|1400|90">3 Months - ₹1400</option><option value="6M|2600|180">6 Months - ₹2600</option>';
+  }
+  calculateAdmissionFee();
+}
+
+function calculateAdmissionFee() {
+  const val = document.getElementById("admDurationSelect").value;
+  const amt = val.split("|")[1];
+  document.getElementById("admFeeDisplay").innerText = "₹" + amt;
+}
+
+function selectLevel(lvl, el) {
+  selectedFitnessLevel = lvl;
+  document.querySelectorAll('.tap-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('fitLevelInput').value = lvl;
+}
+
+function toggleSuppBox() {
+  const v = document.getElementById('admSupplement').value;
+  document.getElementById('suppDetailBox').style.display = v === 'Yes' ? 'block' : 'none';
+}
+
+function checkUnder18() {
+  const age = parseInt(document.getElementById('admAge').value, 10);
+  document.getElementById('under18Box').style.display = (!isNaN(age) && age > 0 && age < 18) ? 'block' : 'none';
+}
+
+function autoCalculateAgeFromDob() {
+  const dob = document.getElementById('admDobInput').value;
+  if (!dob) return;
+  const diff = Date.now() - new Date(dob).getTime();
+  const age = Math.abs(new Date(diff).getUTCFullYear() - 1970);
+  document.getElementById('admAge').value = age;
+  checkUnder18();
+}
+
+// UNIVERSAL PINCODE FETCHER
+async function fetchUniversalPincode() {
+  const pin = document.getElementById('memberPincode').value.trim();
+  const dd = document.getElementById('unnaoAreaDropdown');
+  if (pin.length !== 6) return;
+  try {
+    dd.innerHTML = '<div style="padding:6px; color:var(--ac); font-size:11px;">Loading areas...</div>';
+    dd.style.display = 'block';
+    const res = await fetch('https://api.postalpincode.in/pincode/' + pin);
+    const data = await res.json();
+    dd.innerHTML = '';
+    if (data && data[0] && data[0].Status === 'Success') {
+      data[0].PostOffice.forEach(po => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding:8px; font-size:11px; border-bottom:1px solid #333; cursor:pointer;';
+        item.textContent = `📍 ${po.Name} (${po.District}, ${po.State}) - ${pin}`;
+        item.onclick = () => {
+          document.getElementById('unnaoAreaInput').value = `${po.Name}, ${po.District} - ${pin}`;
+          dd.style.display = 'none';
+        };
+        dd.appendChild(item);
+      });
+      dd.style.display = 'block';
+    }
+  } catch(e) { dd.style.display = 'none'; }
+}
+
+function searchUniversalAreas() {
+  const q = document.getElementById('unnaoAreaInput').value.trim();
+  const dd = document.getElementById('unnaoAreaDropdown');
+  if (q.length < 2) { dd.style.display = 'none'; return; }
+  dd.innerHTML = `<div style="padding:8px; font-size:11px; color:var(--ac); cursor:pointer;" onclick="document.getElementById('unnaoAreaDropdown').style.display='none'">✔ Set: ${q}</div>`;
+  dd.style.display = 'block';
+}
+
+function previewImage(input, previewId) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById(previewId);
+      img.src = e.target.result;
+      img.style.display = 'block';
+    }
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function togglePayMode() {
+  const mode = document.getElementById('paymentMode').value;
+  document.getElementById('onlineTray').style.display = mode === 'Online' ? 'block' : 'none';
+}
+
+function goToStep(step) {
+  if (step === 2 && !document.getElementById('admFullName').value) { alert('कृपया पूरा नाम भरें!'); return; }
+  if (step === 6) {
+    const name = document.getElementById('admFullName').value.trim() || "Member";
+    const phone = document.getElementById('admPhone').value.trim() || "000";
+    document.getElementById('qrcode').innerHTML = "";
+    new QRCode(document.getElementById("qrcode"), {
+      text: `ORGDESK-ATTENDANCE-${name}-${phone}-${Date.now()}`,
+      width: 120,
+      height: 120
+    });
+
+    const sumHtml = `
+      <b>नाम:</b> ${name}<br>
+      <b>मोबाइल:</b> ${phone}<br>
+      <b>प्लान फीस:</b> ${document.getElementById('admFeeDisplay').innerText}<br>
+      <b>बैच समय:</b> ${document.getElementById('admSlotSelect').value}<br>
+      <b>फिटनेस स्तर:</b> ${selectedFitnessLevel}
+    `;
+    document.getElementById('summaryContent').innerHTML = sumHtml;
+  }
+
+  [1,2,3,4,5,6].forEach(i => {
+    document.getElementById(`stepBox${i}`).className = (i === step) ? "step-box active" : "step-box";
+  });
+}
+
+function submitAdmissionForm() {
+  if (!document.getElementById('rulesAgreedCheck').checked) {
+    alert('कृपया नियम व शर्तें (Legal Consent) चेकबॉक्स पर टिक करें!');
+    return;
+  }
+  alert('🎉 बधाई हो! एडमिशन सफलतापूर्वक पूरा हो गया और यूनिक QR कोड जनरेट हो गया है!');
+  location.reload();
+}
+</script>
+</body>
+</html>
