@@ -1,5 +1,5 @@
 /**
- * 5 Brother's Fitness Club — Secure Auth Gate
+ * Gym Secure Auth Gate
  * -------------------------------------------
  * - Firebase Email/Password Auth (recommended)
  * - Session: firebase.auth().currentUser (sessionStorage bypass nahi chalega)
@@ -42,6 +42,19 @@
       if (!firebase.apps.length) firebase.initializeApp(FB_CFG);
     } catch (e) {}
     return firebase;
+  }
+
+  // Login screen par us gym ka naam jo signup/profile me registered hai (hardcoded naam nahi)
+  function gymNameNow() {
+    var keys = ["om_org_profile", "bfc_gym_profile"];
+    for (var i = 0; i < keys.length; i++) {
+      try {
+        var o = JSON.parse(localStorage.getItem(keys[i]) || "{}") || {};
+        var n = o.orgName || o.gymName || o.name;
+        if (n && String(n).trim()) return String(n).trim();
+      } catch (e) {}
+    }
+    return "Gym Fees Portal";
   }
 
   function lockState() {
@@ -159,7 +172,7 @@
         '<div style="background:#111;border:2px solid #ffcc00;border-radius:14px;max-width:360px;width:100%;padding:20px;color:#fff;font-family:system-ui,sans-serif">' +
         '<div style="text-align:center;font-size:28px;margin-bottom:6px">🔒</div>' +
         '<h3 style="margin:0 0 4px;color:#ffcc00;text-align:center;font-size:16px">Admin Login</h3>' +
-        '<p style="margin:0 0 12px;color:#888;font-size:11px;text-align:center">5 Brother\'s Fitness Club · Secure</p>' +
+        '<p style="margin:0 0 12px;color:#888;font-size:11px;text-align:center"><span id="bfcAuthGym"></span> · Secure</p>' +
         '<label style="font-size:11px;color:#aaa">Email</label>' +
         '<input id="bfcAuthEmail" type="email" autocomplete="username" placeholder="admin@email.com" style="width:100%;box-sizing:border-box;background:#181818;border:1.5px solid #444;color:#fff;padding:10px;border-radius:8px;margin:4px 0 10px;font-size:14px">' +
         '<label style="font-size:11px;color:#aaa">Password</label>' +
@@ -172,6 +185,7 @@
       document.body.appendChild(overlay);
     }
     overlay.style.display = "flex";
+    try { document.getElementById("bfcAuthGym").textContent = gymNameNow(); } catch (e) {}
 
     return new Promise(function (resolve) {
       var emailEl = document.getElementById("bfcAuthEmail");

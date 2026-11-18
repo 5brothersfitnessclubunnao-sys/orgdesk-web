@@ -693,7 +693,11 @@ const GYM_DEFAULT = {
   stampImg: "https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg"
 };
 let GYM = Object.assign({}, GYM_DEFAULT);
-try { GYM = Object.assign({}, GYM_DEFAULT, JSON.parse(localStorage.getItem("bfc_gym_profile") || "{}")); } catch (e) {}
+try {
+  var _org = JSON.parse(localStorage.getItem("om_org_profile") || "{}") || {};
+  var _orgName = _org.orgName || _org.gymName;
+  GYM = Object.assign({}, GYM_DEFAULT, _orgName ? { name: _orgName } : {}, JSON.parse(localStorage.getItem("bfc_gym_profile") || "{}"));
+} catch (e) {}
 function applyGymProfile() {
   try {
     document.querySelectorAll("[data-gym]").forEach(function (el) { el.textContent = GYM[el.getAttribute("data-gym")] || ""; });
