@@ -1095,8 +1095,11 @@ async function submitAdmissionForm() {
   const feeAmt = Number(feeAmtRaw) || 0;
   const months = monthsFromPlanName(feeName);
   const joinDate = $('admDateInput').value || new Date().toISOString().slice(0, 10);
-  const photo = await fileToDataUrl($('memberPhotoFile').files[0], 320, 0.7);
-  const idImg = await fileToDataUrl($('memberIdFile').files[0], 800, 0.6);
+  const rawRead = f => new Promise(res => { if (!f) return res(''); const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => res(''); r.readAsDataURL(f); });
+  const pf = $('memberPhotoFile').files[0], idf = $('memberIdFile').files[0];
+  if (!pf && !confirm('⚠️ फोटो चुनी नहीं गई है। बिना फोटो के आगे बढ़ें?')) { if (btn) { btn.disabled = false; btn.textContent = '🚀 Submit Form & View Receipt'; } goToStep(5); return; }
+  const photo = (await fileToDataUrl(pf, 320, 0.7)) || (await rawRead(pf));
+  const idImg = (await fileToDataUrl(idf, 800, 0.6)) || (await rawRead(idf));
   if (!window.__admId) window.__admId = 'adm' + Date.now();
   const area = $('unnaoAreaInput').value.trim();
   const pin = $('memberPincode').value.trim();
@@ -1264,7 +1267,7 @@ function buildFormPagesHtml(r) {
 .afp .l{color:#555;font-size:10.5px;white-space:nowrap}
 .afp .v{font-weight:700;font-size:13.5px;word-break:break-word}
 .afp .meta{font-size:11px;margin:2px 0;color:#222}
-.afp .box{border:1.5px solid #222;padding:6px 10px;margin:10px 0;border-radius:2px}
+.afp .bx{border:1.5px solid #222;padding:6px 10px;margin:10px 0;border-radius:2px}
 .afp .sg{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:26px}
 .afp .foot{position:absolute;left:36px;right:36px;bottom:16px;border-top:1px dotted #777;padding-top:4px;display:flex;justify-content:space-between;font-size:10px;color:#444}
 .afp table{width:100%;border-collapse:collapse;font-size:11px}
@@ -1277,7 +1280,7 @@ function buildFormPagesHtml(r) {
   <div style="margin-right:150px"><h1>${E(gym)}</h1>
   <div class="sub">सदस्य पंजीकरण एवं स्वास्थ्य विवरण (Membership Registration Form)</div>
   <div class="sub">${E(adminSettings.gymAddress || '')}${gymPh ? ' | Ph: ' + E(gymPh) : ''}</div></div>
-  <div class="sec" style="margin-top:34px">1. व्यक्तिगत विवरण (Personal Details)</div>
+  <div class="sec" style="margin-top:34px;margin-right:150px">1. व्यक्तिगत विवरण (Personal Details)</div>
   <div class="meta">Member ID: <b>${E(memberId)}</b> &nbsp;|&nbsp; जॉइनिंग: <b>${E(r.joinDate)}</b></div>
   <div class="meta">फॉर्म भरा गया: <b>${E(filled)}</b></div>
   <div class="meta">प्लान: <b>${E(planShort || r.planName)}</b> &nbsp;|&nbsp; बैच: <b>${E(r.batch)}</b> &nbsp;|&nbsp; भुगतान: <b>${E(r.admissionPayMode || r.payMode || '')}</b>${r.admissionUtr ? ' (UTR ' + E(r.admissionUtr) + ')' : ''}</div>
@@ -1287,7 +1290,7 @@ function buildFormPagesHtml(r) {
   <div class="r">${F('जन्म तिथि / आयु (DOB / Age):', (r.dob || '-') + ' / ' + (r.age || '-') + ' yrs', 1.4)}${F('लिंग (M/F):', female ? 'महिला (F)' : 'पुरुष (M)')}</div>
   <div class="r">${F('मोबाइल नंबर (Mobile):', r.phone ? '+91 ' + r.phone : '')}</div>
   <div class="r">${F('पूरा पता (Address):', r.address)}</div>
-  <div class="box"><div style="font-weight:800;font-size:12px">🚨 आपातकालीन संपर्क — केवल परिवार/रिश्तेदार का नंबर</div>
+  <div class="bx"><div style="font-weight:800;font-size:12px">🚨 आपातकालीन संपर्क — केवल परिवार/रिश्तेदार का नंबर</div>
     <div class="r">${F('संपर्क व्यक्ति का नाम:', r.emergencyName)}</div>
     <div class="r">${F('मोबाइल नंबर:', r.emergencyPhone)}</div></div>
   <div class="sec">2. स्वास्थ्य एवं फिटनेस विवरण (Health Details)</div>
@@ -1317,11 +1320,11 @@ function buildFormPagesHtml(r) {
   <ul style="margin:3px 0 0 6px;padding-left:16px"><li>जिम के अंदर साफ इनडोर जूते व पर्सनल तौलिया लाना अनिवार्य है। उपकरण पटकना मना है।</li><li>गुटका, तंबाकू, धूम्रपान या शराब जिम में पूर्णतः प्रतिबंधित है। कीमती सामान की सुरक्षा स्वयं करें।</li></ul>
   <div style="font-weight:800;margin-top:10px">4. स्वास्थ्य जोखिम एवं दायित्व मुक्ति (WAIVER):</div>
   <ul style="margin:3px 0 0 6px;padding-left:16px"><li>भारी वजन उठाने में होने वाले खिंचाव या चोट की जिम्मेदारी स्वयं सदस्य की होगी। प्रबंधन कानूनी रूप से जिम्मेदार नहीं होगा।</li><li>मैंने अपनी स्वास्थ्य जानकारी सही और पूरी दी है। मैं अपने फोटो व पहचान पत्र के सदस्यता सत्यापन और उपस्थिति हेतु उपयोग की सहमति देता/देती हूँ।</li></ul>
-  <div class="box" style="background:#f7f7f7;margin-top:16px"><div style="font-weight:800;font-size:12px">कानूनी चेतावनी एवं घोषणा (Legal Declaration &amp; Warning):</div>
+  <div class="bx" style="background:#f7f7f7;margin-top:16px"><div style="font-weight:800;font-size:12px">कानूनी चेतावनी एवं घोषणा (Legal Declaration &amp; Warning):</div>
     <div style="font-style:italic;font-size:11px;margin:4px 0">“मैंने ${E(adminSettings.gymName || '')} के सभी नियमों, फीस पॉलिसी और कानूनी चेतावनी को भली-भांति पढ़ व समझ लिया है। यदि मैं फीस बकाया छोड़कर जाता/जाती हूँ, तो प्रबंधन को मेरे विरुद्ध कानूनी कार्रवाई करने की पूर्ण अनुमति है।”</div>
     <div class="r">${F('सदस्य का नाम:', r.name, 2)}${F('दिनांक:', r.joinDate)}</div>
     <div style="font-size:10.5px;color:#555">सदस्य के हस्ताक्षर:</div><div style="border-bottom:1px dotted #444;width:260px;padding:2px 0">${sign}</div></div>
-  <div class="box"><div style="font-weight:800;text-decoration:underline">केवल कार्यालय उपयोग हेतु (OFFICE USE ONLY)</div>
+  <div class="bx"><div style="font-weight:800;text-decoration:underline">केवल कार्यालय उपयोग हेतु (OFFICE USE ONLY)</div>
     <div class="r">${F('Form Received By:', 'सदस्य (स्वयं)')}${F('Batch:', r.batch)}</div>
     <div class="r">${F('Amount Received ₹:', '')}${F('Date &amp; Sign:', '')}</div>
     <div style="font-weight:800;margin:8px 0 4px">BODY MEASUREMENTS &amp; MONTHLY PROGRESS RECORD</div>
