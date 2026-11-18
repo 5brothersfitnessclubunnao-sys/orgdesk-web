@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5 Brother's Fitness Club - Universal Digital Admission Form</title>
+  <title>Admission Form</title>
   <!-- Firebase App & Firestore SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -109,9 +109,9 @@
     
     <div style="background:#18181f; padding:10px; border-radius:8px; margin-bottom:10px;">
       <label style="color:var(--ac); margin-bottom:6px;">🏢 आपकी जिम का नाम और विवरण (Gym Branding)</label>
-      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">जिम का नाम (Gym Name)</label><input type="text" id="cfgGymName" placeholder="उदा. 5 Brother's Fitness Club"></div>
-      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">पता (Address)</label><input type="text" id="cfgGymAddress" placeholder="उदा. Umrao Khera, Akrampur, Unnao"></div>
-      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">फोन नंबर (Phone)</label><input type="tel" id="cfgGymPhone" placeholder="उदा. 9140417259"></div>
+      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">जिम का नाम (Gym Name)</label><input type="text" id="cfgGymName" placeholder="उदा. Power Gym"></div>
+      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">पता (Address)</label><input type="text" id="cfgGymAddress" placeholder="उदा. गली/मोहल्ला, शहर"></div>
+      <div class="field" style="margin-bottom:6px;"><label style="color:#aaa;">फोन नंबर (Phone)</label><input type="tel" id="cfgGymPhone" placeholder="उदा. 98XXXXXXXX"></div>
     </div>
     
     <div style="background:#18181f; padding:10px; border-radius:8px; margin-bottom:10px;">
@@ -155,8 +155,8 @@
   </div>
 
   <div style="text-align:center; border-bottom:1.5px dashed var(--border); padding-bottom:8px; margin-bottom:12px;">
-    <h2 style="color:var(--ac); margin:0; font-size:16px;" id="orgNameHeader">5 BROTHER'S FITNESS CLUB</h2>
-    <p style="color:var(--mut); font-size:10.5px; margin:3px 0 0;" id="orgDetailsHeader">Umrao Khera, Akrampur, Unnao | Digital Registration</p>
+    <h2 style="color:var(--ac); margin:0; font-size:16px;" id="orgNameHeader">GYM</h2>
+    <p style="color:var(--mut); font-size:10.5px; margin:3px 0 0;" id="orgDetailsHeader">Digital Registration</p>
   </div>
 
   <!-- STEP 1: PLAN & BATCH -->
@@ -430,7 +430,7 @@
       1. सभी प्रकार की फीस <b>Non-Refundable (वापस नहीं होगी)</b> है।<br>
       2. जिम परिसर में अनुशासनहीनता या किसी भी प्रकार की क्षति पर सदस्यता तुरंत रद्द की जा सकती है।<br>
       3. जिम में वर्कआउट के दौरान किसी भी शारीरिक चोट या दुर्घटना के लिए सदस्य स्वयं जिम्मेदार होगा।<br>
-      4. सभी नियम 5 Brother's Fitness Club के प्रबंधन के अधीन हैं।
+      4. सभी नियम <span id="termsGym"></span> के प्रबंधन के अधीन हैं।
     </div>
 
     <div style="background:#261200; border:1px solid #ff9900; padding:8px; border-radius:8px; margin-bottom:12px; font-size:10.5px; color:#eee;">
@@ -451,8 +451,8 @@
 <!-- INSTANT ADMISSION RECEIPT MODAL (Flaw 5) -->
 <div id="receiptModal">
   <div class="receipt-card" id="printableReceiptArea">
-    <div style="text-align:center; font-size:20px; font-weight:900; color:#000;">5 BROTHER'S FITNESS CLUB</div>
-    <div style="text-align:center; font-size:10px; color:#555; margin-bottom:8px;">Umrao Khera, Akrampur, Unnao | Ph: 9140417259</div>
+    <div style="text-align:center; font-size:20px; font-weight:900; color:#000;">GYM NAME</div>
+    <div style="text-align:center; font-size:10px; color:#555; margin-bottom:8px;"></div>
     <div class="receipt-header">
       <div style="background:#ffcc00; color:#000; font-size:9.5px; font-weight:900; padding:2px 6px; border-radius:10px; display:inline-block;">OFFICIAL ADMISSION CARD & RECEIPT</div>
     </div>
@@ -509,9 +509,20 @@
 </div>
 <div id="imgFull" onclick="this.style.display='none'"><img id="imgFullImg"></div>
 <script>
+/* ---- Org isolation: har gym ka apna naam/data (om_org_profile se) ---- */
+const LEGACY_OWNER_ORG = ''; // 5 Brother's ka orgId yahan daalo (purana orgId-rahit data sirf unhe dikhega)
+const ORG = (() => { try { return JSON.parse(localStorage.getItem('om_org_profile') || '{}') || {}; } catch (e) { return {}; } })();
+const ORG_ID = String(ORG.orgId || '');
+const ORG_NAME = ORG.orgName || ORG.gymName || 'Your Gym';
+const ORG_ADDR = ORG.address || '';
+const ORG_PHONE = ORG.phone || '';
+const isOwner = () => !!LEGACY_OWNER_ORG && ORG_ID === LEGACY_OWNER_ORG;
+const ORG_DOC = isOwner() ? '5brothersfitness' : ORG_ID;
+const SETTINGS_KEY = 'admission_admin_settings' + (ORG_ID ? '_' + ORG_ID : '');
+const mine = r => { if (!ORG_ID) return false; const ro = String((r && r.orgId) || ''); return ro ? ro === ORG_ID : isOwner(); };
 let currentLang = 'hi';
 let selectedFitnessLevel = 'Beginner';
-let dynamicOrgData = { name: "5 Brother's Fitness Club", address: "Umrao Khera, Akrampur, Unnao", phone: "9140417259" };
+let dynamicOrgData = { name: ORG_NAME, address: ORG_ADDR, phone: ORG_PHONE };
 
 let defaultSettings = {
   fees: [
@@ -528,14 +539,14 @@ let defaultSettings = {
   ],
   reqEmergency: true,
   reqHealth: true,
-  gymName: "5 Brother's Fitness Club",
-  gymAddress: "Umrao Khera, Akrampur, Unnao",
-  gymPhone: "9140417259"
+  gymName: ORG_NAME,
+  gymAddress: ORG_ADDR,
+  gymPhone: ORG_PHONE
 };
 
 let adminSettings = defaultSettings;
 try {
-  let saved = JSON.parse(localStorage.getItem('admission_admin_settings') || 'null');
+  let saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
   if (saved && typeof saved === 'object') {
     if (Array.isArray(saved.fees) && saved.fees.length > 0) adminSettings.fees = saved.fees;
     if (Array.isArray(saved.batches) && saved.batches.length > 0) adminSettings.batches = saved.batches;
@@ -735,10 +746,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   try {
     if (typeof db !== "undefined") {
-      const doc = await db.collection("orgs").doc("5brothersfitness").get();
+      const doc = ORG_DOC ? await db.collection("orgs").doc(ORG_DOC).get() : { exists: false };
       if (doc.exists) {
         const data = doc.data();
-        dynamicOrgData = data;
+        dynamicOrgData = Object.assign({}, dynamicOrgData, data, { name: data.name || data.gymName || dynamicOrgData.name, address: data.address || dynamicOrgData.address, phone: data.phone || dynamicOrgData.phone });
         if (data.admissionSettings) {
           adminSettings = normalizeSettings(data.admissionSettings);
           if (data.admissionSettings.reqEmergency !== undefined) adminSettings.reqEmergency = data.admissionSettings.reqEmergency;
@@ -754,9 +765,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   } catch (e) {
     console.warn("Cloud fetch settings warning:", e);
   }
-  document.getElementById("orgTopHeader").innerText = (dynamicOrgData.name || "5 BROTHER'S FITNESS CLUB").toUpperCase();
-  document.getElementById("orgNameHeader").innerText = (dynamicOrgData.name || "5 BROTHER'S FITNESS CLUB").toUpperCase();
-  document.getElementById("orgDetailsHeader").innerText = (dynamicOrgData.address || "Umrao Khera, Akrampur, Unnao") + (dynamicOrgData.phone ? " | Ph: " + dynamicOrgData.phone : "");
+  applyDynamicBranding();
 });
 
 async function toggleAdminPanel() {
@@ -771,15 +780,15 @@ async function toggleAdminPanel() {
 function saveFormConfig() {
   adminSettings.reqEmergency = document.getElementById('cfgReqEmergency').checked;
   adminSettings.reqHealth = document.getElementById('cfgReqHealth').checked;
-  adminSettings.gymName = document.getElementById('cfgGymName').value.trim() || "5 Brother's Fitness Club";
-  adminSettings.gymAddress = document.getElementById('cfgGymAddress').value.trim() || "Umrao Khera, Akrampur, Unnao";
-  adminSettings.gymPhone = document.getElementById('cfgGymPhone').value.trim() || "9140417259";
+  adminSettings.gymName = document.getElementById('cfgGymName').value.trim() || ORG_NAME;
+  adminSettings.gymAddress = document.getElementById('cfgGymAddress').value.trim() || ORG_ADDR;
+  adminSettings.gymPhone = document.getElementById('cfgGymPhone').value.trim() || ORG_PHONE;
 }
 
 function applyDynamicBranding() {
-  const name = adminSettings.gymName || dynamicOrgData.name || "5 Brother's Fitness Club";
-  const addr = adminSettings.gymAddress || dynamicOrgData.address || "Umrao Khera, Akrampur, Unnao";
-  const ph = adminSettings.gymPhone || dynamicOrgData.phone || "9140417259";
+  const name = adminSettings.gymName || dynamicOrgData.name || ORG_NAME;
+  const addr = adminSettings.gymAddress || dynamicOrgData.address || ORG_ADDR;
+  const ph = adminSettings.gymPhone || dynamicOrgData.phone || ORG_PHONE;
 
   document.getElementById("orgTopHeader").innerText = name.toUpperCase();
   document.getElementById("orgNameHeader").innerText = name.toUpperCase();
@@ -788,6 +797,8 @@ function applyDynamicBranding() {
   // Also update receipt card title & details
   const rcTitle = document.querySelector('#printableReceiptArea div:first-child');
   if (rcTitle) rcTitle.textContent = name.toUpperCase();
+  const tg = document.getElementById('termsGym'); if (tg) tg.textContent = name;
+  document.title = name + ' - Admission Form';
   const rcSub = document.querySelector('#printableReceiptArea div:nth-child(2)');
   if (rcSub) rcSub.textContent = addr + (ph ? " | Ph: " + ph : "");
 }
@@ -798,9 +809,9 @@ function renderAdminSettings() {
   const batchList = document.getElementById('batchSettingsList');
   document.getElementById('cfgReqEmergency').checked = !!adminSettings.reqEmergency;
   document.getElementById('cfgReqHealth').checked = !!adminSettings.reqHealth;
-  document.getElementById('cfgGymName').value = adminSettings.gymName || "5 Brother's Fitness Club";
-  document.getElementById('cfgGymAddress').value = adminSettings.gymAddress || "Umrao Khera, Akrampur, Unnao";
-  document.getElementById('cfgGymPhone').value = adminSettings.gymPhone || "9140417259";
+  document.getElementById('cfgGymName').value = adminSettings.gymName || ORG_NAME;
+  document.getElementById('cfgGymAddress').value = adminSettings.gymAddress || ORG_ADDR;
+  document.getElementById('cfgGymPhone').value = adminSettings.gymPhone || ORG_PHONE;
 
   feeList.innerHTML = '<div style="font-size:11px;color:#ccc;margin-bottom:4px;">सिर्फ़ रकम (₹) भरें:</div>' + adminSettings.fees.map((f, i) => {
     const def = DEFAULT_FEE_NAMES.includes(f.name);
@@ -842,13 +853,13 @@ function removeBatchSetting(i) {
 }
 async function persistSettings(msg) {
   saveFormConfig();
-  localStorage.setItem('admission_admin_settings', JSON.stringify(adminSettings));
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(adminSettings)); try { localStorage.setItem('admission_admin_settings', JSON.stringify(adminSettings)); } catch (e) {}
   renderAdminSettings(); renderMemberOptions();
   const st = document.getElementById('batchStatus');
   if (st) st.textContent = msg || '';
   try {
     if (typeof db !== 'undefined') {
-      await db.collection('orgs').doc('5brothersfitness').set({ admissionSettings: adminSettings, name: "5 Brother's Fitness Club" }, { merge: true });
+      if (ORG_DOC) await db.collection('orgs').doc(ORG_DOC).set({ admissionSettings: adminSettings, name: adminSettings.gymName || ORG_NAME }, { merge: true });
       if (st) st.textContent = (msg || '') + '  ☁️ Cloud par Global Save हो गया!';
     }
   } catch (e) {
@@ -1148,7 +1159,7 @@ async function submitAdmissionForm() {
     supplement: $('admSupplement').value, supplementName: $('admSuppName').value.trim(),
     signName: $('memberSignName').value.trim(),
     memberPhoto: photo, memberIdImg: idImg,
-    idSubmitted: !!idImg, source: 'admission_form', admittedAt: new Date().toISOString()
+    idSubmitted: !!idImg, source: 'admission_form', orgId: ORG_ID, orgName: (adminSettings.gymName || ORG_NAME), admittedAt: new Date().toISOString()
   };
 
   lastSubmittedRecord = rec;
@@ -1205,7 +1216,7 @@ function downloadReceiptImage() {
 function sendReceiptToCustomerWhatsApp() {
   if (!lastSubmittedRecord) return;
   const r = lastSubmittedRecord;
-  const txt = `🏋️ *5 BROTHER'S FITNESS CLUB*
+  const txt = `🏋️ *${(adminSettings.gymName || ORG_NAME).toUpperCase()}*
 *Official Admission Card*
 ━━━━━━━━━━━━━━━━━━━━
 👤 *नाम:* ${r.name}
@@ -1215,7 +1226,7 @@ function sendReceiptToCustomerWhatsApp() {
 📅 *जॉइनिंग:* ${r.joinDate}
 🆔 *Member ID:* ${r.attendanceId}
 ━━━━━━━━━━━━━━━━━━━━
-📍 उमराव खेड़ा, अकरमपुर, उन्नाव`;
+📍 ${adminSettings.gymAddress || ORG_ADDR}`;
   window.open(`https://wa.me/91${r.phone}?text=` + encodeURIComponent(txt), '_blank');
 }
 
@@ -1233,8 +1244,10 @@ function sendReceiptToOwnerWhatsApp() {
 ⏰ *बैच:* ${r.batch}
 📅 *जॉइनिंग:* ${r.joinDate}
 ━━━━━━━━━━━━━━━━━━━━
-📍 5 Brother's Fitness Club, Unnao`;
-  window.open(`https://wa.me/919990954574?text=` + encodeURIComponent(txt), '_blank');
+📍 ${adminSettings.gymName || ORG_NAME}`;
+  const ownerPh = String(adminSettings.gymPhone || ORG_PHONE || '').replace(/\D/g, '').slice(-10);
+  if (!ownerPh) { alert('पहले Admin Settings में जिम का फोन नंबर भरें'); return; }
+  window.open(`https://wa.me/91${ownerPh}?text=` + encodeURIComponent(txt), '_blank');
 }
 
 function finishAdmissionDone() {
@@ -1267,7 +1280,7 @@ function qrDataUrl(text, size) {
 
 function buildFormPagesHtml(r) {
   const E = esc2, ck = b => b ? '[✓]' : '[ ]';
-  const gym = (adminSettings.gymName || "5 Brother's Fitness Club").toUpperCase();
+  const gym = (adminSettings.gymName || ORG_NAME).toUpperCase();
   const gymPh = adminSettings.gymPhone || '';
   const memberId = r.memberCode || r.id || '';
   const parq = Array.isArray(r.parq) ? r.parq : [];
@@ -1467,12 +1480,12 @@ async function openSavedList() {
 function closeSavedList() { document.getElementById('savedModal').style.display = 'none'; }
 async function loadSaved() {
   const map = {};
-  lsGet('5bfc_admissions').forEach(r => { if (r && r.id) map[r.id] = r; });
-  lsGet('5BFC_MEMBERS').forEach(r => { if (r && r.id && r.source === 'admission_form' && !map[r.id]) map[r.id] = r; });
+  lsGet('5bfc_admissions').forEach(r => { if (r && r.id && mine(r)) map[r.id] = r; });
+  lsGet('5BFC_MEMBERS').forEach(r => { if (r && r.id && mine(r) && r.source === 'admission_form' && !map[r.id]) map[r.id] = r; });
   try {
     if (typeof db !== 'undefined') {
-      const snap = await db.collection('admissions').get();
-      snap.forEach(d => { const c = d.data(); c.id = c.id || d.id; map[c.id] = Object.assign({}, c, map[c.id] || {}); });
+      const snap = await (isOwner() ? db.collection('admissions').get() : db.collection('admissions').where('orgId', '==', ORG_ID).get());
+      snap.forEach(d => { const c = d.data(); if (!mine(c)) return; c.id = c.id || d.id; map[c.id] = Object.assign({}, c, map[c.id] || {}); });
     }
   } catch (e) { console.warn('cloud list', e); }
   savedCache = Object.values(map).sort((a, b) => String(b.admittedAt || b.joinDate || '').localeCompare(String(a.admittedAt || a.joinDate || '')));
