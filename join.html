@@ -15,7 +15,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     window.__esc = function(v){ return String(v==null?"":v).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c] }); };
-    window.__csv = function(v){ var s = String(v==null?"":v).replace(/"/g,'""'); return /^[=+\-@\t\r\n]/.test(s) ? "'"+s : s; };
+    window.__csv = function(v){ var s = String(v==null?"":v).replace(/"/g,'""'); return /^[=+\-@	
+]/.test(s) ? "'"+s : s; };
   </script>
   <script>
     const firebaseConfig = {
@@ -70,26 +71,6 @@
     .receipt-card { background:#fff; color:#000; border-radius:12px; padding:16px; width:100%; max-width:440px; margin:20px auto; position:relative; box-shadow:0 0 30px rgba(0,0,0,0.8); }
     .receipt-header { text-align:center; border-bottom:2px dashed #000; padding-bottom:8px; margin-bottom:10px; }
     .r-row { display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:5px; border-bottom:1px dotted #ccc; padding-bottom:3px; }
-
-    /* Saved admissions / edit / viewer */
-    .sv-card{background:#16161a;border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px}
-    .sv-ph{width:46px;height:56px;border-radius:6px;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;font-size:20px}
-    .sv-ph img{width:100%;height:100%;object-fit:cover}
-    .sv-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
-    .sv-btns button,.db button{background:#2a2a33;color:#fff;border:1px solid var(--border);border-radius:6px;padding:8px 4px;font-size:11.5px;font-weight:700;cursor:pointer}
-    .sv-btns button.del,.db button.del{background:#512027;color:#ffb3b3;border-color:#a8414d}
-    .ov{display:none;position:fixed;inset:0;background:#0b0b0d;z-index:1000000;overflow-y:auto;padding:12px;box-sizing:border-box}
-    .ov-in{max-width:520px;margin:0 auto}
-    .ov-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;position:sticky;top:0;background:#0b0b0d;padding:6px 0;z-index:2}
-    .ed-sec{color:var(--ac);font-weight:800;font-size:12.5px;margin:14px 0 8px;border-bottom:1px dashed var(--border);padding-bottom:4px}
-    .doc-box{background:#111;border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center}
-    .doc-box .dl{font-size:11px;color:#ccc;margin-bottom:6px;font-weight:700}
-    .doc-box img{width:100%;max-height:130px;object-fit:cover;border-radius:6px;cursor:zoom-in}
-    .nodoc{font-size:11px;color:#777;padding:30px 0}
-    .db{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
-    #formViewer{display:none;position:fixed;inset:0;background:#222;z-index:1000001;flex-direction:column}
-    #imgFull{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:1000003;align-items:center;justify-content:center;padding:8px}
-    #imgFull img{max-width:100%;max-height:100%;object-fit:contain}
   </style>
 </head>
 <body>
@@ -102,7 +83,6 @@
 
 <div style="max-width:520px; margin:0 auto;">
   <button type="button" class="admin-toggle" onclick="toggleAdminPanel()">⚙️ Admin Settings — फीस, बैच और फॉर्म आवश्यकताएँ manage करें</button>
-  <button type="button" class="admin-toggle" onclick="openSavedList()" style="margin-top:8px">📂 Saved Admissions — देखें / Edit / Documents / Delete</button>
   <div id="adminPanel" class="admin-panel">
     <h3>Admin Settings (Global Cloud Sync)</h3>
     <p class="admin-note">यहाँ से सेट की गई फीस, बैच और नियम दुनिया में कहीं से भी फॉर्म खोलने पर लागू होंगे।</p>
@@ -451,10 +431,17 @@
 <!-- INSTANT ADMISSION RECEIPT MODAL (Flaw 5) -->
 <div id="receiptModal">
   <div class="receipt-card" id="printableReceiptArea">
-    <div style="text-align:center; font-size:20px; font-weight:900; color:#000;">5 BROTHER'S FITNESS CLUB</div>
-    <div style="text-align:center; font-size:10px; color:#555; margin-bottom:8px;">Umrao Khera, Akrampur, Unnao | Ph: 9140417259</div>
-    <div class="receipt-header">
-      <div style="background:#ffcc00; color:#000; font-size:9.5px; font-weight:900; padding:2px 6px; border-radius:10px; display:inline-block;">OFFICIAL ADMISSION CARD & RECEIPT</div>
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #000; padding-bottom:8px; margin-bottom:8px;">
+      <div>
+        <div style="font-size:18px; font-weight:900; color:#000;" id="rcGymName">5 BROTHER'S FITNESS CLUB</div>
+        <div style="font-size:10px; color:#555;" id="rcGymDetails">Umrao Khera, Akrampur, Unnao | Ph: 9140417259</div>
+      </div>
+      <div>
+        <img id="rcMemberPhoto" style="display:none; width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid #000;" alt="Photo">
+      </div>
+    </div>
+    <div class="receipt-header" style="border:none; margin:0; padding:0;">
+      <div style="background:#ffcc00; color:#000; font-size:9.5px; font-weight:900; padding:2px 6px; border-radius:10px; display:inline-block; margin-bottom:8px;">OFFICIAL ADMISSION CARD & RECEIPT</div>
     </div>
 
     <div class="r-row"><span>Admission ID:</span><b id="rcId"></b></div>
@@ -473,39 +460,13 @@
   </div>
 
   <div style="max-width:440px; width:100%; margin:0 auto; display:flex; flex-direction:column; gap:8px;" data-html2canvas-ignore="true">
-    <button type="button" onclick="downloadFullFormImage()" style="background:#ffcc00; color:#000; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">📥 पूरा एडमिशन फॉर्म डाउनलोड (Image)</button>
-    <button type="button" onclick="downloadFullFormPdf()" style="background:#f59e0b; color:#000; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">📄 पूरा एडमिशन फॉर्म डाउनलोड (PDF)</button>
-    <button type="button" onclick="openFormViewer(lastSubmittedRecord)" style="background:#1f2937; color:#fff; font-weight:800; padding:11px; border:1px solid #444; border-radius:8px; cursor:pointer; font-size:12.5px;">👁 पूरा फॉर्म देखें</button>
-    <button type="button" onclick="downloadReceiptImage()" style="background:#ffcc00; color:#000; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">🧾 सिर्फ छोटी रसीद डाउनलोड</button>
+    <button type="button" onclick="downloadReceiptImage()" style="background:#ffcc00; color:#000; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">📥 रसीद इमेज डाउनलोड करें</button>
     <button type="button" onclick="sendReceiptToCustomerWhatsApp()" style="background:#25D366; color:#fff; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">📲 ग्राहक को WhatsApp पर भेजें</button>
     <button type="button" onclick="sendReceiptToOwnerWhatsApp()" style="background:#3b82f6; color:#fff; font-weight:900; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:13px;">👑 Send to Owner (स्टाफ द्वारा एडमिशन पर)</button>
     <button type="button" onclick="finishAdmissionDone()" style="background:#333; color:#fff; font-weight:bold; padding:10px; border:none; border-radius:8px; cursor:pointer;">✔ पूर्ण करें (Done & Refresh)</button>
   </div>
 </div>
 
-
-<!-- SAVED LIST -->
-<div id="savedModal" class="ov"><div class="ov-in">
-  <div class="ov-top"><b style="color:var(--ac)">📂 Saved Admissions</b><button class="btn-sec" onclick="closeSavedList()">✖ बंद</button></div>
-  <input id="savedSearch" placeholder="🔍 नाम या मोबाइल से खोजें" oninput="renderSaved()" style="margin-bottom:10px">
-  <div id="savedList"></div>
-</div></div>
-<!-- EDIT -->
-<div id="editModal" class="ov"><div class="ov-in">
-  <div class="ov-top"><b style="color:var(--ac)">✏️ Edit Admission</b><button class="btn-sec" onclick="closeEdit()">✖ रद्द</button></div>
-  <div id="editBody"></div>
-  <button id="editSaveBtn" class="btn-main" style="margin-bottom:30px" onclick="saveEdit()">💾 Save Changes</button>
-</div></div>
-<!-- FORM VIEWER -->
-<div id="formViewer">
-  <div style="display:flex;gap:6px;padding:8px;background:#111;flex-wrap:wrap">
-    <button class="btn-sec" onclick="closeFormViewer()">✖ बंद</button>
-    <button class="btn-sec" style="background:var(--ac);color:#000" onclick="downloadFullFormImage(viewerRec)">📥 Image</button>
-    <button class="btn-sec" style="background:#f59e0b;color:#000" onclick="downloadFullFormPdf(viewerRec)">📄 PDF</button>
-  </div>
-  <div style="flex:1;overflow:auto;padding:8px"><div id="fvBody"></div></div>
-</div>
-<div id="imgFull" onclick="this.style.display='none'"><img id="imgFullImg"></div>
 <script>
 let currentLang = 'hi';
 let selectedFitnessLevel = 'Beginner';
@@ -661,7 +622,7 @@ const TRANSLATIONS = {
     lblSummaryTitle: "📌 एडमिशन सारांश:",
     lblPayMode: "भुगतान माध्यम (Payment Mode) *",
     lblUtr: "🔗 UTR / UPI Reference Number (12 Digit) *",
-    lblLegalText: "“मैंने जिम के सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी को पढ़कर फॉर्म स्वीकार किया है।” *",
+    lblLegalText: ""मैंने जिम के सभी नियम, फीस पॉलिसी (Non-refundable) और सख्त कानूनी चेतावनी को पढ़कर फॉर्म स्वीकार किया है।" *",
     btnBack6: "⬅ पीछे",
     btnSubmitForm: "🚀 फॉर्म सबमिट करें व डिजिटल रसीद देखें"
   },
@@ -707,7 +668,7 @@ const TRANSLATIONS = {
     lblSummaryTitle: "📌 Admission Summary:",
     lblPayMode: "Payment Mode *",
     lblUtr: "🔗 UTR / UPI Reference Number (12 Digit) *",
-    lblLegalText: "“I have read all gym rules, non-refundable fee policy, and strict legal warnings before submitting this form.” *",
+    lblLegalText: ""I have read all gym rules, non-refundable fee policy, and strict legal warnings before submitting this form." *",
     btnBack6: "⬅ Back",
     btnSubmitForm: "🚀 Submit Form & View Receipt"
   }
@@ -1095,11 +1056,8 @@ async function submitAdmissionForm() {
   const feeAmt = Number(feeAmtRaw) || 0;
   const months = monthsFromPlanName(feeName);
   const joinDate = $('admDateInput').value || new Date().toISOString().slice(0, 10);
-  const rawRead = f => new Promise(res => { if (!f) return res(''); const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => res(''); r.readAsDataURL(f); });
-  const pf = $('memberPhotoFile').files[0], idf = $('memberIdFile').files[0];
-  if (!pf && !confirm('⚠️ फोटो चुनी नहीं गई है। बिना फोटो के आगे बढ़ें?')) { if (btn) { btn.disabled = false; btn.textContent = '🚀 Submit Form & View Receipt'; } goToStep(5); return; }
-  const photo = (await fileToDataUrl(pf, 320, 0.7)) || (await rawRead(pf));
-  const idImg = (await fileToDataUrl(idf, 800, 0.6)) || (await rawRead(idf));
+  const photo = await fileToDataUrl($('memberPhotoFile').files[0], 320, 0.7);
+  const idImg = await fileToDataUrl($('memberIdFile').files[0], 800, 0.6);
   if (!window.__admId) window.__admId = 'adm' + Date.now();
   const area = $('unnaoAreaInput').value.trim();
   const pin = $('memberPincode').value.trim();
@@ -1151,6 +1109,13 @@ async function submitAdmissionForm() {
 }
 
 function openReceiptModal(rec) {
+  const gymName = adminSettings.gymName || dynamicOrgData.name || "5 BROTHER'S FITNESS CLUB";
+  const gymAddr = adminSettings.gymAddress || dynamicOrgData.address || "Umrao Khera, Akrampur, Unnao";
+  const gymPhone = adminSettings.gymPhone || dynamicOrgData.phone || "9140417259";
+
+  document.getElementById('rcGymName').textContent = gymName.toUpperCase();
+  document.getElementById('rcGymDetails').textContent = gymAddr + (gymPhone ? " | Ph: " + gymPhone : "");
+
   document.getElementById('rcId').textContent = rec.id;
   document.getElementById('rcDate').textContent = rec.joinDate;
   document.getElementById('rcName').textContent = rec.name;
@@ -1159,6 +1124,14 @@ function openReceiptModal(rec) {
   document.getElementById('rcEmergency').textContent = (rec.emergencyName ? rec.emergencyName + ' - ' : '') + rec.emergencyPhone;
   document.getElementById('rcPlan').textContent = rec.planName + ' (₹' + rec.planBase + ' - ' + rec.status + ')';
   document.getElementById('rcBatch').textContent = rec.batch;
+
+  const photoEl = document.getElementById('rcMemberPhoto');
+  if (rec.memberPhoto) {
+    photoEl.src = rec.memberPhoto;
+    photoEl.style.display = 'block';
+  } else {
+    photoEl.style.display = 'none';
+  }
 
   const qb = document.getElementById('rcQrBox');
   qb.innerHTML = '';
@@ -1216,388 +1189,6 @@ function finishAdmissionDone() {
   document.getElementById('receiptModal').style.display = 'none';
   location.reload();
 }
-
-/* ===================== FULL FORM (download / view) + SAVED ADMISSIONS MANAGER ===================== */
-function esc2(v){ return String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-if (typeof updateGuardianLabel !== 'function') {
-  window.updateGuardianLabel = function () {
-    try {
-      const g = document.getElementById('admGender').value, m = document.getElementById('admMarital').value;
-      const hi = currentLang === 'hi';
-      const t = (g === 'Female' && m === 'Married') ? (hi ? 'पति का नाम (Husband Name) *' : 'Husband Name *') : (hi ? 'पिता / माता का नाम (Father / Mother Name) *' : 'Father / Mother Name *');
-      const el = document.getElementById('lblGuardianName'); if (el) el.innerText = t;
-    } catch (e) {}
-  };
-}
-
-const PARQ_HI = { 'Heart Condition':'दिल की बीमारी','Chest Pain':'सीने में दर्द','Dizziness':'चक्कर / बेहोशी','Bone / Joint Issue':'हड्डी / जोड़ की समस्या','Blood Pressure Meds':'बीपी / दिल की दवा','Other Medical Reason':'अन्य चिकित्सीय कारण','Injury / Surgery':'सर्जरी / चोट (1 साल)' };
-const GOAL_HI = { 'Muscle Building':'मसल बिल्डिंग / साइज','Weight Loss':'वजन घटाना','General Fitness':'सामान्य फिटनेस' };
-
-function qrDataUrl(text, size) {
-  const d = document.createElement('div');
-  new QRCode(d, { text: text || 'NA', width: size, height: size });
-  const c = d.querySelector('canvas');
-  try { return c.toDataURL('image/png'); } catch (e) { const im = d.querySelector('img'); return im ? im.src : ''; }
-}
-
-function buildFormPagesHtml(r) {
-  const E = esc2, ck = b => b ? '[✓]' : '[ ]';
-  const gym = (adminSettings.gymName || "5 Brother's Fitness Club").toUpperCase();
-  const gymPh = adminSettings.gymPhone || '';
-  const memberId = r.memberCode || r.id || '';
-  const parq = Array.isArray(r.parq) ? r.parq : [];
-  const female = r.gender === 'Female', wife = female && r.marital === 'Married';
-  let filled = '';
-  try { filled = new Date(r.admittedAt || Date.now()).toLocaleString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric', hour:'numeric', minute:'2-digit', hour12:true, timeZone:'Asia/Kolkata' }) + ' (IST)'; } catch (e) {}
-  const planShort = String(r.planName || '').replace(/^.*? - /, '');
-  const due = (r.dueAmount != null ? r.dueAmount : r.planBase) || 0;
-  const F = (l, v, w) => `<div class="f" style="${w ? 'flex:' + w : ''}"><span class="l">${l}</span><span class="v">${E(v)}</span></div>`;
-  const qr = qrDataUrl(r.attendanceId || memberId, 110);
-  const photo = r.memberPhoto ? `<img src="${r.memberPhoto}" style="width:100%;height:100%;object-fit:cover">` : '<span style="color:#777;font-size:11px">PHOTO</span>';
-  const sign = r.signName ? `<span class="sg">${E(r.signName)}</span>` : '';
-  const mid = [r.height, r.weight].some(Boolean);
-  return `
-<style>
-.afp{width:794px;height:1123px;box-sizing:border-box;padding:30px 36px;background:#fff;color:#000;font-family:'Segoe UI','Noto Sans Devanagari',Arial,sans-serif;font-size:12px;position:relative;overflow:hidden}
-.afp h1{margin:0;font-size:25px;text-align:center;font-weight:900}
-.afp .sub{text-align:center;font-size:11px;color:#333;margin-top:4px}
-.afp .sec{font-weight:800;font-size:15px;border-bottom:1.5px solid #333;padding-bottom:3px;margin:16px 0 8px}
-.afp .r{display:flex;gap:26px;margin:8px 0}
-.afp .f{flex:1;display:flex;gap:6px;align-items:baseline;border-bottom:1px dotted #444;padding-bottom:2px;min-width:0}
-.afp .l{color:#555;font-size:10.5px;white-space:nowrap}
-.afp .v{font-weight:700;font-size:13.5px;word-break:break-word}
-.afp .meta{font-size:11px;margin:2px 0;color:#222}
-.afp .bx{border:1.5px solid #222;padding:6px 10px;margin:10px 0;border-radius:2px}
-.afp .sg{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:26px}
-.afp .foot{position:absolute;left:36px;right:36px;bottom:16px;border-top:1px dotted #777;padding-top:4px;display:flex;justify-content:space-between;font-size:10px;color:#444}
-.afp table{width:100%;border-collapse:collapse;font-size:11px}
-.afp td,.afp th{border:1px solid #333;padding:9px 4px;text-align:center}
-.afp th{background:#eee}
-.afp li{margin:3px 0}
-</style>
-<div class="afp" id="afpPage1">
-  <div style="position:absolute;right:36px;top:30px;width:128px;height:160px;border:2px solid #000;display:flex;align-items:center;justify-content:center;overflow:hidden">${photo}</div>
-  <div style="margin-right:150px"><h1>${E(gym)}</h1>
-  <div class="sub">सदस्य पंजीकरण एवं स्वास्थ्य विवरण (Membership Registration Form)</div>
-  <div class="sub">${E(adminSettings.gymAddress || '')}${gymPh ? ' | Ph: ' + E(gymPh) : ''}</div></div>
-  <div class="sec" style="margin-top:34px;margin-right:150px">1. व्यक्तिगत विवरण (Personal Details)</div>
-  <div class="meta">Member ID: <b>${E(memberId)}</b> &nbsp;|&nbsp; जॉइनिंग: <b>${E(r.joinDate)}</b></div>
-  <div class="meta">फॉर्म भरा गया: <b>${E(filled)}</b></div>
-  <div class="meta">प्लान: <b>${E(planShort || r.planName)}</b> &nbsp;|&nbsp; बैच: <b>${E(r.batch)}</b> &nbsp;|&nbsp; भुगतान: <b>${E(r.admissionPayMode || r.payMode || '')}</b>${r.admissionUtr ? ' (UTR ' + E(r.admissionUtr) + ')' : ''}</div>
-  <div class="meta">फीस: <b>₹${E(r.planBase || 0)}</b> &nbsp;|&nbsp; जमा: <b>₹${E(r.amount || 0)}</b> &nbsp;|&nbsp; बकाया: <b>₹${E(due)}</b></div>
-  <div class="r">${F('पूरा नाम (Full Name):', r.name)}</div>
-  <div class="r">${F(wife ? 'पति का नाम (Husband):' : 'पिता का नाम (Father):', r.parentName || r.guardian)}</div>
-  <div class="r">${F('जन्म तिथि / आयु (DOB / Age):', (r.dob || '-') + ' / ' + (r.age || '-') + ' yrs', 1.4)}${F('लिंग (M/F):', female ? 'महिला (F)' : 'पुरुष (M)')}</div>
-  <div class="r">${F('मोबाइल नंबर (Mobile):', r.phone ? '+91 ' + r.phone : '')}</div>
-  <div class="r">${F('पूरा पता (Address):', r.address)}</div>
-  <div class="bx"><div style="font-weight:800;font-size:12px">🚨 आपातकालीन संपर्क — केवल परिवार/रिश्तेदार का नंबर</div>
-    <div class="r">${F('संपर्क व्यक्ति का नाम:', r.emergencyName)}</div>
-    <div class="r">${F('मोबाइल नंबर:', r.emergencyPhone)}</div></div>
-  <div class="sec">2. स्वास्थ्य एवं फिटनेस विवरण (Health Details)</div>
-  <div class="r">${F('ऊंचाई (सेमी):', r.height || '')}${F('वज़न (किलो):', r.weight || '')}${F('ब्लड ग्रुप:', r.bloodGroup || '')}</div>
-  <div class="meta" style="margin-top:8px">फिटनेस लक्ष्य: ${Object.keys(GOAL_HI).map(k => ck(r.goal === k) + ' ' + GOAL_HI[k]).join(' &nbsp; ')}</div>
-  <div class="meta" style="margin-top:8px">स्वास्थ्य स्थिति (यदि लागू हो तो टिक करें):<br>${ck(!parq.length)} कोई समस्या नहीं (Fit) &nbsp; ${Object.keys(PARQ_HI).map(k => ck(parq.includes(k)) + ' ' + PARQ_HI[k]).join(' &nbsp; ')}</div>
-  <div class="meta" style="margin-top:8px">सप्लीमेंट लेते हैं? ${ck(r.supplement === 'Yes')} हाँ &nbsp; ${ck(r.supplement !== 'Yes')} नहीं ${r.supplement === 'Yes' && r.supplementName ? ' — <b>' + E(r.supplementName) + '</b>' : ''}</div>
-  <div class="r">${F('फिटनेस स्तर:', r.fitnessLevel)}${F('हफ्ते में दिन:', r.daysPerWeek)}${F('खान-पान:', r.diet)}</div>
-  <div class="sec">3. आपातकालीन सहमति एवं घोषणा</div>
-  <div style="font-size:11.5px;line-height:1.5">मैं जिम परिसर में किसी भी आपातकालीन स्थिति में प्राथमिक चिकित्सा या नज़दीकी अस्पताल ले जाने हेतु जिम प्रबंधन को पूर्ण सहमति देता/देती हूँ। मैंने अपनी स्वास्थ्य जानकारी सही और पूरी दी है।</div>
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:12px">
-    <div><div style="font-weight:800;font-size:11px">सदस्य के हस्ताक्षर:</div><div style="border-bottom:1px dotted #444;min-width:250px;padding:2px 0">${sign}</div></div>
-    <div style="font-size:11px"><span class="l">दिनांक:</span> <b style="font-size:13.5px">${E(r.joinDate)}</b></div></div>
-  <div style="position:absolute;left:36px;bottom:46px;display:flex;align-items:flex-end;gap:8px"><img src="${qr}" style="width:96px;height:96px"><div style="font-size:10px;color:#444">यूनिक QR (उपस्थिति)<br><b style="font-size:11px">${E(memberId)}</b></div></div>
-  <div style="position:absolute;right:36px;bottom:60px;text-align:right;font-size:10.5px;color:#444">अधिकृत मुहर / Authorised Stamp<div style="border-bottom:1px solid #444;width:130px;margin:22px 0 0 auto"></div></div>
-  <div class="foot"><span>${E(adminSettings.gymName || '')}</span><span>Application ID: ${E(r.id)}</span></div>
-</div>
-
-<div class="afp" id="afpPage2">
-  <div style="text-align:center;font-weight:900;font-size:19px">${E(gym)}</div>
-  <div style="text-align:center;font-weight:800;font-size:15px;margin:6px 0 14px">नियम, शर्तें एवं दायित्व पत्र (Terms, Rules &amp; Waiver)</div>
-  <div style="font-weight:800;margin-top:8px">1. फीस एवं उपस्थिति नियम (FEES POLICY - STRICT):</div>
-  <ul style="margin:3px 0 0 6px;padding-left:16px"><li>शिक्षा संस्थानों की तरह यह भी एक अभ्यास संस्थान है। यदि आप महीने में 1 दिन भी आते हैं, तो भी पूरे 1 महीने की पूरी फीस देय होगी।</li><li>अनुपस्थिति के आधार पर फीस में कोई छूट या रिफंड नहीं मिलेगा। फीस गैर-वापसी योग्य (Non-Refundable) है।</li></ul>
-  <div style="font-weight:800;margin-top:10px">2. जिम छोड़ने की प्रक्रिया (EXIT POLICY):</div>
-  <ul style="margin:3px 0 0 6px;padding-left:16px"><li>यदि जिम छोड़ना है, तो महीना पूरा होते ही तुरंत जिम आना बंद कर दें। बिना फीस दिए नया महीना शुरू करने पर प्रबंधन सख्त कदम उठाएगा।</li></ul>
-  <div style="font-weight:800;margin-top:10px">3. जिम अनुशासन एवं व्यवस्था (DISCIPLINE):</div>
-  <ul style="margin:3px 0 0 6px;padding-left:16px"><li>जिम के अंदर साफ इनडोर जूते व पर्सनल तौलिया लाना अनिवार्य है। उपकरण पटकना मना है।</li><li>गुटका, तंबाकू, धूम्रपान या शराब जिम में पूर्णतः प्रतिबंधित है। कीमती सामान की सुरक्षा स्वयं करें।</li></ul>
-  <div style="font-weight:800;margin-top:10px">4. स्वास्थ्य जोखिम एवं दायित्व मुक्ति (WAIVER):</div>
-  <ul style="margin:3px 0 0 6px;padding-left:16px"><li>भारी वजन उठाने में होने वाले खिंचाव या चोट की जिम्मेदारी स्वयं सदस्य की होगी। प्रबंधन कानूनी रूप से जिम्मेदार नहीं होगा।</li><li>मैंने अपनी स्वास्थ्य जानकारी सही और पूरी दी है। मैं अपने फोटो व पहचान पत्र के सदस्यता सत्यापन और उपस्थिति हेतु उपयोग की सहमति देता/देती हूँ।</li></ul>
-  <div class="bx" style="background:#f7f7f7;margin-top:16px"><div style="font-weight:800;font-size:12px">कानूनी चेतावनी एवं घोषणा (Legal Declaration &amp; Warning):</div>
-    <div style="font-style:italic;font-size:11px;margin:4px 0">“मैंने ${E(adminSettings.gymName || '')} के सभी नियमों, फीस पॉलिसी और कानूनी चेतावनी को भली-भांति पढ़ व समझ लिया है। यदि मैं फीस बकाया छोड़कर जाता/जाती हूँ, तो प्रबंधन को मेरे विरुद्ध कानूनी कार्रवाई करने की पूर्ण अनुमति है।”</div>
-    <div class="r">${F('सदस्य का नाम:', r.name, 2)}${F('दिनांक:', r.joinDate)}</div>
-    <div style="font-size:10.5px;color:#555">सदस्य के हस्ताक्षर:</div><div style="border-bottom:1px dotted #444;width:260px;padding:2px 0">${sign}</div></div>
-  <div class="bx"><div style="font-weight:800;text-decoration:underline">केवल कार्यालय उपयोग हेतु (OFFICE USE ONLY)</div>
-    <div class="r">${F('Form Received By:', 'सदस्य (स्वयं)')}${F('Batch:', r.batch)}</div>
-    <div class="r">${F('Amount Received ₹:', '')}${F('Date &amp; Sign:', '')}</div>
-    <div style="font-weight:800;margin:8px 0 4px">BODY MEASUREMENTS &amp; MONTHLY PROGRESS RECORD</div>
-    <table><tr><th>Stage</th><th>Chest</th><th>Waist</th><th>Shoulder</th><th>Biceps</th><th>Forearm</th><th>Weight</th></tr>
-    <tr><td>Initial</td><td></td><td></td><td></td><td></td><td></td><td>${E(r.weight || '')}</td></tr>
-    <tr><td>Current</td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table></div>
-  <div class="foot"><span>${E(adminSettings.gymName || '')}</span><span>Member ID: ${E(memberId)}</span></div>
-</div>`;
-}
-
-function makeOffscreen(rec) {
-  const host = document.createElement('div');
-  host.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;background:#fff;z-index:-1';
-  host.innerHTML = buildFormPagesHtml(rec);
-  document.body.appendChild(host);
-  return host;
-}
-function saveBlob(blob, name) {
-  const url = URL.createObjectURL(blob), a = document.createElement('a');
-  a.href = url; a.download = name; document.body.appendChild(a); a.click();
-  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 4000);
-}
-function safeName(r) { return String(r.name || 'Member').replace(/[^\w\u0900-\u097F]+/g, '_'); }
-
-async function downloadFullFormImage(rec) {
-  rec = rec || lastSubmittedRecord; if (!rec) return;
-  const host = makeOffscreen(rec);
-  try {
-    await new Promise(r => setTimeout(r, 250));
-    const c1 = await html2canvas(host.querySelector('#afpPage1'), { scale: 2, backgroundColor: '#fff', useCORS: true });
-    const c2 = await html2canvas(host.querySelector('#afpPage2'), { scale: 2, backgroundColor: '#fff', useCORS: true });
-    const out = document.createElement('canvas');
-    out.width = c1.width; out.height = c1.height + c2.height + 8;
-    const x = out.getContext('2d'); x.fillStyle = '#000'; x.fillRect(0, 0, out.width, out.height);
-    x.drawImage(c1, 0, 0); x.drawImage(c2, 0, c1.height + 8);
-    out.toBlob(b => saveBlob(b, 'Admission_Form_' + safeName(rec) + '.png'), 'image/png');
-  } catch (e) { alert('Download error: ' + (e && e.message || e)); }
-  host.remove();
-}
-async function downloadFullFormPdf(rec) {
-  rec = rec || lastSubmittedRecord; if (!rec) return;
-  const host = makeOffscreen(rec);
-  try {
-    await new Promise(r => setTimeout(r, 250));
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-    for (let i = 1; i <= 2; i++) {
-      const c = await html2canvas(host.querySelector('#afpPage' + i), { scale: 2, backgroundColor: '#fff', useCORS: true });
-      if (i > 1) pdf.addPage();
-      pdf.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
-    }
-    saveBlob(pdf.output('blob'), 'Admission_Form_' + safeName(rec) + '.pdf');
-  } catch (e) { alert('PDF error: ' + (e && e.message || e)); }
-  host.remove();
-}
-
-/* ---------- viewer ---------- */
-let viewerRec = null;
-function openFormViewer(rec) {
-  viewerRec = rec;
-  const body = document.getElementById('fvBody');
-  body.innerHTML = '<div id="fvWrap" style="width:794px;transform-origin:top left">' + buildFormPagesHtml(rec) + '</div>';
-  const s = Math.min(1, (window.innerWidth - 16) / 794), w = document.getElementById('fvWrap');
-  w.style.transform = 'scale(' + s + ')';
-  w.querySelectorAll('.afp').forEach(p => p.style.marginBottom = '12px');
-  body.style.height = ''; w.parentElement.style.height = (w.offsetHeight * s) + 'px';
-  document.getElementById('formViewer').style.display = 'flex';
-}
-function closeFormViewer() { document.getElementById('formViewer').style.display = 'none'; }
-function viewImg(src) {
-  if (!src) return;
-  document.getElementById('imgFullImg').src = src;
-  document.getElementById('imgFull').style.display = 'flex';
-}
-
-/* ---------- storage helpers ---------- */
-const LS_KEYS = ['5bfc_admissions', '5BFC_MEMBERS'];
-function lsGet(k) { try { const a = JSON.parse(localStorage.getItem(k) || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-function lsSetRec(rec) {
-  LS_KEYS.forEach(k => {
-    let arr = lsGet(k); const i = arr.findIndex(x => String(x.id) === String(rec.id));
-    if (i >= 0) arr[i] = Object.assign({}, arr[i], rec); else if (k === '5bfc_admissions') arr.push(rec);
-    try { localStorage.setItem(k, JSON.stringify(arr)); } catch (e) {
-      const slim = arr.map(x => String(x.id) === String(rec.id) ? Object.assign({}, x, { memberPhoto: '', memberIdImg: '' }) : x);
-      try { localStorage.setItem(k, JSON.stringify(slim)); } catch (e2) {}
-    }
-  });
-}
-function lsDelRec(id) {
-  LS_KEYS.forEach(k => { const arr = lsGet(k).filter(x => String(x.id) !== String(id)); try { localStorage.setItem(k, JSON.stringify(arr)); } catch (e) {} });
-}
-async function cloudSaveRec(rec) {
-  try {
-    if (typeof db === 'undefined') return;
-    const cloudRec = Object.assign({}, rec); delete cloudRec.memberPhoto; delete cloudRec.memberIdImg;
-    await db.collection('admissions').doc(rec.id).set(cloudRec, { merge: true });
-    await db.collection('admission_docs').doc(rec.id).set({ memberPhoto: rec.memberPhoto || '', memberIdImg: rec.memberIdImg || '' });
-  } catch (e) { console.warn('cloud save', e); }
-}
-async function cloudDelRec(id) {
-  try { if (typeof db === 'undefined') return;
-    await db.collection('admissions').doc(id).delete();
-    await db.collection('admission_docs').doc(id).delete(); } catch (e) { console.warn('cloud del', e); }
-}
-
-/* ---------- saved list ---------- */
-let savedCache = [];
-async function openSavedList() {
-  if (typeof bfcLogin === 'function') { const ok = await bfcLogin(); if (!ok) return; }
-  document.getElementById('savedModal').style.display = 'block';
-  document.getElementById('savedList').innerHTML = '<div class="empty-state">Loading...</div>';
-  await loadSaved();
-}
-function closeSavedList() { document.getElementById('savedModal').style.display = 'none'; }
-async function loadSaved() {
-  const map = {};
-  lsGet('5bfc_admissions').forEach(r => { if (r && r.id) map[r.id] = r; });
-  lsGet('5BFC_MEMBERS').forEach(r => { if (r && r.id && r.source === 'admission_form' && !map[r.id]) map[r.id] = r; });
-  try {
-    if (typeof db !== 'undefined') {
-      const snap = await db.collection('admissions').get();
-      snap.forEach(d => { const c = d.data(); c.id = c.id || d.id; map[c.id] = Object.assign({}, c, map[c.id] || {}); });
-    }
-  } catch (e) { console.warn('cloud list', e); }
-  savedCache = Object.values(map).sort((a, b) => String(b.admittedAt || b.joinDate || '').localeCompare(String(a.admittedAt || a.joinDate || '')));
-  renderSaved();
-}
-function renderSaved() {
-  const q = (document.getElementById('savedSearch').value || '').toLowerCase().trim();
-  const list = savedCache.filter(r => !q || (String(r.name) + ' ' + r.phone).toLowerCase().includes(q));
-  const el = document.getElementById('savedList');
-  if (!list.length) { el.innerHTML = '<div class="empty-state">कोई admission form नहीं मिला।</div>'; return; }
-  el.innerHTML = list.map(r => `
-    <div class="sv-card">
-      <div style="display:flex;gap:10px;align-items:center">
-        <div class="sv-ph">${r.memberPhoto ? `<img src="${r.memberPhoto}">` : '👤'}</div>
-        <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px">${esc2(r.name)}</div>
-          <div style="font-size:10.5px;color:#aaa">${esc2(r.phone)} • ${esc2(r.joinDate)}<br>${esc2(r.planName)} • ${esc2(r.batch)}</div>
-          <div style="font-size:10px;margin-top:2px;color:#8dffb0">${r.memberPhoto ? '📸 फोटो ' : ''}${r.memberIdImg ? '🪪 ID' : ''}</div></div>
-      </div>
-      <div class="sv-btns">
-        <button onclick="svView('${esc2(r.id)}')">👁 फॉर्म</button>
-        <button onclick="svEdit('${esc2(r.id)}')">✏️ Edit</button>
-        <button onclick="svDownload('${esc2(r.id)}')">📥 Download</button>
-        <button class="del" onclick="svDelete('${esc2(r.id)}')">🗑 Delete</button>
-      </div>
-    </div>`).join('');
-}
-function svFind(id) { return savedCache.find(r => String(r.id) === String(id)); }
-async function ensureDocs(rec) {
-  if ((rec.memberPhoto && rec.memberIdImg) || typeof db === 'undefined') return rec;
-  try {
-    const d = await db.collection('admission_docs').doc(rec.id).get();
-    if (d.exists) { const x = d.data(); if (!rec.memberPhoto) rec.memberPhoto = x.memberPhoto || ''; if (!rec.memberIdImg) rec.memberIdImg = x.memberIdImg || ''; }
-  } catch (e) {}
-  return rec;
-}
-async function svView(id) { const r = svFind(id); if (!r) return; await ensureDocs(r); openFormViewer(r); }
-async function svDownload(id) { const r = svFind(id); if (!r) return; await ensureDocs(r); await downloadFullFormImage(r); }
-async function svDelete(id) {
-  const r = svFind(id); if (!r) return;
-  if (!confirm('पक्का "' + r.name + '" का admission form (फोटो/ID समेत) हमेशा के लिए Delete करें?')) return;
-  lsDelRec(id); await cloudDelRec(id);
-  savedCache = savedCache.filter(x => String(x.id) !== String(id)); renderSaved();
-}
-
-/* ---------- edit ---------- */
-let editRec = null;
-function opt(v, label, cur) { return `<option value="${esc2(v)}" ${String(cur) === String(v) ? 'selected' : ''}>${esc2(label)}</option>`; }
-async function svEdit(id) {
-  const r = svFind(id); if (!r) return;
-  await ensureDocs(r);
-  editRec = JSON.parse(JSON.stringify(r));
-  const x = editRec, I = (k, label, type, extra) => `<div class="field"><label>${label}</label><input id="ed_${k}" type="${type || 'text'}" value="${esc2(x[k] || '')}" ${extra || ''}></div>`;
-  const fees = liveFees(), curPlan = fees.find(f => f.name === x.planName);
-  const planOpts = (curPlan ? '' : opt(x.planName, x.planName + ' (current)', x.planName)) + fees.map(f => opt(f.name + '|' + f.amount, f.name + ' - ₹' + f.amount, f.name === x.planName ? f.name + '|' + f.amount : '')).join('');
-  const batches = (adminSettings.batches || []).map(b => b.label);
-  if (x.batch && !batches.includes(x.batch)) batches.unshift(x.batch);
-  const parq = x.parq || [];
-  document.getElementById('editBody').innerHTML = `
-    <div class="ed-sec">📄 Documents</div>
-    <div class="row">
-      <div class="doc-box"><div class="dl">📸 फोटो</div>
-        <div id="edPhotoBox">${x.memberPhoto ? `<img src="${x.memberPhoto}" onclick="viewImg(this.src)">` : '<div class="nodoc">अपलोड नहीं</div>'}</div>
-        <input type="file" id="edPhotoFile" accept="image/*" onchange="edPickDoc('photo',this)" style="display:none">
-        <div class="db"><button onclick="document.getElementById('edPhotoFile').click()">बदलें / जोड़ें</button><button class="del" onclick="edDelDoc('photo')">हटाएँ</button></div></div>
-      <div class="doc-box"><div class="dl">🪪 पहचान पत्र (ID)</div>
-        <div id="edIdBox">${x.memberIdImg ? `<img src="${x.memberIdImg}" onclick="viewImg(this.src)">` : '<div class="nodoc">अपलोड नहीं</div>'}</div>
-        <input type="file" id="edIdFile" accept="image/*" onchange="edPickDoc('id',this)" style="display:none">
-        <div class="db"><button onclick="document.getElementById('edIdFile').click()">बदलें / जोड़ें</button><button class="del" onclick="edDelDoc('id')">हटाएँ</button></div></div>
-    </div>
-    <div style="font-size:10px;color:#888;margin:-4px 0 8px">फोटो/ID पर tap करो — पूरी screen में खुलेगी।</div>
-    <div class="ed-sec">👤 व्यक्तिगत विवरण</div>
-    ${I('name', 'पूरा नाम')}
-    <div class="row"><div class="field"><label>लिंग</label><select id="ed_gender">${opt('Male', 'पुरुष', x.gender)}${opt('Female', 'महिला', x.gender)}</select></div>
-    <div class="field"><label>वैवाहिक स्थिति</label><select id="ed_marital">${opt('Unmarried', 'अविवाहित', x.marital)}${opt('Married', 'विवाहित', x.marital)}</select></div></div>
-    ${I('parentName', 'पिता / माता / पति का नाम')}
-    <div class="row">${I('dob', 'जन्म तिथि', 'date')}${I('age', 'आयु', 'number')}</div>
-    ${I('phone', 'मोबाइल', 'tel', 'maxlength="10"')}
-    ${I('address', 'पता')}
-    <div class="row">${I('emergencyName', 'Emergency नाम')}${I('emergencyPhone', 'Emergency मोबाइल', 'tel', 'maxlength="10"')}</div>
-    <div class="ed-sec">📦 प्लान व बैच</div>
-    <div class="field"><label>Plan</label><select id="ed_plan">${planOpts}</select></div>
-    <div class="field"><label>Batch</label><select id="ed_batch">${batches.map(b => opt(b, b, x.batch)).join('')}</select></div>
-    ${I('joinDate', 'Joining Date', 'date')}
-    <div class="field"><label>भुगतान माध्यम</label><select id="ed_pay">${opt('Cash', 'Cash', x.admissionPayMode)}${opt('Online', 'Online UPI', x.admissionPayMode)}</select></div>
-    ${I('admissionUtr', 'UTR (यदि Online)')}
-    <div class="ed-sec">💪 स्वास्थ्य व फिटनेस</div>
-    <div class="row">${I('height', 'ऊंचाई (सेमी)', 'number')}${I('weight', 'वज़न (किलो)', 'number')}</div>
-    ${I('bloodGroup', 'ब्लड ग्रुप')}
-    <div class="row"><div class="field"><label>फिटनेस स्तर</label><select id="ed_level">${['Beginner','Intermediate','Advanced'].map(v => opt(v, v, x.fitnessLevel)).join('')}</select></div>
-    <div class="field"><label>हफ्ते में दिन</label><select id="ed_days">${['3 Days','5 Days','6 Days'].map(v => opt(v, v, x.daysPerWeek)).join('')}</select></div></div>
-    <div class="row"><div class="field"><label>खान-पान</label><select id="ed_diet">${['Vegetarian','Non-Vegetarian','Eggiterian'].map(v => opt(v, v, x.diet)).join('')}</select></div>
-    <div class="field"><label>लक्ष्य</label><select id="ed_goal">${Object.keys(GOAL_HI).map(v => opt(v, GOAL_HI[v], x.goal)).join('')}</select></div></div>
-    <div class="field"><label>स्वास्थ्य समस्याएँ (टिक करें)</label><div style="display:flex;flex-direction:column;gap:5px;font-size:11.5px">
-      ${Object.keys(PARQ_HI).map(k => `<label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" class="ed-parq" value="${esc2(k)}" ${parq.includes(k) ? 'checked' : ''} style="width:auto"> ${PARQ_HI[k]}</label>`).join('')}</div></div>
-    <div class="row"><div class="field"><label>सप्लीमेंट</label><select id="ed_supp">${opt('No', 'नहीं', x.supplement)}${opt('Yes', 'हाँ', x.supplement)}</select></div>${I('supplementName', 'सप्लीमेंट नाम')}</div>
-    ${I('signName', '✍️ हस्ताक्षर (टाइप नाम)')}`;
-  document.getElementById('editModal').style.display = 'block';
-  document.getElementById('editModal').scrollTop = 0;
-}
-async function edPickDoc(kind, input) {
-  if (!input.files || !input.files[0]) return;
-  const data = await fileToDataUrl(input.files[0], kind === 'photo' ? 320 : 800, kind === 'photo' ? 0.7 : 0.6);
-  if (!data) { alert('Image पढ़ नहीं पाया।'); return; }
-  if (kind === 'photo') editRec.memberPhoto = data; else { editRec.memberIdImg = data; editRec.idSubmitted = true; }
-  document.getElementById(kind === 'photo' ? 'edPhotoBox' : 'edIdBox').innerHTML = `<img src="${data}" onclick="viewImg(this.src)">`;
-}
-function edDelDoc(kind) {
-  if (!confirm(kind === 'photo' ? 'फोटो हटाएँ?' : 'ID proof हटाएँ?')) return;
-  if (kind === 'photo') editRec.memberPhoto = ''; else { editRec.memberIdImg = ''; editRec.idSubmitted = false; }
-  document.getElementById(kind === 'photo' ? 'edPhotoBox' : 'edIdBox').innerHTML = '<div class="nodoc">हटा दिया (Save दबाओ)</div>';
-}
-function closeEdit() { document.getElementById('editModal').style.display = 'none'; editRec = null; }
-async function saveEdit() {
-  const g = id => document.getElementById('ed_' + id), x = editRec; if (!x) return;
-  const name = g('name').value.trim(); if (!name) { alert('नाम खाली नहीं हो सकता'); return; }
-  const ph = g('phone').value.trim(); if (ph && !/^\d{10}$/.test(ph)) { alert('मोबाइल 10 अंक का होना चाहिए'); return; }
-  Object.assign(x, {
-    name, gender: g('gender').value, marital: g('marital').value, parentName: g('parentName').value.trim(), guardian: g('parentName').value.trim(),
-    dob: g('dob').value, age: g('age').value, phone: ph, address: g('address').value.trim(),
-    emergencyName: g('emergencyName').value.trim(), emergencyPhone: g('emergencyPhone').value.trim(),
-    batch: g('batch').value, joinDate: g('joinDate').value || x.joinDate, admissionPayMode: g('pay').value, admissionUtr: g('admissionUtr').value.trim(),
-    height: g('height').value, weight: g('weight').value, bloodGroup: g('bloodGroup').value.trim(),
-    fitnessLevel: g('level').value, daysPerWeek: g('days').value, diet: g('diet').value, goal: g('goal').value,
-    parq: [...document.querySelectorAll('.ed-parq:checked')].map(c => c.value),
-    supplement: g('supp').value, supplementName: g('supplementName').value.trim(), signName: g('signName').value.trim()
-  });
-  const pv = g('plan').value;
-  if (pv.includes('|')) {
-    const [pn, pa] = pv.split('|'), amt = Number(pa) || 0;
-    if (pn !== x.planName) {
-      const paid = Number(x.amount) || 0;
-      x.planName = pn; x.planBase = amt; x.planMonths = monthsFromPlanName(pn);
-      x.type = planTypeFromCategory(pn.includes(' - ') ? pn.split(' - ')[0] : '');
-      if (!paid) x.dueAmount = amt;
-    }
-  }
-  x.expiryDate = calculateExpiryDate(x.joinDate, x.planMonths);
-  x.attendanceId = x.attendanceId || ('ORGDESK-ATTENDANCE-' + x.name + '-' + x.phone + '-' + x.id);
-  const btn = document.getElementById('editSaveBtn'); btn.disabled = true; btn.textContent = 'Saving...';
-  lsSetRec(x); await cloudSaveRec(x);
-  const i = savedCache.findIndex(r => String(r.id) === String(x.id)); if (i >= 0) savedCache[i] = x;
-  btn.disabled = false; btn.textContent = '💾 Save Changes';
-  closeEdit(); renderSaved(); alert('✅ Save हो गया');
-}
-
-/* also keep photos in cloud on first submit */
-const _origSubmit = submitAdmissionForm;
-submitAdmissionForm = async function () {
-  await _origSubmit();
-  try { if (lastSubmittedRecord) cloudSaveRec(lastSubmittedRecord); } catch (e) {}
-};
 </script>
 </body>
 </html>
