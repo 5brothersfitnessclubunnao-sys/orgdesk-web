@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Universal SaaS Portal - Organization Setup</title>
-  <!-- Firebase SDKs -->
+  <title>Om Software - Organization Setup</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -19,36 +18,31 @@
     .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     .cat-card { background: #0b0b0d; border: 2px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; cursor: pointer; transition: all 0.2s ease; }
     .cat-card.active { border-color: var(--ac); background: rgba(255, 204, 0, 0.08); }
-    .cat-card .icon { font-size: 28px; margin-bottom: 6px; }
-    .cat-card .title { font-size: 12.5px; font-weight: bold; color: #fff; }
+    .cat-card .icon { font-size: 26px; margin-bottom: 4px; }
+    .cat-card .title { font-size: 12px; font-weight: bold; color: #fff; }
 
     .field { margin-bottom: 12px; }
     label { display: block; font-size: 11px; color: #ccc; margin-bottom: 4px; font-weight: 600; }
-    input, textarea { width: 100%; background: #0b0b0d; border: 1.5px solid var(--border); color: #fff; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; outline: none; }
-    input:focus, textarea:focus { border-color: var(--ac); }
+    input, textarea, select { width: 100%; background: #0b0b0d; border: 1.5px solid var(--border); color: #fff; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; box-sizing: border-box; outline: none; }
+    input:focus, textarea:focus, select:focus { border-color: var(--ac); }
     
     .btn-main { width: 100%; background: var(--ac); color: #000; font-weight: 900; padding: 13px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; margin-top: 10px; }
-    .btn-main:hover { opacity: 0.9; }
-    
-    .error-msg { background: rgba(231, 76, 60, 0.15); border: 1px solid var(--err); color: var(--err); padding: 8px; border-radius: 6px; font-size: 11.5px; margin-bottom: 12px; display: none; text-align: center; }
     .success-msg { background: rgba(46, 204, 113, 0.15); border: 1px solid var(--ok); color: var(--ok); padding: 8px; border-radius: 6px; font-size: 11.5px; margin-bottom: 12px; display: none; text-align: center; }
-    
-    #gymSetupForm { display: none; }
+    #orgSetupForm { display: none; }
   </style>
 </head>
 <body>
 
 <div class="setup-box">
   <div class="header">
-    <div style="background:var(--ac); color:#000; font-size:9px; font-weight:900; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:6px;">STEP 2 : ONBOARDING</div>
+    <div style="background:var(--ac); color:#000; font-size:9px; font-weight:900; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:6px;">OM SOFTWARE SETUP</div>
     <h2>Select Your Business Type</h2>
-    <p>Choose your management category to configure workspace</p>
+    <p>Configure your secure management workspace</p>
   </div>
 
-  <div id="errorAlert" class="error-msg"></div>
   <div id="successAlert" class="success-msg"></div>
 
-  <!-- Category Selection Screen -->
+  <!-- Step A: Category Selection -->
   <div id="categoryStep">
     <div class="category-grid">
       <div class="cat-card active" id="catGym" onclick="selectCategory('gym')">
@@ -57,23 +51,31 @@
       </div>
       <div class="cat-card" id="catSchool" onclick="selectCategory('school')">
         <div class="icon">🏫</div>
-        <div class="title">School / College</div>
+        <div class="title">School</div>
+      </div>
+      <div class="cat-card" id="catCollege" onclick="selectCategory('college')">
+        <div class="icon">🎓</div>
+        <div class="title">College</div>
+      </div>
+      <div class="cat-card" id="catCompany" onclick="selectCategory('company')">
+        <div class="icon">🏢</div>
+        <div class="title">Company</div>
       </div>
     </div>
-    <button type="button" class="btn-main" onclick="proceedToSetup()">Continue to Setup ➔</button>
+    <button type="button" class="btn-main" onclick="proceedToSetup()">Continue to Details ➔</button>
   </div>
 
-  <!-- Gym Setup Form -->
-  <form id="gymSetupForm" onsubmit="handleGymSetupSubmit(event)">
-    <div style="font-size: 12px; font-weight: bold; color: var(--ac); margin-bottom: 10px;">🏋️‍♂️ Gym Profile Configuration</div>
+  <!-- Step B: Organization Details Form -->
+  <form id="orgSetupForm" onsubmit="handleOrgSetupSubmit(event)">
+    <div style="font-size: 12px; font-weight: bold; color: var(--ac); margin-bottom: 10px;" id="formTitleLabel">🏢 Organization Configuration</div>
     
     <div class="field">
-      <label>Gym / Fitness Club Name *</label>
-      <input type="text" id="setupGymName" required placeholder="e.g. 5 Brother's Fitness Club">
+      <label id="lblOrgName">Organization Name *</label>
+      <input type="text" id="setupOrgName" required placeholder="e.g. 5 Brother's Fitness Club">
     </div>
 
     <div class="field">
-      <label>Owner Name *</label>
+      <label>Owner / Director Name *</label>
       <input type="text" id="setupOwnerName" required placeholder="e.g. Saurabh Singh Chandel">
     </div>
 
@@ -84,11 +86,11 @@
 
     <div class="field">
       <label>Full Address / Location *</label>
-      <textarea id="setupAddress" rows="2" required placeholder="e.g. Umrao Khera, Akrampur, Unnao, UP"></textarea>
+      <textarea id="setupAddress" rows="2" required placeholder="Enter complete address"></textarea>
     </div>
 
     <div class="field">
-      <label>Default UPI ID (For Fee Collection) *</label>
+      <label>Default UPI ID (For Fee / Payments) *</label>
       <input type="text" id="setupUpiId" required placeholder="e.g. 9140417259@okbizaxis">
     </div>
 
@@ -97,7 +99,6 @@
 </div>
 
 <script>
-  // Firebase Initialization
   const firebaseConfig = {
     apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
     authDomain: "bfc-gym-215ae.firebaseapp.com",
@@ -108,71 +109,72 @@
   };
   if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
   const db = firebase.firestore();
+  const auth = firebase.auth();
 
   let selectedCategory = "gym";
 
+  window.addEventListener("DOMContentLoaded", () => {
+    // If already configured, skip setup
+    const existingOrg = localStorage.getItem("om_org_profile");
+    if (existingOrg) {
+      window.location.href = "index.html";
+    }
+  });
+
   function selectCategory(cat) {
     selectedCategory = cat;
-    document.getElementById("catGym").classList.toggle("active", cat === "gym");
-    document.getElementById("catSchool").classList.toggle("active", cat === "school");
+    ['gym', 'school', 'college', 'company'].forEach(c => {
+      document.getElementById('cat' + c.charAt(0).toUpperCase() + c.slice(1)).classList.toggle('active', c === cat);
+    });
   }
 
   function proceedToSetup() {
-    if (selectedCategory === "school") {
-      alert("School/College management module is coming soon! Proceeding with Gym configuration.");
-    }
     document.getElementById("categoryStep").style.display = "none";
-    document.getElementById("gymSetupForm").style.display = "block";
-  }
-
-  function showError(msg) {
-    const el = document.getElementById("errorAlert");
-    el.innerText = msg;
-    el.style.display = "block";
-    document.getElementById("successAlert").style.display = "none";
+    document.getElementById("orgSetupForm").style.display = "block";
+    const labels = { gym: "🏋️‍♂️ Gym Profile", school: "🏫 School Profile", college: "🎓 College Profile", company: "🏢 Company Profile" };
+    document.getElementById("formTitleLabel").innerText = labels[selectedCategory];
   }
 
   function showSuccess(msg) {
     const el = document.getElementById("successAlert");
     el.innerText = msg;
     el.style.display = "block";
-    document.getElementById("errorAlert").style.display = "none";
   }
 
-  async function handleGymSetupSubmit(e) {
+  async function handleOrgSetupSubmit(e) {
     e.preventDefault();
     const btn = document.getElementById("saveSetupBtn");
     btn.disabled = true;
     btn.innerText = "Saving configuration...";
 
-    const gymData = {
-      category: "gym",
-      gymName: document.getElementById("setupGymName").value.trim(),
+    const currentUser = auth.currentUser;
+    const orgId = currentUser ? currentUser.uid : "org_" + Date.now(); // Secure Unique Tenant ID
+
+    const orgData = {
+      orgId: orgId,
+      category: selectedCategory,
+      orgName: document.getElementById("setupOrgName").value.trim(),
       ownerName: document.getElementById("setupOwnerName").value.trim(),
       phone: document.getElementById("setupPhone").value.trim(),
       address: document.getElementById("setupAddress").value.trim(),
       upiId: document.getElementById("setupUpiId").value.trim(),
-      updatedAt: new Date().toISOString()
+      createdAt: new Date().toISOString()
     };
 
-    // Consistent tenant ID
-    const orgId = "5brothersfitness";
-
-    // 1. Save locally first (Guarantees instant success)
-    localStorage.setItem("bfc_org_profile", JSON.stringify(gymData));
-    localStorage.setItem("bfc_org_id", orgId);
+    // Save locally and isolate securely
+    localStorage.setItem("om_org_profile", JSON.stringify(orgData));
+    localStorage.setItem("om_org_id", orgId);
 
     try {
-      // 2. Try syncing with Cloud Firestore
-      await db.collection("orgs").doc(orgId).set(gymData, { merge: true });
-      showSuccess("Configuration saved successfully! Launching dashboard...");
+      await db.collection("organizations").doc(orgId).set(orgData, { merge: true });
+      showSuccess("Configuration saved securely! Launching dashboard...");
     } catch (err) {
-      console.warn("Cloud warning:", err.message);
+      console.warn("Cloud sync warning:", err.message);
       showSuccess("Saved locally! Launching dashboard...");
     }
 
     setTimeout(() => {
-      window.location.href = "index.html"; // Launch main dashboard instantly
+      window.location.href = "index.html";
     }, 1000);
   }
 </script>
