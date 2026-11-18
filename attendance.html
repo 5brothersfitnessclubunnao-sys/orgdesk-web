@@ -7,16 +7,12 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
 <script>
-// Inline auth-gate implementation for robust offline/standalone operation
-window.bfcLogin = async function() {
-  let pin = prompt("🔐 Enter Admin / Staff PIN (Default: 1234):", "");
-  if (pin === "1234" || pin === "5858" || pin === "admin") {
-    return true;
-  }
-  if (pin !== null) {
-    alert("❌ Incorrect PIN!");
-  }
-  return false;
+// Admin PIN (index.html -> Admin Portal se badal sakte hain). Cancel dabane par sirf band hota hai.
+window.bfcLogin = async function () {
+  var pin = prompt("🔐 Admin PIN दर्ज करें:", "");
+  if (pin === null) return false;
+  if (pin === (localStorage.getItem("om_admin_pin") || "1234")) return true;
+  alert("❌ गलत PIN!"); return false;
 };
 </script>
 
@@ -306,7 +302,7 @@ function togElite(i){const m=M[i];let e=eliteSet();const on=isElite(m)&&m.ids.so
 
 /* ---------- init ---------- */
 (function(){
-  const g=lsj('admission_admin_settings',{}).gymName;if(g)$('gym').textContent=g.toUpperCase();
+  const g=lsj('admission_admin_settings',{}).gymName||lsj('om_org_profile',{}).orgName||lsj('om_org_profile',{}).gymName;if(g)$('gym').textContent=g.toUpperCase();
   setInterval(()=>{const n=new Date();today=iso(n);$('clk').textContent='📅 '+iso(n).split('-').reverse().join('-')+' | ⏰ '+n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true})},1000);
   if(SELF){['admBtn','repBtn','bAt','bAm','bAe','batchBtns','bStat','mb_m'].forEach(i=>{const e=$(i);e&&e.classList.add('hide')});document.querySelector('.lv').classList.add('hide');mode='m'}
   else new QRCode($('qrbox'),{text:location.origin+location.pathname+'?self=1',width:140,height:140});
@@ -314,11 +310,6 @@ function togElite(i){const m=M[i];let e=eliteSet();const on=isElite(m)&&m.ids.so
   setInterval(refresh,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 })();
 
-window.addEventListener("DOMContentLoaded", () => {
-  if (localStorage.getItem('open_admin_mode') === '1') {
-    localStorage.removeItem('open_admin_mode');
-    setTimeout(() => { if(typeof openAdmin === 'function') openAdmin(); }, 500);
-  }
-});
+
 
 </script></body></html>

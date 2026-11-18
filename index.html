@@ -9,102 +9,138 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="license-gate.js"></script>
   <style>
-    :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; }
-    body { background: var(--bg); color: var(--tx); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
-    .dash-container { max-width: 480px; width: 100%; }
-    .header-card { background: radial-gradient(circle at top,#1e1908,#0d0d0d); border: 2px solid var(--ac); border-radius: 16px; padding: 16px; text-align: center; margin-bottom: 14px; box-shadow: 0 4px 20px rgba(255,204,0,0.2); }
-    .header-card h2 { color: var(--ac); margin: 0; font-size: 20px; text-transform: uppercase; font-weight: 900; }
-    .header-card p { font-size: 11.5px; color: var(--mut); margin: 4px 0 0; }
-    
-    .grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-    .menu-card { background: var(--card); border: 2px solid var(--border); border-radius: 14px; padding: 18px 12px; text-align: center; cursor: pointer; text-decoration: none; color: #fff; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .menu-card:hover { border-color: var(--ac); background: rgba(255,204,0,0.05); }
-    .menu-card .icon { font-size: 30px; margin-bottom: 6px; }
-    .menu-card .title { font-size: 13px; font-weight: bold; color: #fff; }
-    .menu-card .sub { font-size: 10px; color: var(--mut); margin-top: 3px; }
-    .menu-card.full { grid-column: span 2; background: linear-gradient(135deg,#ffcc00,#e6b800); color: #000; border: none; font-weight: 900; }
-    .menu-card.full .title { color: #000; font-size: 15px; }
-    .menu-card.full .sub { color: #333; }
-
-    .upgrade-banner { background: linear-gradient(135deg, #1f1f23, #141418); border: 1.5px solid var(--ac); border-radius: 12px; padding: 14px; margin-bottom: 12px; display: block; position: relative; }
-    .upgrade-banner .info { display: inline-block; width: 68%; vertical-align: middle; }
-    .upgrade-banner .info b { color: var(--ac); font-size: 13px; display: block; margin-bottom: 2px; }
-    .upgrade-banner .info span { color: var(--mut); font-size: 10.5px; }
-    .upgrade-banner .upgrade-btn { float: right; background: var(--ac); color: #000; font-weight: 900; font-size: 11.5px; padding: 9px 12px; border-radius: 8px; border: none; cursor: pointer; text-transform: uppercase; margin-top: 4px; }
-    .upgrade-banner::after { content: ""; display: table; clear: both; }
-    .upgrade-btn { background: var(--ac); color: #000; font-weight: 900; font-size: 11.5px; padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; text-transform: uppercase; }
-
-    .logout-btn { display: block; width: 100%; background: #1c1c1c; color: #e74c3c; border: 1.5px solid #e74c3c; padding: 11px; border-radius: 10px; font-weight: bold; font-size: 12.5px; text-align: center; cursor: pointer; text-decoration: none; margin-top: 8px; }
+    :root{--bg:#0b0b0d;--card:#16161a;--border:#2c2c35;--ac:#ffcc00;--tx:#f0f0f5;--mut:#9999a8;--ok:#2ecc71}
+    *{box-sizing:border-box}
+    body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:16px;display:block;min-height:100vh}
+    .dash-container{max-width:480px;width:100%;margin:0 auto}
+    .header-card{background:radial-gradient(circle at top,#1e1908,#0d0d0d);border:2px solid var(--ac);border-radius:16px;padding:16px;text-align:center;margin-bottom:14px;box-shadow:0 4px 20px rgba(255,204,0,.2)}
+    .header-card h2{color:var(--ac);margin:0;font-size:20px;text-transform:uppercase;font-weight:900}
+    .header-card p{font-size:11.5px;color:var(--mut);margin:4px 0 0}
+    .grid-menu{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .menu-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:18px 12px;text-align:center;cursor:pointer;text-decoration:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit}
+    .menu-card:active{border-color:var(--ac)}
+    .menu-card .icon{font-size:30px;margin-bottom:6px}.menu-card .title{font-size:13px;font-weight:bold}.menu-card .sub{font-size:10px;color:var(--mut);margin-top:3px}
+    .menu-card.full{grid-column:span 2;background:linear-gradient(135deg,#ffcc00,#e6b800);color:#000;border:0;font-weight:900}
+    .menu-card.full .title{color:#000;font-size:15px}.menu-card.full .sub{color:#333}
+    .upgrade-banner{background:linear-gradient(135deg,#1f1f23,#141418);border:1.5px solid var(--ac);border-radius:12px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .upgrade-banner b{color:var(--ac);font-size:13px;display:block;margin-bottom:2px}.upgrade-banner span{color:var(--mut);font-size:10.5px}
+    .upgrade-btn{background:var(--ac);color:#000;font-weight:900;font-size:11.5px;padding:9px 12px;border-radius:8px;border:0;cursor:pointer;text-transform:uppercase;white-space:nowrap}
+    .logout-btn{display:block;width:100%;background:#1c1c1c;color:#e74c3c;border:1.5px solid #e74c3c;padding:11px;border-radius:10px;font-weight:bold;font-size:12.5px;text-align:center;cursor:pointer;text-decoration:none}
+    .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;overflow-y:auto;padding:14px}.ov.show{display:block}
+    .bx{background:var(--card);border:2px solid var(--ac);border-radius:16px;padding:16px;max-width:440px;margin:20px auto}
+    .bx h3{color:var(--ac);margin:0 0 10px;font-size:17px}
+    input{width:100%;background:#0b0b0d;border:1.5px solid var(--border);color:#fff;padding:11px;border-radius:8px;font-size:13px;margin-top:6px;outline:0}
+    .btn{width:100%;background:var(--ac);color:#000;font-weight:900;padding:12px;border:0;border-radius:8px;font-size:13px;margin-top:8px;cursor:pointer}
+    .btn.g{background:#222;color:var(--ac);border:1px solid var(--ac)}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:9px;margin-top:6px;background:#0f0f12;font-size:13px}
+    .row small{color:var(--mut)}.due{color:#ff6b6b;font-weight:900}.sec{margin-top:14px;color:var(--ac);font-weight:800;font-size:13px}
   </style>
 </head>
 <body>
-
 <div class="dash-container">
   <div class="header-card">
-    <div style="background:var(--ac); color:#000; font-size:9px; font-weight:900; padding:2px 8px; border-radius:10px; display:inline-block; margin-bottom:6px;">MASTER APP DASHBOARD</div>
-    <h2 id="orgTitle">5 BROTHER'S FITNESS CLUB</h2>
+    <div style="background:var(--ac);color:#000;font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px">MASTER APP DASHBOARD</div>
+    <h2 id="orgTitle">GYM</h2>
     <p>GYM Management &amp; Attendance Portal</p>
   </div>
 
-  <!-- Compact Professional Upgrade Plan Banner -->
   <div class="upgrade-banner">
-    <div class="info">
-      <b>⚡ 7-Day Free Trial Active</b>
-      <span id="trialDaysText">Full access to all software features</span>
-    </div>
+    <div><b id="trialTitle">⚡ 7-Day Free Trial Active</b><span id="trialDaysText"></span></div>
     <button class="upgrade-btn" onclick="openUpgradeModal()">Upgrade Plan</button>
   </div>
 
   <div class="grid-menu">
-    <a href="join.html" class="menu-card full">
-      <div class="icon">📝</div>
-      <div class="title">Admission Form</div>
-      <div class="sub">New member registration, plan &amp; QR generation</div>
-    </a>
-
-    <a href="attendance.html" class="menu-card">
-      <div class="icon">📋</div>
-      <div class="title">Attendance</div>
-      <div class="sub">Staff &amp; Member tracking</div>
-    </a>
-
-    <a href="attendance.html" class="menu-card" onclick="alert('Fee collection tracker is integrated inside admission receipts & attendance system!');">
-      <div class="icon">💰</div>
-      <div class="title">Fee Collection</div>
-      <div class="sub">Dues &amp; payment tracking</div>
-    </a>
-
-    <a href="category-select.html" class="menu-card">
-      <div class="icon">⚙️</div>
-      <div class="title">Org Setup</div>
-      <div class="sub">Change business profile</div>
-    </a>
-
-    <a href="attendance.html" class="menu-card" onclick="localStorage.setItem('open_admin_mode', '1');">
-      <div class="icon">🔐</div>
-      <div class="title">Admin Portal</div>
-      <div class="sub">Staff &amp; PIN controls</div>
-    </a>
+    <a href="join.html" class="menu-card full"><div class="icon">📝</div><div class="title">Admission Form</div><div class="sub">New member registration, plan &amp; QR generation</div></a>
+    <a href="attendance.html" class="menu-card"><div class="icon">📋</div><div class="title">Attendance</div><div class="sub">Staff &amp; Member tracking</div></a>
+    <button type="button" class="menu-card" onclick="openFee()"><div class="icon">💰</div><div class="title">Fee Collection</div><div class="sub">Dues &amp; payment tracking</div></button>
+    <a href="category-select.html" class="menu-card"><div class="icon">⚙️</div><div class="title">Org Setup</div><div class="sub">Change business profile</div></a>
+    <button type="button" class="menu-card" onclick="openAdmin()"><div class="icon">🔐</div><div class="title">Admin Portal</div><div class="sub">Staff &amp; PIN controls</div></button>
   </div>
-
   <a href="login.html" class="logout-btn" onclick="localStorage.removeItem('om_org_profile');">🚪 Switch Account / Logout</a>
 </div>
 
-<script>
-  window.addEventListener("DOMContentLoaded", () => {
-    try {
-      const org = JSON.parse(localStorage.getItem("om_org_profile") || "{}");
-      if (org.orgName || org.gymName) {
-        document.getElementById("orgTitle").textContent = (org.orgName || org.gymName).toUpperCase();
-      }
-      
-      const now = new Date().getTime();
-      let createdAt = org.createdAt ? new Date(org.createdAt).getTime() : now;
-      const daysLeft = Math.max(0, Math.ceil((createdAt + (7 * 24 * 60 * 60 * 1000) - now) / (1000 * 60 * 60 * 24)));
-      document.getElementById("trialDaysText").innerText = `${daysLeft} Days remaining in trial`;
-    } catch(e) {}
-  });
-</script>
+<!-- PIN -->
+<div class="ov" id="pinOv"><div class="bx"><h3>🔐 PIN दर्ज करें</h3>
+  <input id="pinIn" type="password" inputmode="numeric" placeholder="Admin PIN" onkeydown="if(event.key==='Enter')pinOk()">
+  <div id="pinMsg" style="color:#ff6b6b;font-size:12px;margin-top:6px;min-height:14px"></div>
+  <button class="btn" onclick="pinOk()">OK</button><button class="btn g" onclick="closeOv('pinOv')">Cancel</button></div></div>
 
+<!-- ADMIN -->
+<div class="ov" id="admOv"><div class="bx"><h3>🔐 Admin Portal</h3>
+  <div class="sec" style="margin-top:0">➕ Staff जोड़ें</div>
+  <input id="sn" placeholder="Staff का नाम"><input id="sp" placeholder="मोबाइल (optional)" inputmode="tel"><input id="sj" type="date">
+  <button class="btn" onclick="addStaff()">Save Staff</button>
+  <div class="sec">🧑‍💼 Staff list</div><div id="stList"></div>
+  <div class="sec">🔑 PIN बदलें</div>
+  <input id="np" type="password" inputmode="numeric" placeholder="नया PIN (कम से कम 4 अंक)"><button class="btn g" onclick="changePin()">PIN Save करें</button>
+  <button class="btn g" onclick="closeOv('admOv')">✖ बंद</button></div></div>
+
+<!-- FEES -->
+<div class="ov" id="feeOv"><div class="bx"><h3>💰 Fee Collection — बकाया</h3>
+  <div id="feeSum" style="font-size:12px;color:var(--mut)"></div>
+  <input id="feeQ" placeholder="🔍 नाम / मोबाइल" oninput="renderFee()"><div id="feeList"></div>
+  <button class="btn g" onclick="closeOv('feeOv')">✖ बंद</button></div></div>
+
+<script>
+const $=i=>document.getElementById(i),LS=localStorage;
+const J=(k,d)=>{try{const v=JSON.parse(LS.getItem(k));return v==null?d:v}catch(e){return d}};
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fdb=()=>{try{return firebase.apps.length?firebase.firestore():null}catch(e){return null}};
+const iso=()=>new Date().toISOString().slice(0,10);
+const MK=['5BFC_MEMBERS','bbf_master_records_v4','5bfc_admissions'];
+function closeOv(i){$(i).classList.remove('show')}   // Cancel = dashboard par hi raho
+let pinNext=null;
+const getPin=()=>LS.getItem('om_admin_pin')||'1234';
+function askPin(cb){pinNext=cb;$('pinIn').value='';$('pinMsg').textContent='';$('pinOv').classList.add('show');setTimeout(()=>$('pinIn').focus(),60)}
+function pinOk(){if($('pinIn').value===getPin()){closeOv('pinOv');const f=pinNext;pinNext=null;f&&f()}else $('pinMsg').textContent='❌ गलत PIN'}
+
+/* ----- Admin Portal ----- */
+let STAFF=[];
+function openAdmin(){askPin(()=>{STAFF=J('bfc_staff_list',[]);renderStaff();$('admOv').classList.add('show')})}
+function renderStaff(){$('stList').innerHTML=STAFF.map((s,i)=>`<div class="row"><span><b>${esc(s.name)}</b><br><small>${esc(s.phone||'')}</small></span><button class="upgrade-btn" onclick="delStaff(${i})">🗑</button></div>`).join('')||'<div class="row"><small>अभी कोई staff नहीं</small></div>'}
+async function addStaff(){const n=$('sn').value.trim();if(!n){alert('नाम भरें');return}
+  const s={id:'stf'+Date.now(),name:n,phone:$('sp').value.trim(),joinDate:$('sj').value||iso()};STAFF.push(s);LS.setItem('bfc_staff_list',JSON.stringify(STAFF));
+  try{const d=fdb();d&&await d.collection('staff').doc(s.id).set(s)}catch(e){}
+  $('sn').value=$('sp').value='';renderStaff()}
+async function delStaff(i){const s=STAFF[i];if(!confirm(s.name+' हटाएँ?'))return;STAFF.splice(i,1);LS.setItem('bfc_staff_list',JSON.stringify(STAFF));
+  try{const d=fdb();d&&await d.collection('staff').doc(String(s.id)).delete()}catch(e){}renderStaff()}
+function changePin(){const p=$('np').value.trim();if(!/^\d{4,8}$/.test(p)){alert('PIN 4 से 8 अंक का होना चाहिए');return}LS.setItem('om_admin_pin',p);$('np').value='';alert('✅ PIN बदल गया')}
+
+/* ----- Fee Collection ----- */
+let FEE=[];
+async function loadFee(){
+  const mp=new Map();
+  MK.forEach(k=>J(k,[]).forEach(r=>{if(r&&r.id&&r.name)mp.set(String(r.id),Object.assign(mp.get(String(r.id))||{},r))}));
+  const d=fdb();if(d){for(const c of['members','admissions']){try{(await d.collection(c).get()).forEach(x=>{const r=Object.assign({id:x.id},x.data());if(r.name)mp.set(String(r.id),Object.assign({},r,mp.get(String(r.id))||{}))})}catch(e){}}}
+  FEE=[...mp.values()];renderFee();
+}
+const dueOf=m=>Number(m.dueAmount)||0;
+function openFee(){askPin(()=>{$('feeOv').classList.add('show');$('feeQ').value='';FEE=[];renderFee();loadFee()})}
+function renderFee(){
+  const q=($('feeQ').value||'').toLowerCase().trim(),all=FEE.filter(m=>dueOf(m)>0).sort((a,b)=>dueOf(b)-dueOf(a));
+  const L=all.filter(m=>!q||(m.name+' '+(m.phone||'')).toLowerCase().includes(q));
+  $('feeSum').innerHTML='बकाया वाले: <b>'+all.length+'</b> • कुल बकाया: <b style="color:#ff6b6b">₹'+all.reduce((t,m)=>t+dueOf(m),0)+'</b>';
+  $('feeList').innerHTML=L.map(m=>`<div class="row"><span><b>${esc(m.name)}</b><br><small>${esc(m.phone||'')} • ${esc(m.planName||'')}</small></span><span style="text-align:right"><span class="due">₹${dueOf(m)}</span><br><button class="upgrade-btn" style="margin-top:4px" onclick="payFee('${esc(m.id)}')">Payment मिला</button></span></div>`).join('')||'<div class="row"><small>कोई बकाया नहीं 🎉</small></div>';
+}
+async function payFee(id){
+  const m=FEE.find(x=>String(x.id)===String(id));if(!m)return;const d0=dueOf(m);
+  const a=Number(prompt(m.name+' — कितने ₹ मिले? (बकाया ₹'+d0+')',d0));if(!a||a<=0)return;
+  const paid=Math.min(a,d0),patch={amount:(Number(m.amount)||0)+paid,dueAmount:d0-paid,status:d0-paid?'Pending':'Paid',manualStatus:d0-paid?'Pending':'Paid',lastPaid:iso()};
+  MK.forEach(k=>{const arr=J(k,[]);let ch=false;arr.forEach(r=>{if(r&&String(r.id)===String(id)){Object.assign(r,patch);ch=true}});if(ch)LS.setItem(k,JSON.stringify(arr))});
+  Object.assign(m,patch);
+  const d=fdb();if(d){for(const c of['members','admissions']){try{await d.collection(c).doc(String(id)).set(patch,{merge:true})}catch(e){}}}
+  renderFee();
+}
+
+/* ----- header / trial status ----- */
+window.addEventListener('DOMContentLoaded',()=>{
+  try{
+    const s=omLicenseStatus(),o=s.org;
+    $('orgTitle').textContent=(o.orgName||o.gymName||'GYM').toUpperCase();
+    if(s.licenseValid){$('trialTitle').textContent='✅ License Active';$('trialDaysText').textContent=s.licenseDays+' Days remaining'+(s.licenseKey?' • '+s.licenseKey:'')}
+    else $('trialDaysText').textContent=s.trialDays+' Days remaining in trial';
+  }catch(e){}
+});
+</script>
 </body>
 </html>
