@@ -26,9 +26,12 @@
     .menu-card.full .title { color: #000; font-size: 15px; }
     .menu-card.full .sub { color: #333; }
 
-    .upgrade-banner { background: linear-gradient(135deg, #222, #111); border: 1.5px solid var(--ac); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .upgrade-banner .info b { color: var(--ac); font-size: 12.5px; display: block; }
+    .upgrade-banner { background: linear-gradient(135deg, #1f1f23, #141418); border: 1.5px solid var(--ac); border-radius: 12px; padding: 14px; margin-bottom: 12px; display: block; position: relative; }
+    .upgrade-banner .info { display: inline-block; width: 68%; vertical-align: middle; }
+    .upgrade-banner .info b { color: var(--ac); font-size: 13px; display: block; margin-bottom: 2px; }
     .upgrade-banner .info span { color: var(--mut); font-size: 10.5px; }
+    .upgrade-banner .upgrade-btn { float: right; background: var(--ac); color: #000; font-weight: 900; font-size: 11.5px; padding: 9px 12px; border-radius: 8px; border: none; cursor: pointer; text-transform: uppercase; margin-top: 4px; }
+    .upgrade-banner::after { content: ""; display: table; clear: both; }
     .upgrade-btn { background: var(--ac); color: #000; font-weight: 900; font-size: 11.5px; padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; text-transform: uppercase; }
 
     .logout-btn { display: block; width: 100%; background: #1c1c1c; color: #e74c3c; border: 1.5px solid #e74c3c; padding: 11px; border-radius: 10px; font-weight: bold; font-size: 12.5px; text-align: center; cursor: pointer; text-decoration: none; margin-top: 8px; }
