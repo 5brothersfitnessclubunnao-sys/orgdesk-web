@@ -16,7 +16,6 @@
   const isLicenseValid = now < licenseExpiry;
 
   if (!isTrialActive && !isLicenseValid) {
-    // Lock screen if trial expired and no active license
     window.addEventListener("DOMContentLoaded", () => {
       document.body.innerHTML = `
         <div style="background:#0b0b0d;color:#f0f0f5;font-family:Segoe UI,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box;">
@@ -37,7 +36,6 @@
       `;
     });
   } else {
-    // Show active trial countdown banner
     window.addEventListener("DOMContentLoaded", () => {
       if (isTrialActive && !isLicenseValid) {
         const daysLeft = Math.ceil((trialExpiryTime - now) / (1000 * 60 * 60 * 24));
@@ -57,8 +55,6 @@
       msg.innerText = "कृपया वैध लाइसेंस की (License Key) दर्ज करें!";
       return;
     }
-
-    // Key activation check
     if (key.startsWith("OM-") || key.length >= 8) {
       const oneYearTime = now + (365 * 24 * 60 * 60 * 1000);
       org.licenseKey = key;
