@@ -16,6 +16,7 @@ window.bfcLogin = async function () {
 };
 </script>
 
+<script src="backup.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -58,6 +59,10 @@ video{width:100%;max-width:360px;border-radius:14px;background:#000;transform:sc
 table{border-collapse:collapse;font-size:11px;min-width:100%}th,td{border:1px solid #222;padding:5px 3px;text-align:center;min-width:24px}
 th{background:#1a1a1a;position:sticky;top:0;z-index:2;color:var(--g);cursor:pointer}
 td.n,th.n{position:sticky;left:0;background:#111;text-align:left;min-width:92px;max-width:92px;overflow:hidden;white-space:nowrap;z-index:3}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:8px 0}.ch{font-size:10px;color:var(--g);text-align:center}
+.cd{min-height:58px;border:1px solid #222;border-radius:8px;padding:3px;font-size:10px;text-align:center;background:#0f0f0f;background-size:cover;background-position:center;overflow:hidden;position:relative}
+.cd b{display:block;font-size:12px;text-shadow:0 0 4px #000}.cd.p{border:2px solid var(--ok);color:var(--ok)}.cd.a{border:2px solid var(--er);color:var(--er);background:#1a0707}
+.cd.p span{text-shadow:0 0 4px #000,0 0 6px #000;font-weight:800}
 .p{color:var(--ok)}.a{color:var(--er)}.x{color:#444}.hide{display:none!important}
 </style></head><body>
 
@@ -92,13 +97,16 @@ td.n,th.n{position:sticky;left:0;background:#111;text-align:left;min-width:92px;
 <div class="ov" id="rpOv"><h3>📅 पूरे महीने की Attendance</h3>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><select id="rk" onchange="report()"><option value="m">👥 Gym Members</option><option value="s">🧑‍💼 Staff</option></select><input type="month" id="rm" onchange="report()"></div>
  <div class="sm" id="rsum"></div><div class="mw"><table id="rt"></table></div>
- <div class="sm">✔ Present · ✖ Absent · "·" = जॉइनिंग से पहले/आगे की तारीख। तारीख पर tap = उस दिन की list।</div>
+ <div class="sm">✔ Present · ✖ Absent · "·" = जॉइनिंग से पहले/आगे की तारीख। तारीख पर tap = उस दिन की list। नाम पर tap = उसका calendar + selfie।</div>
  <button class="big k" onclick="csv()">⬇ CSV Download</button><button class="big k" onclick="closeOv('rpOv')">✖ बंद</button></div>
 <div class="ov" id="admOv"><h3>🔐 Admin</h3>
  <div class="row" style="display:block"><b>➕ Staff जोड़ें</b><input id="sn" placeholder="नाम" style="margin-top:6px"><input id="sp" placeholder="मोबाइल (optional)" style="margin-top:6px"><input id="sj" type="date" style="margin-top:6px"><button class="big k" onclick="addStaff()">Save Staff</button></div>
  <div class="row" style="display:block"><b>🧑‍💼 Staff list</b><div id="admS"></div></div>
  <div class="row" style="display:block"><b>⭐ Elite members (QR card)</b><small>Plan में “Elite” हो तो अपने आप Elite; बाकी यहाँ ⭐ करें।</small><div id="admM"></div></div>
  <button class="big k" onclick="closeOv('admOv')">✖ बंद</button></div>
+<div class="ov" id="pcOv"><h3 id="pcT"></h3><div class="sm" id="pcSum"></div>
+ <div class="cg" id="pcG"></div><div class="sm">✔ Present (तारीख पर tap = selfie) · ✖ Absent · खाली = जॉइनिंग से पहले / आगे की तारीख</div>
+ <button class="big k" onclick="closeOv('pcOv')">✖ बंद</button></div>
 <canvas id="cv" style="display:none"></canvas>
 
 <script>
@@ -144,13 +152,24 @@ async function refresh(){
   paint();
 }
 async function mark(k,p,photo,method){
-  const now=new Date(),e={isReal:true,name:p.name,phone:p.phone||'',time:now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}),ts:now.toISOString(),method,photo:photo||''};
+  const now=new Date(),e={isReal:true,name:p.name,phone:p.phone||'',time:now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}),ts:now.toISOString(),method,hasPhoto:!!photo};
   const loc=lsj(K[k].ls+today,{}),cl={};
-  p.ids.forEach((i,x)=>{const r=x?Object.assign({},e,{aliasOf:p.ids[0],photo:''}):e;loc[i]=r;cl[i]=r});
+  p.ids.forEach((i,x)=>{const r=x?Object.assign({},e,{aliasOf:p.ids[0]}):e;loc[i]=r;cl[i]=r});
   try{localStorage.setItem(K[k].ls+today,JSON.stringify(loc))}catch(x){}
   try{await db.collection(K[k].col).doc(today).set(cl,{merge:true})}catch(x){}
+  savePhoto(k,p.ids[0],today,photo);
   maps[k]=Object.assign({},maps[k],loc);
 }
+async function savePhoto(k,id,d,ph){
+  if(!ph)return;const key=k+'_'+d+'_'+id;
+  try{localStorage.setItem('bfcph_'+key,ph)}catch(e){}
+  try{await db.collection('attendance_photos').doc(key).set({photo:ph,k:k,d:d,id:id})}catch(e){}
+}
+async function getPhoto(k,id,d){
+  const key=k+'_'+d+'_'+id;let p=localStorage.getItem('bfcph_'+key);if(p)return p;
+  try{const s=await db.collection('attendance_photos').doc(key).get();if(s.exists)return s.data().photo||''}catch(e){}return'';
+}
+function prunePhotos(){const lim=iso(new Date(Date.now()-4*864e5));Object.keys(localStorage).forEach(x=>{if(x.indexOf('bfcph_')===0){const m=x.match(/_(\d{4}-\d{2}-\d{2})_/);if(m&&m[1]<lim)localStorage.removeItem(x)}})}
 async function monthDays(k,p,ym){
   const r=await monthData(k,ym);let c=0;for(let d=1;d<=r.n;d++)if(r.maps[d]&&here(r.maps[d],p))c++;return c;
 }
@@ -259,12 +278,26 @@ async function report(){
   const r=await monthData(k,ym),L=k==='m'?M:S;RP={k,ym,r,L};
   let h='<tr><th class="n">नाम</th>',tp=0;
   for(let d=1;d<=r.n;d++)h+=`<th onclick="dayList(${d})">${d}</th>`;h+='<th>P</th><th>A</th></tr>';
-  L.forEach(p=>{let pr=0,ab=0,row=`<tr><td class="n">${esc(p.name)}</td>`;
+  L.forEach((p,pi)=>{let pr=0,ab=0,row=`<tr><td class="n" onclick="personCal(${pi})" style="cursor:pointer;color:#ffcc00">${esc(p.name)}</td>`;
     for(let d=1;d<=r.n;d++){const ds=ym+'-'+String(d).padStart(2,'0');
       if(ds>today||(p.joinDate&&ds<p.joinDate)){row+='<td class="x">·</td>'}
       else if(here(r.maps[d],p)){pr++;row+='<td class="p">✔</td>'}else{ab++;row+='<td class="a">✖</td>'}}
     tp+=pr;p._p=pr;p._a=ab;h+=row+`<td class="p"><b>${pr}</b></td><td class="a">${ab}</td></tr>`});
   $('rt').innerHTML=h;$('rsum').innerHTML=L.length?'कुल '+L.length+' लोग • कुल Present दिन: <b>'+tp+'</b>':'कोई रिकॉर्ड नहीं';
+}
+async function personCal(pi){
+  const p=RP.L[pi],ym=RP.ym,k=RP.k,[y,m]=ym.split('-').map(Number),first=new Date(y,m-1,1).getDay();let pr=0,ab=0;
+  let h=['रवि','सोम','मंगल','बुध','गुरु','शुक्र','शनि'].map(d=>`<div class="ch">${d}</div>`).join('')+'<div></div>'.repeat(first),pd=[];
+  for(let d=1;d<=RP.r.n;d++){const ds=ym+'-'+String(d).padStart(2,'0'),en=p.ids.map(i=>RP.r.maps[d][i]).find(Boolean);let st='',tx='';
+    if(ds>today||(p.joinDate&&ds<p.joinDate)){st='';}else if(en&&en.isReal!==false){st='p';tx='✔ '+(en.time||'');pr++;pd.push([d,ds])}else{st='a';tx='✖';ab++}
+    h+=`<div class="cd ${st}" id="cd${d}" onclick="pcView(${pi},${d})"><b>${d}</b><span>${tx}</span></div>`}
+  $('pcT').textContent=p.name+' — '+ym;$('pcSum').innerHTML='Present: <b>'+pr+'</b> दिन • Absent: <b style="color:var(--er)">'+ab+'</b> दिन';$('pcG').innerHTML=h;$('pcOv').classList.add('show');
+  pd.forEach(async x=>{const ph=await getPhoto(k,p.ids[0],x[1]);if(ph){const c=$('cd'+x[0]);if(c)c.style.backgroundImage='url('+ph+')'}});
+}
+async function pcView(pi,d){
+  const p=RP.L[pi],ds=RP.ym+'-'+String(d).padStart(2,'0'),en=p.ids.map(i=>RP.r.maps[d][i]).find(Boolean);if(!en)return;
+  const ph=await getPhoto(RP.k,p.ids[0],ds);$('resImg').src=ph||'data:image/gif;base64,R0lGODlhAQABAAAAACw=';$('resN').textContent=p.name;
+  $('resM').innerHTML='📅 '+ds+' • ⏰ '+esc(en.time||'')+(ph?'':'<br><small style="color:#999">इस दिन की selfie नहीं मिली</small>');$('resOv').classList.add('show');
 }
 function dayList(d){
   if(!RP)return;const ds=RP.ym+'-'+String(d).padStart(2,'0'),pr=[],ab=[];
@@ -306,7 +339,7 @@ function togElite(i){const m=M[i];let e=eliteSet();const on=isElite(m)&&m.ids.so
   setInterval(()=>{const n=new Date();today=iso(n);$('clk').textContent='📅 '+iso(n).split('-').reverse().join('-')+' | ⏰ '+n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true})},1000);
   if(SELF){['admBtn','repBtn','bAt','bAm','bAe','batchBtns','bStat','mb_m'].forEach(i=>{const e=$(i);e&&e.classList.add('hide')});document.querySelector('.lv').classList.add('hide');mode='m'}
   else new QRCode($('qrbox'),{text:location.origin+location.pathname+'?self=1',width:140,height:140});
-  $('rm').value=today.slice(0,7);refresh();
+  $('rm').value=today.slice(0,7);prunePhotos();refresh();
   setInterval(refresh,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 })();
 

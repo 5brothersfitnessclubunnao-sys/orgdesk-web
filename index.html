@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="license-gate.js"></script>
+  <script src="backup.js"></script>
   <style>
     :root{--bg:#0b0b0d;--card:#16161a;--border:#2c2c35;--ac:#ffcc00;--tx:#f0f0f5;--mut:#9999a8;--ok:#2ecc71}
     *{box-sizing:border-box}
@@ -48,15 +49,15 @@
     <div><b id="trialTitle">⚡ 7-Day Free Trial Active</b><span id="trialDaysText"></span></div>
     <button class="upgrade-btn" onclick="openUpgradeModal()">Upgrade Plan</button>
   </div>
+  <button type="button" class="logout-btn" style="color:var(--ac);border-color:var(--ac);margin-bottom:12px;padding:9px;font-size:11.5px" onclick="askPin(viewLic)">🔑 View Your License Key</button>
 
   <div class="grid-menu">
     <a href="join.html" class="menu-card full"><div class="icon">📝</div><div class="title">Admission Form</div><div class="sub">New member registration, plan &amp; QR generation</div></a>
     <a href="attendance.html" class="menu-card"><div class="icon">📋</div><div class="title">Attendance</div><div class="sub">Staff &amp; Member tracking</div></a>
     <button type="button" class="menu-card" onclick="openFee()"><div class="icon">💰</div><div class="title">Fee Collection</div><div class="sub">Dues &amp; payment tracking</div></button>
-    <a href="category-select.html" class="menu-card"><div class="icon">⚙️</div><div class="title">Org Setup</div><div class="sub">Change business profile</div></a>
+    <button type="button" class="menu-card" onclick="openImp()"><div class="icon">📤</div><div class="title">Upload Gym Data</div><div class="sub">Purane register ke members daalein</div></button>
     <button type="button" class="menu-card" onclick="openAdmin()"><div class="icon">🔐</div><div class="title">Admin Portal</div><div class="sub">Staff &amp; PIN controls</div></button>
   </div>
-  <a href="login.html" class="logout-btn" onclick="localStorage.removeItem('om_org_profile');">🚪 Switch Account / Logout</a>
 </div>
 
 <!-- PIN -->
@@ -73,8 +74,25 @@
   <div class="sec">🧑‍💼 Staff list</div><div id="stList"></div>
   <div class="sec">🔑 PIN बदलें</div>
   <input id="np" type="password" inputmode="numeric" placeholder="नया PIN (कम से कम 4 अंक)"><button class="btn g" onclick="changePin()">PIN Save करें</button>
+  <div class="sec">💾 Backup</div><div id="bkInfo" style="font-size:11.5px;color:var(--mut)"></div>
+  <button class="btn g" onclick="runBk()">💾 अभी Backup लें + Download</button>
+  <div style="font-size:10.5px;color:var(--mut);margin-top:4px">हर रात 11 बजे auto-backup (Cloud में) — जब यह app खुला हो; बंद हो तो अगली बार खुलते ही।</div>
+  <div class="sec">⚙️ Account</div>
+  <a href="category-select.html" class="btn g" style="display:block;text-align:center;text-decoration:none">⚙️ Org Setup (Business profile)</a>
+  <a href="login.html" class="btn g" style="display:block;text-align:center;text-decoration:none;color:#e74c3c;border-color:#e74c3c" onclick="localStorage.removeItem('om_org_profile')">🚪 Switch Account / Logout</a>
   <button class="btn g" onclick="closeOv('admOv')">✖ बंद</button></div></div>
 
+<!-- LICENSE -->
+<div class="ov" id="licOv"><div class="bx"><h3>🔑 Your License</h3><div id="licBody"></div><button class="btn g" onclick="closeOv('licOv')">✖ बंद</button></div></div>
+<!-- IMPORT -->
+<div class="ov" id="impOv"><div class="bx"><h3>📤 Upload Your Gym Members</h3>
+  <div style="font-size:11.5px;color:var(--mut);line-height:1.5">1) Template download करें → Excel में अपने members भरें → <b>File ▸ Save as ▸ CSV UTF-8</b><br>2) वही CSV यहाँ चुनें।</div>
+  <button class="btn g" onclick="dlTemplate()">⬇ Template (CSV) Download</button>
+  <input type="file" id="impF" accept=".csv,text/csv" onchange="pickCsv(this)" style="margin-top:10px">
+  <div id="impInfo" style="font-size:12px;margin-top:8px;color:var(--ok)"></div>
+  <label style="display:block;margin-top:10px;font-size:12px"><input type="radio" name="impMode" value="replace" checked style="width:auto"> 🗑 पुराना सारा data हटाकर सिर्फ यही रखें (Replace)</label>
+  <label style="display:block;margin-top:6px;font-size:12px"><input type="radio" name="impMode" value="add" style="width:auto"> ➕ पुराने के साथ जोड़ें (Add)</label>
+  <button class="btn" id="impBtn" onclick="doImport()">✅ Import करें</button><button class="btn g" onclick="closeOv('impOv')">✖ बंद</button></div></div>
 <!-- FEES -->
 <div class="ov" id="feeOv"><div class="bx"><h3>💰 Fee Collection — बकाया</h3>
   <div id="feeSum" style="font-size:12px;color:var(--mut)"></div>
@@ -96,7 +114,7 @@ function pinOk(){if($('pinIn').value===getPin()){closeOv('pinOv');const f=pinNex
 
 /* ----- Admin Portal ----- */
 let STAFF=[];
-function openAdmin(){askPin(()=>{STAFF=J('bfc_staff_list',[]);renderStaff();$('admOv').classList.add('show')})}
+function openAdmin(){askPin(()=>{STAFF=J('bfc_staff_list',[]);renderStaff();$('bkInfo').textContent='Last backup: '+omLastBackupText();$('admOv').classList.add('show')})}
 function renderStaff(){$('stList').innerHTML=STAFF.map((s,i)=>`<div class="row"><span><b>${esc(s.name)}</b><br><small>${esc(s.phone||'')}</small></span><button class="upgrade-btn" onclick="delStaff(${i})">🗑</button></div>`).join('')||'<div class="row"><small>अभी कोई staff नहीं</small></div>'}
 async function addStaff(){const n=$('sn').value.trim();if(!n){alert('नाम भरें');return}
   const s={id:'stf'+Date.now(),name:n,phone:$('sp').value.trim(),joinDate:$('sj').value||iso()};STAFF.push(s);LS.setItem('bfc_staff_list',JSON.stringify(STAFF));
@@ -127,10 +145,64 @@ async function payFee(id){
   const a=Number(prompt(m.name+' — कितने ₹ मिले? (बकाया ₹'+d0+')',d0));if(!a||a<=0)return;
   const paid=Math.min(a,d0),patch={amount:(Number(m.amount)||0)+paid,dueAmount:d0-paid,status:d0-paid?'Pending':'Paid',manualStatus:d0-paid?'Pending':'Paid',lastPaid:iso()};
   MK.forEach(k=>{const arr=J(k,[]);let ch=false;arr.forEach(r=>{if(r&&String(r.id)===String(id)){Object.assign(r,patch);ch=true}});if(ch)LS.setItem(k,JSON.stringify(arr))});
-  Object.assign(m,patch);
+  Object.assign(m,patch);const lg=J('om_fee_log',[]);lg.push({id,name:m.name,amount:paid,date:iso()});LS.setItem('om_fee_log',JSON.stringify(lg));
   const d=fdb();if(d){for(const c of['members','admissions']){try{await d.collection(c).doc(String(id)).set(patch,{merge:true})}catch(e){}}}
   renderFee();
 }
+
+
+/* ----- License view ----- */
+function viewLic(){
+  const s=omLicenseStatus(),o=s.org,nm={30:'1 Month',90:'3 Months',180:'6 Months',365:'12 Months'};
+  const f=d=>d?new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'-';
+  $('licBody').innerHTML=!s.licenseKey?`<div class="row"><small>अभी कोई License Key नहीं — 7 दिन का Free Trial चल रहा है (${s.trialDays} दिन बाकी)</small></div>`:
+    [['🔑 Key',s.licenseKey],['📦 Plan',(nm[o.licensePlanDays]||(o.licensePlanDays||'?')+' Days')+(o.licenseAmount?' • ₹'+o.licenseAmount:'')],['🛒 Purchase Date',f(o.licenseBoughtAt)],['⏳ Expire Date',f(o.licenseExpiry)],['📊 Status',s.licenseValid?'✅ Active — '+s.licenseDays+' दिन बाकी':'❌ Expired']].map(x=>`<div class="row"><small>${x[0]}</small><b>${esc(x[1])}</b></div>`).join('');
+  $('licOv').classList.add('show');
+}
+async function runBk(){try{await omBackupDownload();$('bkInfo').textContent='Last backup: '+omLastBackupText()}catch(e){alert('Backup error: '+e.message)}}
+
+/* ----- Upload gym members (CSV) ----- */
+const COLS={name:['name','naam','नाम','fullname','membername','पूरानाम'],parentName:['fathername','father','parent','guardian','husbandname','पिताकानाम','पिता'],phone:['mobile','phone','mobileno','mobilenumber','contact','मोबाइल','फोन'],dob:['dob','dateofbirth','जन्मतिथि'],gender:['gender','sex','लिंग'],address:['address','पता','पूरापता'],planName:['plan','planname','प्लान'],joinDate:['joindate','joining','doj','dateofjoining','प्रवेशतिथि'],batch:['batch','slot','बैच'],planBase:['fees','fee','planfee','फीस'],amount:['paid','amountpaid','जमा'],dueAmount:['due','pending','dueamount','बकाया'],emergencyName:['emergencyname','emergencycontact'],emergencyPhone:['emergencymobile','emergencyphone'],height:['height','ऊंचाई'],weight:['weight','वज़न','वजन'],bloodGroup:['bloodgroup','blood','ब्लडग्रुप'],expiryDate:['expiry','expirydate','validtill']};
+const TPL=['Name','Father Name','Mobile','DOB','Gender','Address','Plan','Join Date','Batch','Fees','Paid','Due','Emergency Name','Emergency Mobile','Height','Weight','Blood Group'];
+const nk=s=>String(s||'').toLowerCase().replace(/[^a-z0-9\u0900-\u097f]/g,'');
+function csvParse(t,d){const rows=[];let r=[],c='',q=false;t=t.replace(/^\ufeff/,'');
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}
+    else if(ch==='"')q=true;else if(ch===d){r.push(c);c=''}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch}
+  r.push(c);if(r.some(x=>x.trim()))rows.push(r);return rows}
+function normDate(v){v=String(v||'').trim();let m=v.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');return /^\d{4}-\d{2}-\d{2}/.test(v)?v.slice(0,10):''}
+let IMP=[];
+function dlTemplate(){const b=new Blob(['\ufeff'+TPL.join(',')+'\n'],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Gym_Members_Template.csv';a.click()}
+async function pickCsv(inp){
+  const f=inp.files[0];IMP=[];if(!f)return;const t=await f.text(),l1=t.split('\n')[0],d=l1.split(';').length>l1.split(',').length?';':',';
+  const rows=csvParse(t,d);if(rows.length<2){$('impInfo').textContent='❌ File खाली है';return}
+  const H=rows[0].map(nk),ix={};Object.keys(COLS).forEach(k=>{ix[k]=H.findIndex(h=>COLS[k].includes(h))});
+  if(ix.name<0){$('impInfo').style.color='#ff6b6b';$('impInfo').textContent='❌ "Name" कॉलम नहीं मिला — Template इस्तेमाल करें';return}
+  const org=(J('om_org_profile',{}).orgId||''),seen=new Set(),now=Date.now();
+  rows.slice(1).forEach((r,i)=>{const g=k=>ix[k]>=0?String(r[ix[k]]||'').trim():'';const name=g('name');if(!name)return;
+    const ph=g('phone').replace(/\D/g,'').slice(-10);if(ph&&seen.has(ph))return;if(ph)seen.add(ph);
+    const fee=Number(g('planBase'))||0,paid=Number(g('amount'))||0,due=g('dueAmount')!==''?Number(g('dueAmount'))||0:Math.max(0,fee-paid),id='imp'+now+'_'+i,jd=normDate(g('joinDate'))||iso();
+    IMP.push({id,name,parentName:g('parentName'),guardian:g('parentName'),phone:ph,dob:normDate(g('dob')),gender:/^(f|female|महिला)/i.test(g('gender'))?'Female':'Male',address:g('address'),planName:g('planName'),planBase:fee,amount:paid,dueAmount:due,joinDate:jd,admittedAt:jd+'T00:00:00',batch:g('batch'),slot:g('batch'),expiryDate:normDate(g('expiryDate')),emergencyName:g('emergencyName'),emergencyPhone:g('emergencyPhone'),height:g('height'),weight:g('weight'),bloodGroup:g('bloodGroup'),status:due>0?'Pending':'Paid',manualStatus:due>0?'Pending':'Paid',source:'import',activeInGym:true,orgId:org,attendanceId:'ORGDESK-ATTENDANCE-'+name+'-'+ph+'-'+id})});
+  $('impInfo').style.color='#2ecc71';$('impInfo').textContent=IMP.length?'✅ '+IMP.length+' members मिले: '+IMP.slice(0,3).map(m=>m.name).join(', ')+(IMP.length>3?' …':''):'❌ कोई member नहीं मिला';
+}
+async function doImport(){
+  if(!IMP.length){alert('पहले CSV file चुनें');return}
+  const rep=document.querySelector('input[name=impMode]:checked').value==='replace';
+  if(!confirm(rep?'⚠️ पुराना सारा members/admission data हटेगा और '+IMP.length+' नए members आएँगे।\n(हटाने से पहले Backup अपने आप ले लिया जाएगा)\n\nजारी रखें?':IMP.length+' members जोड़े जाएँगे। जारी रखें?'))return;
+  $('impBtn').disabled=true;$('impBtn').textContent='Import हो रहा है…';
+  const d=fdb();
+  try{
+    if(rep){try{await omBackup()}catch(e){}
+      if(d){for(const c of['members','admissions']){try{const s=await d.collection(c).get();let b=d.batch(),n=0;for(const x of s.docs){b.delete(x.ref);if(++n%400===0){await b.commit();b=d.batch()}}await b.commit()}catch(e){}}}
+      MK.forEach(k=>LS.setItem(k,'[]'));}
+    ['5bfc_admissions','5BFC_MEMBERS'].forEach(k=>{const old=rep?[]:J(k,[]),ph=new Set(old.map(m=>m.phone).filter(Boolean));LS.setItem(k,JSON.stringify(old.concat(IMP.filter(m=>!m.phone||!ph.has(m.phone)))))});
+    if(d){let b=d.batch(),n=0;for(const m of IMP){b.set(d.collection('members').doc(m.id),m);if(++n%400===0){await b.commit();b=d.batch()}}await b.commit().catch(()=>{})}
+    alert('✅ '+IMP.length+' members आ गए'+(rep?' — पुराना register हट गया।':'।')+'\nअब Attendance में सबके नाम दिखेंगे।');IMP=[];$('impInfo').textContent='';$('impF').value='';closeOv('impOv');
+  }catch(e){alert('Import error: '+e.message)}
+  $('impBtn').disabled=false;$('impBtn').textContent='✅ Import करें';
+}
+function openImp(){askPin(()=>{IMP=[];$('impInfo').textContent='';$('impF').value='';$('impOv').classList.add('show')})}
 
 /* ----- header / trial status ----- */
 window.addEventListener('DOMContentLoaded',()=>{

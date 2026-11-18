@@ -22,7 +22,7 @@
   window.omLicenseStatus = status;
   function getDb() { try { if (!window.firebase) return null; if (!firebase.apps.length) firebase.initializeApp(CFG); return firebase.firestore(); } catch (e) { return null; } }
   function activate(days, keyObj) {
-    var o = getOrg(); o.licenseKey = keyObj.key; o.licenseExpiry = new Date(Date.now() + days * DAY).toISOString(); saveOrg(o);
+    var o = getOrg(); o.licenseKey = keyObj.key; o.licensePlanDays = days; o.licenseAmount = keyObj.amount || ""; o.licenseBoughtAt = new Date().toISOString(); o.licenseExpiry = new Date(Date.now() + days * DAY).toISOString(); saveOrg(o);
   }
   // Ek fresh key uthao -> Used mark (Firestore transaction => dusre device ko wahi key nahi milegi)
   async function claimKey(days, extra) {
