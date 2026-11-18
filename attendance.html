@@ -313,4 +313,12 @@ function togElite(i){const m=M[i];let e=eliteSet();const on=isElite(m)&&m.ids.so
   $('rm').value=today.slice(0,7);refresh();
   setInterval(refresh,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 })();
+
+window.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem('open_admin_mode') === '1') {
+    localStorage.removeItem('open_admin_mode');
+    setTimeout(() => { if(typeof openAdmin === 'function') openAdmin(); }, 500);
+  }
+});
+
 </script></body></html>

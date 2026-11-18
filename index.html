@@ -77,7 +77,7 @@
       <div class="sub">Change business profile</div>
     </a>
 
-    <a href="attendance.html" onclick="if(typeof openAdmin==='function'){openAdmin();return false;}" class="menu-card">
+    <a href="attendance.html" class="menu-card" onclick="localStorage.setItem('open_admin_mode', '1');">
       <div class="icon">🔐</div>
       <div class="title">Admin Portal</div>
       <div class="sub">Staff &amp; PIN controls</div>
@@ -95,7 +95,6 @@
         document.getElementById("orgTitle").textContent = (org.orgName || org.gymName).toUpperCase();
       }
       
-      // Calculate trial days remaining
       const now = new Date().getTime();
       let createdAt = org.createdAt ? new Date(org.createdAt).getTime() : now;
       const daysLeft = Math.max(0, Math.ceil((createdAt + (7 * 24 * 60 * 60 * 1000) - now) / (1000 * 60 * 60 * 24)));
