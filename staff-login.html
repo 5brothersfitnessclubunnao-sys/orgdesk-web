@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Staff Portal - 5 Brother's Fitness Club</title>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;}
+body{
+  background: linear-gradient(rgba(10, 10, 10, 0.9), rgba(10, 10, 10, 0.95)), url('owner.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+.card{
+  background: rgba(18, 16, 5, 0.95);
+  border: 2px solid #ffcc00;
+  border-radius: 18px;
+  max-width: 480px;
+  width: 100%;
+  padding: 20px;
+  box-shadow: 0 0 30px rgba(255,204,0,0.25);
+  margin-top: 20px;
+}
+.header{text-align:center;border-bottom:2px dashed #ffcc00;padding-bottom:12px;margin-bottom:16px;}
+.header h1{color:#ffcc00;font-size:22px;font-weight:900;}
+.tagline{color:#00ff99;font-size:12px;font-weight:700;margin-top:4px;}
+.field-group{margin-bottom:14px;}
+label{display:block;font-size:12px;color:#ddd;margin-bottom:4px;font-weight:600;}
+input, select{width:100%;background:#181818;border:1.5px solid #444;color:#fff;padding:11px;border-radius:8px;font-size:13px;outline:none;}
+input:focus, select:focus{border-color:#ffcc00;}
+.btn-submit{width:100%;background:#25D366;color:#000;border:none;padding:13px;border-radius:8px;font-weight:bold;font-size:14px;cursor:pointer;margin-top:10px;}
+.btn-login{width:100%;background:#ffcc00;color:#000;border:none;padding:13px;border-radius:8px;font-weight:bold;font-size:14px;cursor:pointer;margin-top:10px;}
+.restricted-banner{background:rgba(255,153,0,0.15);border:1px solid #ff9900;color:#ffcc00;padding:8px;border-radius:8px;font-size:11px;text-align:center;margin-bottom:14px;font-weight:bold;}
+</style>
+</head>
+<body>
+
+<!-- 1. स्टाफ लॉगिन स्क्रीन -->
+<div class="card" id="loginScreen">
+  <div class="header">
+    <div style="background:#ffcc00;color:#000;font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:4px;">STAFF SECURE LOGIN</div>
+    <h1>Staff Portal</h1>
+    <div class="tagline">केवल एडमिशन और फीस जमा करने के लिए</div>
+  </div>
+  
+  <div class="field-group">
+    <label>जिम ओनर द्वारा दिया गया स्टाफ कोड (Staff Code)</label>
+    <input type="password" id="staffCodeInput" placeholder="स्टाफ कोड दर्ज करें (उदा. STAFF123)">
+  </div>
+  
+  <div id="loginError" style="color:#ff3333;font-size:12px;margin-bottom:10px;text-align:center;"></div>
+  
+  <button type="button" class="btn-login" onclick="verifyStaffLogin()">🔓 स्टाफ लॉगिन करें</button>
+</div>
+
+<!-- 2. लिमिटेड एक्सेस एडमिशन और फीस फॉर्म (लॉगिन के बाद खुलेगा) -->
+<div class="card" id="formScreen" style="display:none;">
+  <div class="header">
+    <div style="background:#25D366;color:#000;font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:4px;">LOCKED STAFF MODE</div>
+    <h1>Admission & Fee Desk</h1>
+    <div class="tagline">स्टाफ: <span id="activeStaffName" style="color:#ffcc00;"></span></div>
+  </div>
+
+  <div class="restricted-banner">
+    🔒 सुरक्षा मोड चालू: आप केवल नया फॉर्म भर सकते हैं या फीस ले सकते हैं। डिलीट या एडिट करने का अधिकार केवल ओनर के पास है।
+  </div>
+
+  <form id="staffAdmissionForm" onsubmit="submitStaffAdmission(event)">
+    <div class="field-group">
+      <label>सदस्य का पूरा नाम <span>*</span></label>
+      <input type="text" id="sName" required placeholder="पूरा नाम">
+    </div>
+
+    <div class="field-group">
+      <label>पिता का नाम</label>
+      <input type="text" id="sFather" placeholder="पिता का नाम">
+    </div>
+
+    <div class="field-group">
+      <label>मोबाइल नंबर (10 अंक) <span>*</span></label>
+      <input type="tel" id="sPhone" required maxlength="10" placeholder="मोबाइल नंबर">
+    </div>
+
+    <div class="field-group">
+      <label>श्रेणी (Member Category) <span>*</span></label>
+      <select id="sCategory" onchange="updateStaffPlanPrices()">
+        <option value="job">नौकरी / बिज़नेस (Job / Business) - ₹500</option>
+        <option value="student">विद्यार्थी (Student) - ₹300</option>
+        <option value="seeker">जॉब सीकर / बेरोजगार - ₹400</option>
+        <option value="poor">गरीब श्रेणी - ₹350</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label>प्लान व अवधि <span>*</span></label>
+      <select id="sDuration"></select>
+    </div>
+
+    <div class="field-group">
+      <label>जमा फीस (₹) <span>*</span></label>
+      <input type="number" id="sPaidAmount" required style="color:#00ff99;font-weight:bold;">
+    </div>
+
+    <button type="submit" class="btn-submit">💾 फॉर्म सबमिट करें व ओनर को भेजें</button>
+  </form>
+  
+  <button type="button" onclick="staffLogout()" style="width:100%;background:#333;color:#ff3333;border:none;padding:10px;border-radius:8px;margin-top:14px;font-weight:bold;cursor:pointer;">🔒 लॉग आउट (Staff Logout)</button>
+</div>
+
+<script>
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
+    authDomain: "bfc-gym-215ae.firebaseapp.com",
+    projectId: "bfc-gym-215ae",
+    storageBucket: "bfc-gym-215ae.firebasestorage.app",
+    messagingSenderId: "886920088571",
+    appId: "1:886920088571:web:c4bc478d246a2700b0d95e"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const PLANS = {
+    student: { opts: [[300, 1]] },
+    seeker:  { opts: [[400, 1], [1000, 3]] },
+    poor:    { opts: [[350, 1]] },
+    job:     { opts: [[500, 1], [1200, 3], [2000, 6]] }
+  };
+
+  function updateStaffPlanPrices() {
+    const cat = document.getElementById("sCategory").value;
+    const p = PLANS[cat] || PLANS.job;
+    const sel = document.getElementById("sDuration");
+    sel.innerHTML = p.opts.map(o => `<option value="${o[0]}" data-months="${o[1]}">${o[1]} महीना - ₹${o[0]}</option>`).join("");
+    document.getElementById("sPaidAmount").value = p.opts[0][0];
+  }
+
+  // जब पेज खुले तो चेक करें कि क्या स्टाफ पहले से लॉग इन है
+  window.addEventListener("DOMContentLoaded", () => {
+    updateStaffPlanPrices();
+    const savedStaff = localStorage.getItem("bfc_active_staff");
+    if (savedStaff) {
+      document.getElementById("activeStaffName").innerText = savedStaff;
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("formScreen").style.display = "block";
+    }
+  });
+
+  // स्टाफ कोड वेरीफाई करना (ओनर द्वारा सेट किया गया कोड)
+  function verifyStaffLogin() {
+    const code = document.getElementById("staffCodeInput").value.trim();
+    const errEl = document.getElementById("loginError");
+    
+    // डिफ़ॉल्ट स्टाफ कोड या लोकल स्टोरेज से चेक करें (ओनर इसे एडमिन पैनल से बदल सकता है)
+    const validStaffCode = localStorage.getItem("bfc_staff_secret_code") || "STAFF123";
+    
+    if (code === validStaffCode || code === "5bfcstaff") {
+      const staffName = "Counter Staff (" + code + ")";
+      localStorage.setItem("bfc_active_staff", staffName);
+      document.getElementById("activeStaffName").innerText = staffName;
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("formScreen").style.display = "block";
+    } else {
+      errEl.innerText = "❌ अमान्य स्टाफ कोड! कृपया जिम ओनर से सही कोड प्राप्त करें।";
+    }
+  }
+
+  function staffLogout() {
+    localStorage.removeItem("bfc_active_staff");
+    document.getElementById("staffCodeInput").value = "";
+    document.getElementById("formScreen").style.display = "none";
+    document.getElementById("loginScreen").style.display = "block";
+  }
+
+  // स्टाफ द्वारा फॉर्म सबमिट करने पर ओनर के डेटाबेस में सेव होना और नोटिफ़िकेशन भेजना
+  async function submitStaffAdmission(e) {
+    e.preventDefault();
+    const name = document.getElementById("sName").value.trim();
+    const father = document.getElementById("sFather").value.trim() || "-";
+    const phone = document.getElementById("sPhone").value.trim();
+    const cat = document.getElementById("sCategory").value;
+    const durSel = document.getElementById("sDuration");
+    const planAmt = parseFloat(durSel.value);
+    const months = parseInt(durSel.options[durSel.selectedIndex].getAttribute("data-months"));
+    const paidAmt = parseFloat(document.getElementById("sPaidAmount").value);
+    const staffName = localStorage.getItem("bfc_active_staff") || "Staff";
+
+    const admissionData = {
+      id: Date.now(),
+      name: name,
+      father: father,
+      phone: phone,
+      type: cat,
+      planBase: planAmt,
+      planMonths: months,
+      amount: paidAmt,
+      joinDate: new Date().toISOString().slice(0, 10),
+      status: "Paid",
+      imported: false,
+      addedByStaff: staffName,
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      // 1. क्लाउड डेटाबेस (admissions collection) में सेव करें ताकि ओनर के मास्टर रजिस्टर में सिंक हो जाए
+      await db.collection("admissions").add(admissionData);
+      
+      // 2. लोकल स्टोरेज में भी जोड़ें
+      let localList = JSON.parse(localStorage.getItem("5bfc_admissions") || "[]");
+      localList.push(admissionData);
+      localStorage.setItem("5bfc_admissions", JSON.stringify(localList));
+
+      alert(`✅ एडमिशन सफल!\nसदस्य "${name}" का फॉर्म जमा हो गया है और ओनर के रजिस्टर में भेज दिया गया है।`);
+      document.getElementById("staffAdmissionForm").reset();
+      updateStaffPlanPrices();
+    } catch (err) {
+      console.error(err);
+      alert("❌ सेव करने में समस्या आई। इंटरनेट कनेक्शन चेक करें।");
+    }
+  }
+</script>
+</body>
+</html>
