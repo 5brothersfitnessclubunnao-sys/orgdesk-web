@@ -60,6 +60,22 @@
   </div>
 </div>
 
+  <div class="grid-menu">
+    <a href="join.html" class="menu-card full"><div class="icon">📝</div><div class="title">Admission Form</div><div class="sub">New member registration, plan &amp; QR generation</div></a>
+    
+    <!-- यह रहा Pay / UPI & Fees (pay.html) का बटन जो गायब था -->
+    <a href="pay.html" class="menu-card full" style="background:linear-gradient(135deg,#c0392b,#962d22); color:#fff; border:0; font-weight:900;">
+      <div class="icon">💳</div>
+      <div class="title" style="color:#fff; font-size:15px;">Pay / UPI &amp; Fees</div>
+      <div class="sub" style="color:#f0f0f5;">जिम फीस भरें / रसीद डाउनलोड करें</div>
+    </a>
+
+    <a href="attendance.html" class="menu-card"><div class="icon">📋</div><div class="title">Attendance</div><div class="sub">Staff &amp; Member tracking</div></a>
+    <button type="button" class="menu-card" onclick="openFee()"><div class="icon">💰</div><div class="title">Fee Collection</div><div class="sub">Dues &amp; payment tracking</div></button>
+    <button type="button" class="menu-card" onclick="openImp()"><div class="icon">📤</div><div class="title">Upload Gym Data</div><div class="sub">Purane register ke members daalein</div></button>
+    <button type="button" class="menu-card" onclick="openAdmin()"><div class="icon">🔐</div><div class="title">Admin Portal</div><div class="sub">Staff &amp; PIN controls</div></button>
+  </div>
+  
 <!-- PIN -->
 <div class="ov" id="pinOv"><div class="bx"><h3>🔐 PIN दर्ज करें</h3>
   <input id="pinIn" type="password" inputmode="numeric" placeholder="Admin PIN" onkeydown="if(event.key==='Enter')pinOk()">
