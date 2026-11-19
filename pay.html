@@ -1335,11 +1335,22 @@ function cycleFromJoin(joinStr, paidStr, months) {
 }
 /** पिछली expiry पता हो तो: अगली expiry = उसके बाद वाली जॉइनिंग-साइकिल (14/11 चुकाया → 14/12). देर = भुगतान − पिछली expiry */
 function cycleForPayment(joinStr, paidStr, months, prevExp) {
-  if (!prevExp) return cycleFromJoin(joinStr, paidStr, months);
   const m = Math.max(1, parseInt(months, 10) || 1);
-  if (!joinStr) joinStr = prevExp;
-  let k = 1, end = calcExpiryDate(joinStr, m);
-  while (end && (end <= prevExp || end < paidStr) && k < 600) { k++; end = calcExpiryDate(joinStr, m * k); }
+  const baseAnchor = joinStr || paidStr;
+  // If an existing future next payment date (prevExp) is set and paidStr is BEFORE prevExp,
+  // keep that existing next payment date unchanged (e.g., 20 Nov paid -> 20 Dec; paying again 2 days later stays 20 Dec).
+  if (prevExp && /^\d{4}-\d{2}-\d{2}$/.test(prevExp) && paidStr < prevExp) {
+    const startGuess = calcExpiryDate(prevExp, -m) || baseAnchor;
+    return {
+      nextExpiry: prevExp,
+      dueDate: prevExp,
+      startDate: startGuess,
+      lateDays: 0
+    };
+  }
+  if (!prevExp) return cycleFromJoin(baseAnchor, paidStr, m);
+  let k = 1, end = calcExpiryDate(baseAnchor, m);
+  while (end && (end <= prevExp || end <= paidStr) && k < 600) { k++; end = calcExpiryDate(baseAnchor, m * k); }
   const late = Math.round((new Date(paidStr + "T00:00:00") - new Date(prevExp + "T00:00:00")) / 86400000);
   return { nextExpiry: end, dueDate: prevExp, startDate: prevExp, lateDays: Math.max(0, late) };
 }
@@ -1825,14 +1836,38 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
   if (!reprint && window.__currentProofId) { try { db.collection("payment_proofs").doc(window.__currentProofId).update({ billId: billId }); } catch (e) {} }
   document.getElementById("billId").innerText = billId;
 
-  // Har mahine banne wali naye Bill ID ke mutabiq dynamic QR code
+  // Safe monthly receipt QR: encodes ?doc=receipt&code=<billId> without exposing phone numbers or portal controls
   try {
+    const receiptRecord = {
+      billId: billId,
+      gymName: GYM.name,
+      gymAddress: GYM.address,
+      gymPhone: GYM.phone,
+      memberName: data.name,
+      fatherName: data.father || "-",
+      planDetails: `${data.cat} | ${data.planText}`,
+      paidAmount: data.paidAmt,
+      dueAmount: data.dueAmt || 0,
+      paidDate: paidDateFormatted,
+      validTill: validTill,
+      modeText: modeText,
+      createdAt: new Date().toISOString()
+    };
+    try {
+      const arch = JSON.parse(localStorage.getItem("om_receipt_archive") || "{}");
+      arch[billId] = receiptRecord;
+      localStorage.setItem("om_receipt_archive", JSON.stringify(arch));
+    } catch (e) {}
+    try {
+      if (db) db.collection("receipts").doc(billId).set(receiptRecord, { merge: true }).catch(function(){});
+    } catch (e) {}
+
     const qrContainer = document.getElementById("receiptMonthlyQrBox");
     if (qrContainer) {
       qrContainer.innerHTML = "";
-      const receiptUrl = window.location.origin + window.location.pathname + "?view_bill=" + encodeURIComponent(billId);
+      const safeDocUrl = window.location.origin + window.location.pathname + "?doc=receipt&code=" + encodeURIComponent(billId);
       new QRCode(qrContainer, {
-        text: receiptUrl,
+        text: safeDocUrl,
         width: 64,
         height: 64,
         colorDark: "#000000",
@@ -2600,6 +2635,52 @@ window.addEventListener("DOMContentLoaded",function(){
   var tabs=document.querySelector(".nav-tabs");if(tabs)tabs.style.display="none";
   var pm=document.getElementById("paymentMethod");
   if(pm){for(var i=pm.options.length-1;i>=0;i--){if(pm.options[i].value==="cash")pm.remove(i)}pm.value="online"}
+});
+</script>
+
+<script>
+window.addEventListener("DOMContentLoaded", async function () {
+  try {
+    const params = new URLSearchParams(location.search);
+    const docType = params.get("doc");
+    const docCode = params.get("code");
+    if (docType === "receipt" && docCode) {
+      document.getElementById("feesWelcomeModal").style.display = "none";
+      document.querySelector(".main-card").style.display = "none";
+      let rec = null;
+      try {
+        const arch = JSON.parse(localStorage.getItem("om_receipt_archive") || "{}");
+        if (arch && arch[docCode]) rec = arch[docCode];
+      } catch (e) {}
+      if (!rec && db) {
+        try {
+          const snap = await db.collection("receipts").doc(docCode).get();
+          if (snap.exists) rec = snap.data();
+        } catch (e) {}
+      }
+      if (rec) {
+        document.getElementById("billId").innerText = rec.billId || docCode;
+        document.getElementById("rMode").innerText = rec.modeText || "Verified";
+        document.getElementById("rJoinDate").innerText = rec.paidDate || "--";
+        document.getElementById("billDate").innerText = rec.paidDate || "--";
+        document.getElementById("rName").innerText = rec.memberName || "--";
+        document.getElementById("rFather").innerText = rec.fatherName || "-";
+        document.getElementById("rPhone").innerText = "Verified Member";
+        document.getElementById("rPlanDetails").innerText = rec.planDetails || "--";
+        document.getElementById("rGymFee").innerText = "₹" + (rec.paidAmount || 0);
+        document.getElementById("rDueFee").innerText = "₹" + (rec.dueAmount || 0);
+        document.getElementById("rValidTill").innerText = rec.validTill || "--";
+        const qrContainer = document.getElementById("receiptMonthlyQrBox");
+        if (qrContainer) {
+          qrContainer.innerHTML = "";
+          new QRCode(qrContainer, { text: location.href, width: 64, height: 64 });
+        }
+        document.getElementById("receiptModal").style.display = "flex";
+      } else {
+        alert("Receipt record (" + docCode + ") nahi mila.");
+      }
+    }
+  } catch (e) {}
 });
 </script>
 </body>

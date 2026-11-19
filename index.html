@@ -10,100 +10,666 @@
   <script src="auth-gate.js"></script>
   <script src="license-gate.js"></script>
   <link rel="stylesheet" href="theme.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#0b0b0d;--card:#16161a;--border:#2c2c35;--ac:#ffcc00;--tx:#f0f0f5;--mut:#9999a8;--ok:#2ecc71;--er:#ff4d4d}
-    *{box-sizing:border-box}
-    body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:14px;min-height:100vh}
-    .dash-container{max-width:520px;width:100%;margin:0 auto}
-    .top-action-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .top-badge{background:var(--ac);color:#000;font-size:10px;font-weight:900;padding:3px 10px;border-radius:12px;text-transform:uppercase}
-    .header-card{background:radial-gradient(circle at top,#1e1908,#0d0d0d);border:2px solid var(--ac);border-radius:18px;padding:16px;text-align:center;margin-bottom:14px;box-shadow:0 4px 22px rgba(255,204,0,.22)}
-    .header-card h2{color:var(--ac);margin:0;font-size:22px;text-transform:uppercase;font-weight:900}
-    .header-card p{font-size:12px;color:var(--mut);margin:4px 0 0}
-    .grid-menu{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-    .menu-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;text-decoration:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit}
-    .menu-card:active{border-color:var(--ac)}
-    .menu-card .icon{font-size:32px;margin-bottom:6px}.menu-card .title{font-size:14px;font-weight:bold}.menu-card .sub{font-size:10.5px;color:var(--mut);margin-top:3px}
-    .menu-card.full{grid-column:span 2;background:linear-gradient(135deg,#ffcc00,#e6b800);color:#000;border:0;font-weight:900}
-    .menu-card.full .title{color:#000;font-size:16px}.menu-card.full .sub{color:#222}
-    .menu-card.pay-fees{background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;border:0;font-weight:900}
-    .menu-card.pay-fees .title{color:#fff;font-size:15px}.menu-card.pay-fees .sub{color:#dcfce7}
-    .upgrade-banner{background:linear-gradient(135deg,#1f1f23,#141418);border:1.5px solid var(--ac);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-    .upgrade-banner b{color:var(--ac);font-size:13px;display:block;margin-bottom:2px}.upgrade-banner span{color:var(--mut);font-size:10.5px}
-    .btn-upgrade{background:var(--ac);color:#000;font-weight:900;font-size:11.5px;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
-    .btn-logout-screen{background:#1e0d0d;color:var(--er);border:1.5px solid var(--er);padding:7px 12px;border-radius:8px;font-weight:900;font-size:11.5px;cursor:pointer}
-    .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;overflow-y:auto;padding:12px}.ov.show{display:block}
-    .bx{background:var(--card);border:2px solid var(--ac);border-radius:16px;padding:16px;max-width:480px;margin:15px auto}
-    .bx h3{color:var(--ac);margin:0 0 10px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
-    input,select,textarea{width:100%;background:#0b0b0d;border:1.5px solid var(--border);color:#fff;padding:10px;border-radius:8px;font-size:12.5px;margin-top:4px;outline:0}
-    .btn{width:100%;background:var(--ac);color:#000;font-weight:900;padding:12px;border:0;border-radius:8px;font-size:13px;margin-top:8px;cursor:pointer}
-    .btn.g{background:#222;color:var(--ac);border:1px solid var(--ac)}
-    .btn.red{background:var(--er);color:#fff;border:0}
-    .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px;border:1px solid var(--border);border-radius:8px;margin-top:6px;background:#0f0f12;font-size:12px}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .sec-tag{color:var(--ac);font-weight:800;font-size:12px;margin:12px 0 4px;border-bottom:1px dashed var(--border);padding-bottom:3px}
+    :root {
+      --bg: #070B14;
+      --bg-gradient: radial-gradient(1300px 700px at 50% -5%, #152244 0%, #080D1A 60%, #05070D 100%);
+      --card-bg: rgba(16, 24, 46, 0.85);
+      --card-hover: rgba(22, 34, 64, 0.95);
+      --border: rgba(45, 68, 115, 0.55);
+      --border-hover: rgba(255, 184, 0, 0.8);
+      --ac-gold: #FFB800;
+      --ac-gold-glow: rgba(255, 184, 0, 0.28);
+      --ac-blue: #0284C7;
+      --ac-cyan: #38BDF8;
+      --ac-green: #10B981;
+      --ac-red: #EF4444;
+      --tx-main: #FFFFFF;
+      --tx-sub: #CBD5E1;
+      --tx-muted: #8494B2;
+      --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.65), 0 0 25px -3px rgba(255, 184, 0, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      background: var(--bg-gradient) fixed;
+      color: var(--tx-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Full Laptop Width Responsive Layout */
+    .app-wrapper {
+      max-width: 1380px;
+      width: 94%;
+      margin: 0 auto;
+      padding: 24px 0 60px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* Executive Top Navigation Bar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(13, 20, 39, 0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 22px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-avatar {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #FFB800, #F59E0B);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+    }
+    .brand-titles h1 {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #FFFFFF;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-badge {
+      background: rgba(255, 184, 0, 0.15);
+      color: var(--ac-gold);
+      border: 1px solid rgba(255, 184, 0, 0.4);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.8px;
+    }
+    .brand-titles p {
+      font-size: 12px;
+      color: var(--tx-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-nav {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--tx-sub);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-nav:hover {
+      background: rgba(255, 184, 0, 0.12);
+      border-color: var(--ac-gold);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+    }
+    .btn-nav.logout {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #FCA5A5;
+    }
+    .btn-nav.logout:hover {
+      background: var(--ac-red);
+      color: #FFFFFF;
+      border-color: var(--ac-red);
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
+    }
+
+    /* Hero / Status Strip (Full Laptop Breadth) */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(20, 31, 60, 0.85) 0%, rgba(12, 19, 38, 0.95) 100%);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 20px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 184, 0, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .status-pulse-dot {
+      width: 14px;
+      height: 14px;
+      background: var(--ac-green);
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25);
+      animation: pulseAnim 2s infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulseAnim {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .hero-text b {
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 800;
+      display: block;
+    }
+    .hero-text span {
+      color: var(--tx-muted);
+      font-size: 12.5px;
+      font-weight: 500;
+    }
+    .hero-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-upgrade-hero {
+      background: linear-gradient(135deg, #FFB800, #F59E0B);
+      color: #0F172A;
+      font-weight: 900;
+      font-size: 13px;
+      padding: 11px 22px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+      transition: all 0.2s ease;
+    }
+    .btn-upgrade-hero:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 26px rgba(245, 158, 11, 0.5);
+    }
+
+    /* SECTION HEADER */
+    .section-headline {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 6px;
+      padding: 0 4px;
+    }
+    .section-headline h2 {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--tx-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-headline h2::before {
+      content: '';
+      width: 4px;
+      height: 18px;
+      background: var(--ac-gold);
+      border-radius: 2px;
+    }
+
+    /* DYNAMIC EXPANSIVE DESKTOP GRID */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    /* FEATURED WIDE CARDS (Span 2 columns on desktop) */
+    .card-featured {
+      grid-column: span 2;
+      border-radius: 20px;
+      padding: 24px 26px;
+      text-decoration: none;
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 165px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-card);
+      border: 1.5px solid transparent;
+    }
+    .card-featured:hover {
+      transform: translateY(-4px);
+    }
+
+    /* Staff Join Card - Cyan / Royal Electric Blue */
+    .card-staff {
+      background: linear-gradient(135deg, #0284C7 0%, #0369A1 50%, #0C4A6E 100%);
+      border-color: rgba(56, 189, 248, 0.45);
+    }
+    .card-staff:hover {
+      box-shadow: 0 20px 40px -10px rgba(2, 132, 199, 0.45), 0 0 25px rgba(56, 189, 248, 0.3);
+      border-color: #38BDF8;
+    }
+
+    /* Admission Card - Warm Amber / Royal Gold */
+    .card-admission {
+      background: linear-gradient(135deg, #D97706 0%, #B45309 50%, #78350F 100%);
+      border-color: rgba(251, 191, 36, 0.45);
+    }
+    .card-admission:hover {
+      box-shadow: 0 20px 40px -10px rgba(217, 119, 6, 0.45), 0 0 25px rgba(251, 191, 36, 0.3);
+      border-color: #FBBF24;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .card-icon-pill {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .card-tag {
+      background: rgba(0, 0, 0, 0.28);
+      color: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .card-body h3 {
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 6px;
+      letter-spacing: 0.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-body p {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.45;
+      font-weight: 500;
+      max-width: 480px;
+    }
+    .card-footer {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-top: 14px;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #FFFFFF;
+      gap: 6px;
+    }
+
+    /* STANDARD DESKTOP CARDS (1 Column Each) */
+    .card-item {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 22px 20px;
+      text-decoration: none;
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 175px;
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-card);
+      cursor: pointer;
+      text-align: left;
+    }
+    .card-item:hover {
+      background: var(--card-hover);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--border-hover);
+    }
+
+    /* Pay Fees specific styling */
+    .card-item.pay-accent {
+      border-color: rgba(16, 185, 129, 0.45);
+      background: linear-gradient(160deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 24, 46, 0.85) 60%);
+    }
+    .card-item.pay-accent:hover {
+      border-color: var(--ac-green);
+      box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.35);
+    }
+
+    .item-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 14px;
+      transition: transform 0.2s ease;
+    }
+    .card-item:hover .item-icon {
+      transform: scale(1.08);
+      background: rgba(255, 184, 0, 0.18);
+      border-color: var(--ac-gold);
+    }
+    .item-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+    .item-sub {
+      font-size: 12px;
+      color: var(--tx-muted);
+      line-height: 1.45;
+      font-weight: 500;
+    }
+    .item-arrow {
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ac-gold);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.85;
+      transition: gap 0.2s ease;
+    }
+    .card-item:hover .item-arrow {
+      gap: 8px;
+      opacity: 1;
+    }
+
+    /* OVERLAYS & MODALS */
+    .ov {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 7, 15, 0.94);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      overflow-y: auto;
+      padding: 20px;
+      align-items: center;
+      justify-content: center;
+    }
+    .ov.show { display: flex; }
+    .bx {
+      background: #111A30;
+      border: 2px solid var(--ac-gold);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    }
+    .bx h3 {
+      color: var(--ac-gold);
+      margin: 0 0 14px;
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    input, select, textarea {
+      width: 100%;
+      background: #0B1224;
+      border: 1.5px solid #22345C;
+      color: #FFFFFF;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-top: 6px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--ac-gold);
+      box-shadow: 0 0 0 3px rgba(255, 184, 0, 0.15);
+    }
+    .btn {
+      width: 100%;
+      background: var(--ac-gold);
+      color: #0F172A;
+      font-weight: 900;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13.5px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(255, 184, 0, 0.35);
+    }
+    .btn.g {
+      background: #192644;
+      color: var(--ac-gold);
+      border: 1px solid var(--border);
+    }
+    .btn.g:hover {
+      background: #22345C;
+      border-color: var(--ac-gold);
+    }
+    .btn.red {
+      background: var(--ac-red);
+      color: #FFFFFF;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-top: 8px;
+      background: #0C1428;
+      font-size: 12.5px;
+    }
+    .sec-tag {
+      color: var(--ac-gold);
+      font-weight: 800;
+      font-size: 13px;
+      margin: 16px 0 6px;
+      border-bottom: 1.5px dashed var(--border);
+      padding-bottom: 4px;
+    }
+
+    /* RESPONSIVE BREAKPOINTS (Seamless laptop -> tablet -> mobile) */
+    @media (max-width: 1024px) {
+      .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+      .card-featured { grid-column: span 2; }
+    }
+    @media (max-width: 680px) {
+      .app-wrapper { width: 92%; padding: 14px 0 40px; }
+      .navbar { flex-direction: column; align-items: flex-start; gap: 12px; padding: 14px; }
+      .nav-actions { width: 100%; justify-content: space-between; }
+      .hero-banner { flex-direction: column; align-items: flex-start; padding: 16px; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .card-featured { grid-column: span 1; }
+    }
   </style>
 </head>
 <body>
-<div class="dash-container">
-  <div class="top-action-bar">
-    <div class="top-badge">MASTER APP DASHBOARD</div>
-    <button type="button" class="btn-logout-screen" onclick="omLogoutNow()">Logout</button>
+
+<div class="app-wrapper">
+  <!-- Top Navigation Header -->
+  <header class="navbar">
+    <div class="brand-section">
+      <div class="brand-avatar">🏋️</div>
+      <div class="brand-titles">
+        <h1 id="orgTitle">GYM PORTAL <span class="brand-badge">ENTERPRISE</span></h1>
+        <p>Universal Gym Management &amp; Automated Verification Portal</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button type="button" class="btn-nav" onclick="askPin(viewLic)">🔑 License Key</button>
+      <button type="button" class="btn-nav" onclick="askPin(viewSec)">🛡️ Security Code</button>
+      <button type="button" class="btn-nav logout" onclick="omLogoutNow()">🚪 Logout</button>
+    </div>
+  </header>
+
+  <!-- Hero Subscription & Status Banner -->
+  <div class="hero-banner">
+    <div class="hero-left">
+      <div class="status-pulse-dot"></div>
+      <div class="hero-text">
+        <b id="trialTitle">7-Day Free Trial Active</b>
+        <span id="trialDaysText">Full features unlocked &bull; Cloud sync live</span>
+      </div>
+    </div>
+    <div class="hero-right">
+      <button type="button" class="btn-upgrade-hero" onclick="openUpgradeModal()">⚡ Upgrade Plan</button>
+    </div>
   </div>
 
-  <div class="header-card">
-    <h2 id="orgTitle">GYM PORTAL</h2>
-    <p>Universal Gym Management &amp; Attendance Portal</p>
+  <!-- Section Heading -->
+  <div class="section-headline">
+    <h2>Operations &amp; Control Desk</h2>
   </div>
 
-  <div class="upgrade-banner">
-    <div><b id="trialTitle">7-Day Free Trial Active</b><span id="trialDaysText"></span></div>
-    <button type="button" class="btn-upgrade" onclick="openUpgradeModal()">Upgrade Plan</button>
-  </div>
+  <!-- Laptop & Desktop Expansive Grid -->
+  <main class="dashboard-grid">
+    <!-- Featured Card 1: Staff Joining Form -->
+    <a href="staff-join.html" class="card-featured card-staff">
+      <div class="card-top">
+        <div class="card-icon-pill">🧑‍💼</div>
+        <span class="card-tag">Class A &bull; B &bull; C &bull; S</span>
+      </div>
+      <div class="card-body">
+        <h3>Staff Joining Form (स्टाफ जॉइनिंग)</h3>
+        <p>Official staff onboarding, live photo capture, RBI bank digit validation, smart KYC &amp; full 2-page agreement generation.</p>
+      </div>
+      <div class="card-footer">
+        <span>कर्मचारी फॉर्म खोलें &rarr;</span>
+      </div>
+    </a>
 
-  <div class="grid2" style="margin-bottom:12px">
-    <button type="button" class="btn g" style="margin-top:0;font-size:11.5px;padding:9px" onclick="askPin(viewLic)">License Key</button>
-    <button type="button" class="btn g" style="margin-top:0;font-size:11.5px;padding:9px" onclick="askPin(viewSec)">Security Code</button>
-  </div>
+    <!-- Featured Card 2: Member Admission Form -->
+    <a href="join.html" class="card-featured card-admission">
+      <div class="card-top">
+        <div class="card-icon-pill">📝</div>
+        <span class="card-tag">New Member KYC</span>
+      </div>
+      <div class="card-body">
+        <h3>Admission Form (सदस्य पंजीकरण)</h3>
+        <p>New member registration, personal details, health waiver, monthly plans &amp; QR verification download.</p>
+      </div>
+      <div class="card-footer">
+        <span>नया दाखिला शुरू करें &rarr;</span>
+      </div>
+    </a>
 
-  <div class="grid-menu">
-        <a href="staff-join.html" class="menu-card full" style="background:linear-gradient(135deg,#38bdf8,#0284c7);color:#fff">
-      <div class="icon">🧑‍💼</div>
-      <div class="title" style="color:#fff">Staff Joining Form (स्टाफ जॉइनिंग)</div>
-      <div class="sub" style="color:#e0f2fe">New staff onboarding, KYC, experience &amp; bank ledger</div>
+    <!-- Standard Card 1: Attendance -->
+    <a href="attendance.html" class="card-item">
+      <div>
+        <div class="item-icon">📋</div>
+        <div class="item-title">Attendance Kiosk</div>
+        <div class="item-sub">Live selfie attendance tracking, calendar check &amp; member / staff presence.</div>
+      </div>
+      <div class="item-arrow">उपस्थिति कियोस्क &rarr;</div>
     </a>
-    <a href="join.html" class="menu-card full">
-      <div class="icon">📝</div>
-      <div class="title">Admission Form</div>
-      <div class="sub">New member registration, plan &amp; QR generation</div>
+
+    <!-- Standard Card 2: Pay Fees (Accent Highlighted) -->
+    <a href="pay.html" class="card-item pay-accent">
+      <div>
+        <div class="item-icon" style="background:rgba(16,185,129,0.2);border-color:#10B981;color:#10B981">💳</div>
+        <div class="item-title" style="color:#A7F3D0">Pay Fees Desk</div>
+        <div class="item-sub">Same-cycle due date lock, collect dues, UTR confirmation &amp; monthly QR invoices.</div>
+      </div>
+      <div class="item-arrow" style="color:#34D399">फीस डेस्क &rarr;</div>
     </a>
-    <a href="attendance.html" class="menu-card">
-      <div class="icon">📋</div>
-      <div class="title">Attendance</div>
-      <div class="sub">Staff &amp; Member tracking</div>
-    </a>
-    <a href="pay.html" class="menu-card pay-fees">
-      <div class="icon">💳</div>
-      <div class="title">Pay Fees</div>
-      <div class="sub">Collect member dues &amp; generate receipt</div>
-    </a>
-    <button type="button" class="menu-card" onclick="openImp()">
-      <div class="icon">📤</div>
-      <div class="title">Upload Gym Data</div>
-      <div class="sub">Purane register ke members CSV upload karein</div>
+
+    <!-- Standard Card 3: Upload Gym Data -->
+    <button type="button" class="card-item" onclick="openImp()">
+      <div>
+        <div class="item-icon">📤</div>
+        <div class="item-title">Upload Gym Data</div>
+        <div class="item-sub">Purane register ke members CSV file se direct import aur batch sync karein.</div>
+      </div>
+      <div class="item-arrow">CSV Import करें &rarr;</div>
     </button>
-    <button type="button" class="menu-card" onclick="openAdmin()">
-      <div class="icon">🔐</div>
-      <div class="title">Admin Portal</div>
-      <div class="sub">Staff &amp; PIN controls</div>
+
+    <!-- Standard Card 4: Admin Portal -->
+    <button type="button" class="card-item" onclick="openAdmin()">
+      <div>
+        <div class="item-icon">🔐</div>
+        <div class="item-title">Admin Portal</div>
+        <div class="item-sub">Staff registry management, system security PIN &amp; administrative controls.</div>
+      </div>
+      <div class="item-arrow">Admin लॉगिन &rarr;</div>
     </button>
-  </div>
+  </main>
 </div>
 
 <!-- PIN OVERLAY -->
 <div class="ov" id="pinOv">
   <div class="bx">
-    <h3>Admin PIN darj karein</h3>
+    <h3>Admin PIN दर्ज करें</h3>
     <input id="pinIn" type="password" inputmode="numeric" placeholder="Admin PIN (default: 1234)" onkeydown="if(event.key==='Enter')pinOk()">
     <div id="pinMsg" style="color:#ff6b6b;font-size:12px;margin-top:6px;min-height:14px"></div>
     <button type="button" class="btn" onclick="pinOk()">OK</button>
@@ -114,19 +680,19 @@
 <!-- UPLOAD GYM DATA OVERLAY -->
 <div class="ov" id="impOv">
   <div class="bx">
-    <h3>Upload Gym Members CSV <button type="button" onclick="closeOv('impOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">X</button></h3>
-    <div style="font-size:11.5px;color:var(--mut);line-height:1.5">
+    <h3>Upload Gym Members CSV <button type="button" onclick="closeOv('impOv')" style="background:none;border:0;color:var(--ac-gold);font-size:18px;cursor:pointer">X</button></h3>
+    <div style="font-size:12px;color:var(--tx-muted);line-height:1.5">
       1) Template download karein -&gt; members bharein<br>
       2) CSV file yahan chunein aur Import dabayein.
     </div>
     <button type="button" class="btn g" onclick="dlTemplate()">Template (CSV) Download</button>
     <input type="file" id="impF" accept=".csv,text/csv" onchange="pickCsv(this)" style="margin-top:10px">
     <div id="impInfo" style="font-size:12px;margin-top:8px;font-weight:bold;min-height:16px"></div>
-    <label style="display:flex;align-items:center;gap:6px;font-size:12px;margin-top:8px;cursor:pointer">
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:10px;cursor:pointer">
       <input type="radio" name="impMode" value="add" checked style="width:auto">
       <span>Purane data ke saath jodein (Add)</span>
     </label>
-    <label style="display:flex;align-items:center;gap:6px;font-size:12px;margin-top:6px;cursor:pointer">
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:6px;cursor:pointer">
       <input type="radio" name="impMode" value="replace" style="width:auto">
       <span style="color:#ff7b6b">Purana data hata kar sirf yahi rakhein (Replace)</span>
     </label>
@@ -138,7 +704,7 @@
 <!-- ADMIN PORTAL OVERLAY -->
 <div class="ov" id="admOv">
   <div class="bx">
-    <h3>Admin Portal <button type="button" onclick="closeOv('admOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">X</button></h3>
+    <h3>Admin Portal <button type="button" onclick="closeOv('admOv')" style="background:none;border:0;color:var(--ac-gold);font-size:18px;cursor:pointer">X</button></h3>
     <div class="sec-tag">Staff jodein</div>
     <input id="sn" placeholder="Staff ka naam">
     <input id="sp" placeholder="Mobile (optional)" inputmode="tel">
@@ -399,7 +965,7 @@ function viewLic() {
 
 function viewSec() {
   const o = J("om_org_profile", {});
-  $("secBody").innerHTML = '<div style="font-size:20px;color:var(--ac);font-weight:900;padding:12px">' + esc(o.securityCode || "SEC-S32D-PW4Z") + "</div>";
+  $("secBody").innerHTML = '<div style="font-size:20px;color:var(--ac-gold);font-weight:900;padding:12px">' + esc(o.securityCode || "SEC-S32D-PW4Z") + "</div>";
   $("secOv").classList.add("show");
 }
 
