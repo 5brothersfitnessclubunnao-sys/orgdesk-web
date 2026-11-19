@@ -49,7 +49,7 @@
   <div class="header">
     <div class="badge">UNIVERSAL SAAS PORTAL</div>
     <h2 id="formTitle">Welcome Back</h2>
-    <p id="formSub">नीचे के 3 तरीकों में से कोई भी एक चुनकर Sign In करें</p>
+    <p id="formSub">Email / Mobile + Password ya Security Code se Sign In karein</p>
   </div>
 
   <div class="tabs">
@@ -87,34 +87,33 @@
       <div class="wrap"><input type="password" id="codeInput" class="code-in" placeholder="SEC-XXXX-XXXX-XXXX" autocomplete="off"><button type="button" class="eye" onclick="eye('codeInput',this)">👁</button></div>
     </div>
 
-    <div class="hint" id="upHint" style="display:none">Signup par आपके लिए एक Unique Security Code बनेगा। उसे save कर लें — बाद में Dashboard में PIN डालकर कभी भी देख सकते हैं।</div>
+    <div class="hint" id="upHint" style="display:none">Signup par aapke liye ek Unique Security Code banega.</div>
 
     <button type="submit" class="btn-main" id="submitBtn">Sign In</button>
   </form>
 
   <div class="links">
-    <a onclick="forgot()">Forgot Password / Security Code?</a>
+    <a onclick="forgot()">Forgot Password?</a>
     <span id="swText">Naya account? <a onclick="setMode('up')">Sign Up</a></span>
   </div>
 </div>
 
-<!-- SECURITY CODE POPUP -->
 <div class="ov" id="codeOv"><div class="cbox">
   <div class="badge">YOUR UNIQUE SECURITY CODE</div>
-  <h3 style="color:var(--ac);margin:6px 0 2px">🔑 इसे save कर लें</h3>
-  <div style="font-size:12px;color:var(--mut);line-height:1.5">यह code आपके जिम का अपना है। इससे सीधे Sign In हो जाता है। Dashboard में <b>PIN</b> डालकर इसे कभी भी दोबारा देख सकते हैं।</div>
+  <h3 style="color:var(--ac);margin:6px 0 2px">🔑 Ise save kar lein</h3>
   <div class="code-big" id="codeShow">-</div>
-  <button class="btn2" onclick="copyCode()">📋 Copy करें</button>
-  <button class="btn2" onclick="shareCode()">📤 WhatsApp / Share</button>
-  <label style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px;font-size:12px"><input type="checkbox" id="savedChk" style="width:auto" onchange="document.getElementById('contBtn').disabled=!this.checked"> मैंने code save कर लिया है</label>
-  <button class="btn-main" id="contBtn" disabled onclick="goNext()">आगे बढ़ें ➔</button>
+  <button class="btn2" onclick="copyCode()">📋 Copy karein</button>
+  <label style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px;font-size:12px">
+    <input type="checkbox" id="savedChk" style="width:auto" onchange="document.getElementById('contBtn').disabled=!this.checked"> Maine code save kar liya hai
+  </label>
+  <button class="btn-main" id="contBtn" disabled onclick="goNext()">Aage badhein ➔</button>
 </div></div>
 
 <script>
   var CFG = { apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" };
   if (!firebase.apps.length) firebase.initializeApp(CFG);
   var auth = firebase.auth(), db = firebase.firestore();
-  var LS = localStorage, mode = 'in', method = 'email', nextUrl = 'category-select.html', pendingCode = '';
+  var LS = localStorage, mode = 'in', method = 'email', nextUrl = 'index.html', pendingCode = '';
   var $ = function (i) { return document.getElementById(i); };
 
   function setMode(m) {
@@ -125,10 +124,9 @@
     $('mCode').style.display = m === 'up' ? 'none' : 'block';
     if (m === 'up' && method === 'code') method = 'email';
     $('formTitle').textContent = m === 'up' ? 'Create Account' : 'Welcome Back';
-    $('formSub').textContent = m === 'up' ? 'अपना Gym register करें — आपको Unique Security Code मिलेगा' : 'नीचे के 3 तरीकों में से कोई भी एक चुनकर Sign In करें';
     $('submitBtn').textContent = m === 'up' ? 'Create Account' : 'Sign In';
-    $('pwHint').textContent = m === 'up' ? '(कम से कम 6 अक्षर)' : '';
-    $('swText').innerHTML = m === 'up' ? 'Pehle se account hai? <a onclick="setMode('in')">Sign In</a>' : 'Naya account? <a onclick="setMode('up')">Sign Up</a>';
+    $('pwHint').textContent = m === 'up' ? '(kam se kam 6 akshar)' : '';
+    $('swText').innerHTML = m === 'up' ? 'Pehle se account hai? <a onclick="setMode(\'in\')">Sign In</a>' : 'Naya account? <a onclick="setMode(\'up\')">Sign Up</a>';
     setMethod(method);
   }
   function setMethod(x) {
@@ -139,7 +137,7 @@
     $('pwField').style.display = isCode ? 'none' : 'block';
     $('codeField').style.display = isCode ? 'block' : 'none';
     $('idLabel').textContent = x === 'mobile' ? 'Mobile Number *' : 'Email Address *';
-    $('idInput').placeholder = x === 'mobile' ? '10 अंक का मोबाइल' : 'name@example.com';
+    $('idInput').placeholder = x === 'mobile' ? '10 ank ka mobile' : 'name@example.com';
     $('idInput').inputMode = x === 'mobile' ? 'numeric' : 'email';
   }
   function eye(id, b) { var i = $(id); i.type = i.type === 'password' ? 'text' : 'password'; b.textContent = i.type === 'password' ? '👁' : '🙈'; }
@@ -147,15 +145,15 @@
   function err(t) { var e = $('errBox'); e.textContent = t; e.style.display = 'block'; $('okBox').style.display = 'none'; }
   function ok(t) { var e = $('okBox'); e.textContent = t; e.style.display = 'block'; $('errBox').style.display = 'none'; }
   function busy(b) { var s = $('submitBtn'); s.disabled = b; s.textContent = b ? 'Please wait…' : (mode === 'up' ? 'Create Account' : 'Sign In'); }
+
   function friendly(e) {
     var c = (e && e.code) || '';
-    if (c === 'auth/email-already-in-use') return 'यह Email/Mobile पहले से registered है — Sign In करें।';
-    if (c === 'auth/invalid-email') return 'Email सही नहीं है।';
-    if (c === 'auth/weak-password') return 'Password कम से कम 6 अक्षर का रखें।';
-    if (c === 'auth/user-not-found' || c === 'auth/wrong-password' || c === 'auth/invalid-credential' || c === 'auth/invalid-login-credentials') return 'जानकारी गलत है — दोबारा जाँचें।';
-    if (c === 'auth/too-many-requests') return 'बहुत कोशिशें हो गईं — थोड़ी देर बाद try करें।';
-    if (c === 'auth/network-request-failed') return 'इंटरनेट चेक करें।';
-    return (e && e.message) || 'कुछ गड़बड़ हुई।';
+    if (c === 'auth/email-already-in-use') return 'Yeh Email/Mobile pehle se registered hai — Sign In karein.';
+    if (c === 'auth/invalid-email') return 'Email sahi nahi hai.';
+    if (c === 'auth/weak-password') return 'Password kam se kam 6 akshar ka rakhein.';
+    if (c === 'auth/user-not-found' || c === 'auth/wrong-password' || c === 'auth/invalid-credential' || c === 'auth/invalid-login-credentials') return 'Email/Mobile ya Password galat hai.';
+    if (c === 'auth/network-request-failed') return 'Internet connection check karein.';
+    return (e && e.message) || 'Login/Signup mein error aaya.';
   }
 
   function idToCred(raw) { raw = (raw || '').trim(); return /^\d{10}$/.test(raw) ? raw + '@orgdesk.phone' : raw; }
@@ -172,110 +170,104 @@
   }
   async function codeEmail(code) { return 'c' + (await sha(code)).slice(0, 32) + '@code.orgdesk.app'; }
 
-  async function createCodeAccount(code) {
-    var app2 = firebase.apps.filter(function (a) { return a.name === 'sec'; })[0] || firebase.initializeApp(CFG, 'sec');
-    var a2 = app2.auth();
-    try {
-      var cred = await a2.createUserWithEmailAndPassword(await codeEmail(code), code);
-      return cred.user.uid;
-    } finally { try { await a2.signOut(); } catch (e) {} }
-  }
-
-  async function issueCode(orgId) {
-    var code = genCode(), uid2 = await createCodeAccount(code), h = await sha(code);
-    await db.collection('roles').doc(orgId).set({ orgId: orgId, role: 'owner', via: 'email' }, { merge: true });
-    await db.collection('roles').doc(uid2).set({ orgId: orgId, role: 'owner', via: 'code', createdAt: new Date().toISOString() });
-    await db.collection('orgs').doc(orgId).collection('private').doc('security').set({ code: code, codeUid: uid2, updatedAt: new Date().toISOString() });
-    await db.collection('orgs').doc(orgId).set({ ownerUid: orgId, codeHash: h }, { merge: true });
-    return code;
-  }
-
-  function saveLocalProfile(orgId, cloud) {
+  function saveLocalSession(orgId, gymName) {
     var prev = {}; try { prev = JSON.parse(LS.getItem('om_org_profile') || '{}') || {}; } catch (e) {}
-    if (prev.orgId && prev.orgId !== orgId) prev = {};
-    cloud = cloud || {};
-    var o = Object.assign({}, prev, cloud, {
-      orgId: orgId, orgName: cloud.gymName || prev.orgName || prev.gymName || '',
-      createdAt: cloud.createdAt || prev.createdAt || new Date().toISOString()
+    var o = Object.assign({}, prev, {
+      orgId: orgId,
+      orgName: gymName || prev.orgName || prev.gymName || 'My Gym',
+      gymName: gymName || prev.gymName || prev.orgName || 'My Gym',
+      createdAt: prev.createdAt || new Date().toISOString()
     });
     LS.setItem('om_org_profile', JSON.stringify(o));
     LS.setItem('bfc_org_id', orgId);
     LS.setItem('bfc_role', 'owner');
-    return o;
   }
 
   async function afterAuth(user, justSignedUp, signupGym) {
-    var orgId = user.uid, role = 'owner';
-    try { var r = await db.collection('roles').doc(user.uid).get(); if (r.exists) { orgId = r.data().orgId || orgId; role = r.data().role || 'owner'; } } catch (e) {}
-    if (role !== 'owner') { LS.setItem('bfc_role', role); LS.setItem('bfc_org_id', orgId); window.location.replace('index.html'); return; }
+    var orgId = user.uid;
+    var gymName = signupGym || '';
+    try {
+      var s = await db.collection('orgs').doc(orgId).get();
+      if (s.exists && s.data().gymName) gymName = s.data().gymName;
+    } catch (e) {}
 
-    var cloud = null;
-    try { var s = await db.collection('orgs').doc(orgId).get(); if (s.exists) cloud = s.data(); } catch (e) { console.warn(e); }
-    if (justSignedUp && signupGym) cloud = Object.assign({}, cloud || {}, { gymName: signupGym });
+    saveLocalSession(orgId, gymName);
+    nextUrl = 'index.html';
 
-    var prevLocal = {}; try { prevLocal = JSON.parse(LS.getItem('om_org_profile') || '{}') || {}; } catch (e) {}
-    var createdAt = (cloud && cloud.createdAt) || (prevLocal.orgId === orgId && prevLocal.createdAt) || new Date().toISOString();
-    var base = { createdAt: createdAt, ownerUid: orgId };
-    if (justSignedUp && signupGym) { base.gymName = signupGym; base.category = 'gym'; }
-    try { await db.collection('orgs').doc(orgId).set(base, { merge: true }); } catch (e) {}
-    cloud = Object.assign({}, cloud || {}, base);
-    try { await db.collection('publicOrgs').doc(orgId).set({ gymName: cloud.gymName || '' }, { merge: true }); } catch (e) {}
-
-    saveLocalProfile(orgId, cloud);
-    var complete = !!(cloud.gymName && cloud.phone && cloud.upiId);
-    nextUrl = complete ? 'index.html' : 'category-select.html';
-
-    if (justSignedUp || !cloud.codeHash) {
-      try { pendingCode = await issueCode(orgId); showCode(pendingCode); return; }
-      catch (e) { console.warn('code issue failed', e); err('Security Code नहीं बन पाया: ' + friendly(e)); }
+    if (justSignedUp) {
+      pendingCode = genCode();
+      try {
+        await db.collection('orgs').doc(orgId).set({
+          ownerUid: orgId,
+          gymName: gymName,
+          securityCode: pendingCode,
+          createdAt: new Date().toISOString()
+        }, { merge: true });
+      } catch (e) {}
+      var p = JSON.parse(LS.getItem('om_org_profile') || '{}');
+      p.securityCode = pendingCode;
+      LS.setItem('om_org_profile', JSON.stringify(p));
+      $('codeShow').textContent = pendingCode;
+      $('codeOv').classList.add('show');
+      busy(false);
+      return;
     }
+
     window.location.replace(nextUrl);
   }
 
-  function showCode(c) { $('codeShow').textContent = c; $('codeOv').classList.add('show'); }
   function goNext() { window.location.replace(nextUrl); }
-  function copyCode() { try { navigator.clipboard.writeText(pendingCode); } catch (e) {} ok('Copy हो गया ✔'); }
-  function shareCode() { var t = 'मेरा Security Code: ' + pendingCode; if (navigator.share) navigator.share({ text: t }).catch(function () {}); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); }
+  function copyCode() { try { navigator.clipboard.writeText(pendingCode); } catch (e) {} ok('Copy ho gaya ✔'); }
 
   async function submitForm(e) {
     e.preventDefault(); hide(); busy(true);
     try {
       if (mode === 'up') {
-        var gym = $('gymName').value.trim(); if (!gym) throw { message: 'Gym / Organization का नाम लिखें।' };
+        var gym = $('gymName').value.trim();
+        if (!gym) throw { message: 'Gym / Organization ka naam likhein.' };
         var raw = $('idInput').value.trim(), pw = $('pwInput').value;
-        if (method === 'mobile' && !/^\d{10}$/.test(raw)) throw { message: '10 अंक का सही मोबाइल नंबर लिखें।' };
-        if (!raw) throw { message: (method === 'mobile' ? 'Mobile' : 'Email') + ' लिखें।' };
+        if (!raw) throw { message: (method === 'mobile' ? 'Mobile' : 'Email') + ' likhein.' };
+        if (method === 'mobile' && !/^\d{10}$/.test(raw)) throw { message: '10 ank ka sahi mobile number likhein.' };
         var cred = await auth.createUserWithEmailAndPassword(idToCred(raw), pw);
         try { await cred.user.updateProfile({ displayName: gym }); } catch (x) {}
         await afterAuth(cred.user, true, gym);
       } else if (method === 'code') {
-        var code = normCode($('codeInput').value); if (!code) throw { message: 'Security Code सही फॉर्मेट में लिखें (SEC-XXXX-XXXX-XXXX)।' };
+        var code = normCode($('codeInput').value);
+        if (!code) throw { message: 'Security Code sahi format mein likhein (SEC-XXXX-XXXX-XXXX).' };
         var c2 = await auth.signInWithEmailAndPassword(await codeEmail(code), code);
         await afterAuth(c2.user, false);
       } else {
         var raw2 = $('idInput').value.trim(), pw2 = $('pwInput').value;
-        if (!raw2 || !pw2) throw { message: (method === 'mobile' ? 'Mobile' : 'Email') + ' और Password दोनों लिखें।' };
+        if (!raw2 || !pw2) throw { message: 'Email/Mobile aur Password dono likhein.' };
         var c3 = await auth.signInWithEmailAndPassword(idToCred(raw2), pw2);
         await afterAuth(c3.user, false);
       }
-    } catch (x) { err(friendly(x)); busy(false); }
+    } catch (x) {
+      err(friendly(x));
+      busy(false);
+    }
   }
 
   async function forgot() {
     hide();
-    if (method === 'code') { err('Security Code भूल गए? Email/Mobile + Password से Sign In करें, फिर Dashboard में 🔐 Security Code (PIN डालकर) देखें।'); return; }
     var raw = $('idInput').value.trim();
-    if (!raw) { err('पहले ऊपर अपना Email लिखें।'); return; }
-    if (/^\d{10}$/.test(raw)) { err('Mobile account का Password email से reset नहीं हो सकता — Security Code से Sign In करें।'); return; }
-    try { await auth.sendPasswordResetEmail(raw); ok('Password reset link आपके Email पर भेज दिया गया।'); } catch (x) { err(friendly(x)); }
+    if (!raw || /^\d{10}$/.test(raw)) { err('Pehle upar apna Email likhein.'); return; }
+    try { await auth.sendPasswordResetEmail(raw); ok('Password reset link aapke Email par bhej diya gaya.'); } catch (x) { err(friendly(x)); }
   }
 
   (function init() {
     var q = new URLSearchParams(location.search);
     if (q.get('logout')) {
-      ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role'].forEach(function (k) { LS.removeItem(k); });
+      ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role', 'bfc_active_staff', 'bfc_admin_logged_in'].forEach(function (k) { LS.removeItem(k); });
       auth.signOut().catch(function () {});
+      return;
     }
+    var off = auth.onAuthStateChanged(function (u) {
+      off();
+      if (u && !u.isAnonymous && LS.getItem('bfc_org_id')) {
+        window.location.replace('index.html');
+      }
+    });
   })();
   setMode('in');
 </script>
