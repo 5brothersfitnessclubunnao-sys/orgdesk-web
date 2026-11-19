@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Staff Joining & Verification Form</title>
 <link rel="stylesheet" href="theme.css">
-<!-- Firebase App & Firestore SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -52,7 +51,6 @@ body{
   padding:18px 14px;
   text-align:center;
   margin-bottom:14px;
-  box-shadow:0 10px 28px rgba(0,0,0,.35);
 }
 .header-box h1{color:#fff;font-size:20px;font-weight:900;letter-spacing:0.5px}
 .header-box p{color:var(--ac);font-size:12px;font-weight:700;margin-top:4px}
@@ -61,7 +59,6 @@ body{
   border:1.5px solid var(--border);
   border-radius:18px;
   padding:18px 14px;
-  box-shadow:0 12px 32px rgba(0,0,0,.35);
 }
 .section-title{
   color:var(--ac);
@@ -70,9 +67,6 @@ body{
   margin:16px 0 10px;
   padding-bottom:4px;
   border-bottom:1.5px dashed var(--border);
-  display:flex;
-  align-items:center;
-  gap:6px;
 }
 .section-title:first-of-type{margin-top:0}
 .field-group{margin-bottom:11px}
@@ -90,7 +84,6 @@ input,select,textarea{
 }
 input:focus,select:focus,textarea:focus{
   border-color:var(--ac);
-  box-shadow:0 0 0 3px rgba(255,184,0,.15);
 }
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
@@ -120,7 +113,6 @@ input:focus,select:focus,textarea:focus{
   border-radius:12px;
   cursor:pointer;
   margin-top:16px;
-  box-shadow:0 6px 20px rgba(34,197,94,.25);
   text-transform:uppercase;
 }
 .role-badge{
@@ -134,7 +126,6 @@ input:focus,select:focus,textarea:focus{
   font-weight:800;
   margin-bottom:8px;
 }
-/* Photo Upload & Preview Box */
 .photo-box{
   background:#0B1226;
   border:1.5px dashed var(--border);
@@ -144,14 +135,13 @@ input:focus,select:focus,textarea:focus{
   margin-bottom:12px;
 }
 .photo-preview{
-  width:110px;
-  height:130px;
+  width:105px;
+  height:125px;
   border-radius:10px;
   object-fit:cover;
   border:2px solid var(--ac);
   display:none;
   margin:0 auto 10px;
-  background:#1a233a;
 }
 .photo-btns{display:flex;gap:8px;justify-content:center}
 .btn-cam{
@@ -163,11 +153,7 @@ input:focus,select:focus,textarea:focus{
   font-size:12px;
   font-weight:700;
   cursor:pointer;
-  display:flex;
-  align-items:center;
-  gap:4px;
 }
-.btn-cam.active{background:var(--ac);color:#000}
 .sig-box{
   font:32px "Brush Script MT","Segoe Script","Lucida Handwriting",cursive;
   color:var(--ac);
@@ -176,107 +162,145 @@ input:focus,select:focus,textarea:focus{
   min-height:50px;
   margin-top:4px;
 }
+.verify-pill{
+  display:inline-block;
+  margin-top:5px;
+  font-size:11px;
+  font-weight:800;
+  padding:4px 8px;
+  border-radius:6px;
+}
+.v-ok{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid #22c55e}
+.v-warn{background:rgba(255,107,107,.15);color:#fca5a5;border:1px solid #ff6b6b}
+.v-info{background:rgba(255,184,0,.15);color:#fde047;border:1px solid #ffb800}
 
-/* Modal styles for full joining print form */
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:99999;overflow-y:auto;padding:12px;align-items:flex-start;justify-content:center}
-.modal-ov.show{display:flex}
-.slip-wrapper{max-width:520px;width:100%;margin:10px auto;box-sizing:border-box}
-.slip-paper{
+/* Full Printable Form Modal matching Admission Form sheet style */
+.doc-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#121316;
+  z-index:99999;
+  overflow-y:auto;
+  padding:10px 10px 40px;
+}
+.doc-modal.show{display:block}
+.doc-toolbar{
+  max-width:680px;
+  margin:0 auto 10px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  background:#1c1e24;
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid #333;
+}
+.tb-close{background:#2a2d36;color:#fff;border:none;padding:9px 14px;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer}
+.tb-img{background:#f5b700;color:#111;border:none;padding:9px 14px;border-radius:8px;font-weight:900;font-size:12px;cursor:pointer;flex:1}
+.tb-pdf{background:#f5f5f5;color:#111;border:none;padding:9px 14px;border-radius:8px;font-weight:900;font-size:12px;cursor:pointer;flex:1}
+
+.form-sheet-stack{
+  max-width:680px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.form-sheet-page{
   background:#ffffff;
   color:#111111;
-  border-radius:14px;
-  padding:18px 16px;
-  box-shadow:0 0 35px rgba(0,0,0,0.5);
-  position:relative;
-  font-size:11.5px;
-  line-height:1.5;
+  border:3px solid #111111;
+  padding:20px 22px;
+  font-size:12px;
+  line-height:1.48;
 }
-.slip-header{
+.sheet-top-banner{
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
-  border-bottom:2.5px solid #000;
+  border-bottom:2.5px solid #111;
   padding-bottom:10px;
   margin-bottom:12px;
 }
-.slip-header-text{flex:1;text-align:center}
-.slip-header-text h2{font-size:18px;font-weight:900;color:#000;margin:0 0 2px;text-transform:uppercase}
-.slip-header-text p{font-size:10px;color:#555;margin:0}
-.slip-photo{
-  width:85px;
-  height:105px;
-  border:2px solid #000;
-  border-radius:6px;
+.sheet-title-center{flex:1;text-align:center}
+.sheet-title-center h2{font-size:19px;font-weight:900;color:#000;letter-spacing:0.5px;margin:0}
+.sheet-title-center .sub-h{font-size:11px;font-weight:700;color:#333;margin-top:2px}
+.sheet-title-center .addr-h{font-size:10px;color:#555;margin-top:2px}
+.sheet-photo-box{
+  width:92px;
+  height:112px;
+  border:1.5px solid #111;
   object-fit:cover;
-  margin-left:8px;
-  background:#f0f0f0;
+  margin-left:10px;
+  background:#f3f4f6;
 }
-.slip-sec-head{
-  background:#f4f4f4;
+.sheet-sec-title{
+  font-size:12.5px;
   font-weight:900;
-  font-size:11.5px;
-  padding:4px 8px;
-  margin:10px 0 6px;
-  border-left:3px solid #ffcc00;
-  text-transform:uppercase;
-  letter-spacing:0.5px;
+  color:#000;
+  border-bottom:1.5px solid #222;
+  padding-bottom:3px;
+  margin:12px 0 8px;
 }
-.slip-table{width:100%;border-collapse:collapse;margin-bottom:6px}
-.slip-table td{padding:4px 6px;border-bottom:1px dotted #ccc;vertical-align:top}
-.slip-table td.lbl{width:36%;font-weight:700;color:#444}
-.slip-table td.val{width:64%;font-weight:800;color:#000}
-.slip-conduct{
-  background:#fffbeb;
-  border:1px solid #fde68a;
+.sheet-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px 14px;
+  margin-bottom:8px;
+}
+.sheet-field{
+  border-bottom:1px dotted #999;
+  padding-bottom:3px;
+}
+.sheet-field.full{grid-column:span 2}
+.sheet-field .fl{font-size:10px;color:#555;font-weight:700}
+.sheet-field .fv{font-size:12px;color:#000;font-weight:800;margin-top:1px}
+.sheet-box-panel{
+  border:1.5px solid #333;
   border-radius:6px;
   padding:8px 10px;
-  font-size:10px;
-  line-height:1.45;
-  color:#78350f;
-  margin-top:8px;
+  margin:8px 0;
+  background:#fafafa;
 }
-.slip-signatures{
+.sheet-rules-list{
+  font-size:11px;
+  color:#111;
+  line-height:1.5;
+  padding-left:4px;
+}
+.sheet-rules-list b{display:block;margin-top:6px;font-size:11.5px}
+.sheet-decl-box{
+  border:1.5px solid #111;
+  padding:8px 10px;
+  margin-top:10px;
+  font-size:10.5px;
+  line-height:1.45;
+  background:#fdfdfd;
+}
+.sheet-sign-row{
   display:flex;
   justify-content:space-between;
   align-items:flex-end;
-  margin-top:18px;
+  margin-top:16px;
   padding-top:10px;
-  border-top:1px dashed #000;
 }
-.sig-block{text-align:center;font-size:10.5px}
-.sig-line{width:130px;border-bottom:1.5px solid #000;margin:0 auto 4px;height:36px;display:flex;align-items:flex-end;justify-content:center}
-.sig-text{font:24px "Brush Script MT","Segoe Script",cursive;color:#000}
-.action-bar{
-  display:flex;
-  gap:8px;
-  margin-top:12px;
-}
-.btn-dl{
-  flex:1;
-  background:#000;
-  color:#ffcc00;
-  border:none;
-  padding:12px;
-  border-radius:8px;
-  font-weight:900;
-  font-size:12.5px;
-  cursor:pointer;
-  text-align:center;
-}
-.btn-ok-done{
-  flex:1;
-  background:#22C55E;
+.sheet-sig-col{text-align:center;min-width:150px}
+.sheet-sig-cursive{
+  font:26px "Brush Script MT","Segoe Script",cursive;
   color:#000;
-  border:none;
-  padding:12px;
-  border-radius:8px;
-  font-weight:900;
-  font-size:12.5px;
-  cursor:pointer;
-  text-align:center;
+  border-bottom:1px solid #222;
+  padding:0 10px 2px;
+  display:inline-block;
+  min-width:130px;
+}
+.sheet-office-box{
+  border:1.5px solid #222;
+  padding:8px 10px;
+  margin-top:12px;
+  font-size:11px;
 }
 
-/* Camera Stream Overlay */
 .cam-popup-ov{
   display:none;
   position:fixed;
@@ -316,41 +340,36 @@ input:focus,select:focus,textarea:focus{
 
 <div class="header-box">
   <div style="font-size:32px;margin-bottom:4px">🧑‍💼</div>
-  <h1 id="gymBrandTitle">5 BROTHER'S FITNESS CLUB</h1>
-  <p>आधिकारिक स्टाफ पंजीकरण एवं अनुबंध प्रपत्र (Staff Joining Form)</p>
+  <h1 id="gymBrandTitle">GYM / FITNESS CLUB</h1>
+  <p>स्टाफ पंजीकरण एवं अनुबंध प्रपत्र (Staff Joining &amp; Service Form)</p>
 </div>
 
 <div class="form-card">
   <form id="staffJoinForm" onsubmit="handleStaffJoinSubmit(event)">
 
-    <!-- PHOTO UPLOAD & LIVE CAPTURE -->
+    <!-- 1. PHOTO -->
     <div class="section-title">📷 1. कर्मचारी फोटो (Staff Photo) <span>*</span></div>
     <div class="photo-box">
       <img id="staffPhotoPreview" class="photo-preview" alt="Staff Photo Preview">
       <div id="noPhotoText" style="font-size:11.5px;color:var(--mut);margin-bottom:8px">
-        कृपया पासपोर्ट साइज फोटो अपलोड करें या लाइव कैमरा से खींचें
+        पासपोर्ट साइज फोटो अपलोड करें या लाइव कैमरा से खींचें
       </div>
       <div class="photo-btns">
-        <button type="button" class="btn-cam" onclick="openLiveCamera()">
-          📸 Live Camera
-        </button>
-        <button type="button" class="btn-cam" onclick="document.getElementById('photoFileInput').click()">
-          🖼️ Gallery / File
-        </button>
+        <button type="button" class="btn-cam" onclick="openLiveCamera()">📸 Live Camera</button>
+        <button type="button" class="btn-cam" onclick="document.getElementById('photoFileInput').click()">🖼️ Gallery / File</button>
       </div>
       <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handleFilePhotoPicked(this)">
     </div>
 
-    <!-- 2. ROLE & DESIGNATION -->
-    <div class="section-title">💼 2. पद एवं वेतन संरचना (Designation & Role)</div>
-    
+    <!-- 2. ROLE & SALARY -->
+    <div class="section-title">💼 2. पद एवं वेतन संरचना (Designation &amp; Role)</div>
     <div class="field-group">
-      <label>स्टाफ श्रेणी (Staff Category / Role) <span>*</span></label>
+      <label>स्टाफ श्रेणी / पद (Staff Role) <span>*</span></label>
       <select id="stfRole" required onchange="handleRoleChange()">
-        <option value="Trainer">🏋️ Class A: जिम ट्रेनर / फिटनेस कोच (Gym Trainer)</option>
-        <option value="Receptionist">👩‍💼 Class B: रिसेप्शन / फ्रंट डेस्क / बिलिंग (Front Desk / Receptionist)</option>
-        <option value="Support" selected>🧹 Class C: सफाई कर्मचारी / हेल्पर / प्यून (Housekeeping / Helper)</option>
-        <option value="Manager">👔 Class S: फ्लोर मैनेजर / ऑपरेशन हेड (Manager / Operations)</option>
+        <option value="Trainer">🏋️ Class A: जिम ट्रेनर / फिटनेस कोच</option>
+        <option value="Receptionist">👩‍💼 Class B: रिसेप्शन / फ्रंट डेस्क / बिलिंग</option>
+        <option value="Support" selected>🧹 Class C: सफाई कर्मचारी / हेल्पर / प्यून</option>
+        <option value="Manager">👔 Class S: फ्लोर मैनेजर / ऑपरेशन हेड</option>
       </select>
     </div>
 
@@ -374,8 +393,8 @@ input:focus,select:focus,textarea:focus{
         <label>वेतन प्रकार (Salary Type) <span>*</span></label>
         <select id="stfSalaryType" onchange="handleSalaryTypeChange()">
           <option value="Fixed">मासिक फिक्स्ड वेतन (Fixed Monthly)</option>
-          <option value="Incentive">बेस + क्लाइंट इंसेंटिव (Base + Commission)</option>
-          <option value="Daily">दैनिक मजदूरी (Daily Wage Basis)</option>
+          <option value="Incentive">बेस + क्लाइंट इंसेंटिव</option>
+          <option value="Daily">दैनिक मजदूरी (Daily Wage)</option>
         </select>
       </div>
       <div class="field-group">
@@ -385,37 +404,36 @@ input:focus,select:focus,textarea:focus{
     </div>
 
     <div id="salaryPreviewLine" style="font-size:11.5px;color:var(--ok);font-weight:800;margin:-4px 0 10px;">
-      👉 Per Day Rate: ₹0 / दिन (Whole-Day लेजर के लिए)
+      👉 Per Day Rate: ₹0 / दिन
     </div>
 
     <div class="row-2">
       <div class="field-group">
-        <label>टी-शर्ट / यूनिफॉर्म साइज (Uniform Size)</label>
+        <label>यूनिफॉर्म / टी-शर्ट साइज</label>
         <select id="stfUniformSize">
           <option value="M">M (38 - Medium)</option>
           <option value="L" selected>L (40 - Large)</option>
           <option value="XL">XL (42 - Extra Large)</option>
-          <option value="XXL">XXL (44 - Double Extra Large)</option>
-          <option value="S">S (36 - Small)</option>
+          <option value="XXL">XXL (44)</option>
+          <option value="S">S (36)</option>
         </select>
       </div>
       <div class="field-group">
-        <label>सप्ताहिक अवकाश (Weekly Off Day)</label>
+        <label>साप्ताहिक अवकाश (Weekly Off)</label>
         <select id="stfWeeklyOff">
           <option value="Sunday">रविवार (Sunday)</option>
           <option value="Monday">सोमवार (Monday)</option>
-          <option value="Wednesday">बुधवार (Wednesday)</option>
-          <option value="Rotational">रोटेशनल / आपसी सहमति (Rotational)</option>
+          <option value="Wednesday">बुधवार</option>
+          <option value="Rotational">रोटेशनल</option>
         </select>
       </div>
     </div>
 
-    <!-- 3. PERSONAL & FAMILY DETAILS -->
-    <div class="section-title">👤 3. व्यक्तिगत एवं पारिवारिक विवरण (Personal Details)</div>
-
+    <!-- 3. PERSONAL DETAILS -->
+    <div class="section-title">👤 3. व्यक्तिगत एवं पारिवारिक विवरण</div>
     <div class="field-group">
-      <label>पूरा नाम (Full Legal Name) <span>*</span></label>
-      <input type="text" id="stfName" placeholder="आधार कार्ड अनुसार पूरा नाम" required oninput="updateSignaturePreview()">
+      <label>पूरा नाम (Full Name) <span>*</span></label>
+      <input type="text" id="stfName" placeholder="पूरा नाम" required oninput="updateSignaturePreview()">
     </div>
 
     <div class="row-2">
@@ -435,13 +453,13 @@ input:focus,select:focus,textarea:focus{
         <select id="stfGender" required>
           <option value="Male">पुरुष (Male)</option>
           <option value="Female">महिला (Female)</option>
-          <option value="Other">अन्य (Other)</option>
+          <option value="Other">अन्य</option>
         </select>
       </div>
       <div class="field-group">
         <label>वैवाहिक स्थिति (Marital Status) <span>*</span></label>
         <select id="stfMarital" required onchange="handleMaritalChange()">
-          <option value="Single">अविवाहित (Single / Unmarried)</option>
+          <option value="Single">अविवाहित (Single)</option>
           <option value="Married">विवाहित (Married)</option>
         </select>
       </div>
@@ -449,177 +467,213 @@ input:focus,select:focus,textarea:focus{
 
     <div class="field-group">
       <label>पिता का नाम (Father's Name) <span>*</span></label>
-      <input type="text" id="stfFather" placeholder="पिता का पूरा नाम" required>
+      <input type="text" id="stfFather" placeholder="पिता का नाम" required>
     </div>
 
-    <!-- SPOUSE NAME DYNAMIC -->
     <div class="field-group" id="spouseBox" style="display:none">
       <label>पति / पत्नी का नाम (Spouse Name) <span>*</span></label>
-      <input type="text" id="stfSpouse" placeholder="जीवनसाथी का पूरा नाम">
+      <input type="text" id="stfSpouse" placeholder="पति या पत्नी का नाम">
     </div>
 
     <div class="row-2">
       <div class="field-group">
-        <label>मोबाइल नंबर (Calling/WhatsApp) <span>*</span></label>
+        <label>मोबाइल नंबर (WhatsApp) <span>*</span></label>
         <input type="tel" id="stfPhone" maxlength="10" placeholder="10 अंक मोबाइल" required>
       </div>
       <div class="field-group">
-        <label>ईमेल आईडी (Email Address)</label>
+        <label>ईमेल आईडी</label>
         <input type="email" id="stfEmail" placeholder="optional@gmail.com">
       </div>
     </div>
 
     <div class="field-group">
-      <label>🚨 आपातकालीन संपर्क व्यक्ति (Emergency Contact Person) <span>*</span></label>
+      <label>🚨 आपातकालीन संपर्क (Emergency Contact) <span>*</span></label>
       <div class="row-3">
         <input type="text" id="stfEmName" placeholder="नाम" required>
-        <input type="text" id="stfEmRel" placeholder="संबंध (उदा. भाई/पत्नी)" required>
-        <input type="tel" id="stfEmPhone" maxlength="10" placeholder="इमरजेंसी मोबाइल" required>
+        <input type="text" id="stfEmRel" placeholder="संबंध" required>
+        <input type="tel" id="stfEmPhone" maxlength="10" placeholder="मोबाइल" required>
       </div>
     </div>
 
-    <!-- 4. ADDRESS & GOVT IDS -->
-    <div class="section-title">🏠 4. पता एवं सरकारी पहचान (Address & Govt ID)</div>
-
+    <!-- 4. ADDRESS & SMART GOVT ID PATTERN -->
+    <div class="section-title">🏠 4. पता एवं स्मार्ट सरकारी पहचान (Smart Govt ID Format)</div>
     <div class="field-group">
       <label>स्थाई घर का पता (Permanent Address) <span>*</span></label>
-      <textarea id="stfPermAddr" rows="2" placeholder="मकान नंबर, गांव/गली, पोस्ट, जिला, राज्य, पिनकोड..." required></textarea>
+      <textarea id="stfPermAddr" rows="2" placeholder="स्थाई पता..." required></textarea>
     </div>
 
     <label class="check-inline">
       <input type="checkbox" id="chkSameAddr" onchange="copyAddressIfSame()">
-      <span>वर्तमान पता (Current Address) स्थाई पते के समान है</span>
+      <span>वर्तमान पता स्थाई पते के समान है</span>
     </label>
 
     <div class="field-group" style="margin-top:8px">
-      <label>वर्तमान पता (Current Local Address) <span>*</span></label>
-      <textarea id="stfCurrAddr" rows="2" placeholder="अभी उन्नाव/लोकल में कहाँ रहते हैं..." required></textarea>
+      <label>वर्तमान पता (Current Address) <span>*</span></label>
+      <textarea id="stfCurrAddr" rows="2" placeholder="वर्तमान पता..." required></textarea>
     </div>
 
     <div class="row-2">
       <div class="field-group">
-        <label>सरकारी आईडी प्रकार (Govt ID Type) <span>*</span></label>
-        <select id="stfGovType" required>
-          <option value="Aadhaar Card">आधार कार्ड (Aadhaar Card)</option>
-          <option value="Voter ID">वोटर कार्ड (Voter ID)</option>
+        <label>सरकारी आईडी प्रकार <span>*</span></label>
+        <select id="stfGovType" required onchange="applyGovIdRules()">
+          <option value="Aadhaar Card">आधार कार्ड (12 अंक)</option>
+          <option value="PAN Card">पैन कार्ड (ABCDE1234F)</option>
+          <option value="Voter ID">वोटर कार्ड (ABC1234567)</option>
           <option value="Driving License">ड्राइविंग लाइसेंस (DL)</option>
-          <option value="PAN Card">पैन कार्ड (PAN Card)</option>
         </select>
       </div>
       <div class="field-group">
-        <label>आईडी नंबर (Govt ID Number) <span>*</span></label>
-        <input type="text" id="stfGovNo" placeholder="पहचान पत्र संख्या" required>
+        <label id="lblGovNo">आईडी नंबर <span>*</span></label>
+        <input type="text" id="stfGovNo" placeholder="12 अंक आधार नंबर" required oninput="validateGovIdInput()">
+        <div id="govVerifyBadge" class="verify-pill v-info">12 अंक दर्ज करें</div>
       </div>
     </div>
 
-    <!-- 5. EXPERIENCE & PREVIOUS COMPANY (DYNAMIC LEVEL BASED) -->
+    <!-- 5. EXPERIENCE -->
     <div id="experienceSection">
-      <div class="section-title">🏢 5. पिछला कार्य अनुभव (Previous Employment & Skills)</div>
-      <div class="role-badge" id="roleBadgeExp">Class A / B Onboarding Profile</div>
-      
+      <div class="section-title">🏢 5. पिछला कार्य अनुभव</div>
+      <div class="role-badge" id="roleBadgeExp">Class C Profile</div>
       <div class="row-2">
         <div class="field-group">
-          <label>कार्य अनुभव स्थिति <span>*</span></label>
+          <label>अनुभव स्थिति <span>*</span></label>
           <select id="stfExpType" onchange="handleExpTypeChange()">
             <option value="Experienced">अनुभवी (Experienced)</option>
-            <option value="Fresher">नया / फ्रेशर (Fresher)</option>
+            <option value="Fresher">फ्रेशर (Fresher)</option>
           </select>
         </div>
         <div class="field-group" id="totalExpBox">
-          <label>कुल अनुभव (Total Experience)</label>
-          <input type="text" id="stfTotalExp" placeholder="उदा. 2 वर्ष 6 महीने">
+          <label>कुल अनुभव</label>
+          <input type="text" id="stfTotalExp" placeholder="उदा. 2 वर्ष">
         </div>
       </div>
-
       <div id="prevCompanyBlock">
         <div class="field-group">
-          <label>पिछली संस्था / कंपनी / जिम का नाम (Previous Company / Gym Name) <span>*</span></label>
-          <input type="text" id="stfPrevCompany" placeholder="उदा. Gold's Gym, ओम ऑटोमोबाइल, आदि">
+          <label>पिछली संस्था / कंपनी का नाम <span>*</span></label>
+          <input type="text" id="stfPrevCompany" placeholder="पिछली कंपनी या जिम का नाम">
         </div>
-
         <div class="row-2">
           <div class="field-group">
-            <label>वहां आपका पद (Last Designation)</label>
-            <input type="text" id="stfPrevRole" placeholder="उदा. फ्लोर ट्रेनर / रिसेप्शनिस्ट">
+            <label>पिछला पद</label>
+            <input type="text" id="stfPrevRole" placeholder="Designation">
           </div>
           <div class="field-group">
-            <label>छोड़ने का कारण (Reason for Leaving)</label>
-            <input type="text" id="stfLeaveReason" placeholder="उदा. बेहतर अवसर / दूरी">
+            <label>छोड़ने का कारण</label>
+            <input type="text" id="stfLeaveReason" placeholder="Reason">
           </div>
         </div>
-
-        <div class="field-group" id="specialSkillsBox">
-          <label id="lblSpecialSkills">विशेष योग्यता / सर्टिफिकेट्स (Specialization / Certificates)</label>
-          <input type="text" id="stfSkills" placeholder="उदा. CPR Certified, वेट लॉस कोच, कंप्यूटर एक्सेल, बिलिंग...">
+        <div class="field-group">
+          <label id="lblSpecialSkills">विशेष योग्यता / सर्टिफिकेट्स</label>
+          <input type="text" id="stfSkills" placeholder="योग्यता या सर्टिफिकेट">
         </div>
       </div>
     </div>
 
-    <!-- 6. BANKING & UAN DETAILS -->
-    <div class="section-title">🏦 6. बैंक खाता एवं UAN विवरण (Bank & Accounts)</div>
-
+    <!-- 6. BANK, IFSC, BRANCH & UAN (RBI / INDIAN BANKS) -->
+    <div class="section-title">🏦 6. वेतन भुगतान माध्यम एवं बैंक / UAN विवरण</div>
+    <div class="field-group">
+      <label>वेतन भुगतान माध्यम (Mode of Salary Payment) <span>*</span></label>
+      <select id="stfPayMode" required onchange="handlePayModeChange()">
+        <option value="Bank / Online" selected>🏦 Online Banking / NEFT / RTGS / IMPS</option>
+        <option value="UPI">📲 UPI (GPay / PhonePe / Paytm)</option>
+        <option value="Cash">💵 नकद (Cash Payment — बैंक खाता नहीं / नकद)</option>
+      </select>
+    </div>
+    <div id="bankDetailsContainer">
     <div class="row-2">
+      <div class="field-group">
+        <label>बैंक चुनें (Indian Bank / RBI) <span>*</span></label>
+        <select id="stfBankName" required onchange="onBankSelected()">
+          <option value="">-- बैंक चुनें --</option>
+          <option value="State Bank of India (SBI)">State Bank of India (SBI)</option>
+          <option value="Bank of Baroda (BoB)">Bank of Baroda (BoB)</option>
+          <option value="Punjab National Bank (PNB)">Punjab National Bank (PNB)</option>
+          <option value="Union Bank of India">Union Bank of India</option>
+          <option value="Canara Bank">Canara Bank</option>
+          <option value="Bank of India (BoI)">Bank of India (BoI)</option>
+          <option value="Indian Bank">Indian Bank</option>
+          <option value="Central Bank of India">Central Bank of India</option>
+          <option value="UCO Bank">UCO Bank</option>
+          <option value="Bank of Maharashtra">Bank of Maharashtra</option>
+          <option value="Indian Overseas Bank (IOB)">Indian Overseas Bank (IOB)</option>
+          <option value="Punjab & Sind Bank">Punjab &amp; Sind Bank</option>
+          <option value="HDFC Bank">HDFC Bank</option>
+          <option value="ICICI Bank">ICICI Bank</option>
+          <option value="Axis Bank">Axis Bank</option>
+          <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+          <option value="IndusInd Bank">IndusInd Bank</option>
+          <option value="Yes Bank">Yes Bank</option>
+          <option value="IDFC First Bank">IDFC First Bank</option>
+          <option value="Federal Bank">Federal Bank</option>
+          <option value="Bandhan Bank">Bandhan Bank</option>
+          <option value="RBL Bank">RBL Bank</option>
+          <option value="Karnataka Bank">Karnataka Bank</option>
+          <option value="South Indian Bank">South Indian Bank</option>
+          <option value="Other RBI Registered Bank">अन्य (RBI Bank)</option>
+        </select>
+      </div>
       <div class="field-group">
         <label>खाताधारक का नाम <span>*</span></label>
-        <input type="text" id="stfBankHolder" placeholder="पासबुक अनुसार नाम" required>
-      </div>
-      <div class="field-group">
-        <label>बैंक का नाम (Bank Name) <span>*</span></label>
-        <input type="text" id="stfBankName" placeholder="उदा. SBI, HDFC, PNB..." required>
+        <input type="text" id="stfBankHolder" placeholder="Account Holder Name" required>
       </div>
     </div>
 
     <div class="row-2">
       <div class="field-group">
-        <label>खाता संख्या (Bank A/C Number) <span>*</span></label>
-        <input type="text" id="stfBankAcc" placeholder="Account Number" required>
+        <label id="lblBankAcc">खाता संख्या (Account No.) <span>*</span></label>
+        <input type="text" id="stfBankAcc" placeholder="Account Number" required oninput="validateBankAccInput()">
+        <div id="accRuleBadge" class="verify-pill v-info">बैंक चुनें</div>
       </div>
       <div class="field-group">
-        <label>IFSC कोड (IFSC Code) <span>*</span></label>
-        <input type="text" id="stfBankIfsc" placeholder="उदा. SBIN0001234" required style="text-transform:uppercase">
+        <label>IFSC कोड (11 अक्षर) <span>*</span></label>
+        <input type="text" id="stfBankIfsc" maxlength="11" placeholder="उदा. SBIN0001234" required style="text-transform:uppercase" oninput="onIfscInput()">
+        <div id="ifscInfoBadge" class="verify-pill v-info">IFSC डालें — शाखा दिखेगी</div>
       </div>
+    </div>
+
+    <div class="field-group">
+      <label>शाखा / Branch Name (IFSC से Auto या दर्ज करें) <span>*</span></label>
+      <input type="text" id="stfBankBranch" placeholder="Branch Name (जैसे Unnao Main / Civil Lines)" required>
     </div>
 
     <div class="row-2">
       <div class="field-group">
-        <label>UPI ID (GooglePay / PhonePe / Paytm)</label>
-        <input type="text" id="stfUpi" placeholder="उदा. 9140417259@upi">
+        <label>UPI ID</label>
+        <input type="text" id="stfUpi" placeholder="upi@bank">
       </div>
       <div class="field-group">
-        <label>UAN नंबर (EPF Universal Account Number)</label>
-        <input type="text" id="stfUan" placeholder="12 अंक UAN (यदि हो तो)">
+        <label>UAN नंबर (EPF 12 अंक)</label>
+        <input type="text" id="stfUan" maxlength="12" placeholder="12-digit UAN (Optional)" oninput="validateUanInput()">
+        <div id="uanBadge" class="verify-pill v-info" style="display:none"></div>
       </div>
     </div>
 
-    <!-- 7. TERMS & SIGNATURE -->
-    <div class="section-title">📜 7. नियम, शर्तें एवं घोषणा (Terms & Declaration)</div>
-    <div style="background:#0B1226;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:11px;color:#cbd5e1;line-height:1.5;margin-bottom:8px">
-      1. मैं अपनी शिफ्ट में समय पर आने और <b>प्रतिदिन सेल्फी उपस्थिति</b> दर्ज करने के लिए बाध्य रहूँगा/रहूँगी।<br>
-      2. जिम संपत्ति, मशीनरी और क्लाइंट्स के साथ शालीन व्यवहार रखूँगा/रखूँगी। बिना अनुमति निजी ट्रेनिंग का कोई सौदा नहीं करूँगा/करूँगी।<br>
-      3. इस फॉर्म में दी गई सभी व्यक्तिगत, शैक्षिक एवं बैंक विवरण पूरी तरह सत्य हैं।
+    </div><!-- /bankDetailsContainer -->
+    <div id="cashModeNote" style="display:none;background:#0B1226;border:1px dashed var(--ac);border-radius:10px;padding:10px;font-size:11.5px;color:var(--ac);margin-bottom:10px">
+      💵 <b>Cash Mode चुना गया है:</b> बैंक खाता / IFSC / शाखा / UPI / UAN अनिवार्य नहीं हैं। वेतन नकद (Cash) दिया जाएगा।
     </div>
 
+    <!-- 7. AGREEMENT -->
+    <div class="section-title">📜 7. नियम एवं शर्तें</div>
     <label class="check-inline">
       <input type="checkbox" id="chkTermsAgreed" required>
-      <span>मैं जिम के सभी नियमों एवं शर्तों को पूरी तरह स्वीकार करता/करती हूँ। *</span>
+      <span>मैं जिम के नियमों, सेल्फी अटेंडेंस और आचार संहिता से सहमत हूँ। *</span>
     </label>
 
     <div class="field-group" style="margin-top:10px">
-      <label>डिजिटल हस्ताक्षर (Digital Signature Preview)</label>
+      <label>डिजिटल हस्ताक्षर Preview</label>
       <div class="sig-box" id="sigPreview">Signature</div>
     </div>
 
-    <!-- SUBMIT BUTTON -->
     <button type="submit" class="btn-submit" id="btnSubmitStaff">
-      💾 स्टाफ का पूरा फॉर्म सेव करें (Generate Official Joining Form)
+      💾 स्टाफ का पूरा जॉइनिंग फॉर्म बनाएं व सेव करें
     </button>
   </form>
 </div>
 
-<!-- LIVE CAMERA CAPTURE POPUP -->
+<!-- CAMERA POPUP -->
 <div class="cam-popup-ov" id="camPopupOv">
   <div class="cam-box">
-    <h3 style="color:var(--ac);font-size:15px;margin-bottom:10px">📸 कर्मचारी सेल्फी लें (Live Photo)</h3>
+    <h3 style="color:var(--ac);font-size:15px;margin-bottom:10px">📸 Live Photo Capture</h3>
     <video id="liveVideoFeed" class="cam-feed" playsinline autoplay muted></video>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button type="button" onclick="closeLiveCamera()" style="flex:1;background:#222;color:#bbb;border:1px solid #444;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer">✕ रद्द</button>
@@ -628,89 +682,105 @@ input:focus,select:focus,textarea:focus{
   </div>
 </div>
 
-<!-- FULL JOINING FORM / AGREEMENT PRINT MODAL -->
-<div class="modal-ov" id="fullFormModal">
-  <div class="slip-wrapper">
-    <div class="slip-paper" id="printableFullForm">
-      
-      <!-- SLIP HEADER -->
-      <div class="slip-header">
-        <div class="slip-header-text">
-          <div style="font-size:9.5px;font-weight:900;background:#000;color:#ffcc00;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:4px">OFFICIAL EMPLOYEE ONBOARDING FORM</div>
-          <h2 id="printGymName">5 BROTHER'S FITNESS CLUB</h2>
-          <p id="printGymTagline">"100% असली और असरदार रिजल्ट"</p>
-          <p id="printGymAddress">उमराव खेड़ा, अकरमपुर, उन्नाव | Ph: 9140417259</p>
+<!-- FULL ADMISSION-STYLE MULTI-SECTION PRINTABLE JOINING FORM -->
+<div class="doc-modal" id="fullFormModal">
+  <div class="doc-toolbar" data-html2canvas-ignore="true">
+    <button type="button" class="tb-close" onclick="document.getElementById('fullFormModal').classList.remove('show')">✕ बंद</button>
+    <button type="button" class="tb-img" onclick="downloadJoiningFormImage()">🖼️ Image</button>
+    <button type="button" class="tb-pdf" onclick="downloadJoiningFormPDF()">📄 PDF</button>
+  </div>
+
+  <div class="form-sheet-stack" id="printableFullForm">
+    <!-- PAGE 1 -->
+    <div class="form-sheet-page">
+      <div class="sheet-top-banner">
+        <div class="sheet-title-center">
+          <h2 id="printGymName">GYM / FITNESS CLUB</h2>
+          <div class="sub-h">कर्मचारी पंजीकरण एवं नियुक्ति प्रपत्र (Staff Joining &amp; Service Form)</div>
+          <div class="addr-h" id="printGymAddress">Staff Onboarding &amp; Service Record</div>
         </div>
-        <img id="printStaffPhoto" class="slip-photo" src="" alt="Staff Photo">
+        <img id="printStaffPhoto" class="sheet-photo-box" src="" alt="Photo">
       </div>
 
-      <!-- SECTION 1: APPOINTMENT DETAILS -->
-      <div class="slip-sec-head">1. पद एवं नियुक्ति विवरण (Appointment Details)</div>
-      <table class="slip-table">
-        <tr><td class="lbl">कर्मचारी कोड (ID):</td><td class="val" id="pId" style="color:#b37400">--</td></tr>
-        <tr><td class="lbl">पद / श्रेणी:</td><td class="val" id="pRole" style="color:#0a7a2f">--</td></tr>
-        <tr><td class="lbl">ज्वाइनिंग तिथि:</td><td class="val" id="pJoinDate">--</td></tr>
-        <tr><td class="lbl">शिफ्ट व समय:</td><td class="val" id="pShift">--</td></tr>
-        <tr><td class="lbl">वेतन (Salary):</td><td class="val" id="pSalary" style="color:#0a7a2f">--</td></tr>
-        <tr><td class="lbl">प्रति दिन दर (Daily Rate):</td><td class="val" id="pDailyRate">--</td></tr>
-        <tr><td class="lbl">यूनिफॉर्म साइज:</td><td class="val" id="pUniform">--</td></tr>
-      </table>
-
-      <!-- SECTION 2: PERSONAL & KYC -->
-      <div class="slip-sec-head">2. व्यक्तिगत एवं पहचान विवरण (Personal & KYC)</div>
-      <table class="slip-table">
-        <tr><td class="lbl">पूरा नाम:</td><td class="val" id="pName">--</td></tr>
-        <tr><td class="lbl">पिता का नाम:</td><td class="val" id="pFather">--</td></tr>
-        <tr id="pSpouseRow" style="display:none"><td class="lbl">पति/पत्नी का नाम:</td><td class="val" id="pSpouse">--</td></tr>
-        <tr><td class="lbl">जन्म तिथि / उम्र / लिंग:</td><td class="val" id="pDobAge">--</td></tr>
-        <tr><td class="lbl">मोबाइल नंबर:</td><td class="val" id="pPhone">--</td></tr>
-        <tr><td class="lbl">सरकारी पहचान पत्र:</td><td class="val" id="pGovId">--</td></tr>
-        <tr><td class="lbl">स्थाई घर का पता:</td><td class="val" id="pPermAddr">--</td></tr>
-        <tr><td class="lbl">वर्तमान पता:</td><td class="val" id="pCurrAddr">--</td></tr>
-        <tr><td class="lbl">आपातकालीन संपर्क:</td><td class="val" id="pEmergency">--</td></tr>
-      </table>
-
-      <!-- SECTION 3: PREVIOUS EXPERIENCE & BANK -->
-      <div class="slip-sec-head">3. अनुभव एवं बैंक विवरण (Experience & Bank)</div>
-      <table class="slip-table">
-        <tr id="pPrevCompanyRow"><td class="lbl">पिछली संस्था (Company):</td><td class="val" id="pPrevCompany">--</td></tr>
-        <tr id="pSkillsRow"><td class="lbl">विशेष योग्यता / सर्टिफिकेशन:</td><td class="val" id="pSkills">--</td></tr>
-        <tr><td class="lbl">बैंक खाता संख्या:</td><td class="val" id="pBank">--</td></tr>
-        <tr><td class="lbl">IFSC कोड / UPI:</td><td class="val" id="pIfscUpi">--</td></tr>
-        <tr><td class="lbl">UAN नंबर (EPF):</td><td class="val" id="pUan">--</td></tr>
-      </table>
-
-      <!-- CODE OF CONDUCT -->
-      <div class="slip-conduct">
-        <b>सख्त आचार संहिता एवं नियम:</b><br>
-        1. कर्मचारी को प्रतिदिन कियोस्क में सेल्फी अटेंडेंस दर्ज करना अनिवार्य होगा।<br>
-        2. किसी भी प्रकार की अनुशासनहीनता, क्लाइंट के साथ दुर्व्यवहार या अनधिकृत अनुपस्थिति पर अनुशासनात्मक कार्रवाई होगी।<br>
-        3. कर्मचारी ने घोषणा की है कि उसके ऊपर कोई आपराधिक मामला दर्ज नहीं है और दी गई सारी जानकारी सत्य है।
+      <div class="sheet-sec-title">1. व्यक्तिगत एवं पारिवारिक विवरण (Personal &amp; Family Details)</div>
+      <div class="sheet-grid">
+        <div class="sheet-field"><div class="fl">Staff ID</div><div class="fv" id="pId">--</div></div>
+        <div class="sheet-field"><div class="fl">Joining Date</div><div class="fv" id="pJoinDate">--</div></div>
+        <div class="sheet-field full"><div class="fl">पूरा नाम (Full Name)</div><div class="fv" id="pName">--</div></div>
+        <div class="sheet-field"><div class="fl">पिता का नाम (Father's Name)</div><div class="fv" id="pFather">--</div></div>
+        <div class="sheet-field" id="pSpouseBox"><div class="fl">पति / पत्नी का नाम (Spouse)</div><div class="fv" id="pSpouse">--</div></div>
+        <div class="sheet-field"><div class="fl">जन्म तिथि / उम्र (DOB / Age)</div><div class="fv" id="pDobAge">--</div></div>
+        <div class="sheet-field"><div class="fl">लिंग / वैवाहिक स्थिति</div><div class="fv" id="pGenderMarital">--</div></div>
+        <div class="sheet-field"><div class="fl">मोबाइल नंबर (Mobile)</div><div class="fv" id="pPhone">--</div></div>
+        <div class="sheet-field"><div class="fl">ईमेल / यूनिफॉर्म साइज</div><div class="fv" id="pEmailUniform">--</div></div>
+        <div class="sheet-field full"><div class="fl">स्थाई घर का पता (Permanent Address)</div><div class="fv" id="pPermAddr">--</div></div>
+        <div class="sheet-field full"><div class="fl">वर्तमान पता (Current Address)</div><div class="fv" id="pCurrAddr">--</div></div>
+        <div class="sheet-field full"><div class="fl">सरकारी पहचान पत्र (Govt ID)</div><div class="fv" id="pGovId">--</div></div>
       </div>
 
-      <!-- SIGNATURES -->
-      <div class="slip-signatures">
-        <div class="sig-block">
-          <div class="sig-line">
-            <span class="sig-text" id="pStaffSignature">Signature</span>
-          </div>
-          <b>कर्मचारी के हस्ताक्षर</b>
-        </div>
-        <div class="sig-block">
-          <div class="sig-line">
-            <span style="font-weight:900;color:#000;font-size:13px" id="pOwnerSignature">Saurabh Singh Chandel</span>
-          </div>
-          <b id="pOwnerLabel">जिम ओनर / अधिकृत मुहर</b>
+      <div class="sheet-box-panel">
+        <div style="font-size:11px;font-weight:900;margin-bottom:4px">🚨 आपातकालीन संपर्क विवरण (Emergency Contact)</div>
+        <div class="sheet-grid" style="margin-bottom:0">
+          <div class="sheet-field"><div class="fl">संपर्क व्यक्ति का नाम</div><div class="fv" id="pEmName">--</div></div>
+          <div class="sheet-field"><div class="fl">संबंध व मोबाइल</div><div class="fv" id="pEmRelPhone">--</div></div>
         </div>
       </div>
 
+      <div class="sheet-sec-title">2. पद, वेतन, अनुभव एवं बैंक विवरण (Role, Salary, Experience &amp; Bank)</div>
+      <div class="sheet-grid">
+        <div class="sheet-field"><div class="fl">पद / श्रेणी (Designation)</div><div class="fv" id="pRole">--</div></div>
+        <div class="sheet-field"><div class="fl">शिफ्ट एवं साप्ताहिक अवकाश</div><div class="fv" id="pShiftOff">--</div></div>
+        <div class="sheet-field"><div class="fl">वेतन प्रकार व राशि</div><div class="fv" id="pSalary">--</div></div>
+        <div class="sheet-field"><div class="fl">प्रति दिन दर (Daily Rate)</div><div class="fv" id="pDailyRate">--</div></div>
+        <div class="sheet-field full"><div class="fl">पिछला कार्य अनुभव / संस्था</div><div class="fv" id="pPrevCompany">--</div></div>
+        <div class="sheet-field full"><div class="fl">विशेष योग्यता / सर्टिफिकेट्स</div><div class="fv" id="pSkills">--</div></div>
+        <div class="sheet-field"><div class="fl">बैंक व शाखा (Bank &amp; Branch)</div><div class="fv" id="pBank">--</div></div>
+        <div class="sheet-field"><div class="fl">खाता / IFSC / UPI / UAN</div><div class="fv" id="pBankExtra">--</div></div>
+      </div>
+
+      <div class="sheet-sign-row">
+        <div class="sheet-sig-col">
+          <div class="sheet-sig-cursive" id="pStaffSignature">Signature</div>
+          <div style="font-size:10.5px;font-weight:800;margin-top:2px">कर्मचारी के हस्ताक्षर</div>
+        </div>
+        <div class="sheet-sig-col">
+          <div style="font-weight:900;font-size:12px;border-bottom:1px solid #222;padding-bottom:4px" id="pOwnerSignature">Authorized Signatory</div>
+          <div style="font-size:10.5px;font-weight:800;margin-top:2px">अधिकृत हस्ताक्षर / मुहर</div>
+        </div>
+      </div>
     </div>
 
-    <!-- ACTION BUTTONS -->
-    <div class="action-bar">
-      <button type="button" class="btn-dl" onclick="downloadJoiningFormImage()">📥 फोटो डाउनलोड</button>
-      <button type="button" class="btn-dl" onclick="downloadJoiningFormPDF()">📄 PDF डाउनलोड</button>
-      <button type="button" class="btn-ok-done" onclick="finishAndGoDashboard()">✔ Dashboard जाएं</button>
+    <!-- PAGE 2 -->
+    <div class="form-sheet-page">
+      <div class="sheet-sec-title" style="margin-top:0">3. कर्मचारी नियम, आचार संहिता एवं घोषणा (Service Rules &amp; Declaration)</div>
+      <div class="sheet-rules-list">
+        <b>1. उपस्थिति एवं शिफ्ट अनुशासन (ATTENDANCE &amp; TIMINGS):</b>
+        • कर्मचारी को निर्धारित शिफ्ट समय पर उपस्थित होना तथा प्रतिदिन सेल्फी अटेंडेंस दर्ज करना अनिवार्य है।<br>
+        • बिना पूर्व सूचना या स्वीकृति के अनुपस्थिति रहने पर अनुशासनात्मक व वेतन कटौती की कार्रवाई हो सकती है।
+        <b>2. कार्य एवं व्यवहार (CONDUCT &amp; ETHICS):</b>
+        • सभी सदस्यों/क्लाइंट्स के साथ विनम्र, अनुशासित और सम्मानजनक व्यवहार रखें।<br>
+        • प्रबंधन की अनुमति के बिना जिम परिसर में किसी भी प्रकार का निजी लेन-देन या अनधिकृत कार्य न करें।
+        <b>3. उपकरण एवं संपत्ति सुरक्षा (PROPERTY &amp; EQUIPMENT CARE):</b>
+        • जिम के उपकरणों व संसाधनों का सुरक्षित उपयोग करें; किसी भी नुकसान या खराबी की तुरंत सूचना दें।
+      </div>
+
+      <div class="sheet-decl-box">
+        <b>घोषणा पत्र (DECLARATION):</b><br>
+        मैं यह घोषणा करता/करती हूँ कि इस ज्वाइनिंग फॉर्म में दी गई सभी जानकारी, पता, पहचान पत्र और बैंक विवरण पूर्णतः सत्य व सही हैं। मैं जिम के नियमों व शर्तों का पालन करने के लिए सहमत हूँ।
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-weight:800">
+          <span>कर्मचारी का नाम: <span id="pDeclName">--</span></span>
+          <span>दिनांक: <span id="pDeclDate">--</span></span>
+        </div>
+        <div style="margin-top:8px">
+          कर्मचारी के हस्ताक्षर: <span class="sheet-sig-cursive" id="pDeclSig" style="font-size:20px">Signature</span>
+        </div>
+      </div>
+
+      <div class="sheet-office-box">
+        <div style="font-weight:900;margin-bottom:6px">कार्यालय उपयोग हेतु (FOR OFFICE USE ONLY)</div>
+        <div>नियुक्ति अधिकारी: <b id="pOfficeBy">Authorized Officer</b> &nbsp;&nbsp;|&nbsp;&nbsp; श्रेणी: <b id="pOfficeRole">--</b></div>
+        <div style="margin-top:4px">स्वीकृत वेतन: <b id="pOfficeSal">--</b> &nbsp;&nbsp;|&nbsp;&nbsp; स्थिति: <b>ACTIVE</b></div>
+      </div>
     </div>
   </div>
 </div>
@@ -718,7 +788,6 @@ input:focus,select:focus,textarea:focus{
 <canvas id="hiddenSnapCanvas" style="display:none"></canvas>
 
 <script>
-// --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
   apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
   authDomain: "bfc-gym-215ae.firebaseapp.com",
@@ -729,49 +798,290 @@ const firebaseConfig = {
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
 const LS = localStorage;
 let capturedStaffPhotoData = "";
 let liveStreamInstance = null;
+
+// Bank account digit patterns (Indian / RBI banks)
+const BANK_RULES = {
+  "State Bank of India (SBI)": { min: 11, max: 17, hint: "SBI Account: आमतौर पर 11 या 17 अंक", prefix: "SBIN" },
+  "Bank of Baroda (BoB)": { min: 14, max: 14, hint: "Bank of Baroda: 14 अंक का खाता नंबर", prefix: "BARB" },
+  "Punjab National Bank (PNB)": { min: 13, max: 16, hint: "PNB Account: 13 से 16 अंक", prefix: "PUNB" },
+  "Union Bank of India": { min: 15, max: 15, hint: "Union Bank: 15 अंक का खाता नंबर", prefix: "UBIN" },
+  "Canara Bank": { min: 13, max: 13, hint: "Canara Bank: 13 अंक का खाता नंबर", prefix: "CNRB" },
+  "Bank of India (BoI)": { min: 15, max: 15, hint: "Bank of India: 15 अंक का खाता नंबर", prefix: "BKID" },
+  "Indian Bank": { min: 9, max: 12, hint: "Indian Bank: 9 से 12 अंक", prefix: "IDIB" },
+  "Central Bank of India": { min: 10, max: 10, hint: "Central Bank: 10 अंक का खाता नंबर", prefix: "CBIN" },
+  "UCO Bank": { min: 14, max: 14, hint: "UCO Bank: 14 अंक का खाता नंबर", prefix: "UCBA" },
+  "Bank of Maharashtra": { min: 11, max: 11, hint: "Bank of Maharashtra: 11 अंक", prefix: "MAHB" },
+  "Indian Overseas Bank (IOB)": { min: 15, max: 15, hint: "IOB Account: 15 अंक", prefix: "IOBA" },
+  "Punjab & Sind Bank": { min: 14, max: 14, hint: "Punjab & Sind Bank: 14 अंक", prefix: "PSIB" },
+  "HDFC Bank": { min: 14, max: 14, hint: "HDFC Bank: 14 अंक का खाता नंबर", prefix: "HDFC" },
+  "ICICI Bank": { min: 12, max: 12, hint: "ICICI Bank: 12 अंक का खाता नंबर", prefix: "ICIC" },
+  "Axis Bank": { min: 15, max: 15, hint: "Axis Bank: 15 अंक का खाता नंबर", prefix: "UTIB" },
+  "Kotak Mahindra Bank": { min: 10, max: 14, hint: "Kotak Bank: 10 से 14 अंक", prefix: "KKBK" },
+  "IndusInd Bank": { min: 12, max: 12, hint: "IndusInd Bank: 12 अंक", prefix: "INDB" },
+  "Yes Bank": { min: 15, max: 15, hint: "Yes Bank: 15 अंक", prefix: "YESB" },
+  "IDFC First Bank": { min: 11, max: 12, hint: "IDFC First Bank: 11 से 12 अंक", prefix: "IDFB" },
+  "Federal Bank": { min: 14, max: 14, hint: "Federal Bank: 14 अंक", prefix: "FDRL" },
+  "Bandhan Bank": { min: 14, max: 14, hint: "Bandhan Bank: 14 अंक", prefix: "BDBL" },
+  "RBL Bank": { min: 12, max: 16, hint: "RBL Bank: 12 से 16 अंक", prefix: "RATN" },
+  "Karnataka Bank": { min: 16, max: 16, hint: "Karnataka Bank: 16 अंक", prefix: "KARB" },
+  "South Indian Bank": { min: 16, max: 16, hint: "South Indian Bank: 16 अंक", prefix: "SIBL" }
+};
 
 function todayISO() {
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("stfJoinDate").value = todayISO();
-  
-  // Dynamic Gym Details from profile
-  const org = JSON.parse(LS.getItem("om_org_profile") || "{}");
-  const gName = org.orgName || org.gymName || "5 BROTHER'S FITNESS CLUB";
-  const gAddr = org.address || "उमराव खेड़ा, अकरमपुर, उन्नाव";
-  const gPhone = org.phone || "9140417259";
-  const gOwner = org.ownerName || "Saurabh Singh Chandel";
+function applyOrgBranding(orgObj) {
+  const o = orgObj || {};
+  const gName = (o.gymName || o.orgName || "").trim();
+  const gAddr = (o.address || "").trim();
+  const gPhone = (o.phone || "").trim();
+  const gOwner = (o.ownerName || "").trim();
 
-  document.getElementById("gymBrandTitle").textContent = gName.toUpperCase();
-  document.getElementById("printGymName").textContent = gName.toUpperCase();
-  document.getElementById("printGymAddress").textContent = `${gAddr} | Ph: ${gPhone}`;
-  document.getElementById("pOwnerSignature").textContent = gOwner;
+  if (gName) {
+    document.getElementById("gymBrandTitle").textContent = gName.toUpperCase();
+    document.getElementById("printGymName").textContent = gName.toUpperCase();
+  }
+  const addrParts = [];
+  if (gAddr) addrParts.push(gAddr);
+  if (gPhone) addrParts.push("Ph: " + gPhone);
+  if (addrParts.length) {
+    document.getElementById("printGymAddress").textContent = addrParts.join(" | ");
+  }
+  if (gOwner) {
+    document.getElementById("pOwnerSignature").textContent = gOwner;
+    document.getElementById("pOfficeBy").textContent = gOwner;
+  }
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("stfJoinDate").value = todayISO();
+  let org = {};
+  try {
+    org = Object.assign(
+      {},
+      JSON.parse(LS.getItem("bfc_org_profile") || "{}"),
+      JSON.parse(LS.getItem("om_org_profile") || "{}")
+    );
+  } catch (e) {}
+  applyOrgBranding(org);
+
+  try {
+    const orgId = LS.getItem("bfc_org_id") || org.orgId;
+    if (orgId && db) {
+      const snap = await db.collection("orgs").doc(String(orgId)).get();
+      if (snap.exists) {
+        applyOrgBranding(Object.assign({}, org, snap.data()));
+      }
+    }
+  } catch (e) {}
 
   handleRoleChange();
   calcPerDayPreview();
+  applyGovIdRules();
 });
 
-// Update Digital Signature
+// Smart Govt ID format & validation
+function applyGovIdRules() {
+  const gType = document.getElementById("stfGovType").value;
+  const inp = document.getElementById("stfGovNo");
+  const lbl = document.getElementById("lblGovNo");
+  const badge = document.getElementById("govVerifyBadge");
+  inp.value = "";
+
+  if (gType === "Aadhaar Card") {
+    lbl.innerHTML = "आधार नंबर (12 अंक) <span>*</span>";
+    inp.setAttribute("maxlength", "12");
+    inp.setAttribute("inputmode", "numeric");
+    inp.style.textTransform = "none";
+    inp.placeholder = "12 अंक का आधार नंबर";
+    badge.className = "verify-pill v-info";
+    badge.textContent = "12 अंक (0-9) आवश्यक";
+  } else if (gType === "PAN Card") {
+    lbl.innerHTML = "पैन नंबर (10 अक्षर: ABCDE1234F) <span>*</span>";
+    inp.setAttribute("maxlength", "10");
+    inp.setAttribute("inputmode", "text");
+    inp.style.textTransform = "uppercase";
+    inp.placeholder = "ABCDE1234F";
+    badge.className = "verify-pill v-info";
+    badge.textContent = "5 अक्षर + 4 अंक + 1 अक्षर (उदा. ABCDE1234F)";
+  } else if (gType === "Voter ID") {
+    lbl.innerHTML = "वोटर आईडी नंबर (EPIC) <span>*</span>";
+    inp.setAttribute("maxlength", "12");
+    inp.setAttribute("inputmode", "text");
+    inp.style.textTransform = "uppercase";
+    inp.placeholder = "ABC1234567";
+    badge.className = "verify-pill v-info";
+    badge.textContent = "अक्षर + अंक (उदा. ABC1234567)";
+  } else {
+    lbl.innerHTML = "ड्राइविंग लाइसेंस नंबर <span>*</span>";
+    inp.setAttribute("maxlength", "20");
+    inp.setAttribute("inputmode", "text");
+    inp.style.textTransform = "uppercase";
+    inp.placeholder = "UP35 20200001234";
+    badge.className = "verify-pill v-info";
+    badge.textContent = "DL नंबर दर्ज करें";
+  }
+}
+
+function validateGovIdInput() {
+  const gType = document.getElementById("stfGovType").value;
+  const inp = document.getElementById("stfGovNo");
+  const badge = document.getElementById("govVerifyBadge");
+
+  if (gType === "Aadhaar Card") {
+    inp.value = inp.value.replace(/\D/g, "").slice(0, 12);
+    if (inp.value.length === 12) {
+      badge.className = "verify-pill v-ok";
+      badge.textContent = "✔ 12 अंक आधार फॉर्मेट सही";
+    } else {
+      badge.className = "verify-pill v-warn";
+      badge.textContent = `${inp.value.length}/12 अंक (12 अंक पूरे करें)`;
+    }
+  } else if (gType === "PAN Card") {
+    inp.value = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+    if (/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(inp.value)) {
+      badge.className = "verify-pill v-ok";
+      badge.textContent = "✔ PAN फॉर्मेट सही (ABCDE1234F)";
+    } else {
+      badge.className = "verify-pill v-warn";
+      badge.textContent = "फॉर्मेट: 5 अक्षर + 4 अंक + 1 अक्षर";
+    }
+  } else if (gType === "Voter ID") {
+    inp.value = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+    if (/^[A-Z]{3}[0-9]{7}$/.test(inp.value)) {
+      badge.className = "verify-pill v-ok";
+      badge.textContent = "✔ Voter ID फॉर्मेट सही";
+    } else {
+      badge.className = "verify-pill v-info";
+      badge.textContent = `${inp.value.length} अक्षर दर्ज`;
+    }
+  } else {
+    inp.value = inp.value.toUpperCase().slice(0, 20);
+    badge.className = inp.value.trim().length >= 6 ? "verify-pill v-ok" : "verify-pill v-info";
+    badge.textContent = inp.value.trim().length >= 6 ? "✔ DL नंबर दर्ज" : "DL नंबर दर्ज करें";
+  }
+}
+
+// Bank selection & IFSC / branch lookup
+function onBankSelected() {
+  const bank = document.getElementById("stfBankName").value;
+  const accInp = document.getElementById("stfBankAcc");
+  const ifscInp = document.getElementById("stfBankIfsc");
+  const rule = BANK_RULES[bank];
+
+  if (rule) {
+    accInp.setAttribute("maxlength", String(rule.max));
+    if (!ifscInp.value.trim() && rule.prefix) {
+      ifscInp.value = rule.prefix;
+    }
+  } else {
+    accInp.setAttribute("maxlength", "20");
+  }
+  validateBankAccInput();
+}
+
+function validateBankAccInput() {
+  const bank = document.getElementById("stfBankName").value;
+  const accInp = document.getElementById("stfBankAcc");
+  const badge = document.getElementById("accRuleBadge");
+  accInp.value = accInp.value.replace(/\D/g, "");
+  const len = accInp.value.length;
+  const rule = BANK_RULES[bank];
+
+  if (!rule) {
+    badge.className = len >= 8 ? "verify-pill v-ok" : "verify-pill v-info";
+    badge.textContent = len >= 8 ? `✔ ${len} अंक खाता नंबर` : "खाता संख्या (8-20 अंक)";
+    return;
+  }
+
+  if (len >= rule.min && len <= rule.max) {
+    badge.className = "verify-pill v-ok";
+    badge.textContent = `✔ ${rule.hint} (${len} अंक)`;
+  } else {
+    badge.className = "verify-pill v-warn";
+    badge.textContent = `${rule.hint} — अभी ${len} अंक`;
+  }
+}
+
+let ifscLookupTimer = null;
+function onIfscInput() {
+  const inp = document.getElementById("stfBankIfsc");
+  const badge = document.getElementById("ifscInfoBadge");
+  const branchInp = document.getElementById("stfBankBranch");
+  inp.value = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 11);
+  const code = inp.value;
+
+  if (code.length < 11) {
+    badge.className = "verify-pill v-info";
+    badge.textContent = `IFSC: ${code.length}/11 अक्षर (11वां अक्षर डालते ही शाखा आएगी)`;
+    return;
+  }
+
+  if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(code)) {
+    badge.className = "verify-pill v-warn";
+    badge.textContent = "IFSC का 5वां अक्षर '0' होना चाहिए";
+    return;
+  }
+
+  badge.className = "verify-pill v-info";
+  badge.textContent = "⏳ IFSC से शाखा खोज रहे हैं...";
+
+  clearTimeout(ifscLookupTimer);
+  ifscLookupTimer = setTimeout(async () => {
+    try {
+      const res = await fetch("https://ifsc.razorpay.com/" + code);
+      if (res.ok) {
+        const data = await res.json();
+        const branchTxt = [data.BRANCH, data.CITY, data.DISTRICT].filter(Boolean).join(", ");
+        if (branchTxt && !branchInp.value.trim()) {
+          branchInp.value = branchTxt;
+        }
+        badge.className = "verify-pill v-ok";
+        badge.textContent = `✔ ${data.BANK || ""} — Branch: ${branchTxt || "Verified"}`;
+      } else {
+        badge.className = "verify-pill v-warn";
+        badge.textContent = "IFSC ऑनलाइन नहीं मिला — Branch हाथ से लिखें";
+      }
+    } catch (e) {
+      badge.className = "verify-pill v-info";
+      badge.textContent = "Offline/Network: Branch ऊपर हाथ से दर्ज करें";
+    }
+  }, 250);
+}
+
+function validateUanInput() {
+  const inp = document.getElementById("stfUan");
+  const badge = document.getElementById("uanBadge");
+  inp.value = inp.value.replace(/\D/g, "").slice(0, 12);
+  if (!inp.value.length) {
+    badge.style.display = "none";
+    return;
+  }
+  badge.style.display = "inline-block";
+  if (inp.value.length === 12) {
+    badge.className = "verify-pill v-ok";
+    badge.textContent = "✔ 12 अंक UAN सही";
+  } else {
+    badge.className = "verify-pill v-warn";
+    badge.textContent = `${inp.value.length}/12 अंक UAN`;
+  }
+}
+
 function updateSignaturePreview() {
   const n = document.getElementById("stfName").value.trim() || "Signature";
   document.getElementById("sigPreview").textContent = n;
 }
 
-// Photo Upload Handlers
 function handleFilePhotoPicked(input) {
   const file = input.files && input.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
-    resizeAndSetPhoto(e.target.result);
-  };
+  reader.onload = function(e) { resizeAndSetPhoto(e.target.result); };
   reader.readAsDataURL(file);
 }
 
@@ -823,7 +1133,6 @@ function resizeAndSetPhoto(dataUrl) {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     capturedStaffPhotoData = canvas.toDataURL("image/jpeg", 0.75);
-
     const prev = document.getElementById("staffPhotoPreview");
     prev.src = capturedStaffPhotoData;
     prev.style.display = "block";
@@ -832,7 +1141,6 @@ function resizeAndSetPhoto(dataUrl) {
   img.src = dataUrl;
 }
 
-// Role Toggles
 function handleRoleChange() {
   const role = document.getElementById("stfRole").value;
   const roleBadge = document.getElementById("roleBadgeExp");
@@ -842,19 +1150,19 @@ function handleRoleChange() {
   if (role === "Support") {
     roleBadge.textContent = "Class C: सफाई कर्मचारी / हेल्पर / प्यून (अनुभव वैकल्पिक)";
     prevCompany.required = false;
-    skillsLabel.textContent = "कार्य में विशेषज्ञता (जैसे उपकरण रखरखाव, हाइजीन, आदि)";
+    skillsLabel.textContent = "कार्य में विशेषज्ञता";
   } else if (role === "Trainer") {
-    roleBadge.textContent = "Class A: जिम ट्रेनर / फिटनेस कोच (सर्टिफिकेशन व अनुभव ज़रूरी)";
+    roleBadge.textContent = "Class A: जिम ट्रेनर / फिटनेस कोच";
     prevCompany.required = true;
-    skillsLabel.textContent = "फिटनेस सर्टिफिकेशन (CPR, पर्सनल ट्रेनिंग, डाइट चार्ट विशेषज्ञता)";
+    skillsLabel.textContent = "फिटनेस सर्टिफिकेशन / डाइट विशेषज्ञता";
   } else if (role === "Receptionist") {
-    roleBadge.textContent = "Class B: रिसेप्शन / फ्रंट डेस्क (कंप्यूटर, एक्सेल एवं बिलिंग)";
+    roleBadge.textContent = "Class B: रिसेप्शन / फ्रंट डेस्क / बिलिंग";
     prevCompany.required = true;
-    skillsLabel.textContent = "कंप्यूटर योग्यता (MS Excel, सॉफ्टवेयर, बिलिंग, क्लाइंट डीलिंग)";
+    skillsLabel.textContent = "कंप्यूटर / एक्सेल / बिलिंग योग्यता";
   } else {
-    roleBadge.textContent = "Class S: प्रबंधन एवं ऑपरेशन्स (प्रबंधन अनुभव अनिवार्य)";
+    roleBadge.textContent = "Class S: फ्लोर मैनेजर / ऑपरेशन हेड";
     prevCompany.required = true;
-    skillsLabel.textContent = "टीम मैनेजमेंट, सेल्स क्लोजिंग एवं जिम ऑपरेशन्स";
+    skillsLabel.textContent = "टीम मैनेजमेंट / ऑपरेशन्स अनुभव";
   }
 }
 
@@ -900,33 +1208,77 @@ function handleSalaryTypeChange() {
 function calcPerDayPreview() {
   const type = document.getElementById("stfSalaryType").value;
   const sal = Number(document.getElementById("stfSalary").value) || 0;
-  let dailyRate = 0;
-  if (type === "Daily") dailyRate = sal;
-  else dailyRate = Math.round((sal / 30) * 100) / 100;
-  document.getElementById("salaryPreviewLine").innerHTML = 
-    `👉 <b>Per Day Rate:</b> ₹${dailyRate} / दिन (हर शाम Whole-Day लेजर और सैलरी हिसाब के लिए)`;
+  const dailyRate = (type === "Daily") ? sal : Math.round((sal / 30) * 100) / 100;
+  document.getElementById("salaryPreviewLine").innerHTML = `👉 <b>Per Day Rate:</b> ₹${dailyRate} / दिन`;
   return dailyRate;
+}
+
+function handlePayModeChange() {
+  const mode = document.getElementById("stfPayMode").value;
+  const bankWrap = document.getElementById("bankDetailsContainer");
+  const cashNote = document.getElementById("cashModeNote");
+  const isCash = mode === "Cash";
+
+  if (bankWrap) bankWrap.style.display = isCash ? "none" : "block";
+  if (cashNote) cashNote.style.display = isCash ? "block" : "none";
+
+  // Toggle required attributes on bank fields when Cash is chosen
+  const reqFields = ["stfBankName", "stfBankHolder", "stfBankAcc", "stfBankIfsc", "stfBankBranch"];
+  reqFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (isCash) {
+      el.required = false;
+      el.value = "";
+    } else {
+      el.required = true;
+    }
+  });
 }
 
 function handleExpTypeChange() {
   const type = document.getElementById("stfExpType").value;
   const block = document.getElementById("prevCompanyBlock");
   const totalExp = document.getElementById("totalExpBox");
-  if (type === "Fresher") {
-    block.style.display = "none";
-    totalExp.style.display = "none";
-  } else {
-    block.style.display = "block";
-    totalExp.style.display = "block";
-  }
+  const show = type !== "Fresher";
+  block.style.display = show ? "block" : "none";
+  totalExp.style.display = show ? "block" : "none";
 }
 
-// SUBMIT FORM AND BUILD PRINTABLE FULL FORM
 async function handleStaffJoinSubmit(e) {
   e.preventDefault();
+
+  const gType = document.getElementById("stfGovType").value;
+  const govNo = document.getElementById("stfGovNo").value.trim().toUpperCase();
+  if (gType === "Aadhaar Card" && !/^\d{12}$/.test(govNo)) {
+    alert("कृपया 12 अंकों का सही आधार नंबर दर्ज करें।");
+    return;
+  }
+  if (gType === "PAN Card" && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(govNo)) {
+    alert("कृपया सही PAN नंबर दर्ज करें (उदा. ABCDE1234F)।");
+    return;
+  }
+
+  const payMode = document.getElementById("stfPayMode").value;
+  const bankName = document.getElementById("stfBankName").value.trim();
+  const bankAcc = document.getElementById("stfBankAcc").value.trim();
+  if (payMode !== "Cash") {
+    const rule = BANK_RULES[bankName];
+    if (rule && (bankAcc.length < rule.min || bankAcc.length > rule.max)) {
+      alert(`${bankName} के लिए खाता संख्या ${rule.min === rule.max ? rule.min : (rule.min + "-" + rule.max)} अंक की होनी चाहिए।`);
+      return;
+    }
+  }
+
+  const uan = document.getElementById("stfUan").value.trim();
+  if (uan && !/^\d{12}$/.test(uan)) {
+    alert("UAN नंबर दर्ज किया है तो पूरे 12 अंक का होना चाहिए।");
+    return;
+  }
+
   const btn = document.getElementById("btnSubmitStaff");
   btn.disabled = true;
-  btn.innerText = "⏳ स्टाफ का फॉर्म तैयार हो रहा है...";
+  btn.innerText = "⏳ फॉर्म तैयार हो रहा है...";
 
   const staffId = "STF-" + Date.now().toString().slice(-6);
   const role = document.getElementById("stfRole").value;
@@ -944,8 +1296,6 @@ async function handleStaffJoinSubmit(e) {
   const emPhone = document.getElementById("stfEmPhone").value.trim();
   const permAddr = document.getElementById("stfPermAddr").value.trim();
   const currAddr = document.getElementById("stfCurrAddr").value.trim();
-  const govType = document.getElementById("stfGovType").value;
-  const govNo = document.getElementById("stfGovNo").value.trim();
   const joinDate = document.getElementById("stfJoinDate").value || todayISO();
   const shift = document.getElementById("stfShift").value;
   const salaryType = document.getElementById("stfSalaryType").value;
@@ -957,106 +1307,107 @@ async function handleStaffJoinSubmit(e) {
   const totalExp = document.getElementById("stfTotalExp").value.trim();
   const prevCompany = document.getElementById("stfPrevCompany").value.trim();
   const prevRole = document.getElementById("stfPrevRole").value.trim();
-  const leaveReason = document.getElementById("stfLeaveReason").value.trim();
   const skills = document.getElementById("stfSkills").value.trim();
   const bankHolder = document.getElementById("stfBankHolder").value.trim();
-  const bankName = document.getElementById("stfBankName").value.trim();
-  const bankAcc = document.getElementById("stfBankAcc").value.trim();
   const bankIfsc = document.getElementById("stfBankIfsc").value.trim().toUpperCase();
+  const bankBranch = document.getElementById("stfBankBranch").value.trim();
   const upi = document.getElementById("stfUpi").value.trim();
-  const uan = document.getElementById("stfUan").value.trim();
+
+  const categoryLabel = role === "Support" ? "Class C (Support)" :
+    (role === "Trainer" ? "Class A (Trainer)" : (role === "Receptionist" ? "Class B (Desk)" : "Class S (Manager)"));
 
   const staffRecord = {
     id: staffId,
-    name: name,
-    phone: phone,
-    role: role,
-    category: role === "Support" ? "Class C (Housekeeping)" : (role === "Trainer" ? "Class A (Trainer)" : (role === "Receptionist" ? "Class B (Desk)" : "Class S (Manager)")),
+    name,
+    phone,
+    role,
+    category: categoryLabel,
     designation: role,
     photo: capturedStaffPhotoData || "",
-    dob: dob,
-    age: age,
-    gender: gender,
+    dob,
+    age,
+    gender,
     maritalStatus: marital,
     fatherName: father,
     spouseName: spouse,
-    email: email,
+    email,
     emergency: { name: emName, relation: emRel, phone: emPhone },
     permanentAddress: permAddr,
     currentAddress: currAddr,
-    govId: { type: govType, number: govNo },
+    govId: { type: gType, number: govNo },
     joiningDate: joinDate,
-    joinDate: joinDate,
-    shift: shift,
+    joinDate,
+    shift,
     slot: shift === "Morning" ? "05:30 AM - 12:00 PM" : (shift === "Evening" ? "04:00 PM - 10:00 PM" : "Full Day"),
-    salaryType: salaryType,
+    salaryType,
     monthlySalary: salary,
-    salary: salary,
-    dailyRate: dailyRate,
+    salary,
+    dailyRate,
     uniformSize: uniform,
-    weeklyOff: weeklyOff,
-    experience: { type: expType, totalExp: totalExp, prevCompany: prevCompany, prevRole: prevRole, leaveReason: leaveReason, skills: skills },
-    banking: { holder: bankHolder, bank: bankName, account: bankAcc, ifsc: bankIfsc, upi: upi, uan: uan },
+    weeklyOff,
+    experience: { type: expType, totalExp, prevCompany, prevRole, skills },
+    payMode: payMode,
+    banking: payMode === "Cash"
+      ? { mode: "Cash", holder: "", bank: "Cash Payment", branch: "", account: "", ifsc: "", upi: "", uan }
+      : { mode: payMode, holder: bankHolder, bank: bankName, branch: bankBranch, account: bankAcc, ifsc: bankIfsc, upi, uan },
     status: "Active",
     createdAt: new Date().toISOString()
   };
 
-  // 1. Save to LocalStorage
   let staffList = JSON.parse(LS.getItem("bfc_staff_list") || "[]");
   staffList.push(staffRecord);
   LS.setItem("bfc_staff_list", JSON.stringify(staffList));
   LS.setItem("om_staff_master_v2", JSON.stringify(staffList));
 
-  // 2. Sync to Cloud Firestore
   try {
     await db.collection("staff").doc(staffId).set(staffRecord, { merge: true });
   } catch (err) {
-    console.warn("Cloud sync notice:", err);
+    console.warn("Cloud sync:", err);
   }
 
-  // 3. Fill the Full Printable Form
   document.getElementById("pId").innerText = staffId;
-  document.getElementById("pName").innerText = name;
-  document.getElementById("pRole").innerText = `${role} (${staffRecord.category})`;
   document.getElementById("pJoinDate").innerText = joinDate;
-  document.getElementById("pShift").innerText = `${shift} (${staffRecord.slot}) | Off: ${weeklyOff}`;
-  document.getElementById("pSalary").innerText = `₹${salary} (${salaryType})`;
-  document.getElementById("pDailyRate").innerText = `₹${dailyRate} / दिन`;
-  document.getElementById("pUniform").innerText = `Size: ${uniform}`;
-
+  document.getElementById("pName").innerText = name;
   document.getElementById("pFather").innerText = father;
+
   if (marital === "Married" && spouse) {
-    document.getElementById("pSpouseRow").style.display = "table-row";
+    document.getElementById("pSpouseBox").style.display = "block";
     document.getElementById("pSpouse").innerText = spouse;
   } else {
-    document.getElementById("pSpouseRow").style.display = "none";
+    document.getElementById("pSpouseBox").style.display = "none";
   }
 
-  document.getElementById("pDobAge").innerText = `${dob} (${age} वर्ष) | ${gender}`;
-  document.getElementById("pPhone").innerText = `${phone} ${email ? "· " + email : ""}`;
-  document.getElementById("pGovId").innerText = `${govType}: ${govNo}`;
+  document.getElementById("pDobAge").innerText = `${dob || "--"} / ${age} वर्ष`;
+  document.getElementById("pGenderMarital").innerText = `${gender} / ${marital}`;
+  document.getElementById("pPhone").innerText = phone;
+  document.getElementById("pEmailUniform").innerText = `${email || "-"} / Size: ${uniform}`;
   document.getElementById("pPermAddr").innerText = permAddr;
   document.getElementById("pCurrAddr").innerText = currAddr;
-  document.getElementById("pEmergency").innerText = `${emName} (${emRel}) - 📞 ${emPhone}`;
+  document.getElementById("pGovId").innerText = `${gType}: ${govNo}`;
+  document.getElementById("pEmName").innerText = emName;
+  document.getElementById("pEmRelPhone").innerText = `${emRel} · ${emPhone}`;
 
-  if (expType === "Experienced" && prevCompany) {
-    document.getElementById("pPrevCompanyRow").style.display = "table-row";
-    document.getElementById("pPrevCompany").innerText = `${prevCompany} (${prevRole || "—"}) · Exp: ${totalExp || "—"}`;
+  document.getElementById("pRole").innerText = `${role} (${categoryLabel})`;
+  document.getElementById("pShiftOff").innerText = `${shift} · Off: ${weeklyOff}`;
+  document.getElementById("pSalary").innerText = `₹${salary} (${salaryType})`;
+  document.getElementById("pDailyRate").innerText = `₹${dailyRate} / दिन`;
+  document.getElementById("pPrevCompany").innerText = (expType === "Experienced" && prevCompany)
+    ? `${prevCompany} (${prevRole || "-"}) · ${totalExp || ""}` : "Fresher / N/A";
+  document.getElementById("pSkills").innerText = skills || "-";
+  if (payMode === "Cash") {
+    document.getElementById("pBank").innerText = "💵 Cash Payment (नकद वेतन)";
+    document.getElementById("pBankExtra").innerText = `Mode: Cash · UAN: ${uan || "N/A"}`;
   } else {
-    document.getElementById("pPrevCompanyRow").style.display = "table-row";
-    document.getElementById("pPrevCompany").innerText = "फ्रेशर (Fresher)";
+    document.getElementById("pBank").innerText = `${bankName} — ${bankBranch} (${bankHolder})`;
+    document.getElementById("pBankExtra").innerText = `Mode: ${payMode} · A/C: ${bankAcc} · IFSC: ${bankIfsc} · UPI: ${upi || "-"} · UAN: ${uan || "-"}`;
   }
 
-  if (skills) {
-    document.getElementById("pSkillsRow").style.display = "table-row";
-    document.getElementById("pSkills").innerText = skills;
-  } else {
-    document.getElementById("pSkillsRow").style.display = "none";
-  }
-
-  document.getElementById("pBank").innerText = `${bankName} (A/C: ${bankAcc})`;
-  document.getElementById("pIfscUpi").innerText = `IFSC: ${bankIfsc} ${upi ? "· UPI: " + upi : ""}`;
-  document.getElementById("pUan").innerText = uan || "N/A";
+  document.getElementById("pStaffSignature").innerText = name;
+  document.getElementById("pDeclName").innerText = name;
+  document.getElementById("pDeclDate").innerText = joinDate;
+  document.getElementById("pDeclSig").innerText = name;
+  document.getElementById("pOfficeRole").innerText = categoryLabel;
+  document.getElementById("pOfficeSal").innerText = `₹${salary}`;
 
   const photoElem = document.getElementById("printStaffPhoto");
   if (capturedStaffPhotoData) {
@@ -1066,42 +1417,41 @@ async function handleStaffJoinSubmit(e) {
     photoElem.style.display = "none";
   }
 
-  document.getElementById("pStaffSignature").innerText = name;
-
   btn.disabled = false;
-  btn.innerText = "💾 स्टाफ का पूरा फॉर्म सेव करें (Generate Official Joining Form)";
-
-  // Open Full Print Modal
+  btn.innerText = "💾 स्टाफ का पूरा जॉइनिंग फॉर्म बनाएं व सेव करें";
   document.getElementById("fullFormModal").classList.add("show");
 }
 
 function downloadJoiningFormImage() {
-  const paper = document.getElementById("printableFullForm");
-  html2canvas(paper, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+  const stack = document.getElementById("printableFullForm");
+  html2canvas(stack, { scale: 2, backgroundColor: "#121316" }).then(canvas => {
     const link = document.createElement("a");
-    link.download = `Staff_Joining_${document.getElementById("pId").innerText}.png`;
+    link.download = `Staff_Joining_Form_${document.getElementById("pId").innerText}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   });
 }
 
 function downloadJoiningFormPDF() {
-  const paper = document.getElementById("printableFullForm");
-  html2canvas(paper, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
-    const imgData = canvas.toDataURL("image/jpeg", 0.95);
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-    const imgWidth = 190;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    pdf.addImage(imgData, "JPEG", 10, 10, imgWidth, imgHeight);
-    pdf.save(`Staff_Joining_Form_${document.getElementById("pId").innerText}.pdf`);
-  });
-}
+  const pages = document.querySelectorAll("#printableFullForm .form-sheet-page");
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-function finishAndGoDashboard() {
-  document.getElementById("fullFormModal").classList.remove("show");
-  alert("🎉 स्टाफ सफलतापुर्वक जुड़ गया है और इसका पूरा जॉइनिंग फॉर्म सुरक्षित हो गया है!");
-  window.location.href = "index.html";
+  const renderPage = (idx) => {
+    if (idx >= pages.length) {
+      pdf.save(`Staff_Joining_Form_${document.getElementById("pId").innerText}.pdf`);
+      return;
+    }
+    html2canvas(pages[idx], { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+      if (idx > 0) pdf.addPage();
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdfWidth = pdf.internal.pageSize.getWidth() - 20;
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "JPEG", 10, 10, pdfWidth, Math.min(pdfHeight, pdf.internal.pageSize.getHeight() - 20));
+      renderPage(idx + 1);
+    });
+  };
+  renderPage(0);
 }
 </script>
 </body>
