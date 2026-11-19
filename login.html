@@ -117,7 +117,6 @@
   var LS = localStorage, mode = 'in', method = 'email', nextUrl = 'category-select.html', pendingCode = '';
   var $ = function (i) { return document.getElementById(i); };
 
-  /* ---------- UI ---------- */
   function setMode(m) {
     mode = m; hide();
     $('tabIn').classList.toggle('on', m === 'in'); $('tabUp').classList.toggle('on', m === 'up');
@@ -129,7 +128,7 @@
     $('formSub').textContent = m === 'up' ? 'अपना Gym register करें — आपको Unique Security Code मिलेगा' : 'नीचे के 3 तरीकों में से कोई भी एक चुनकर Sign In करें';
     $('submitBtn').textContent = m === 'up' ? 'Create Account' : 'Sign In';
     $('pwHint').textContent = m === 'up' ? '(कम से कम 6 अक्षर)' : '';
-    $('swText').innerHTML = m === 'up' ? 'Pehle se account hai? <a onclick="setMode(\'in\')">Sign In</a>' : 'Naya account? <a onclick="setMode(\'up\')">Sign Up</a>';
+    $('swText').innerHTML = m === 'up' ? 'Pehle se account hai? <a onclick="setMode('in')">Sign In</a>' : 'Naya account? <a onclick="setMode('up')">Sign Up</a>';
     setMethod(method);
   }
   function setMethod(x) {
@@ -159,7 +158,6 @@
     return (e && e.message) || 'कुछ गड़बड़ हुई।';
   }
 
-  /* ---------- helpers ---------- */
   function idToCred(raw) { raw = (raw || '').trim(); return /^\d{10}$/.test(raw) ? raw + '@orgdesk.phone' : raw; }
   async function sha(s) { var b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
   function genCode() {
@@ -174,7 +172,6 @@
   }
   async function codeEmail(code) { return 'c' + (await sha(code)).slice(0, 32) + '@code.orgdesk.app'; }
 
-  // Code ke liye alag hidden login account (secondary app se, taaki owner ka session na badle)
   async function createCodeAccount(code) {
     var app2 = firebase.apps.filter(function (a) { return a.name === 'sec'; })[0] || firebase.initializeApp(CFG, 'sec');
     var a2 = app2.auth();
@@ -195,7 +192,7 @@
 
   function saveLocalProfile(orgId, cloud) {
     var prev = {}; try { prev = JSON.parse(LS.getItem('om_org_profile') || '{}') || {}; } catch (e) {}
-    if (prev.orgId && prev.orgId !== orgId) prev = {};           // doosre gym ka data mix nahi hoga
+    if (prev.orgId && prev.orgId !== orgId) prev = {};
     cloud = cloud || {};
     var o = Object.assign({}, prev, cloud, {
       orgId: orgId, orgName: cloud.gymName || prev.orgName || prev.gymName || '',
@@ -207,11 +204,10 @@
     return o;
   }
 
-  /* ---------- after login: cloud se poora profile + license wapas ---------- */
   async function afterAuth(user, justSignedUp, signupGym) {
     var orgId = user.uid, role = 'owner';
     try { var r = await db.collection('roles').doc(user.uid).get(); if (r.exists) { orgId = r.data().orgId || orgId; role = r.data().role || 'owner'; } } catch (e) {}
-    if (role !== 'owner') { LS.setItem('bfc_role', role); LS.setItem('bfc_org_id', orgId); location.href = 'index.html'; return; }
+    if (role !== 'owner') { LS.setItem('bfc_role', role); LS.setItem('bfc_org_id', orgId); window.location.replace('index.html'); return; }
 
     var cloud = null;
     try { var s = await db.collection('orgs').doc(orgId).get(); if (s.exists) cloud = s.data(); } catch (e) { console.warn(e); }
@@ -225,24 +221,22 @@
     cloud = Object.assign({}, cloud || {}, base);
     try { await db.collection('publicOrgs').doc(orgId).set({ gymName: cloud.gymName || '' }, { merge: true }); } catch (e) {}
 
-    var prof = saveLocalProfile(orgId, cloud);
+    saveLocalProfile(orgId, cloud);
     var complete = !!(cloud.gymName && cloud.phone && cloud.upiId);
     nextUrl = complete ? 'index.html' : 'category-select.html';
 
-    // Security Code: naya signup ya purana account jisme abhi tak code nahi bana
     if (justSignedUp || !cloud.codeHash) {
       try { pendingCode = await issueCode(orgId); showCode(pendingCode); return; }
       catch (e) { console.warn('code issue failed', e); err('Security Code नहीं बन पाया: ' + friendly(e)); }
     }
-    location.href = nextUrl;
+    window.location.replace(nextUrl);
   }
 
   function showCode(c) { $('codeShow').textContent = c; $('codeOv').classList.add('show'); }
-  function goNext() { location.href = nextUrl; }
+  function goNext() { window.location.replace(nextUrl); }
   function copyCode() { try { navigator.clipboard.writeText(pendingCode); } catch (e) {} ok('Copy हो गया ✔'); }
   function shareCode() { var t = 'मेरा Security Code: ' + pendingCode; if (navigator.share) navigator.share({ text: t }).catch(function () {}); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); }
 
-  /* ---------- submit ---------- */
   async function submitForm(e) {
     e.preventDefault(); hide(); busy(true);
     try {
@@ -276,17 +270,12 @@
     try { await auth.sendPasswordResetEmail(raw); ok('Password reset link आपके Email पर भेज दिया गया।'); } catch (x) { err(friendly(x)); }
   }
 
-  /* ---------- page load: logout ya auto-continue ---------- */
   (function init() {
     var q = new URLSearchParams(location.search);
     if (q.get('logout')) {
       ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role'].forEach(function (k) { LS.removeItem(k); });
-      auth.signOut().catch(function () {}); return;
+      auth.signOut().catch(function () {});
     }
-    var off = auth.onAuthStateChanged(function (u) {
-      off();
-      if (u && !u.isAnonymous) { ok('पहले से Sign In है — Dashboard खुल रहा है…'); afterAuth(u, false); }
-    });
   })();
   setMode('in');
 </script>

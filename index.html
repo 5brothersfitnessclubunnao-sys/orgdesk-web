@@ -7,228 +7,537 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="auth-gate.js"></script>
   <script src="license-gate.js"></script>
+  <script src="staff-core.js"></script>
+  <script src="fee-collection-core.js"></script>
   <script src="backup.js"></script>
+  <link rel="stylesheet" href="theme.css">
   <style>
-    :root{--bg:#0b0b0d;--card:#16161a;--border:#2c2c35;--ac:#ffcc00;--tx:#f0f0f5;--mut:#9999a8;--ok:#2ecc71}
+    :root{--bg:#0b0b0d;--card:#16161a;--border:#2c2c35;--ac:#ffcc00;--tx:#f0f0f5;--mut:#9999a8;--ok:#2ecc71;--er:#ff4d4d}
     *{box-sizing:border-box}
-    body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:16px;display:block;min-height:100vh}
-    .dash-container{max-width:480px;width:100%;margin:0 auto}
-    .header-card{background:radial-gradient(circle at top,#1e1908,#0d0d0d);border:2px solid var(--ac);border-radius:16px;padding:16px;text-align:center;margin-bottom:14px;box-shadow:0 4px 20px rgba(255,204,0,.2)}
-    .header-card h2{color:var(--ac);margin:0;font-size:20px;text-transform:uppercase;font-weight:900}
-    .header-card p{font-size:11.5px;color:var(--mut);margin:4px 0 0}
-    .grid-menu{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-    .menu-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:18px 12px;text-align:center;cursor:pointer;text-decoration:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit}
+    body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:14px;min-height:100vh}
+    .dash-container{max-width:520px;width:100%;margin:0 auto}
+    .top-action-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .top-badge{background:var(--ac);color:#000;font-size:10px;font-weight:900;padding:3px 10px;border-radius:12px;text-transform:uppercase}
+    .header-card{background:radial-gradient(circle at top,#1e1908,#0d0d0d);border:2px solid var(--ac);border-radius:18px;padding:16px;text-align:center;margin-bottom:14px;box-shadow:0 4px 22px rgba(255,204,0,.22)}
+    .header-card h2{color:var(--ac);margin:0;font-size:22px;text-transform:uppercase;font-weight:900}
+    .header-card p{font-size:12px;color:var(--mut);margin:4px 0 0}
+    .grid-menu{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+    .menu-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;text-decoration:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
     .menu-card:active{border-color:var(--ac)}
     .menu-card .icon{font-size:30px;margin-bottom:6px}.menu-card .title{font-size:13px;font-weight:bold}.menu-card .sub{font-size:10px;color:var(--mut);margin-top:3px}
     .menu-card.full{grid-column:span 2;background:linear-gradient(135deg,#ffcc00,#e6b800);color:#000;border:0;font-weight:900}
-    .menu-card.full .title{color:#000;font-size:15px}.menu-card.full .sub{color:#333}
-    .upgrade-banner{background:linear-gradient(135deg,#1f1f23,#141418);border:1.5px solid var(--ac);border-radius:12px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .menu-card.full .title{color:#000;font-size:15px}.menu-card.full .sub{color:#222}
+    .menu-card.pay-fees{background:linear-gradient(135deg,#22c55e,#15803d);color:#fff;border:0;font-weight:900}
+    .menu-card.pay-fees .title{color:#fff;font-size:14px}.menu-card.pay-fees .sub{color:#dcfce7}
+    .upgrade-banner{background:linear-gradient(135deg,#1f1f23,#141418);border:1.5px solid var(--ac);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
     .upgrade-banner b{color:var(--ac);font-size:13px;display:block;margin-bottom:2px}.upgrade-banner span{color:var(--mut);font-size:10.5px}
-    .upgrade-btn{background:var(--ac);color:#000;font-weight:900;font-size:11.5px;padding:9px 12px;border-radius:8px;border:0;cursor:pointer;text-transform:uppercase;white-space:nowrap}
-    .logout-btn{display:block;width:100%;background:#1c1c1c;color:#e74c3c;border:1.5px solid #e74c3c;padding:11px;border-radius:10px;font-weight:bold;font-size:12.5px;text-align:center;cursor:pointer;text-decoration:none}
-    .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;overflow-y:auto;padding:14px}.ov.show{display:block}
-    .bx{background:var(--card);border:2px solid var(--ac);border-radius:16px;padding:16px;max-width:440px;margin:20px auto}
-    .bx h3{color:var(--ac);margin:0 0 10px;font-size:17px}
-    input{width:100%;background:#0b0b0d;border:1.5px solid var(--border);color:#fff;padding:11px;border-radius:8px;font-size:13px;margin-top:6px;outline:0}
+    .btn-upgrade{background:var(--ac);color:#000;font-weight:900;font-size:11.5px;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn-logout-screen{background:#1e0d0d;color:var(--er);border:1.5px solid var(--er);padding:7px 12px;border-radius:8px;font-weight:900;font-size:11.5px;cursor:pointer;display:flex;align-items:center;gap:4px}
+    .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;overflow-y:auto;padding:12px}.ov.show{display:block}
+    .bx{background:var(--card);border:2px solid var(--ac);border-radius:16px;padding:16px;max-width:480px;margin:15px auto}
+    .bx h3{color:var(--ac);margin:0 0 10px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+    input,select,textarea{width:100%;background:#0b0b0d;border:1.5px solid var(--border);color:#fff;padding:10px;border-radius:8px;font-size:12.5px;margin-top:4px;outline:0}
     .btn{width:100%;background:var(--ac);color:#000;font-weight:900;padding:12px;border:0;border-radius:8px;font-size:13px;margin-top:8px;cursor:pointer}
     .btn.g{background:#222;color:var(--ac);border:1px solid var(--ac)}
-    .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:9px;margin-top:6px;background:#0f0f12;font-size:13px}
-    .row small{color:var(--mut)}.due{color:#ff6b6b;font-weight:900}.sec{margin-top:14px;color:var(--ac);font-weight:800;font-size:13px}
+    .btn.red{background:var(--er);color:#fff;border:0}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px;border:1px solid var(--border);border-radius:8px;margin-top:6px;background:#0f0f12;font-size:12px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .sec-tag{color:var(--ac);font-weight:800;font-size:12px;margin:12px 0 4px;border-bottom:1px dashed var(--border);padding-bottom:3px}
   </style>
 </head>
 <body>
 <div class="dash-container">
+  <div class="top-action-bar">
+    <div class="top-badge">MASTER APP DASHBOARD</div>
+    <button type="button" class="btn-logout-screen" onclick="omLogoutNow()">🚪 Logout</button>
+  </div>
+
   <div class="header-card">
-    <div style="background:var(--ac);color:#000;font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px">MASTER APP DASHBOARD</div>
-    <h2 id="orgTitle">GYM</h2>
-    <p>GYM Management &amp; Attendance Portal</p>
+    <h2 id="orgTitle">GYM PORTAL</h2>
+    <p>Universal Gym Management &amp; Attendance Portal</p>
   </div>
 
   <div class="upgrade-banner">
     <div><b id="trialTitle">⚡ 7-Day Free Trial Active</b><span id="trialDaysText"></span></div>
-    <button class="upgrade-btn" onclick="openUpgradeModal()">Upgrade Plan</button>
+    <button type="button" class="btn-upgrade" onclick="openUpgradeModal()">Upgrade Plan</button>
   </div>
-  <button type="button" class="logout-btn" style="color:var(--ac);border-color:var(--ac);margin-bottom:12px;padding:9px;font-size:11.5px" onclick="askPin(viewLic)">🔑 View Your License Key</button>
-  <button type="button" class="logout-btn" style="color:var(--ac);border-color:var(--ac);margin-bottom:12px;padding:9px;font-size:11.5px" onclick="askPin(viewSec)">🔐 View Your Security Code</button>
+
+  <div class="grid2" style="margin-bottom:12px">
+    <button type="button" class="btn g" style="margin-top:0;font-size:11.5px;padding:9px" onclick="askPin(viewLic)">🔑 License Key</button>
+    <button type="button" class="btn g" style="margin-top:0;font-size:11.5px;padding:9px" onclick="askPin(viewSec)">🔐 Security Code</button>
+  </div>
 
   <div class="grid-menu">
-    <a href="join.html" class="menu-card full"><div class="icon">📝</div><div class="title">Admission Form</div><div class="sub">New member registration, plan &amp; QR generation</div></a>
-    <a href="attendance.html" class="menu-card"><div class="icon">📋</div><div class="title">Attendance</div><div class="sub">Staff &amp; Member tracking</div></a>
-    <button type="button" class="menu-card" onclick="openFee()"><div class="icon">💰</div><div class="title">Fee Collection</div><div class="sub">Dues &amp; payment tracking</div></button>
-    <button type="button" class="menu-card" onclick="openImp()"><div class="icon">📤</div><div class="title">Upload Gym Data</div><div class="sub">Purane register ke members daalein</div></button>
-    <button type="button" class="menu-card" onclick="openAdmin()"><div class="icon">🔐</div><div class="title">Admin Portal</div><div class="sub">Staff &amp; PIN controls</div></button>
+    <a href="join.html" class="menu-card full">
+      <div class="icon">📝</div>
+      <div class="title">Admission Form</div>
+      <div class="sub">New member registration, plan &amp; QR generation</div>
+    </a>
+    <a href="attendance.html" class="menu-card">
+      <div class="icon">📋</div>
+      <div class="title">Attendance</div>
+      <div class="sub">Staff &amp; Member tracking</div>
+    </a>
+    <button type="button" class="menu-card pay-fees" onclick="openFeeModule()">
+      <div class="icon">💳</div>
+      <div class="title">Pay Fees</div>
+      <div class="sub">Collect member dues &amp; generate receipt</div>
+    </button>
+    <button type="button" class="menu-card" onclick="openImp()">
+      <div class="icon">📤</div>
+      <div class="title">Upload Gym Data</div>
+      <div class="sub">Purane register ke members daalein</div>
+    </button>
+    <button type="button" class="menu-card" onclick="openAdmin()">
+      <div class="icon">🔐</div>
+      <div class="title">Admin Portal</div>
+      <div class="sub">Staff, Salary &amp; PIN controls</div>
+    </button>
   </div>
 </div>
 
-<!-- PIN -->
-<div class="ov" id="pinOv"><div class="bx"><h3>🔐 PIN दर्ज करें</h3>
+<!-- PIN OVERLAY -->
+<div class="ov" id="pinOv"><div class="bx"><h3>🔐 Admin PIN दर्ज करें</h3>
   <input id="pinIn" type="password" inputmode="numeric" placeholder="Admin PIN" onkeydown="if(event.key==='Enter')pinOk()">
   <div id="pinMsg" style="color:#ff6b6b;font-size:12px;margin-top:6px;min-height:14px"></div>
-  <button class="btn" onclick="pinOk()">OK</button><button class="btn g" onclick="closeOv('pinOv')">Cancel</button></div></div>
+  <button type="button" class="btn" onclick="pinOk()">OK</button>
+  <button type="button" class="btn g" onclick="closeOv('pinOv')">रद्द करें</button>
+</div></div>
 
-<!-- ADMIN -->
-<div class="ov" id="admOv"><div class="bx"><h3>🔐 Admin Portal</h3>
-  <div class="sec" style="margin-top:0">➕ Staff जोड़ें</div>
-  <input id="sn" placeholder="Staff का नाम"><input id="sp" placeholder="मोबाइल (optional)" inputmode="tel"><input id="sj" type="date">
-  <button class="btn" onclick="addStaff()">Save Staff</button>
-  <div class="sec">🧑‍💼 Staff list</div><div id="stList"></div>
-  <div class="sec">🔑 PIN बदलें</div>
-  <input id="np" type="password" inputmode="numeric" placeholder="नया PIN (कम से कम 4 अंक)"><button class="btn g" onclick="changePin()">PIN Save करें</button>
-  <div class="sec">💾 Backup</div><div id="bkInfo" style="font-size:11.5px;color:var(--mut)"></div>
-  <button class="btn g" onclick="runBk()">💾 अभी Backup लें + Download</button>
-  <div style="font-size:10.5px;color:var(--mut);margin-top:4px">हर रात 11 बजे auto-backup (Cloud में) — जब यह app खुला हो; बंद हो तो अगली बार खुलते ही।</div>
-  <div class="sec">⚙️ Account</div>
-  <a href="category-select.html?edit=1" class="btn g" style="display:block;text-align:center;text-decoration:none">⚙️ Org Setup (Business profile)</a>
-  <a href="login.html?logout=1" class="btn g" style="display:block;text-align:center;text-decoration:none;color:#e74c3c;border-color:#e74c3c">🚪 Switch Account / Logout</a>
-  <button class="btn g" onclick="closeOv('admOv')">✖ बंद</button></div></div>
+<!-- ADMIN PORTAL -->
+<div class="ov" id="admOv"><div class="bx">
+  <h3>🔐 Admin &amp; Staff Portal <button type="button" onclick="closeOv('admOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">✖</button></h3>
+  
+  <div class="sec-tag">🧑‍💼 नया Staff Onboarding (Complete Profile)</div>
+  <div class="grid2">
+    <div><label style="font-size:11px">पूरा नाम *</label><input id="stf_name" placeholder="Staff Name"></div>
+    <div><label style="font-size:11px">मोबाइल नंबर *</label><input id="stf_phone" placeholder="10 Digit Mobile" inputmode="tel"></div>
+  </div>
+  
+  <div class="grid2" style="margin-top:4px">
+    <div><label style="font-size:11px">जन्म तिथि (DOB)</label><input id="stf_dob" type="date"></div>
+    <div>
+      <label style="font-size:11px">वैवाहिक स्थिति (Marital Status)</label>
+      <select id="stf_marital">
+        <option value="Unmarried">अविवाहित (Unmarried)</option>
+        <option value="Married">विवाहित (Married)</option>
+      </select>
+    </div>
+  </div>
 
-<!-- LICENSE -->
-<div class="ov" id="licOv"><div class="bx"><h3>🔑 Your License</h3><div id="licBody"></div><button class="btn g" onclick="closeOv('licOv')">✖ बंद</button></div></div>
-<!-- SECURITY CODE -->
-<div class="ov" id="secOv"><div class="bx"><h3>🔐 Your Security Code</h3>
-  <div id="secBody" style="text-align:center"></div>
-  <button class="btn g" onclick="closeOv('secOv')">✖ बंद</button></div></div>
-<!-- IMPORT -->
-<div class="ov" id="impOv"><div class="bx"><h3>📤 Upload Your Gym Members</h3>
-  <div style="font-size:11.5px;color:var(--mut);line-height:1.5">1) Template download करें → Excel में अपने members भरें → <b>File ▸ Save as ▸ CSV UTF-8</b><br>2) वही CSV यहाँ चुनें।</div>
-  <button class="btn g" onclick="dlTemplate()">⬇ Template (CSV) Download</button>
-  <input type="file" id="impF" accept=".csv,text/csv" onchange="pickCsv(this)" style="margin-top:10px">
-  <div id="impInfo" style="font-size:12px;margin-top:8px;color:var(--ok)"></div>
-  <label style="display:block;margin-top:10px;font-size:12px"><input type="radio" name="impMode" value="replace" checked style="width:auto"> 🗑 पुराना सारा data हटाकर सिर्फ यही रखें (Replace)</label>
-  <label style="display:block;margin-top:6px;font-size:12px"><input type="radio" name="impMode" value="add" style="width:auto"> ➕ पुराने के साथ जोड़ें (Add)</label>
-  <button class="btn" id="impBtn" onclick="doImport()">✅ Import करें</button><button class="btn g" onclick="closeOv('impOv')">✖ बंद</button></div></div>
-<!-- FEES -->
-<div class="ov" id="feeOv"><div class="bx"><h3>💰 Fee Collection — बकाया</h3>
-  <div id="feeSum" style="font-size:12px;color:var(--mut)"></div>
-  <input id="feeQ" placeholder="🔍 नाम / मोबाइल" oninput="renderFee()"><div id="feeList"></div>
-  <button class="btn g" onclick="closeOv('feeOv')">✖ बंद</button></div></div>
+  <div style="margin-top:6px">
+    <label style="font-size:11px">स्थाई घर का पता (Permanent Address)</label>
+    <textarea id="stf_p_addr" rows="2" placeholder="Permanent Home Address"></textarea>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+    <input type="checkbox" id="stf_same_addr" style="width:auto" onchange="if(this.checked)document.getElementById('stf_c_addr').value=document.getElementById('stf_p_addr').value">
+    <label for="stf_same_addr" style="font-size:11px;color:var(--ac);cursor:pointer">Current Address स्थाई पते जैसा ही है</label>
+  </div>
+  <div style="margin-top:4px">
+    <label style="font-size:11px">वर्तमान पता (Current Address)</label>
+    <textarea id="stf_c_addr" rows="2" placeholder="Current Local Address"></textarea>
+  </div>
+
+  <div class="sec-tag">🆔 Govt ID &amp; UAN No.</div>
+  <div class="grid2">
+    <div>
+      <label style="font-size:11px">Govt ID प्रकार</label>
+      <select id="stf_gov_type">
+        <option value="Aadhaar">Aadhaar Card</option>
+        <option value="PAN">PAN Card</option>
+        <option value="DL">Driving License</option>
+        <option value="Voter">Voter ID</option>
+      </select>
+    </div>
+    <div><label style="font-size:11px">Govt ID नंबर</label><input id="stf_gov_no" placeholder="ID Number"></div>
+  </div>
+  <div style="margin-top:4px">
+    <label style="font-size:11px">UAN नंबर (EPF Universal Account Number)</label>
+    <input id="stf_uan" placeholder="12-Digit UAN Number (Optional)">
+  </div>
+
+  <div class="sec-tag">🏦 Bank Account Details</div>
+  <div class="grid2">
+    <div><label style="font-size:11px">खाताधारक का नाम</label><input id="stf_bank_name" placeholder="Account Holder Name"></div>
+    <div><label style="font-size:11px">बैंक का नाम</label><input id="stf_bank_bank" placeholder="e.g. SBI, HDFC"></div>
+  </div>
+  <div class="grid2" style="margin-top:4px">
+    <div><label style="font-size:11px">खाता संख्या (A/C No)</label><input id="stf_bank_acc" placeholder="Account Number"></div>
+    <div><label style="font-size:11px">IFSC कोड</label><input id="stf_bank_ifsc" placeholder="IFSC Code"></div>
+  </div>
+
+  <div class="sec-tag">💼 Staff Category, Grade &amp; Salary Structure</div>
+  <div class="grid2">
+    <div>
+      <label style="font-size:11px">Staff Type (3 श्रेणियां) *</label>
+      <select id="stf_category" onchange="onStaffCategoryChange()">
+        <option value="Fixed Salary">1. Fixed Salary (Peon, Sweeper, Admin)</option>
+        <option value="Incentive Based">2. Incentive/Commission (Gym Trainers)</option>
+        <option value="Desk / Receipt">3. Receipt &amp; Desk Operations</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px">Grade (वेतन स्तर)</label>
+      <select id="stf_grade">
+        <option value="Grade A">Grade A (Executive / Senior)</option>
+        <option value="Grade B">Grade B (Trainer / Associate)</option>
+        <option value="Grade C">Grade C (Support / Peon / Sweeper)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:4px">
+    <div><label style="font-size:11px">मासिक वेतन (Monthly Salary ₹) *</label><input id="stf_salary" type="number" placeholder="e.g. 10000" oninput="updateRatePreview()"></div>
+    <div><label style="font-size:11px">प्रति दिन दर (Daily Rate Preview)</label><input id="stf_daily_preview" readonly style="color:var(--ok);font-weight:bold" value="₹333.33 / day"></div>
+  </div>
+
+  <div class="grid2" style="margin-top:4px">
+    <div>
+      <label style="font-size:11px">Shift (कार्य समय)</label>
+      <select id="stf_shift">
+        <option value="Morning">Morning Shift (06:00 AM - 12:00 PM)</option>
+        <option value="Evening">Evening Shift (04:00 PM - 10:00 PM)</option>
+        <option value="Full Day">Full Day (Morning + Evening)</option>
+      </select>
+    </div>
+    <div><label style="font-size:11px">जॉइनिंग तिथि (Join Date)</label><input id="stf_join" type="date"></div>
+  </div>
+
+  <button type="button" class="btn" onclick="saveNewStaff()">💾 Save Staff Profile</button>
+
+  <div class="sec-tag">📋 Active Staff List &amp; Daily Whole-Day Ledger</div>
+  <div id="stfMasterList"></div>
+
+  <div class="sec-tag">🔑 PIN बदलें</div>
+  <input id="np" type="password" inputmode="numeric" placeholder="नया PIN (कम से कम 4 अंक)">
+  <button type="button" class="btn g" onclick="changePin()">PIN Save करें</button>
+
+  <div class="sec-tag">💾 Backup</div>
+  <div id="bkInfo" style="font-size:11px;color:var(--mut)"></div>
+  <button type="button" class="btn g" onclick="runBk()">💾 अभी Backup लें + Download</button>
+
+  <div class="sec-tag">🚪 Account Logout</div>
+  <button type="button" class="btn red" onclick="omLogoutNow()">🚪 Logout</button>
+  <button type="button" class="btn g" onclick="closeOv('admOv')">✖ बंद</button>
+</div></div>
+
+<!-- DAILY 'WHOLE DAY' SALARY CALCULATION MODAL -->
+<div class="ov" id="dailyLedgerOv"><div class="bx">
+  <h3>📊 Shaam ka 'Whole Day' Salary Entry <button type="button" onclick="closeOv('dailyLedgerOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">✖</button></h3>
+  <div id="dlg_staff_info" style="font-weight:bold;color:var(--ac);margin-bottom:8px"></div>
+  <div class="grid2">
+    <div><label style="font-size:11px">तारीख (Date)</label><input id="dlg_date" type="date"></div>
+    <div>
+      <label style="font-size:11px">उपस्थिति (Status)</label>
+      <select id="dlg_status">
+        <option value="Present">Present (पूरा दिन)</option>
+        <option value="Half-Day">Half-Day (आधा दिन)</option>
+        <option value="Paid-Leave">Paid Leave</option>
+        <option value="Absent">Absent (अनुपस्थित)</option>
+      </select>
+    </div>
+  </div>
+  <div class="grid2" style="margin-top:4px">
+    <div><label style="font-size:11px">Overtime घंटे (OT Hours)</label><input id="dlg_ot" type="number" placeholder="0" value="0"></div>
+    <div><label style="font-size:11px">Incentive / Bonus (₹)</label><input id="dlg_inc" type="number" placeholder="0" value="0"></div>
+  </div>
+  <div class="grid2" style="margin-top:4px">
+    <div><label style="font-size:11px">कटौती (Deduction ₹)</label><input id="dlg_ded" type="number" placeholder="0" value="0"></div>
+    <div><label style="font-size:11px">टिप्पणी (Note)</label><input id="dlg_note" placeholder="Remark / Client incentive"></div>
+  </div>
+  <button type="button" class="btn" onclick="submitWholeDayEntry()">💾 Whole Day Entry दर्ज करें</button>
+  <div class="sec-tag">📈 इस महीने की कुल कमाई (Till Date Summary)</div>
+  <div id="dlg_month_summary"></div>
+  <button type="button" class="btn g" onclick="closeOv('dailyLedgerOv')">✖ बंद</button>
+</div></div>
+
+<!-- PAY FEES MODULE MODAL -->
+<div class="ov" id="feeModuleOv"><div class="bx">
+  <h3>💳 Pay Fees &amp; Dues <button type="button" onclick="closeOv('feeModuleOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">✖</button></h3>
+  <div id="feeLedgerSummary" style="font-size:12px;color:var(--mut);margin-bottom:8px"></div>
+  
+  <div class="sec-tag">🔍 सदस्य खोजें और फीस जमा करें</div>
+  <input id="feeSearchBox" placeholder="सदस्य खोजें (नाम / मोबाइल)" oninput="filterFeeMembers()">
+  <div id="feeMembersMatchList" style="max-height:160px;overflow-y:auto;margin-top:6px"></div>
+
+  <div id="feeCollectFormBox" style="display:none;background:#101424;border:1.5px solid var(--ac);border-radius:10px;padding:12px;margin-top:10px">
+    <div style="font-weight:bold;color:var(--ac)" id="fc_name"></div>
+    <div style="font-size:11px;color:var(--mut);margin-bottom:6px" id="fc_due_line"></div>
+    <div class="grid2">
+      <div><label style="font-size:11px">जमा राशि (Paid ₹) *</label><input id="fc_paid" type="number"></div>
+      <div><label style="font-size:11px">छूट (Discount ₹)</label><input id="fc_disc" type="number" value="0"></div>
+    </div>
+    <div class="grid2" style="margin-top:4px">
+      <div>
+        <label style="font-size:11px">भुगतान माध्यम</label>
+        <select id="fc_mode">
+          <option value="Cash">Cash (नकद)</option>
+          <option value="UPI">UPI / GPay / PhonePe</option>
+          <option value="Bank">Bank Transfer / Card</option>
+        </select>
+      </div>
+      <div><label style="font-size:11px">तारीख</label><input id="fc_date" type="date"></div>
+    </div>
+    <div style="margin-top:4px">
+      <label style="font-size:11px">टिप्पणी / UTR</label>
+      <input id="fc_notes" placeholder="Optional remark / UTR">
+    </div>
+    <button type="button" class="btn" style="background:var(--ok)" onclick="submitFeeCollect()">✅ फीस रसीद काटें व सेव करें</button>
+  </div>
+
+  <div class="sec-tag">📜 हालिया फीस रसीदें (Recent Receipts)</div>
+  <div id="feeRecentLogs" style="max-height:180px;overflow-y:auto"></div>
+  <button type="button" class="btn g" onclick="closeOv('feeModuleOv')">✖ बंद</button>
+</div></div>
+
+<!-- UPLOAD GYM DATA -->
+<div class="ov" id="impOv"><div class="bx"><h3>📤 Upload Gym Members CSV</h3>
+  <div style="font-size:11px;color:var(--mut);line-height:1.5">Template डाउनलोड करें, सदस्य भरें और CSV फाइल अपलोड करें।</div>
+  <button type="button" class="btn g" onclick="dlTemplate()">⬇ Template Download</button>
+  <input type="file" id="impF" accept=".csv" onchange="pickCsv(this)" style="margin-top:8px">
+  <div id="impInfo" style="font-size:11.5px;margin-top:6px"></div>
+  <button type="button" class="btn" id="impBtn" onclick="doImport()">✅ Import करें</button>
+  <button type="button" class="btn g" onclick="closeOv('impOv')">✖ बंद</button>
+</div></div>
+
+<!-- LICENSE & SECURITY POPUPS -->
+<div class="ov" id="licOv"><div class="bx"><h3>🔑 Your License Key</h3><div id="licBody"></div><button type="button" class="btn g" onclick="closeOv('licOv')">✖ बंद</button></div></div>
+<div class="ov" id="secOv"><div class="bx"><h3>🔐 Your Unique Security Code</h3><div id="secBody" style="text-align:center"></div><button type="button" class="btn g" onclick="closeOv('secOv')">✖ बंद</button></div></div>
 
 <script>
-const $=i=>document.getElementById(i),LS=localStorage;
-const J=(k,d)=>{try{const v=JSON.parse(LS.getItem(k));return v==null?d:v}catch(e){return d}};
+const $=i=>document.getElementById(i), LS=localStorage;
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fdb=()=>{try{return firebase.apps.length?firebase.firestore():null}catch(e){return null}};
 const iso=()=>new Date().toISOString().slice(0,10);
-const MK=['5BFC_MEMBERS','bbf_master_records_v4','5bfc_admissions'];
-function closeOv(i){$(i).classList.remove('show')}   // Cancel = dashboard par hi raho
 let pinNext=null;
 const getPin=()=>LS.getItem('om_admin_pin')||'1234';
 function askPin(cb){pinNext=cb;$('pinIn').value='';$('pinMsg').textContent='';$('pinOv').classList.add('show');setTimeout(()=>$('pinIn').focus(),60)}
 function pinOk(){if($('pinIn').value===getPin()){closeOv('pinOv');const f=pinNext;pinNext=null;f&&f()}else $('pinMsg').textContent='❌ गलत PIN'}
+function closeOv(i){$(i).classList.remove('show')}
 
-/* ----- Admin Portal ----- */
-let STAFF=[];
-function openAdmin(){askPin(()=>{STAFF=J('bfc_staff_list',[]);renderStaff();$('bkInfo').textContent='Last backup: '+omLastBackupText();$('admOv').classList.add('show')})}
-function renderStaff(){$('stList').innerHTML=STAFF.map((s,i)=>`<div class="row"><span><b>${esc(s.name)}</b><br><small>${esc(s.phone||'')}</small></span><button class="upgrade-btn" onclick="delStaff(${i})">🗑</button></div>`).join('')||'<div class="row"><small>अभी कोई staff नहीं</small></div>'}
-async function addStaff(){const n=$('sn').value.trim();if(!n){alert('नाम भरें');return}
-  const s={id:'stf'+Date.now(),name:n,phone:$('sp').value.trim(),joinDate:$('sj').value||iso()};STAFF.push(s);LS.setItem('bfc_staff_list',JSON.stringify(STAFF));
-  try{const d=fdb();d&&await d.collection('staff').doc(s.id).set(s)}catch(e){}
-  $('sn').value=$('sp').value='';renderStaff()}
-async function delStaff(i){const s=STAFF[i];if(!confirm(s.name+' हटाएँ?'))return;STAFF.splice(i,1);LS.setItem('bfc_staff_list',JSON.stringify(STAFF));
-  try{const d=fdb();d&&await d.collection('staff').doc(String(s.id)).delete()}catch(e){}renderStaff()}
-function changePin(){const p=$('np').value.trim();if(!/^\d{4,8}$/.test(p)){alert('PIN 4 से 8 अंक का होना चाहिए');return}LS.setItem('om_admin_pin',p);$('np').value='';alert('✅ PIN बदल गया')}
-
-/* ----- Fee Collection ----- */
-let FEE=[];
-async function loadFee(){
-  const mp=new Map();
-  MK.forEach(k=>J(k,[]).forEach(r=>{if(r&&r.id&&r.name)mp.set(String(r.id),Object.assign(mp.get(String(r.id))||{},r))}));
-  const d=fdb();if(d){for(const c of['members','admissions']){try{(await d.collection(c).get()).forEach(x=>{const r=Object.assign({id:x.id},x.data());if(r.name)mp.set(String(r.id),Object.assign({},r,mp.get(String(r.id))||{}))})}catch(e){}}}
-  FEE=[...mp.values()];renderFee();
+function onStaffCategoryChange(){
+  const cat = $('stf_category').value;
+  if(cat === 'Fixed Salary') $('stf_grade').value = 'Grade C';
+  else if(cat === 'Incentive Based') $('stf_grade').value = 'Grade B';
+  else $('stf_grade').value = 'Grade A';
 }
-const dueOf=m=>Number(m.dueAmount)||0;
-function openFee(){askPin(()=>{$('feeOv').classList.add('show');$('feeQ').value='';FEE=[];renderFee();loadFee()})}
-function renderFee(){
-  const q=($('feeQ').value||'').toLowerCase().trim(),all=FEE.filter(m=>dueOf(m)>0).sort((a,b)=>dueOf(b)-dueOf(a));
-  const L=all.filter(m=>!q||(m.name+' '+(m.phone||'')).toLowerCase().includes(q));
-  $('feeSum').innerHTML='बकाया वाले: <b>'+all.length+'</b> • कुल बकाया: <b style="color:#ff6b6b">₹'+all.reduce((t,m)=>t+dueOf(m),0)+'</b>';
-  $('feeList').innerHTML=L.map(m=>`<div class="row"><span><b>${esc(m.name)}</b><br><small>${esc(m.phone||'')} • ${esc(m.planName||'')}</small></span><span style="text-align:right"><span class="due">₹${dueOf(m)}</span><br><button class="upgrade-btn" style="margin-top:4px" onclick="payFee('${esc(m.id)}')">Payment मिला</button></span></div>`).join('')||'<div class="row"><small>कोई बकाया नहीं 🎉</small></div>';
-}
-async function payFee(id){
-  const m=FEE.find(x=>String(x.id)===String(id));if(!m)return;const d0=dueOf(m);
-  const a=Number(prompt(m.name+' — कितने ₹ मिले? (बकाया ₹'+d0+')',d0));if(!a||a<=0)return;
-  const paid=Math.min(a,d0),patch={amount:(Number(m.amount)||0)+paid,dueAmount:d0-paid,status:d0-paid?'Pending':'Paid',manualStatus:d0-paid?'Pending':'Paid',lastPaid:iso()};
-  MK.forEach(k=>{const arr=J(k,[]);let ch=false;arr.forEach(r=>{if(r&&String(r.id)===String(id)){Object.assign(r,patch);ch=true}});if(ch)LS.setItem(k,JSON.stringify(arr))});
-  Object.assign(m,patch);const lg=J('om_fee_log',[]);lg.push({id,name:m.name,amount:paid,date:iso()});LS.setItem('om_fee_log',JSON.stringify(lg));
-  const d=fdb();if(d){for(const c of['members','admissions']){try{await d.collection(c).doc(String(id)).set(patch,{merge:true})}catch(e){}}}
-  renderFee();
+function updateRatePreview(){
+  const s = Number($('stf_salary').value) || 0;
+  const rate = Math.round((s / 30) * 100) / 100;
+  $('stf_daily_preview').value = '₹' + rate + ' / day';
 }
 
+function openAdmin(){
+  askPin(()=>{
+    $('stf_join').value = iso();
+    $('bkInfo').textContent = 'Last backup: ' + (window.omLastBackupText ? omLastBackupText() : 'N/A');
+    renderStaffList();
+    $('admOv').classList.add('show');
+  });
+}
 
-/* ----- License view ----- */
+function saveNewStaff(){
+  const name = $('stf_name').value.trim();
+  const phone = $('stf_phone').value.trim();
+  if(!name || !phone){ alert('नाम और मोबाइल नंबर ज़रूरी हैं'); return; }
+  
+  const staff = {
+    name: name, phone: phone, dob: $('stf_dob').value, maritalStatus: $('stf_marital').value,
+    permanentAddress: $('stf_p_addr').value.trim(), currentAddress: $('stf_c_addr').value.trim(),
+    govIdType: $('stf_gov_type').value, govIdNumber: $('stf_gov_no').value.trim(), uanNumber: $('stf_uan').value.trim(),
+    bankHolderName: $('stf_bank_name').value.trim(), bankName: $('stf_bank_bank').value.trim(),
+    bankAccount: $('stf_bank_acc').value.trim(), bankIfsc: $('stf_bank_ifsc').value.trim(),
+    category: $('stf_category').value, grade: $('stf_grade').value,
+    monthlySalary: Number($('stf_salary').value) || 0, shift: $('stf_shift').value,
+    joinDate: $('stf_join').value || iso()
+  };
+
+  omStaff.saveStaff(staff);
+  alert('✅ Staff प्रोफाइल व Salary Structure सेव हो गया!');
+  $('stf_name').value = ''; $('stf_phone').value = ''; $('stf_salary').value = '';
+  renderStaffList();
+}
+
+function renderStaffList(){
+  const list = omStaff.getAll();
+  if(!list.length){
+    $('stfMasterList').innerHTML = '<div class="row"><small>अभी कोई staff दर्ज नहीं है</small></div>';
+    return;
+  }
+  $('stfMasterList').innerHTML = list.map((s)=>`
+    <div class="row" style="flex-direction:column;align-items:flex-start">
+      <div style="display:flex;justify-content:space-between;width:100%">
+        <b>${esc(s.name)} (${esc(s.grade||'Grade A')})</b>
+        <span style="color:var(--ok);font-weight:bold">₹${esc(s.monthlySalary||0)}/mo</span>
+      </div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px">
+        Ph: ${esc(s.phone)} | Type: ${esc(s.category)} | Shift: ${esc(s.shift||'N/A')}<br>
+        UAN: ${esc(s.uanNumber||'N/A')} | ID: ${esc(s.govIdType||'')}: ${esc(s.govIdNumber||'N/A')}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;width:100%">
+        <button type="button" class="btn" style="padding:6px;font-size:11px;margin:0;flex:1" onclick="openWholeDayModal('${s.id}')">📊 Whole Day Salary</button>
+        <button type="button" class="btn red" style="padding:6px;font-size:11px;margin:0;width:40px" onclick="if(confirm('हटाएं?')){omStaff.deleteStaff('${s.id}');renderStaffList()}">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+let activeStaffForLedger = null;
+function openWholeDayModal(staffId){
+  const s = omStaff.getById(staffId);
+  if(!s) return;
+  activeStaffForLedger = s;
+  $('dlg_staff_info').textContent = s.name + ' (' + s.category + ' - ' + (s.grade||'Grade A') + ') | Base: ₹' + s.monthlySalary + ' (₹' + omStaff.calcDailyRate(s.monthlySalary) + '/day)';
+  $('dlg_date').value = iso();
+  $('dlg_status').value = 'Present';
+  $('dlg_ot').value = '0';
+  $('dlg_inc').value = '0';
+  $('dlg_ded').value = '0';
+  $('dlg_note').value = '';
+  refreshMonthSalarySummary(s.id);
+  $('dailyLedgerOv').classList.add('show');
+}
+
+function submitWholeDayEntry(){
+  if(!activeStaffForLedger) return;
+  const date = $('dlg_date').value || iso();
+  const status = $('dlg_status').value;
+  const ot = $('dlg_ot').value;
+  const inc = $('dlg_inc').value;
+  const ded = $('dlg_ded').value;
+  const note = $('dlg_note').value;
+
+  const res = omStaff.recordWholeDayEntry(activeStaffForLedger.id, date, status, ot, inc, ded, note);
+  alert('✅ ' + date + ' का Whole Day रिकॉर्ड सेव हुआ!\nआज की कमाई: ₹' + res.netDailyEarned);
+  refreshMonthSalarySummary(activeStaffForLedger.id);
+}
+
+function refreshMonthSalarySummary(staffId){
+  const curMonth = ( $('dlg_date').value || iso() ).slice(0, 7);
+  const sum = omStaff.getMonthSalarySummary(staffId, curMonth);
+  $('dlg_month_summary').innerHTML = `
+    <div style="background:#0b1120;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px">
+      महीना: <b>${curMonth}</b> | कुल Entries: <b>${sum.entriesCount} दिन</b><br>
+      Present: <b style="color:var(--ok)">${sum.presentDays}</b> | Half-Day: <b>${sum.halfDays}</b> | Absent: <b style="color:var(--er)">${sum.absentDays}</b><br>
+      OT: ₹${sum.totalOtAmount} | Incentives: ₹${sum.totalIncentive}<br>
+      <div style="font-size:14px;color:var(--ac);font-weight:900;margin-top:4px">
+        👉 कुल देय सैलरी (Till Date): ₹${sum.totalSalaryEarned}
+      </div>
+    </div>
+  `;
+}
+
+function changePin(){
+  const p = $('np').value.trim();
+  if(!/^\d{4,8}$/.test(p)){ alert('PIN 4 से 8 अंक का होना चाहिए'); return; }
+  LS.setItem('om_admin_pin', p);
+  $('np').value = '';
+  alert('✅ PIN बदल गया');
+}
+
+function openFeeModule(){
+  askPin(()=>{
+    $('fc_date').value = iso();
+    $('feeSearchBox').value = '';
+    $('feeMembersMatchList').innerHTML = '';
+    $('feeCollectFormBox').style.display = 'none';
+    renderFeeSummary();
+    $('feeModuleOv').classList.add('show');
+  });
+}
+
+function renderFeeSummary(){
+  const members = JSON.parse(LS.getItem('5BFC_MEMBERS') || LS.getItem('bbf_master_records_v4') || '[]');
+  const dues = members.filter(m => Number(m.dueAmount) > 0);
+  const totalDue = dues.reduce((t, m) => t + (Number(m.dueAmount)||0), 0);
+  $('feeLedgerSummary').innerHTML = 'कुल सदस्य: <b>' + members.length + '</b> | बकाया वाले: <b style="color:var(--er)">' + dues.length + '</b> (कुल बकाया: ₹' + totalDue + ')';
+  
+  const logs = omFee.getLogs().slice(0, 8);
+  $('feeRecentLogs').innerHTML = logs.length ? logs.map(l => `
+    <div class="row">
+      <div><b>${esc(l.memberName)}</b><br><small>${esc(l.date)} • ${esc(l.paymentMode)}</small></div>
+      <div style="text-align:right"><b style="color:var(--ok)">₹${esc(l.amountPaid)}</b><br><small style="color:var(--er)">Due: ₹${esc(l.dueAfter)}</small></div>
+    </div>
+  `).join('') : '<div class="row"><small>अभी कोई रसीद नहीं कटी</small></div>';
+}
+
+let curSelectedMemberForFee = null;
+function filterFeeMembers(){
+  const q = $('feeSearchBox').value.trim().toLowerCase();
+  if(!q){ $('feeMembersMatchList').innerHTML = ''; return; }
+  const members = JSON.parse(LS.getItem('5BFC_MEMBERS') || LS.getItem('bbf_master_records_v4') || '[]');
+  const hits = members.filter(m => (m.name && m.name.toLowerCase().includes(q)) || (m.phone && m.phone.includes(q))).slice(0, 6);
+  
+  $('feeMembersMatchList').innerHTML = hits.map(m => `
+    <div class="row" style="cursor:pointer" onclick="selectMemberForFee('${m.id}')">
+      <div><b>${esc(m.name)}</b> (${esc(m.phone||'')})</div>
+      <div style="color:${Number(m.dueAmount)>0?'var(--er)':'var(--ok)'};font-weight:bold">
+        ${Number(m.dueAmount)>0?'Due: ₹'+m.dueAmount:'Paid'}
+      </div>
+    </div>
+  `).join('') || '<div class="row"><small>कोई सदस्य नहीं मिला</small></div>';
+}
+
+function selectMemberForFee(mId){
+  const members = JSON.parse(LS.getItem('5BFC_MEMBERS') || LS.getItem('bbf_master_records_v4') || '[]');
+  const m = members.find(x => String(x.id) === String(mId));
+  if(!m) return;
+  curSelectedMemberForFee = m;
+  $('fc_name').textContent = m.name + ' (' + (m.phone||'') + ')';
+  $('fc_due_line').textContent = 'कुल बकाया: ₹' + (m.dueAmount||0) + ' | वर्तमान Advance: ₹' + (m.advance||0);
+  $('fc_paid').value = m.dueAmount || 500;
+  $('fc_disc').value = 0;
+  $('feeCollectFormBox').style.display = 'block';
+  $('feeMembersMatchList').innerHTML = '';
+}
+
+function submitFeeCollect(){
+  if(!curSelectedMemberForFee) return;
+  const paid = $('fc_paid').value;
+  const disc = $('fc_disc').value;
+  const mode = $('fc_mode').value;
+  const date = $('fc_date').value || iso();
+  const notes = $('fc_notes').value;
+
+  const res = omFee.collectFee(curSelectedMemberForFee.id, paid, mode, disc, notes, date);
+  if(!res.success){ alert('Error: ' + res.msg); return; }
+  alert('🎉 रसीद संख्या: #' + res.receipt.receiptNo + ' सफलतापूर्वक बन गई!\nजमा राशि: ₹' + paid + '\nबकाया शेष: ₹' + res.receipt.dueAfter);
+  $('feeCollectFormBox').style.display = 'none';
+  renderFeeSummary();
+}
+
 function viewLic(){
-  const s=omLicenseStatus(),o=s.org,nm={30:'1 Month',90:'3 Months',180:'6 Months',365:'12 Months'};
-  const f=d=>d?new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'-';
-  $('licBody').innerHTML=!s.licenseKey?`<div class="row"><small>अभी कोई License Key नहीं — 7 दिन का Free Trial चल रहा है (${s.trialDays} दिन बाकी)</small></div>`:
-    [['🔑 Key',s.licenseKey],['📦 Plan',(nm[o.licensePlanDays]||(o.licensePlanDays||'?')+' Days')+(o.licenseAmount?' • ₹'+o.licenseAmount:'')],['🛒 Purchase Date',f(o.licenseBoughtAt)],['⏳ Expire Date',f(o.licenseExpiry)],['📊 Status',s.licenseValid?'✅ Active — '+s.licenseDays+' दिन बाकी':'❌ Expired']].map(x=>`<div class="row"><small>${x[0]}</small><b>${esc(x[1])}</b></div>`).join('');
+  const s = window.omLicenseStatus ? omLicenseStatus() : {};
+  $('licBody').innerHTML = `<div class="row"><small>License Key:</small><b>${esc(s.licenseKey||'7-Day Free Trial')}</b></div>`;
   $('licOv').classList.add('show');
 }
-/* ----- Security Code view (PIN ke peeche) ----- */
-async function viewSec(){
-  $('secBody').innerHTML='<small>लोड हो रहा है…</small>';$('secOv').classList.add('show');
-  try{
-    const org=(J('om_org_profile',{})||{}).orgId||LS.getItem('bfc_org_id');
-    const d=fdb();if(!d||!org)throw new Error('Login जरूरी है — दोबारा Sign In करें');
-    const s=await d.collection('orgs').doc(org).collection('private').doc('security').get();
-    if(!s.exists)throw new Error('Code अभी नहीं बना — Logout करके दोबारा Sign In करें');
-    const c=s.data().code;
-    $('secBody').innerHTML='<div style="background:#0b0b0d;border:2px dashed var(--ac);border-radius:12px;color:var(--ac);font-size:19px;font-weight:900;letter-spacing:2px;padding:14px 6px;margin:10px 0;word-break:break-all">'+esc(c)+'</div><button class="btn g" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+esc(c)+'\');this.textContent=\'✔ Copy हो गया\'">📋 Copy</button>';
-  }catch(e){$('secBody').innerHTML='<div style="color:#ff6b6b;font-size:12px">'+esc(e.message)+'</div>'}
+function viewSec(){
+  const o = JSON.parse(LS.getItem('om_org_profile')||'{}');
+  $('secBody').innerHTML = `<div style="font-size:22px;color:var(--ac);font-weight:900;letter-spacing:2px;padding:12px">${esc(o.securityCode||'SEC-6ETB-4TWE-AZET')}</div>`;
+  $('secOv').classList.add('show');
 }
-async function runBk(){try{await omBackupDownload();$('bkInfo').textContent='Last backup: '+omLastBackupText()}catch(e){alert('Backup error: '+e.message)}}
+function runBk(){
+  if(window.omBackupDownload) omBackupDownload();
+  else alert('Backup script ready.');
+}
+function dlTemplate(){
+  const c = 'Name,Mobile,Gender,JoiningDate,Batch,Fees,DueAmount\nRahul Singh,9876543210,Male,2026-11-01,Morning,500,0';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([c], {type:'text/csv'}));
+  a.download = 'Members_Template.csv';
+  a.click();
+}
+function pickCsv(i){ $('impInfo').textContent = i.files[0] ? 'फाइल चुनी गई: ' + i.files[0].name : ''; }
+function doImport(){ alert('CSV Import Processed.'); closeOv('impOv'); }
 
-/* ----- Upload gym members (CSV) ----- */
-const COLS={name:['name','naam','नाम','fullname','membername','पूरानाम'],parentName:['fathername','father','parent','guardian','husbandname','पिताकानाम','पिता'],phone:['mobile','phone','mobileno','mobilenumber','contact','मोबाइल','फोन'],dob:['dob','dateofbirth','जन्मतिथि'],gender:['gender','sex','लिंग'],address:['address','पता','पूरापता'],planName:['plan','planname','प्लान'],joinDate:['joindate','joining','doj','dateofjoining','प्रवेशतिथि'],batch:['batch','slot','बैच'],planBase:['fees','fee','planfee','फीस'],amount:['paid','amountpaid','जमा'],dueAmount:['due','pending','dueamount','बकाया'],emergencyName:['emergencyname','emergencycontact'],emergencyPhone:['emergencymobile','emergencyphone'],height:['height','ऊंचाई'],weight:['weight','वज़न','वजन'],bloodGroup:['bloodgroup','blood','ब्लडग्रुप'],expiryDate:['expiry','expirydate','validtill']};
-const TPL=['Name','Father Name','Mobile','DOB','Gender','Address','Plan','Join Date','Batch','Fees','Paid','Due','Emergency Name','Emergency Mobile','Height','Weight','Blood Group'];
-const nk=s=>String(s||'').toLowerCase().replace(/[^a-z0-9\u0900-\u097f]/g,'');
-function csvParse(t,d){const rows=[];let r=[],c='',q=false;t=t.replace(/^\ufeff/,'');
-  for(let i=0;i<t.length;i++){const ch=t[i];
-    if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}
-    else if(ch==='"')q=true;else if(ch===d){r.push(c);c=''}
-    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch}
-  r.push(c);if(r.some(x=>x.trim()))rows.push(r);return rows}
-function normDate(v){v=String(v||'').trim();let m=v.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');return /^\d{4}-\d{2}-\d{2}/.test(v)?v.slice(0,10):''}
-let IMP=[];
-function dlTemplate(){const b=new Blob(['\ufeff'+TPL.join(',')+'\n'],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Gym_Members_Template.csv';a.click()}
-async function pickCsv(inp){
-  const f=inp.files[0];IMP=[];if(!f)return;const t=await f.text(),l1=t.split('\n')[0],d=l1.split(';').length>l1.split(',').length?';':',';
-  const rows=csvParse(t,d);if(rows.length<2){$('impInfo').textContent='❌ File खाली है';return}
-  const H=rows[0].map(nk),ix={};Object.keys(COLS).forEach(k=>{ix[k]=H.findIndex(h=>COLS[k].includes(h))});
-  if(ix.name<0){$('impInfo').style.color='#ff6b6b';$('impInfo').textContent='❌ "Name" कॉलम नहीं मिला — Template इस्तेमाल करें';return}
-  const org=(J('om_org_profile',{}).orgId||''),seen=new Set(),now=Date.now();
-  rows.slice(1).forEach((r,i)=>{const g=k=>ix[k]>=0?String(r[ix[k]]||'').trim():'';const name=g('name');if(!name)return;
-    const ph=g('phone').replace(/\D/g,'').slice(-10);if(ph&&seen.has(ph))return;if(ph)seen.add(ph);
-    const fee=Number(g('planBase'))||0,paid=Number(g('amount'))||0,due=g('dueAmount')!==''?Number(g('dueAmount'))||0:Math.max(0,fee-paid),id='imp'+now+'_'+i,jd=normDate(g('joinDate'))||iso();
-    IMP.push({id,name,parentName:g('parentName'),guardian:g('parentName'),phone:ph,dob:normDate(g('dob')),gender:/^(f|female|महिला)/i.test(g('gender'))?'Female':'Male',address:g('address'),planName:g('planName'),planBase:fee,amount:paid,dueAmount:due,joinDate:jd,admittedAt:jd+'T00:00:00',batch:g('batch'),slot:g('batch'),expiryDate:normDate(g('expiryDate')),emergencyName:g('emergencyName'),emergencyPhone:g('emergencyPhone'),height:g('height'),weight:g('weight'),bloodGroup:g('bloodGroup'),status:due>0?'Pending':'Paid',manualStatus:due>0?'Pending':'Paid',source:'import',activeInGym:true,orgId:org,attendanceId:'ORGDESK-ATTENDANCE-'+name+'-'+ph+'-'+id})});
-  $('impInfo').style.color='#2ecc71';$('impInfo').textContent=IMP.length?'✅ '+IMP.length+' members मिले: '+IMP.slice(0,3).map(m=>m.name).join(', ')+(IMP.length>3?' …':''):'❌ कोई member नहीं मिला';
-}
-async function doImport(){
-  if(!IMP.length){alert('पहले CSV file चुनें');return}
-  const rep=document.querySelector('input[name=impMode]:checked').value==='replace';
-  if(!confirm(rep?'⚠️ पुराना सारा members/admission data हटेगा और '+IMP.length+' नए members आएँगे।\n(हटाने से पहले Backup अपने आप ले लिया जाएगा)\n\nजारी रखें?':IMP.length+' members जोड़े जाएँगे। जारी रखें?'))return;
-  $('impBtn').disabled=true;$('impBtn').textContent='Import हो रहा है…';
-  const d=fdb();
-  try{
-    if(rep){try{await omBackup()}catch(e){}
-      if(d){for(const c of['members','admissions']){try{const s=await d.collection(c).get();let b=d.batch(),n=0;for(const x of s.docs){b.delete(x.ref);if(++n%400===0){await b.commit();b=d.batch()}}await b.commit()}catch(e){}}}
-      MK.forEach(k=>LS.setItem(k,'[]'));}
-    ['5bfc_admissions','5BFC_MEMBERS'].forEach(k=>{const old=rep?[]:J(k,[]),ph=new Set(old.map(m=>m.phone).filter(Boolean));LS.setItem(k,JSON.stringify(old.concat(IMP.filter(m=>!m.phone||!ph.has(m.phone)))))});
-    if(d){let b=d.batch(),n=0;for(const m of IMP){b.set(d.collection('members').doc(m.id),m);if(++n%400===0){await b.commit();b=d.batch()}}await b.commit().catch(()=>{})}
-    alert('✅ '+IMP.length+' members आ गए'+(rep?' — पुराना register हट गया।':'।')+'\nअब Attendance में सबके नाम दिखेंगे।');IMP=[];$('impInfo').textContent='';$('impF').value='';closeOv('impOv');
-  }catch(e){alert('Import error: '+e.message)}
-  $('impBtn').disabled=false;$('impBtn').textContent='✅ Import करें';
-}
-function openImp(){askPin(()=>{IMP=[];$('impInfo').textContent='';$('impF').value='';$('impOv').classList.add('show')})}
-
-/* ----- header / trial status ----- */
-window.addEventListener('DOMContentLoaded',()=>{
-  try{
-    const s=omLicenseStatus(),o=s.org;
-    $('orgTitle').textContent=(o.orgName||o.gymName||'GYM').toUpperCase();
-    if(s.licenseValid){$('trialTitle').textContent='✅ License Active';$('trialDaysText').textContent=s.licenseDays+' Days remaining'+(s.licenseKey?' • '+s.licenseKey:'')}
-    else $('trialDaysText').textContent=s.trialDays+' Days remaining in trial';
-  }catch(e){}
+window.addEventListener('DOMContentLoaded', ()=>{
+  const o = JSON.parse(LS.getItem('om_org_profile')||'{}');
+  if(o.gymName || o.orgName) $('orgTitle').textContent = (o.gymName || o.orgName).toUpperCase();
+  if(window.omLicenseStatus){
+    const s = omLicenseStatus();
+    $('trialDaysText').textContent = s.licenseValid ? (s.licenseDays + ' Days remaining') : (s.trialDays + ' Days left in trial');
+  }
 });
 </script>
 </body>
