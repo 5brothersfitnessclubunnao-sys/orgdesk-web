@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reset Password & Security Code</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<style>:root{--bg:#0b0b0d;--card:#16161a;--bd:#2c2c35;--ac:#ffcc00;--ok:#2ecc71;--err:#e74c3c;--mut:#9999a8}
+body{background:var(--bg);color:#f0f0f5;font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh;box-sizing:border-box}
+.b{max-width:420px;width:100%;background:var(--card);border:2px solid var(--ac);border-radius:18px;padding:24px;box-sizing:border-box}h2{color:var(--ac);margin:0 0 6px}p{color:var(--mut);font-size:12px;line-height:1.5}
+label{font-size:11px;color:#ccc;font-weight:600}.pw{position:relative;margin:4px 0 12px}input{width:100%;background:#0b0b0d;border:1.5px solid var(--bd);color:#fff;padding:12px;border-radius:8px;font-size:14px;box-sizing:border-box;padding-right:50px}
+.pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:transparent;border:0;font-size:19px;padding:8px 10px;cursor:pointer;color:var(--ac)}
+.btn{width:100%;background:var(--ac);color:#000;font-weight:900;padding:13px;border:0;border-radius:8px;font-size:14px;cursor:pointer;margin-top:6px}.e{color:var(--err);font-size:12px;margin:8px 0}
+#code{font-size:22px;font-weight:900;color:var(--ac);letter-spacing:1.5px;text-align:center;margin:12px 0;word-break:break-all}</style></head><body><div class="b" id="b"><h2>Naya Password & Security Code</h2><p id="m">Link check ho rahi hai…</p></div>
+<script>
+firebase.initializeApp({apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",authDomain:"bfc-gym-215ae.firebaseapp.com",projectId:"bfc-gym-215ae",storageBucket:"bfc-gym-215ae.firebasestorage.app",messagingSenderId:"886920088571",appId:"1:886920088571:web:c4bc478d246a2700b0d95e"});
+const auth=firebase.auth(),$=id=>document.getElementById(id),q=new URLSearchParams(location.search),oob=q.get('oobCode');
+async function derive(p,c){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("orgdesk|"+p+"|"+String(c||"").toUpperCase().replace(/[^A-Z0-9]/g,"")));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
+function newCode(){const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",a=new Uint8Array(12);crypto.getRandomValues(a);const s=Array.from(a).map(x=>ch[x%32]).join("");return"SEC-"+s.slice(0,4)+"-"+s.slice(4,8)+"-"+s.slice(8,12)}
+function eye(id,b){const i=$(id),s=i.type==='password';i.type=s?'text':'password';b.innerText=s?'🙈':'👁'}
+if(q.get('mode')!=='resetPassword'||!oob){$('m').innerText='Ye link galat ya adhoori hai. Login page par Forgot Password dobara dabayein.'}
+else auth.verifyPasswordResetCode(oob).then(email=>{
+ $('m').innerHTML='Account: <b>'+email.replace(/[<>&]/g,'')+'</b><br>Naya Password likhein. Aapke liye naya Unique Security Code bhi ban jaayega.';
+ $('b').insertAdjacentHTML('beforeend','<label>Naya Password * (kam se kam 6 akshar)</label><div class="pw"><input type="password" id="p"><button type="button" onclick="eye(\'p\',this)">👁</button></div><div class="e" id="e"></div><button class="btn" id="go" onclick="go()">Naya Password & Code Banayein</button>');
+}).catch(()=>{$('m').innerText='Ye link purani ho chuki hai ya pehle use ho chuki hai. Login page par Forgot Password se nayi link mangwayein.'});
+async function go(){const p=$('p').value;if(p.length<6){$('e').innerText='Password kam se kam 6 akshar ka rakhein.';return}
+ $('go').disabled=true;try{const c=newCode();await auth.confirmPasswordReset(oob,await derive(p,c));
+ $('b').innerHTML='<h2>✅ Ho gaya!</h2><p>Aapka naya Unique Security Code:</p><div id="code">'+c+'</div><p>Ise abhi <b>save</b> kar lein — ye sirf ek baar dikhega. Ab Email + naya Password + ye code se Sign In karein.</p><button class="btn" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+c+'\');this.innerText=\'✅ Copy ho gaya\'">📋 Copy karein</button><button class="btn" style="background:#2ecc71" onclick="location.href=\'login.html\'">Sign In par jaayein</button>'}
+ catch(e){$('e').innerText='Nahi ho paaya: '+(e.message||e);$('go').disabled=false}}
+</script></body></html>
