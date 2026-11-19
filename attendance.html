@@ -1,357 +1,612 @@
 <!DOCTYPE html>
-<html lang="hi"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>Attendance Kiosk - Calendar &amp; Selfie</title>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Attendance &amp; Verification Portal</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="auth-gate.js"></script>
-  <script src="cloud-sync.js"></script>
-<script src="staff-core.js"></script>
-<script src="backup.js"></script>
 <link rel="stylesheet" href="theme.css">
 <style>
-:root{--g:#ffcc00;--bg:#070707;--b:#2a2a2a;--ok:#00ff66;--er:#ff3b3b;--m:#999}
+:root{
+  --bg:#0A0F1E;
+  --card:#121A2E;
+  --border:#223052;
+  --ac:#FFB800;
+  --tx:#EAF0FF;
+  --mut:#8D99B8;
+  --ok:#22C55E;
+  --er:#FF6B6B;
+}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
-body{background:var(--bg);color:#fff;max-width:520px;margin:0 auto;padding:12px 10px 60px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
-.pill{background:var(--g);color:#000;font-weight:900;font-size:11px;padding:8px 12px;border-radius:9px;border:0;text-decoration:none;cursor:pointer}
-.pill.d{background:#1c1c1c;color:var(--g);border:1px solid var(--g)}
-.brand{background:radial-gradient(circle at top,#1e1908,#0d0d0d);border:2px solid var(--g);border-radius:16px;padding:14px;text-align:center;margin-bottom:12px}
-.brand b{color:var(--g);font-size:18px;text-transform:uppercase}
-.mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.mode button{background:#161616;color:#bbb;border:1.5px solid var(--b);border-radius:11px;padding:11px;font-weight:800;font-size:13px;cursor:pointer}
-.mode button.on{background:var(--g);color:#000;border-color:var(--g)}
-.hero{border:2px dashed #333;border-radius:18px;padding:14px;background:#0e0e0e}
-.big{width:100%;background:linear-gradient(135deg,#ffcc00,#e6b800);color:#000;font-weight:900;font-size:16px;padding:15px;border:0;border-radius:14px;cursor:pointer}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:99;overflow:auto;padding:12px}.ov.show{display:block}
-.ov h3{color:var(--g);margin:4px 0 8px}
-input,select{width:100%;background:#0b0b0b;border:1.5px solid var(--b);color:#fff;padding:11px;border-radius:8px;font-size:13px;outline:0}
-.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:11px;border:1px solid var(--b);border-radius:9px;margin-top:6px;background:#0f0f0f;font-size:13px}
+body{
+  background:radial-gradient(1200px 500px at 50% -10%,#16224a 0%,#0A0F1E 60%) fixed #0A0F1E;
+  color:var(--tx);
+  max-width:500px;
+  margin:0 auto;
+  padding:12px 10px 70px;
+  min-height:100vh;
+}
+.top-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.btn-gold{
+  background:linear-gradient(135deg,#FFC83D,#FFA800);
+  color:#1a1200;
+  font-weight:900;
+  font-size:12px;
+  padding:9px 14px;
+  border-radius:10px;
+  border:none;
+  text-decoration:none;
+  cursor:pointer;
+}
+.btn-dark{
+  background:#0E1629;
+  color:var(--ac);
+  border:1.5px solid var(--border);
+  font-weight:800;
+  font-size:12px;
+  padding:9px 14px;
+  border-radius:10px;
+  cursor:pointer;
+}
+.brand-box{
+  background:linear-gradient(160deg,#16213f,#101830);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px 14px;
+  text-align:center;
+  margin-bottom:12px;
+  box-shadow:0 10px 26px rgba(0,0,0,.35);
+}
+.brand-box h1{color:#fff;font-size:18px;font-weight:900;line-height:1.3;margin-top:4px}
+.brand-box p{color:var(--mut);font-size:12px;margin-top:4px;line-height:1.4}
+.clock-pill{
+  display:inline-block;
+  margin-top:8px;
+  background:#0B1226;
+  border:1px solid var(--border);
+  color:var(--ac);
+  font-size:11.5px;
+  font-weight:800;
+  padding:4px 12px;
+  border-radius:12px;
+}
+.mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mode-btn{
+  background:#0E1629;
+  color:var(--mut);
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  padding:12px 8px;
+  font-weight:800;
+  font-size:13px;
+  cursor:pointer;
+  text-align:center;
+}
+.mode-btn.active{
+  background:linear-gradient(135deg,#FFC83D,#FFA800);
+  color:#1a1200;
+  border-color:transparent;
+}
+.main-panel{
+  background:linear-gradient(160deg,#16213f,#101830);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:16px 14px;
+  box-shadow:0 12px 30px rgba(0,0,0,.35);
+}
+.btn-mark-main{
+  width:100%;
+  background:linear-gradient(135deg,#FFC83D,#FFA800);
+  color:#1a1200;
+  font-weight:900;
+  font-size:15px;
+  padding:15px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  text-transform:uppercase;
+  margin-top:10px;
+}
+.sub-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.btn-sub{
+  background:#0E1629;
+  color:var(--tx);
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  padding:11px 8px;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  text-align:center;
+}
+.live-box{
+  margin-top:14px;
+  background:#0B1226;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+}
+.live-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.live-header b{color:var(--ac);font-size:13px}
+.stats-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.stat-card{background:#121A2E;border:1px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center}
+.stat-card span{font-size:10px;color:var(--mut);display:block}
+.stat-card b{font-size:19px;font-weight:900;margin-top:2px;display:block}
+.batch-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.batch-card{background:#121A2E;border:1px solid var(--border);border-radius:10px;padding:9px;font-size:11.5px;line-height:1.5}
+.ov{display:none;position:fixed;inset:0;background:rgba(5,9,20,.96);z-index:9999;overflow-y:auto;padding:14px}
+.ov.show{display:block}
+.modal-card{
+  background:linear-gradient(160deg,#16213f,#101830);
+  border:1.5px solid var(--border);
+  border-radius:18px;
+  padding:16px;
+  max-width:460px;
+  margin:14px auto;
+}
+.modal-card h3{color:var(--ac);font-size:16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+input,select{
+  width:100%;
+  background:#0B1226;
+  border:1.5px solid var(--border);
+  color:var(--tx);
+  padding:10px;
+  border-radius:10px;
+  font-size:13px;
+  outline:none;
+}
+.list-row{
+  background:#0B1226;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+  margin-top:7px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+}
 video{width:100%;max-width:340px;border-radius:14px;background:#000;transform:scaleX(-1);display:block;margin:0 auto}
-.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:8px 0}
-.ch{font-size:10px;color:var(--g);text-align:center}
-.cd{min-height:62px;border:1px solid #222;border-radius:8px;padding:3px;font-size:10px;text-align:center;background:#0f0f0f;background-size:cover;background-position:center;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between}
-.cd.p{border:2px solid var(--ok);color:var(--ok)}
-.cd.a{border:2px solid var(--er);color:var(--er);background:#1a0707}
-.date-inspect-card{background:#12182b;border:1.5px solid var(--g);border-radius:12px;padding:12px;margin-top:10px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.cal-head{font-size:10px;color:var(--ac);text-align:center;font-weight:800}
+.cal-day{
+  min-height:56px;
+  background:#0B1226;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:4px 2px;
+  text-align:center;
+  font-size:10.5px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.cal-day.present{border-color:var(--ok);color:var(--ok)}
+.cal-day.absent{border-color:rgba(255,107,107,.45);color:var(--er)}
+.detail-box{
+  margin-top:12px;
+  background:#0B1226;
+  border:1px solid var(--ac);
+  border-radius:12px;
+  padding:12px;
+}
 </style>
 </head>
 <body>
-<div class="top">
-  <a class="pill" href="index.html">← Master Dashboard</a>
-  <button type="button" class="pill d" onclick="openCalendarInspect()">📅 Calendar View</button>
+
+<div class="top-bar">
+  <a class="btn-gold" href="index.html">← Master Dashboard</a>
+  <button type="button" class="btn-dark" onclick="openCalendarModal()">📅 Calendar View</button>
 </div>
 
-<div class="brand">
-  <b>👑 <span id="gym">Attendance &amp; Verification Portal</span></b>
+<div class="brand-box">
+  <div style="font-size:24px">👑</div>
+  <h1 id="portalTitle">ATTENDANCE &amp; VERIFICATION PORTAL</h1>
   <p>Staff &amp; Members Smart Selfie &amp; Calendar Attendance</p>
-  <div style="font-size:11px;color:var(--g)" id="clk"></div>
+  <div class="clock-pill" id="liveClock">19-11-2026 | 06:39 pm</div>
 </div>
 
-<div class="mode">
-  <button type="button" class="on" id="mb_m" onclick="setMode('m')">👥 Members</button>
-  <button type="button" id="mb_s" onclick="setMode('s')">🧑‍💼 Staff (Selfie + Time)</button>
+<div class="mode-switch">
+  <button type="button" class="mode-btn active" id="btnModeMembers" onclick="switchMode('m')">👥 Members</button>
+  <button type="button" class="mode-btn" id="btnModeStaff" onclick="switchMode('s')">🧑‍💼 Staff (Selfie + Time)</button>
 </div>
 
-<div class="hero">
-  <div style="text-align:center;margin-bottom:10px">
-    <div style="font-size:36px">📸</div>
-    <b style="color:var(--g);font-size:17px" id="modeTitle">सदस्य उपस्थिति (Member Attendance)</b>
-    <div style="font-size:11.5px;color:var(--m)" id="modeSub">Selfie + Day, Date, Time रिकॉर्ड होगा</div>
+<div class="main-panel">
+  <div style="text-align:center">
+    <div style="font-size:34px">📸</div>
+    <div style="color:var(--ac);font-weight:900;font-size:16px;margin-top:6px" id="modeHeading">सदस्य उपस्थिति (Member Attendance)</div>
+    <div style="color:var(--mut);font-size:12px;margin-top:3px" id="modeSub">Selfie + Day, Date, Time रिकॉर्ड होगा</div>
   </div>
-  <button type="button" class="big" onclick="openAttendanceList()">👉 MARK ATTENDANCE (WITH SELFIE)</button>
-  
-  <div class="two">
-    <button type="button" class="pill d" onclick="openCalendarInspect()">📅 Calendar Date Wise Dekhein</button>
-    <button type="button" class="pill d" onclick="openSelfieGallery()">🖼️ Date Selfie Gallery</button>
+
+  <button type="button" class="btn-mark-main" onclick="openMarkList()">👉 MARK ATTENDANCE (WITH SELFIE)</button>
+
+  <div class="sub-actions">
+    <button type="button" class="btn-sub" onclick="openCalendarModal()">📅 Calendar Date Wise Dekhein</button>
+    <button type="button" class="btn-sub" onclick="openGalleryModal()">🖼️ Date Selfie Gallery</button>
+  </div>
+
+  <!-- LIVE ATTENDANCE COUNTS (Joined from attendance_22.html logic) -->
+  <div class="live-box">
+    <div class="live-header">
+      <b>📊 Aaj ka Live Count</b>
+      <button type="button" class="btn-dark" style="padding:5px 10px;font-size:11px" onclick="refreshLiveStats()">↻ Refresh</button>
+    </div>
+    <div class="stats-3">
+      <div class="stat-card"><span>Total</span><b id="cntTotal">0</b></div>
+      <div class="stat-card" style="border-color:var(--ok)"><span>Present</span><b id="cntPresent" style="color:var(--ok)">0</b></div>
+      <div class="stat-card" style="border-color:var(--er)"><span>Absent</span><b id="cntAbsent" style="color:var(--er)">0</b></div>
+    </div>
+    <div class="batch-2">
+      <div class="batch-card" onclick="openFilteredList('morning')" style="cursor:pointer">
+        <b style="color:#60a5fa">🌅 Morning Batch</b><br>
+        Total: <b id="mTot">0</b> · Present: <b id="mPre" style="color:var(--ok)">0</b> · Absent: <b id="mAbs" style="color:var(--er)">0</b>
+      </div>
+      <div class="batch-card" onclick="openFilteredList('evening')" style="cursor:pointer">
+        <b style="color:#c084fc">🌙 Evening Batch</b><br>
+        Total: <b id="eTot">0</b> · Present: <b id="ePre" style="color:var(--ok)">0</b> · Absent: <b id="eAbs" style="color:var(--er)">0</b>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+      <button type="button" class="btn-sub" onclick="openFilteredList('absent_all')" style="color:var(--er)">❌ Total Absent Today</button>
+      <button type="button" class="btn-sub" onclick="openFilteredList('all')" style="color:var(--ac)">📋 सभी सूची देखें</button>
+    </div>
   </div>
 </div>
 
-<!-- ATTENDANCE SELECTION LIST -->
-<div class="ov" id="lsOv">
-  <h3 id="lsT">उपस्थिति दर्ज करें</h3>
-  <input id="lsQ" placeholder="🔍 नाम / मोबाइल से खोजें" oninput="renderList()">
-  <div id="lsB" style="margin-top:8px"></div>
-  <button type="button" class="big" style="background:#333;color:#fff;margin-top:10px" onclick="closeOv('lsOv')">✖ बंद</button>
-</div>
-
-<!-- CAMERA CAPTURE -->
-<div class="ov" id="camOv" style="text-align:center">
-  <h3 id="camT">Selfie Verification</h3>
-  <video id="vid" playsinline muted></video>
-  <div id="camMsg" style="margin:8px;font-size:13px;color:#ddd">कैमरे के सामने चेहरा रखें...</div>
-  <button type="button" class="big" onclick="shotNow()">📸 अभी Selfie लें</button>
-  <button type="button" class="big" style="background:#333;color:#fff;margin-top:8px" onclick="closeCam()">✖ रद्द</button>
-</div>
-
-<!-- RESULT SUCCESS MODAL -->
-<div class="ov" id="resOv" style="text-align:center">
-  <div style="margin-top:60px">
-    <img id="resImg" style="width:130px;height:130px;border-radius:50%;object-fit:cover;border:3px solid var(--ok)">
-    <h2 id="resN" style="color:var(--ok);margin:10px 0"></h2>
-    <div id="resM" style="font-size:13px;line-height:1.5"></div>
+<!-- LIST MODAL -->
+<div class="ov" id="listOv">
+  <div class="modal-card">
+    <h3><span id="listModalTitle">उपस्थिति दर्ज करें</span><button type="button" onclick="closeOv('listOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">✖</button></h3>
+    <input id="listSearchInput" placeholder="🔍 नाम या मोबाइल खोजें..." oninput="renderPersonRows()">
+    <div id="listRowsBox" style="margin-top:8px;max-height:60vh;overflow-y:auto"></div>
   </div>
-  <button type="button" class="big" style="margin-top:20px" onclick="closeOv('resOv')">ठीक है (OK)</button>
 </div>
 
-<!-- FULL CALENDAR & DATE INSPECTOR -->
+<!-- CAMERA MODAL -->
+<div class="ov" id="camOv">
+  <div class="modal-card" style="text-align:center">
+    <h3><span id="camTitle">Selfie Verification</span><button type="button" onclick="stopCamera()" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">✖</button></h3>
+    <video id="camVideo" autoplay playsinline muted></video>
+    <div id="camStatusText" style="margin:10px 0;font-size:12.5px;color:var(--mut)">कैमरे के सामने चेहरा रखें...</div>
+    <button type="button" class="btn-mark-main" onclick="captureSelfie()">📸 अभी Selfie लें</button>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="ov" id="resOv">
+  <div class="modal-card" style="text-align:center">
+    <img id="resSelfieImg" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--ok);margin:6px auto;display:block">
+    <h2 id="resPersonName" style="color:var(--ok);font-size:18px;margin-top:8px"></h2>
+    <div id="resMetaInfo" style="font-size:12.5px;line-height:1.6;margin-top:8px;color:var(--tx)"></div>
+    <button type="button" class="btn-mark-main" onclick="closeOv('resOv')">ठीक है (OK)</button>
+  </div>
+</div>
+
+<!-- CALENDAR DATE WISE MODAL -->
 <div class="ov" id="calOv">
-  <h3>📅 Calendar Attendance &amp; Selfie Lookup</h3>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-    <select id="cal_target" onchange="loadCalData()">
-      <option value="s">🧑‍💼 Staff Calendar</option>
-      <option value="m">👥 Members Calendar</option>
-    </select>
-    <input type="month" id="cal_month" onchange="loadCalData()">
+  <div class="modal-card">
+    <h3><span>📅 Calendar Date Wise</span><button type="button" onclick="closeOv('calOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">✖</button></h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <select id="calModeSelect" onchange="drawCalendarGrid()">
+        <option value="s">🧑‍💼 Staff</option>
+        <option value="m">👥 Members</option>
+      </select>
+      <input type="month" id="calMonthInput" onchange="drawCalendarGrid()">
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="detail-box" id="calDetailBox" style="display:none">
+      <div id="calDetailHeader" style="font-weight:900;color:var(--ac);font-size:13px;margin-bottom:8px"></div>
+      <div id="calDetailBody"></div>
+    </div>
   </div>
-
-  <div class="cg" id="calGrid"></div>
-
-  <div id="calSelectedDetailBox" class="date-inspect-card" style="display:none">
-    <h4 id="calDetailTitle" style="color:var(--g);margin-bottom:8px"></h4>
-    <div id="calDetailList"></div>
-  </div>
-
-  <button type="button" class="big" style="background:#333;color:#fff;margin-top:12px" onclick="closeOv('calOv')">✖ बंद</button>
 </div>
 
-<!-- SELFIE GALLERY BY DATE -->
-<div class="ov" id="galleryOv">
-  <h3>🖼️ Date-Wise Selfie Gallery</h3>
-  <label style="font-size:11px;color:var(--g)">कोई भी पुरानी तारीख चुनें:</label>
-  <input type="date" id="galleryDateInput" onchange="loadGalleryForDate()" style="margin-top:4px">
-  <div id="galleryCount" style="font-size:12px;color:var(--ok);margin:8px 0"></div>
-  <div id="galleryPhotosList" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
-  <button type="button" class="big" style="background:#333;color:#fff;margin-top:12px" onclick="closeOv('galleryOv')">✖ बंद</button>
+<!-- DATE SELFIE GALLERY MODAL -->
+<div class="ov" id="galOv">
+  <div class="modal-card">
+    <h3><span>🖼️ Date Selfie Gallery</span><button type="button" onclick="closeOv('galOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">✖</button></h3>
+    <input type="date" id="galDateInput" onchange="drawGalleryByDate()">
+    <div id="galSummaryText" style="font-size:12px;color:var(--ok);font-weight:800;margin:8px 0"></div>
+    <div id="galCardsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+  </div>
 </div>
 
-<canvas id="cv" style="display:none"></canvas>
+<canvas id="snapCanvas" style="display:none"></canvas>
 
 <script>
-const $=i=>document.getElementById(i), LS=localStorage;
-const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const iso=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
-let mode = 'm';
-let stream = null;
-let curTarget = null;
+const $ = id => document.getElementById(id);
+const LS = localStorage;
+const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const isoToday = (d = new Date()) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 
-function setMode(m){
-  mode = m;
-  $('mb_m').classList.toggle('on', m==='m');
-  $('mb_s').classList.toggle('on', m==='s');
-  $('modeTitle').textContent = m==='m' ? 'सदस्य उपस्थिति (Member Attendance)' : 'स्टाफ उपस्थिति (Staff Attendance)';
-  $('modeSub').textContent = m==='m' ? 'Selfie + Day, Date, Time रिकॉर्ड होगा' : 'Staff के लिए Selfie + Day, Date, Time अनिवार्य है';
+let currentMode = "m";
+let currentFilter = "all";
+let activeStream = null;
+let selectedPerson = null;
+
+function closeOv(id) { $(id).classList.remove("show"); }
+
+function switchMode(m) {
+  currentMode = m;
+  $("btnModeMembers").classList.toggle("active", m === "m");
+  $("btnModeStaff").classList.toggle("active", m === "s");
+  $("modeHeading").textContent = m === "m" ? "सदस्य उपस्थिति (Member Attendance)" : "स्टाफ उपस्थिति (Staff Attendance)";
+  $("modeSub").textContent = m === "m" ? "Selfie + Day, Date, Time रिकॉर्ड होगा" : "Staff के लिए Selfie + Day, Date, Time रिकॉर्ड होगा";
+  refreshLiveStats();
 }
 
-function closeOv(i){ $(i).classList.remove('show'); }
-
-function openAttendanceList(){
-  $('lsT').textContent = mode === 'm' ? '👥 सदस्य चुनें (Selfie Verification)' : '🧑‍💼 Staff चुनें (Selfie Verification)';
-  $('lsQ').value = '';
-  renderList();
-  $('lsOv').classList.add('show');
+function getPeoplePool(mode) {
+  if (mode === "s") {
+    return JSON.parse(LS.getItem("bfc_staff_list") || LS.getItem("om_staff_master_v2") || "[]");
+  }
+  const keys = ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"];
+  const map = new Map();
+  keys.forEach(k => {
+    const arr = JSON.parse(LS.getItem(k) || "[]");
+    if (Array.isArray(arr)) {
+      arr.forEach((m, idx) => {
+        if (!m || !m.name) return;
+        const id = String(m.id || m.phone || ("idx_" + idx));
+        if (!map.has(id)) map.set(id, Object.assign({}, m, { id }));
+      });
+    }
+  });
+  return Array.from(map.values());
 }
 
-function getCurPeople(){
-  if(mode === 's'){
-    return window.omStaff ? omStaff.getAll() : JSON.parse(LS.getItem('bfc_staff_list')||'[]');
-  } else {
-    return JSON.parse(LS.getItem('5BFC_MEMBERS') || LS.getItem('bbf_master_records_v4') || '[]');
+function getBatchGroup(p) {
+  const txt = String(p.slot || p.batch || p.shift || "").toLowerCase();
+  if (txt.includes("even") || txt.includes("pm") || txt.includes("शाम")) return "evening";
+  return "morning";
+}
+
+function getDayMap(mode, dateStr) {
+  try {
+    return JSON.parse(LS.getItem("5bfc_att_" + mode + "_" + dateStr) || LS.getItem("om_att_" + mode + "_" + dateStr) || "{}") || {};
+  } catch (e) {
+    return {};
   }
 }
 
-function renderList(){
-  const q = $('lsQ').value.trim().toLowerCase();
-  const list = getCurPeople().filter(p => !q || (p.name && p.name.toLowerCase().includes(q)) || (p.phone && p.phone.includes(q)));
-  const todayStr = iso();
-  const attMap = JSON.parse(LS.getItem('om_att_' + mode + '_' + todayStr) || '{}');
+function refreshLiveStats() {
+  const pool = getPeoplePool(currentMode);
+  const dStr = isoToday();
+  const map = getDayMap(currentMode, dStr);
 
-  $('lsB').innerHTML = list.map(p => {
-    const isMarked = !!attMap[p.id];
+  const presentCount = pool.filter(p => !!map[String(p.id)]).length;
+  const totalCount = pool.length;
+  const absentCount = Math.max(0, totalCount - presentCount);
+
+  $("cntTotal").textContent = totalCount;
+  $("cntPresent").textContent = presentCount;
+  $("cntAbsent").textContent = absentCount;
+
+  const mor = pool.filter(p => getBatchGroup(p) === "morning");
+  const eve = pool.filter(p => getBatchGroup(p) === "evening");
+  const mP = mor.filter(p => !!map[String(p.id)]).length;
+  const eP = eve.filter(p => !!map[String(p.id)]).length;
+
+  $("mTot").textContent = mor.length;
+  $("mPre").textContent = mP;
+  $("mAbs").textContent = Math.max(0, mor.length - mP);
+
+  $("eTot").textContent = eve.length;
+  $("ePre").textContent = eP;
+  $("eAbs").textContent = Math.max(0, eve.length - eP);
+}
+
+function openMarkList() {
+  currentFilter = "all";
+  $("listModalTitle").textContent = currentMode === "m" ? "👥 सदस्य चुनें" : "🧑‍💼 Staff चुनें";
+  $("listSearchInput").value = "";
+  renderPersonRows();
+  $("listOv").classList.add("show");
+}
+
+function openFilteredList(filterType) {
+  currentFilter = filterType;
+  $("listModalTitle").textContent = filterType === "morning" ? "🌅 Morning Batch" :
+    filterType === "evening" ? "🌙 Evening Batch" :
+    filterType === "absent_all" ? "❌ Today Absent" : "📋 सभी सूची";
+  $("listSearchInput").value = "";
+  renderPersonRows();
+  $("listOv").classList.add("show");
+}
+
+function renderPersonRows() {
+  const q = $("listSearchInput").value.trim().toLowerCase();
+  const dStr = isoToday();
+  const map = getDayMap(currentMode, dStr);
+  let list = getPeoplePool(currentMode);
+
+  if (currentFilter === "morning") list = list.filter(p => getBatchGroup(p) === "morning");
+  if (currentFilter === "evening") list = list.filter(p => getBatchGroup(p) === "evening");
+  if (currentFilter === "absent_all") list = list.filter(p => !map[String(p.id)]);
+
+  if (q) {
+    list = list.filter(p => (p.name && p.name.toLowerCase().includes(q)) || (p.phone && String(p.phone).includes(q)));
+  }
+
+  $("listRowsBox").innerHTML = list.length ? list.map(p => {
+    const rec = map[String(p.id)];
     return `
-      <div class="row" style="cursor:pointer" onclick="startSelfieFlow('${p.id}')">
-        <div><b>${esc(p.name)}</b><br><small>${esc(p.phone||'')} ${p.category?'• '+p.category:''}</small></div>
-        <div>${isMarked ? '<span style="color:var(--ok);font-weight:bold">✔ ' + esc(attMap[p.id].time) + '</span>' : '<span style="color:var(--g)">Mark Selfie ➔</span>'}</div>
+      <div class="list-row" onclick="beginPersonSelfie('${esc(String(p.id))}')">
+        <div>
+          <b>${esc(p.name)}</b><br>
+          <small style="color:var(--mut)">${esc(p.phone || "")} ${p.slot ? "· " + esc(p.slot) : ""}</small>
+        </div>
+        <div>${rec ? '<span style="color:var(--ok);font-weight:800;font-size:11px">✔ ' + esc(rec.time || "Present") + '</span>' : '<span style="color:var(--ac);font-weight:800;font-size:11px">Selfie ➔</span>'}</div>
       </div>
     `;
-  }).join('') || '<div class="row"><small>कोई नहीं मिला</small></div>';
+  }).join("") : '<div style="color:var(--mut);text-align:center;padding:16px;font-size:12px">कोई रिकॉर्ड नहीं मिला</div>';
 }
 
-function startSelfieFlow(id){
-  const p = getCurPeople().find(x => String(x.id) === String(id));
-  if(!p) return;
-  curTarget = p;
-  closeOv('lsOv');
-  openCamModal(p.name);
-}
+async function beginPersonSelfie(pid) {
+  const person = getPeoplePool(currentMode).find(x => String(x.id) === String(pid));
+  if (!person) return;
+  selectedPerson = person;
+  closeOv("listOv");
+  $("camTitle").textContent = person.name + " — Selfie";
+  $("camStatusText").textContent = "कैमरे के सामने चेहरा रखें...";
+  $("camOv").classList.add("show");
 
-async function openCamModal(name){
-  $('camT').textContent = name + ' — Selfie Verification';
-  $('camOv').classList.add('show');
   try {
-    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:640}},audio:false});
-    $('vid').srcObject = stream;
-    await $('vid').play();
-  } catch(e){
-    alert('कैमरा permission दें!');
-    closeCam();
-    return;
+    activeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } }, audio: false });
+    $("camVideo").srcObject = activeStream;
+    await $("camVideo").play();
+  } catch (e) {
+    alert("कैमरा permission दें!");
+    stopCamera();
   }
 }
 
-function shotNow(){
-  const v = $('vid'), c = $('cv');
-  c.width = 320; c.height = 320;
-  const ctx = c.getContext('2d');
-  ctx.translate(c.width, 0); ctx.scale(-1, 1);
+function stopCamera() {
+  if (activeStream) {
+    activeStream.getTracks().forEach(t => t.stop());
+    activeStream = null;
+  }
+  closeOv("camOv");
+}
+
+function captureSelfie() {
+  if (!selectedPerson) return;
+  const v = $("camVideo");
+  const c = $("snapCanvas");
+  c.width = 320;
+  c.height = 320;
+  const ctx = c.getContext("2d");
+  ctx.translate(c.width, 0);
+  ctx.scale(-1, 1);
   ctx.drawImage(v, 0, 0, c.width, c.height);
-  const photoBase64 = c.toDataURL('image/jpeg', 0.65);
-  closeCam();
-  saveAttendanceRecord(photoBase64);
-}
+  const photoData = c.toDataURL("image/jpeg", 0.65);
+  stopCamera();
 
-function closeCam(){
-  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
-  $('camOv').classList.remove('show');
-}
-
-function saveAttendanceRecord(photo){
-  if(!curTarget) return;
   const now = new Date();
-  const todayStr = iso(now);
-  const timeStr = now.toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-  const dayStr = now.toLocaleDateString('hi-IN', { weekday: 'long' });
+  const dStr = isoToday(now);
+  const timeStr = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
+  const dayName = now.toLocaleDateString("hi-IN", { weekday: "long" });
 
   const record = {
-    id: curTarget.id,
-    name: curTarget.name,
-    phone: curTarget.phone || '',
-    category: curTarget.category || (mode==='s'?'Staff':'Member'),
-    date: todayStr,
-    day: dayStr,
+    id: String(selectedPerson.id),
+    name: selectedPerson.name,
+    phone: selectedPerson.phone || "",
+    date: dStr,
+    day: dayName,
     time: timeStr,
-    photo: photo,
-    mode: mode,
-    timestamp: now.toISOString()
+    photo: photoData
   };
 
-  const mapKey = 'om_att_' + mode + '_' + todayStr;
-  const map = JSON.parse(LS.getItem(mapKey) || '{}');
-  map[curTarget.id] = record;
-  LS.setItem(mapKey, JSON.stringify(map));
+  const key = "5bfc_att_" + currentMode + "_" + dStr;
+  const map = JSON.parse(LS.getItem(key) || "{}");
+  map[String(selectedPerson.id)] = record;
+  LS.setItem(key, JSON.stringify(map));
 
-  // Save in dedicated persistent selfie key
-  LS.setItem('om_photo_' + mode + '_' + todayStr + '_' + curTarget.id, photo);
-
-  try {
-    if(window.firebase && firebase.apps.length){
-      firebase.firestore().collection('kiosk_attendance').doc(mode + '_' + todayStr + '_' + curTarget.id).set(record, {merge:true}).catch(()=>{});
-    }
-  } catch(e){}
-
-  $('resImg').src = photo;
-  $('resN').textContent = curTarget.name;
-  $('resM').innerHTML = `
-    <b>उपस्थिति दर्ज हो गई!</b><br>
-    📅 तारीख: ${todayStr} (${dayStr})<br>
-    ⏰ समय: ${timeStr}<br>
-    <span style="color:var(--ok)">Selfie के साथ Attendance सेव है।</span>
+  $("resSelfieImg").src = photoData;
+  $("resPersonName").textContent = selectedPerson.name;
+  $("resMetaInfo").innerHTML = `
+    उपस्थिति दर्ज हो गई है!<br>
+    📅 Date: <b>${esc(dStr)}</b> (${esc(dayName)})<br>
+    ⏰ Time: <b>${esc(timeStr)}</b><br>
+    <span style="color:var(--ok)">✔ Selfie सुरक्षित सेव हो गई</span>
   `;
-  $('resOv').classList.add('show');
+  $("resOv").classList.add("show");
+  refreshLiveStats();
 }
 
-function openCalendarInspect(){
-  $('cal_month').value = iso().slice(0, 7);
-  $('calSelectedDetailBox').style.display = 'none';
-  loadCalData();
-  $('calOv').classList.add('show');
+function openCalendarModal() {
+  $("calModeSelect").value = currentMode;
+  $("calMonthInput").value = isoToday().slice(0, 7);
+  $("calDetailBox").style.display = "none";
+  drawCalendarGrid();
+  $("calOv").classList.add("show");
 }
 
-function loadCalData(){
-  const ym = $('cal_month').value || iso().slice(0, 7);
-  const targetMode = $('cal_target').value;
-  const [y, m] = ym.split('-').map(Number);
-  const daysInMonth = new Date(y, m, 0).getDate();
-  const firstDay = new Date(y, m - 1, 1).getDay();
+function drawCalendarGrid() {
+  const mMode = $("calModeSelect").value;
+  const ym = $("calMonthInput").value || isoToday().slice(0, 7);
+  const [y, m] = ym.split("-").map(Number);
+  const totalDays = new Date(y, m, 0).getDate();
+  const startOffset = new Date(y, m - 1, 1).getDay();
 
-  const daysHeader = ['रवि','सोम','मंगल','बुध','गुरु','शुक्र','शनि'].map(d=>`<div class="ch">${d}</div>`).join('');
-  let gridHtml = daysHeader + '<div></div>'.repeat(firstDay);
+  const headers = ["रवि", "सोम", "मंगल", "बुध", "गुरु", "शुक्र", "शनि"].map(h => `<div class="cal-head">${h}</div>`).join("");
+  let html = headers + "<div></div>".repeat(startOffset);
 
-  for(let d=1; d<=daysInMonth; d++){
-    const dStr = ym + '-' + String(d).padStart(2, '0');
-    const map = JSON.parse(LS.getItem('om_att_' + targetMode + '_' + dStr) || '{}');
-    const count = Object.keys(map).length;
-    gridHtml += `
-      <div class="cd ${count>0?'p':'a'}" onclick="inspectDateDetails('${targetMode}', '${dStr}')">
+  for (let d = 1; d <= totalDays; d++) {
+    const dStr = ym + "-" + String(d).padStart(2, "0");
+    const dayMap = getDayMap(mMode, dStr);
+    const count = Object.keys(dayMap).length;
+    html += `
+      <div class="cal-day ${count > 0 ? "present" : "absent"}" onclick="showDateInspection('${mMode}', '${dStr}')">
         <b>${d}</b>
-        <span>${count>0 ? count+' Present' : '0'}</span>
+        <span>${count > 0 ? count + " Present" : "—"}</span>
       </div>
     `;
   }
-  $('calGrid').innerHTML = gridHtml;
+  $("calGrid").innerHTML = html;
 }
 
-function inspectDateDetails(targetMode, dStr){
-  const map = JSON.parse(LS.getItem('om_att_' + targetMode + '_' + dStr) || '{}');
-  const ids = Object.keys(map);
-  const dObj = new Date(dStr + 'T00:00:00');
-  const dayLabel = dObj.toLocaleDateString('hi-IN', { weekday: 'long' });
+function showDateInspection(mMode, dStr) {
+  const dayMap = getDayMap(mMode, dStr);
+  const entries = Object.values(dayMap);
+  const dObj = new Date(dStr + "T00:00:00");
+  const dayLabel = dObj.toLocaleDateString("hi-IN", { weekday: "long" });
 
-  $('calSelectedDetailBox').style.display = 'block';
-  $('calDetailTitle').textContent = '📅 ' + dStr + ' (' + dayLabel + ') — Present: ' + ids.length;
+  $("calDetailBox").style.display = "block";
+  $("calDetailHeader").textContent = `📅 ${dStr} (${dayLabel}) · Present: ${entries.length}`;
 
-  if(!ids.length){
-    $('calDetailList').innerHTML = '<div style="color:#aaa;font-size:12px">इस तारीख को कोई उपस्थिति या Selfie दर्ज नहीं हुई।</div>';
+  if (!entries.length) {
+    $("calDetailBody").innerHTML = '<div style="font-size:12px;color:var(--mut)">इस तारीख को कोई उपस्थिति या Selfie दर्ज नहीं हुई।</div>';
     return;
   }
 
-  $('calDetailList').innerHTML = ids.map(id => {
-    const r = map[id];
-    const pImg = r.photo || LS.getItem('om_photo_' + targetMode + '_' + dStr + '_' + id) || '';
-    return `
-      <div class="row">
-        <div style="display:flex;align-items:center;gap:10px">
-          ${pImg ? `<img src="${pImg}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--ok)">` : '<span style="font-size:20px">📸</span>'}
-          <div>
-            <b>${esc(r.name)}</b><br>
-            <small style="color:var(--ok)">⏰ Time: ${esc(r.time)} | ${esc(r.day||dayLabel)}</small><br>
-            <small style="color:#aaa">${pImg ? '✔ Selfie लगी है' : '✖ Selfie नहीं मिली'}</small>
-          </div>
-        </div>
+  $("calDetailBody").innerHTML = entries.map(r => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      ${r.photo ? `<img src="${r.photo}" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--ok)">` : '<span style="font-size:20px">📸</span>'}
+      <div style="font-size:12px">
+        <b>${esc(r.name)}</b><br>
+        <small style="color:var(--ok)">⏰ Time: ${esc(r.time || "")} · ${esc(r.day || dayLabel)}</small><br>
+        <small style="color:var(--mut)">${r.photo ? "✔ Selfie लगी है" : "✖ Selfie नहीं"}</small>
       </div>
-    `;
-  }).join('');
-}
-
-function openSelfieGallery(){
-  $('galleryDateInput').value = iso();
-  loadGalleryForDate();
-  $('galleryOv').classList.add('show');
-}
-
-function loadGalleryForDate(){
-  const dStr = $('galleryDateInput').value || iso();
-  const mapM = JSON.parse(LS.getItem('om_att_m_' + dStr) || '{}');
-  const mapS = JSON.parse(LS.getItem('om_att_s_' + dStr) || '{}');
-  const all = [...Object.values(mapM), ...Object.values(mapS)];
-
-  $('galleryCount').textContent = dStr + ' को कुल ' + all.length + ' लोगों की Selfie लगी';
-  $('galleryPhotosList').innerHTML = all.length ? all.map(r => `
-    <div style="background:#16161a;border:1px solid #333;border-radius:10px;padding:8px;text-align:center">
-      <img src="${r.photo||''}" style="width:100%;height:130px;object-fit:cover;border-radius:8px">
-      <b style="color:var(--g);display:block;margin-top:4px;font-size:12px">${esc(r.name)}</b>
-      <small style="color:#aaa;font-size:10px">⏰ ${esc(r.time)} | ${esc(r.day)}</small>
     </div>
-  `).join('') : '<div style="grid-column:span 2;color:#aaa;text-align:center;padding:20px">इस तारीख की कोई Selfie नहीं मिली</div>';
+  `).join("");
 }
 
-window.addEventListener('DOMContentLoaded', ()=>{
-  setInterval(()=>{
+function openGalleryModal() {
+  $("galDateInput").value = isoToday();
+  drawGalleryByDate();
+  $("galOv").classList.add("show");
+}
+
+function drawGalleryByDate() {
+  const dStr = $("galDateInput").value || isoToday();
+  const mMap = getDayMap("m", dStr);
+  const sMap = getDayMap("s", dStr);
+  const all = [...Object.values(mMap), ...Object.values(sMap)];
+
+  $("galSummaryText").textContent = `${dStr} को कुल ${all.length} लोगों की Selfie दर्ज है`;
+  $("galCardsGrid").innerHTML = all.length ? all.map(r => `
+    <div style="background:#0B1226;border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center">
+      ${r.photo ? `<img src="${r.photo}" style="width:100%;height:125px;object-fit:cover;border-radius:8px">` : '<div style="height:125px;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:11px">No Photo</div>'}
+      <b style="display:block;margin-top:5px;font-size:12px;color:var(--ac)">${esc(r.name)}</b>
+      <small style="color:var(--mut);font-size:10px">⏰ ${esc(r.time || "")} · ${esc(r.day || "")}</small>
+    </div>
+  `).join("") : '<div style="grid-column:span 2;text-align:center;color:var(--mut);padding:18px;font-size:12px">इस तारीख की कोई Selfie नहीं मिली</div>';
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  const org = JSON.parse(LS.getItem("om_org_profile") || "{}");
+  if (org.gymName || org.orgName) {
+    $("portalTitle").textContent = String(org.gymName || org.orgName).toUpperCase() + " - ATTENDANCE";
+  }
+  setInterval(() => {
     const n = new Date();
-    $('clk').textContent = '📅 ' + iso(n).split('-').reverse().join('-') + ' | ⏰ ' + n.toLocaleTimeString('hi-IN', {hour:'2-digit',minute:'2-digit',hour12:true});
+    $("liveClock").textContent = "📅 " + isoToday(n).split("-").reverse().join("-") + " | ⏰ " + n.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
   }, 1000);
+  refreshLiveStats();
 });
 </script>
 </body>
