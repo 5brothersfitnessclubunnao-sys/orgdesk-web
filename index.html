@@ -710,23 +710,37 @@ function changePin(){
   alert('✅ PIN बदल गया');
 }
 
-function viewSecCode(){
+function getActiveSecurityRecord(){
   const org = J('om_org_profile', {}) || {};
   const lp = J('om_last_org_profile', {}) || {};
   let em = '';
   try { em = ((firebase.auth().currentUser || {}).email) || org.email || lp.email || ''; } catch (e) {}
   const gymName = org.orgName || org.gymName || lp.orgName || lp.gymName || 'Gym';
   const phone = org.phone || lp.phone || '';
-  const lic = org.licenseKey || lp.licenseKey || 'TRIAL-ACTIVE';
-  const rec = typeof omEnsureUserSecurityRecord === 'function' ? omEnsureUserSecurityRecord(em || ('admin_' + (org.orgId || 'org') + '@gym.local'), gymName, phone, lic) : null;
+  const lic = org.licenseKey || lp.licenseKey || 'TRIAL-7DAY';
+  const directCode = org.securityCode || lp.securityCode || '';
+  let rec = null;
+  if (typeof omGetSecurityRecordStrict === 'function') {
+    rec = omGetSecurityRecordStrict(em) || omGetSecurityRecordStrict(phone);
+  }
+  if (!rec && typeof omEnsureUserSecurityRecord === 'function') {
+    const keyId = em || (phone ? (String(phone).replace(/\D/g, '').slice(-10) + '@orgdesk.phone') : ('admin_' + (org.orgId || lp.orgId || 'org') + '@orgdesk.local'));
+    rec = omEnsureUserSecurityRecord(keyId, gymName, phone, lic, directCode ? { forcedCode: directCode } : {});
+  }
+  if (rec && directCode && !rec.code) rec.code = directCode;
+  return rec;
+}
+
+function viewSecCode(){
+  const rec = getActiveSecurityRecord();
   $('secBody').innerHTML = rec
     ? [
-        ['🛡️ Unique Security Code', rec.code],
-        ['🏢 Gym Name', rec.gymName || gymName],
-        ['📞 Mobile', rec.phone || phone || '-'],
-        ['📧 Email', rec.email || '-'],
-        ['🔑 License Key', rec.licenseKey || lic],
-        ['♻️ Plan Resets Used', (rec.resetCountInCycle || 0) + ' / 3 (Non-Deletable)']
+        ['Unique Security Code', rec.code],
+        ['Gym Name', rec.gymName || '-'],
+        ['Mobile', rec.phone || '-'],
+        ['Email', rec.email || '-'],
+        ['License Key', rec.licenseKey || 'TRIAL-7DAY'],
+        ['Plan Resets Used', (rec.resetCountInCycle || 0) + ' / 3 (Non-Deletable)']
       ].map(x => `<div class="row"><small>${x[0]}</small><b style="color:var(--ac)">${esc(x[1])}</b></div>`).join('')
     : '<div class="row"><small>Security record unavailable</small></div>';
   $('admSecSearchIn').value = '';
@@ -746,148 +760,6 @@ function renderAdmSecSearch(){
   ).join('') || '<div class="row"><small>Koi matching gym/license/email nahi mila</small></div>';
 }
 
-/* ----- Side AI Assistant (Command + Voice) ----- */
-let aiUnlockedSession = false;
-function toggleAiDrawer(forceState){
-  const d = $('aiDrawer');
-  if(!d) return;
-  const next = (typeof forceState === 'boolean') ? forceState : !d.classList.contains('show');
-  if(next && !aiUnlockedSession){
-    if(typeof askPin === 'function'){
-      askPin(()=>{ aiUnlockedSession = true; d.classList.add('show'); setTimeout(()=>{ const inp=$('aiPromptInput'); if(inp) inp.focus(); }, 80); });
-      return;
-    }
-    aiUnlockedSession = true;
-  }
-  d.classList.toggle('show', next);
-  if(next) setTimeout(()=>{ const inp=$('aiPromptInput'); if(inp) inp.focus(); }, 80);
-}
-
-function startAiVoice(){
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ alert('इस ब्राउज़र में Voice Recognition उपलब्ध नहीं है — कृपया टाइप करें।'); return; }
-  const rec = new SR();
-  rec.lang = 'hi-IN';
-  rec.interimResults = false;
-  rec.onresult = function(ev){
-    const txt = (ev.results && ev.results[0] && ev.results[0][0] && ev.results[0][0].transcript) || '';
-    if(txt){
-      $('aiPromptInput').value = txt;
-      runAiQuery(txt);
-    }
-  };
-  rec.onerror = function(){ alert('आवाज़ स्पष्ट नहीं आ पाई, कृपया दोबारा बोलें या टाइप करें।'); };
-  rec.start();
-}
-
-function collectOrgMembersSafe(){
-  const mp = new Map();
-  MK.forEach(k=>{
-    J(k,[]).forEach(r=>{
-      if(r && r.name && mine(r)){
-        const key = String(r.id || r.phone || r.name).trim();
-        mp.set(key, Object.assign(mp.get(key) || {}, r));
-      }
-    });
-  });
-  return Array.from(mp.values());
-}
-
-function appendAiBubble(html){
-  const b = $('aiChatBody');
-  if(!b) return;
-  const div = document.createElement('div');
-  div.className = 'ai-ans';
-  div.innerHTML = html;
-  b.appendChild(div);
-  b.scrollTop = b.scrollHeight;
-}
-
-function runAiQuery(customText){
-  const inp = $('aiPromptInput');
-  const raw = (typeof customText === 'string' ? customText : (inp ? inp.value : '')).trim();
-  if(!raw) return;
-  if(inp && typeof customText !== 'string') inp.value = '';
-
-  appendAiBubble('<div style="color:var(--ac);font-weight:800">आप: ' + esc(raw) + '</div>');
-
-  const q = raw.toLowerCase();
-  const members = collectOrgMembersSafe();
-  const staffList = J('bfc_staff_list',[]).filter(mine);
-  const gym = activeGymInfo();
-
-  const dueMembers = members.filter(m => {
-    const d = Number(m.dueAmount || m.dueFee || 0) || 0;
-    const vt = String(m.validTill || m.expiryDate || '').slice(0,10);
-    const expired = /^\d{4}-\d{2}-\d{2}$/.test(vt) && vt < iso();
-    return d > 0 || expired;
-  });
-
-  if(/bakaya|due|बकाया|फीस/.test(q) && !/salary|सैलरी/.test(q)){
-    const totDue = dueMembers.reduce((t,m)=>t+(Number(m.dueAmount||m.dueFee||0)||0),0);
-    const items = dueMembers.slice(0,8).map(m=>`<div class="ai-item"><b>${esc(m.name)}</b> • <small>${esc(m.phone||'-')}</small><br>Due: <b style="color:#ff6b6b">₹${Number(m.dueAmount||m.dueFee||0)||0}</b> ${m.validTill ? '• Till: '+esc(m.validTill) : ''}</div>`).join('');
-    appendAiBubble(`<b>${esc(gym.name)} — बकाया रिपोर्ट:</b><br>कुल बकाया सदस्य: <b>${dueMembers.length}</b> • कुल बकाया: <b style="color:#ff6b6b">₹${totDue}</b>${items || '<div class="ai-item">कोई बकाया रिकॉर्ड नहीं मिला।</div>'}`);
-    return;
-  }
-
-  if(/salary|सैलरी|staff|स्टाफ|penalty|पेनल्टी/.test(q)){
-    const ym = iso().slice(0,7);
-    const store = getStaffPayrollStore();
-    const rows = staffList.map(s=>{
-      const savedM = (store[s.id] && store[s.id][ym]) || {};
-      const b = calcSalaryBreakdown(s, ym, savedM);
-      return `<div class="ai-item"><b>${esc(s.name)}</b> (${esc(s.role||'Staff')})<br>Present: <b>${b.presentDays}d</b> | Late: <b>${b.lateDays}d</b> | Penalty: <b style="color:#ff6b6b">₹${Number(b.penalty||0).toFixed(2)}</b><br>Net Salary: <b style="color:var(--ok)">₹${Number(b.netPayable||0).toFixed(2)}</b></div>`;
-    }).join('');
-    appendAiBubble(`<b>Staff सैलरी व पेनल्टी (${esc(ym)}):</b><br>कुल Staff: <b>${staffList.length}</b>${rows || '<div class="ai-item">कोई Staff रिकॉर्ड नहीं मिला।</div>'}`);
-    return;
-  }
-
-  if(/attend|हाज़िरी|उपस्थिति|aaj|आज|summary|सारांश/.test(q)){
-    const tDay = iso();
-    const mAtt = J('5bfc_attendance_' + tDay, {}) || {};
-    const sAtt = J('5bfc_staff_attendance_' + tDay, {}) || {};
-    const mPresent = Object.keys(mAtt).filter(k=>mAtt[k] && mAtt[k].isReal!==false).length;
-    const sPresent = Object.keys(sAtt).filter(k=>sAtt[k] && sAtt[k].isReal!==false).length;
-    appendAiBubble(`<b>${esc(gym.name)} — ${esc(tDay)} Summary:</b><br>• कुल Members: <b>${members.length}</b> (आज Present: <b style="color:var(--ok)">${mPresent}</b>)<br>• कुल Staff: <b>${staffList.length}</b> (आज Present: <b style="color:var(--ok)">${sPresent}</b>)<br>• बकाया/अवधि-पूर्ण Members: <b style="color:#ff6b6b">${dueMembers.length}</b>`);
-    return;
-  }
-
-  const hits = members.filter(m => (String(m.name||'') + ' ' + String(m.phone||'')).toLowerCase().includes(q)).slice(0,5);
-  if(hits.length){
-    appendAiBubble(`<b>मिलते-जुलते सदस्य (${hits.length}):</b>` + hits.map(m=>`<div class="ai-item"><b>${esc(m.name)}</b> • <small>${esc(m.phone||'-')}</small><br>Plan: <b>${esc(m.planName||m.type||'-')}</b> • Due: <b>₹${Number(m.dueAmount||0)||0}</b></div>`).join(''));
-  } else {
-    appendAiBubble(`मुझे <b>"${esc(raw)}"</b> के लिए सीधा रिकॉर्ड नहीं मिला। आप <i>"बकाया"</i>, <i>"स्टाफ सैलरी"</i>, <i>"आज का सारांश"</i> या किसी सदस्य का नाम/फ़ोन पूछ सकते हैं।`);
-  }
-}
-
-/* ----- Fee Collection ----- */
-let FEE=[];
-async function loadFee(){
-  const mp=new Map();
-  MK.forEach(k=>J(k,[]).forEach(r=>{if(r&&r.id&&r.name)mp.set(String(r.id),Object.assign(mp.get(String(r.id))||{},r))}));
-  const d=fdb();if(d){for(const c of['members','admissions']){try{(await d.collection(c).get()).forEach(x=>{const r=Object.assign({id:x.id},x.data());if(r.name)mp.set(String(r.id),Object.assign({},r,mp.get(String(r.id))||{}))})}catch(e){}}}
-  FEE=[...mp.values()];renderFee();
-}
-const dueOf=m=>Number(m.dueAmount)||0;
-function openFee(){askPin(()=>{$('feeOv').classList.add('show');$('feeQ').value='';FEE=[];renderFee();loadFee()})}
-function renderFee(){
-  const q=($('feeQ').value||'').toLowerCase().trim(),all=FEE.filter(m=>dueOf(m)>0).sort((a,b)=>dueOf(b)-dueOf(a));
-  const L=all.filter(m=>!q||(m.name+' '+(m.phone||'')).toLowerCase().includes(q));
-  $('feeSum').innerHTML='बकाया वाले: <b>'+all.length+'</b> • कुल बकाया: <b style="color:#ff6b6b">₹'+all.reduce((t,m)=>t+dueOf(m),0)+'</b>';
-  $('feeList').innerHTML=L.map(m=>`<div class="row"><span><b>${esc(m.name)}</b><br><small>${esc(m.phone||'')} • ${esc(m.planName||'')}</small></span><span style="text-align:right"><span class="due">₹${dueOf(m)}</span><br><button class="upgrade-btn" style="margin-top:4px" onclick="payFee('${esc(m.id)}')">Payment मिला</button></span></div>`).join('')||'<div class="row"><small>कोई बकाया नहीं 🎉</small></div>';
-}
-async function payFee(id){
-  const m=FEE.find(x=>String(x.id)===String(id));if(!m)return;const d0=dueOf(m);
-  const a=Number(prompt(m.name+' — कितने ₹ मिले? (बकाया ₹'+d0+')',d0));if(!a||a<=0)return;
-  const paid=Math.min(a,d0),patch={amount:(Number(m.amount)||0)+paid,dueAmount:d0-paid,status:d0-paid?'Pending':'Paid',manualStatus:d0-paid?'Pending':'Paid',lastPaid:iso()};
-  MK.forEach(k=>{const arr=J(k,[]);let ch=false;arr.forEach(r=>{if(r&&String(r.id)===String(id)){Object.assign(r,patch);ch=true}});if(ch)LS.setItem(k,JSON.stringify(arr))});
-  Object.assign(m,patch);const lg=J('om_fee_log',[]);lg.push({id,name:m.name,amount:paid,date:iso()});LS.setItem('om_fee_log',JSON.stringify(lg));
-  const d=fdb();if(d){for(const c of['members','admissions']){try{await d.collection(c).doc(String(id)).set(patch,{merge:true})}catch(e){}}}
-  renderFee();
-}
-
-
-/* ----- License view ----- */
 function viewLic(){
   const s=omLicenseStatus(),o=s.org,nm={30:'1 Month',90:'3 Months',180:'6 Months',365:'12 Months'};
   const f=d=>d?new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'-';
@@ -975,6 +847,32 @@ window.addEventListener('DOMContentLoaded',()=>{
     <button type="button" class="btn-sm" style="background:var(--ac);color:#000;padding:9px 12px" onclick="runAiQuery()">भेजें</button>
   </div>
 </div>
+
+
+<script>
+(function installSafeBackGuard(){
+  try {
+    if (window.history && window.history.pushState) {
+      window.history.pushState({ omDash: 1 }, '', window.location.href);
+      window.addEventListener('popstate', function () {
+        var openOvs = Array.prototype.slice.call(document.querySelectorAll('.ov.show'));
+        if (openOvs.length) {
+          openOvs[openOvs.length - 1].classList.remove('show');
+          window.history.pushState({ omDash: 1 }, '', window.location.href);
+          return;
+        }
+        var ai = document.getElementById('aiDrawer');
+        if (ai && ai.classList.contains('show')) {
+          ai.classList.remove('show');
+          window.history.pushState({ omDash: 1 }, '', window.location.href);
+          return;
+        }
+        window.history.pushState({ omDash: 1 }, '', window.location.href);
+      });
+    }
+  } catch (e) {}
+})();
+</script>
 
 </body>
 </html>

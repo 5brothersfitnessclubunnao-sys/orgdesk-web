@@ -159,11 +159,38 @@
     let uid = ""; try { uid = (firebase.auth().currentUser || {}).uid || ""; } catch (e) {}
     const orgId = uid || localStorage.getItem("bfc_org_id") || ("org" + Date.now());
 
+
+window.addEventListener("DOMContentLoaded", function () {
+  try {
+    const cur = JSON.parse(localStorage.getItem("om_org_profile") || localStorage.getItem("om_last_org_profile") || "{}") || {};
+    if (cur.gymName || cur.orgName) document.getElementById("setupGymName").value = cur.gymName || cur.orgName || "";
+    if (cur.ownerName) document.getElementById("setupOwnerName").value = cur.ownerName || "";
+    if (cur.phone) document.getElementById("setupPhone").value = cur.phone || "";
+    if (cur.address) document.getElementById("setupAddress").value = cur.address || "";
+    if (cur.upiId) document.getElementById("setupUpiId").value = cur.upiId || "";
+  } catch (e) {}
+});
+
+    const secCodeNow = (prev && prev.securityCode) || (typeof omEnsureUserSecurityRecord === "function" ? (omEnsureUserSecurityRecord(prev.email || uid, gymData.gymName, gymData.phone, prev.licenseKey) || {}).code : "") || "";
+    const mergedProfile = Object.assign({}, prev, gymData, {
+      orgId: orgId,
+      uid: uid || prev.uid || orgId,
+      orgName: gymData.gymName,
+      securityCode: secCodeNow || prev.securityCode || "",
+      createdAt: prev.createdAt || new Date().toISOString()
+    });
+    if (typeof omEnsureUserSecurityRecord === "function") {
+      omEnsureUserSecurityRecord(mergedProfile.email || uid, gymData.gymName, gymData.phone, mergedProfile.licenseKey || "TRIAL-7DAY", { forcedCode: mergedProfile.securityCode || undefined, uid: mergedProfile.uid, orgId: orgId });
+    }
+    try {
+      localStorage.setItem("om_org_profile_saved_" + orgId, JSON.stringify(mergedProfile));
+      localStorage.setItem("om_last_org_profile", JSON.stringify(mergedProfile));
+    } catch (e) {}
     // 1. Save locally first (Guarantees instant success)
     localStorage.setItem("bfc_org_profile", JSON.stringify(gymData));
     // index / login / license-gate isi profile ko padhte hain (trial 7 din yahin se shuru)
     let prev = {}; try { prev = JSON.parse(localStorage.getItem("om_org_profile") || "{}"); } catch (e) {}
-    localStorage.setItem("om_org_profile", JSON.stringify(Object.assign({}, prev, gymData, { orgId: orgId, orgName: gymData.gymName, createdAt: prev.createdAt || new Date().toISOString() })));
+    localStorage.setItem("om_org_profile", JSON.stringify(mergedProfile));
     localStorage.setItem("bfc_org_id", orgId);
 
     try {
