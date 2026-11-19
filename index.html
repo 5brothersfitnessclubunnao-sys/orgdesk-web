@@ -9,7 +9,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="auth-gate.js"></script>
   <script src="license-gate.js"></script>
-  <script src="backup.js"></script>
   <link rel="stylesheet" href="theme.css">
   <style>
     :root{--bg:#0b0b0d;--card:#16161a;--border:#2c2c35;--ac:#ffcc00;--tx:#f0f0f5;--mut:#9999a8;--ok:#2ecc71;--er:#ff4d4d}
@@ -22,7 +21,7 @@
     .header-card h2{color:var(--ac);margin:0;font-size:22px;text-transform:uppercase;font-weight:900}
     .header-card p{font-size:12px;color:var(--mut);margin:4px 0 0}
     .grid-menu{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-    .menu-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;text-decoration:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .menu-card{background:var(--card);border:2px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;text-decoration:none;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font:inherit}
     .menu-card:active{border-color:var(--ac)}
     .menu-card .icon{font-size:32px;margin-bottom:6px}.menu-card .title{font-size:14px;font-weight:bold}.menu-card .sub{font-size:10.5px;color:var(--mut);margin-top:3px}
     .menu-card.full{grid-column:span 2;background:linear-gradient(135deg,#ffcc00,#e6b800);color:#000;border:0;font-weight:900}
@@ -32,7 +31,7 @@
     .upgrade-banner{background:linear-gradient(135deg,#1f1f23,#141418);border:1.5px solid var(--ac);border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
     .upgrade-banner b{color:var(--ac);font-size:13px;display:block;margin-bottom:2px}.upgrade-banner span{color:var(--mut);font-size:10.5px}
     .btn-upgrade{background:var(--ac);color:#000;font-weight:900;font-size:11.5px;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
-    .btn-logout-screen{background:#1e0d0d;color:var(--er);border:1.5px solid var(--er);padding:7px 12px;border-radius:8px;font-weight:900;font-size:11.5px;cursor:pointer;display:flex;align-items:center;gap:4px}
+    .btn-logout-screen{background:#1e0d0d;color:var(--er);border:1.5px solid var(--er);padding:7px 12px;border-radius:8px;font-weight:900;font-size:11.5px;cursor:pointer}
     .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;overflow-y:auto;padding:12px}.ov.show{display:block}
     .bx{background:var(--card);border:2px solid var(--ac);border-radius:16px;padding:16px;max-width:480px;margin:15px auto}
     .bx h3{color:var(--ac);margin:0 0 10px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
@@ -49,7 +48,7 @@
 <div class="dash-container">
   <div class="top-action-bar">
     <div class="top-badge">MASTER APP DASHBOARD</div>
-    <button type="button" class="btn-logout-screen" onclick="omLogoutNow()">🚪 Logout</button>
+    <button type="button" class="btn-logout-screen" onclick="omLogoutNow()">Logout</button>
   </div>
 
   <div class="header-card">
@@ -58,13 +57,13 @@
   </div>
 
   <div class="upgrade-banner">
-    <div><b id="trialTitle">⚡ 7-Day Free Trial Active</b><span id="trialDaysText"></span></div>
+    <div><b id="trialTitle">7-Day Free Trial Active</b><span id="trialDaysText"></span></div>
     <button type="button" class="btn-upgrade" onclick="openUpgradeModal()">Upgrade Plan</button>
   </div>
 
   <div class="grid2" style="margin-bottom:12px">
-    <button type="button" class="btn g" style="margin-top:0;font-size:11.5px;padding:9px" onclick="askPin(viewLic)">🔑 License Key</button>
-    <button type="button" class="btn g" style="margin-top:0;font-size:11.5px;padding:9px" onclick="askPin(viewSec)">🔐 Security Code</button>
+    <button type="button" class="btn g" style="margin-top:0;font-size:11.5px;padding:9px" onclick="askPin(viewLic)">License Key</button>
+    <button type="button" class="btn g" style="margin-top:0;font-size:11.5px;padding:9px" onclick="askPin(viewSec)">Security Code</button>
   </div>
 
   <div class="grid-menu">
@@ -76,12 +75,12 @@
     <a href="attendance.html" class="menu-card">
       <div class="icon">📋</div>
       <div class="title">Attendance</div>
-      <div class="sub">Staff &amp; Member tracking (Selfie + Calendar)</div>
+      <div class="sub">Staff &amp; Member tracking</div>
     </a>
-    <a href="pay.html" class="menu-card pay-fees" style="text-decoration:none">
+    <a href="pay.html" class="menu-card pay-fees">
       <div class="icon">💳</div>
-      <div class="title">Pay Fees (फीस पोर्टल)</div>
-      <div class="sub">Live search, collect dues, receipts &amp; WhatsApp</div>
+      <div class="title">Pay Fees</div>
+      <div class="sub">Collect member dues &amp; generate receipt</div>
     </a>
     <button type="button" class="menu-card" onclick="openImp()">
       <div class="icon">📤</div>
@@ -91,308 +90,320 @@
     <button type="button" class="menu-card" onclick="openAdmin()">
       <div class="icon">🔐</div>
       <div class="title">Admin Portal</div>
-      <div class="sub">Staff, Salary Ledger &amp; PIN controls</div>
+      <div class="sub">Staff &amp; PIN controls</div>
     </button>
   </div>
 </div>
 
 <!-- PIN OVERLAY -->
-<div class="ov" id="pinOv"><div class="bx"><h3>🔐 Admin PIN दर्ज करें</h3>
-  <input id="pinIn" type="password" inputmode="numeric" placeholder="Admin PIN (डिफ़ॉल्ट: 1234)" onkeydown="if(event.key==='Enter')pinOk()">
-  <div id="pinMsg" style="color:#ff6b6b;font-size:12px;margin-top:6px;min-height:14px"></div>
-  <button type="button" class="btn" onclick="pinOk()">OK</button>
-  <button type="button" class="btn g" onclick="closeOv('pinOv')">रद्द करें</button>
-</div></div>
+<div class="ov" id="pinOv">
+  <div class="bx">
+    <h3>Admin PIN darj karein</h3>
+    <input id="pinIn" type="password" inputmode="numeric" placeholder="Admin PIN (default: 1234)" onkeydown="if(event.key==='Enter')pinOk()">
+    <div id="pinMsg" style="color:#ff6b6b;font-size:12px;margin-top:6px;min-height:14px"></div>
+    <button type="button" class="btn" onclick="pinOk()">OK</button>
+    <button type="button" class="btn g" onclick="closeOv('pinOv')">Cancel</button>
+  </div>
+</div>
 
 <!-- UPLOAD GYM DATA OVERLAY -->
-<div class="ov" id="impOv"><div class="bx">
-  <h3>📤 Upload Gym Members Data <button type="button" onclick="closeOv('impOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">✖</button></h3>
-  <div style="font-size:11.5px;color:var(--mut);line-height:1.5">
-    1) Template डाउनलोड करें → अपने पुराने मेंबर्स का डेटा भरें<br>
-    2) CSV UTF-8 फॉर्मेट में सेव करके यहाँ अपलोड करें।
-  </div>
-  <button type="button" class="btn g" onclick="dlTemplate()">⬇ Template (CSV) Download</button>
-  
-  <input type="file" id="impF" accept=".csv,text/csv" onchange="pickCsv(this)" style="margin-top:10px">
-  <div id="impInfo" style="font-size:12px;margin-top:8px;font-weight:bold;min-height:16px"></div>
-  
-  <div style="margin-top:10px;background:#0d0d12;border:1px solid #333;border-radius:8px;padding:8px">
-    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+<div class="ov" id="impOv">
+  <div class="bx">
+    <h3>Upload Gym Members CSV <button type="button" onclick="closeOv('impOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">X</button></h3>
+    <div style="font-size:11.5px;color:var(--mut);line-height:1.5">
+      1) Template download karein -&gt; members bharein<br>
+      2) CSV file yahan chunein aur Import dabayein.
+    </div>
+    <button type="button" class="btn g" onclick="dlTemplate()">Template (CSV) Download</button>
+    <input type="file" id="impF" accept=".csv,text/csv" onchange="pickCsv(this)" style="margin-top:10px">
+    <div id="impInfo" style="font-size:12px;margin-top:8px;font-weight:bold;min-height:16px"></div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;margin-top:8px;cursor:pointer">
       <input type="radio" name="impMode" value="add" checked style="width:auto">
-      <span>➕ पुराने डेटा के साथ जोड़ें (Add)</span>
+      <span>Purane data ke saath jodein (Add)</span>
     </label>
-    <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-top:6px">
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;margin-top:6px;cursor:pointer">
       <input type="radio" name="impMode" value="replace" style="width:auto">
-      <span style="color:#ff7b6b">🗑 पुराना सारा डेटा हटाकर सिर्फ यही रखें (Replace)</span>
+      <span style="color:#ff7b6b">Purana data hata kar sirf yahi rakhein (Replace)</span>
     </label>
+    <button type="button" class="btn" id="impBtn" onclick="doImport()">Import karein</button>
+    <button type="button" class="btn g" onclick="closeOv('impOv')">Band</button>
   </div>
-  
-  <button type="button" class="btn" id="impBtn" onclick="doImport()">✅ Import करें</button>
-  <button type="button" class="btn g" onclick="closeOv('impOv')">✖ बंद</button>
-</div></div>
+</div>
 
 <!-- ADMIN PORTAL OVERLAY -->
-<div class="ov" id="admOv"><div class="bx">
-  <h3>🔐 Admin &amp; Staff Portal <button type="button" onclick="closeOv('admOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">✖</button></h3>
-  
-  <div class="sec-tag">🧑‍💼 नया Staff Onboarding (Complete Profile)</div>
-  <div class="grid2">
-    <div><label style="font-size:11px">पूरा नाम *</label><input id="sn" placeholder="Staff Name"></div>
-    <div><label style="font-size:11px">मोबाइल नंबर *</label><input id="sp" placeholder="10 Digit Mobile" inputmode="tel"></div>
+<div class="ov" id="admOv">
+  <div class="bx">
+    <h3>Admin Portal <button type="button" onclick="closeOv('admOv')" style="background:none;border:0;color:var(--ac);font-size:18px;cursor:pointer">X</button></h3>
+    <div class="sec-tag">Staff jodein</div>
+    <input id="sn" placeholder="Staff ka naam">
+    <input id="sp" placeholder="Mobile (optional)" inputmode="tel">
+    <input id="sj" type="date">
+    <button type="button" class="btn" onclick="addStaff()">Save Staff</button>
+
+    <div class="sec-tag">Staff list</div>
+    <div id="stList"></div>
+
+    <div class="sec-tag">PIN badlein</div>
+    <input id="np" type="password" inputmode="numeric" placeholder="Naya PIN (4 se 8 ank)">
+    <button type="button" class="btn g" onclick="changePin()">PIN Save karein</button>
+
+    <div class="sec-tag">Account</div>
+    <button type="button" class="btn red" onclick="omLogoutNow()">Logout</button>
+    <button type="button" class="btn g" onclick="closeOv('admOv')">Band</button>
   </div>
-  <div class="grid2" style="margin-top:4px">
-    <div><label style="font-size:11px">जॉइनिंग तिथि</label><input id="sj" type="date"></div>
-    <div><label style="font-size:11px">मासिक वेतन (₹)</label><input id="ss" type="number" placeholder="10000"></div>
-  </div>
-  <button type="button" class="btn" onclick="addStaff()">💾 Save Staff</button>
+</div>
 
-  <div class="sec-tag">📋 Active Staff List</div>
-  <div id="stList"></div>
-
-  <div class="sec-tag">🔑 PIN बदलें</div>
-  <input id="np" type="password" inputmode="numeric" placeholder="नया PIN (कम से कम 4 अंक)">
-  <button type="button" class="btn g" onclick="changePin()">PIN Save करें</button>
-
-  <div class="sec-tag">💾 Backup</div>
-  <div id="bkInfo" style="font-size:11px;color:var(--mut)"></div>
-  <button type="button" class="btn g" onclick="runBk()">💾 अभी Backup लें + Download</button>
-
-  <div class="sec-tag">🚪 Account Control</div>
-  <button type="button" class="btn red" onclick="omLogoutNow()">🚪 Logout (लॉग आउट करें)</button>
-  <button type="button" class="btn g" onclick="closeOv('admOv')">✖ बंद</button>
-</div></div>
-
-<!-- LICENSE & SECURITY POPUPS -->
-<div class="ov" id="licOv"><div class="bx"><h3>🔑 Your License Key</h3><div id="licBody"></div><button type="button" class="btn g" onclick="closeOv('licOv')">✖ बंद</button></div></div>
-<div class="ov" id="secOv"><div class="bx"><h3>🔐 Your Unique Security Code</h3><div id="secBody" style="text-align:center"></div><button type="button" class="btn g" onclick="closeOv('secOv')">✖ बंद</button></div></div>
+<!-- LICENSE & SECURITY -->
+<div class="ov" id="licOv"><div class="bx"><h3>Your License Key</h3><div id="licBody"></div><button type="button" class="btn g" onclick="closeOv('licOv')">Band</button></div></div>
+<div class="ov" id="secOv"><div class="bx"><h3>Your Security Code</h3><div id="secBody" style="text-align:center"></div><button type="button" class="btn g" onclick="closeOv('secOv')">Band</button></div></div>
 
 <script>
-const $=i=>document.getElementById(i), LS=localStorage;
-const J=(k,d)=>{try{const v=JSON.parse(LS.getItem(k));return v==null?d:v}catch(e){return d}};
-const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const iso=()=>new Date().toISOString().slice(0,10);
-const fdb=()=>{try{return firebase.apps.length?firebase.firestore():null}catch(e){return null}};
+const $ = i => document.getElementById(i);
+const LS = localStorage;
+const J = (k, d) => { try { const v = JSON.parse(LS.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
+const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+const iso = () => new Date().toISOString().slice(0, 10);
+const fdb = () => { try { return (window.firebase && firebase.apps && firebase.apps.length) ? firebase.firestore() : null; } catch (e) { return null; } };
 
-let pinNext=null;
-const getPin=()=>LS.getItem('om_admin_pin')||'1234';
+let pinNext = null;
+const getPin = () => LS.getItem("om_admin_pin") || "1234";
 
-function askPin(cb){
-  pinNext=cb;
-  $('pinIn').value='';
-  $('pinMsg').textContent='';
-  $('pinOv').classList.add('show');
-  setTimeout(()=>$('pinIn').focus(),80);
+function askPin(cb) {
+  pinNext = cb;
+  $("pinIn").value = "";
+  $("pinMsg").textContent = "";
+  $("pinOv").classList.add("show");
+  setTimeout(() => $("pinIn").focus(), 60);
 }
 
-function pinOk(){
-  var val = $('pinIn').value.trim();
-  if(val === getPin()){
-    $('pinOv').classList.remove('show');
-    var fn = pinNext;
+function pinOk() {
+  if ($("pinIn").value.trim() === getPin()) {
+    $("pinOv").classList.remove("show");
+    const fn = pinNext;
     pinNext = null;
-    if(typeof fn === 'function') fn();
+    if (typeof fn === "function") fn();
   } else {
-    $('pinMsg').textContent='❌ गलत PIN (डिफ़ॉल्ट 1234 है)';
+    $("pinMsg").textContent = "Galat PIN (default 1234 hai)";
   }
 }
 
-function closeOv(i){ $(i).classList.remove('show'); }
+function closeOv(id) {
+  $(id).classList.remove("show");
+}
 
-/* ----- ADMIN PORTAL ----- */
-let STAFF=[];
-function openAdmin(){
-  askPin(()=>{
-    STAFF = J('bfc_staff_list', []);
-    renderStaff();
-    $('sj').value = iso();
-    $('bkInfo').textContent = 'Last backup: ' + (window.omLastBackupText ? omLastBackupText() : 'N/A');
-    $('admOv').classList.add('show');
+let STAFF = [];
+function openAdmin() {
+  askPin(() => {
+    try {
+      STAFF = J("bfc_staff_list", []);
+      if (!$("sj").value) $("sj").value = iso();
+      renderStaff();
+      $("admOv").classList.add("show");
+    } catch (e) {
+      alert("Admin open error: " + e.message);
+    }
   });
 }
 
-function renderStaff(){
-  $('stList').innerHTML = STAFF.map((s,i)=>`
-    <div class="row">
-      <span><b>${esc(s.name)}</b><br><small>${esc(s.phone||'')} ${s.salary?'• ₹'+s.salary+'/mo':''}</small></span>
-      <button type="button" class="btn red" style="padding:4px 8px;font-size:11px;margin:0;width:auto" onclick="delStaff(${i})">🗑</button>
-    </div>
-  `).join('') || '<div class="row"><small>अभी कोई staff नहीं है</small></div>';
+function renderStaff() {
+  $("stList").innerHTML = STAFF.map((s, i) =>
+    '<div class="row"><span><b>' + esc(s.name) + '</b><br><small>' + esc(s.phone || "") + "</small></span>" +
+    '<button type="button" class="btn red" style="padding:4px 8px;font-size:11px;margin:0;width:auto" onclick="delStaff(' + i + ')">Delete</button></div>'
+  ).join("") || '<div class="row"><small>Abhi koi staff nahi</small></div>';
 }
 
-async function addStaff(){
-  const n = $('sn').value.trim();
-  if(!n){ alert('नाम लिखें'); return; }
-  const s = {
-    id: 'stf' + Date.now(),
-    name: n,
-    phone: $('sp').value.trim(),
-    joinDate: $('sj').value || iso(),
-    salary: Number($('ss').value) || 0
-  };
+async function addStaff() {
+  const n = $("sn").value.trim();
+  if (!n) { alert("Naam bharein"); return; }
+  const s = { id: "stf" + Date.now(), name: n, phone: $("sp").value.trim(), joinDate: $("sj").value || iso() };
   STAFF.push(s);
-  LS.setItem('bfc_staff_list', JSON.stringify(STAFF));
-  try{ const d=fdb(); if(d) await d.collection('staff').doc(s.id).set(s); }catch(e){}
-  $('sn').value = ''; $('sp').value = ''; $('ss').value = '';
+  LS.setItem("bfc_staff_list", JSON.stringify(STAFF));
+  try { const d = fdb(); if (d) await d.collection("staff").doc(s.id).set(s); } catch (e) {}
+  $("sn").value = ""; $("sp").value = "";
   renderStaff();
-  alert('✅ Staff सेव हो गया');
+  alert("Staff save ho gaya");
 }
 
-async function delStaff(i){
+async function delStaff(i) {
   const s = STAFF[i];
-  if(!confirm(s.name + ' को हटाएं?')) return;
+  if (!s || !confirm(s.name + " hatayein?")) return;
   STAFF.splice(i, 1);
-  LS.setItem('bfc_staff_list', JSON.stringify(STAFF));
-  try{ const d=fdb(); if(d) await d.collection('staff').doc(String(s.id)).delete(); }catch(e){}
+  LS.setItem("bfc_staff_list", JSON.stringify(STAFF));
+  try { const d = fdb(); if (d) await d.collection("staff").doc(String(s.id)).delete(); } catch (e) {}
   renderStaff();
 }
 
-function changePin(){
-  const p = $('np').value.trim();
-  if(!/^\d{4,8}$/.test(p)){ alert('PIN 4 से 8 अंक का होना चाहिए'); return; }
-  LS.setItem('om_admin_pin', p);
-  $('np').value = '';
-  alert('✅ PIN बदल गया');
+function changePin() {
+  const p = $("np").value.trim();
+  if (!/^\d{4,8}$/.test(p)) { alert("PIN 4 se 8 ank ka hona chahiye"); return; }
+  LS.setItem("om_admin_pin", p);
+  $("np").value = "";
+  alert("PIN badal gaya");
 }
 
-/* ----- CSV DATA UPLOAD ENGINE ----- */
-const COLS={
-  name:['name','naam','नाम','fullname','membername','पूरानाम'],
-  parentName:['fathername','father','parent','guardian','husbandname','पिताकानाम','पिता'],
-  phone:['mobile','phone','mobileno','mobilenumber','contact','मोबाइल','फोन'],
-  planBase:['fees','fee','planfee','फीस'],
-  amount:['paid','amountpaid','जमा'],
-  dueAmount:['due','pending','dueamount','बकाया'],
-  joinDate:['joindate','joining','doj','dateofjoining','प्रवेशतिथि']
+const COLS = {
+  name: ["name", "naam", "fullname", "membername"],
+  parentName: ["fathername", "father", "parent", "guardian", "husbandname"],
+  phone: ["mobile", "phone", "mobileno", "mobilenumber", "contact"],
+  planBase: ["fees", "fee", "planfee"],
+  amount: ["paid", "amountpaid"],
+  dueAmount: ["due", "pending", "dueamount"],
+  joinDate: ["joindate", "joining", "doj", "dateofjoining"]
 };
-const TPL=['Name','Father Name','Mobile','Join Date','Fees','Paid','Due'];
-const nk=s=>String(s||'').toLowerCase().replace(/[^a-z0-9ऀ-ॿ]/g,'');
+const TPL = ["Name", "Father Name", "Mobile", "Join Date", "Fees", "Paid", "Due"];
+const nk = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
-function csvParse(t,d){
-  const rows=[];let r=[],c='',q=false;t=t.replace(/^﻿/,'');
-  for(let i=0;i<t.length;i++){
-    const ch=t[i];
-    if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}
-    else if(ch==='"')q=true;else if(ch===d){r.push(c);c=''}
-    else if(ch==='
-'||ch==='
-'){if(ch==='
-'&&t[i+1]==='
-')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch;
+function csvParse(t, d) {
+  const rows = [];
+  let r = [], c = "", q = false;
+  t = t.replace(/^\ufeff/, "");
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (q) {
+      if (ch === '"') { if (t[i + 1] === '"') { c += '"'; i++; } else q = false; }
+      else c += ch;
+    } else if (ch === '"') { q = true; }
+    else if (ch === d) { r.push(c); c = ""; }
+    else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && t[i + 1] === "\n") i++;
+      r.push(c); c = "";
+      if (r.some(x => x.trim())) rows.push(r);
+      r = [];
+    } else { c += ch; }
   }
-  r.push(c);if(r.some(x=>x.trim()))rows.push(r);return rows;
-}
-function normDate(v){
-  v=String(v||'').trim();let m=v.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);
-  if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
-  return /^\d{4}-\d{2}-\d{2}/.test(v)?v.slice(0,10):'';
+  r.push(c);
+  if (r.some(x => x.trim())) rows.push(r);
+  return rows;
 }
 
-let IMP=[];
-function dlTemplate(){
-  const b=new Blob(['﻿'+TPL.join(',')+'
-Rahul Singh,Santosh Singh,9876543210,2026-11-01,500,500,0
-'],{type:'text/csv'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Gym_Members_Template.csv';a.click();
+function normDate(v) {
+  v = String(v || "").trim();
+  const m = v.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);
+  if (m) return m[3] + "-" + m[2].padStart(2, "0") + "-" + m[1].padStart(2, "0");
+  return /^\d{4}-\d{2}-\d{2}/.test(v) ? v.slice(0, 10) : "";
 }
 
-function openImp(){
-  askPin(()=>{
-    IMP=[];$('impInfo').textContent='';$('impF').value='';
-    $('impOv').classList.add('show');
+let IMP = [];
+function dlTemplate() {
+  const b = new Blob(["\ufeff" + TPL.join(",") + "\nRahul Singh,Santosh Singh,9876543210,2026-11-01,500,500,0\n"], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(b);
+  a.download = "Gym_Members_Template.csv";
+  a.click();
+}
+
+function openImp() {
+  askPin(() => {
+    try {
+      IMP = [];
+      $("impInfo").textContent = "";
+      $("impF").value = "";
+      $("impOv").classList.add("show");
+    } catch (e) {
+      alert("Upload modal error: " + e.message);
+    }
   });
 }
 
-async function pickCsv(inp){
-  const f=inp.files[0];IMP=[];if(!f)return;
-  const t=await f.text(),l1=t.split('
-')[0],d=l1.split(';').length>l1.split(',').length?';':',';
-  const rows=csvParse(t,d);
-  if(rows.length<2){$('impInfo').style.color='var(--er)';$('impInfo').textContent='❌ File खाली है';return}
-  const H=rows[0].map(nk),ix={};
-  Object.keys(COLS).forEach(k=>{ix[k]=H.findIndex(h=>COLS[k].includes(h))});
-  if(ix.name<0){$('impInfo').style.color='var(--er)';$('impInfo').textContent='❌ "Name" कॉलम नहीं मिला';return}
-  
-  const seen=new Set(),now=Date.now();
-  rows.slice(1).forEach((r,i)=>{
-    const g=k=>ix[k]>=0?String(r[ix[k]]||'').trim():'';
-    const name=g('name');if(!name)return;
-    const ph=g('phone').replace(/\D/g,'').slice(-10);
-    if(ph&&seen.has(ph))return;if(ph)seen.add(ph);
-    const fee=Number(g('planBase'))||500,paid=Number(g('amount'))||fee,due=g('dueAmount')!==''?Number(g('dueAmount'))||0:Math.max(0,fee-paid);
-    const jd=normDate(g('joinDate'))||iso();
+async function pickCsv(inp) {
+  const f = inp.files && inp.files[0];
+  IMP = [];
+  if (!f) return;
+  const t = await f.text();
+  const l1 = t.split(/\r?\n/)[0] || "";
+  const d = l1.split(";").length > l1.split(",").length ? ";" : ",";
+  const rows = csvParse(t, d);
+  if (rows.length < 2) { $("impInfo").style.color = "var(--er)"; $("impInfo").textContent = "File khali hai"; return; }
+  const H = rows[0].map(nk);
+  const ix = {};
+  Object.keys(COLS).forEach(k => { ix[k] = H.findIndex(h => COLS[k].includes(h)); });
+  if (ix.name < 0) { $("impInfo").style.color = "var(--er)"; $("impInfo").textContent = "Name column nahi mila"; return; }
+
+  const seen = new Set(), now = Date.now();
+  rows.slice(1).forEach((r, i) => {
+    const g = k => ix[k] >= 0 ? String(r[ix[k]] || "").trim() : "";
+    const name = g("name");
+    if (!name) return;
+    const ph = g("phone").replace(/\D/g, "").slice(-10);
+    if (ph && seen.has(ph)) return;
+    if (ph) seen.add(ph);
+    const fee = Number(g("planBase")) || 500;
+    const paid = Number(g("amount")) || fee;
+    const due = g("dueAmount") !== "" ? (Number(g("dueAmount")) || 0) : Math.max(0, fee - paid);
+    const jd = normDate(g("joinDate")) || iso();
     IMP.push({
-      id:'m'+now+'_'+i,
-      name:name,
-      parentName:g('parentName')||'-',
-      father:g('parentName')||'-',
-      phone:ph,
-      joinDate:jd,
-      lastPaid:jd,
-      planBase:fee,
-      amount:paid,
-      dueAmount:due,
-      status:due>0?'Pending':'Paid',
-      manualStatus:due>0?'Pending':'Paid',
-      payMode:'Cash'
+      id: "m" + now + "_" + i,
+      name: name,
+      parentName: g("parentName") || "-",
+      father: g("parentName") || "-",
+      phone: ph,
+      joinDate: jd,
+      lastPaid: jd,
+      planBase: fee,
+      amount: paid,
+      dueAmount: due,
+      status: due > 0 ? "Pending" : "Paid",
+      manualStatus: due > 0 ? "Pending" : "Paid",
+      payMode: "Cash"
     });
   });
-  
-  $('impInfo').style.color='var(--ok)';
-  $('impInfo').textContent=IMP.length?'✅ '+IMP.length+' members मिले — Import करने के लिए नीचे हरा बटन दबाएं':'❌ कोई member नहीं मिला';
+
+  $("impInfo").style.color = "var(--ok)";
+  $("impInfo").textContent = IMP.length ? (IMP.length + " members mile") : "Koi member nahi mila";
 }
 
-async function doImport(){
-  if(!IMP.length){ alert('पहले CSV file चुनें'); return; }
-  const rep = document.querySelector('input[name=impMode]:checked').value === 'replace';
-  if(!confirm((rep?'⚠️ पुराना डेटा हटकर ':'') + IMP.length + ' नए members जोड़े जाएँगे। जारी रखें?')) return;
-  
-  $('impBtn').disabled=true; $('impBtn').textContent='Import हो रहा है…';
-  const keys = ['5BFC_MEMBERS', 'bbf_master_records_v4', '5bfc_admissions'];
-  keys.forEach(k => {
+async function doImport() {
+  if (!IMP.length) { alert("Pehle CSV file chunein"); return; }
+  const rep = document.querySelector("input[name=impMode]:checked").value === "replace";
+  $("impBtn").disabled = true;
+  $("impBtn").textContent = "Import ho raha hai...";
+
+  ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"].forEach(k => {
     const old = rep ? [] : J(k, []);
-    const phoneSet = new Set(old.map(m=>m.phone).filter(Boolean));
+    const phoneSet = new Set(old.map(m => m.phone).filter(Boolean));
     const merged = old.concat(IMP.filter(m => !m.phone || !phoneSet.has(m.phone)));
     LS.setItem(k, JSON.stringify(merged));
   });
 
   try {
     const d = fdb();
-    if(d){
+    if (d) {
       let b = d.batch(), count = 0;
-      for(const m of IMP){
-        b.set(d.collection('members').doc(m.id), m, {merge:true});
-        if(++count % 400 === 0){ await b.commit(); b = d.batch(); }
+      for (const m of IMP) {
+        b.set(d.collection("members").doc(m.id), m, { merge: true });
+        if (++count % 400 === 0) { await b.commit(); b = d.batch(); }
       }
       await b.commit();
     }
-  } catch(e){}
+  } catch (e) {}
 
-  alert('🎉 ' + IMP.length + ' members सफलतापूर्वक आ गए! अब Pay Fees और Attendance में सबके नाम दिखेंगे।');
-  IMP=[]; $('impInfo').textContent=''; $('impF').value=''; $('impBtn').disabled=false; $('impBtn').textContent='✅ Import करें';
-  closeOv('impOv');
+  alert(IMP.length + " members import ho gaye!");
+  IMP = [];
+  $("impInfo").textContent = "";
+  $("impF").value = "";
+  $("impBtn").disabled = false;
+  $("impBtn").textContent = "Import karein";
+  closeOv("impOv");
 }
 
-function viewLic(){
+function viewLic() {
   const s = window.omLicenseStatus ? omLicenseStatus() : {};
-  $('licBody').innerHTML = `<div class="row"><small>License Key:</small><b>${esc(s.licenseKey||'7-Day Free Trial')}</b></div>`;
-  $('licOv').classList.add('show');
-}
-function viewSec(){
-  const o = J('om_org_profile',{});
-  $('secBody').innerHTML = `<div style="font-size:22px;color:var(--ac);font-weight:900;letter-spacing:2px;padding:12px">${esc(o.securityCode||'SEC-6ETB-4TWE-AZET')}</div>`;
-  $('secOv').classList.add('show');
-}
-function runBk(){
-  if(window.omBackupDownload) omBackupDownload();
-  else alert('Backup script ready.');
+  $("licBody").innerHTML = '<div class="row"><small>License Key:</small><b>' + esc(s.licenseKey || "7-Day Free Trial") + "</b></div>";
+  $("licOv").classList.add("show");
 }
 
-window.addEventListener('DOMContentLoaded', ()=>{
-  const o = J('om_org_profile',{});
-  if(o.gymName || o.orgName) $('orgTitle').textContent = (o.gymName || o.orgName).toUpperCase();
-  if(window.omLicenseStatus){
+function viewSec() {
+  const o = J("om_org_profile", {});
+  $("secBody").innerHTML = '<div style="font-size:20px;color:var(--ac);font-weight:900;padding:12px">' + esc(o.securityCode || "SEC-S32D-PW4Z") + "</div>";
+  $("secOv").classList.add("show");
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  const o = J("om_org_profile", {});
+  if (o.gymName || o.orgName) $("orgTitle").textContent = String(o.gymName || o.orgName).toUpperCase();
+  if (window.omLicenseStatus) {
     const s = omLicenseStatus();
-    $('trialDaysText').textContent = s.licenseValid ? (s.licenseDays + ' Days remaining') : (s.trialDays + ' Days left in trial');
+    $("trialDaysText").textContent = s.licenseValid ? (s.licenseDays + " Days remaining") : (s.trialDays + " Days left in trial");
   }
 });
 </script>
