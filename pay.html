@@ -177,7 +177,6 @@ th{color:#ffcc00;}
 .receipt-stamp-img{width:70px;height:70px;object-fit:cover;border-radius:50%;opacity:.85;}
 .discount-locked { opacity: 0.55; pointer-events: none; }
 </style>
-<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -696,13 +695,24 @@ const GYM_DEFAULT = {
 let GYM = Object.assign({}, GYM_DEFAULT);
 try {
   var _org = JSON.parse(localStorage.getItem("om_org_profile") || "{}") || {};
-  var _orgName = _org.orgName || _org.gymName;
-  GYM = Object.assign({}, GYM_DEFAULT, _orgName ? { name: _orgName } : {}, JSON.parse(localStorage.getItem("bfc_gym_profile") || "{}"));
+  var _orgName = _org.orgName || _org.gymName, _ov = {};
+  if (_orgName) {
+    _ov.name = _orgName;
+    if (_org.address) _ov.address = _org.address;
+    if (_org.phone) { _ov.phone = _org.phone; _ov.ownerWa = "91" + String(_org.phone).replace(/\D/g, "").slice(-10); }
+    if (_org.ownerName) _ov.ownerName = _org.ownerName;
+    if (_org.upiId) _ov.upiId = _org.upiId;
+    if (_orgName !== GYM_DEFAULT.name) {   // doosre gym par 5 Brother's ka stamp/tagline na aaye
+      _ov.tagline = ""; _ov.signImg = ""; _ov.stampImg = "";
+      _ov.billPrefix = (_orgName.split(/\s+/).map(function (w) { return w[0] || ""; }).join("").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 5)) || "BILL";
+    }
+  }
+  GYM = Object.assign({}, GYM_DEFAULT, _ov, JSON.parse(localStorage.getItem("bfc_gym_profile") || "{}"));
 } catch (e) {}
 function applyGymProfile() {
   try {
     document.querySelectorAll("[data-gym]").forEach(function (el) { el.textContent = GYM[el.getAttribute("data-gym")] || ""; });
-    document.querySelectorAll("img[data-gym-img]").forEach(function (im) { var u = GYM[im.getAttribute("data-gym-img")]; if (u && im.getAttribute("src") !== u) im.src = u; });
+    document.querySelectorAll("img[data-gym-img]").forEach(function (im) { var u = GYM[im.getAttribute("data-gym-img")]; if (u) { im.style.display = ""; if (im.getAttribute("src") !== u) im.src = u; } else { im.style.display = "none"; } });
     document.title = GYM.name + " - Fees Portal";
   } catch (e) {}
 }

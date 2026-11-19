@@ -3,231 +3,292 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Universal SaaS Portal - Login &amp; Authentication</title>
+  <title>Universal SaaS Portal - Login</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="security-core.js"></script>
-  <script src="license-gate.js"></script>
-  <script src="auth-gate.js" data-mode="ondemand"></script>
   <style>
-    :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; --err: #e74c3c; }
-    body { background: var(--bg); color: var(--tx); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-    .auth-box { max-width: 420px; width: 100%; background: var(--card); border: 2px solid var(--ac); border-radius: 18px; padding: 24px; box-sizing: border-box; box-shadow: 0 0 30px rgba(255,204,0,0.15); }
-    .header { text-align: center; margin-bottom: 20px; border-bottom: 1.5px dashed var(--border); padding-bottom: 12px; }
-    .header h2 { color: var(--ac); margin: 0; font-size: 20px; font-weight: 900; }
-    .header p { color: var(--mut); font-size: 11.5px; margin: 4px 0 0; }
-    .field { margin-bottom: 14px; }
-    label { display: block; font-size: 11px; color: #ccc; margin-bottom: 4px; font-weight: 600; }
-    input { width: 100%; background: #0b0b0d; border: 1.5px solid var(--border); color: #fff; padding: 12px; border-radius: 8px; font-size: 13px; box-sizing: border-box; outline: none; }
-    input:focus { border-color: var(--ac); }
-    .btn-main { width: 100%; background: var(--ac); color: #000; font-weight: 900; padding: 13px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; margin-top: 10px; }
-    .links { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 11.5px; }
-    .links a { color: var(--ac); text-decoration: none; cursor: pointer; }
-    .links a:hover { text-decoration: underline; }
-    .error-msg { background: rgba(231, 76, 60, 0.15); border: 1px solid var(--err); color: var(--err); padding: 8px; border-radius: 6px; font-size: 11.5px; margin-bottom: 12px; display: none; text-align: center; }
-    .success-msg { background: rgba(46, 204, 113, 0.15); border: 1px solid var(--ok); color: var(--ok); padding: 8px; border-radius: 6px; font-size: 11.5px; margin-bottom: 12px; display: none; text-align: center; }
-  </style><style>
-.seg{display:flex;gap:6px;margin-bottom:14px}.seg button{flex:1;background:#0b0b0d;color:var(--mut);border:1.5px solid var(--border);border-radius:8px;padding:10px;font-weight:700;font-size:13px;cursor:pointer}.seg button.on{background:var(--ac);color:#000;border-color:var(--ac)}
-.pw{position:relative}.pw input{padding-right:50px}.pw button{position:absolute;right:4px;top:50%;transform:translateY(-50%);background:transparent;border:0;font-size:19px;padding:8px 10px;cursor:pointer;color:var(--ac)}
-.note{font-size:11px;color:var(--mut);line-height:1.45;margin:-6px 0 12px;display:none}.tabs{display:flex;margin-bottom:16px;border-bottom:1.5px solid var(--border)}.tabs a{flex:1;text-align:center;padding:10px;font-weight:800;color:var(--mut);cursor:pointer;border-bottom:3px solid transparent}.tabs a.on{color:var(--ac);border-color:var(--ac)}
-#codeModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:9999;justify-content:center;align-items:center;padding:16px}#codeModal .bx{background:var(--card);border:2px solid var(--ok);border-radius:16px;max-width:400px;width:100%;padding:20px;text-align:center}
-#codeShow{font-size:22px;font-weight:900;color:var(--ac);letter-spacing:1.5px;margin:10px 0;word-break:break-all}.sec{background:#0b0b0d;border:1px dashed var(--ac)}
-</style>
+    :root { --bg:#0b0b0d; --card:#16161a; --border:#2c2c35; --ac:#ffcc00; --tx:#f0f0f5; --mut:#9999a8; --ok:#2ecc71; --err:#e74c3c; }
+    *{box-sizing:border-box}
+    body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh}
+    .auth-box{max-width:420px;width:100%;background:var(--card);border:2px solid var(--ac);border-radius:22px;padding:24px;box-shadow:0 0 30px rgba(255,204,0,.15)}
+    .header{text-align:center;margin-bottom:16px;border-bottom:1.5px dashed var(--border);padding-bottom:12px}
+    .badge{background:var(--ac);color:#000;font-size:9px;font-weight:900;padding:2px 10px;border-radius:10px;display:inline-block;margin-bottom:6px}
+    .header h2{color:var(--ac);margin:0;font-size:22px;font-weight:900}
+    .header p{color:var(--mut);font-size:12px;margin:4px 0 0}
+    .tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px}
+    .tab{flex:1;text-align:center;padding:10px;font-weight:800;font-size:16px;color:var(--mut);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+    .tab.on{color:var(--ac);border-bottom-color:var(--ac)}
+    .seg{display:flex;gap:8px;margin-bottom:12px}
+    .seg button{flex:1;background:#0b0b0d;border:2px solid var(--border);color:#fff;font-weight:800;font-size:13px;padding:11px 4px;border-radius:12px;cursor:pointer}
+    .seg button.on{background:var(--ac);color:#000;border-color:var(--ac)}
+    .hint{font-size:11px;color:var(--mut);margin:-4px 0 12px;line-height:1.5}
+    .field{margin-bottom:12px}
+    label{display:block;font-size:12px;color:#ddd;margin-bottom:5px;font-weight:700}
+    .wrap{position:relative}
+    input{width:100%;background:#0b0b0d;border:1.5px solid var(--border);color:#fff;padding:13px;border-radius:12px;font-size:14px;outline:none}
+    input:focus{border-color:var(--ac)}
+    .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;font-size:20px;cursor:pointer;color:#fff}
+    .code-in{border:1.5px dashed var(--ac);font-weight:900;letter-spacing:1.5px;text-transform:uppercase}
+    .btn-main{width:100%;background:var(--ac);color:#000;font-weight:900;padding:14px;border:none;border-radius:12px;cursor:pointer;font-size:16px;margin-top:6px}
+    .btn-main:disabled{opacity:.6}
+    .links{display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:12.5px}
+    .links a{color:var(--ac);cursor:pointer}
+    .msg{padding:9px;border-radius:8px;font-size:12px;margin-bottom:12px;display:none;text-align:center;line-height:1.5}
+    .err{background:rgba(231,76,60,.15);border:1px solid var(--err);color:#ff7b6b}
+    .okm{background:rgba(46,204,113,.15);border:1px solid var(--ok);color:var(--ok)}
+    .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:99;justify-content:center;align-items:flex-start;padding:16px;overflow-y:auto}
+    .ov.show{display:flex}
+    .cbox{background:var(--card);border:2px solid var(--ac);border-radius:18px;padding:20px;max-width:420px;width:100%;margin:auto;text-align:center}
+    .code-big{background:#0b0b0d;border:2px dashed var(--ac);border-radius:12px;color:var(--ac);font-size:20px;font-weight:900;letter-spacing:2px;padding:14px 6px;margin:12px 0;word-break:break-all}
+    .btn2{width:100%;background:#222;color:#fff;border:1.5px solid var(--border);padding:11px;border-radius:10px;font-weight:800;cursor:pointer;margin-top:8px;font-size:13px}
+  </style>
 </head>
 <body>
 <div class="auth-box">
   <div class="header">
-    <div style="background:var(--ac);color:#000;font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px;">UNIVERSAL SAAS PORTAL</div>
+    <div class="badge">UNIVERSAL SAAS PORTAL</div>
     <h2 id="formTitle">Welcome Back</h2>
-    <p id="formSub">Email/Mobile + Password + Unique Security Code se Sign In karein</p>
+    <p id="formSub">नीचे के 3 तरीकों में से कोई भी एक चुनकर Sign In करें</p>
   </div>
-  <div class="tabs"><a id="tabIn" class="on" onclick="setMode('in')">Sign In</a><a id="tabUp" onclick="setMode('up')">Sign Up</a></div>
-  <div id="errorAlert" class="error-msg"></div>
-  <div id="successAlert" class="success-msg"></div>
-  <form id="authForm" onsubmit="handleAuthSubmit(event)">
-    <div class="field" id="nameField" style="display:none;">
+
+  <div class="tabs">
+    <div class="tab on" id="tabIn" onclick="setMode('in')">Sign In</div>
+    <div class="tab" id="tabUp" onclick="setMode('up')">Sign Up</div>
+  </div>
+
+  <div id="errBox" class="msg err"></div>
+  <div id="okBox" class="msg okm"></div>
+
+  <form id="authForm" onsubmit="submitForm(event)" autocomplete="on">
+    <div class="field" id="nameField" style="display:none">
       <label>Gym / Organization Name *</label>
-      <input type="text" id="userNameInput" placeholder="Apne gym ka naam" autocomplete="organization">
+      <input type="text" id="gymName" placeholder="अपने जिम का नाम">
     </div>
-    <div class="seg"><button type="button" id="tEmail" class="on" onclick="setIdType('email')">📧 Email</button><button type="button" id="tMob" onclick="setIdType('mobile')">📱 Mobile</button></div>
-    <div class="field">
+
+    <div class="seg" id="seg">
+      <button type="button" id="mEmail" class="on" onclick="setMethod('email')">📧 Email</button>
+      <button type="button" id="mMobile" onclick="setMethod('mobile')">📱 Mobile</button>
+      <button type="button" id="mCode" onclick="setMethod('code')">🔑 Security Code</button>
+    </div>
+
+    <div class="field" id="idField">
       <label id="idLabel">Email Address *</label>
-      <input type="email" id="userEmailOrPhone" required placeholder="name@example.com" autocomplete="username" inputmode="email">
+      <input type="text" id="idInput" placeholder="name@example.com" autocomplete="username">
     </div>
-    <div class="note" id="mobNote">Mobile se bane account ka Password/Security Code email se wapas nahi mil sakta. Recovery ke liye Email se account banayein.</div>
-    <div class="field">
-      <label><span id="pwLbl">Password *</span></label>
-      <div class="pw"><input type="password" id="userPassword" required placeholder="Password" autocomplete="current-password"><button type="button" onclick="togglePw('userPassword',this)" aria-label="Show / hide password">👁</button></div>
+
+    <div class="field" id="pwField">
+      <label>Password * <span id="pwHint" style="color:var(--mut);font-weight:400"></span></label>
+      <div class="wrap"><input type="password" id="pwInput" placeholder="Password" autocomplete="current-password"><button type="button" class="eye" onclick="eye('pwInput',this)">👁</button></div>
     </div>
-    <div class="field" id="codeField">
+
+    <div class="field" id="codeField" style="display:none">
       <label style="color:var(--ac)">Unique Security Code *</label>
-      <div class="pw"><input class="sec" type="password" id="userSecurityCodeInput" placeholder="SEC-XXXX-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" style="color:var(--ac);font-weight:800;letter-spacing:1.5px"><button type="button" onclick="togglePw('userSecurityCodeInput',this)" aria-label="Show / hide code">👁</button></div>
+      <div class="wrap"><input type="password" id="codeInput" class="code-in" placeholder="SEC-XXXX-XXXX-XXXX" autocomplete="off"><button type="button" class="eye" onclick="eye('codeInput',this)">👁</button></div>
     </div>
-    <div class="note" id="upNote" style="display:none">Signup par aapke liye ek Unique Security Code banega. Wo sirf ek baar dikhega — use save kar lein. Bina us code ke login nahi hoga.</div>
+
+    <div class="hint" id="upHint" style="display:none">Signup par आपके लिए एक Unique Security Code बनेगा। उसे save कर लें — बाद में Dashboard में PIN डालकर कभी भी देख सकते हैं।</div>
+
     <button type="submit" class="btn-main" id="submitBtn">Sign In</button>
   </form>
+
   <div class="links">
-    <a onclick="triggerForgot()">Forgot Password / Security Code?</a>
-    <span id="toggleModeText">Naya account? <a onclick="setMode('up')">Sign Up</a></span>
+    <a onclick="forgot()">Forgot Password / Security Code?</a>
+    <span id="swText">Naya account? <a onclick="setMode('up')">Sign Up</a></span>
   </div>
-  <div class="links" style="margin-top:10px"><a id="upgLink" onclick="setMode('upg')">Purana account hai, Security Code nahi bana? Yahan banayein</a></div>
 </div>
-<div id="codeModal"><div class="bx">
-  <div style="color:var(--ok);font-weight:800;font-size:13px">✅ Aapka Unique Security Code</div>
-  <div id="codeShow"></div>
-  <button type="button" class="btn-main" style="background:#333;color:#fff;margin-top:0" onclick="copyCode()" id="copyBtn">📋 Copy karein</button>
-  <p style="font-size:11.5px;color:#ddd;line-height:1.5;margin:12px 0">Ise abhi <b>save</b> kar lein (screenshot / notes / copy). Ye <b>sirf ek baar</b> dikhega aur kahin store nahi hota. Har login par Email/Mobile + Password + ye code lagega. Bhool jaayein to <b>Forgot Password / Security Code</b> se email par link aayegi, usse naya code ban jaata hai.</p>
-  <label style="display:flex;gap:8px;align-items:center;justify-content:center;font-size:12px"><input type="checkbox" id="codeSaved" style="width:auto" onchange="$('codeGo').disabled=!this.checked"> Maine code save kar liya</label>
-  <button type="button" class="btn-main" id="codeGo" disabled style="opacity:1" onclick="codeNext()">Aage badhein</button>
+
+<!-- SECURITY CODE POPUP -->
+<div class="ov" id="codeOv"><div class="cbox">
+  <div class="badge">YOUR UNIQUE SECURITY CODE</div>
+  <h3 style="color:var(--ac);margin:6px 0 2px">🔑 इसे save कर लें</h3>
+  <div style="font-size:12px;color:var(--mut);line-height:1.5">यह code आपके जिम का अपना है। इससे सीधे Sign In हो जाता है। Dashboard में <b>PIN</b> डालकर इसे कभी भी दोबारा देख सकते हैं।</div>
+  <div class="code-big" id="codeShow">-</div>
+  <button class="btn2" onclick="copyCode()">📋 Copy करें</button>
+  <button class="btn2" onclick="shareCode()">📤 WhatsApp / Share</button>
+  <label style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px;font-size:12px"><input type="checkbox" id="savedChk" style="width:auto" onchange="document.getElementById('contBtn').disabled=!this.checked"> मैंने code save कर लिया है</label>
+  <button class="btn-main" id="contBtn" disabled onclick="goNext()">आगे बढ़ें ➔</button>
 </div></div>
+
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
-    authDomain: "bfc-gym-215ae.firebaseapp.com",
-    projectId: "bfc-gym-215ae",
-    storageBucket: "bfc-gym-215ae.firebasestorage.app",
-    messagingSenderId: "886920088571",
-    appId: "1:886920088571:web:c4bc478d246a2700b0d95e"
-  };
-  if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-  const auth = firebase.auth();
-  const $ = function (id) { return document.getElementById(id); };
-  let mode = "in", idType = "email", codeNext = function () {};
+  var CFG = { apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" };
+  if (!firebase.apps.length) firebase.initializeApp(CFG);
+  var auth = firebase.auth(), db = firebase.firestore();
+  var LS = localStorage, mode = 'in', method = 'email', nextUrl = 'category-select.html', pendingCode = '';
+  var $ = function (i) { return document.getElementById(i); };
 
-  // ---- Security Code: asli Firebase password = SHA-256(password + code). Code ke bina login ho hi nahi sakta (server-side check). ----
-  async function derive(p, c) {
-    const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("orgdesk|" + p + "|" + String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "")));
-    return Array.from(new Uint8Array(b)).map(function (x) { return x.toString(16).padStart(2, "0"); }).join("");
-  }
-  function newCode() {
-    const ch = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", a = new Uint8Array(12); crypto.getRandomValues(a);
-    const s = Array.from(a).map(function (x) { return ch[x % 32]; }).join("");
-    return "SEC-" + s.slice(0, 4) + "-" + s.slice(4, 8) + "-" + s.slice(8, 12);
-  }
-  function showCode(code, next) {
-    $("codeShow").innerText = code; $("codeSaved").checked = false; $("codeGo").disabled = true; $("copyBtn").innerText = "📋 Copy karein";
-    codeNext = next; $("codeModal").style.display = "flex";
-  }
-  function copyCode() {
-    const t = $("codeShow").innerText;
-    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { $("copyBtn").innerText = "✅ Copy ho gaya"; }).catch(function () { $("copyBtn").innerText = "Code ko dabakar copy karein"; });
-  }
-
-  function hideAlerts() { $("errorAlert").style.display = "none"; $("successAlert").style.display = "none"; }
-  function showError(m) { const e = $("errorAlert"); e.innerText = m; e.style.display = "block"; $("successAlert").style.display = "none"; try { e.scrollIntoView({ block: "center" }); } catch (x) {} }
-  function showSuccess(m) { const e = $("successAlert"); e.innerText = m; e.style.display = "block"; $("errorAlert").style.display = "none"; }
-  function friendly(err) {
-    const c = (err && err.code) || "";
-    if (/invalid-login-credentials|invalid-credential|user-not-found|wrong-password/.test(c))
-      return mode === "upg" ? "Email/Mobile ya purana Password galat hai." : "Email/Mobile, Password ya Security Code galat hai (ya account bana hi nahi). Teeno dobara check karein.";
-    if (c === "auth/email-already-in-use") return "Ye Email/Mobile pehle se registered hai. Sign In karein.";
-    if (c === "auth/weak-password") return "Password kam se kam 6 akshar ka rakhein.";
-    if (c === "auth/invalid-email") return "Email ya Mobile sahi format me likhein.";
-    if (c === "auth/network-request-failed") return "Internet check karein aur dobara try karein.";
-    if (c === "auth/too-many-requests") return "Bahut zyada koshish ho gayi. Thodi der baad try karein.";
-    if (c === "auth/operation-not-allowed") return "Firebase me Email/Password sign-in ON nahi hai. (Admin: Authentication > Sign-in method)";
-    if (c === "auth/unauthorized-domain") return "Ye website Firebase ke Authorized domains me nahi hai. (Admin: Authentication > Settings)";
-    return (err && err.message) ? err.message : String(err);
-  }
-
-  function setIdType(t) {
-    idType = t;
-    $("tEmail").classList.toggle("on", t === "email"); $("tMob").classList.toggle("on", t === "mobile");
-    const i = $("userEmailOrPhone"); i.value = "";
-    i.type = t === "email" ? "email" : "tel"; i.maxLength = t === "email" ? 120 : 10; i.inputMode = t === "email" ? "email" : "numeric";
-    i.placeholder = t === "email" ? "name@example.com" : "10 digit mobile number";
-    $("idLabel").innerText = t === "email" ? "Email Address *" : "Mobile Number (10 digit) *";
-    $("mobNote").style.display = t === "mobile" ? "block" : "none";
-  }
+  /* ---------- UI ---------- */
   function setMode(m) {
-    mode = m; hideAlerts();
-    $("tabIn").classList.toggle("on", m !== "up"); $("tabUp").classList.toggle("on", m === "up");
-    $("nameField").style.display = m === "up" ? "block" : "none";
-    $("codeField").style.display = m === "in" ? "block" : "none";
-    $("upNote").style.display = m === "up" ? "block" : "none";
-    $("upgLink").style.display = m === "in" ? "inline" : "none";
-    $("pwLbl").innerText = m === "upg" ? "Purana Password *" : (m === "up" ? "Password * (kam se kam 6 akshar)" : "Password *");
-    $("formTitle").innerText = m === "up" ? "Create Account" : (m === "upg" ? "Security Code Banayein" : "Welcome Back");
-    $("formSub").innerText = m === "up" ? "Gym register karein — aapko Unique Security Code milega" : (m === "upg" ? "Purane account ke liye ek baar Security Code banayein" : "Email/Mobile + Password + Unique Security Code se Sign In karein");
-    $("submitBtn").innerText = m === "up" ? "Create Account" : (m === "upg" ? "Security Code Banayein" : "Sign In");
-    $("userPassword").autocomplete = m === "up" ? "new-password" : "current-password";
-    $("toggleModeText").innerHTML = m === "up" ? 'Pehle se account hai? <a onclick="setMode(\'in\')">Sign In</a>' : (m === "upg" ? '<a onclick="setMode(\'in\')">← Sign In par wapas</a>' : 'Naya account? <a onclick="setMode(\'up\')">Sign Up</a>');
+    mode = m; hide();
+    $('tabIn').classList.toggle('on', m === 'in'); $('tabUp').classList.toggle('on', m === 'up');
+    $('nameField').style.display = m === 'up' ? 'block' : 'none';
+    $('upHint').style.display = m === 'up' ? 'block' : 'none';
+    $('mCode').style.display = m === 'up' ? 'none' : 'block';
+    if (m === 'up' && method === 'code') method = 'email';
+    $('formTitle').textContent = m === 'up' ? 'Create Account' : 'Welcome Back';
+    $('formSub').textContent = m === 'up' ? 'अपना Gym register करें — आपको Unique Security Code मिलेगा' : 'नीचे के 3 तरीकों में से कोई भी एक चुनकर Sign In करें';
+    $('submitBtn').textContent = m === 'up' ? 'Create Account' : 'Sign In';
+    $('pwHint').textContent = m === 'up' ? '(कम से कम 6 अक्षर)' : '';
+    $('swText').innerHTML = m === 'up' ? 'Pehle se account hai? <a onclick="setMode(\'in\')">Sign In</a>' : 'Naya account? <a onclick="setMode(\'up\')">Sign Up</a>';
+    setMethod(method);
   }
-  function togglePw(id, btn) {
-    const i = $(id), show = i.type === "password";
-    i.type = show ? "text" : "password"; btn.innerText = show ? "🙈" : "👁";
+  function setMethod(x) {
+    method = x; hide();
+    ['Email', 'Mobile', 'Code'].forEach(function (n) { $('m' + n).classList.toggle('on', n.toLowerCase() === x); });
+    var isCode = x === 'code';
+    $('idField').style.display = isCode ? 'none' : 'block';
+    $('pwField').style.display = isCode ? 'none' : 'block';
+    $('codeField').style.display = isCode ? 'block' : 'none';
+    $('idLabel').textContent = x === 'mobile' ? 'Mobile Number *' : 'Email Address *';
+    $('idInput').placeholder = x === 'mobile' ? '10 अंक का मोबाइल' : 'name@example.com';
+    $('idInput').inputMode = x === 'mobile' ? 'numeric' : 'email';
+  }
+  function eye(id, b) { var i = $(id); i.type = i.type === 'password' ? 'text' : 'password'; b.textContent = i.type === 'password' ? '👁' : '🙈'; }
+  function hide() { $('errBox').style.display = 'none'; $('okBox').style.display = 'none'; }
+  function err(t) { var e = $('errBox'); e.textContent = t; e.style.display = 'block'; $('okBox').style.display = 'none'; }
+  function ok(t) { var e = $('okBox'); e.textContent = t; e.style.display = 'block'; $('errBox').style.display = 'none'; }
+  function busy(b) { var s = $('submitBtn'); s.disabled = b; s.textContent = b ? 'Please wait…' : (mode === 'up' ? 'Create Account' : 'Sign In'); }
+  function friendly(e) {
+    var c = (e && e.code) || '';
+    if (c === 'auth/email-already-in-use') return 'यह Email/Mobile पहले से registered है — Sign In करें।';
+    if (c === 'auth/invalid-email') return 'Email सही नहीं है।';
+    if (c === 'auth/weak-password') return 'Password कम से कम 6 अक्षर का रखें।';
+    if (c === 'auth/user-not-found' || c === 'auth/wrong-password' || c === 'auth/invalid-credential' || c === 'auth/invalid-login-credentials') return 'जानकारी गलत है — दोबारा जाँचें।';
+    if (c === 'auth/too-many-requests') return 'बहुत कोशिशें हो गईं — थोड़ी देर बाद try करें।';
+    if (c === 'auth/network-request-failed') return 'इंटरनेट चेक करें।';
+    return (e && e.message) || 'कुछ गड़बड़ हुई।';
   }
 
-  function credentialFromInput() {
-    const raw = $("userEmailOrPhone").value.trim();
-    if (idType === "mobile") {
-      const d = raw.replace(/\D/g, "").slice(-10);
-      if (d.length !== 10) throw new Error("10 digit ka mobile number likhein.");
-      return { cred: d + "@orgdesk.phone", phone: d };
+  /* ---------- helpers ---------- */
+  function idToCred(raw) { raw = (raw || '').trim(); return /^\d{10}$/.test(raw) ? raw + '@orgdesk.phone' : raw; }
+  async function sha(s) { var b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)); return Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+  function genCode() {
+    var A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = new Uint8Array(12); crypto.getRandomValues(r);
+    var s = Array.prototype.map.call(r, function (x) { return A[x % 32]; }).join('');
+    return 'SEC-' + s.slice(0, 4) + '-' + s.slice(4, 8) + '-' + s.slice(8, 12);
+  }
+  function normCode(c) {
+    c = (c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (c.indexOf('SEC') === 0) c = c.slice(3);
+    if (c.length !== 12) return '';
+    return 'SEC-' + c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8, 12);
+  }
+  async function codeEmail(code) { return 'c' + (await sha(code)).slice(0, 32) + '@code.orgdesk.app'; }
+
+  // Code ke liye alag hidden login account (secondary app se, taaki owner ka session na badle)
+  async function createCodeAccount(code) {
+    var app2 = firebase.apps.filter(function (a) { return a.name === 'sec'; })[0] || firebase.initializeApp(CFG, 'sec');
+    var a2 = app2.auth();
+    try {
+      var cred = await a2.createUserWithEmailAndPassword(await codeEmail(code), code);
+      return cred.user.uid;
+    } finally { try { await a2.signOut(); } catch (e) {} }
+  }
+
+  async function issueCode(orgId) {
+    var code = genCode(), uid2 = await createCodeAccount(code), h = await sha(code);
+    await db.collection('roles').doc(orgId).set({ orgId: orgId, role: 'owner', via: 'email' }, { merge: true });
+    await db.collection('roles').doc(uid2).set({ orgId: orgId, role: 'owner', via: 'code', createdAt: new Date().toISOString() });
+    await db.collection('orgs').doc(orgId).collection('private').doc('security').set({ code: code, codeUid: uid2, updatedAt: new Date().toISOString() });
+    await db.collection('orgs').doc(orgId).set({ ownerUid: orgId, codeHash: h }, { merge: true });
+    return code;
+  }
+
+  function saveLocalProfile(orgId, cloud) {
+    var prev = {}; try { prev = JSON.parse(LS.getItem('om_org_profile') || '{}') || {}; } catch (e) {}
+    if (prev.orgId && prev.orgId !== orgId) prev = {};           // doosre gym ka data mix nahi hoga
+    cloud = cloud || {};
+    var o = Object.assign({}, prev, cloud, {
+      orgId: orgId, orgName: cloud.gymName || prev.orgName || prev.gymName || '',
+      createdAt: cloud.createdAt || prev.createdAt || new Date().toISOString()
+    });
+    LS.setItem('om_org_profile', JSON.stringify(o));
+    LS.setItem('bfc_org_id', orgId);
+    LS.setItem('bfc_role', 'owner');
+    return o;
+  }
+
+  /* ---------- after login: cloud se poora profile + license wapas ---------- */
+  async function afterAuth(user, justSignedUp, signupGym) {
+    var orgId = user.uid, role = 'owner';
+    try { var r = await db.collection('roles').doc(user.uid).get(); if (r.exists) { orgId = r.data().orgId || orgId; role = r.data().role || 'owner'; } } catch (e) {}
+    if (role !== 'owner') { LS.setItem('bfc_role', role); LS.setItem('bfc_org_id', orgId); location.href = 'index.html'; return; }
+
+    var cloud = null;
+    try { var s = await db.collection('orgs').doc(orgId).get(); if (s.exists) cloud = s.data(); } catch (e) { console.warn(e); }
+    if (justSignedUp && signupGym) cloud = Object.assign({}, cloud || {}, { gymName: signupGym });
+
+    var prevLocal = {}; try { prevLocal = JSON.parse(LS.getItem('om_org_profile') || '{}') || {}; } catch (e) {}
+    var createdAt = (cloud && cloud.createdAt) || (prevLocal.orgId === orgId && prevLocal.createdAt) || new Date().toISOString();
+    var base = { createdAt: createdAt, ownerUid: orgId };
+    if (justSignedUp && signupGym) { base.gymName = signupGym; base.category = 'gym'; }
+    try { await db.collection('orgs').doc(orgId).set(base, { merge: true }); } catch (e) {}
+    cloud = Object.assign({}, cloud || {}, base);
+    try { await db.collection('publicOrgs').doc(orgId).set({ gymName: cloud.gymName || '' }, { merge: true }); } catch (e) {}
+
+    var prof = saveLocalProfile(orgId, cloud);
+    var complete = !!(cloud.gymName && cloud.phone && cloud.upiId);
+    nextUrl = complete ? 'index.html' : 'category-select.html';
+
+    // Security Code: naya signup ya purana account jisme abhi tak code nahi bana
+    if (justSignedUp || !cloud.codeHash) {
+      try { pendingCode = await issueCode(orgId); showCode(pendingCode); return; }
+      catch (e) { console.warn('code issue failed', e); err('Security Code नहीं बन पाया: ' + friendly(e)); }
     }
-    if (!/^\S+@\S+\.\S+$/.test(raw)) throw new Error("Sahi Email likhein (jaise name@gmail.com).");
-    return { cred: raw.toLowerCase(), phone: "" };
+    location.href = nextUrl;
   }
 
-  // Baaki pages ke liye local record (asli Security Code yahan store NAHI hota)
-  function saveLocalProfile(user, name, id) {
-    const local = "LOCAL-" + newCode();
-    try { if (typeof omEnsureUserSecurityRecord === "function") omEnsureUserSecurityRecord(id.cred, name || user.displayName || "Gym", id.phone, "TRIAL-7DAY", { forcedCode: local, uid: user.uid, orgId: user.uid }); } catch (x) {}
-    let p = null;
-    try { p = JSON.parse(localStorage.getItem("om_org_profile_saved_" + user.uid) || localStorage.getItem("om_last_org_profile") || "null"); } catch (x) {}
-    const has = !!(p && (p.orgName || p.gymName));
-    if (!has) p = { uid: user.uid, orgId: user.uid, orgName: name || user.displayName || "", gymName: name || user.displayName || "", phone: id.phone, email: id.cred, createdAt: new Date().toISOString() };
-    p.securityCode = local; if (!p.orgId) p.orgId = user.uid;
-    try {
-      localStorage.setItem("om_org_profile", JSON.stringify(p)); localStorage.setItem("om_last_org_profile", JSON.stringify(p));
-      localStorage.setItem("om_org_profile_saved_" + user.uid, JSON.stringify(p));
-    } catch (x) {}
-    return has;
-  }
+  function showCode(c) { $('codeShow').textContent = c; $('codeOv').classList.add('show'); }
+  function goNext() { location.href = nextUrl; }
+  function copyCode() { try { navigator.clipboard.writeText(pendingCode); } catch (e) {} ok('Copy हो गया ✔'); }
+  function shareCode() { var t = 'मेरा Security Code: ' + pendingCode; if (navigator.share) navigator.share({ text: t }).catch(function () {}); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); }
 
-  async function handleAuthSubmit(e) {
-    e.preventDefault(); hideAlerts();
-    const password = $("userPassword").value, btn = $("submitBtn"), label = btn.innerText;
-    btn.disabled = true; btn.innerText = "Please wait...";
+  /* ---------- submit ---------- */
+  async function submitForm(e) {
+    e.preventDefault(); hide(); busy(true);
     try {
-      const id = credentialFromInput();
-      if (mode === "up") {
-        const name = $("userNameInput").value.trim();
-        if (!name) throw new Error("Gym / Organization ka naam likhein.");
-        if (password.length < 6) throw new Error("Password kam se kam 6 akshar ka rakhein.");
-        const code = newCode();
-        const uc = await auth.createUserWithEmailAndPassword(id.cred, await derive(password, code));
-        await uc.user.updateProfile({ displayName: name });
-        saveLocalProfile(uc.user, name, id);
-        showCode(code, function () { window.location.href = "category-select.html"; });
-      } else if (mode === "upg") {
-        const uc = await auth.signInWithEmailAndPassword(id.cred, password);
-        const code = newCode();
-        await uc.user.updatePassword(await derive(password, code));
-        const has = saveLocalProfile(uc.user, uc.user.displayName, id);
-        showCode(code, function () { window.location.href = has ? "index.html" : "category-select.html"; });
+      if (mode === 'up') {
+        var gym = $('gymName').value.trim(); if (!gym) throw { message: 'Gym / Organization का नाम लिखें।' };
+        var raw = $('idInput').value.trim(), pw = $('pwInput').value;
+        if (method === 'mobile' && !/^\d{10}$/.test(raw)) throw { message: '10 अंक का सही मोबाइल नंबर लिखें।' };
+        if (!raw) throw { message: (method === 'mobile' ? 'Mobile' : 'Email') + ' लिखें।' };
+        var cred = await auth.createUserWithEmailAndPassword(idToCred(raw), pw);
+        try { await cred.user.updateProfile({ displayName: gym }); } catch (x) {}
+        await afterAuth(cred.user, true, gym);
+      } else if (method === 'code') {
+        var code = normCode($('codeInput').value); if (!code) throw { message: 'Security Code सही फॉर्मेट में लिखें (SEC-XXXX-XXXX-XXXX)।' };
+        var c2 = await auth.signInWithEmailAndPassword(await codeEmail(code), code);
+        await afterAuth(c2.user, false);
       } else {
-        const code = ($("userSecurityCodeInput").value || "").trim();
-        if (!code) throw new Error("Unique Security Code daalna zaroori hai.");
-        const uc = await auth.signInWithEmailAndPassword(id.cred, await derive(password, code));
-        const has = saveLocalProfile(uc.user, uc.user.displayName, id);
-        showSuccess("Login ho gaya! Khul raha hai...");
-        setTimeout(function () { window.location.href = has ? "index.html" : "category-select.html"; }, 500);
+        var raw2 = $('idInput').value.trim(), pw2 = $('pwInput').value;
+        if (!raw2 || !pw2) throw { message: (method === 'mobile' ? 'Mobile' : 'Email') + ' और Password दोनों लिखें।' };
+        var c3 = await auth.signInWithEmailAndPassword(idToCred(raw2), pw2);
+        await afterAuth(c3.user, false);
       }
-    } catch (err) { showError(friendly(err)); }
-    btn.disabled = false; btn.innerText = label;
+    } catch (x) { err(friendly(x)); busy(false); }
   }
 
-  // Password ya Security Code bhoolne par: email par link jaati hai -> reset.html par naya Password + naya Code banta hai
-  async function triggerForgot() {
-    hideAlerts();
-    if (idType === "mobile") { showError("Mobile se bane account ka recovery email se nahi ho sakta. Upar 📧 Email chuniye (agar Email se account banaya tha)."); return; }
-    const em = $("userEmailOrPhone").value.trim().toLowerCase();
-    if (!/^\S+@\S+\.\S+$/.test(em)) { showError("Pehle upar apni registered Email likhein."); return; }
-    try { await auth.sendPasswordResetEmail(em); showSuccess("Agar " + em + " registered hai to usme link bhej di gayi hai. Email kholkar link dabayein — wahan naya Password aur naya Security Code ban jaayega. (Spam folder bhi dekhein)"); }
-    catch (err) { showError(friendly(err)); }
+  async function forgot() {
+    hide();
+    if (method === 'code') { err('Security Code भूल गए? Email/Mobile + Password से Sign In करें, फिर Dashboard में 🔐 Security Code (PIN डालकर) देखें।'); return; }
+    var raw = $('idInput').value.trim();
+    if (!raw) { err('पहले ऊपर अपना Email लिखें।'); return; }
+    if (/^\d{10}$/.test(raw)) { err('Mobile account का Password email से reset नहीं हो सकता — Security Code से Sign In करें।'); return; }
+    try { await auth.sendPasswordResetEmail(raw); ok('Password reset link आपके Email पर भेज दिया गया।'); } catch (x) { err(friendly(x)); }
   }
+
+  /* ---------- page load: logout ya auto-continue ---------- */
+  (function init() {
+    var q = new URLSearchParams(location.search);
+    if (q.get('logout')) {
+      ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role'].forEach(function (k) { LS.removeItem(k); });
+      auth.signOut().catch(function () {}); return;
+    }
+    var off = auth.onAuthStateChanged(function (u) {
+      off();
+      if (u && !u.isAnonymous) { ok('पहले से Sign In है — Dashboard खुल रहा है…'); afterAuth(u, false); }
+    });
+  })();
+  setMode('in');
 </script>
 </body>
 </html>

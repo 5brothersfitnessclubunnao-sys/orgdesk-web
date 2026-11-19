@@ -5,7 +5,14 @@
   var KEYS = [["X8K9",365],["M2P4",365],["L7W1",365],["K9Q3",365],["H4N6",365],["R5Y8",90],["B3V2",90],["J1C7",30],["D8F5",30],["T6Z2",30]];
   function J(k, d) { try { var v = JSON.parse(LS.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
   function getOrg() { return J("om_org_profile", {}); }
-  function saveOrg(o) { LS.setItem("om_org_profile", JSON.stringify(o)); }
+  function saveOrg(o) {
+    LS.setItem("om_org_profile", JSON.stringify(o));
+    // License/trial cloud me bhi save: logout-login ke baad wapas mil jaye, trial dobara shuru na ho
+    try {
+      var d = getDb(); if (!d || !o.orgId) return;
+      d.collection("orgs").doc(o.orgId).set({ createdAt: o.createdAt || null, licenseKey: o.licenseKey || null, licensePlanDays: o.licensePlanDays || null, licenseAmount: o.licenseAmount || null, licenseBoughtAt: o.licenseBoughtAt || null, licenseExpiry: o.licenseExpiry || null }, { merge: true }).catch(function () {});
+    } catch (e) {}
+  }
   function getPool() {
     var p = J("om_license_pool", null);
     if (!Array.isArray(p) || p.length < 1) {
