@@ -7,7 +7,7 @@
   var CFG = { apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain: "bfc-gym-215ae.firebaseapp.com", projectId: "bfc-gym-215ae", storageBucket: "bfc-gym-215ae.firebasestorage.app", messagingSenderId: "886920088571", appId: "1:886920088571:web:c4bc478d246a2700b0d95e" };
   var LS = localStorage;
   var origSet = Storage.prototype.setItem, origRemove = Storage.prototype.removeItem;
-  var SYNC_KEYS = ['5BFC_MEMBERS', '5bfc_admissions', 'bfc_staff_list', 'om_admin_pin'];
+  var SYNC_KEYS = ['5BFC_MEMBERS', '5bfc_admissions', 'bfc_staff_list', 'om_admin_pin', 'om_join_cfg', 'om_fee_log'];
   var MEMBER_KEYS = ['5BFC_MEMBERS', 'bbf_master_records_v4'];
   var muted = false, timers = {}, latest = {};
 
@@ -119,6 +119,8 @@
 
   // Safe logout: pehle cloud me save, phir hi phone se data hatao
   window.omLogoutNow = async function () {
+    if (!confirm('क्या आप वाकई Logout करना चाहते हैं?')) return;
+    ['bfc_active_staff', 'bfc_admin_logged_in'].forEach(function (k) { origRemove.call(LS, k); });
     var ok = false; try { ok = await flush(); } catch (e) {}
     if (!ok && !confirm('⚠️ कुछ डेटा cloud में save नहीं हो पाया।\nफिर भी Logout करें? (डेटा इस फोन में रहेगा, पर नए Login पर cloud वाला version आएगा)')) return;
     if (ok) wipeLocal();
