@@ -8,6 +8,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="security-core.js"></script>
+  <script src="license-gate.js"></script>
   <style>
     :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; --err: #e74c3c; }
     body { background: var(--bg); color: var(--tx); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
@@ -35,6 +37,7 @@
     
     #gymSetupForm { display: none; }
   </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -139,6 +142,17 @@
     document.getElementById("errorAlert").style.display = "none";
   }
 
+window.addEventListener("DOMContentLoaded", function () {
+  try {
+    const cur = JSON.parse(localStorage.getItem("om_org_profile") || localStorage.getItem("om_last_org_profile") || "{}") || {};
+    if (cur.gymName || cur.orgName) document.getElementById("setupGymName").value = cur.gymName || cur.orgName || "";
+    if (cur.ownerName) document.getElementById("setupOwnerName").value = cur.ownerName || "";
+    if (cur.phone) document.getElementById("setupPhone").value = cur.phone || "";
+    if (cur.address) document.getElementById("setupAddress").value = cur.address || "";
+    if (cur.upiId) document.getElementById("setupUpiId").value = cur.upiId || "";
+  } catch (e) {}
+});
+
   async function handleGymSetupSubmit(e) {
     e.preventDefault();
     const btn = document.getElementById("saveSetupBtn");
@@ -158,18 +172,12 @@
     // Har user ka apna tenant ID (pehle sabke liye ek hi tha)
     let uid = ""; try { uid = (firebase.auth().currentUser || {}).uid || ""; } catch (e) {}
     const orgId = uid || localStorage.getItem("bfc_org_id") || ("org" + Date.now());
+    // Pichla profile (logout ke baad bhi): trial start date / license / security code purane se hi lo
+    let prev = {};
+    try {
+      prev = JSON.parse(localStorage.getItem("om_org_profile") || localStorage.getItem("om_org_profile_saved_" + orgId) || localStorage.getItem("om_last_org_profile") || "{}") || {};
+    } catch (e) { prev = {}; }
 
-
-window.addEventListener("DOMContentLoaded", function () {
-  try {
-    const cur = JSON.parse(localStorage.getItem("om_org_profile") || localStorage.getItem("om_last_org_profile") || "{}") || {};
-    if (cur.gymName || cur.orgName) document.getElementById("setupGymName").value = cur.gymName || cur.orgName || "";
-    if (cur.ownerName) document.getElementById("setupOwnerName").value = cur.ownerName || "";
-    if (cur.phone) document.getElementById("setupPhone").value = cur.phone || "";
-    if (cur.address) document.getElementById("setupAddress").value = cur.address || "";
-    if (cur.upiId) document.getElementById("setupUpiId").value = cur.upiId || "";
-  } catch (e) {}
-});
 
     const secCodeNow = (prev && prev.securityCode) || (typeof omEnsureUserSecurityRecord === "function" ? (omEnsureUserSecurityRecord(prev.email || uid, gymData.gymName, gymData.phone, prev.licenseKey) || {}).code : "") || "";
     const mergedProfile = Object.assign({}, prev, gymData, {
@@ -189,7 +197,6 @@ window.addEventListener("DOMContentLoaded", function () {
     // 1. Save locally first (Guarantees instant success)
     localStorage.setItem("bfc_org_profile", JSON.stringify(gymData));
     // index / login / license-gate isi profile ko padhte hain (trial 7 din yahin se shuru)
-    let prev = {}; try { prev = JSON.parse(localStorage.getItem("om_org_profile") || "{}"); } catch (e) {}
     localStorage.setItem("om_org_profile", JSON.stringify(mergedProfile));
     localStorage.setItem("bfc_org_id", orgId);
 

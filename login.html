@@ -7,6 +7,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="security-core.js"></script>
+  <script src="license-gate.js"></script>
   <script src="auth-gate.js" data-mode="ondemand"></script>
   <style>
     :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; --err: #e74c3c; }
@@ -26,6 +28,7 @@
     .error-msg { background: rgba(231, 76, 60, 0.15); border: 1px solid var(--err); color: var(--err); padding: 8px; border-radius: 6px; font-size: 11.5px; margin-bottom: 12px; display: none; text-align: center; }
     .success-msg { background: rgba(46, 204, 113, 0.15); border: 1px solid var(--ok); color: var(--ok); padding: 8px; border-radius: 6px; font-size: 11.5px; margin-bottom: 12px; display: none; text-align: center; }
   </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 
@@ -267,6 +270,8 @@
           throw new Error("Unique Security Code is mandatory to login.");
         }
 
+        // Nayi device / cleared data: pehle cloud se security record mangao
+        if (typeof omSecurityPull === "function") { try { await omSecurityPull(primaryCredential); } catch (e) {} }
         const existingRec = typeof omGetSecurityRecordStrict === "function" ? omGetSecurityRecordStrict(primaryCredential) : null;
         if (existingRec && existingRec.code && String(existingRec.code).toUpperCase() !== secCodeEntered) {
           throw new Error("Invalid Unique Security Code! Email/Mobile & Password alone cannot bypass security code.");
@@ -295,8 +300,8 @@
           }
         }
 
+        try { if (typeof omSecurityPull === "function") await omSecurityPull(uc.user.email || primaryCredential); } catch (e) {}
         const hasSavedProfile = restoreProfileAfterAuth(uid, uc.user.email || primaryCredential, /^\d{10}$/.test(rawInput) ? rawInput : "", secCodeEntered);
-        try { localStorage.setItem("om_session_active", "1"); localStorage.setItem("om_last_activity_time", String(Date.now())); } catch (e) {}
         showSuccess("Login successful! Redirecting...");
         setTimeout(() => {
           window.location.href = hasSavedProfile ? "index.html" : "category-select.html";

@@ -1,0 +1,36 @@
+/* theme.css - Om Software shared professional theme (fintech-style). Har page ke </head> se pehle link hota hai */
+:root{--bg:#0A0F1E;--card:#121A2E;--border:#223052;--ac:#FFB800;--tx:#EAF0FF;--mut:#8D99B8;--ok:#22C55E;--err:#FF6B6B;
+      --g:#FFB800;--b:#223052;--m:#8D99B8;--er:#FF6B6B}
+html *{font-family:Inter,'Segoe UI',Roboto,'Noto Sans Devanagari',system-ui,-apple-system,Arial,sans-serif}
+html,body{-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(1200px 500px at 50% -10%,#16224a 0%,#0A0F1E 60%) fixed #0A0F1E !important;color:var(--tx)}
+
+/* cards / containers */
+.auth-box,.setup-box,.box,.card,.main-card,.brand,.hero,.header-card,.bx,.modal-box{
+  background:linear-gradient(160deg,#16213f,#101830) !important;border:1px solid var(--border) !important;
+  border-radius:20px !important;box-shadow:0 14px 36px rgba(0,0,0,.4) !important}
+.header,.brand{border-bottom-style:solid !important;border-bottom-color:var(--border) !important}
+.hero{border-style:solid !important}
+.header h1,.header h2,.auth-box h2,.setup-box h2,.box h2,.box h3,.brand b{color:var(--tx) !important;font-weight:800}
+.tagline{background:rgba(255,184,0,.12) !important;color:var(--ac) !important;border-radius:20px !important}
+.restricted-banner{background:rgba(255,184,0,.1) !important;border-color:rgba(255,184,0,.45) !important;border-radius:12px !important}
+
+/* inputs */
+input,select,textarea{background:#0B1226 !important;border:1.5px solid var(--border) !important;color:var(--tx) !important;border-radius:10px !important;outline:0}
+input:focus,select:focus,textarea:focus{border-color:var(--ac) !important;box-shadow:0 0 0 3px rgba(255,184,0,.12)}
+input::placeholder,textarea::placeholder{color:#5f6c8f}
+label{color:var(--mut) !important}
+
+/* buttons */
+button,.btn,.btn-login,.btn-submit,.big,.pill,.tab-btn,.stab{border-radius:12px !important;-webkit-tap-highlight-color:transparent}
+.btn-login,.btn-submit,.big,.pill:not(.d),.tab-btn.active,.mode button.on{background:linear-gradient(135deg,#FFC83D,#FFA800) !important;color:#1a1200 !important;border-color:transparent !important;font-weight:800}
+.btn-submit{background:linear-gradient(135deg,#22C55E,#16A34A) !important;color:#04210f !important}
+.tab-btn,.mode button,.tap-card,.pill.d{background:#0E1629 !important;border:1.5px solid var(--border) !important;color:var(--mut) !important}
+.tab-btn.active,.mode button.on{color:#1a1200 !important}
+.pill.d{color:var(--ac) !important}
+button:active{transform:scale(.985)}
+
+/* misc */
+.row,.list-item,.item{border-color:var(--border)}
+a{color:var(--ac)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#2a3860;border-radius:6px}
