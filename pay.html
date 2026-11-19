@@ -15,7 +15,7 @@
 /* safai helpers: naam/id kabhi code ban kar na chale */
 window.__esc=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 window.__jq=function(v){return window.__esc(JSON.stringify(String(v==null?"":v)))};
-window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^[=+\-@	]/.test(s)?"'"+s:s};
+window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^[=+\-@\t\r]/.test(s)?"'"+s:s};
 window.bfcLoadMembersSnap = window.bfcLoadMembersSnap || async function (db) {
   try { var s = await db.collection("public_members").get(); if (!s.empty) return s; } catch (e) {}
   return await db.collection("members").get();
@@ -187,10 +187,10 @@ th{color:#ffcc00;}
     <div class="welcome-slide-in" style="animation-delay:0.15s">
       <div style="background:#ffcc00;color:#000;font-size:11px;font-weight:900;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:12px;">OFFICIAL PORTAL</div>
     </div>
-    <h1 class="welcome-title welcome-slide-in" style="animation-delay:0.3s">Welcome To<br><span data-gym="name">Gym Portal</span></h1>
-    <p class="welcome-sub welcome-slide-in" style="animation-delay:0.45s">आपका <span data-gym="name">Gym Portal</span> में स्वागत है</p>
+    <h1 class="welcome-title welcome-slide-in" style="animation-delay:0.3s">Welcome To<br><span data-gym="name">5 Brother's Fitness Club</span></h1>
+    <p class="welcome-sub welcome-slide-in" style="animation-delay:0.45s">आपका <span data-gym="name">5 Brother's Fitness Club</span> में स्वागत है</p>
     <p class="welcome-slide-in" style="animation-delay:0.55s;color:#aaa;font-size:13px;text-align:center;line-height:1.5;margin:0;">
-      <span data-gym="address">Main City</span><br>फीस जमा · रसीद · रजिस्टर
+      <span data-gym="address">उमराव खेड़ा, अकरमपुर, उन्नाव</span><br>फीस जमा · रसीद · रजिस्टर
     </p>
     <button type="button" class="welcome-btn welcome-slide-in" style="animation-delay:0.7s" onclick="closeFeesWelcome()">✔ आगे बढ़ें</button>
   </div>
@@ -199,8 +199,8 @@ th{color:#ffcc00;}
 <div class="main-card">
   <div class="header">
     <div style="background:#ffcc00;color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius:10px;display:inline-block;margin-bottom:4px;">OFFICIAL PORTAL</div>
-    <h1 data-gym="name">Gym Portal</h1>
-    <div class="tagline"><span data-gym="address">Main City</span> | Ph: <span data-gym="phone">9876543210</span></div>
+    <h1 data-gym="name">5 Brother's Fitness Club</h1>
+    <div class="tagline"><span data-gym="address">उमराव खेड़ा, अकरमपुर, उन्नाव</span> | Ph: <span data-gym="phone">9140417259</span></div>
   </div>
 
   <div class="nav-tabs">
@@ -480,7 +480,7 @@ th{color:#ffcc00;}
       <div style="background:#fff; border-radius:10px; padding:10px; margin-bottom:10px; text-align:center;">
         <div id="upiQrBox" style="display:inline-block; min-height:180px; min-width:180px;"></div>
         <div style="color:#000; font-size:11px; font-weight:bold; margin-top:4px;">📷 दूसरे फोन के UPI ऐप से स्कैन करें — रकम अपने-आप भरी होगी</div>
-        <div style="color:#555; font-size:10px;">UPI ID: <span data-gym="upiId">9876543210@paytm</span></div>
+        <div style="color:#555; font-size:10px;">UPI ID: <span data-gym="upiId">9140417259@okbizaxis</span></div>
       </div>
       <button type="button" onclick="openUpiApp()" style="width:100%; background:#ffcc00; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px; cursor:pointer; margin-bottom:12px;">🚀 UPI App खोलें (GPay / PhonePe / Paytm)</button>
 
@@ -491,7 +491,7 @@ th{color:#ffcc00;}
         <label style="font-size:11px; color:#ffcc00; display:block; margin-top:8px;">📸 या पेमेंट का स्क्रीनशॉट:</label>
         <input type="file" id="payProofFile" accept="image/*" onchange="onProofPicked(this)" style="margin-top:4px; width:100%; font-size:12px; color:#fff;">
         <img id="payProofPreview" alt="" style="display:none; max-width:100%; max-height:160px; margin-top:6px; border-radius:6px; border:1px solid #444;">
-        <button type="button" id="btnConfirmUtr" onclick="confirmOnlinePayment()" style="width:100%; background:#25D366; color:#000; border:none; padding:12px; border-radius:6px; font-weight:900; margin-top:10px; cursor:pointer;">✅ Sent to <span data-gym="name">Gym Portal</span> Owner<br>for confirmation — Your Payment Receive</button>
+        <button type="button" id="btnConfirmUtr" onclick="confirmOnlinePayment()" style="width:100%; background:#25D366; color:#000; border:none; padding:12px; border-radius:6px; font-weight:900; margin-top:10px; cursor:pointer;">✅ Sent to <span data-gym="name">5 Brother's Fitness Club</span> Owner<br>for confirmation — Your Payment Receive</button>
         <button type="button" onclick="closeUpiModal()" style="width:100%; background:#333; color:#fff; border:none; padding:8px; border-radius:6px; margin-top:6px; cursor:pointer;">रद्द करें (Cancel)</button>
       </div>
     </div>
@@ -499,7 +499,7 @@ th{color:#ffcc00;}
     <div id="upiStepWait" style="display:none; padding:10px 0;">
       <div style="font-size:42px; margin-bottom:8px;">⌛</div>
       <h3 style="color:#ffcc00; margin-bottom:6px;">Payment Details Sent!</h3>
-      <p style="font-size:13px; color:#00ff99; font-weight:bold; margin-bottom:8px;">Sent to <span data-gym="name">Gym Portal</span> Owner<br>for confirmation — Your Payment Receive</p>
+      <p style="font-size:13px; color:#00ff99; font-weight:bold; margin-bottom:8px;">Sent to <span data-gym="name">5 Brother's Fitness Club</span> Owner<br>for confirmation — Your Payment Receive</p>
       <p style="font-size:12px; color:#ccc; margin-bottom:14px;">Owner चेक करके Approve करेंगे।<br>Approve होते ही Receipt अपने-आप डाउनलोड होगी।</p>
       <div style="background:#222; border:2px solid #ffcc00; border-radius:12px; padding:16px; margin-bottom:12px;">
         <div style="font-size:11px; color:#aaa; margin-bottom:4px;">⏳ Live Verification Wait</div>
@@ -520,7 +520,7 @@ th{color:#ffcc00;}
     <h2 style="color:#25D366; font-size:20px; font-weight:900; margin-bottom:6px;">HURRAY! PAYMENT SUCCESSFUL!</h2>
     <h3 style="color:#ffcc00; font-size:15px; font-weight:800; margin-bottom:10px;">Thanks So Much For Payment</h3>
     <div style="background:#1e1e1e; border:1px dashed #ffcc00; border-radius:8px; padding:10px; margin-bottom:14px;">
-      <p data-gym="name" style="font-size:13px; color:#fff; font-weight:bold; margin-bottom:4px;">Gym Portal</p>
+      <p data-gym="name" style="font-size:13px; color:#fff; font-weight:bold; margin-bottom:4px;">5 Brother's Fitness Club</p>
       <p style="font-size:11px; color:#aaa;">आपकी सदस्यता सक्रिय कर दी गई है। हार्ड वर्क और रिजल्ट्स जारी रखें!</p>
     </div>
     <button type="button" onclick="proceedToReceiptFromHurray()" style="width:100%; background:#25D366; color:#000; border:none; padding:11px; border-radius:8px; font-weight:900; font-size:13px; cursor:pointer;">📄 रसीद देखें व डाउनलोड करें ➡️</button>
@@ -570,13 +570,13 @@ th{color:#ffcc00;}
 
     <div id="printablePages">
       <div class="receipt-card">
-        <div class="receipt-watermark" data-gym="name">Gym Portal</div>
+        <div class="receipt-watermark" data-gym="name">5 Brother's Fitness Club</div>
 
         <div class="receipt-header">
           <div style="background:#ffcc00; color:#000; font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px; display:inline-block;">PAGE 1 : OFFICIAL INVOICE</div>
-          <h2 data-gym="name" style="font-size:16px; margin-top:4px; font-weight:900;">Gym Portal</h2>
-          <div data-gym="tagline" style="font-size:10px; font-weight:bold; color:#555; margin-top:2px;">"100% Fitness & Results"</div>
-          <p style="font-size:10px; color:#777; margin-top:2px;"><span data-gym="address">Main City</span> | Ph: <span data-gym="phone">9876543210</span></p>
+          <h2 data-gym="name" style="font-size:16px; margin-top:4px; font-weight:900;">5 Brother's Fitness Club</h2>
+          <div data-gym="tagline" style="font-size:10px; font-weight:bold; color:#555; margin-top:2px;">"100% असली और असरदार रिजल्ट"</div>
+          <p style="font-size:10px; color:#777; margin-top:2px;"><span data-gym="address">उमराव खेड़ा, अकरमपुर, उन्नाव</span> | Ph: <span data-gym="phone">9140417259</span></p>
         </div>
 
         <div class="r-row"><span>Bill ID:</span><b id="billId" style="color:#b37400;"></b></div>
@@ -599,14 +599,14 @@ th{color:#ffcc00;}
         <div class="r-row"><span>वैधता / अगला भुगतान:</span><b id="rValidTill" style="color:#b37400;"></b></div>
         <div class="receipt-footer-stamp">
           <div class="receipt-sign-box">
-            <img src="" alt="Signature" crossorigin="anonymous" class="receipt-sign-img" data-gym-img="signImg">
+            <img src="https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg" alt="Signature" crossorigin="anonymous" class="receipt-sign-img" data-gym-img="signImg">
             <div class="receipt-owner-txt">
-              <strong data-gym="ownerName">Owner Name</strong>
-              <span data-gym="ownerTitle">Owner</span><br><span data-gym="name">Gym Portal</span>
+              <strong data-gym="ownerName">Saurabh Singh Chandel</strong>
+              <span data-gym="ownerTitle">Owner</span><br><span data-gym="name">5 Brother's Fitness Club</span>
             </div>
           </div>
           <div class="receipt-stamp-box">
-            <img src="" alt="Authorized Stamp" crossorigin="anonymous" class="receipt-stamp-img" data-gym-img="stampImg">
+            <img src="https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg" alt="Authorized Stamp" crossorigin="anonymous" class="receipt-stamp-img" data-gym-img="stampImg">
           </div>
         </div>
       </div>
@@ -671,7 +671,7 @@ th{color:#ffcc00;}
 
 <script>
 
-// --- FIREBASE CLOUD SYNC ---
+// --- FIREBASE CLOUD SYNC (taaki attendance kiosk par sabhi members dikhein) ---
 const firebaseConfig = {
   apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
   authDomain: "bfc-gym-215ae.firebaseapp.com",
@@ -683,14 +683,14 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ===== DYNAMIC GYM PROFILE (Loaded from org setup / localStorage / Cloud) =====
+// ===== GYM PROFILE: naam / pata / sign / stamp registered gym ke hisab se =====
 const GYM_DEFAULT = {
-  name: "Gym Portal", tagline: ""Your Fitness Partner"",
-  address: "Main City", phone: "9876543210",
-  ownerName: "Owner Name", ownerTitle: "Owner", ownerWa: "919876543210",
-  upiId: "9876543210@paytm", billPrefix: "BILL",
-  signImg: "",
-  stampImg: ""
+  name: "5 Brother's Fitness Club", tagline: "\"100% असली और असरदार रिजल्ट\"",
+  address: "उमराव खेड़ा, अकरमपुर, उन्नाव", phone: "9140417259",
+  ownerName: "Saurabh Singh Chandel", ownerTitle: "Owner", ownerWa: "919990954574",
+  upiId: "9140417259@okbizaxis", billPrefix: "5BFC",
+  signImg: "https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg",
+  stampImg: "https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg"
 };
 let GYM = Object.assign({}, GYM_DEFAULT);
 try {
@@ -773,6 +773,7 @@ function bfcStripImgs(list) {
     return c;
   });
 }
+// Phone ki memory bhar jaye to bhi rasid na ruke: pehle poora, fir bina photo ke, fir kuch nahi
 function bfcSafeSetLocal(list) {
   var keys = ["bbf_master_records_v4", "5BFC_MEMBERS"];
   try {
@@ -794,6 +795,7 @@ function bfcSafeSetLocal(list) {
 
 async function syncListToCloud(list) {
   try {
+    // cloud par sirf admin likhe (public customer ka phone nahi)
     if (!(typeof bfcIsAdmin === "function" && await bfcIsAdmin())) return;
     const items = (list || []).filter(m => m && m.name && (m.id || m.phone));
     for (let i = 0; i < items.length; i += 400) {
@@ -813,6 +815,9 @@ async function syncListToCloud(list) {
   }
 }
 
+
+// Cloud ko source of truth maano: pehle cloud se sab members laao, phir sirf wahi local members
+// cloud par bhejo jo cloud me nahi hain. (Isse purana local data cloud ka naya data overwrite nahi karega.)
 async function loadMembersFromCloud() {
   try {
     const snap = await bfcLoadMembersSnap(db);
@@ -845,6 +850,7 @@ async function loadMembersFromCloud() {
   }
 }
 
+// Customer wali screen "public_members" se data padhti hai: wahan bhi nayi due date / advance update karo (sirf existing doc, fail ho to chup)
 function bfcMirrorPublic(m) {
   try {
     if (!m || m.id == null || typeof bfcIsAdmin !== "function") return;
@@ -861,8 +867,10 @@ function bfcMirrorPublic(m) {
   } catch (e) {}
 }
 
+// Admission form (member ke phone se) -> "admissions" collection -> admin ke khulte hi fees list me
 async function bfcImportAdmissions() {
   try {
+    if (!(typeof bfcIsAdmin === "function" && await bfcIsAdmin())) return;
     const snap = await db.collection("admissions").where("imported", "==", false).get();
     if (snap.empty) return;
     let list = getMasterList(), added = 0;
@@ -901,7 +909,7 @@ function todayStr() {
 let currentAdminPage = 1;
 const itemsPerPage = 12;
 
-const INITIAL_MEMBERS = [];
+const INITIAL_MEMBERS = [];  // asli data cloud se (public_members) aata hai
 
 function getMasterList() {
   let masterSaved = JSON.parse(localStorage.getItem("bbf_master_records_v4") || "[]");
@@ -943,13 +951,14 @@ document.addEventListener("click", (e) => {
   if (!e.target.closest(".field-group")) hideSugBoxes();
 });
 
+// ---- प्लान तालिका (यहीं से सब जगह दाम चलते हैं) ----
 const PLANS = {
   student: { label: "विद्यार्थी",              opts: [[300, 1]] },
   seeker:  { label: "जॉब सीकर / बेरोजगार",     opts: [[400, 1], [1000, 3]] },
   poor:    { label: "गरीब श्रेणी",             opts: [[350, 1]] },
   job:     { label: "नौकरी / बिज़नेस",         opts: [[500, 1], [1200, 3], [2000, 6]] }
 };
-
+const LEGACY_MONTHS = { 900: 3, 1500: 6, 2200: 6 };
 function planOptionsHTML(cat, withLabel) {
   const p = PLANS[cat] || PLANS.job;
   return p.opts.map(function (o) {
@@ -988,6 +997,7 @@ function calculateFinalAmount() {
   }
 }
 
+
 function esc(t) { return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 function planInfoOf(m) {
@@ -1004,7 +1014,9 @@ function planInfoOf(m) {
   return { type: type, base: hit[0], months: hit[1] };
 }
 
-const FEES_ONLY = /[?&]m=fees/.test(location.search);
+
+/* ===== Public masking + Fees-only (QR) mode ===== */
+const FEES_ONLY = /[?&]m=fees\b/.test(location.search);
 function maskName(n){return String(n||"").trim().split(/\s+/).filter(Boolean).map(function(w){return w.length<=2?w.charAt(0)+"*":w.slice(0,2)+"***"}).join(" ")}
 function maskPhone(p){p=String(p||"");return p.length>=10?p.slice(0,2)+"******"+p.slice(-2):(p?"******":"")}
 function shownName(m){return m.name||""}
@@ -1027,7 +1039,7 @@ function publicSugHTML(list){
   if(list===null)return '<div style="color:#ffcc00;font-size:12px;text-align:center;padding:8px;">अपना नाम या मोबाइल लिखें</div>';
   if(!list.length)return '<div style="color:#ff6666;font-size:12px;text-align:center;padding:8px;">कोई सदस्य नहीं मिला। जिम में संपर्क करें।</div>';
   return list.slice(0,6).map(function(m){var p=planInfoOf(m);
-    return '<div class="sug-item" onclick="selectMember(''+String(m.id).replace(/'/g,"")+'')"><div><b style="color:#fff;font-size:12px;">'+esc(m.name)+'</b><br><small style="color:#aaa;">Ph: '+esc(maskPhone(m.phone))+' | '+p.months+' माह ₹'+p.base+'</small></div><span style="background:#ffcc00;color:#000;padding:4px 8px;border-radius:4px;font-weight:bold;font-size:11px;">चुनें</span></div>'}).join("");
+    return '<div class="sug-item" onclick="selectMember(\''+String(m.id).replace(/'/g,"")+'\')"><div><b style="color:#fff;font-size:12px;">'+esc(m.name)+'</b><br><small style="color:#aaa;">Ph: '+esc(maskPhone(m.phone))+' | '+p.months+' माह ₹'+p.base+'</small></div><span style="background:#ffcc00;color:#000;padding:4px 8px;border-radius:4px;font-weight:bold;font-size:11px;">चुनें</span></div>'}).join("");
 }
 
 function searchMembers(q) {
@@ -1123,6 +1135,7 @@ function clearSelection() {
   checkLateStatus();
 }
 
+// Admission form se aaye custom plan (jaise 12 mahine / alag rakam) select me na ho to jod do
 function ensureDurOption(sel, base, months) {
   if (!sel || String(sel.value) === String(base)) return;
   const o = document.createElement("option");
@@ -1149,7 +1162,9 @@ function selectMember(identifier) {
 
   const jDate = m.joinDate || m.lastPaid || todayStr();
   document.getElementById("mFeeJoinDate").value = jDate;
+  // Expiry = (lastPaid || join) + plan months − 1 day  e.g. 20 Oct → 19 Nov
   let _prevExp = memberDueDate(m);
+  // Jisne abhi tak koi fees nahi di: pehli fees join wali date ki hai (13 Nov join -> 13 Nov se cycle, agli 13 Dec)
   if (!_prevExp) _prevExp = m.lastPaid ? cycleFromJoin(jDate, m.lastPaid, p.months).nextExpiry : jDate;
   document.getElementById("mFeePrevPaidDate").value = _prevExp || jDate;
   document.getElementById("mFeePaidDate").value = todayStr();
@@ -1190,6 +1205,7 @@ function applyLock() {
   jd.classList.toggle("is-locked", lockedPlan);
   pd.classList.toggle("is-locked", lockedPlan);
 
+  // Jama Fees – only Admin
   if (paidEl) {
     if (!adminUnlocked && !isAdvOnly()) {
       paidEl.readOnly = true;
@@ -1202,6 +1218,7 @@ function applyLock() {
     }
   }
 
+  // Special Discount – only Admin
   if (discChk) {
     discChk.disabled = !adminUnlocked;
     if (!adminUnlocked) {
@@ -1257,7 +1274,9 @@ function initFormState() {
   checkLateStatus();
 }
 
+/** Join 20 Oct + 1 month → Expiry 19 Nov (same day next month minus 1) */
 function calcExpiryDate(baseDateStr, months) {
+  // AB: join 10 Oct + 1 mahina = agli fees date 10 Nov (same din, -1 din nahi). 31 tarikh ho to mahine ke aakhri din par.
   if (!baseDateStr) return "";
   const d = new Date(baseDateStr + "T00:00:00");
   if (isNaN(d.getTime())) return "";
@@ -1269,19 +1288,22 @@ function calcExpiryDate(baseDateStr, months) {
   d.setDate(Math.min(day, last));
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
-
+/** Purane records me validTill = "aakhri din" (9 Nov) tha; naye me = "agli fees date" (10 Nov, dueV:2) */
 function memberDueDate(m) {
   const v = String((m && (m.validTill || m.expiryDate || m.endDate)) || "").slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return "";
   return (m.dueV === 2) ? v : addDaysStr(v, 1);
 }
-
 function addDaysStr(str, n) {
   const d = new Date(str + "T00:00:00");
   d.setDate(d.getDate() + n);
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
-
+/** पिछली expiry (जैसे 1 Nov) → अगली expiry (1 Dec) */
+function nextCycleExpiry(prevExpiryStr, months) {
+  return calcExpiryDate(prevExpiryStr, months);
+}
+/** जॉइनिंग तारीख से साइकिल: join 20 Oct, 1 माह → 19 Nov, 19 Dec ... (भुगतान की तारीख से कभी नहीं खिसकता) */
 function cycleFromJoin(joinStr, paidStr, months) {
   const m = Math.max(1, parseInt(months, 10) || 1);
   if (!joinStr) joinStr = paidStr;
@@ -1289,13 +1311,13 @@ function cycleFromJoin(joinStr, paidStr, months) {
   while (end && end <= paidStr && k < 600) { k++; end = calcExpiryDate(joinStr, m * k); }
   const prevEnd = k > 1 ? calcExpiryDate(joinStr, m * (k - 1)) : "";
   return {
-    nextExpiry: end,
-    dueDate: prevEnd || end,
+    nextExpiry: end,                                   // अगली फीस की तारीख
+    dueDate: prevEnd || end,                           // जिस तारीख को फीस देनी थी
     startDate: prevEnd ? prevEnd : joinStr,
     lateDays: prevEnd ? Math.round((new Date(paidStr + "T00:00:00") - new Date(prevEnd + "T00:00:00")) / 86400000) : 0
   };
 }
-
+/** पिछली expiry पता हो तो: अगली expiry = उसके बाद वाली जॉइनिंग-साइकिल (14/11 चुकाया → 14/12). देर = भुगतान − पिछली expiry */
 function cycleForPayment(joinStr, paidStr, months, prevExp) {
   if (!prevExp) return cycleFromJoin(joinStr, paidStr, months);
   const m = Math.max(1, parseInt(months, 10) || 1);
@@ -1305,14 +1327,12 @@ function cycleForPayment(joinStr, paidStr, months, prevExp) {
   const late = Math.round((new Date(paidStr + "T00:00:00") - new Date(prevExp + "T00:00:00")) / 86400000);
   return { nextExpiry: end, dueDate: prevExp, startDate: prevExp, lateDays: Math.max(0, late) };
 }
-
 function getSelectedPlanMonths() {
   const durSelect = document.getElementById("feeDuration");
   if (!durSelect || !durSelect.options.length) return 1;
   const opt = durSelect.options[durSelect.selectedIndex];
   return parseInt(opt && opt.getAttribute("data-months"), 10) || 1;
 }
-
 function getLateDaysDetails() {
   const ok = { isLate: false, days: 0, text: "समय पर (On Time) ✅" };
   const paidDateVal = document.getElementById("mFeePaidDate").value;
@@ -1327,7 +1347,6 @@ function getLateDaysDetails() {
   if (c.lateDays <= 0) return ok;
   return { isLate: true, days: c.lateDays, text: `आपने ${c.lateDays} दिन देर से भुगतान किया ⚠️` };
 }
-
 function checkLateStatus() {
   const lateInfo = getLateDaysDetails();
   const warn = document.getElementById("lateWarningBox");
@@ -1355,20 +1374,6 @@ async function handleInitialSubmit(e) {
     }
   }
 
-  // ---- DUPLICATE / ONCE-PER-CYCLE PAYMENT GUARD ----
-  const paidDateVal = document.getElementById("mFeePaidDate").value;
-  if (selectedMember && !adminUnlocked) {
-    // Check if a payment for this active billing period/month was already recorded
-    const lastPaidDate = selectedMember.lastPaid || "";
-    const memberValidTill = selectedMember.validTill || "";
-    // If the selected paidDateVal is within the already paid period or matches lastPaid exactly without admin override:
-    if (lastPaidDate && paidDateVal && paidDateVal <= memberValidTill && !isAdvOnly()) {
-      alert("⚠️ इस सदस्य की फीस इस अवधि (वैधता: " + formatDateDMY(memberValidTill) + ") तक पहले ही जमा हो चुकी है!
-एक महीने/साइकिल में एक ही बार फीस मान्य होती है। यदि आप तारीख सुधारना चाहते हैं या डुप्लिकेट एंट्री करना चाहते हैं तो कृपया 'Admin Unlock' करें।");
-      return;
-    }
-  }
-
   if (FEES_ONLY && !selectedMember && !adminUnlocked) { alert("⚠️ पहले अपना नाम/मोबाइल खोजकर अपना नाम चुनें।"); return; }
   const _real = (selectedMember && !adminUnlocked) ? selectedMember : null;
   const name = _real ? (_real.name || "") : document.getElementById("mFeeName").value.trim();
@@ -1381,6 +1386,7 @@ async function handleInitialSubmit(e) {
   const planAmt = parseFloat(document.getElementById("mFeeAmount").value) || 0;
   const paidAmt = parseFloat(document.getElementById("mFeePaidAmount").value) || 0;
   const mode = document.getElementById("paymentMethod").value;
+  const paidDateVal = document.getElementById("mFeePaidDate").value;
   const joinDateVal = document.getElementById("mFeeJoinDate").value;
   const prevPaidDateVal = document.getElementById("mFeePrevPaidDate").value;
   const isDiscountChecked = document.getElementById("chkSpecialDiscount").checked;
@@ -1388,13 +1394,11 @@ async function handleInitialSubmit(e) {
   let specialDiscount = 0;
   let dueAmt = 0;
 
+  // ---- Sirf ADVANCE jama (fees / date / status nahi badlegi) ----
   if (isAdvOnly()) {
     if (!selectedMember) { alert("⚠️ Pehle member chuniye."); return; }
     if (!(paidAmt > 0)) { alert("⚠️ Advance ki rakam likhiye."); return; }
-    if (!confirm("💰 ₹" + paidAmt + " ADVANCE me jama hoga.
-Fees ki date aur Paid/Pending status nahi badlegi.
-
-OK?")) return;
+    if (!confirm("💰 ₹" + paidAmt + " ADVANCE me jama hoga.\nFees ki date aur Paid/Pending status nahi badlegi.\n\nOK?")) return;
     pendingPaymentData = {
       name, phone, father, cat, planText, months, planAmt: 0, paidAmt,
       specialDiscount: 0, dueAmt: 0, mode, paidDateVal, joinDateVal, prevPaidDateVal,
@@ -1409,6 +1413,7 @@ OK?")) return;
     return;
   }
 
+  // Advance: pehle se jama advance + is baar zyada diya hua paisa
   const advBefore = selectedMember ? (Number(selectedMember.advance) || 0) : 0;
   const _useBox = document.getElementById("chkUseAdvance");
   const useAdv = (advBefore > 0 && _useBox && _useBox.checked) ? Math.min(advBefore, planAmt) : 0;
@@ -1425,12 +1430,7 @@ OK?")) return;
     }
   } else if (covered > planAmt) {
     advanceAdd = covered - planAmt;
-    if (!confirm("💰 ₹" + advanceAdd + " zyada hai (fees ₹" + planAmt + ").
-
-Ise ADVANCE me jama kar dein? (agli fees me kaam aayega)
-
-OK = Advance jama
-Cancel = amount sudharo")) return;
+    if (!confirm("💰 ₹" + advanceAdd + " zyada hai (fees ₹" + planAmt + ").\n\nIse ADVANCE me jama kar dein? (agli fees me kaam aayega)\n\nOK = Advance jama\nCancel = amount sudharo")) return;
   }
 
   const lateInfo = getLateDaysDetails();
@@ -1585,41 +1585,22 @@ async function confirmOnlinePayment() {
   }
   if (btn) { btn.disabled = false; btn.innerText = old; }
 
+  // 📲 Telegram: turant suchna (Approve link ke saath)
   try {
     const _lnk = proofId ? (location.origin + location.pathname + "?approve=" + proofId) : "";
-    const _cap = "⏳ नई ऑनलाइन पेमेंट — Approve बाकी
-👤 " + d.name + "
-📞 " + d.phone + "
-💰 ₹" + d.paidAmt + (d.advanceOnly ? "  (💰 सिर्फ़ ADVANCE)" : "") + "
-📦 " + d.cat + " | " + d.planText +
-      "
-" + (hasRef ? "🔗 UTR: " + ref : "📸 स्क्रीनशॉट दिया") + "
-🕒 " + fmtIST(nowIso) + (_lnk ? "
-
-👉 Approve: " + _lnk : "");
+    const _cap = "⏳ नई ऑनलाइन पेमेंट — Approve बाकी\n👤 " + d.name + "\n📞 " + d.phone + "\n💰 ₹" + d.paidAmt + (d.advanceOnly ? "  (💰 सिर्फ़ ADVANCE)" : "") + "\n📦 " + d.cat + " | " + d.planText +
+      "\n" + (hasRef ? "🔗 UTR: " + ref : "📸 स्क्रीनशॉट दिया") + "\n🕒 " + fmtIST(nowIso) + (_lnk ? "\n\n👉 Approve: " + _lnk : "");
     if (hasProof) bfcNotifyPhoto(window.__proofData, _cap); else bfcNotify(_cap);
   } catch (e) {}
 
-  const waMsg = `🏋️ *${GYM.name} – New Payment*
-
-*सदस्य:* ${d.name}
-*मोबाइल:* ${d.phone}
-*राशि:* ₹${d.paidAmt}
-*प्लान:* ${d.cat} | ${d.planText}
-` +
-    (hasRef ? `*UTR:* ${ref}
-` : `*Proof:* Screenshot
-`) +
-    `*तारीख:* ${d.paidDateVal || ""}
-*समय:* ${fmtIST(nowIso)}
-
-⚠️ Approve बाकी है।`;
+  // WhatsApp Owner 9990954574
+  const waMsg = `🏋️ *${GYM.name} – New Payment*\n\n*सदस्य:* ${d.name}\n*मोबाइल:* ${d.phone}\n*राशि:* ₹${d.paidAmt}\n*प्लान:* ${d.cat} | ${d.planText}\n` +
+    (hasRef ? `*UTR:* ${ref}\n` : `*Proof:* Screenshot\n`) +
+    `*तारीख:* ${d.paidDateVal || ""}\n*समय:* ${fmtIST(nowIso)}\n\n⚠️ Approve बाकी है।`;
   const apprLink = proofId ? (location.origin + location.pathname + "?approve=" + proofId) : "";
-  window.open("https://wa.me/" + GYM.ownerWa + "?text=" + encodeURIComponent(waMsg + (apprLink ? "
+  window.open("https://wa.me/" + GYM.ownerWa + "?text=" + encodeURIComponent(waMsg + (apprLink ? "\n\n👉 सीधा Approve करने के लिए यह लिंक खोलें:\n" + apprLink : "")), "_blank");
 
-👉 सीधा Approve करने के लिए यह लिंक खोलें:
-" + apprLink : "")), "_blank");
-
+  // Owner khud (admin login ke saath) fees le raha ho to wait nahi: seedha approve + receipt
   try {
     if (d.adminEdited && typeof bfcIsAdmin === "function" && await bfcIsAdmin()) {
       window.__currentProofId = proofId;
@@ -1627,7 +1608,7 @@ async function confirmOnlinePayment() {
       return;
     }
   } catch (e) { console.warn(e); }
-
+  // Show wait screen + timer (repeats every 60s until approved)
   document.getElementById("upiStepPay").style.display = "none";
   document.getElementById("upiStepWait").style.display = "block";
   startApprovalWait(proofId, d);
@@ -1670,7 +1651,7 @@ function startApprovalWait(proofId, paymentData) {
     seconds--;
     if (timerEl) timerEl.innerText = String(Math.max(0, seconds));
     if (seconds <= 0) {
-      seconds = 60;
+      seconds = 60; // repeat until approved
       if (timerEl) timerEl.innerText = "60";
       if (statusEl) statusEl.innerText = "फिर से 60 सेकंड... Owner Approve करें";
     }
@@ -1700,6 +1681,7 @@ function startApprovalWait(proofId, paymentData) {
   }, 3000);
 }
 
+// भारतीय समय (IST) में पूरी तारीख व समय: शुक्रवार, 06 नवंबर 2026 • 11:51:32 PM
 function fmtIST(iso) {
   const dt = iso ? new Date(iso) : new Date();
   const parts = {};
@@ -1734,6 +1716,8 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
   if (!data) return;
   const reprint = !!(opts && opts.reprint);
 
+  // अगला भुगतान = जॉइनिंग साइकिल से (भुगतान की तारीख से नहीं)
+  // जैसे: 2 Oct join → 1 Nov; 5 तक देर से भी दिया तो अगला भुगतान 1 Dec (दिन आगे नहीं खिसकेगा)
   const _paidStr = data.paidDateVal || todayStr();
   const _cyc = data.advanceOnly
     ? { nextExpiry: data.prevPaidDateVal || "", startDate: data.prevPaidDateVal || _paidStr, dueDate: data.prevPaidDateVal || "", lateDays: 0 }
@@ -1748,90 +1732,77 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
   const prevDateFormatted = formatDateDMY(data.prevPaidDateVal);
 
   if (!reprint) {
-    let list = getMasterList();
-    let existingIndex = data.memberId != null
-      ? list.findIndex(x => x.id != null && x.id.toString() === data.memberId.toString())
-      : list.findIndex(x => x.phone === data.phone && (x.name || "").toLowerCase() === data.name.toLowerCase());
-    
-    if (data.advanceOnly) {
-      if (existingIndex >= 0) {
-        list[existingIndex].advance = (Number(list[existingIndex].advance) || 0) + (Number(data.advanceAdd) || 0);
-        list[existingIndex].lastAdvanceAt = data.paidAtIso || new Date().toISOString();
-        persistList(list);
-        try { bfcMirrorPublic(list[existingIndex]); } catch (e) {}
-      }
-      try {
-        bfcNotify("💰 ADVANCE जमा
-👤 " + data.name + "
-📞 " + data.phone + "
-💰 ₹" + data.advanceAdd + "
-💳 " + modeText + "
-⏱ " + fmtIST(data.paidAtIso || new Date().toISOString()));
-      } catch (e) {}
-    } else if (existingIndex >= 0) {
-      list[existingIndex].status = "Paid";
-      list[existingIndex].manualStatus = "Paid";
-      list[existingIndex].fees = "Paid";
-      list[existingIndex].payMode = shortMode;
-      list[existingIndex].amount = data.paidAmt;
-      list[existingIndex].lastPaid = data.paidDateVal;
-      list[existingIndex].dueAmount = Number(data.dueAmt) || 0;
-      list[existingIndex].validTill = _nextExpiry;
-      list[existingIndex].dueV = 2;
-      list[existingIndex].lastPaidAt = data.paidAtIso || new Date().toISOString();
-      list[existingIndex].advance = Math.max(0, (Number(list[existingIndex].advance) || 0) - (Number(data.advanceUsed) || 0) + (Number(data.advanceAdd) || 0));
-      list[existingIndex].father = data.father;
-      list[existingIndex].parentName = data.father;
-      list[existingIndex].planBase = data.planBase;
-      list[existingIndex].planMonths = data.months;
-      if (data.adminEdited) {
-        list[existingIndex].joinDate = data.joinDateVal;
-        list[existingIndex].type = data.catVal;
-      }
-    } else {
-      list.push({ 
-        id: Date.now(),
-        name: data.name, 
-        father: data.father, 
-        parentName: data.father,
-        phone: data.phone, 
-        emergency: "",
-        address: "",
-        status: "Paid", 
-        manualStatus: "Paid",
-        fees: "Paid",
-        payMode: shortMode,
-        amount: data.paidAmt, 
-        lastPaid: data.paidDateVal, 
-        dueAmount: Number(data.dueAmt) || 0,
-        validTill: _nextExpiry,
-        dueV: 2,
-        type: document.getElementById("feeCategory").value, 
-        planBase: data.planBase,
-        planMonths: data.months,
-        joinDate: data.joinDateVal,
-        advance: Number(data.advanceAdd) || 0,
-        idSubmitted: true
-      });
-    }
-    
-    if (!data.advanceOnly) {
+  let list = getMasterList();
+  let existingIndex = data.memberId != null
+    ? list.findIndex(x => x.id != null && x.id.toString() === data.memberId.toString())
+    : list.findIndex(x => x.phone === data.phone && (x.name || "").toLowerCase() === data.name.toLowerCase());
+  
+  if (data.advanceOnly) {
+    if (existingIndex >= 0) {
+      list[existingIndex].advance = (Number(list[existingIndex].advance) || 0) + (Number(data.advanceAdd) || 0);
+      list[existingIndex].lastAdvanceAt = data.paidAtIso || new Date().toISOString();
       persistList(list);
-      try { if (existingIndex >= 0) bfcMirrorPublic(list[existingIndex]); } catch (e) {}
-      try {
-        bfcNotify("🧾 फीस जमा — रसीद बनी
-👤 " + data.name + "
-📞 " + data.phone + "
-💰 ₹" + data.paidAmt + (Number(data.dueAmt) ? "  (बाकी ₹" + data.dueAmt + ")" : "") +
-          "
-📦 " + data.cat + " | " + data.planText + "
-💳 " + modeText + "
-📅 वैधता: " + validTill + "
-⏱ " + fmtIST(data.paidAtIso || new Date().toISOString()) +
-          (data.lateInfo && data.lateInfo.text ? "
-⚠️ " + data.lateInfo.text : ""));
-      } catch (e) {}
+      try { bfcMirrorPublic(list[existingIndex]); } catch (e) {}
     }
+    try {
+      bfcNotify("💰 ADVANCE जमा\n👤 " + data.name + "\n📞 " + data.phone + "\n💰 ₹" + data.advanceAdd + "\n💳 " + modeText + "\n⏱ " + fmtIST(data.paidAtIso || new Date().toISOString()));
+    } catch (e) {}
+  } else if (existingIndex >= 0) {
+    list[existingIndex].status = "Paid";
+    list[existingIndex].manualStatus = "Paid";
+    list[existingIndex].fees = "Paid";
+    list[existingIndex].payMode = shortMode;
+    list[existingIndex].amount = data.paidAmt;
+    list[existingIndex].lastPaid = data.paidDateVal;
+    list[existingIndex].dueAmount = Number(data.dueAmt) || 0;
+    list[existingIndex].validTill = _nextExpiry;
+    list[existingIndex].dueV = 2;
+    list[existingIndex].lastPaidAt = data.paidAtIso || new Date().toISOString();
+    list[existingIndex].advance = Math.max(0, (Number(list[existingIndex].advance) || 0) - (Number(data.advanceUsed) || 0) + (Number(data.advanceAdd) || 0));
+    list[existingIndex].father = data.father;
+    list[existingIndex].parentName = data.father;
+    list[existingIndex].planBase = data.planBase;
+    list[existingIndex].planMonths = data.months;
+    if (data.adminEdited) {
+      list[existingIndex].joinDate = data.joinDateVal;
+      list[existingIndex].type = data.catVal;
+    }
+  } else {
+    list.push({ 
+      id: Date.now(),
+      name: data.name, 
+      father: data.father, 
+      parentName: data.father,
+      phone: data.phone, 
+      emergency: "",
+      address: "",
+      status: "Paid", 
+      manualStatus: "Paid",
+      fees: "Paid",
+      payMode: shortMode,
+      amount: data.paidAmt, 
+      lastPaid: data.paidDateVal, 
+      dueAmount: Number(data.dueAmt) || 0,
+      validTill: _nextExpiry,
+      dueV: 2,
+      type: document.getElementById("feeCategory").value, 
+      planBase: data.planBase,
+      planMonths: data.months,
+      joinDate: data.joinDateVal,
+      advance: Number(data.advanceAdd) || 0,
+      idSubmitted: true
+    });
+  }
+  
+  if (!data.advanceOnly) {
+  persistList(list);
+  try { if (existingIndex >= 0) bfcMirrorPublic(list[existingIndex]); } catch (e) {}
+  try {
+    bfcNotify("🧾 फीस जमा — रसीद बनी\n👤 " + data.name + "\n📞 " + data.phone + "\n💰 ₹" + data.paidAmt + (Number(data.dueAmt) ? "  (बाकी ₹" + data.dueAmt + ")" : "") +
+      "\n📦 " + data.cat + " | " + data.planText + "\n💳 " + modeText + "\n📅 वैधता: " + validTill + "\n⏱ " + fmtIST(data.paidAtIso || new Date().toISOString()) +
+      (data.lateInfo && data.lateInfo.text ? "\n⚠️ " + data.lateInfo.text : ""));
+  } catch (e) {}
+  }
   }
 
   const billId = (opts && opts.billId) ? opts.billId : (GYM.billPrefix + "-" + Date.now().toString().slice(-4));
@@ -1867,35 +1838,21 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
   if (_auRow) { _auRow.style.display = (Number(data.advanceUsed) > 0) ? "flex" : "none"; document.getElementById("rAdvUsed").innerText = "-₹" + (Number(data.advanceUsed) || 0); }
   if (_adRow) { _adRow.style.display = (Number(data.advanceAdd) > 0) ? "flex" : "none"; document.getElementById("rAdvance").innerText = data.advanceOnly ? ("₹" + (Number(data.advanceAdd) || 0) + (reprint ? "" : " (कुल Advance ₹" + ((Number(data.advanceBefore) || 0) + (Number(data.advanceAdd) || 0)) + ")")) : ("₹" + (Number(data.advanceAdd) || 0) + " (fees ₹" + data.planAmt + " + advance ₹" + (Number(data.advanceAdd) || 0) + ")"); }
   let advMsg = "";
-  if (Number(data.advanceUsed) > 0) advMsg += "💰 *Advance se adjust:* ₹" + data.advanceUsed + "
-";
-  if (Number(data.advanceAdd) > 0) advMsg += "💰 *Advance jama:* ₹" + data.advanceAdd + " (fees ₹" + data.planAmt + " + advance ₹" + data.advanceAdd + ")
-";
+  if (Number(data.advanceUsed) > 0) advMsg += "💰 *Advance se adjust:* ₹" + data.advanceUsed + "\n";
+  if (Number(data.advanceAdd) > 0) advMsg += "💰 *Advance jama:* ₹" + data.advanceAdd + " (fees ₹" + data.planAmt + " + advance ₹" + data.advanceAdd + ")\n";
   document.getElementById("rValidTill").innerText = validTill;
 
   let specialDiscountMsg = "";
   if (data.specialDiscount > 0) {
-    specialDiscountMsg = `• *विशेष छूट:* ₹${data.specialDiscount} (Special Discount) 🎁
-`;
+    specialDiscountMsg = `• *विशेष छूट:* ₹${data.specialDiscount} (Special Discount) 🎁\n`;
   }
 
   let prevPayMsg = "";
   if (prevDateFormatted !== "--" && prevDateFormatted !== paidDateFormatted) {
-    prevPayMsg = `• *पिछला भुगतान:* ${prevDateFormatted}
-`;
+    prevPayMsg = `• *पिछला भुगतान:* ${prevDateFormatted}\n`;
   }
 
-  const msg = data.advanceOnly ? (`🏋️‍♂️ *${GYM.name.toUpperCase()}*
-*Advance जमा रसीद*
-━━━━━━━━━━━━━━━━━━━━
-*सदस्य:* ${data.name}
-*रसीद संख्या:* #${billId}
-• *तारीख:* ${paidDateFormatted}
-• *Advance जमा:* ₹${data.advanceAdd} (${modeText})
-• *अगली फीस तारीख:* ${validTill} (बदली नहीं)
-━━━━━━━━━━━━━━━━━━━━
-📍 ${GYM.address}
-📞 संपर्क: ${GYM.phone}`) : `🏋️‍♂️ *${GYM.name.toUpperCase()}*
+  const msg = data.advanceOnly ? (`🏋️‍♂️ *${GYM.name.toUpperCase()}*\n*Advance जमा रसीद*\n━━━━━━━━━━━━━━━━━━━━\n*सदस्य:* ${data.name}\n*रसीद संख्या:* #${billId}\n• *तारीख:* ${paidDateFormatted}\n• *Advance जमा:* ₹${data.advanceAdd} (${modeText})\n• *अगली फीस तारीख:* ${validTill} (बदली नहीं)\n━━━━━━━━━━━━━━━━━━━━\n📍 ${GYM.address}\n📞 संपर्क: ${GYM.phone}`) : `🏋️‍♂️ *${GYM.name.toUpperCase()}*
 *Official Payment & Fee Slip*
 ━━━━━━━━━━━━━━━━━━━━
 *सदस्य:* ${data.name}
@@ -1908,8 +1865,7 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
 • *विलंब स्थिति:* ${data.lateInfo.text}
 ${prevPayMsg}
 💰 *शुल्क व भुगतान विवरण:*
-• *सक्रिय प्लान:* ${data.cat} — ${data.months === 1 ? "1 महीना" : data.months + " महीने"} (₹${data.planAmt})${data.catVal === "poor" ? "
-🎁 आपको गरीब श्रेणी में रखकर विशेष छूट दी गई है।" : ""}
+• *सक्रिय प्लान:* ${data.cat} — ${data.months === 1 ? "1 महीना" : data.months + " महीने"} (₹${data.planAmt})${data.catVal === "poor" ? "\n🎁 आपको गरीब श्रेणी में रखकर विशेष छूट दी गई है।" : ""}
 • *जमा राशि:* ₹${data.paidAmt} (${modeText})
 ${specialDiscountMsg}${advMsg}• *बकाया राशि:* ₹${data.dueAmt} ${data.dueAmt === 0 ? '(कोई बकाया नहीं)' : '⚠️'}
 • *अगला भुगतान:* ${validTill}
@@ -1944,7 +1900,7 @@ function bfcSaveBlob(blob, fileName) {
   a.click();
   setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 4000);
 }
-
+// 📥 फोटो सीधा डाउनलोड
 function downloadReceiptImage() {
   const billId = document.getElementById("billId").innerText || "Receipt";
   const btn = document.getElementById("dlImgBtn"); const old = btn.innerText; btn.innerText = "⏳ बन रही है...";
@@ -1956,7 +1912,7 @@ function downloadReceiptImage() {
     }, "image/png");
   }).catch(function (e) { btn.innerText = old; console.error(e); alert("❌ फोटो नहीं बनी: " + (e && e.message || e)); });
 }
-
+// 📄 PDF डाउनलोड
 function downloadReceiptPDF() {
   const billId = document.getElementById("billId").innerText || "Receipt";
   const btn = document.getElementById("dlPdfBtn"); const old = btn.innerText; btn.innerText = "⏳ बन रही है...";
@@ -2007,6 +1963,7 @@ function enterAdminSection() {
   renderAdminTable();
 }
 
+/** Same phone ke multiple records → father name sahi wala rakho, baaki hatao */
 function cleanDuplicateMembers() {
   if (!confirm("एक ही नाम + मोबाइल वाले डुप्लिकेट हटाकर सिर्फ सही एंट्री रखी जाएगी (अलग नाम वाले सदस्य सुरक्षित रहेंगे)। चलूँ?")) return;
   let list = getMasterList();
@@ -2030,6 +1987,7 @@ function cleanDuplicateMembers() {
       keep.push(group[0]);
       return;
     }
+    // Prefer: proper father name, then Paid status, then latest lastPaid
     group.sort((a, b) => {
       const fa = (a.father || a.parentName || "").trim();
       const fb = (b.father || b.parentName || "").trim();
@@ -2067,6 +2025,8 @@ function changeAdminPage(direction) {
   renderAdminTable();
 }
 
+
+// ---- Hindi/English dono me naam dhundo (Sonu = सोनू) + mobile ----
 var __DEV = {"क":"k","ख":"k","ग":"g","घ":"g","ङ":"n","च":"c","छ":"c","ज":"j","झ":"j","ञ":"n","ट":"t","ठ":"t","ड":"d","ढ":"d","ण":"n","त":"t","थ":"t","द":"d","ध":"d","न":"n","प":"p","फ":"p","ब":"b","भ":"b","म":"m","य":"y","र":"r","ल":"l","ळ":"l","व":"v","श":"s","ष":"s","स":"s","ह":"h","ऋ":"r","ं":"n","ँ":"n"};
 function phoneticKey(str) {
   var t = String(str || "").toLowerCase().normalize("NFC").replace(/क्ष/g,"ks").replace(/ज्ञ/g,"gy").replace(/ड़/g,"र").replace(/ढ़/g,"र");
@@ -2074,13 +2034,13 @@ function phoneticKey(str) {
   for (var i = 0; i < t.length; i++) {
     var ch = t[i];
     if (__DEV[ch] !== undefined) out += __DEV[ch];
-    else if (/[ऀ-ॿ]/.test(ch)) continue;
+    else if (/[\u0900-\u097F]/.test(ch)) continue;
     else out += ch;
   }
   out = out.replace(/chh?/g,"#").replace(/sh/g,"s").replace(/kh/g,"k").replace(/gh/g,"g").replace(/jh/g,"j").replace(/th/g,"t")
            .replace(/dh/g,"d").replace(/bh/g,"b").replace(/ph/g,"p").replace(/c/g,"k").replace(/#/g,"c").replace(/q/g,"k")
            .replace(/x/g,"ks").replace(/z/g,"j").replace(/f/g,"p").replace(/w/g,"v").replace(/[aeiou]/g,"").replace(/[^a-z]/g,"");
-  return out.replace(/(.)+/g,"$1");
+  return out.replace(/(.)\1+/g,"$1");
 }
 function memberMatchesSearch(m, q) {
   q = String(q || "").trim().toLowerCase();
@@ -2098,6 +2058,7 @@ function memberMatchesSearch(m, q) {
   });
 }
 
+// ---- ADVANCE: zyada diya hua paisa agli fees me adjust ----
 function isAdvOnly() { const c = document.getElementById("chkAdvanceOnly"); return !!(c && c.checked); }
 function onAdvanceOnlyChange() {
   const on = isAdvOnly();
@@ -2219,6 +2180,7 @@ function renderAdminTable() {
   });
 }
 
+// ---- बकाया फीस की सूची ----
 let __duesRows = [];
 function computeDues() {
   const todayY = todayStr();
@@ -2258,21 +2220,18 @@ async function sendDuesToTelegram() {
   const lines = __duesRows.map(function (r, i) {
     return (i + 1) + ". " + r.name + " (" + r.phone + ") — " + r.plan + (r.exp ? " | खत्म " + formatDateDMY(r.exp) : "") + (r.late > 0 ? " | " + r.late + " दिन देर" : "") + (r.dueAmt ? " | बाकी ₹" + r.dueAmt : "");
   });
-  const head = "⚠️ बकाया फीस — " + __duesRows.length + " सदस्य (" + formatDateDMY(todayStr()) + ")
-
-";
+  const head = "⚠️ बकाया फीस — " + __duesRows.length + " सदस्य (" + formatDateDMY(todayStr()) + ")\n\n";
   let ok = true, chunk = head;
   for (let i = 0; i < lines.length; i++) {
-    if ((chunk + lines[i] + "
-").length > 3800) { ok = (await bfcNotify(chunk)) && ok; chunk = ""; }
-    chunk += lines[i] + "
-";
+    if ((chunk + lines[i] + "\n").length > 3800) { ok = (await bfcNotify(chunk)) && ok; chunk = ""; }
+    chunk += lines[i] + "\n";
   }
   if (chunk) ok = (await bfcNotify(chunk)) && ok;
   alert(ok ? "✅ सूची Telegram पर भेज दी।" : "❌ नहीं गई — इंटरनेट देखें।");
 }
 
 async function openProofs() {
+  // 🔐 सिर्फ़ Admin (Email + Password) — बिना login लिस्ट नहीं खुलेगी
   if (typeof bfcLogin !== "function") { alert("auth-gate.js लोड नहीं हुई — पेज रिफ्रेश करें।"); return; }
   const okLogin = await bfcLogin();
   if (!okLogin) return;
@@ -2285,6 +2244,7 @@ async function openProofs() {
     if (snap.empty) { box.innerHTML = "अभी कोई पेमेंट नहीं आई है।"; return; }
     const rows = [];
     snap.forEach(function (doc) { rows.push({ id: doc.id, p: doc.data() }); });
+    // पहले Approve बाकी, फिर बाकी
     const rank = function (p) { return (p.status === "rejected") ? 2 : (p.checked ? 1 : 0); };
     rows.sort(function (a, b) { return rank(a.p) - rank(b.p) || String(b.p.createdAt).localeCompare(String(a.p.createdAt)); });
     const pend = rows.filter(function (r) { return rank(r.p) === 0; }).length;
@@ -2298,11 +2258,11 @@ async function openProofs() {
         '<div style="font-size:12px; margin:3px 0;">UTR: <b style="color:#ffcc00;">' + esc(p.utr || "—") + '</b></div>' +
         '<div style="font-size:11px; color:#aaa;">' + esc(fmtIST(p.createdAt)) + '</div>' +
         (p.image ? '<img src="' + esc(p.image) + '" style="width:100%; border-radius:8px; margin:6px 0; cursor:zoom-in;" onclick="window.open(this.src)">' : '<div style="color:#aaa; font-size:12px; margin:6px 0;">(सिर्फ़ UTR दिया, स्क्रीनशॉट नहीं)</div>') +
-        (st === 1 ? '<div style="color:#25D366; font-size:12px; font-weight:bold;">✔ Approve हो चुका</div>' + '<button type="button" onclick="reprintProofReceipt('' + r.id + '')" style="width:100%; background:#ffcc00; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; margin-top:6px; cursor:pointer;">🧾 Receipt dikhao / download</button>' :
+        (st === 1 ? '<div style="color:#25D366; font-size:12px; font-weight:bold;">✔ Approve हो चुका</div>' + '<button type="button" onclick="reprintProofReceipt(\'' + r.id + '\')" style="width:100%; background:#ffcc00; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; margin-top:6px; cursor:pointer;">🧾 Receipt dikhao / download</button>' :
          st === 2 ? '<div style="color:#ff6666; font-size:12px; font-weight:bold;">❌ Reject किया गया</div>' :
           '<div style="display:flex; gap:8px;">' +
-          '<button type="button" onclick="markProofChecked('' + r.id + '', this)" style="flex:2; background:#25D366; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">✅ Approve करें</button>' +
-          '<button type="button" onclick="rejectProof('' + r.id + '', this)" style="flex:1; background:#ff4444; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">❌ Reject</button></div>') +
+          '<button type="button" onclick="markProofChecked(\'' + r.id + '\', this)" style="flex:2; background:#25D366; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">✅ Approve करें</button>' +
+          '<button type="button" onclick="rejectProof(\'' + r.id + '\', this)" style="flex:1; background:#ff4444; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer;">❌ Reject</button></div>') +
         '</div>';
     });
     box.innerHTML = html;
@@ -2312,7 +2272,6 @@ async function openProofs() {
     box.innerHTML = "❌ लोड नहीं हुआ: " + esc(e && e.message || e) + "<br><small>(Admin login सही है? Firestore Rules देखें)</small>";
   }
 }
-
 async function reprintProofReceipt(id) {
   try {
     const snap = await db.collection("payment_proofs").doc(id).get();
@@ -2334,7 +2293,6 @@ async function reprintProofReceipt(id) {
     finalizeReceiptAndUnlock(p.modeText || "Online UPI", "Online", false, { reprint: true, billId: p.billId || (GYM.billPrefix + "-" + String(stamp).slice(-4)) });
   } catch (e) { alert("❌ Receipt nahi bani: " + (e && e.message || e)); }
 }
-
 async function rejectProof(id, btn) {
   const why = prompt("Reject का कारण (वैकल्पिक):", "पैसा नहीं मिला");
   if (why === null) return;
@@ -2343,7 +2301,6 @@ async function rejectProof(id, btn) {
     btn.parentNode.outerHTML = '<div style="color:#ff6666; font-size:12px; font-weight:bold;">❌ Reject किया गया</div>';
   } catch (e) { alert("❌ सेव नहीं हुआ: " + (e && e.message || e)); }
 }
-
 async function markProofChecked(id, btn) {
   try {
     const docRef = db.collection("payment_proofs").doc(id);
@@ -2382,9 +2339,9 @@ async function markProofChecked(id, btn) {
       persistList(list);
       try { bfcMirrorPublic(list[idx]); } catch (e) {}
     }
-    (btn.parentNode.tagName === "DIV" && btn.parentNode.children.length > 1 ? btn.parentNode : btn).outerHTML = '<div style="color:#25D366; font-size:12px; font-weight:bold;">✔ Approve हो गया — सदस्य Paid</div>' + '<button type="button" onclick="reprintProofReceipt('' + id + '')" style="width:100%; background:#ffcc00; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; margin-top:6px; cursor:pointer;">🧾 Receipt banao / download</button>';
+    (btn.parentNode.tagName === "DIV" && btn.parentNode.children.length > 1 ? btn.parentNode : btn).outerHTML = '<div style="color:#25D366; font-size:12px; font-weight:bold;">✔ Approve हो गया — सदस्य Paid</div>' + '<button type="button" onclick="reprintProofReceipt(\'' + id + '\')" style="width:100%; background:#ffcc00; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; margin-top:6px; cursor:pointer;">🧾 Receipt banao / download</button>';
     if (document.getElementById("adminTableBody")) { try { renderAdminTable(); } catch (e) {} }
-    alert("✅ Approve सफल! Customer को Receipt auto mil jayegi.");
+    alert("✅ Approve सफल! Customer को Receipt auto mil jayegi (agar wait screen par hai).");
   } catch (e) {
     console.error(e);
     alert("❌ सेव नहीं हुआ: " + (e && e.message || e));
@@ -2455,24 +2412,14 @@ function toggleMemberPaidById(identifier) {
 function showMemberDetailById(identifier) {
   const m = getMasterList().find(x => (x.id && x.id.toString() === identifier.toString()) || (x.phone && x.phone.toString() === identifier.toString()));
   if (!m) return;
-  alert(`📋 सदस्य सम्पूर्ण रिकॉर्ड (ADMIN ONLY):
-
-नाम: ${m.name}
-पिता का नाम: ${m.father || m.parentName || 'N/A'}
-मोबाइल: ${m.phone}
-श्रेणी: ${m.type === 'student' ? 'विद्यार्थी' : 'जॉब/व्यापार'}
-स्थिति: ${m.status || m.manualStatus}
-माध्यम: ${m.payMode || 'Cash'}
-अंतिम पेमेंट तिथि: ${m.lastPaid || 'N/A'}
-जॉइनिंग तिथि: ${m.joinDate || 'N/A'}
-अगली फीस तारीख: ${memberDueDate(m) ? formatDateDMY(memberDueDate(m)) : 'N/A'}`);
+  alert(`📋 सदस्य सम्पूर्ण रिकॉर्ड (ADMIN ONLY):\n\nनाम: ${m.name}\nपिता का नाम: ${m.father || m.parentName || 'N/A'}\nमोबाइल: ${m.phone}\nश्रेणी: ${m.type === 'student' ? 'विद्यार्थी' : 'जॉब/व्यापार'}\nस्थिति: ${m.status || m.manualStatus}\nमाध्यम: ${m.payMode || 'Cash'}\nअंतिम पेमेंट तिथि: ${m.lastPaid || 'N/A'}\nजॉइनिंग तिथि: ${m.joinDate || 'N/A'}\nअगली फीस तारीख: ${memberDueDate(m) ? formatDateDMY(memberDueDate(m)) : 'N/A'}`);
 }
 
 async function deleteMemberById(identifier) {
   let list = getMasterList();
   const m = list.find(x => (x.id && x.id.toString() === identifier.toString()) || (x.phone && x.phone.toString() === identifier.toString()));
   if (!m) return;
-  if (!confirm("⚠️ "" + m.name + "" ki fees reset (Pending) karni hai?")) return;
+  if (!confirm("⚠️ \"" + m.name + "\" ki fees reset (Pending) karni hai?")) return;
   const okAdmin = (typeof bfcLogin === "function") ? await bfcLogin() : false;
   if (!okAdmin) return;
   m.status = "Pending";
@@ -2485,7 +2432,7 @@ async function deleteMemberById(identifier) {
   delete m.dueV;
   persistList(list);
   try { bfcMirrorPublic(Object.assign({}, m, { validTill: "" })); } catch (e) {}
-  alert("✅ "" + m.name + "" ki fees reset ho gayi (ab Pending hai).");
+  alert("✅ \"" + m.name + "\" ki fees reset ho gayi (ab Pending hai).");
   renderAdminTable();
 }
 
@@ -2543,13 +2490,11 @@ function handleManualAddSubmit(e) {
 
 function downloadCSV() {
   const list = getMasterList();
-  let csv = "क्र.,तारीख,सदस्य का नाम,पिता का नाम,मोबाइल नंबर,श्रेणी,स्थिति,माध्यम,अंतिम पेमेंट
-";
+  let csv = "क्र.,तारीख,सदस्य का नाम,पिता का नाम,मोबाइल नंबर,श्रेणी,स्थिति,माध्यम,अंतिम पेमेंट\n";
   list.forEach((m, i) => {
     let day = m.joinDate ? m.joinDate.split('-')[2] : '-';
     let isPaid = (m.status === 'Paid' || m.manualStatus === 'Paid' || m.fees === 'Paid');
-    csv += `"${i+1}","${day} तारीख","${m.name}","${m.father || m.parentName || '-'}","${m.phone}","${m.type || '-'}","${isPaid ? 'Paid' : 'Pending'}","${m.payMode || 'Cash'}","${m.lastPaid || '-'}"
-`;
+    csv += `"${i+1}","${day} तारीख","${m.name}","${m.father || m.parentName || '-'}","${m.phone}","${m.type || '-'}","${isPaid ? 'Paid' : 'Pending'}","${m.payMode || 'Cash'}","${m.lastPaid || '-'}"\n`;
   });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const a = document.createElement("a");
@@ -2608,6 +2553,7 @@ function closeBillModalAndReset() {
 }
 </script>
 <script>
+/* Fees-only QR mode: ?m=fees  -> sirf fees; admin tab / unlock / cash band */
 window.addEventListener("DOMContentLoaded",function(){
   var lab=document.querySelector("#sectionFees .field-group label");
   var inp=document.getElementById("feeSearchInput");

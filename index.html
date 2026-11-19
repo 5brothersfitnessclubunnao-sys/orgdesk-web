@@ -35,7 +35,19 @@
     .btn.g{background:#222;color:var(--ac);border:1px solid var(--ac)}
     .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;border:1px solid var(--border);border-radius:9px;margin-top:6px;background:#0f0f12;font-size:13px}
     .row small{color:var(--mut)}.due{color:#ff6b6b;font-weight:900}.sec{margin-top:14px;color:var(--ac);font-weight:800;font-size:13px}
-  </style>
+  
+    .sub-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+    .stab{background:#111;border:1px solid var(--border);color:#bbb;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;text-align:center}
+    .stab.on{background:var(--ac);color:#000;border-color:var(--ac)}
+    .st-card{background:#101015;border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:8px}
+    .st-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .st-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .st-lbl{font-size:10.5px;color:#bbb;display:block;margin-top:6px}
+    .st-box{background:#0b0b0e;border:1px dashed var(--border);border-radius:8px;padding:8px;margin-top:8px;font-size:11.5px;line-height:1.5}
+    .slip-paper{background:#fff;color:#111;border-radius:12px;padding:16px;font-size:12px;line-height:1.45}
+    .slip-row{display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:4px 0}
+    .btn-sm{padding:6px 8px;font-size:11px;font-weight:800;border-radius:6px;border:0;cursor:pointer}
+</style>
 </head>
 <body>
 <div class="dash-container">
@@ -53,6 +65,11 @@
 
   <div class="grid-menu">
     <a href="join.html" class="menu-card full"><div class="icon">📝</div><div class="title">Admission Form</div><div class="sub">New member registration, plan &amp; QR generation</div></a>
+        <a href="pay.html" class="menu-card full" style="background:linear-gradient(135deg,#c0392b,#962d22); color:#fff; border:0; font-weight:900;">
+      <div class="icon">💳</div>
+      <div class="title" style="color:#fff; font-size:15px;">Pay / UPI &amp; Fees</div>
+      <div class="sub" style="color:#f0f0f5;">जिम फीस भरें / रसीद डाउनलोड करें</div>
+    </a>
     <a href="attendance.html" class="menu-card"><div class="icon">📋</div><div class="title">Attendance</div><div class="sub">Staff &amp; Member tracking</div></a>
     <button type="button" class="menu-card" onclick="openFee()"><div class="icon">💰</div><div class="title">Fee Collection</div><div class="sub">Dues &amp; payment tracking</div></button>
     <button type="button" class="menu-card" onclick="openImp()"><div class="icon">📤</div><div class="title">Upload Gym Data</div><div class="sub">Purane register ke members daalein</div></button>
@@ -67,20 +84,169 @@
   <button class="btn" onclick="pinOk()">OK</button><button class="btn g" onclick="closeOv('pinOv')">Cancel</button></div></div>
 
 <!-- ADMIN -->
-<div class="ov" id="admOv"><div class="bx"><h3>🔐 Admin Portal</h3>
-  <div class="sec" style="margin-top:0">➕ Staff जोड़ें</div>
-  <input id="sn" placeholder="Staff का नाम"><input id="sp" placeholder="मोबाइल (optional)" inputmode="tel"><input id="sj" type="date">
-  <button class="btn" onclick="addStaff()">Save Staff</button>
-  <div class="sec">🧑‍💼 Staff list</div><div id="stList"></div>
-  <div class="sec">🔑 PIN बदलें</div>
-  <input id="np" type="password" inputmode="numeric" placeholder="नया PIN (कम से कम 4 अंक)"><button class="btn g" onclick="changePin()">PIN Save करें</button>
-  <div class="sec">💾 Backup</div><div id="bkInfo" style="font-size:11.5px;color:var(--mut)"></div>
-  <button class="btn g" onclick="runBk()">💾 अभी Backup लें + Download</button>
-  <div style="font-size:10.5px;color:var(--mut);margin-top:4px">हर रात 11 बजे auto-backup (Cloud में) — जब यह app खुला हो; बंद हो तो अगली बार खुलते ही।</div>
-  <div class="sec">⚙️ Account</div>
-  <a href="category-select.html" class="btn g" style="display:block;text-align:center;text-decoration:none">⚙️ Org Setup (Business profile)</a>
-  <a href="login.html" class="btn g" style="display:block;text-align:center;text-decoration:none;color:#e74c3c;border-color:#e74c3c" onclick="localStorage.removeItem('om_org_profile')">🚪 Switch Account / Logout</a>
-  <button class="btn g" onclick="closeOv('admOv')">✖ बंद</button></div></div>
+<div class="ov" id="admOv"><div class="bx" style="max-width:480px">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h3 style="margin:0">🔐 Admin Portal</h3>
+    <button class="btn-sm" style="background:#222;color:var(--ac);border:1px solid var(--ac)" onclick="closeOv('admOv')">✖ बंद</button>
+  </div>
+
+  <div class="sub-tabs">
+    <button type="button" class="stab on" id="stab_staff" onclick="switchAdmTab('staff')">🧑‍💼 Staff &amp; Salary</button>
+    <button type="button" class="stab" id="stab_sec" onclick="switchAdmTab('sec')">🔑 PIN &amp; Backup</button>
+    <button type="button" class="stab" id="stab_acc" onclick="switchAdmTab('acc')">⚙️ Account</button>
+  </div>
+
+  <div id="admPane_staff">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px">
+      <div class="sec" style="margin:0">👥 Staff Members</div>
+      <button type="button" class="btn-sm" style="background:var(--ok);color:#000" onclick="openStaffEditor(null)">➕ Add / Register Staff</button>
+    </div>
+    <div style="font-size:11px;color:var(--mut);margin-top:4px">किसी स्टाफ पर क्लिक करके उसकी पूरी प्रोफ़ाइल, डेली/आवरली/मिनट/सेकंड सैलरी, लेट पेनल्टी और सैलरी स्लिप देखें या एडिट करें।</div>
+    <div id="stList"></div>
+  </div>
+
+  <div id="admPane_sec" style="display:none">
+    <div class="sec" style="margin-top:4px">🔑 PIN बदलें</div>
+    <input id="np" type="password" inputmode="numeric" placeholder="नया PIN (कम से कम 4 अंक)">
+    <button class="btn g" onclick="changePin()">PIN Save करें</button>
+
+    <div class="sec">💾 Backup</div>
+    <div id="bkInfo" style="font-size:11.5px;color:var(--mut)"></div>
+    <button class="btn g" onclick="runBk()">💾 अभी Backup लें + Download</button>
+    <div style="font-size:10.5px;color:var(--mut);margin-top:4px">हर रात 11 बजे auto-backup (Cloud में) — जब यह app खुला हो; बंद हो तो अगली बार खुलते ही।</div>
+  </div>
+
+  <div id="admPane_acc" style="display:none">
+    <div class="sec" style="margin-top:4px">⚙️ Account &amp; Organization</div>
+    <a href="category-select.html" class="btn g" style="display:block;text-align:center;text-decoration:none">⚙️ Org Setup (Business profile)</a>
+    <button type="button" class="btn g" style="color:#e74c3c;border-color:#e74c3c;margin-top:12px" onclick="doLogout()">🚪 Logout</button>
+    <div style="font-size:10.5px;color:var(--mut);margin-top:6px;line-height:1.4">Logout करने पर सेशन बंद होगा, लेकिन आपका जिम डेटा और प्रोफ़ाइल सुरक्षित रहेगी। दोबारा लॉगिन करने पर बार-बार नया डेटा नहीं भरना पड़ेगा।</div>
+  </div>
+</div></div>
+
+<!-- STAFF DETAIL / ADD / EDIT / SALARY ENGINE MODAL -->
+<div class="ov" id="staffDetailOv"><div class="bx" style="max-width:500px">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h3 id="sdTitle" style="margin:0">🧑‍💼 Staff Profile &amp; Salary</h3>
+    <button type="button" class="btn-sm" style="background:#222;color:var(--ac);border:1px solid var(--ac)" onclick="closeOv('staffDetailOv')">✖ बंद</button>
+  </div>
+
+  <div class="sub-tabs" id="sdSubTabs">
+    <button type="button" class="stab on" id="sdt_prof" onclick="switchStaffSubTab('prof')">📋 Details</button>
+    <button type="button" class="stab" id="sdt_sal" onclick="switchStaffSubTab('sal')">💰 Salary &amp; Penalty</button>
+    <button type="button" class="stab" id="sdt_slip" onclick="switchStaffSubTab('slip')">🧾 Salary Slip</button>
+  </div>
+
+  <div id="sdp_prof">
+    <label class="st-lbl">पूरा नाम (Full Name) *</label>
+    <input id="sf_name" placeholder="Staff का पूरा नाम">
+
+    <div class="st-grid">
+      <div><label class="st-lbl">मोबाइल नंबर</label><input id="sf_phone" inputmode="tel" placeholder="10 अंक मोबाइल"></div>
+      <div><label class="st-lbl">पद / भूमिका (Role)</label><input id="sf_role" placeholder="Trainer / Manager / Staff"></div>
+    </div>
+
+    <div class="st-grid">
+      <div><label class="st-lbl">वैवाहिक स्थिति (Marital Status)</label>
+        <select id="sf_marital" onchange="toggleSpouseField()">
+          <option value="Unmarried">अविवाहित (Unmarried)</option>
+          <option value="Married">विवाहित (Married)</option>
+        </select>
+      </div>
+      <div><label class="st-lbl">जन्म तिथि (DOB)</label><input id="sf_dob" type="date"></div>
+    </div>
+
+    <div class="st-grid">
+      <div><label class="st-lbl">पिता का नाम (Father Name)</label><input id="sf_father" placeholder="पिता का नाम"></div>
+      <div><label class="st-lbl">माता का नाम (Mother Name)</label><input id="sf_mother" placeholder="माता का नाम"></div>
+    </div>
+
+    <div id="sf_spouseWrap" style="display:none">
+      <div class="st-grid">
+        <div><label class="st-lbl">पति / पत्नी का नाम (Husband / Wife)</label><input id="sf_spouse" placeholder="Husband / Wife नाम"></div>
+        <div><label class="st-lbl">रिश्ता (Relation)</label><input id="sf_relation" placeholder="Spouse / Guardian Relation"></div>
+      </div>
+    </div>
+
+    <div class="st-grid">
+      <div><label class="st-lbl">Government ID Type</label>
+        <select id="sf_govType">
+          <option value="Voter ID">Voter ID</option>
+          <option value="Driving License">Driving License</option>
+          <option value="Passport">Passport</option>
+          <option value="PAN / Other Gov ID">PAN / Other Gov ID</option>
+        </select>
+      </div>
+      <div><label class="st-lbl">Government ID Number</label><input id="sf_govId" placeholder="ID Number"></div>
+    </div>
+
+    <div class="st-grid">
+      <div><label class="st-lbl">Joining Date</label><input id="sf_joinDate" type="date"></div>
+      <div><label class="st-lbl">मासिक तय सैलरी (Monthly Salary ₹)</label><input id="sf_monthlySalary" type="number" min="0" step="1" placeholder="उदा. 10000"></div>
+    </div>
+
+    <div class="st-grid">
+      <div><label class="st-lbl">प्रतिदिन काम के घंटे (Shift Hours/Day)</label><input id="sf_shiftHours" type="number" min="1" max="24" step="0.5" value="8"></div>
+      <div><label class="st-lbl">महीने के कार्य दिवस (Working Days/Mo)</label><input id="sf_workDays" type="number" min="1" max="31" value="30"></div>
+    </div>
+
+    <div class="sec">🏦 Bank &amp; Statutory Details</div>
+    <div class="st-grid">
+      <div><label class="st-lbl">बैंक का नाम (Bank Name)</label><input id="sf_bankName" placeholder="SBI / HDFC / ICICI"></div>
+      <div><label class="st-lbl">खाता संख्या (Account No.)</label><input id="sf_accNo" placeholder="Account Number"></div>
+    </div>
+    <div class="st-grid">
+      <div><label class="st-lbl">IFSC Code</label><input id="sf_ifsc" placeholder="IFSC Code"></div>
+      <div><label class="st-lbl">PAN Card No.</label><input id="sf_pan" placeholder="ABCDE1234F"></div>
+    </div>
+    <div class="st-grid">
+      <div><label class="st-lbl">PF UAN No. (यदि PF कटता हो)</label><input id="sf_uan" placeholder="12-digit UAN"></div>
+      <div><label class="st-lbl">ESI No. (यदि कंपनी ESI देती हो)</label><input id="sf_esi" placeholder="ESI Number"></div>
+    </div>
+
+    <button type="button" class="btn" style="background:var(--ok);color:#000" onclick="saveStaffProfile()">💾 Staff Details Save करें</button>
+    <button type="button" id="sf_delBtn" class="btn g" style="color:#ff8080;border-color:#a8414d;display:none" onclick="deleteCurrentStaff()">🗑 इस Staff को हटाएँ</button>
+  </div>
+
+  <div id="sdp_sal" style="display:none">
+    <div class="st-grid">
+      <div><label class="st-lbl">माह चुनें (Month)</label><input id="sal_month" type="month" onchange="recalcStaffSalaryUI()"></div>
+      <div><label class="st-lbl">शाम की Shift का समय (Auto EOD Calc)</label><input id="sal_eodTime" type="time" value="19:00" onchange="recalcStaffSalaryUI()"></div>
+    </div>
+
+    <div id="sal_rateBreakdown" class="st-box"></div>
+
+    <div class="st-grid">
+      <div><label class="st-lbl">Total Present Days</label><input id="sal_presentDays" type="number" min="0" max="31" onchange="recalcStaffSalaryUI()"></div>
+      <div><label class="st-lbl">Total Late Days</label><input id="sal_lateDays" type="number" min="0" max="31" onchange="recalcStaffSalaryUI()"></div>
+    </div>
+
+    <div class="st-grid">
+      <div><label class="st-lbl">कुल देरी (Late Hours)</label><input id="sal_lateHours" type="number" min="0" step="0.25" onchange="recalcStaffSalaryUI()"></div>
+      <div><label class="st-lbl">अतिरिक्त देरी (Late Mins)</label><input id="sal_lateMins" type="number" min="0" step="1" onchange="recalcStaffSalaryUI()"></div>
+    </div>
+
+    <div class="st-grid">
+      <div><label class="st-lbl">Manual Salary Override (₹, खाली = Auto)</label><input id="sal_manualOverride" type="number" min="0" step="1" placeholder="Auto Calculated" onchange="recalcStaffSalaryUI()"></div>
+      <div><label class="st-lbl">Manual Penalty Override (₹, खाली = Auto)</label><input id="sal_manualPenalty" type="number" min="0" step="1" placeholder="Auto Penalty" onchange="recalcStaffSalaryUI()"></div>
+    </div>
+
+    <div class="st-grid">
+      <div><label class="st-lbl">Bonus / Allowance (₹)</label><input id="sal_bonus" type="number" min="0" step="1" value="0" onchange="recalcStaffSalaryUI()"></div>
+      <div><label class="st-lbl">Advance / Deduction (₹)</label><input id="sal_deduction" type="number" min="0" step="1" value="0" onchange="recalcStaffSalaryUI()"></div>
+    </div>
+
+    <div id="sal_liveSummary" class="st-box" style="border-style:solid;border-color:var(--ac)"></div>
+
+    <button type="button" class="btn" style="background:var(--ok);color:#000" onclick="saveEveningSalaryRecord()">🌆 शाम की Salary Finalize &amp; Save करें</button>
+  </div>
+
+  <div id="sdp_slip" style="display:none">
+    <div id="salarySlipPrintable" class="slip-paper"></div>
+    <button type="button" class="btn" style="background:var(--ac);color:#000" onclick="downloadSalarySlipImage()">📥 Salary Receipt Download (PNG)</button>
+    <button type="button" class="btn g" onclick="printSalarySlip()">🖨️ Print / Save PDF</button>
+  </div>
+</div></div>
 
 <!-- LICENSE -->
 <div class="ov" id="licOv"><div class="bx"><h3>🔑 Your License</h3><div id="licBody"></div><button class="btn g" onclick="closeOv('licOv')">✖ बंद</button></div></div>
@@ -112,16 +278,378 @@ const getPin=()=>LS.getItem('om_admin_pin')||'1234';
 function askPin(cb){pinNext=cb;$('pinIn').value='';$('pinMsg').textContent='';$('pinOv').classList.add('show');setTimeout(()=>$('pinIn').focus(),60)}
 function pinOk(){if($('pinIn').value===getPin()){closeOv('pinOv');const f=pinNext;pinNext=null;f&&f()}else $('pinMsg').textContent='❌ गलत PIN'}
 
-/* ----- Admin Portal ----- */
+/* ----- Logout: sirf session band, org ka data cloud/device me safe rehta hai ----- */
+async function doLogout(){if(!confirm('Logout करें?'))return;
+  let uid='';try{uid=(firebase.auth().currentUser||{}).uid||''}catch(e){}
+  const curProf = LS.getItem('om_org_profile');
+  try{
+    if(curProf && uid) LS.setItem('om_org_profile_saved_'+uid, curProf);
+    if(curProf) LS.setItem('om_last_org_profile', curProf);
+  }catch(e){}
+  LS.removeItem('om_org_profile');
+  try{await firebase.auth().signOut()}catch(e){}
+  location.href='login.html'}
+
+const curOrg=()=>{
+  const p = J('om_org_profile', {}) || {};
+  if (p.orgId) return String(p.orgId);
+  const lp = J('om_last_org_profile', {}) || {};
+  return String(lp.orgId || '');
+};
+const activeGymInfo=()=>{
+  const p = J('om_org_profile', {}) || {};
+  const lp = J('om_last_org_profile', {}) || {};
+  const bp = J('bfc_gym_profile', {}) || {};
+  return {
+    name: p.orgName || p.gymName || bp.name || lp.orgName || lp.gymName || 'GYM',
+    address: p.address || bp.address || lp.address || '',
+    phone: p.phone || bp.phone || lp.phone || '',
+    orgId: p.orgId || lp.orgId || ''
+  };
+};
+const mine=r=>{const o=curOrg();return !o || !r.orgId || String(r.orgId)===o};
+
+function switchAdmTab(t){
+  ['staff','sec','acc'].forEach(k=>{
+    $('stab_'+k).classList.toggle('on', k===t);
+    $('admPane_'+k).style.display = (k===t) ? 'block' : 'none';
+  });
+}
+
 let STAFF=[];
-function openAdmin(){askPin(()=>{STAFF=J('bfc_staff_list',[]);renderStaff();$('bkInfo').textContent='Last backup: '+omLastBackupText();$('admOv').classList.add('show')})}
-function renderStaff(){$('stList').innerHTML=STAFF.map((s,i)=>`<div class="row"><span><b>${esc(s.name)}</b><br><small>${esc(s.phone||'')}</small></span><button class="upgrade-btn" onclick="delStaff(${i})">🗑</button></div>`).join('')||'<div class="row"><small>अभी कोई staff नहीं</small></div>'}
-async function addStaff(){const n=$('sn').value.trim();if(!n){alert('नाम भरें');return}
-  const s={id:'stf'+Date.now(),name:n,phone:$('sp').value.trim(),joinDate:$('sj').value||iso()};STAFF.push(s);LS.setItem('bfc_staff_list',JSON.stringify(STAFF));
-  try{const d=fdb();d&&await d.collection('staff').doc(s.id).set(s)}catch(e){}
-  $('sn').value=$('sp').value='';renderStaff()}
-async function delStaff(i){const s=STAFF[i];if(!confirm(s.name+' हटाएँ?'))return;STAFF.splice(i,1);LS.setItem('bfc_staff_list',JSON.stringify(STAFF));
-  try{const d=fdb();d&&await d.collection('staff').doc(String(s.id)).delete()}catch(e){}renderStaff()}
+let activeStaffId=null;
+
+function getStaffPayrollStore(){ return J('om_staff_payroll_v1', {}) || {}; }
+function saveStaffPayrollStore(st){ LS.setItem('om_staff_payroll_v1', JSON.stringify(st)); }
+
+function computeAttendanceMetricsForMonth(staff, ym){
+  ym = ym || iso().slice(0,7);
+  const [y,m] = ym.split('-').map(Number);
+  const daysInMonth = new Date(y, m, 0).getDate();
+  let presentDays = 0;
+  let lateDays = 0;
+  let autoLateMins = 0;
+
+  for(let d=1; d<=daysInMonth; d++){
+    const ds = ym + '-' + String(d).padStart(2,'0');
+    const att = J('5bfc_staff_attendance_' + ds, {}) || {};
+    const rec = att[staff.id] || att[String(staff.id)];
+    if(rec && rec.isReal !== false){
+      presentDays++;
+      const lateM = Number(rec.lateMinutes || rec.lateMins || 0) || 0;
+      if(lateM > 0 || rec.isLate){
+        lateDays++;
+        autoLateMins += (lateM > 0 ? lateM : 30);
+      }
+    }
+  }
+  return {
+    daysInMonth,
+    presentDays,
+    lateDays,
+    lateHours: Number((autoLateMins / 60).toFixed(2)),
+    lateMins: autoLateMins
+  };
+}
+
+function calcSalaryBreakdown(staff, ym, overrides){
+  overrides = overrides || {};
+  const monthlySalary = Number(staff.monthlySalary || 10000) || 0;
+  const shiftHours = Math.max(1, Number(staff.shiftHours || 8) || 8);
+  const workDays = Math.max(1, Number(staff.workDays || 30) || 30);
+
+  const perDay = monthlySalary / workDays;
+  const perHour = perDay / shiftHours;
+  const perMin = perHour / 60;
+  const perSec = perMin / 60;
+
+  const autoAtt = computeAttendanceMetricsForMonth(staff, ym);
+  const presentDays = (overrides.presentDays !== undefined && overrides.presentDays !== '') ? Math.max(0, Number(overrides.presentDays) || 0) : autoAtt.presentDays;
+  const lateDays = (overrides.lateDays !== undefined && overrides.lateDays !== '') ? Math.max(0, Number(overrides.lateDays) || 0) : autoAtt.lateDays;
+  const lateHours = (overrides.lateHours !== undefined && overrides.lateHours !== '') ? Math.max(0, Number(overrides.lateHours) || 0) : autoAtt.lateHours;
+  const lateMins = (overrides.lateMins !== undefined && overrides.lateMins !== '') ? Math.max(0, Number(overrides.lateMins) || 0) : Math.round(lateHours * 60);
+
+  const totalLateSeconds = Math.round((lateHours * 3600) + (lateMins * 60));
+  const autoPenalty = totalLateSeconds * perSec;
+  const penalty = (overrides.manualPenalty !== undefined && overrides.manualPenalty !== '' && overrides.manualPenalty !== null)
+    ? Math.max(0, Number(overrides.manualPenalty) || 0)
+    : autoPenalty;
+
+  const earnedByDays = presentDays * perDay;
+  const baseEarned = (overrides.manualOverride !== undefined && overrides.manualOverride !== '' && overrides.manualOverride !== null)
+    ? Math.max(0, Number(overrides.manualOverride) || 0)
+    : earnedByDays;
+
+  const bonus = Math.max(0, Number(overrides.bonus || 0) || 0);
+  const deduction = Math.max(0, Number(overrides.deduction || 0) || 0);
+  const netPayable = Math.max(0, baseEarned + bonus - penalty - deduction);
+
+  return {
+    monthlySalary, shiftHours, workDays,
+    perDay, perHour, perMin, perSec,
+    presentDays, lateDays, lateHours, lateMins,
+    autoPenalty, penalty, bonus, deduction,
+    earnedByDays, netPayable
+  };
+}
+
+function openAdmin(){
+  askPin(()=>{
+    STAFF = J('bfc_staff_list', []).filter(mine);
+    renderStaff();
+    $('bkInfo').textContent = 'Last backup: ' + omLastBackupText();
+    switchAdmTab('staff');
+    $('admOv').classList.add('show');
+  });
+}
+
+function renderStaff(){
+  const ym = iso().slice(0,7);
+  $('stList').innerHTML = STAFF.map((s,i)=>{
+    const stStore = getStaffPayrollStore();
+    const savedM = (stStore[s.id] && stStore[s.id][ym]) || {};
+    const b = calcSalaryBreakdown(s, ym, savedM);
+    return `<div class="st-card" onclick="openStaffEditor('${esc(s.id)}')" style="cursor:pointer">
+      <div class="st-head">
+        <div>
+          <b style="color:var(--ac);font-size:13.5px">${esc(s.name)}</b> <span style="font-size:11px;color:#aaa">(${esc(s.role || 'Staff')})</span><br>
+          <small style="color:#888">📞 ${esc(s.phone || '-')} • Joined: ${esc(s.joinDate || '-')}</small>
+        </div>
+        <span class="btn-sm" style="background:#222;color:var(--ac);border:1px solid var(--ac)">Open ➔</span>
+      </div>
+      <div style="font-size:11px;color:#ccc;margin-top:6px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px">
+        <span>Present: <b style="color:var(--ok)">${b.presentDays}d</b> | Late: <b style="color:#ff9a00">${b.lateDays}d</b></span>
+        <span>Penalty: <b style="color:#ff6b6b">₹${b.penalty.toFixed(2)}</b> | Net: <b style="color:var(--ok)">₹${b.netPayable.toFixed(0)}</b></span>
+      </div>
+    </div>`;
+  }).join('') || '<div class="row"><small>अभी कोई staff नहीं — ऊपर "Add / Register Staff" दबाएँ</small></div>';
+}
+
+function toggleSpouseField(){
+  const m = $('sf_marital').value;
+  $('sf_spouseWrap').style.display = (m === 'Married') ? 'block' : 'none';
+}
+
+function switchStaffSubTab(t){
+  ['prof','sal','slip'].forEach(k=>{
+    $('sdt_'+k).classList.toggle('on', k===t);
+    $('sdp_'+k).style.display = (k===t) ? 'block' : 'none';
+  });
+  if(t === 'sal') recalcStaffSalaryUI();
+  if(t === 'slip') renderSalarySlip();
+}
+
+function openStaffEditor(id){
+  activeStaffId = id || null;
+  const s = id ? STAFF.find(x=>String(x.id)===String(id)) : null;
+  $('sdTitle').textContent = s ? ('🧑‍💼 ' + s.name + ' — Profile & Salary') : '➕ नया Staff Register करें';
+  $('sf_delBtn').style.display = s ? 'block' : 'none';
+
+  $('sf_name').value = s ? (s.name || '') : '';
+  $('sf_phone').value = s ? (s.phone || '') : '';
+  $('sf_role').value = s ? (s.role || 'Staff') : 'Staff';
+  $('sf_marital').value = s ? (s.marital || 'Unmarried') : 'Unmarried';
+  $('sf_dob').value = s ? (s.dob || '') : '';
+  $('sf_father').value = s ? (s.father || '') : '';
+  $('sf_mother').value = s ? (s.mother || '') : '';
+  $('sf_spouse').value = s ? (s.spouse || '') : '';
+  $('sf_relation').value = s ? (s.relation || '') : '';
+  $('sf_govType').value = s ? (s.govIdType || 'Voter ID') : 'Voter ID';
+  $('sf_govId').value = s ? (s.govIdNumber || '') : '';
+  $('sf_joinDate').value = s ? (s.joinDate || iso()) : iso();
+  $('sf_monthlySalary').value = s ? (s.monthlySalary || 10000) : 10000;
+  $('sf_shiftHours').value = s ? (s.shiftHours || 8) : 8;
+  $('sf_workDays').value = s ? (s.workDays || 30) : 30;
+  $('sf_bankName').value = s ? (s.bankName || '') : '';
+  $('sf_accNo').value = s ? (s.accNo || '') : '';
+  $('sf_ifsc').value = s ? (s.ifsc || '') : '';
+  $('sf_pan').value = s ? (s.pan || '') : '';
+  $('sf_uan').value = s ? (s.uan || '') : '';
+  $('sf_esi').value = s ? (s.esi || '') : '';
+
+  toggleSpouseField();
+
+  const curYm = iso().slice(0,7);
+  $('sal_month').value = curYm;
+  const savedM = (s && getStaffPayrollStore()[s.id] && getStaffPayrollStore()[s.id][curYm]) || {};
+  $('sal_eodTime').value = savedM.eodTime || '19:00';
+  $('sal_presentDays').value = savedM.presentDays !== undefined ? savedM.presentDays : '';
+  $('sal_lateDays').value = savedM.lateDays !== undefined ? savedM.lateDays : '';
+  $('sal_lateHours').value = savedM.lateHours !== undefined ? savedM.lateHours : '';
+  $('sal_lateMins').value = savedM.lateMins !== undefined ? savedM.lateMins : '';
+  $('sal_manualOverride').value = savedM.manualOverride !== undefined ? savedM.manualOverride : '';
+  $('sal_manualPenalty').value = savedM.manualPenalty !== undefined ? savedM.manualPenalty : '';
+  $('sal_bonus').value = savedM.bonus || 0;
+  $('sal_deduction').value = savedM.deduction || 0;
+
+  switchStaffSubTab('prof');
+  $('staffDetailOv').classList.add('show');
+}
+
+function currentStaffObjFromForm(){
+  return {
+    id: activeStaffId || ('stf' + Date.now()),
+    name: $('sf_name').value.trim(),
+    phone: $('sf_phone').value.trim(),
+    role: $('sf_role').value.trim() || 'Staff',
+    marital: $('sf_marital').value,
+    dob: $('sf_dob').value,
+    father: $('sf_father').value.trim(),
+    mother: $('sf_mother').value.trim(),
+    spouse: $('sf_spouse').value.trim(),
+    relation: $('sf_relation').value.trim(),
+    govIdType: $('sf_govType').value,
+    govIdNumber: $('sf_govId').value.trim(),
+    joinDate: $('sf_joinDate').value || iso(),
+    monthlySalary: Number($('sf_monthlySalary').value || 0) || 0,
+    shiftHours: Number($('sf_shiftHours').value || 8) || 8,
+    workDays: Number($('sf_workDays').value || 30) || 30,
+    bankName: $('sf_bankName').value.trim(),
+    accNo: $('sf_accNo').value.trim(),
+    ifsc: $('sf_ifsc').value.trim(),
+    pan: $('sf_pan').value.trim().toUpperCase(),
+    uan: $('sf_uan').value.trim(),
+    esi: $('sf_esi').value.trim(),
+    orgId: curOrg()
+  };
+}
+
+async function saveStaffProfile(){
+  const obj = currentStaffObjFromForm();
+  if(!obj.name){ alert('कृपया Staff का पूरा नाम भरें'); return; }
+  let all = J('bfc_staff_list', []);
+  const idx = all.findIndex(x=>String(x.id)===String(obj.id));
+  if(idx >= 0) all[idx] = Object.assign({}, all[idx], obj);
+  else all.push(obj);
+  LS.setItem('bfc_staff_list', JSON.stringify(all));
+  STAFF = all.filter(mine);
+  activeStaffId = obj.id;
+  try{ const d = fdb(); d && await d.collection('staff').doc(obj.id).set(obj, {merge:true}); }catch(e){}
+  renderStaff();
+  alert('✅ Staff प्रोफ़ाइल सेव हो गई');
+}
+
+async function deleteCurrentStaff(){
+  if(!activeStaffId) return;
+  const s = STAFF.find(x=>String(x.id)===String(activeStaffId));
+  if(!s || !confirm((s.name || 'Staff') + ' को हटाएँ?')) return;
+  let all = J('bfc_staff_list', []).filter(x=>String(x.id)!==String(activeStaffId));
+  LS.setItem('bfc_staff_list', JSON.stringify(all));
+  STAFF = all.filter(mine);
+  try{ const d = fdb(); d && await d.collection('staff').doc(String(activeStaffId)).delete(); }catch(e){}
+  closeOv('staffDetailOv');
+  renderStaff();
+}
+
+function recalcStaffSalaryUI(){
+  const s = currentStaffObjFromForm();
+  const ym = $('sal_month').value || iso().slice(0,7);
+  const ov = {
+    presentDays: $('sal_presentDays').value,
+    lateDays: $('sal_lateDays').value,
+    lateHours: $('sal_lateHours').value,
+    lateMins: $('sal_lateMins').value,
+    manualOverride: $('sal_manualOverride').value,
+    manualPenalty: $('sal_manualPenalty').value,
+    bonus: $('sal_bonus').value,
+    deduction: $('sal_deduction').value
+  };
+  const b = calcSalaryBreakdown(s, ym, ov);
+  if($('sal_presentDays').value === '') $('sal_presentDays').value = b.presentDays;
+  if($('sal_lateDays').value === '') $('sal_lateDays').value = b.lateDays;
+  if($('sal_lateHours').value === '') $('sal_lateHours').value = b.lateHours;
+  if($('sal_lateMins').value === '') $('sal_lateMins').value = b.lateMins;
+
+  $('sal_rateBreakdown').innerHTML =
+    `<b>Rate Breakdown (₹${b.monthlySalary} / ${b.workDays}d / ${b.shiftHours}h):</b><br>` +
+    `• Per Day: <b>₹${b.perDay.toFixed(2)}</b> &nbsp;|&nbsp; Per Hour: <b>₹${b.perHour.toFixed(2)}</b><br>` +
+    `• Per Min: <b>₹${b.perMin.toFixed(2)}</b> &nbsp;|&nbsp; Per Sec: <b>₹${b.perSec.toFixed(4)}</b>`;
+
+  $('sal_liveSummary').innerHTML =
+    `• Earned (Present ${b.presentDays}d): <b>₹${b.earnedByDays.toFixed(2)}</b><br>` +
+    `• Auto Late Penalty: <b>₹${b.autoPenalty.toFixed(2)}</b> &nbsp;|&nbsp; Applied Penalty: <b style="color:#ff6b6b">₹${b.penalty.toFixed(2)}</b><br>` +
+    `• Bonus: <b style="color:var(--ok)">+₹${b.bonus.toFixed(2)}</b> &nbsp;|&nbsp; Deduction: <b style="color:#ff6b6b">-₹${b.deduction.toFixed(2)}</b><br>` +
+    `<span style="font-size:13.5px">• Net Payable Salary: <b style="color:var(--ok)">₹${b.netPayable.toFixed(2)}</b></span>`;
+}
+
+function saveEveningSalaryRecord(){
+  const s = currentStaffObjFromForm();
+  if(!s.name){ alert('पहले Staff का नाम सेव करें'); return; }
+  const ym = $('sal_month').value || iso().slice(0,7);
+  const store = getStaffPayrollStore();
+  if(!store[s.id]) store[s.id] = {};
+  const payload = {
+    ym,
+    eodTime: $('sal_eodTime').value || '19:00',
+    presentDays: Number($('sal_presentDays').value || 0),
+    lateDays: Number($('sal_lateDays').value || 0),
+    lateHours: Number($('sal_lateHours').value || 0),
+    lateMins: Number($('sal_lateMins').value || 0),
+    manualOverride: $('sal_manualOverride').value,
+    manualPenalty: $('sal_manualPenalty').value,
+    bonus: Number($('sal_bonus').value || 0),
+    deduction: Number($('sal_deduction').value || 0),
+    settledAt: new Date().toISOString()
+  };
+  store[s.id][ym] = payload;
+  saveStaffPayrollStore(store);
+  renderStaff();
+  recalcStaffSalaryUI();
+  alert('🌆 शाम की Salary & Penalty रिकॉर्ड सेव हो गया!');
+}
+
+function renderSalarySlip(){
+  const s = currentStaffObjFromForm();
+  const gym = activeGymInfo();
+  const ym = $('sal_month').value || iso().slice(0,7);
+  const savedM = (getStaffPayrollStore()[s.id] && getStaffPayrollStore()[s.id][ym]) || {};
+  const b = calcSalaryBreakdown(s, ym, savedM);
+  const parentLine = (s.marital === 'Married' && s.spouse)
+    ? `${esc(s.spouse)} (${esc(s.relation || 'Spouse')})`
+    : `${esc(s.father || '-')}${s.mother ? ' / ' + esc(s.mother) : ''}`;
+
+  $('salarySlipPrintable').innerHTML = `
+    <div style="text-align:center;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:10px">
+      <div style="font-size:17px;font-weight:900">${esc(gym.name.toUpperCase())}</div>
+      <div style="font-size:10.5px;color:#555">${esc(gym.address)}${gym.phone ? ' • Ph: ' + esc(gym.phone) : ''}</div>
+      <div style="font-size:12px;font-weight:800;margin-top:4px;background:#fff3bf;padding:3px 8px;border-radius:6px;display:inline-block">SALARY SLIP &amp; PAYROLL STATEMENT (${esc(ym)})</div>
+    </div>
+    <div class="slip-row"><span>Staff Name:</span><b>${esc(s.name || '-')}</b></div>
+    <div class="slip-row"><span>Role / Mobile:</span><b>${esc(s.role || 'Staff')} • ${esc(s.phone || '-')}</b></div>
+    <div class="slip-row"><span>Marital / Family:</span><b>${esc(s.marital)} • ${parentLine}</b></div>
+    <div class="slip-row"><span>DOB / Joining Date:</span><b>${esc(s.dob || '-')} / ${esc(s.joinDate || '-')}</b></div>
+    <div class="slip-row"><span>Gov ID (${esc(s.govIdType || 'ID')}):</span><b>${esc(s.govIdNumber || '-')}</b></div>
+    <div class="slip-row"><span>Bank Details:</span><b>${esc(s.bankName || '-')} • A/c: ${esc(s.accNo || '-')} (${esc(s.ifsc || '-')})</b></div>
+    <div class="slip-row"><span>PAN / UAN / ESI:</span><b>${esc(s.pan || '-')} / ${esc(s.uan || '-')} / ${esc(s.esi || '-')}</b></div>
+    <div class="slip-row"><span>Monthly Fixed Salary:</span><b>₹${b.monthlySalary.toFixed(2)} (${b.workDays}d / ${b.shiftHours}h/d)</b></div>
+    <div class="slip-row"><span>Rates (Day/Hr/Min/Sec):</span><b>₹${b.perDay.toFixed(2)} / ₹${b.perHour.toFixed(2)} / ₹${b.perMin.toFixed(2)} / ₹${b.perSec.toFixed(4)}</b></div>
+    <div class="slip-row"><span>Attendance (Present / Late):</span><b>${b.presentDays} Days / ${b.lateDays} Days (${b.lateHours}h ${b.lateMins}m late)</b></div>
+    <div class="slip-row"><span>Gross Earned:</span><b>₹${b.earnedByDays.toFixed(2)}</b></div>
+    <div class="slip-row"><span>Bonus / Penalty / Deduction:</span><b>+₹${b.bonus.toFixed(2)} / -₹${b.penalty.toFixed(2)} / -₹${b.deduction.toFixed(2)}</b></div>
+    <div class="slip-row" style="border-bottom:2px solid #111;font-size:13.5px;margin-top:4px"><span><b>Net Payable Salary:</b></span><b>₹${b.netPayable.toFixed(2)}</b></div>
+    <div style="font-size:10px;color:#555;margin-top:8px;text-align:right">Generated: ${new Date().toLocaleString('en-IN')}</div>
+  `;
+}
+
+function downloadSalarySlipImage(){
+  const el = $('salarySlipPrintable');
+  if(!el || typeof html2canvas !== 'function'){ alert('Receipt capture unavailable'); return; }
+  html2canvas(el, {scale:2, backgroundColor:'#ffffff'}).then(c=>{
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = 'Salary_Slip_' + ($('sf_name').value.trim() || 'Staff') + '_' + ($('sal_month').value || iso().slice(0,7)) + '.png';
+    a.click();
+  });
+}
+
+function printSalarySlip(){
+  const w = window.open('', '_blank');
+  if(!w) return;
+  w.document.write('<html><head><title>Salary Slip</title><style>body{font-family:Arial,sans-serif;padding:20px}.slip-row{display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:6px 0}</style></head><body>' + $('salarySlipPrintable').innerHTML + '</body></html>');
+  w.document.close();
+  w.print();
+}
+
 function changePin(){const p=$('np').value.trim();if(!/^\d{4,8}$/.test(p)){alert('PIN 4 से 8 अंक का होना चाहिए');return}LS.setItem('om_admin_pin',p);$('np').value='';alert('✅ PIN बदल गया')}
 
 /* ----- Fee Collection ----- */
@@ -208,21 +736,9 @@ function openImp(){askPin(()=>{IMP=[];$('impInfo').textContent='';$('impF').valu
 window.addEventListener('DOMContentLoaded',()=>{
   try{
     const s=omLicenseStatus(),o=s.org||{};
-    let savedProf = {};
-    try {
-      const uid = (firebase.auth().currentUser || {}).uid || '';
-      if (uid) savedProf = JSON.parse(localStorage.getItem('om_org_profile_saved_' + uid) || '{}') || {};
-      if (!savedProf.orgName && !savedProf.gymName) {
-        for (let k in localStorage) {
-          if (k.startsWith('om_org_profile_saved_')) {
-            const tmp = JSON.parse(localStorage.getItem(k) || '{}') || {};
-            if (tmp.orgName || tmp.gymName) { savedProf = tmp; break; }
-          }
-        }
-      }
-    } catch (e) {}
-    const gymProf = J('bfc_gym_profile', {}) || {};
-    const gymName = o.orgName || o.gymName || savedProf.orgName || savedProf.gymName || gymProf.name || gymProf.gymName || 'GYM';
+    const lp=J('om_last_org_profile',{})||{};
+    const bp=J('bfc_gym_profile',{})||{};
+    const gymName = o.orgName || o.gymName || bp.name || bp.gymName || lp.orgName || lp.gymName || 'GYM';
     $('orgTitle').textContent=String(gymName).toUpperCase();
     if(s.licenseValid){$('trialTitle').textContent='✅ License Active';$('trialDaysText').textContent=s.licenseDays+' Days remaining'+(s.licenseKey?' • '+s.licenseKey:'')}
     else $('trialDaysText').textContent=s.trialDays+' Days remaining in trial';

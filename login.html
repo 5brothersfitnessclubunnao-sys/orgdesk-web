@@ -145,9 +145,16 @@
         showSuccess("Account created successfully! Redirecting...");
         setTimeout(() => { window.location.href = "category-select.html"; }, 1200);
       } else {
-        await auth.signInWithEmailAndPassword(credential, password);
+        const uc = await auth.signInWithEmailAndPassword(credential, password);
         showSuccess("Login successful! Redirecting...");
-        setTimeout(() => { window.location.href = "category-select.html"; }, 1000);
+        let saved = null;
+        try { saved = localStorage.getItem("om_org_profile_saved_" + uc.user.uid); } catch (x) {}
+        if (saved) {  // pehle se bani gym profile wapas lagao, dobara setup nahi
+          try { localStorage.setItem("om_org_profile", saved); } catch (x) {}
+          setTimeout(() => { window.location.href = "index.html"; }, 800);
+        } else {
+          setTimeout(() => { window.location.href = "category-select.html"; }, 1000);
+        }
       }
     } catch (err) {
       showError(err.message);
