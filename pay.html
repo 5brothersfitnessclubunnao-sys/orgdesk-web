@@ -598,6 +598,11 @@ th{color:#ffcc00;}
         <div class="r-row" id="rAdvRow" style="display:none; background:#e8fff0; border:1px dashed #0a7a2f; border-radius:6px; padding:4px 6px; color:#0a7a2f;"><span>💰 Advance jama:</span><b id="rAdvance" style="text-align:right;"></b></div>
         <div class="r-row"><span>वैधता / अगला भुगतान:</span><b id="rValidTill" style="color:#b37400;"></b></div>
         <div class="receipt-footer-stamp">
+          <!-- Dynamic Monthly Verification QR Code -->
+          <div style="text-align:center;">
+            <div id="receiptMonthlyQrBox" style="display:inline-block;background:#fff;padding:4px;border:1px solid #000;border-radius:6px;min-width:70px;min-height:70px;"></div>
+            <div style="font-size:8px;font-weight:900;color:#000;margin-top:2px;">SCAN TO VIEW/DL</div>
+          </div>
           <div class="receipt-sign-box">
             <img src="https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg" alt="Signature" crossorigin="anonymous" class="receipt-sign-img" data-gym-img="signImg">
             <div class="receipt-owner-txt">
@@ -1819,6 +1824,25 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
   const billId = (opts && opts.billId) ? opts.billId : (GYM.billPrefix + "-" + Date.now().toString().slice(-4));
   if (!reprint && window.__currentProofId) { try { db.collection("payment_proofs").doc(window.__currentProofId).update({ billId: billId }); } catch (e) {} }
   document.getElementById("billId").innerText = billId;
+
+  // Har mahine banne wali naye Bill ID ke mutabiq dynamic QR code
+  try {
+    const qrContainer = document.getElementById("receiptMonthlyQrBox");
+    if (qrContainer) {
+      qrContainer.innerHTML = "";
+      const receiptUrl = window.location.origin + window.location.pathname + "?view_bill=" + encodeURIComponent(billId);
+      new QRCode(qrContainer, {
+        text: receiptUrl,
+        width: 64,
+        height: 64,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+  } catch(e) {
+    console.warn("Receipt QR Error:", e);
+  }
   document.getElementById("rMode").innerText = modeText;
   document.getElementById("rJoinDate").innerText = joinDateFormatted;
   document.getElementById("billDate").innerText = paidDateFormatted;
