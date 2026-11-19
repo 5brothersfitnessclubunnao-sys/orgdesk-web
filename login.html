@@ -60,7 +60,10 @@
 
     <div class="field" id="secCodeLoginField">
       <label style="color:var(--ac)">Unique Security Code (Login ke liye zaroori) *</label>
-      <input type="text" id="userSecurityCodeInput" placeholder="SEC-XXXX-XXXX" style="border-color:var(--ac);color:var(--ac);font-weight:bold;">
+      <div style="position:relative">
+        <input type="password" id="userSecurityCodeInput" placeholder="Apna Security Code daalein" autocomplete="off" autocapitalize="characters" spellcheck="false" style="border-color:var(--ac);color:var(--ac);font-weight:bold;letter-spacing:2px;padding-right:46px;">
+        <button type="button" id="secEye" onclick="toggleSecEye()" aria-label="Show / hide code" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);margin-top:3px;background:transparent;border:0;color:var(--ac);font-size:18px;padding:6px 10px;cursor:pointer;width:auto">👁</button>
+      </div>
     </div>
 
     <div id="signupSecCodeBanner" style="display:none;background:#102216;border:1.5px solid var(--ok);border-radius:10px;padding:12px;margin-bottom:12px;">
@@ -148,9 +151,15 @@
       const lp = JSON.parse(localStorage.getItem("om_last_org_profile") || "{}") || {};
       if (lp.email) document.getElementById("userEmailOrPhone").value = lp.email;
       else if (lp.phone) document.getElementById("userEmailOrPhone").value = lp.phone;
-      if (lp.securityCode) document.getElementById("userSecurityCodeInput").value = lp.securityCode;
     } catch (e) {}
+    // Security code kabhi auto-fill nahi hota: browser autofill ho bhi jaye to saaf kar do
+    var sc = document.getElementById("userSecurityCodeInput");
+    if (sc) { sc.value = ""; setTimeout(function () { sc.value = ""; }, 400); }
   });
+  function toggleSecEye() {
+    var i = document.getElementById("userSecurityCodeInput");
+    i.type = (i.type === "password") ? "text" : "password";
+  }
 
   function toggleAuthMode() {
     isSignUpMode = !isSignUpMode;
@@ -179,6 +188,7 @@
     el.innerText = msg;
     el.style.display = "block";
     document.getElementById("successAlert").style.display = "none";
+    try { el.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {}
   }
 
   function showSuccess(msg) {
@@ -266,18 +276,12 @@
         setTimeout(() => { window.location.href = "category-select.html"; }, 1400);
       } else {
         const secCodeEntered = (document.getElementById("userSecurityCodeInput").value || "").trim().toUpperCase();
-        if (!secCodeEntered) {
-          throw new Error("Unique Security Code is mandatory to login.");
-        }
 
         // Nayi device / cleared data: pehle cloud se security record mangao
         if (typeof omSecurityPull === "function") { try { await omSecurityPull(primaryCredential); } catch (e) {} }
-        const existingRec = typeof omGetSecurityRecordStrict === "function" ? omGetSecurityRecordStrict(primaryCredential) : null;
-        if (existingRec && existingRec.code && String(existingRec.code).toUpperCase() !== secCodeEntered) {
-          throw new Error("Invalid Unique Security Code! Email/Mobile & Password alone cannot bypass security code.");
-        }
+        let existingRec = typeof omGetSecurityRecordStrict === "function" ? omGetSecurityRecordStrict(primaryCredential) : null;
 
-        // Try signing in with entered Email or Mobile; if mobile was entered and no @orgdesk.phone account exists, check registry email
+        // Step 1: Email/Mobile + Password verify
         let uc = null;
         try {
           uc = await auth.signInWithEmailAndPassword(primaryCredential, password);
@@ -288,24 +292,35 @@
             throw authErr;
           }
         }
-
         const uid = uc.user.uid;
-        if (typeof omEnsureUserSecurityRecord === "function") {
-          const bound = existingRec
-            ? existingRec
-            : omEnsureUserSecurityRecord(uc.user.email || primaryCredential, uc.user.displayName || "Gym", /^\d{10}$/.test(rawInput) ? rawInput : "", "TRIAL-7DAY", { forcedCode: secCodeEntered, uid: uid, orgId: uid });
-          if (bound && String(bound.code).toUpperCase() !== secCodeEntered) {
-            await auth.signOut();
-            throw new Error("Invalid Unique Security Code.");
-          }
+        const realEmail = uc.user.email || primaryCredential;
+        if (!existingRec && typeof omGetSecurityRecordStrict === "function") {
+          if (typeof omSecurityPull === "function") { try { await omSecurityPull(realEmail); } catch (e) {} }
+          existingRec = omGetSecurityRecordStrict(realEmail) || omGetSecurityRecordStrict(uid);
         }
 
-        try { if (typeof omSecurityPull === "function") await omSecurityPull(uc.user.email || primaryCredential); } catch (e) {}
-        const hasSavedProfile = restoreProfileAfterAuth(uid, uc.user.email || primaryCredential, /^\d{10}$/.test(rawInput) ? rawInput : "", secCodeEntered);
-        showSuccess("Login successful! Redirecting...");
-        setTimeout(() => {
-          window.location.href = hasSavedProfile ? "index.html" : "category-select.html";
-        }, 700);
+        // Step 2: Security Code verify
+        if (existingRec && existingRec.code) {
+          if (!secCodeEntered) { await auth.signOut(); throw new Error("Unique Security Code daalna zaroori hai."); }
+          if (String(existingRec.code).toUpperCase() !== secCodeEntered) {
+            await auth.signOut();
+            throw new Error("Security Code galat hai. Sahi code daalein (Forgot Security Code se naya bana sakte hain).");
+          }
+          const rec2 = omEnsureUserSecurityRecord(realEmail, uc.user.displayName || "Gym", /^\d{10}$/.test(rawInput) ? rawInput : "", existingRec.licenseKey || "TRIAL-7DAY", { uid: uid, orgId: uid });
+          const hasSaved = restoreProfileAfterAuth(uid, realEmail, /^\d{10}$/.test(rawInput) ? rawInput : "", rec2.code);
+          showSuccess("Login successful! Redirecting...");
+          setTimeout(() => { window.location.href = hasSaved ? "index.html" : "category-select.html"; }, 600);
+        } else {
+          // Purana account jiska code abhi tak bana hi nahi tha: password sahi hai, to ab ek Unique Code bana kar DIKHAO (ek hi baar)
+          const nrec = omEnsureUserSecurityRecord(realEmail, uc.user.displayName || "Gym", /^\d{10}$/.test(rawInput) ? rawInput : "", "TRIAL-7DAY", { uid: uid, orgId: uid });
+          const hasSaved = restoreProfileAfterAuth(uid, realEmail, "", nrec.code);
+          document.getElementById("generatedSecCodeBox").innerText = nrec.code;
+          document.getElementById("signupSecCodeBanner").style.display = "block";
+          showSuccess("Aapka naya Unique Security Code ban gaya. Ise save kar lein — agli baar login par yahi daalna hoga.");
+          btn.disabled = false; btn.innerText = "Code save kar liya → Aage badhein";
+          btn.type = "button";
+          btn.onclick = function () { window.location.href = hasSaved ? "index.html" : "category-select.html"; };
+        }
       }
     } catch (err) {
       showError(err && err.message ? err.message : String(err));
