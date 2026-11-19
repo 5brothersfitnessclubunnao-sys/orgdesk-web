@@ -8,6 +8,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="auth-gate.js"></script>
+  <script src="cloud-sync.js"></script>
   <script src="license-gate.js"></script>
   <script src="backup.js"></script>
   <link rel="stylesheet" href="theme.css">
@@ -171,7 +172,8 @@ const $=i=>document.getElementById(i), LS=localStorage;
 const J=(k,d)=>{try{const v=JSON.parse(LS.getItem(k));return v==null?d:v}catch(e){return d}};
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const iso=()=>new Date().toISOString().slice(0,10);
-const fdb=()=>{try{return firebase.apps.length?firebase.firestore():null}catch(e){return null}};
+const fdb=()=>window.omDb?omDb():null;
+const ORGID=()=>LS.getItem('bfc_org_id')||J('om_org_profile',{}).orgId||'';
 
 let pinNext=null;
 const getPin=()=>LS.getItem('om_admin_pin')||'1234';
@@ -273,9 +275,7 @@ function csvParse(t,d){
     const ch=t[i];
     if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++}else q=false}else c+=ch}
     else if(ch==='"')q=true;else if(ch===d){r.push(c);c=''}
-    else if(ch==='
-'||ch===''){if(ch===''&&t[i+1]==='
-')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch;
+    else if(ch==='\n'||ch==='\n'){if(ch==='\n'&&t[i+1]==='\n')i++;r.push(c);c='';if(r.some(x=>x.trim()))rows.push(r);r=[]}else c+=ch;
   }
   r.push(c);if(r.some(x=>x.trim()))rows.push(r);return rows;
 }
@@ -287,9 +287,7 @@ function normDate(v){
 
 let IMP=[];
 function dlTemplate(){
-  const b=new Blob(['﻿'+TPL.join(',')+'
-Rahul Singh,Santosh Singh,9876543210,2026-11-01,500,500,0
-'],{type:'text/csv'});
+  const b=new Blob(['﻿'+TPL.join(',')+'\nRahul Singh,Santosh Singh,9876543210,2026-11-01,500,500,0\n'],{type:'text/csv'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Gym_Members_Template.csv';a.click();
 }
 
@@ -302,8 +300,7 @@ function openImp(){
 
 async function pickCsv(inp){
   const f=inp.files[0];IMP=[];if(!f)return;
-  const t=await f.text(),l1=t.split('
-')[0],d=l1.split(';').length>l1.split(',').length?';':',';
+  const t=await f.text(),l1=t.split('\n')[0],d=l1.split(';').length>l1.split(',').length?';':',';
   const rows=csvParse(t,d);
   if(rows.length<2){$('impInfo').style.color='var(--er)';$('impInfo').textContent='❌ File खाली है';return}
   const H=rows[0].map(nk),ix={};
@@ -358,14 +355,16 @@ async function doImport(){
     if(d){
       let b = d.batch(), count = 0;
       for(const m of IMP){
-        b.set(d.collection('members').doc(m.id), m, {merge:true});
+        b.set(d.collection('members').doc(m.id), Object.assign({orgId:ORGID()}, m), {merge:true});
         if(++count % 400 === 0){ await b.commit(); b = d.batch(); }
       }
       await b.commit();
     }
   } catch(e){}
 
-  alert('🎉 ' + IMP.length + ' members सफलतापूर्वक आ गए! अब Pay Fees और Attendance में सबके नाम दिखेंगे।');
+  let synced = true;
+  try{ if(window.omSyncFlush) synced = await omSyncFlush(); }catch(e){ synced = false; }
+  alert('🎉 ' + IMP.length + ' members सफलतापूर्वक आ गए! अब Pay Fees और Attendance में सबके नाम दिखेंगे।' + (synced ? '\n☁️ Cloud में भी save हो गया।' : '\n⚠️ Cloud save नहीं हुआ: ' + (window.omSyncError||'इंटरनेट/Firestore rules चेक करें') + ' — इस फोन में data है।'));
   IMP=[]; $('impInfo').textContent=''; $('impF').value=''; $('impBtn').disabled=false; $('impBtn').textContent='✅ Import करें';
   closeOv('impOv');
 }
@@ -375,10 +374,22 @@ function viewLic(){
   $('licBody').innerHTML = `<div class="row"><small>License Key:</small><b>${esc(s.licenseKey||'7-Day Free Trial')}</b></div>`;
   $('licOv').classList.add('show');
 }
-function viewSec(){
-  const o = J('om_org_profile',{});
-  $('secBody').innerHTML = `<div style="font-size:22px;color:var(--ac);font-weight:900;letter-spacing:2px;padding:12px">${esc(o.securityCode||'SEC-6ETB-4TWE-AZET')}</div>`;
+async function viewSec(){
+  $('secBody').innerHTML = '<div style="padding:12px;color:var(--mut)">लोड हो रहा है…</div>';
   $('secOv').classList.add('show');
+  let code = '', why = '';
+  try{
+    const d = fdb(), oid = ORGID();
+    if(!d || !oid) why = 'Login session नहीं मिला — logout करके दोबारा login करें।';
+    else {
+      const s = await d.collection('orgs').doc(oid).collection('private').doc('security').get();
+      if(s.exists) code = (s.data()||{}).code || '';
+      else why = 'आपका Security Code अभी बना नहीं है। Logout करके Email+Password से दोबारा Sign In करें — नया code बन जाएगा।';
+    }
+  }catch(e){ why = 'Code पढ़ नहीं पाए: ' + (e.message||e); }
+  $('secBody').innerHTML = code
+    ? `<div style="font-size:22px;color:var(--ac);font-weight:900;letter-spacing:2px;padding:12px;word-break:break-all">${esc(code)}</div><div style="font-size:11px;color:var(--mut)">इसे सुरक्षित रखें। इसी से Sign In भी हो जाता है।</div>`
+    : `<div style="color:#ff7b6b;font-size:12.5px;padding:10px;line-height:1.5">${esc(why)}</div>`;
 }
 function runBk(){
   if(window.omBackupDownload) omBackupDownload();
