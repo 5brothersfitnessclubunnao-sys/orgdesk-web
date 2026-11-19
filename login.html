@@ -603,7 +603,7 @@
   async function afterAuth(user, justSignedUp, signupGym) {
     var orgId = user.uid, role = 'owner';
     try { var r = await db.collection('roles').doc(user.uid).get(); if (r.exists) { orgId = r.data().orgId || orgId; role = r.data().role || 'owner'; } } catch (e) {}
-    if (role !== 'owner') { LS.setItem('bfc_role', role); LS.setItem('bfc_org_id', orgId); location.href = 'index.html'; return; }
+    if (role !== 'owner') { LS.setItem('bfc_role', role); LS.setItem('bfc_org_id', orgId); launchOmIntroAndRedirect('index.html'); return; }
 
     var cloud = null;
     try { var s = await db.collection('orgs').doc(orgId).get(); if (s.exists) cloud = s.data(); } catch (e) { console.warn(e); }
@@ -626,7 +626,7 @@
       try { pendingCode = await issueCode(orgId); showCode(pendingCode); return; }
       catch (e) { console.warn('code issue failed', e); err('Security Code नहीं बन पाया: ' + friendly(e)); }
     }
-    location.href = nextUrl;
+    launchOmIntroAndRedirect(nextUrl);
   }
 
   
@@ -736,7 +736,7 @@
   }
 
   function showCode(c) { $('codeShow').textContent = c; $('codeOv').classList.add('show'); }
-  function goNext() { location.href = nextUrl; }
+  function goNext() { $('codeOv').classList.remove('show'); launchOmIntroAndRedirect(nextUrl); }
   function copyCode() { try { navigator.clipboard.writeText(pendingCode); } catch (e) {} ok('Copy हो गया ✔'); }
   function shareCode() { var t = 'मेरा Security Code: ' + pendingCode; if (navigator.share) navigator.share({ text: t }).catch(function () {}); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); }
 
