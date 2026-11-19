@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Staff Joining & Onboarding Form</title>
+<title>Staff Joining & Verification Form</title>
 <link rel="stylesheet" href="theme.css">
 <!-- Firebase App & Firestore SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="auth-gate.js"></script>
 <style>
 :root{
@@ -25,9 +27,9 @@
 body{
   background:radial-gradient(1200px 500px at 50% -10%,#16224a 0%,#0A0F1E 60%) fixed #0A0F1E;
   color:var(--tx);
-  max-width:540px;
+  max-width:560px;
   margin:0 auto;
-  padding:14px 12px 80px;
+  padding:14px 12px 90px;
   min-height:100vh;
 }
 .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -52,8 +54,8 @@ body{
   margin-bottom:14px;
   box-shadow:0 10px 28px rgba(0,0,0,.35);
 }
-.header-box h1{color:#fff;font-size:19px;font-weight:900;letter-spacing:0.5px}
-.header-box p{color:var(--ac);font-size:11.5px;font-weight:700;margin-top:4px}
+.header-box h1{color:#fff;font-size:20px;font-weight:900;letter-spacing:0.5px}
+.header-box p{color:var(--ac);font-size:12px;font-weight:700;margin-top:4px}
 .form-card{
   background:linear-gradient(160deg,#16213f,#101830);
   border:1.5px solid var(--border);
@@ -121,13 +123,6 @@ input:focus,select:focus,textarea:focus{
   box-shadow:0 6px 20px rgba(34,197,94,.25);
   text-transform:uppercase;
 }
-.dynamic-box{
-  background:#0B1226;
-  border:1.5px solid #223052;
-  border-radius:12px;
-  padding:12px;
-  margin-top:6px;
-}
 .role-badge{
   display:inline-block;
   background:rgba(255,184,0,.12);
@@ -139,23 +134,177 @@ input:focus,select:focus,textarea:focus{
   font-weight:800;
   margin-bottom:8px;
 }
-/* Modal print / slip */
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99999;overflow-y:auto;padding:14px;align-items:center;justify-content:center}
-.modal-ov.show{display:flex}
-.slip-box{
-  background:#fff;
-  color:#000;
-  border-radius:16px;
-  padding:20px;
-  max-width:440px;
-  width:100%;
+/* Photo Upload & Preview Box */
+.photo-box{
+  background:#0B1226;
+  border:1.5px dashed var(--border);
+  border-radius:12px;
+  padding:12px;
+  text-align:center;
+  margin-bottom:12px;
+}
+.photo-preview{
+  width:110px;
+  height:130px;
+  border-radius:10px;
+  object-fit:cover;
+  border:2px solid var(--ac);
+  display:none;
+  margin:0 auto 10px;
+  background:#1a233a;
+}
+.photo-btns{display:flex;gap:8px;justify-content:center}
+.btn-cam{
+  background:#1e293b;
+  color:var(--tx);
+  border:1px solid var(--border);
+  padding:9px 12px;
+  border-radius:8px;
   font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.btn-cam.active{background:var(--ac);color:#000}
+.sig-box{
+  font:32px "Brush Script MT","Segoe Script","Lucida Handwriting",cursive;
+  color:var(--ac);
+  border-bottom:2px solid var(--ac);
+  padding:6px 4px;
+  min-height:50px;
+  margin-top:4px;
+}
+
+/* Modal styles for full joining print form */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:99999;overflow-y:auto;padding:12px;align-items:flex-start;justify-content:center}
+.modal-ov.show{display:flex}
+.slip-wrapper{max-width:520px;width:100%;margin:10px auto;box-sizing:border-box}
+.slip-paper{
+  background:#ffffff;
+  color:#111111;
+  border-radius:14px;
+  padding:18px 16px;
+  box-shadow:0 0 35px rgba(0,0,0,0.5);
+  position:relative;
+  font-size:11.5px;
   line-height:1.5;
 }
-.slip-header{text-align:center;border-bottom:2px dashed #000;padding-bottom:10px;margin-bottom:10px}
-.slip-header h2{font-size:18px;font-weight:900;margin:0}
-.slip-row{display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:4px 0}
-.slip-row b{color:#000}
+.slip-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  border-bottom:2.5px solid #000;
+  padding-bottom:10px;
+  margin-bottom:12px;
+}
+.slip-header-text{flex:1;text-align:center}
+.slip-header-text h2{font-size:18px;font-weight:900;color:#000;margin:0 0 2px;text-transform:uppercase}
+.slip-header-text p{font-size:10px;color:#555;margin:0}
+.slip-photo{
+  width:85px;
+  height:105px;
+  border:2px solid #000;
+  border-radius:6px;
+  object-fit:cover;
+  margin-left:8px;
+  background:#f0f0f0;
+}
+.slip-sec-head{
+  background:#f4f4f4;
+  font-weight:900;
+  font-size:11.5px;
+  padding:4px 8px;
+  margin:10px 0 6px;
+  border-left:3px solid #ffcc00;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+.slip-table{width:100%;border-collapse:collapse;margin-bottom:6px}
+.slip-table td{padding:4px 6px;border-bottom:1px dotted #ccc;vertical-align:top}
+.slip-table td.lbl{width:36%;font-weight:700;color:#444}
+.slip-table td.val{width:64%;font-weight:800;color:#000}
+.slip-conduct{
+  background:#fffbeb;
+  border:1px solid #fde68a;
+  border-radius:6px;
+  padding:8px 10px;
+  font-size:10px;
+  line-height:1.45;
+  color:#78350f;
+  margin-top:8px;
+}
+.slip-signatures{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  margin-top:18px;
+  padding-top:10px;
+  border-top:1px dashed #000;
+}
+.sig-block{text-align:center;font-size:10.5px}
+.sig-line{width:130px;border-bottom:1.5px solid #000;margin:0 auto 4px;height:36px;display:flex;align-items:flex-end;justify-content:center}
+.sig-text{font:24px "Brush Script MT","Segoe Script",cursive;color:#000}
+.action-bar{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+}
+.btn-dl{
+  flex:1;
+  background:#000;
+  color:#ffcc00;
+  border:none;
+  padding:12px;
+  border-radius:8px;
+  font-weight:900;
+  font-size:12.5px;
+  cursor:pointer;
+  text-align:center;
+}
+.btn-ok-done{
+  flex:1;
+  background:#22C55E;
+  color:#000;
+  border:none;
+  padding:12px;
+  border-radius:8px;
+  font-weight:900;
+  font-size:12.5px;
+  cursor:pointer;
+  text-align:center;
+}
+
+/* Camera Stream Overlay */
+.cam-popup-ov{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.95);
+  z-index:100000;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+}
+.cam-popup-ov.show{display:flex}
+.cam-box{
+  background:#121A2E;
+  border:2px solid var(--ac);
+  border-radius:16px;
+  padding:16px;
+  max-width:380px;
+  width:100%;
+  text-align:center;
+}
+.cam-feed{
+  width:100%;
+  height:260px;
+  border-radius:10px;
+  object-fit:cover;
+  background:#000;
+  transform:scaleX(-1);
+}
 </style>
 </head>
 <body>
@@ -166,7 +315,7 @@ input:focus,select:focus,textarea:focus{
 </div>
 
 <div class="header-box">
-  <div style="font-size:30px;margin-bottom:4px">🧑‍💼</div>
+  <div style="font-size:32px;margin-bottom:4px">🧑‍💼</div>
   <h1 id="gymBrandTitle">5 BROTHER'S FITNESS CLUB</h1>
   <p>आधिकारिक स्टाफ पंजीकरण एवं अनुबंध प्रपत्र (Staff Joining Form)</p>
 </div>
@@ -174,8 +323,26 @@ input:focus,select:focus,textarea:focus{
 <div class="form-card">
   <form id="staffJoinForm" onsubmit="handleStaffJoinSubmit(event)">
 
-    <!-- 1. ROLE & DESIGNATION -->
-    <div class="section-title">💼 1. पद एवं वेतन संरचना (Designation & Role)</div>
+    <!-- PHOTO UPLOAD & LIVE CAPTURE -->
+    <div class="section-title">📷 1. कर्मचारी फोटो (Staff Photo) <span>*</span></div>
+    <div class="photo-box">
+      <img id="staffPhotoPreview" class="photo-preview" alt="Staff Photo Preview">
+      <div id="noPhotoText" style="font-size:11.5px;color:var(--mut);margin-bottom:8px">
+        कृपया पासपोर्ट साइज फोटो अपलोड करें या लाइव कैमरा से खींचें
+      </div>
+      <div class="photo-btns">
+        <button type="button" class="btn-cam" onclick="openLiveCamera()">
+          📸 Live Camera
+        </button>
+        <button type="button" class="btn-cam" onclick="document.getElementById('photoFileInput').click()">
+          🖼️ Gallery / File
+        </button>
+      </div>
+      <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handleFilePhotoPicked(this)">
+    </div>
+
+    <!-- 2. ROLE & DESIGNATION -->
+    <div class="section-title">💼 2. पद एवं वेतन संरचना (Designation & Role)</div>
     
     <div class="field-group">
       <label>स्टाफ श्रेणी (Staff Category / Role) <span>*</span></label>
@@ -221,12 +388,34 @@ input:focus,select:focus,textarea:focus{
       👉 Per Day Rate: ₹0 / दिन (Whole-Day लेजर के लिए)
     </div>
 
-    <!-- 2. PERSONAL & FAMILY DETAILS -->
-    <div class="section-title">👤 2. व्यक्तिगत एवं पारिवारिक विवरण (Personal Details)</div>
+    <div class="row-2">
+      <div class="field-group">
+        <label>टी-शर्ट / यूनिफॉर्म साइज (Uniform Size)</label>
+        <select id="stfUniformSize">
+          <option value="M">M (38 - Medium)</option>
+          <option value="L" selected>L (40 - Large)</option>
+          <option value="XL">XL (42 - Extra Large)</option>
+          <option value="XXL">XXL (44 - Double Extra Large)</option>
+          <option value="S">S (36 - Small)</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>सप्ताहिक अवकाश (Weekly Off Day)</label>
+        <select id="stfWeeklyOff">
+          <option value="Sunday">रविवार (Sunday)</option>
+          <option value="Monday">सोमवार (Monday)</option>
+          <option value="Wednesday">बुधवार (Wednesday)</option>
+          <option value="Rotational">रोटेशनल / आपसी सहमति (Rotational)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 3. PERSONAL & FAMILY DETAILS -->
+    <div class="section-title">👤 3. व्यक्तिगत एवं पारिवारिक विवरण (Personal Details)</div>
 
     <div class="field-group">
       <label>पूरा नाम (Full Legal Name) <span>*</span></label>
-      <input type="text" id="stfName" placeholder="आधार कार्ड के अनुसार पूरा नाम" required>
+      <input type="text" id="stfName" placeholder="आधार कार्ड अनुसार पूरा नाम" required oninput="updateSignaturePreview()">
     </div>
 
     <div class="row-2">
@@ -272,7 +461,7 @@ input:focus,select:focus,textarea:focus{
     <div class="row-2">
       <div class="field-group">
         <label>मोबाइल नंबर (Calling/WhatsApp) <span>*</span></label>
-        <input type="tel" id="stfPhone" maxlength="10" placeholder="10 अंक मोबाइल नंबर" required>
+        <input type="tel" id="stfPhone" maxlength="10" placeholder="10 अंक मोबाइल" required>
       </div>
       <div class="field-group">
         <label>ईमेल आईडी (Email Address)</label>
@@ -283,14 +472,14 @@ input:focus,select:focus,textarea:focus{
     <div class="field-group">
       <label>🚨 आपातकालीन संपर्क व्यक्ति (Emergency Contact Person) <span>*</span></label>
       <div class="row-3">
-        <input type="text" id="stfEmName" placeholder="व्यक्ति का नाम" required>
-        <input type="text" id="stfEmRel" placeholder="संबंध (उदा. भाई/पिता/पत्नी)" required>
+        <input type="text" id="stfEmName" placeholder="नाम" required>
+        <input type="text" id="stfEmRel" placeholder="संबंध (उदा. भाई/पत्नी)" required>
         <input type="tel" id="stfEmPhone" maxlength="10" placeholder="इमरजेंसी मोबाइल" required>
       </div>
     </div>
 
-    <!-- 3. ADDRESS & GOVT IDS -->
-    <div class="section-title">🏠 3. पता एवं सरकारी पहचान (Address & Govt ID)</div>
+    <!-- 4. ADDRESS & GOVT IDS -->
+    <div class="section-title">🏠 4. पता एवं सरकारी पहचान (Address & Govt ID)</div>
 
     <div class="field-group">
       <label>स्थाई घर का पता (Permanent Address) <span>*</span></label>
@@ -311,7 +500,7 @@ input:focus,select:focus,textarea:focus{
       <div class="field-group">
         <label>सरकारी आईडी प्रकार (Govt ID Type) <span>*</span></label>
         <select id="stfGovType" required>
-          <option value="Aadhaar">आधार कार्ड (Aadhaar Card)</option>
+          <option value="Aadhaar Card">आधार कार्ड (Aadhaar Card)</option>
           <option value="Voter ID">वोटर कार्ड (Voter ID)</option>
           <option value="Driving License">ड्राइविंग लाइसेंस (DL)</option>
           <option value="PAN Card">पैन कार्ड (PAN Card)</option>
@@ -323,9 +512,9 @@ input:focus,select:focus,textarea:focus{
       </div>
     </div>
 
-    <!-- 4. EXPERIENCE & PREVIOUS COMPANY (DYNAMIC LEVEL BASED) -->
+    <!-- 5. EXPERIENCE & PREVIOUS COMPANY (DYNAMIC LEVEL BASED) -->
     <div id="experienceSection">
-      <div class="section-title">🏢 4. पिछला कार्य अनुभव (Previous Employment & Skills)</div>
+      <div class="section-title">🏢 5. पिछला कार्य अनुभव (Previous Employment & Skills)</div>
       <div class="role-badge" id="roleBadgeExp">Class A / B Onboarding Profile</div>
       
       <div class="row-2">
@@ -366,8 +555,8 @@ input:focus,select:focus,textarea:focus{
       </div>
     </div>
 
-    <!-- 5. BANKING & UAN DETAILS -->
-    <div class="section-title">🏦 5. बैंक खाता एवं UAN विवरण (Bank & Accounts)</div>
+    <!-- 6. BANKING & UAN DETAILS -->
+    <div class="section-title">🏦 6. बैंक खाता एवं UAN विवरण (Bank & Accounts)</div>
 
     <div class="row-2">
       <div class="field-group">
@@ -402,60 +591,134 @@ input:focus,select:focus,textarea:focus{
       </div>
     </div>
 
+    <!-- 7. TERMS & SIGNATURE -->
+    <div class="section-title">📜 7. नियम, शर्तें एवं घोषणा (Terms & Declaration)</div>
+    <div style="background:#0B1226;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:11px;color:#cbd5e1;line-height:1.5;margin-bottom:8px">
+      1. मैं अपनी शिफ्ट में समय पर आने और <b>प्रतिदिन सेल्फी उपस्थिति</b> दर्ज करने के लिए बाध्य रहूँगा/रहूँगी।<br>
+      2. जिम संपत्ति, मशीनरी और क्लाइंट्स के साथ शालीन व्यवहार रखूँगा/रखूँगी। बिना अनुमति निजी ट्रेनिंग का कोई सौदा नहीं करूँगा/करूँगी।<br>
+      3. इस फॉर्म में दी गई सभी व्यक्तिगत, शैक्षिक एवं बैंक विवरण पूरी तरह सत्य हैं।
+    </div>
+
+    <label class="check-inline">
+      <input type="checkbox" id="chkTermsAgreed" required>
+      <span>मैं जिम के सभी नियमों एवं शर्तों को पूरी तरह स्वीकार करता/करती हूँ। *</span>
+    </label>
+
+    <div class="field-group" style="margin-top:10px">
+      <label>डिजिटल हस्ताक्षर (Digital Signature Preview)</label>
+      <div class="sig-box" id="sigPreview">Signature</div>
+    </div>
+
     <!-- SUBMIT BUTTON -->
     <button type="submit" class="btn-submit" id="btnSubmitStaff">
-      💾 स्टाफ को रजिस्टर में सुरक्षित जोड़ें (Submit Joining Form)
+      💾 स्टाफ का पूरा फॉर्म सेव करें (Generate Official Joining Form)
     </button>
   </form>
 </div>
 
-<!-- OFFICIAL JOINING SLIP MODAL -->
-<div class="modal-ov" id="joiningSlipModal">
-  <div class="slip-box" id="printableSlipArea">
-    <div class="slip-header">
-      <div style="font-size:10px;font-weight:900;background:#000;color:#ffcc00;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:4px">OFFICIAL EMPLOYEE RECORD</div>
-      <h2 id="slipGymName">5 BROTHER'S FITNESS CLUB</h2>
-      <div style="font-size:11px;color:#555">Staff Joining &amp; Verification Slip</div>
-    </div>
-
-    <div class="slip-row"><span>कर्मचारी आईडी (Staff ID):</span><b id="slId">--</b></div>
-    <div class="slip-row"><span>पूरा नाम (Staff Name):</span><b id="slName">--</b></div>
-    <div class="slip-row"><span>पद (Designation):</span><b id="slRole" style="color:#0a7a2f">--</b></div>
-    <div class="slip-row"><span>मोबाइल नंबर:</span><b id="slPhone">--</b></div>
-    <div class="slip-row"><span>पिता / जीवनसाथी:</span><b id="slGuardian">--</b></div>
-    <div class="slip-row"><span>ज्वाइनिंग तिथि:</span><b id="slJoinDate">--</b></div>
-    <div class="slip-row"><span>शिफ्ट:</span><b id="slShift">--</b></div>
-    <div class="slip-row"><span>मासिक वेतन:</span><b id="slSalary" style="color:#0a7a2f">--</b></div>
-    <div class="slip-row"><span>प्रति दिन दर (Daily Rate):</span><b id="slDailyRate">--</b></div>
-    <div class="slip-row"><span>पहचान पत्र (Govt ID):</span><b id="slGovId">--</b></div>
-    <div class="slip-row" id="slPrevCompRow"><span>पिछली संस्था:</span><b id="slPrevCompany">--</b></div>
-    <div class="slip-row"><span>बैंक खाता:</span><b id="slBank">--</b></div>
-
-    <div style="margin-top:14px;border-top:1px dashed #000;padding-top:10px;font-size:10px;line-height:1.4;color:#444">
-      • यह कर्मचारी <b>अटेंडेंस कियोस्क (Selfie Portal)</b> और <b>डेली सैलरी लेजर</b> में सक्रिय कर दिया गया है।<br>
-      • कर्मचारी को प्रतिदिन सेल्फी उपस्थिति दर्ज करना अनिवार्य है।
-    </div>
-
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:20px;padding-top:8px">
-      <div style="font-size:10px;text-align:center">
-        ____________________<br>
-        <b>कर्मचारी के हस्ताक्षर</b>
-      </div>
-      <div style="font-size:10px;text-align:center">
-        ____________________<br>
-        <b>ओनर / अधिकृत हस्ताक्षर</b>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button type="button" onclick="window.print()" style="flex:1;background:#000;color:#ffcc00;border:none;padding:10px;border-radius:6px;font-weight:900;cursor:pointer">🖨️ प्रिंट / PDF</button>
-      <button type="button" onclick="closeSlipAndRedirect()" style="flex:1;background:#22C55E;color:#000;border:none;padding:10px;border-radius:6px;font-weight:900;cursor:pointer">✔ Dashboard पर जाएं</button>
+<!-- LIVE CAMERA CAPTURE POPUP -->
+<div class="cam-popup-ov" id="camPopupOv">
+  <div class="cam-box">
+    <h3 style="color:var(--ac);font-size:15px;margin-bottom:10px">📸 कर्मचारी सेल्फी लें (Live Photo)</h3>
+    <video id="liveVideoFeed" class="cam-feed" playsinline autoplay muted></video>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button type="button" onclick="closeLiveCamera()" style="flex:1;background:#222;color:#bbb;border:1px solid #444;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer">✕ रद्द</button>
+      <button type="button" onclick="captureLivePhoto()" style="flex:2;background:var(--ok);color:#000;border:none;padding:10px;border-radius:8px;font-weight:900;cursor:pointer">📸 फोटो खींचें</button>
     </div>
   </div>
 </div>
 
+<!-- FULL JOINING FORM / AGREEMENT PRINT MODAL -->
+<div class="modal-ov" id="fullFormModal">
+  <div class="slip-wrapper">
+    <div class="slip-paper" id="printableFullForm">
+      
+      <!-- SLIP HEADER -->
+      <div class="slip-header">
+        <div class="slip-header-text">
+          <div style="font-size:9.5px;font-weight:900;background:#000;color:#ffcc00;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:4px">OFFICIAL EMPLOYEE ONBOARDING FORM</div>
+          <h2 id="printGymName">5 BROTHER'S FITNESS CLUB</h2>
+          <p id="printGymTagline">"100% असली और असरदार रिजल्ट"</p>
+          <p id="printGymAddress">उमराव खेड़ा, अकरमपुर, उन्नाव | Ph: 9140417259</p>
+        </div>
+        <img id="printStaffPhoto" class="slip-photo" src="" alt="Staff Photo">
+      </div>
+
+      <!-- SECTION 1: APPOINTMENT DETAILS -->
+      <div class="slip-sec-head">1. पद एवं नियुक्ति विवरण (Appointment Details)</div>
+      <table class="slip-table">
+        <tr><td class="lbl">कर्मचारी कोड (ID):</td><td class="val" id="pId" style="color:#b37400">--</td></tr>
+        <tr><td class="lbl">पद / श्रेणी:</td><td class="val" id="pRole" style="color:#0a7a2f">--</td></tr>
+        <tr><td class="lbl">ज्वाइनिंग तिथि:</td><td class="val" id="pJoinDate">--</td></tr>
+        <tr><td class="lbl">शिफ्ट व समय:</td><td class="val" id="pShift">--</td></tr>
+        <tr><td class="lbl">वेतन (Salary):</td><td class="val" id="pSalary" style="color:#0a7a2f">--</td></tr>
+        <tr><td class="lbl">प्रति दिन दर (Daily Rate):</td><td class="val" id="pDailyRate">--</td></tr>
+        <tr><td class="lbl">यूनिफॉर्म साइज:</td><td class="val" id="pUniform">--</td></tr>
+      </table>
+
+      <!-- SECTION 2: PERSONAL & KYC -->
+      <div class="slip-sec-head">2. व्यक्तिगत एवं पहचान विवरण (Personal & KYC)</div>
+      <table class="slip-table">
+        <tr><td class="lbl">पूरा नाम:</td><td class="val" id="pName">--</td></tr>
+        <tr><td class="lbl">पिता का नाम:</td><td class="val" id="pFather">--</td></tr>
+        <tr id="pSpouseRow" style="display:none"><td class="lbl">पति/पत्नी का नाम:</td><td class="val" id="pSpouse">--</td></tr>
+        <tr><td class="lbl">जन्म तिथि / उम्र / लिंग:</td><td class="val" id="pDobAge">--</td></tr>
+        <tr><td class="lbl">मोबाइल नंबर:</td><td class="val" id="pPhone">--</td></tr>
+        <tr><td class="lbl">सरकारी पहचान पत्र:</td><td class="val" id="pGovId">--</td></tr>
+        <tr><td class="lbl">स्थाई घर का पता:</td><td class="val" id="pPermAddr">--</td></tr>
+        <tr><td class="lbl">वर्तमान पता:</td><td class="val" id="pCurrAddr">--</td></tr>
+        <tr><td class="lbl">आपातकालीन संपर्क:</td><td class="val" id="pEmergency">--</td></tr>
+      </table>
+
+      <!-- SECTION 3: PREVIOUS EXPERIENCE & BANK -->
+      <div class="slip-sec-head">3. अनुभव एवं बैंक विवरण (Experience & Bank)</div>
+      <table class="slip-table">
+        <tr id="pPrevCompanyRow"><td class="lbl">पिछली संस्था (Company):</td><td class="val" id="pPrevCompany">--</td></tr>
+        <tr id="pSkillsRow"><td class="lbl">विशेष योग्यता / सर्टिफिकेशन:</td><td class="val" id="pSkills">--</td></tr>
+        <tr><td class="lbl">बैंक खाता संख्या:</td><td class="val" id="pBank">--</td></tr>
+        <tr><td class="lbl">IFSC कोड / UPI:</td><td class="val" id="pIfscUpi">--</td></tr>
+        <tr><td class="lbl">UAN नंबर (EPF):</td><td class="val" id="pUan">--</td></tr>
+      </table>
+
+      <!-- CODE OF CONDUCT -->
+      <div class="slip-conduct">
+        <b>सख्त आचार संहिता एवं नियम:</b><br>
+        1. कर्मचारी को प्रतिदिन कियोस्क में सेल्फी अटेंडेंस दर्ज करना अनिवार्य होगा।<br>
+        2. किसी भी प्रकार की अनुशासनहीनता, क्लाइंट के साथ दुर्व्यवहार या अनधिकृत अनुपस्थिति पर अनुशासनात्मक कार्रवाई होगी।<br>
+        3. कर्मचारी ने घोषणा की है कि उसके ऊपर कोई आपराधिक मामला दर्ज नहीं है और दी गई सारी जानकारी सत्य है।
+      </div>
+
+      <!-- SIGNATURES -->
+      <div class="slip-signatures">
+        <div class="sig-block">
+          <div class="sig-line">
+            <span class="sig-text" id="pStaffSignature">Signature</span>
+          </div>
+          <b>कर्मचारी के हस्ताक्षर</b>
+        </div>
+        <div class="sig-block">
+          <div class="sig-line">
+            <span style="font-weight:900;color:#000;font-size:13px" id="pOwnerSignature">Saurabh Singh Chandel</span>
+          </div>
+          <b id="pOwnerLabel">जिम ओनर / अधिकृत मुहर</b>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="action-bar">
+      <button type="button" class="btn-dl" onclick="downloadJoiningFormImage()">📥 फोटो डाउनलोड</button>
+      <button type="button" class="btn-dl" onclick="downloadJoiningFormPDF()">📄 PDF डाउनलोड</button>
+      <button type="button" class="btn-ok-done" onclick="finishAndGoDashboard()">✔ Dashboard जाएं</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="hiddenSnapCanvas" style="display:none"></canvas>
+
 <script>
-// --- FIREBASE CLOUD SETUP ---
+// --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
   apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
   authDomain: "bfc-gym-215ae.firebaseapp.com",
@@ -467,53 +730,129 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// LocalStorage Helper
 const LS = localStorage;
+let capturedStaffPhotoData = "";
+let liveStreamInstance = null;
+
 function todayISO() {
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  // Set default date
   document.getElementById("stfJoinDate").value = todayISO();
   
-  // Set Gym Name Dynamically
+  // Dynamic Gym Details from profile
   const org = JSON.parse(LS.getItem("om_org_profile") || "{}");
   const gName = org.orgName || org.gymName || "5 BROTHER'S FITNESS CLUB";
+  const gAddr = org.address || "उमराव खेड़ा, अकरमपुर, उन्नाव";
+  const gPhone = org.phone || "9140417259";
+  const gOwner = org.ownerName || "Saurabh Singh Chandel";
+
   document.getElementById("gymBrandTitle").textContent = gName.toUpperCase();
-  document.getElementById("slipGymName").textContent = gName.toUpperCase();
+  document.getElementById("printGymName").textContent = gName.toUpperCase();
+  document.getElementById("printGymAddress").textContent = `${gAddr} | Ph: ${gPhone}`;
+  document.getElementById("pOwnerSignature").textContent = gOwner;
 
   handleRoleChange();
   calcPerDayPreview();
 });
 
-// Dynamic Field Toggles Based on Roles
+// Update Digital Signature
+function updateSignaturePreview() {
+  const n = document.getElementById("stfName").value.trim() || "Signature";
+  document.getElementById("sigPreview").textContent = n;
+}
+
+// Photo Upload Handlers
+function handleFilePhotoPicked(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    resizeAndSetPhoto(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function openLiveCamera() {
+  const ov = document.getElementById("camPopupOv");
+  const video = document.getElementById("liveVideoFeed");
+  ov.classList.add("show");
+  try {
+    liveStreamInstance = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 640 } },
+      audio: false
+    });
+    video.srcObject = liveStreamInstance;
+    await video.play();
+  } catch (err) {
+    alert("कैमरा चालू नहीं हो सका। कृपया परमिशन चेक करें।");
+    closeLiveCamera();
+  }
+}
+
+function closeLiveCamera() {
+  if (liveStreamInstance) {
+    liveStreamInstance.getTracks().forEach(t => t.stop());
+    liveStreamInstance = null;
+  }
+  document.getElementById("camPopupOv").classList.remove("show");
+}
+
+function captureLivePhoto() {
+  const video = document.getElementById("liveVideoFeed");
+  const canvas = document.getElementById("hiddenSnapCanvas");
+  canvas.width = 360;
+  canvas.height = 440;
+  const ctx = canvas.getContext("2d");
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
+  closeLiveCamera();
+  resizeAndSetPhoto(dataUrl);
+}
+
+function resizeAndSetPhoto(dataUrl) {
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.getElementById("hiddenSnapCanvas");
+    canvas.width = 240;
+    canvas.height = 300;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    capturedStaffPhotoData = canvas.toDataURL("image/jpeg", 0.75);
+
+    const prev = document.getElementById("staffPhotoPreview");
+    prev.src = capturedStaffPhotoData;
+    prev.style.display = "block";
+    document.getElementById("noPhotoText").style.display = "none";
+  };
+  img.src = dataUrl;
+}
+
+// Role Toggles
 function handleRoleChange() {
   const role = document.getElementById("stfRole").value;
-  const expSection = document.getElementById("experienceSection");
-  const prevCompany = document.getElementById("stfPrevCompany");
   const roleBadge = document.getElementById("roleBadgeExp");
+  const prevCompany = document.getElementById("stfPrevCompany");
   const skillsLabel = document.getElementById("lblSpecialSkills");
 
   if (role === "Support") {
-    // Class C: Peon, Sweeper, Helper -> Experience optional / minimal
-    roleBadge.textContent = "Class C: सपोर्ट एवं हाउसकीपिंग (अनुभव वैकल्पिक)";
+    roleBadge.textContent = "Class C: सफाई कर्मचारी / हेल्पर / प्यून (अनुभव वैकल्पिक)";
     prevCompany.required = false;
-    skillsLabel.textContent = "कार्य में विशेषज्ञता (जैसे सफाई, उपकरण रखरखाव, आदि)";
+    skillsLabel.textContent = "कार्य में विशेषज्ञता (जैसे उपकरण रखरखाव, हाइजीन, आदि)";
   } else if (role === "Trainer") {
-    // Class A: Trainers
     roleBadge.textContent = "Class A: जिम ट्रेनर / फिटनेस कोच (सर्टिफिकेशन व अनुभव ज़रूरी)";
     prevCompany.required = true;
-    skillsLabel.textContent = "फिटनेस सर्टिफिकेशन (CPR, Personal Training, डाइट चार्ट विशेषज्ञता)";
+    skillsLabel.textContent = "फिटनेस सर्टिफिकेशन (CPR, पर्सनल ट्रेनिंग, डाइट चार्ट विशेषज्ञता)";
   } else if (role === "Receptionist") {
-    // Class B: Front Desk
-    roleBadge.textContent = "Class B: रिसेप्शन एवं बिलिंग (कंप्यूटर एवं कॉलिंग अनुभव)";
+    roleBadge.textContent = "Class B: रिसेप्शन / फ्रंट डेस्क (कंप्यूटर, एक्सेल एवं बिलिंग)";
     prevCompany.required = true;
     skillsLabel.textContent = "कंप्यूटर योग्यता (MS Excel, सॉफ्टवेयर, बिलिंग, क्लाइंट डीलिंग)";
   } else {
-    // Manager
-    roleBadge.textContent = "Class S: प्रबंधन एवं ऑपरेशन्स (पूर्व प्रबंधन अनुभव अनिवार्य)";
+    roleBadge.textContent = "Class S: प्रबंधन एवं ऑपरेशन्स (प्रबंधन अनुभव अनिवार्य)";
     prevCompany.required = true;
     skillsLabel.textContent = "टीम मैनेजमेंट, सेल्स क्लोजिंग एवं जिम ऑपरेशन्स";
   }
@@ -537,9 +876,7 @@ function copyAddressIfSame() {
   const chk = document.getElementById("chkSameAddr");
   const perm = document.getElementById("stfPermAddr");
   const curr = document.getElementById("stfCurrAddr");
-  if (chk.checked) {
-    curr.value = perm.value;
-  }
+  if (chk.checked) curr.value = perm.value;
 }
 
 function calculateStaffAge() {
@@ -547,21 +884,16 @@ function calculateStaffAge() {
   if (!dobVal) return;
   const dob = new Date(dobVal);
   const diff = Date.now() - dob.getTime();
-  const ageDate = new Date(diff);
-  const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+  const age = Math.abs(new Date(diff).getUTCFullYear() - 1970);
   document.getElementById("stfAge").value = age > 0 ? age : "";
 }
 
 function handleSalaryTypeChange() {
   const type = document.getElementById("stfSalaryType").value;
   const lbl = document.getElementById("lblSalaryAmount");
-  if (type === "Daily") {
-    lbl.innerHTML = 'दैनिक वेतन दर (Per Day ₹) <span>*</span>';
-  } else if (type === "Incentive") {
-    lbl.innerHTML = 'बेस मासिक वेतन (Base Salary ₹) <span>*</span>';
-  } else {
-    lbl.innerHTML = 'मासिक वेतन (Fixed Salary ₹) <span>*</span>';
-  }
+  if (type === "Daily") lbl.innerHTML = 'दैनिक वेतन दर (Per Day ₹) <span>*</span>';
+  else if (type === "Incentive") lbl.innerHTML = 'बेस मासिक वेतन (Base Salary ₹) <span>*</span>';
+  else lbl.innerHTML = 'मासिक वेतन (Fixed Salary ₹) <span>*</span>';
   calcPerDayPreview();
 }
 
@@ -569,11 +901,8 @@ function calcPerDayPreview() {
   const type = document.getElementById("stfSalaryType").value;
   const sal = Number(document.getElementById("stfSalary").value) || 0;
   let dailyRate = 0;
-  if (type === "Daily") {
-    dailyRate = sal;
-  } else {
-    dailyRate = Math.round((sal / 30) * 100) / 100;
-  }
+  if (type === "Daily") dailyRate = sal;
+  else dailyRate = Math.round((sal / 30) * 100) / 100;
   document.getElementById("salaryPreviewLine").innerHTML = 
     `👉 <b>Per Day Rate:</b> ₹${dailyRate} / दिन (हर शाम Whole-Day लेजर और सैलरी हिसाब के लिए)`;
   return dailyRate;
@@ -592,19 +921,19 @@ function handleExpTypeChange() {
   }
 }
 
-// SUBMIT FORM & AUTO-LINK
+// SUBMIT FORM AND BUILD PRINTABLE FULL FORM
 async function handleStaffJoinSubmit(e) {
   e.preventDefault();
   const btn = document.getElementById("btnSubmitStaff");
   btn.disabled = true;
-  btn.innerText = "⏳ स्टाफ का डेटा सेव हो रहा है...";
+  btn.innerText = "⏳ स्टाफ का फॉर्म तैयार हो रहा है...";
 
   const staffId = "STF-" + Date.now().toString().slice(-6);
   const role = document.getElementById("stfRole").value;
   const name = document.getElementById("stfName").value.trim();
   const phone = document.getElementById("stfPhone").value.trim();
   const dob = document.getElementById("stfDob").value;
-  const age = document.getElementById("stfAge").value;
+  const age = document.getElementById("stfAge").value || "--";
   const gender = document.getElementById("stfGender").value;
   const marital = document.getElementById("stfMarital").value;
   const father = document.getElementById("stfFather").value.trim();
@@ -622,6 +951,8 @@ async function handleStaffJoinSubmit(e) {
   const salaryType = document.getElementById("stfSalaryType").value;
   const salary = Number(document.getElementById("stfSalary").value) || 0;
   const dailyRate = calcPerDayPreview();
+  const uniform = document.getElementById("stfUniformSize").value;
+  const weeklyOff = document.getElementById("stfWeeklyOff").value;
   const expType = document.getElementById("stfExpType").value;
   const totalExp = document.getElementById("stfTotalExp").value.trim();
   const prevCompany = document.getElementById("stfPrevCompany").value.trim();
@@ -635,7 +966,6 @@ async function handleStaffJoinSubmit(e) {
   const upi = document.getElementById("stfUpi").value.trim();
   const uan = document.getElementById("stfUan").value.trim();
 
-  // Unified Staff Profile Object
   const staffRecord = {
     id: staffId,
     name: name,
@@ -643,6 +973,7 @@ async function handleStaffJoinSubmit(e) {
     role: role,
     category: role === "Support" ? "Class C (Housekeeping)" : (role === "Trainer" ? "Class A (Trainer)" : (role === "Receptionist" ? "Class B (Desk)" : "Class S (Manager)")),
     designation: role,
+    photo: capturedStaffPhotoData || "",
     dob: dob,
     age: age,
     gender: gender,
@@ -662,49 +993,114 @@ async function handleStaffJoinSubmit(e) {
     monthlySalary: salary,
     salary: salary,
     dailyRate: dailyRate,
+    uniformSize: uniform,
+    weeklyOff: weeklyOff,
     experience: { type: expType, totalExp: totalExp, prevCompany: prevCompany, prevRole: prevRole, leaveReason: leaveReason, skills: skills },
     banking: { holder: bankHolder, bank: bankName, account: bankAcc, ifsc: bankIfsc, upi: upi, uan: uan },
     status: "Active",
     createdAt: new Date().toISOString()
   };
 
-  // 1. Save to LocalStorage staff master lists (bfc_staff_list & om_staff_master_v2)
+  // 1. Save to LocalStorage
   let staffList = JSON.parse(LS.getItem("bfc_staff_list") || "[]");
   staffList.push(staffRecord);
   LS.setItem("bfc_staff_list", JSON.stringify(staffList));
   LS.setItem("om_staff_master_v2", JSON.stringify(staffList));
 
-  // 2. Sync directly to Cloud Firestore 'staff' collection
+  // 2. Sync to Cloud Firestore
   try {
     await db.collection("staff").doc(staffId).set(staffRecord, { merge: true });
   } catch (err) {
-    console.warn("Cloud staff sync notice:", err);
+    console.warn("Cloud sync notice:", err);
   }
 
-  // 3. Populate Slip Modal
-  document.getElementById("slId").innerText = staffId;
-  document.getElementById("slName").innerText = name;
-  document.getElementById("slRole").innerText = `${role} (${staffRecord.category})`;
-  document.getElementById("slPhone").innerText = phone;
-  document.getElementById("slGuardian").innerText = marital === "Married" && spouse ? `${spouse} (पति/पत्नी)` : `${father} (पिता)`;
-  document.getElementById("slJoinDate").innerText = joinDate;
-  document.getElementById("slShift").innerText = `${shift} (${staffRecord.slot})`;
-  document.getElementById("slSalary").innerText = `₹${salary} (${salaryType})`;
-  document.getElementById("slDailyRate").innerText = `₹${dailyRate} / दिन`;
-  document.getElementById("slGovId").innerText = `${govType}: ${govNo}`;
-  document.getElementById("slPrevCompany").innerText = prevCompany || "फ्रेशर / एन.ए.";
-  document.getElementById("slBank").innerText = `${bankName} (A/C: ${bankAcc}, IFSC: ${bankIfsc})`;
+  // 3. Fill the Full Printable Form
+  document.getElementById("pId").innerText = staffId;
+  document.getElementById("pName").innerText = name;
+  document.getElementById("pRole").innerText = `${role} (${staffRecord.category})`;
+  document.getElementById("pJoinDate").innerText = joinDate;
+  document.getElementById("pShift").innerText = `${shift} (${staffRecord.slot}) | Off: ${weeklyOff}`;
+  document.getElementById("pSalary").innerText = `₹${salary} (${salaryType})`;
+  document.getElementById("pDailyRate").innerText = `₹${dailyRate} / दिन`;
+  document.getElementById("pUniform").innerText = `Size: ${uniform}`;
+
+  document.getElementById("pFather").innerText = father;
+  if (marital === "Married" && spouse) {
+    document.getElementById("pSpouseRow").style.display = "table-row";
+    document.getElementById("pSpouse").innerText = spouse;
+  } else {
+    document.getElementById("pSpouseRow").style.display = "none";
+  }
+
+  document.getElementById("pDobAge").innerText = `${dob} (${age} वर्ष) | ${gender}`;
+  document.getElementById("pPhone").innerText = `${phone} ${email ? "· " + email : ""}`;
+  document.getElementById("pGovId").innerText = `${govType}: ${govNo}`;
+  document.getElementById("pPermAddr").innerText = permAddr;
+  document.getElementById("pCurrAddr").innerText = currAddr;
+  document.getElementById("pEmergency").innerText = `${emName} (${emRel}) - 📞 ${emPhone}`;
+
+  if (expType === "Experienced" && prevCompany) {
+    document.getElementById("pPrevCompanyRow").style.display = "table-row";
+    document.getElementById("pPrevCompany").innerText = `${prevCompany} (${prevRole || "—"}) · Exp: ${totalExp || "—"}`;
+  } else {
+    document.getElementById("pPrevCompanyRow").style.display = "table-row";
+    document.getElementById("pPrevCompany").innerText = "फ्रेशर (Fresher)";
+  }
+
+  if (skills) {
+    document.getElementById("pSkillsRow").style.display = "table-row";
+    document.getElementById("pSkills").innerText = skills;
+  } else {
+    document.getElementById("pSkillsRow").style.display = "none";
+  }
+
+  document.getElementById("pBank").innerText = `${bankName} (A/C: ${bankAcc})`;
+  document.getElementById("pIfscUpi").innerText = `IFSC: ${bankIfsc} ${upi ? "· UPI: " + upi : ""}`;
+  document.getElementById("pUan").innerText = uan || "N/A";
+
+  const photoElem = document.getElementById("printStaffPhoto");
+  if (capturedStaffPhotoData) {
+    photoElem.src = capturedStaffPhotoData;
+    photoElem.style.display = "block";
+  } else {
+    photoElem.style.display = "none";
+  }
+
+  document.getElementById("pStaffSignature").innerText = name;
 
   btn.disabled = false;
-  btn.innerText = "💾 स्टाफ को रजिस्टर में सुरक्षित जोड़ें (Submit Joining Form)";
+  btn.innerText = "💾 स्टाफ का पूरा फॉर्म सेव करें (Generate Official Joining Form)";
 
-  // Open Slip Modal
-  document.getElementById("joiningSlipModal").classList.add("show");
+  // Open Full Print Modal
+  document.getElementById("fullFormModal").classList.add("show");
 }
 
-function closeSlipAndRedirect() {
-  document.getElementById("joiningSlipModal").classList.remove("show");
-  alert("🎉 स्टाफ सफलतापूर्वक जुड़ गया है! अब अटेंडेंस पोर्टल में इनका नाम एक्टिव है।");
+function downloadJoiningFormImage() {
+  const paper = document.getElementById("printableFullForm");
+  html2canvas(paper, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = `Staff_Joining_${document.getElementById("pId").innerText}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+
+function downloadJoiningFormPDF() {
+  const paper = document.getElementById("printableFullForm");
+  html2canvas(paper, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const imgWidth = 190;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    pdf.addImage(imgData, "JPEG", 10, 10, imgWidth, imgHeight);
+    pdf.save(`Staff_Joining_Form_${document.getElementById("pId").innerText}.pdf`);
+  });
+}
+
+function finishAndGoDashboard() {
+  document.getElementById("fullFormModal").classList.remove("show");
+  alert("🎉 स्टाफ सफलतापुर्वक जुड़ गया है और इसका पूरा जॉइनिंग फॉर्म सुरक्षित हो गया है!");
   window.location.href = "index.html";
 }
 </script>
