@@ -296,6 +296,7 @@
         }
 
         const hasSavedProfile = restoreProfileAfterAuth(uid, uc.user.email || primaryCredential, /^\d{10}$/.test(rawInput) ? rawInput : "", secCodeEntered);
+        try { localStorage.setItem("om_session_active", "1"); localStorage.setItem("om_last_activity_time", String(Date.now())); } catch (e) {}
         showSuccess("Login successful! Redirecting...");
         setTimeout(() => {
           window.location.href = hasSavedProfile ? "index.html" : "category-select.html";

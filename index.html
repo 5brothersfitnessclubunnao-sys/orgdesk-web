@@ -47,6 +47,7 @@
     .slip-paper{background:#fff;color:#111;border-radius:12px;padding:16px;font-size:12px;line-height:1.45}
     .slip-row{display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:4px 0}
     .btn-sm{padding:6px 8px;font-size:11px;font-weight:800;border-radius:6px;border:0;cursor:pointer}
+
     .ai-fab{position:fixed;right:16px;bottom:18px;z-index:9998;background:linear-gradient(135deg,#ffcc00,#e6b800);color:#000;border:2px solid #000;border-radius:999px;padding:12px 16px;font-weight:900;font-size:12.5px;box-shadow:0 8px 24px rgba(255,204,0,.35);cursor:pointer;display:flex;align-items:center;gap:6px}
     .ai-drawer{display:none;position:fixed;right:12px;bottom:74px;width:min(390px,calc(100vw - 24px));max-height:74vh;background:#121216;border:2px solid var(--ac);border-radius:16px;z-index:9999;box-shadow:0 12px 36px rgba(0,0,0,.85);flex-direction:column;overflow:hidden}
     .ai-drawer.show{display:flex}
@@ -61,9 +62,26 @@
     .ai-ans{background:#181820;border:1px solid #2e2e38;border-radius:10px;padding:10px;margin-top:8px}
     .ai-item{background:#0e0e13;border:1px solid #24242d;border-radius:8px;padding:7px 9px;margin-top:6px;font-size:11.5px}
 
+
+    .sub-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+    .stab{background:#111;border:1px solid var(--border);color:#bbb;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;text-align:center}
+    .stab.on{background:var(--ac);color:#000;border-color:var(--ac)}
+    .st-card{background:#101015;border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:8px}
+    .st-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .st-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .st-lbl{font-size:10.5px;color:#bbb;display:block;margin-top:6px}
+    .st-box{background:#0b0b0e;border:1px dashed var(--border);border-radius:8px;padding:8px;margin-top:8px;font-size:11.5px;line-height:1.5}
+    .slip-paper{background:#fff;color:#111;border-radius:12px;padding:16px;font-size:12px;line-height:1.45}
+    .slip-row{display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:4px 0}
+    .btn-sm{padding:6px 8px;font-size:11px;font-weight:800;border-radius:6px;border:0;cursor:pointer}
+    .slot-pill{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#0e0e13;border:1px solid var(--border);border-radius:8px;padding:7px 9px;margin-top:6px;font-size:11.5px}
+    .att-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+    .att-day{background:#101016;border:1px solid #2b2b36;border-radius:6px;padding:6px 2px;text-align:center;font-size:10.5px;cursor:pointer}
+    .att-day.p{border-color:#2ecc71;color:#2ecc71;font-weight:800}
+    .att-day.l{border-color:#ff9a00;color:#ff9a00;font-weight:800}
+    .att-day.a{border-color:#555;color:#888}
+
 </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="auth-gate.js" data-mode="ondemand"></script>
 </head>
 <body>
 <div class="dash-container">
@@ -92,6 +110,7 @@
     <button type="button" class="menu-card" onclick="openImp()"><div class="icon">📤</div><div class="title">Upload Gym Data</div><div class="sub">Purane register ke members daalein</div></button>
     <button type="button" class="menu-card" onclick="openAdmin()"><div class="icon">🔐</div><div class="title">Admin Portal</div><div class="sub">Staff &amp; PIN controls</div></button>
   </div>
+  <button type="button" class="logout-btn" style="margin-top:14px;background:#1a0d0e;border-color:#e74c3c;color:#ff6b6b;font-weight:900;padding:12px;font-size:13px;" onclick="doLogout()">🚪 Logout System</button>
 </div>
   
 <!-- PIN -->
@@ -101,10 +120,10 @@
   <button class="btn" onclick="pinOk()">OK</button><button class="btn g" onclick="closeOv('pinOv')">Cancel</button></div></div>
 
 <!-- ADMIN -->
-<div class="ov" id="admOv"><div class="bx" style="max-width:480px">
+<div class="ov" id="admOv"><div class="bx" style="max-width:490px">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <h3 style="margin:0">🔐 Admin Portal</h3>
-    <button class="btn-sm" style="background:#222;color:var(--ac);border:1px solid var(--ac)" onclick="closeOv('admOv')">✖ बंद</button>
+    <button type="button" class="btn-sm" style="background:#222;color:var(--ac);border:1px solid var(--ac)" onclick="closeOv('admOv')">✖ बंद</button>
   </div>
 
   <div class="sub-tabs">
@@ -118,18 +137,18 @@
       <div class="sec" style="margin:0">👥 Staff Members</div>
       <button type="button" class="btn-sm" style="background:var(--ok);color:#000" onclick="openStaffEditor(null)">➕ Add / Register Staff</button>
     </div>
-    <div style="font-size:11px;color:var(--mut);margin-top:4px">किसी स्टाफ पर क्लिक करके उसकी पूरी प्रोफ़ाइल, डेली/आवरली/मिनट/सेकंड सैलरी, लेट पेनल्टी और सैलरी स्लिप देखें या एडिट करें।</div>
+    <div style="font-size:11px;color:var(--mut);margin-top:4px">किसी स्टाफ पर क्लिक करके उसकी पूरी प्रोफ़ाइल, Shift/Work Type, Attendance Calendar, Salary/Penalty और Salary Slip खोलें।</div>
     <div id="stList"></div>
   </div>
 
   <div id="admPane_sec" style="display:none">
     <div class="sec" style="margin-top:4px">🔑 PIN बदलें</div>
     <input id="np" type="password" inputmode="numeric" placeholder="नया PIN (कम से कम 4 अंक)">
-    <button class="btn g" onclick="changePin()">PIN Save करें</button>
+    <button type="button" class="btn g" onclick="changePin()">PIN Save करें</button>
 
     <div class="sec">💾 Backup</div>
     <div id="bkInfo" style="font-size:11.5px;color:var(--mut)"></div>
-    <button class="btn g" onclick="runBk()">💾 अभी Backup लें + Download</button>
+    <button type="button" class="btn g" onclick="runBk()">💾 अभी Backup लें + Download</button>
     <div style="font-size:10.5px;color:var(--mut);margin-top:4px">हर रात 11 बजे auto-backup (Cloud में) — जब यह app खुला हो; बंद हो तो अगली बार खुलते ही।</div>
   </div>
 
@@ -137,21 +156,22 @@
     <div class="sec" style="margin-top:4px">⚙️ Account &amp; Organization</div>
     <a href="category-select.html" class="btn g" style="display:block;text-align:center;text-decoration:none">⚙️ Org Setup (Business profile)</a>
     <button type="button" class="btn g" style="color:#e74c3c;border-color:#e74c3c;margin-top:12px" onclick="doLogout()">🚪 Logout</button>
-    <div style="font-size:10.5px;color:var(--mut);margin-top:6px;line-height:1.4">Logout करने पर सेशन बंद होगा, लेकिन आपका जिम डेटा और प्रोफ़ाइल सुरक्षित रहेगी। दोबारा लॉगिन करने पर बार-बार नया डेटा नहीं भरना पड़ेगा।</div>
+    <div style="font-size:10.5px;color:var(--mut);margin-top:6px;line-height:1.4">Logout करने पर सेशन बंद होगा, लेकिन आपका जिम डेटा और लाइसेंस/प्रोफ़ाइल सुरक्षित रहेगी।</div>
   </div>
 </div></div>
 
-<!-- STAFF DETAIL / ADD / EDIT / SALARY ENGINE MODAL -->
-<div class="ov" id="staffDetailOv"><div class="bx" style="max-width:500px">
+<!-- STAFF DETAIL / ADD / EDIT / SHIFTS / ATTENDANCE / SALARY ENGINE MODAL -->
+<div class="ov" id="staffDetailOv"><div class="bx" style="max-width:520px">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <h3 id="sdTitle" style="margin:0">🧑‍💼 Staff Profile &amp; Salary</h3>
     <button type="button" class="btn-sm" style="background:#222;color:var(--ac);border:1px solid var(--ac)" onclick="closeOv('staffDetailOv')">✖ बंद</button>
   </div>
 
-  <div class="sub-tabs" id="sdSubTabs">
-    <button type="button" class="stab on" id="sdt_prof" onclick="switchStaffSubTab('prof')">📋 Details</button>
-    <button type="button" class="stab" id="sdt_sal" onclick="switchStaffSubTab('sal')">💰 Salary &amp; Penalty</button>
-    <button type="button" class="stab" id="sdt_slip" onclick="switchStaffSubTab('slip')">🧾 Salary Slip</button>
+  <div class="sub-tabs" style="grid-template-columns:repeat(4,1fr)">
+    <button type="button" class="stab on" id="sdt_prof" onclick="switchStaffSubTab('prof')">📋 Profile</button>
+    <button type="button" class="stab" id="sdt_att" onclick="switchStaffSubTab('att')">📅 Attendance</button>
+    <button type="button" class="stab" id="sdt_sal" onclick="switchStaffSubTab('sal')">💰 Salary</button>
+    <button type="button" class="stab" id="sdt_slip" onclick="switchStaffSubTab('slip')">🧾 Slip</button>
   </div>
 
   <div id="sdp_prof">
@@ -160,7 +180,13 @@
 
     <div class="st-grid">
       <div><label class="st-lbl">मोबाइल नंबर</label><input id="sf_phone" inputmode="tel" placeholder="10 अंक मोबाइल"></div>
-      <div><label class="st-lbl">पद / भूमिका (Role)</label><input id="sf_role" placeholder="Trainer / Manager / Staff"></div>
+      <div><label class="st-lbl">विभाग / Department</label>
+        <select id="sf_dept" onchange="toggleCustomDept()"></select>
+      </div>
+    </div>
+    <div id="sf_customDeptWrap" style="display:none">
+      <label class="st-lbl">नया Department लिखें</label>
+      <input id="sf_customDept" placeholder="उदा. Housekeeping, Front Desk, Reception">
     </div>
 
     <div class="st-grid">
@@ -199,12 +225,64 @@
 
     <div class="st-grid">
       <div><label class="st-lbl">Joining Date</label><input id="sf_joinDate" type="date"></div>
-      <div><label class="st-lbl">मासिक तय सैलरी (Monthly Salary ₹)</label><input id="sf_monthlySalary" type="number" min="0" step="1" placeholder="उदा. 10000"></div>
+      <div><label class="st-lbl">Salary Model (3 Options) *</label>
+        <select id="sf_payModel" onchange="togglePayModelFields()">
+          <option value="fixed">1. Fixed Salary (Entry-Exit / Shift)</option>
+          <option value="incentive">2. Incentive Staff (Trainer / Sales)</option>
+          <option value="work_based">3. Kaam / Task Based (Safai / Part-time)</option>
+        </select>
+      </div>
     </div>
 
-    <div class="st-grid">
-      <div><label class="st-lbl">प्रतिदिन काम के घंटे (Shift Hours/Day)</label><input id="sf_shiftHours" type="number" min="1" max="24" step="0.5" value="8"></div>
-      <div><label class="st-lbl">महीने के कार्य दिवस (Working Days/Mo)</label><input id="sf_workDays" type="number" min="1" max="31" value="30"></div>
+    <div id="sf_fixedBox" class="st-box">
+      <b>⏰ Fixed Salary Shift &amp; Timings:</b>
+      <div class="st-grid">
+        <div><label class="st-lbl">Entry Time</label><input id="sf_entryTime" type="time" value="09:00"></div>
+        <div><label class="st-lbl">Exit Time</label><input id="sf_exitTime" type="time" value="17:00"></div>
+      </div>
+      <div class="st-grid">
+        <div><label class="st-lbl">Monthly Fixed Salary (₹)</label><input id="sf_monthlySalary" type="number" min="0" step="1" value="10000"></div>
+        <div><label class="st-lbl">Working Days / Month</label><input id="sf_workDays" type="number" min="1" max="31" value="30"></div>
+      </div>
+
+      <div class="sec" style="margin-top:10px">🕒 Shift Slots (Add / Edit / Delete — जैसे 05:00-05:30 या 05:00-13:00)</div>
+      <div class="st-grid">
+        <div><label class="st-lbl">Slot Name</label><input id="slot_name" placeholder="उदा. Early Slot / Morning"></div>
+        <div><label class="st-lbl">Active Slot चुनें</label><select id="sf_activeSlot" onchange="applySelectedSlotToTimes()"></select></div>
+      </div>
+      <div class="st-grid">
+        <div><label class="st-lbl">Slot Start</label><input id="slot_start" type="time" value="05:00"></div>
+        <div><label class="st-lbl">Slot End</label><input id="slot_end" type="time" value="05:30"></div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button type="button" class="btn-sm" style="background:var(--ac);color:#000" onclick="addOrUpdateShiftSlot()">➕ Slot Add / Update</button>
+        <button type="button" class="btn-sm" style="background:#512027;color:#ffb3b3" onclick="deleteSelectedShiftSlot()">🗑 Slot Delete</button>
+      </div>
+      <div id="sf_slotsList"></div>
+    </div>
+
+    <div id="sf_incentiveBox" class="st-box" style="display:none">
+      <b>🏋️ Incentive Staff Structure:</b>
+      <div class="st-grid">
+        <div><label class="st-lbl">Base Retainer / Fixed (₹)</label><input id="sf_baseIncentiveSalary" type="number" min="0" step="1" value="5000"></div>
+        <div><label class="st-lbl">Incentive Per Client / PT (₹)</label><input id="sf_incentivePerUnit" type="number" min="0" step="1" value="500"></div>
+      </div>
+      <div class="st-grid">
+        <div><label class="st-lbl">Active Clients / Sessions Count</label><input id="sf_incentiveUnits" type="number" min="0" step="1" value="0"></div>
+        <div><label class="st-lbl">Commission % (Optional)</label><input id="sf_commissionPct" type="number" min="0" max="100" step="0.5" value="0"></div>
+      </div>
+    </div>
+
+    <div id="sf_workBox" class="st-box" style="display:none">
+      <b>🧹 Kaam / Task Based Structure (Per Work / Cycle — Hour Mandatory Nahi):</b>
+      <div class="st-grid">
+        <div><label class="st-lbl">Full Work Cycle Pay (₹)</label><input id="sf_workCyclePay" type="number" min="0" step="1" value="3000"></div>
+        <div><label class="st-lbl">Target Days in Cycle</label><input id="sf_targetCycleDays" type="number" min="1" max="31" value="30"></div>
+      </div>
+      <div class="st-grid">
+        <div><label class="st-lbl">Morning Work Window</label><input id="sf_amWindow" placeholder="उदा. 2 hr (06:00 - 08:00)"></div>
+        <div><label class="st-lbl">Evening Work Window</label><input id="sf_pmWindow" placeholder="उदा. 2 hr (17:00 - 19:00)"></div>
+      </div>
     </div>
 
     <div class="sec">🏦 Bank &amp; Statutory Details</div>
@@ -223,6 +301,17 @@
 
     <button type="button" class="btn" style="background:var(--ok);color:#000" onclick="saveStaffProfile()">💾 Staff Details Save करें</button>
     <button type="button" id="sf_delBtn" class="btn g" style="color:#ff8080;border-color:#a8414d;display:none" onclick="deleteCurrentStaff()">🗑 इस Staff को हटाएँ</button>
+  </div>
+
+  <div id="sdp_att" style="display:none">
+    <div class="st-grid">
+      <div><label class="st-lbl">माह चुनें (Month)</label><input id="att_month" type="month" onchange="renderStaffAttendanceCalendar()"></div>
+      <div><label class="st-lbl">तारीख चुनें (Date Inspect)</label><input id="att_datePick" type="date" onchange="inspectStaffDateAttendance()"></div>
+    </div>
+    <div id="att_monthStats" class="st-box"></div>
+    <div class="att-cal" id="att_calGrid"></div>
+    <div style="font-size:10.5px;color:var(--mut);margin-top:6px">किसी भी तारीख पर tap करें — Present / Late / Absent toggle होगा और नीचे selfie/entry विवरण दिखेगा।</div>
+    <div id="att_dayDetail" class="st-box"></div>
   </div>
 
   <div id="sdp_sal" style="display:none">
@@ -244,13 +333,18 @@
     </div>
 
     <div class="st-grid">
-      <div><label class="st-lbl">Manual Salary Override (₹, खाली = Auto)</label><input id="sal_manualOverride" type="number" min="0" step="1" placeholder="Auto Calculated" onchange="recalcStaffSalaryUI()"></div>
+      <div><label class="st-lbl">Incentive / Extra Earning (₹)</label><input id="sal_incentiveAmt" type="number" min="0" step="1" onchange="recalcStaffSalaryUI()"></div>
       <div><label class="st-lbl">Manual Penalty Override (₹, खाली = Auto)</label><input id="sal_manualPenalty" type="number" min="0" step="1" placeholder="Auto Penalty" onchange="recalcStaffSalaryUI()"></div>
     </div>
 
     <div class="st-grid">
-      <div><label class="st-lbl">Bonus / Allowance (₹)</label><input id="sal_bonus" type="number" min="0" step="1" value="0" onchange="recalcStaffSalaryUI()"></div>
-      <div><label class="st-lbl">Advance / Deduction (₹)</label><input id="sal_deduction" type="number" min="0" step="1" value="0" onchange="recalcStaffSalaryUI()"></div>
+      <div><label class="st-lbl">Manual Salary Override (₹, खाली = Auto)</label><input id="sal_manualOverride" type="number" min="0" step="1" placeholder="Auto Calculated" onchange="recalcStaffSalaryUI()"></div>
+      <div><label class="st-lbl">Bonus / Deduction (Bonus ₹ / Ded ₹)</label>
+        <div style="display:flex;gap:4px">
+          <input id="sal_bonus" type="number" min="0" step="1" value="0" placeholder="Bonus" onchange="recalcStaffSalaryUI()">
+          <input id="sal_deduction" type="number" min="0" step="1" value="0" placeholder="Ded" onchange="recalcStaffSalaryUI()">
+        </div>
+      </div>
     </div>
 
     <div id="sal_liveSummary" class="st-box" style="border-style:solid;border-color:var(--ac)"></div>
@@ -268,12 +362,12 @@
 <!-- SECURITY CODE (PIN LOCKED, NON-DELETABLE) + MASTER AUTO-SEARCH -->
 <div class="ov" id="secOv"><div class="bx">
   <h3>🛡️ Your Unique Security Code For Login</h3>
-  <div style="font-size:11px;color:var(--mut);margin-bottom:8px">Yeh code PIN se protected hai aur delete nahi ho sakta. Login ke waqt Email + Password ke saath yeh code zaroori hai.</div>
+  <div style="font-size:11px;color:var(--mut);margin-bottom:8px">Yeh code PIN se protected hai aur delete nahi ho sakta. Login ke waqt Email/Mobile + Password ke saath yeh code zaroori hai.</div>
   <div id="secBody"></div>
   <div class="sec">🔎 Master Auto-Search (Gym Name / Phone / Email / License Key)</div>
   <input id="admSecSearchIn" oninput="renderAdmSecSearch()" placeholder="Gym naam, mobile, email ya license key likhein...">
   <div id="admSecSearchOut" style="margin-top:8px"></div>
-  <button class="btn g" onclick="closeOv('secOv')">✖ बंद</button>
+  <button type="button" class="btn g" onclick="closeOv('secOv')">✖ बंद</button>
 </div></div>
 
 <!-- LICENSE -->
@@ -294,6 +388,121 @@
   <button class="btn g" onclick="closeOv('feeOv')">✖ बंद</button></div></div>
 
 <script>
+
+/* ----- Side AI Assistant (Local Org-Scoped Instant Query + Voice) ----- */
+let aiUnlockedSession = false;
+function toggleAiDrawer(forceState){
+  const d = $('aiDrawer');
+  if(!d) return;
+  const next = (typeof forceState === 'boolean') ? forceState : !d.classList.contains('show');
+  if(next && !aiUnlockedSession){
+    if(typeof askPin === 'function'){
+      askPin(()=>{ aiUnlockedSession = true; d.classList.add('show'); setTimeout(()=>{ const inp=$('aiPromptInput'); if(inp) inp.focus(); }, 80); });
+      return;
+    }
+    aiUnlockedSession = true;
+  }
+  d.classList.toggle('show', next);
+  if(next) setTimeout(()=>{ const inp=$('aiPromptInput'); if(inp) inp.focus(); }, 80);
+}
+
+function startAiVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert('इस ब्राउज़र में Voice Recognition उपलब्ध नहीं है — कृपया टाइप करें।'); return; }
+  const rec = new SR();
+  rec.lang = 'hi-IN';
+  rec.interimResults = false;
+  rec.onresult = function(ev){
+    const txt = (ev.results && ev.results[0] && ev.results[0][0] && ev.results[0][0].transcript) || '';
+    if(txt){
+      $('aiPromptInput').value = txt;
+      runAiQuery(txt);
+    }
+  };
+  rec.onerror = function(){ alert('आवाज़ स्पष्ट नहीं आ पाई, कृपया दोबारा बोलें या टाइप करें।'); };
+  rec.start();
+}
+
+function collectOrgMembersSafe(){
+  const mp = new Map();
+  MK.forEach(k=>{
+    J(k,[]).forEach(r=>{
+      if(r && r.name && mine(r)){
+        const key = String(r.id || r.phone || r.name).trim();
+        mp.set(key, Object.assign(mp.get(key) || {}, r));
+      }
+    });
+  });
+  return Array.from(mp.values());
+}
+
+function appendAiBubble(html){
+  const b = $('aiChatBody');
+  if(!b) return;
+  const div = document.createElement('div');
+  div.className = 'ai-ans';
+  div.innerHTML = html;
+  b.appendChild(div);
+  b.scrollTop = b.scrollHeight;
+}
+
+function runAiQuery(customText){
+  const inp = $('aiPromptInput');
+  const raw = (typeof customText === 'string' ? customText : (inp ? inp.value : '')).trim();
+  if(!raw) return;
+  if(inp && typeof customText !== 'string') inp.value = '';
+
+  appendAiBubble('<div style="color:var(--ac);font-weight:800">आप: ' + esc(raw) + '</div>');
+
+  const q = raw.toLowerCase();
+  const members = collectOrgMembersSafe();
+  const staffList = J('bfc_staff_list',[]).filter(mine);
+  const gym = (typeof activeGymInfo === 'function') ? activeGymInfo() : { name: 'Gym' };
+
+  const dueMembers = members.filter(m => {
+    const d = Number(m.dueAmount || m.dueFee || 0) || 0;
+    const vt = String(m.validTill || m.expiryDate || '').slice(0,10);
+    const expired = /^\d{4}-\d{2}-\d{2}$/.test(vt) && vt < iso();
+    return d > 0 || expired;
+  });
+
+  if(/bakaya|due|बकाया|फीस/.test(q) && !/salary|सैलरी/.test(q)){
+    const totDue = dueMembers.reduce((t,m)=>t+(Number(m.dueAmount||m.dueFee||0)||0),0);
+    const items = dueMembers.slice(0,8).map(m=>`<div class="ai-item"><b>${esc(m.name)}</b> • <small>${esc(m.phone||'-')}</small><br>Due: <b style="color:#ff6b6b">₹${Number(m.dueAmount||m.dueFee||0)||0}</b> ${m.validTill ? '• Till: '+esc(m.validTill) : ''}</div>`).join('');
+    appendAiBubble(`<b>${esc(gym.name)} — बकाया रिपोर्ट:</b><br>कुल बकाया सदस्य: <b>${dueMembers.length}</b> • कुल बकाया: <b style="color:#ff6b6b">₹${totDue}</b>${items || '<div class="ai-item">कोई बकाया रिकॉर्ड नहीं मिला।</div>'}`);
+    return;
+  }
+
+  if(/salary|सैलरी|staff|स्टाफ|penalty|पेनल्टी/.test(q)){
+    const ym = iso().slice(0,7);
+    const store = (typeof getStaffPayrollStore === 'function') ? getStaffPayrollStore() : {};
+    const rows = staffList.map(s=>{
+      const savedM = (store[s.id] && store[s.id][ym]) || {};
+      const b = (typeof calcSalaryBreakdown === 'function') ? calcSalaryBreakdown(s, ym, savedM) : { presentDays:0, lateDays:0, penalty:0, netPayable:0 };
+      return `<div class="ai-item"><b>${esc(s.name)}</b> (${esc(s.role||'Staff')})<br>Present: <b>${b.presentDays}d</b> | Late: <b>${b.lateDays}d</b> | Penalty: <b style="color:#ff6b6b">₹${Number(b.penalty||0).toFixed(2)}</b><br>Net Salary: <b style="color:var(--ok)">₹${Number(b.netPayable||0).toFixed(2)}</b></div>`;
+    }).join('');
+    appendAiBubble(`<b>Staff सैलरी व पेनल्टी (${esc(ym)}):</b><br>कुल Staff: <b>${staffList.length}</b>${rows || '<div class="ai-item">कोई Staff रिकॉर्ड नहीं मिला।</div>'}`);
+    return;
+  }
+
+  if(/attend|हाज़िरी|उपस्थिति|aaj|आज|summary|सारांश/.test(q)){
+    const tDay = iso();
+    const mAtt = J('5bfc_attendance_' + tDay, {}) || {};
+    const sAtt = J('5bfc_staff_attendance_' + tDay, {}) || {};
+    const mPresent = Object.keys(mAtt).filter(k=>mAtt[k] && mAtt[k].isReal!==false).length;
+    const sPresent = Object.keys(sAtt).filter(k=>sAtt[k] && sAtt[k].isReal!==false).length;
+    appendAiBubble(`<b>${esc(gym.name)} — ${esc(tDay)} Summary:</b><br>• कुल Members: <b>${members.length}</b> (आज Present: <b style="color:var(--ok)">${mPresent}</b>)<br>• कुल Staff: <b>${staffList.length}</b> (आज Present: <b style="color:var(--ok)">${sPresent}</b>)<br>• बकाया/अवधि-पूर्ण Members: <b style="color:#ff6b6b">${dueMembers.length}</b>`);
+    return;
+  }
+
+  const hits = members.filter(m => (String(m.name||'') + ' ' + String(m.phone||'')).toLowerCase().includes(q)).slice(0,5);
+  if(hits.length){
+    appendAiBubble(`<b>मिलते-जुलते सदस्य (${hits.length}):</b>` + hits.map(m=>`<div class="ai-item"><b>${esc(m.name)}</b> • <small>${esc(m.phone||'-')}</small><br>Plan: <b>${esc(m.planName||m.type||'-')}</b> • Due: <b>₹${Number(m.dueAmount||0)||0}</b></div>`).join(''));
+  } else {
+    appendAiBubble(`मुझे <b>"${esc(raw)}"</b> के लिए सीधा रिकॉर्ड नहीं मिला। आप <i>"बकाया"</i>, <i>"स्टाफ सैलरी"</i>, <i>"आज का सारांश"</i> या किसी सदस्य का नाम/फ़ोन पूछ सकते हैं।`);
+  }
+}
+
 const $=i=>document.getElementById(i),LS=localStorage;
 const J=(k,d)=>{try{const v=JSON.parse(LS.getItem(k));return v==null?d:v}catch(e){return d}};
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -306,33 +515,42 @@ const getPin=()=>LS.getItem('om_admin_pin')||'1234';
 function askPin(cb){pinNext=cb;$('pinIn').value='';$('pinMsg').textContent='';$('pinOv').classList.add('show');setTimeout(()=>$('pinIn').focus(),60)}
 function pinOk(){if($('pinIn').value===getPin()){closeOv('pinOv');const f=pinNext;pinNext=null;f&&f()}else $('pinMsg').textContent='❌ गलत PIN'}
 
-/* ----- Logout & Session Restore ----- */
-async function doLogout(){
-  if(!confirm('Logout करें?')) return;
+/* ----- Logout: sirf session band, org ka data cloud/device me safe rehta hai ----- */
+async function doLogout(silent) {
+  if (!silent && !confirm('Logout करें?')) return;
   let uid = '';
   try { uid = (firebase.auth().currentUser || {}).uid || ''; } catch (e) {}
   const curProf = LS.getItem('om_org_profile');
   try {
-    if(curProf && uid) LS.setItem('om_org_profile_saved_' + uid, curProf);
-    if(curProf) LS.setItem('om_last_org_profile', curProf);
+    if (curProf && uid) LS.setItem('om_org_profile_saved_' + uid, curProf);
+    if (curProf) LS.setItem('om_last_org_profile', curProf);
   } catch (e) {}
+  LS.setItem('om_session_active', '0');
+  LS.removeItem('om_last_activity_time');
   LS.removeItem('om_org_profile');
   try { await firebase.auth().signOut(); } catch (e) {}
-  location.href = 'login.html';
+  try { sessionStorage.clear(); } catch (e) {}
+  location.replace('login.html');
 }
+
 
 (function restoreOrgSessionIfMissing(){
   try {
     var cur = JSON.parse(LS.getItem('om_org_profile') || '{}') || {};
-    if (!cur.orgId) {
-      var uid = '';
-      try { if (window.firebase && firebase.auth && firebase.auth().currentUser) uid = firebase.auth().currentUser.uid || ''; } catch (e) {}
-      var saved = (uid && LS.getItem('om_org_profile_saved_' + uid)) || LS.getItem('om_last_org_profile');
-      if (saved) {
-        var parsed = JSON.parse(saved);
-        if (parsed && (parsed.orgId || parsed.orgName || parsed.gymName)) {
-          LS.setItem('om_org_profile', saved);
-        }
+    var uid = '';
+    try { if (window.firebase && firebase.auth && firebase.auth().currentUser) uid = firebase.auth().currentUser.uid || ''; } catch (e) {}
+    var savedRaw = (uid && LS.getItem('om_org_profile_saved_' + uid)) || LS.getItem('om_last_org_profile');
+    if (savedRaw) {
+      var saved = JSON.parse(savedRaw);
+      if (saved && (saved.orgId || saved.orgName || saved.gymName || saved.licenseKey)) {
+        var merged = Object.assign({}, saved, cur);
+        if (!merged.orgId && saved.orgId) merged.orgId = saved.orgId;
+        if (!merged.orgName && saved.orgName) merged.orgName = saved.orgName;
+        if (!merged.gymName && saved.gymName) merged.gymName = saved.gymName;
+        if (!merged.licenseKey && saved.licenseKey) merged.licenseKey = saved.licenseKey;
+        if (!merged.licenseExpiry && saved.licenseExpiry) merged.licenseExpiry = saved.licenseExpiry;
+        if (!merged.createdAt && saved.createdAt) merged.createdAt = saved.createdAt;
+        LS.setItem('om_org_profile', JSON.stringify(merged));
       }
     }
   } catch (e) {}
@@ -355,61 +573,135 @@ const activeGymInfo = () => {
     orgId: p.orgId || lp.orgId || ''
   };
 };
-const mine = r => {
-  const o = curOrg();
-  return !o || !r.orgId || String(r.orgId) === o;
-};
+const mine = r => { const o = curOrg(); return !o || !r.orgId || String(r.orgId) === o; };
 
 function switchAdmTab(t){
-  ['staff','sec','acc'].forEach(k=>{
-    $('stab_'+k).classList.toggle('on', k===t);
-    $('admPane_'+k).style.display = (k===t) ? 'block' : 'none';
+  ['staff', 'sec', 'acc'].forEach(k => {
+    $('stab_' + k).classList.toggle('on', k === t);
+    $('admPane_' + k).style.display = (k === t) ? 'block' : 'none';
   });
 }
 
-/* ----- Admin Portal + Staff Payroll Engine ----- */
 let STAFF = [];
 let activeStaffId = null;
+let workingShiftSlots = [];
+
+function getDeptList(){
+  const base = ['General Staff', 'Gym Trainer', 'Housekeeping / Safai', 'Peon / Helper', 'Front Desk', 'Custom'];
+  const extra = J('om_custom_departments_v1', []) || [];
+  return Array.from(new Set(base.concat(extra)));
+}
+function populateDeptSelect(selectedVal){
+  const sel = $('sf_dept');
+  if (!sel) return;
+  const list = getDeptList();
+  sel.innerHTML = list.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+  if (selectedVal && list.includes(selectedVal)) sel.value = selectedVal;
+  else if (selectedVal) {
+    sel.value = 'Custom';
+    $('sf_customDept').value = selectedVal;
+  } else {
+    sel.value = 'General Staff';
+  }
+  toggleCustomDept();
+}
+function toggleCustomDept(){ $('sf_customDeptWrap').style.display = ($('sf_dept').value === 'Custom') ? 'block' : 'none'; }
+function toggleSpouseField(){ $('sf_spouseWrap').style.display = ($('sf_marital').value === 'Married') ? 'block' : 'none'; }
+function togglePayModelFields(){
+  const m = $('sf_payModel').value;
+  $('sf_fixedBox').style.display = (m === 'fixed') ? 'block' : 'none';
+  $('sf_incentiveBox').style.display = (m === 'incentive') ? 'block' : 'none';
+  $('sf_workBox').style.display = (m === 'work_based') ? 'block' : 'none';
+}
+function defaultSlots(){
+  return [
+    { id: 'sl1', name: 'Early Micro Slot', start: '05:00', end: '05:30' },
+    { id: 'sl2', name: 'Morning Shift', start: '05:00', end: '13:00' },
+    { id: 'sl3', name: 'Evening Shift', start: '17:00', end: '21:00' }
+  ];
+}
+function renderShiftSlotsUI(){
+  const sel = $('sf_activeSlot');
+  const box = $('sf_slotsList');
+  if (!workingShiftSlots.length) workingShiftSlots = defaultSlots();
+  sel.innerHTML = workingShiftSlots.map(sl => `<option value="${esc(sl.id)}">${esc(sl.name)} (${esc(sl.start)} - ${esc(sl.end)})</option>`).join('');
+  box.innerHTML = workingShiftSlots.map(sl =>
+    `<div class="slot-pill">
+      <div><b style="color:var(--ac)">${esc(sl.name)}</b> • <small>${esc(sl.start)} - ${esc(sl.end)}</small></div>
+      <div style="display:flex;gap:4px">
+        <button type="button" class="btn-sm" style="background:#222;color:#fff" onclick="loadSlotToForm('${esc(sl.id)}')">Edit</button>
+        <button type="button" class="btn-sm" style="background:#512027;color:#ffb3b3" onclick="removeSlotById('${esc(sl.id)}')">Del</button>
+      </div>
+    </div>`
+  ).join('');
+}
+function loadSlotToForm(id){
+  const sl = workingShiftSlots.find(x => String(x.id) === String(id));
+  if (!sl) return;
+  $('sf_activeSlot').value = sl.id;
+  $('slot_name').value = sl.name;
+  $('slot_start').value = sl.start;
+  $('slot_end').value = sl.end;
+}
+function applySelectedSlotToTimes(){
+  const sl = workingShiftSlots.find(x => String(x.id) === String($('sf_activeSlot').value));
+  if (!sl) return;
+  if (sl.start) $('sf_entryTime').value = sl.start;
+  if (sl.end) $('sf_exitTime').value = sl.end;
+}
+function addOrUpdateShiftSlot(){
+  const nm = ($('slot_name').value || '').trim() || 'Shift Slot';
+  const st = $('slot_start').value || '05:00';
+  const en = $('slot_end').value || '05:30';
+  const curId = $('sf_activeSlot').value;
+  const hit = workingShiftSlots.find(x => String(x.id) === String(curId) && $('slot_name').value.trim() !== '');
+  if (hit && confirm('मौजूदा slot "' + hit.name + '" को अपडेट करें?')) {
+    hit.name = nm; hit.start = st; hit.end = en;
+  } else {
+    workingShiftSlots.push({ id: 'sl_' + Date.now(), name: nm, start: st, end: en });
+  }
+  $('sf_entryTime').value = st;
+  $('sf_exitTime').value = en;
+  $('slot_name').value = '';
+  renderShiftSlotsUI();
+}
+function deleteSelectedShiftSlot(){ removeSlotById($('sf_activeSlot').value); }
+function removeSlotById(id){
+  if (workingShiftSlots.length <= 1) { alert('कम से कम 1 Shift Slot रखना ज़रूरी है।'); return; }
+  workingShiftSlots = workingShiftSlots.filter(x => String(x.id) !== String(id));
+  renderShiftSlotsUI();
+}
 
 function getStaffPayrollStore(){ return J('om_staff_payroll_v1', {}) || {}; }
 function saveStaffPayrollStore(st){ LS.setItem('om_staff_payroll_v1', JSON.stringify(st)); }
 
 function computeAttendanceMetricsForMonth(staff, ym){
-  ym = ym || iso().slice(0,7);
-  const [y,m] = ym.split('-').map(Number);
+  ym = ym || iso().slice(0, 7);
+  const [y, m] = ym.split('-').map(Number);
   const daysInMonth = new Date(y, m, 0).getDate();
-  let presentDays = 0;
-  let lateDays = 0;
-  let autoLateMins = 0;
-
-  for(let d=1; d<=daysInMonth; d++){
-    const ds = ym + '-' + String(d).padStart(2,'0');
+  let presentDays = 0, lateDays = 0, autoLateMins = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = ym + '-' + String(d).padStart(2, '0');
     const att = J('5bfc_staff_attendance_' + ds, {}) || {};
     const rec = att[staff.id] || att[String(staff.id)];
-    if(rec && rec.isReal !== false){
+    if (rec && rec.isReal !== false && rec.status !== 'Absent') {
       presentDays++;
       const lateM = Number(rec.lateMinutes || rec.lateMins || 0) || 0;
-      if(lateM > 0 || rec.isLate){
+      if (lateM > 0 || rec.isLate || rec.status === 'Late') {
         lateDays++;
         autoLateMins += (lateM > 0 ? lateM : 30);
       }
     }
   }
-  return {
-    daysInMonth,
-    presentDays,
-    lateDays,
-    lateHours: Number((autoLateMins / 60).toFixed(2)),
-    lateMins: autoLateMins
-  };
+  return { daysInMonth, presentDays, lateDays, lateHours: Number((autoLateMins / 60).toFixed(2)), lateMins: autoLateMins };
 }
 
 function calcSalaryBreakdown(staff, ym, overrides){
   overrides = overrides || {};
+  const payModel = staff.payModel || 'fixed';
   const monthlySalary = Number(staff.monthlySalary || 10000) || 0;
   const shiftHours = Math.max(1, Number(staff.shiftHours || 8) || 8);
   const workDays = Math.max(1, Number(staff.workDays || 30) || 30);
-
   const perDay = monthlySalary / workDays;
   const perHour = perDay / shiftHours;
   const perMin = perHour / 60;
@@ -422,31 +714,41 @@ function calcSalaryBreakdown(staff, ym, overrides){
   const lateMins = (overrides.lateMins !== undefined && overrides.lateMins !== '') ? Math.max(0, Number(overrides.lateMins) || 0) : Math.round(lateHours * 60);
 
   const totalLateSeconds = Math.round((lateHours * 3600) + (lateMins * 60));
-  const autoPenalty = totalLateSeconds * perSec;
+  const autoPenalty = (payModel === 'fixed') ? (totalLateSeconds * perSec) : 0;
   const penalty = (overrides.manualPenalty !== undefined && overrides.manualPenalty !== '' && overrides.manualPenalty !== null)
     ? Math.max(0, Number(overrides.manualPenalty) || 0)
     : autoPenalty;
 
-  const earnedByDays = presentDays * perDay;
+  let earnedBase = 0;
+  if (payModel === 'fixed') {
+    earnedBase = presentDays * perDay;
+  } else if (payModel === 'incentive') {
+    const baseRet = Number(staff.baseIncentiveSalary || 0) || 0;
+    const perUnit = Number(staff.incentivePerUnit || 0) || 0;
+    const units = Number(staff.incentiveUnits || 0) || 0;
+    earnedBase = (baseRet * (presentDays / workDays)) + (units * perUnit);
+  } else {
+    const cyclePay = Number(staff.workCyclePay || monthlySalary || 0) || 0;
+    const targetDays = Math.max(1, Number(staff.targetCycleDays || workDays || 30) || 30);
+    earnedBase = (presentDays / targetDays) * cyclePay;
+  }
+
+  const incentiveAmt = (overrides.incentiveAmt !== undefined && overrides.incentiveAmt !== '' && overrides.incentiveAmt !== null)
+    ? Math.max(0, Number(overrides.incentiveAmt) || 0)
+    : 0;
   const baseEarned = (overrides.manualOverride !== undefined && overrides.manualOverride !== '' && overrides.manualOverride !== null)
     ? Math.max(0, Number(overrides.manualOverride) || 0)
-    : earnedByDays;
+    : earnedBase;
 
   const bonus = Math.max(0, Number(overrides.bonus || 0) || 0);
   const deduction = Math.max(0, Number(overrides.deduction || 0) || 0);
-  const netPayable = Math.max(0, baseEarned + bonus - penalty - deduction);
+  const netPayable = Math.max(0, baseEarned + incentiveAmt + bonus - penalty - deduction);
 
-  return {
-    monthlySalary, shiftHours, workDays,
-    perDay, perHour, perMin, perSec,
-    presentDays, lateDays, lateHours, lateMins,
-    autoPenalty, penalty, bonus, deduction,
-    earnedByDays, netPayable
-  };
+  return { payModel, monthlySalary, shiftHours, workDays, perDay, perHour, perMin, perSec, presentDays, lateDays, lateHours, lateMins, autoPenalty, penalty, incentiveAmt, bonus, deduction, earnedByDays: baseEarned, netPayable };
 }
 
 function openAdmin(){
-  askPin(()=>{
+  askPin(() => {
     STAFF = J('bfc_staff_list', []).filter(mine);
     renderStaff();
     $('bkInfo').textContent = 'Last backup: ' + (typeof omLastBackupText === 'function' ? omLastBackupText() : '-');
@@ -456,16 +758,18 @@ function openAdmin(){
 }
 
 function renderStaff(){
-  const ym = iso().slice(0,7);
-  $('stList').innerHTML = STAFF.map((s)=>{
+  const ym = iso().slice(0, 7);
+  $('stList').innerHTML = STAFF.map(s => {
     const stStore = getStaffPayrollStore();
     const savedM = (stStore[s.id] && stStore[s.id][ym]) || {};
     const b = calcSalaryBreakdown(s, ym, savedM);
+    const deptLabel = s.department || s.role || 'Staff';
+    const modelLabel = s.payModel === 'incentive' ? 'Incentive' : (s.payModel === 'work_based' ? 'Kaam Based' : 'Fixed');
     return `<div class="st-card" onclick="openStaffEditor('${esc(s.id)}')" style="cursor:pointer">
       <div class="st-head">
         <div>
-          <b style="color:var(--ac);font-size:13.5px">${esc(s.name)}</b> <span style="font-size:11px;color:#aaa">(${esc(s.role || 'Staff')})</span><br>
-          <small style="color:#888">📞 ${esc(s.phone || '-')} • Joined: ${esc(s.joinDate || '-')}</small>
+          <b style="color:var(--ac);font-size:13.5px">${esc(s.name)}</b> <span style="font-size:11px;color:#aaa">(${esc(deptLabel)} • ${esc(modelLabel)})</span><br>
+          <small style="color:#888">📞 ${esc(s.phone || '-')} • Entry-Exit: ${esc(s.entryTime || '09:00')} - ${esc(s.exitTime || '17:00')}</small>
         </div>
         <span class="btn-sm" style="background:#222;color:var(--ac);border:1px solid var(--ac)">Open ➔</span>
       </div>
@@ -477,29 +781,30 @@ function renderStaff(){
   }).join('') || '<div class="row"><small>अभी कोई staff नहीं — ऊपर "Add / Register Staff" दबाएँ</small></div>';
 }
 
-function toggleSpouseField(){
-  const m = $('sf_marital').value;
-  $('sf_spouseWrap').style.display = (m === 'Married') ? 'block' : 'none';
-}
-
 function switchStaffSubTab(t){
-  ['prof','sal','slip'].forEach(k=>{
-    $('sdt_'+k).classList.toggle('on', k===t);
-    $('sdp_'+k).style.display = (k===t) ? 'block' : 'none';
+  ['prof', 'att', 'sal', 'slip'].forEach(k => {
+    $('sdt_' + k).classList.toggle('on', k === t);
+    $('sdp_' + k).style.display = (k === t) ? 'block' : 'none';
   });
-  if(t === 'sal') recalcStaffSalaryUI();
-  if(t === 'slip') renderSalarySlip();
+  if (t === 'att') {
+    if (!$('att_month').value) $('att_month').value = iso().slice(0, 7);
+    if (!$('att_datePick').value) $('att_datePick').value = iso();
+    renderStaffAttendanceCalendar();
+    inspectStaffDateAttendance();
+  }
+  if (t === 'sal') recalcStaffSalaryUI();
+  if (t === 'slip') renderSalarySlip();
 }
 
 function openStaffEditor(id){
   activeStaffId = id || null;
-  const s = id ? STAFF.find(x=>String(x.id)===String(id)) : null;
+  const s = id ? STAFF.find(x => String(x.id) === String(id)) : null;
   $('sdTitle').textContent = s ? ('🧑‍💼 ' + s.name + ' — Profile & Salary') : '➕ नया Staff Register करें';
   $('sf_delBtn').style.display = s ? 'block' : 'none';
 
   $('sf_name').value = s ? (s.name || '') : '';
   $('sf_phone').value = s ? (s.phone || '') : '';
-  $('sf_role').value = s ? (s.role || 'Staff') : 'Staff';
+  populateDeptSelect(s ? (s.department || s.role || 'General Staff') : 'General Staff');
   $('sf_marital').value = s ? (s.marital || 'Unmarried') : 'Unmarried';
   $('sf_dob').value = s ? (s.dob || '') : '';
   $('sf_father').value = s ? (s.father || '') : '';
@@ -509,9 +814,19 @@ function openStaffEditor(id){
   $('sf_govType').value = s ? (s.govIdType || 'Voter ID') : 'Voter ID';
   $('sf_govId').value = s ? (s.govIdNumber || '') : '';
   $('sf_joinDate').value = s ? (s.joinDate || iso()) : iso();
+  $('sf_payModel').value = s ? (s.payModel || 'fixed') : 'fixed';
+  $('sf_entryTime').value = s ? (s.entryTime || '09:00') : '09:00';
+  $('sf_exitTime').value = s ? (s.exitTime || '17:00') : '17:00';
   $('sf_monthlySalary').value = s ? (s.monthlySalary || 10000) : 10000;
-  $('sf_shiftHours').value = s ? (s.shiftHours || 8) : 8;
   $('sf_workDays').value = s ? (s.workDays || 30) : 30;
+  $('sf_baseIncentiveSalary').value = s ? (s.baseIncentiveSalary || 5000) : 5000;
+  $('sf_incentivePerUnit').value = s ? (s.incentivePerUnit || 500) : 500;
+  $('sf_incentiveUnits').value = s ? (s.incentiveUnits || 0) : 0;
+  $('sf_commissionPct').value = s ? (s.commissionPct || 0) : 0;
+  $('sf_workCyclePay').value = s ? (s.workCyclePay || 3000) : 3000;
+  $('sf_targetCycleDays').value = s ? (s.targetCycleDays || 30) : 30;
+  $('sf_amWindow').value = s ? (s.amWindow || '2 hr (06:00 - 08:00)') : '2 hr (06:00 - 08:00)';
+  $('sf_pmWindow').value = s ? (s.pmWindow || '2 hr (17:00 - 19:00)') : '2 hr (17:00 - 19:00)';
   $('sf_bankName').value = s ? (s.bankName || '') : '';
   $('sf_accNo').value = s ? (s.accNo || '') : '';
   $('sf_ifsc').value = s ? (s.ifsc || '') : '';
@@ -519,16 +834,22 @@ function openStaffEditor(id){
   $('sf_uan').value = s ? (s.uan || '') : '';
   $('sf_esi').value = s ? (s.esi || '') : '';
 
+  workingShiftSlots = (s && Array.isArray(s.shiftSlots) && s.shiftSlots.length) ? JSON.parse(JSON.stringify(s.shiftSlots)) : defaultSlots();
+  renderShiftSlotsUI();
   toggleSpouseField();
+  togglePayModelFields();
 
-  const curYm = iso().slice(0,7);
+  const curYm = iso().slice(0, 7);
   $('sal_month').value = curYm;
+  $('att_month').value = curYm;
+  $('att_datePick').value = iso();
   const savedM = (s && getStaffPayrollStore()[s.id] && getStaffPayrollStore()[s.id][curYm]) || {};
   $('sal_eodTime').value = savedM.eodTime || '19:00';
   $('sal_presentDays').value = savedM.presentDays !== undefined ? savedM.presentDays : '';
   $('sal_lateDays').value = savedM.lateDays !== undefined ? savedM.lateDays : '';
   $('sal_lateHours').value = savedM.lateHours !== undefined ? savedM.lateHours : '';
   $('sal_lateMins').value = savedM.lateMins !== undefined ? savedM.lateMins : '';
+  $('sal_incentiveAmt').value = savedM.incentiveAmt !== undefined ? savedM.incentiveAmt : '';
   $('sal_manualOverride').value = savedM.manualOverride !== undefined ? savedM.manualOverride : '';
   $('sal_manualPenalty').value = savedM.manualPenalty !== undefined ? savedM.manualPenalty : '';
   $('sal_bonus').value = savedM.bonus || 0;
@@ -539,11 +860,23 @@ function openStaffEditor(id){
 }
 
 function currentStaffObjFromForm(){
+  let dept = $('sf_dept').value;
+  if (dept === 'Custom') {
+    const customN = ($('sf_customDept').value || '').trim();
+    if (customN) {
+      dept = customN;
+      const ex = J('om_custom_departments_v1', []) || [];
+      if (!ex.includes(customN)) { ex.push(customN); LS.setItem('om_custom_departments_v1', JSON.stringify(ex)); }
+    } else {
+      dept = 'General Staff';
+    }
+  }
   return {
     id: activeStaffId || ('stf' + Date.now()),
     name: $('sf_name').value.trim(),
     phone: $('sf_phone').value.trim(),
-    role: $('sf_role').value.trim() || 'Staff',
+    department: dept,
+    role: dept,
     marital: $('sf_marital').value,
     dob: $('sf_dob').value,
     father: $('sf_father').value.trim(),
@@ -553,9 +886,21 @@ function currentStaffObjFromForm(){
     govIdType: $('sf_govType').value,
     govIdNumber: $('sf_govId').value.trim(),
     joinDate: $('sf_joinDate').value || iso(),
+    payModel: $('sf_payModel').value,
+    entryTime: $('sf_entryTime').value || '09:00',
+    exitTime: $('sf_exitTime').value || '17:00',
+    shiftSlots: workingShiftSlots,
     monthlySalary: Number($('sf_monthlySalary').value || 0) || 0,
-    shiftHours: Number($('sf_shiftHours').value || 8) || 8,
+    shiftHours: 8,
     workDays: Number($('sf_workDays').value || 30) || 30,
+    baseIncentiveSalary: Number($('sf_baseIncentiveSalary').value || 0) || 0,
+    incentivePerUnit: Number($('sf_incentivePerUnit').value || 0) || 0,
+    incentiveUnits: Number($('sf_incentiveUnits').value || 0) || 0,
+    commissionPct: Number($('sf_commissionPct').value || 0) || 0,
+    workCyclePay: Number($('sf_workCyclePay').value || 0) || 0,
+    targetCycleDays: Number($('sf_targetCycleDays').value || 30) || 30,
+    amWindow: ($('sf_amWindow').value || '').trim(),
+    pmWindow: ($('sf_pmWindow').value || '').trim(),
     bankName: $('sf_bankName').value.trim(),
     accNo: $('sf_accNo').value.trim(),
     ifsc: $('sf_ifsc').value.trim(),
@@ -568,82 +913,138 @@ function currentStaffObjFromForm(){
 
 async function saveStaffProfile(){
   const obj = currentStaffObjFromForm();
-  if(!obj.name){ alert('कृपया Staff का पूरा नाम भरें'); return; }
+  if (!obj.name) { alert('कृपया Staff का पूरा नाम भरें'); return; }
   let all = J('bfc_staff_list', []);
-  const idx = all.findIndex(x=>String(x.id)===String(obj.id));
-  if(idx >= 0) all[idx] = Object.assign({}, all[idx], obj);
+  const idx = all.findIndex(x => String(x.id) === String(obj.id));
+  if (idx >= 0) all[idx] = Object.assign({}, all[idx], obj);
   else all.push(obj);
   LS.setItem('bfc_staff_list', JSON.stringify(all));
   STAFF = all.filter(mine);
   activeStaffId = obj.id;
-  try{ const d = fdb(); d && await d.collection('staff').doc(obj.id).set(obj, {merge:true}); }catch(e){}
+  populateDeptSelect(obj.department);
+  try { const d = fdb(); if (d) await d.collection('staff').doc(obj.id).set(obj, { merge: true }); } catch (e) {}
   renderStaff();
-  alert('✅ Staff प्रोफ़ाइल सेव हो गई');
+  alert('✅ Staff प्रोफ़ाइल और Shift/Pay सेटिंग सेव हो गई');
 }
 
 async function deleteCurrentStaff(){
-  if(!activeStaffId) return;
-  const s = STAFF.find(x=>String(x.id)===String(activeStaffId));
-  if(!s || !confirm((s.name || 'Staff') + ' को हटाएँ?')) return;
-  let all = J('bfc_staff_list', []).filter(x=>String(x.id)!==String(activeStaffId));
+  if (!activeStaffId) return;
+  const s = STAFF.find(x => String(x.id) === String(activeStaffId));
+  if (!s || !confirm((s.name || 'Staff') + ' को हटाएँ?')) return;
+  let all = J('bfc_staff_list', []).filter(x => String(x.id) !== String(activeStaffId));
   LS.setItem('bfc_staff_list', JSON.stringify(all));
   STAFF = all.filter(mine);
-  try{ const d = fdb(); d && await d.collection('staff').doc(String(activeStaffId)).delete(); }catch(e){}
+  try { const d = fdb(); if (d) await d.collection('staff').doc(String(activeStaffId)).delete(); } catch (e) {}
   closeOv('staffDetailOv');
   renderStaff();
 }
 
+function toggleStaffDayAttendance(ds){
+  const s = currentStaffObjFromForm();
+  const key = '5bfc_staff_attendance_' + ds;
+  const att = J(key, {}) || {};
+  const cur = att[s.id] || att[String(s.id)];
+  if (!cur || cur.isReal === false) {
+    att[s.id] = { status: 'Present', time: new Date().toTimeString().slice(0, 8), lateMinutes: 0, isLate: false, isReal: true };
+  } else if (!cur.isLate) {
+    att[s.id] = { status: 'Late', time: cur.time || new Date().toTimeString().slice(0, 8), lateMinutes: 30, isLate: true, isReal: true };
+  } else {
+    delete att[s.id];
+  }
+  LS.setItem(key, JSON.stringify(att));
+  $('att_datePick').value = ds;
+  renderStaffAttendanceCalendar();
+  inspectStaffDateAttendance();
+}
+
+function renderStaffAttendanceCalendar(){
+  const s = currentStaffObjFromForm();
+  const ym = $('att_month').value || iso().slice(0, 7);
+  const [y, m] = ym.split('-').map(Number);
+  const totalDays = new Date(y, m, 0).getDate();
+  const met = computeAttendanceMetricsForMonth(s, ym);
+  $('att_monthStats').innerHTML = `<b>${esc(s.name || 'Staff')} (${esc(ym)}):</b> Present: <b style="color:var(--ok)">${met.presentDays}d</b> • Late: <b style="color:#ff9a00">${met.lateDays}d</b> • Absent: <b>${Math.max(0, totalDays - met.presentDays)}d</b>`;
+
+  let html = '';
+  for (let d = 1; d <= totalDays; d++) {
+    const ds = ym + '-' + String(d).padStart(2, '0');
+    const att = J('5bfc_staff_attendance_' + ds, {}) || {};
+    const rec = att[s.id] || att[String(s.id)];
+    let cls = 'att-day a', tag = 'A';
+    if (rec && rec.isReal !== false) {
+      if (rec.isLate || Number(rec.lateMinutes || 0) > 0) { cls = 'att-day l'; tag = 'L'; }
+      else { cls = 'att-day p'; tag = 'P'; }
+    }
+    html += `<div class="${cls}" onclick="toggleStaffDayAttendance('${ds}')">${d}<br><small>${tag}</small></div>`;
+  }
+  $('att_calGrid').innerHTML = html;
+}
+
+function inspectStaffDateAttendance(){
+  const s = currentStaffObjFromForm();
+  const ds = $('att_datePick').value || iso();
+  const att = J('5bfc_staff_attendance_' + ds, {}) || {};
+  const rec = att[s.id] || att[String(s.id)];
+  if (!rec || rec.isReal === false) {
+    $('att_dayDetail').innerHTML = `<b>${esc(ds)}:</b> Absent (कोई attendance record नहीं) — tap calendar day to mark Present/Late.`;
+    return;
+  }
+  $('att_dayDetail').innerHTML =
+    `<b>${esc(ds)}:</b> <span style="color:var(--ok);font-weight:800">${esc(rec.status || 'Present')}</span> • Time: <b>${esc(rec.time || '-')}</b> • Late Min: <b>${Number(rec.lateMinutes || 0)}</b>` +
+    (rec.selfie ? `<br><img src="${rec.selfie}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;margin-top:6px;border:1px solid var(--ac)">` : '');
+}
+
 function recalcStaffSalaryUI(){
   const s = currentStaffObjFromForm();
-  const ym = $('sal_month').value || iso().slice(0,7);
-  const ov = {
+  const ym = $('sal_month').value || iso().slice(0, 7);
+  const b = calcSalaryBreakdown(s, ym, {
     presentDays: $('sal_presentDays').value,
     lateDays: $('sal_lateDays').value,
     lateHours: $('sal_lateHours').value,
     lateMins: $('sal_lateMins').value,
+    incentiveAmt: $('sal_incentiveAmt').value,
     manualOverride: $('sal_manualOverride').value,
     manualPenalty: $('sal_manualPenalty').value,
     bonus: $('sal_bonus').value,
     deduction: $('sal_deduction').value
-  };
-  const b = calcSalaryBreakdown(s, ym, ov);
-  if($('sal_presentDays').value === '') $('sal_presentDays').value = b.presentDays;
-  if($('sal_lateDays').value === '') $('sal_lateDays').value = b.lateDays;
-  if($('sal_lateHours').value === '') $('sal_lateHours').value = b.lateHours;
-  if($('sal_lateMins').value === '') $('sal_lateMins').value = b.lateMins;
+  });
+  if ($('sal_presentDays').value === '') $('sal_presentDays').value = b.presentDays;
+  if ($('sal_lateDays').value === '') $('sal_lateDays').value = b.lateDays;
+  if ($('sal_lateHours').value === '') $('sal_lateHours').value = b.lateHours;
+  if ($('sal_lateMins').value === '') $('sal_lateMins').value = b.lateMins;
+  if ($('sal_incentiveAmt').value === '') $('sal_incentiveAmt').value = b.incentiveAmt;
 
   $('sal_rateBreakdown').innerHTML =
-    `<b>Rate Breakdown (₹${b.monthlySalary} / ${b.workDays}d / ${b.shiftHours}h):</b><br>` +
-    `• Per Day: <b>₹${b.perDay.toFixed(2)}</b> &nbsp;|&nbsp; Per Hour: <b>₹${b.perHour.toFixed(2)}</b><br>` +
-    `• Per Min: <b>₹${b.perMin.toFixed(2)}</b> &nbsp;|&nbsp; Per Sec: <b>₹${b.perSec.toFixed(4)}</b>`;
+    `<b>Model: ${esc(b.payModel)} • Entry-Exit: ${esc(s.entryTime)} - ${esc(s.exitTime)}</b><br>` +
+    `• Per Day: <b>₹${b.perDay.toFixed(2)}</b> | Per Hour: <b>₹${b.perHour.toFixed(2)}</b> | Per Min: <b>₹${b.perMin.toFixed(2)}</b> | Per Sec: <b>₹${b.perSec.toFixed(4)}</b>`;
 
   $('sal_liveSummary').innerHTML =
-    `• Earned (Present ${b.presentDays}d): <b>₹${b.earnedByDays.toFixed(2)}</b><br>` +
-    `• Auto Late Penalty: <b>₹${b.autoPenalty.toFixed(2)}</b> &nbsp;|&nbsp; Applied Penalty: <b style="color:#ff6b6b">₹${b.penalty.toFixed(2)}</b><br>` +
-    `• Bonus: <b style="color:var(--ok)">+₹${b.bonus.toFixed(2)}</b> &nbsp;|&nbsp; Deduction: <b style="color:#ff6b6b">-₹${b.deduction.toFixed(2)}</b><br>` +
+    `• Earned: <b>₹${b.earnedByDays.toFixed(2)}</b> + Incentive: <b>₹${b.incentiveAmt.toFixed(2)}</b><br>` +
+    `• Auto Penalty: <b>₹${b.autoPenalty.toFixed(2)}</b> | Applied Penalty: <b style="color:#ff6b6b">₹${b.penalty.toFixed(2)}</b><br>` +
+    `• Bonus: <b style="color:var(--ok)">+₹${b.bonus.toFixed(2)}</b> | Deduction: <b style="color:#ff6b6b">-₹${b.deduction.toFixed(2)}</b><br>` +
     `<span style="font-size:13.5px">• Net Payable Salary: <b style="color:var(--ok)">₹${b.netPayable.toFixed(2)}</b></span>`;
 }
 
 function saveEveningSalaryRecord(){
   const s = currentStaffObjFromForm();
-  if(!s.name){ alert('पहले Staff का नाम सेव करें'); return; }
-  const ym = $('sal_month').value || iso().slice(0,7);
+  if (!s.name) { alert('पहले Staff का नाम सेव करें'); return; }
+  const ym = $('sal_month').value || iso().slice(0, 7);
   const store = getStaffPayrollStore();
-  if(!store[s.id]) store[s.id] = {};
-  const payload = {
+  if (!store[s.id]) store[s.id] = {};
+  store[s.id][ym] = {
     ym,
     eodTime: $('sal_eodTime').value || '19:00',
     presentDays: Number($('sal_presentDays').value || 0),
     lateDays: Number($('sal_lateDays').value || 0),
     lateHours: Number($('sal_lateHours').value || 0),
     lateMins: Number($('sal_lateMins').value || 0),
+    incentiveAmt: Number($('sal_incentiveAmt').value || 0),
     manualOverride: $('sal_manualOverride').value,
     manualPenalty: $('sal_manualPenalty').value,
     bonus: Number($('sal_bonus').value || 0),
     deduction: Number($('sal_deduction').value || 0),
     settledAt: new Date().toISOString()
   };
-  store[s.id][ym] = payload;
   saveStaffPayrollStore(store);
   renderStaff();
   recalcStaffSalaryUI();
@@ -653,10 +1054,10 @@ function saveEveningSalaryRecord(){
 function renderSalarySlip(){
   const s = currentStaffObjFromForm();
   const gym = activeGymInfo();
-  const ym = $('sal_month').value || iso().slice(0,7);
+  const ym = $('sal_month').value || iso().slice(0, 7);
   const savedM = (getStaffPayrollStore()[s.id] && getStaffPayrollStore()[s.id][ym]) || {};
   const b = calcSalaryBreakdown(s, ym, savedM);
-  const parentLine = (s.marital === 'Married' && s.spouse)
+  const familyLine = (s.marital === 'Married' && s.spouse)
     ? `${esc(s.spouse)} (${esc(s.relation || 'Spouse')})`
     : `${esc(s.father || '-')}${s.mother ? ' / ' + esc(s.mother) : ''}`;
 
@@ -667,16 +1068,16 @@ function renderSalarySlip(){
       <div style="font-size:12px;font-weight:800;margin-top:4px;background:#fff3bf;padding:3px 8px;border-radius:6px;display:inline-block">SALARY SLIP &amp; PAYROLL STATEMENT (${esc(ym)})</div>
     </div>
     <div class="slip-row"><span>Staff Name:</span><b>${esc(s.name || '-')}</b></div>
-    <div class="slip-row"><span>Role / Mobile:</span><b>${esc(s.role || 'Staff')} • ${esc(s.phone || '-')}</b></div>
-    <div class="slip-row"><span>Marital / Family:</span><b>${esc(s.marital)} • ${parentLine}</b></div>
+    <div class="slip-row"><span>Department / Mobile:</span><b>${esc(s.department || 'Staff')} • ${esc(s.phone || '-')}</b></div>
+    <div class="slip-row"><span>Marital / Family:</span><b>${esc(s.marital)} • ${familyLine}</b></div>
     <div class="slip-row"><span>DOB / Joining Date:</span><b>${esc(s.dob || '-')} / ${esc(s.joinDate || '-')}</b></div>
     <div class="slip-row"><span>Gov ID (${esc(s.govIdType || 'ID')}):</span><b>${esc(s.govIdNumber || '-')}</b></div>
     <div class="slip-row"><span>Bank Details:</span><b>${esc(s.bankName || '-')} • A/c: ${esc(s.accNo || '-')} (${esc(s.ifsc || '-')})</b></div>
     <div class="slip-row"><span>PAN / UAN / ESI:</span><b>${esc(s.pan || '-')} / ${esc(s.uan || '-')} / ${esc(s.esi || '-')}</b></div>
-    <div class="slip-row"><span>Monthly Fixed Salary:</span><b>₹${b.monthlySalary.toFixed(2)} (${b.workDays}d / ${b.shiftHours}h/d)</b></div>
+    <div class="slip-row"><span>Pay Model / Entry-Exit:</span><b>${esc(b.payModel)} • ${esc(s.entryTime)} - ${esc(s.exitTime)}</b></div>
     <div class="slip-row"><span>Rates (Day/Hr/Min/Sec):</span><b>₹${b.perDay.toFixed(2)} / ₹${b.perHour.toFixed(2)} / ₹${b.perMin.toFixed(2)} / ₹${b.perSec.toFixed(4)}</b></div>
     <div class="slip-row"><span>Attendance (Present / Late):</span><b>${b.presentDays} Days / ${b.lateDays} Days (${b.lateHours}h ${b.lateMins}m late)</b></div>
-    <div class="slip-row"><span>Gross Earned:</span><b>₹${b.earnedByDays.toFixed(2)}</b></div>
+    <div class="slip-row"><span>Earned + Incentive:</span><b>₹${b.earnedByDays.toFixed(2)} + ₹${b.incentiveAmt.toFixed(2)}</b></div>
     <div class="slip-row"><span>Bonus / Penalty / Deduction:</span><b>+₹${b.bonus.toFixed(2)} / -₹${b.penalty.toFixed(2)} / -₹${b.deduction.toFixed(2)}</b></div>
     <div class="slip-row" style="border-bottom:2px solid #111;font-size:13.5px;margin-top:4px"><span><b>Net Payable Salary:</b></span><b>₹${b.netPayable.toFixed(2)}</b></div>
     <div style="font-size:10px;color:#555;margin-top:8px;text-align:right">Generated: ${new Date().toLocaleString('en-IN')}</div>
@@ -685,18 +1086,18 @@ function renderSalarySlip(){
 
 function downloadSalarySlipImage(){
   const el = $('salarySlipPrintable');
-  if(!el || typeof html2canvas !== 'function'){ alert('Receipt capture unavailable'); return; }
-  html2canvas(el, {scale:2, backgroundColor:'#ffffff'}).then(c=>{
+  if (!el || typeof html2canvas !== 'function') { alert('Receipt capture unavailable'); return; }
+  html2canvas(el, { scale: 2, backgroundColor: '#ffffff' }).then(c => {
     const a = document.createElement('a');
     a.href = c.toDataURL('image/png');
-    a.download = 'Salary_Slip_' + ($('sf_name').value.trim() || 'Staff') + '_' + ($('sal_month').value || iso().slice(0,7)) + '.png';
+    a.download = 'Salary_Slip_' + ($('sf_name').value.trim() || 'Staff') + '_' + ($('sal_month').value || iso().slice(0, 7)) + '.png';
     a.click();
   });
 }
 
 function printSalarySlip(){
   const w = window.open('', '_blank');
-  if(!w) return;
+  if (!w) return;
   w.document.write('<html><head><title>Salary Slip</title><style>body{font-family:Arial,sans-serif;padding:20px}.slip-row{display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:6px 0}</style></head><body>' + $('salarySlipPrintable').innerHTML + '<' + '/body><' + '/html>');
   w.document.close();
   w.print();
@@ -704,7 +1105,7 @@ function printSalarySlip(){
 
 function changePin(){
   const p = $('np').value.trim();
-  if(!/^\d{4,8}$/.test(p)){ alert('PIN 4 से 8 अंक का होना चाहिए'); return; }
+  if (!/^\d{4,8}$/.test(p)) { alert('PIN 4 से 8 अंक का होना चाहिए'); return; }
   LS.setItem('om_admin_pin', p);
   $('np').value = '';
   alert('✅ PIN बदल गया');
@@ -734,20 +1135,73 @@ function getActiveSecurityRecord(){
 function viewSecCode(){
   const rec = getActiveSecurityRecord();
   $('secBody').innerHTML = rec
-    ? [
-        ['Unique Security Code', rec.code],
-        ['Gym Name', rec.gymName || '-'],
-        ['Mobile', rec.phone || '-'],
-        ['Email', rec.email || '-'],
-        ['License Key', rec.licenseKey || 'TRIAL-7DAY'],
-        ['Plan Resets Used', (rec.resetCountInCycle || 0) + ' / 3 (Non-Deletable)']
-      ].map(x => `<div class="row"><small>${x[0]}</small><b style="color:var(--ac)">${esc(x[1])}</b></div>`).join('')
+    ? [['Unique Security Code', rec.code], ['Gym Name', rec.gymName || '-'], ['Mobile', rec.phone || '-'], ['Email', rec.email || '-'], ['License Key', rec.licenseKey || 'TRIAL-7DAY'], ['Plan Resets Used', (rec.resetCountInCycle || 0) + ' / 3 (Non-Deletable)']].map(x => `<div class="row"><small>${x[0]}</small><b style="color:var(--ac)">${esc(x[1])}</b></div>`).join('')
     : '<div class="row"><small>Security record unavailable</small></div>';
   $('admSecSearchIn').value = '';
   renderAdmSecSearch();
   $('secOv').classList.add('show');
 }
 
+function renderAdmSecSearch(){
+  const q = ($('admSecSearchIn') && $('admSecSearchIn').value) || '';
+  const rows = typeof omSearchSecurityRegistry === 'function' ? omSearchSecurityRegistry(q) : [];
+  $('admSecSearchOut').innerHTML = rows.map(r =>
+    `<div class="row" style="display:block"><div><b style="color:var(--ac)">${esc(r.gymName || '-')}</b> • <small>${esc(r.phone || '-')}</small></div><div style="font-size:11.5px;margin-top:3px">Email: <b>${esc(r.email || '-')}</b> | Key: <b style="color:var(--ok)">${esc(r.licenseKey || '-')}</b></div><div style="font-size:12px;margin-top:2px">Security Code: <b style="color:var(--ac)">${esc(r.code || '-')}</b> <small>(Resets: ${r.resetCountInCycle || 0}/3)</small></div></div>`
+  ).join('') || '<div class="row"><small>Koi matching gym/license/email nahi mila</small></div>';
+}
+
+/* ----- Fee Collection ----- */
+let FEE=[];
+async function loadFee(){
+  const mp=new Map();
+  MK.forEach(k=>J(k,[]).forEach(r=>{if(r&&r.id&&r.name)mp.set(String(r.id),Object.assign(mp.get(String(r.id))||{},r))}));
+  const d=fdb();if(d){for(const c of['members','admissions']){try{(await d.collection(c).get()).forEach(x=>{const r=Object.assign({id:x.id},x.data());if(r.name)mp.set(String(r.id),Object.assign({},r,mp.get(String(r.id))||{}))})}catch(e){}}}
+  FEE=[...mp.values()];renderFee();
+}
+const dueOf=m=>Number(m.dueAmount)||0;
+function openFee(){askPin(()=>{$('feeOv').classList.add('show');$('feeQ').value='';FEE=[];renderFee();loadFee()})}
+function renderFee(){
+  const q=($('feeQ').value||'').toLowerCase().trim(),all=FEE.filter(m=>dueOf(m)>0).sort((a,b)=>dueOf(b)-dueOf(a));
+  const L=all.filter(m=>!q||(m.name+' '+(m.phone||'')).toLowerCase().includes(q));
+  $('feeSum').innerHTML='बकाया वाले: <b>'+all.length+'</b> • कुल बकाया: <b style="color:#ff6b6b">₹'+all.reduce((t,m)=>t+dueOf(m),0)+'</b>';
+  $('feeList').innerHTML=L.map(m=>`<div class="row"><span><b>${esc(m.name)}</b><br><small>${esc(m.phone||'')} • ${esc(m.planName||'')}</small></span><span style="text-align:right"><span class="due">₹${dueOf(m)}</span><br><button class="upgrade-btn" style="margin-top:4px" onclick="payFee('${esc(m.id)}')">Payment मिला</button></span></div>`).join('')||'<div class="row"><small>कोई बकाया नहीं 🎉</small></div>';
+}
+async function payFee(id){
+  const m=FEE.find(x=>String(x.id)===String(id));if(!m)return;const d0=dueOf(m);
+  const a=Number(prompt(m.name+' — कितने ₹ मिले? (बकाया ₹'+d0+')',d0));if(!a||a<=0)return;
+  const paid=Math.min(a,d0),patch={amount:(Number(m.amount)||0)+paid,dueAmount:d0-paid,status:d0-paid?'Pending':'Paid',manualStatus:d0-paid?'Pending':'Paid',lastPaid:iso()};
+  MK.forEach(k=>{const arr=J(k,[]);let ch=false;arr.forEach(r=>{if(r&&String(r.id)===String(id)){Object.assign(r,patch);ch=true}});if(ch)LS.setItem(k,JSON.stringify(arr))});
+  Object.assign(m,patch);const lg=J('om_fee_log',[]);lg.push({id,name:m.name,amount:paid,date:iso()});LS.setItem('om_fee_log',JSON.stringify(lg));
+  const d=fdb();if(d){for(const c of['members','admissions']){try{await d.collection(c).doc(String(id)).set(patch,{merge:true})}catch(e){}}}
+  renderFee();
+}
+
+
+/* ----- License view ----- */
+
+function viewSecCode(){
+  const org = J('om_org_profile', {}) || {};
+  const lp = J('om_last_org_profile', {}) || {};
+  let em = '';
+  try { em = ((firebase.auth().currentUser || {}).email) || org.email || lp.email || ''; } catch (e) {}
+  const gymName = org.orgName || org.gymName || lp.orgName || lp.gymName || 'Gym';
+  const phone = org.phone || lp.phone || '';
+  const lic = org.licenseKey || lp.licenseKey || 'TRIAL-ACTIVE';
+  const rec = typeof omEnsureUserSecurityRecord === 'function' ? omEnsureUserSecurityRecord(em || ('admin_' + (org.orgId || 'org') + '@gym.local'), gymName, phone, lic) : null;
+  $('secBody').innerHTML = rec
+    ? [
+        ['🛡️ Unique Security Code', rec.code],
+        ['🏢 Gym Name', rec.gymName || gymName],
+        ['📞 Mobile', rec.phone || phone || '-'],
+        ['📧 Email', rec.email || '-'],
+        ['🔑 License Key', rec.licenseKey || lic],
+        ['♻️ Plan Resets Used', (rec.resetCountInCycle || 0) + ' / 3 (Non-Deletable)']
+      ].map(x => `<div class="row"><small>${x[0]}</small><b style="color:var(--ac)">${esc(x[1])}</b></div>`).join('')
+    : '<div class="row"><small>Security record unavailable</small></div>';
+  $('admSecSearchIn').value = '';
+  renderAdmSecSearch();
+  $('secOv').classList.add('show');
+}
 function renderAdmSecSearch(){
   const q = ($('admSecSearchIn') && $('admSecSearchIn').value) || '';
   const rows = typeof omSearchSecurityRegistry === 'function' ? omSearchSecurityRegistry(q) : [];
@@ -815,64 +1269,60 @@ function openImp(){askPin(()=>{IMP=[];$('impInfo').textContent='';$('impF').valu
 /* ----- header / trial status ----- */
 window.addEventListener('DOMContentLoaded',()=>{
   try{
-    const s=omLicenseStatus(),o=s.org;
-    $('orgTitle').textContent=(o.orgName||o.gymName||'GYM').toUpperCase();
+    const s=omLicenseStatus(),o=s.org||{};
+    const lp=J('om_last_org_profile',{})||{};
+    const bp=J('bfc_gym_profile',{})||{};
+    const gymName = o.orgName || o.gymName || bp.name || bp.gymName || lp.orgName || lp.gymName || 'GYM';
+    $('orgTitle').textContent=String(gymName).toUpperCase();
     if(s.licenseValid){$('trialTitle').textContent='✅ License Active';$('trialDaysText').textContent=s.licenseDays+' Days remaining'+(s.licenseKey?' • '+s.licenseKey:'')}
     else $('trialDaysText').textContent=s.trialDays+' Days remaining in trial';
   }catch(e){}
 });
-</script>
 
-<!-- SIDE AI ASSISTANT (COMMAND + VOICE) -->
-<button type="button" class="ai-fab" id="aiFabBtn" onclick="toggleAiDrawer()">🤖 Side AI</button>
-<div class="ai-drawer" id="aiDrawer">
-  <div class="ai-hdr">
-    <div><b>🤖 Gym Side AI Copilot</b><div style="font-size:10px;color:var(--mut)">बोलकर या लिखकर तुरंत डेटा निकालें</div></div>
-    <div style="display:flex;gap:6px;align-items:center">
-      <button type="button" class="btn-sm" style="background:#23232c;color:#ffcc00;border:1px solid #444" onclick="startAiVoice()">🎤 बोलें</button>
-      <button type="button" class="btn-sm" style="background:#333;color:#fff" onclick="toggleAiDrawer(false)">✖</button>
-    </div>
-  </div>
-  <div class="ai-body" id="aiChatBody">
-    <div class="ai-chips">
-      <button type="button" class="ai-chip" onclick="runAiQuery('aaj ka summary aur bakaya')">📊 आज का सारांश</button>
-      <button type="button" class="ai-chip" onclick="runAiQuery('bakaya fees wale log')">⚠️ बकाया लिस्ट</button>
-      <button type="button" class="ai-chip" onclick="runAiQuery('staff salary aur penalty')">🧑‍💼 Staff सैलरी</button>
-      <button type="button" class="ai-chip" onclick="runAiQuery('aaj ki attendance')">📋 आज की हाज़िरी</button>
-    </div>
-    <div class="ai-ans"><b>नमस्ते!</b> लॉगिन के बाद आप टाइप करके या <b>🎤 बोलें</b> दबाकर पूछ सकते हैं—जैसे <i>"किसकी फीस बकाया है"</i>, <i>"स्टाफ की सैलरी और पेनल्टी कितनी बनी"</i>, या किसी मेंबर/स्टाफ का नाम लेकर।</div>
-  </div>
-  <div class="ai-in-row">
-    <input type="text" id="aiPromptInput" placeholder="पूछें या बोलें (उदा. बकाया, सैलरी, नाम)..." onkeydown="if(event.key==='Enter')runAiQuery()">
-    <button type="button" class="btn-sm" style="background:var(--ac);color:#000;padding:9px 12px" onclick="runAiQuery()">भेजें</button>
-  </div>
-</div>
+/* ================= 1-HOUR AUTO-LOGOUT & SESSION LOCK GUARD ================= */
+const SESSION_TIMEOUT_MS = 60 * 60 * 1000; // 1 Hour
 
-
-<script>
-(function installSafeBackGuard(){
+function updateLastActivity() {
   try {
-    if (window.history && window.history.pushState) {
-      window.history.pushState({ omDash: 1 }, '', window.location.href);
-      window.addEventListener('popstate', function () {
-        var openOvs = Array.prototype.slice.call(document.querySelectorAll('.ov.show'));
-        if (openOvs.length) {
-          openOvs[openOvs.length - 1].classList.remove('show');
-          window.history.pushState({ omDash: 1 }, '', window.location.href);
-          return;
-        }
-        var ai = document.getElementById('aiDrawer');
-        if (ai && ai.classList.contains('show')) {
-          ai.classList.remove('show');
-          window.history.pushState({ omDash: 1 }, '', window.location.href);
-          return;
-        }
-        window.history.pushState({ omDash: 1 }, '', window.location.href);
-      });
+    if (LS.getItem('om_session_active') === '1') {
+      LS.setItem('om_last_activity_time', String(Date.now()));
     }
   } catch (e) {}
-})();
-</script>
+}
 
+function checkSessionValidity() {
+  try {
+    const isLogged = LS.getItem('om_session_active');
+    const lastActive = Number(LS.getItem('om_last_activity_time') || 0);
+    const now = Date.now();
+
+    // If explicitly logged out, block access and return to login.html
+    if (isLogged === '0') {
+      location.replace('login.html');
+      return false;
+    }
+
+    // If session active flag was set and 1 hour of inactivity passed, auto-logout
+    if (isLogged === '1' && lastActive && (now - lastActive > SESSION_TIMEOUT_MS)) {
+      alert('1 ghante se koi gatividhi nahi hui. Suraksha ke liye system logout ho raha hai.');
+      doLogout(true);
+      return false;
+    }
+
+    if (isLogged === '1' && !lastActive) {
+      LS.setItem('om_last_activity_time', String(now));
+    }
+  } catch (e) {}
+  return true;
+}
+
+['mousedown', 'mousemove', 'keydown', 'touchstart', 'scroll'].forEach(evt => {
+  window.addEventListener(evt, updateLastActivity, { passive: true });
+});
+window.addEventListener('pageshow', checkSessionValidity);
+document.addEventListener('DOMContentLoaded', checkSessionValidity);
+setInterval(checkSessionValidity, 60000);
+
+</script>
 </body>
 </html>
