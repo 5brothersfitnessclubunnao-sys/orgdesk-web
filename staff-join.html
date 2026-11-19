@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Staff Joining & Onboarding Form</title>
+<link rel="stylesheet" href="theme.css">
+<!-- Firebase App & Firestore SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="auth-gate.js"></script>
+<style>
+:root{
+  --bg:#0A0F1E;
+  --card:#121A2E;
+  --border:#223052;
+  --ac:#FFB800;
+  --tx:#EAF0FF;
+  --mut:#8D99B8;
+  --ok:#22C55E;
+  --er:#FF6B6B;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+body{
+  background:radial-gradient(1200px 500px at 50% -10%,#16224a 0%,#0A0F1E 60%) fixed #0A0F1E;
+  color:var(--tx);
+  max-width:540px;
+  margin:0 auto;
+  padding:14px 12px 80px;
+  min-height:100vh;
+}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.btn-back{
+  background:linear-gradient(135deg,#FFC83D,#FFA800);
+  color:#1a1200;
+  font-weight:900;
+  font-size:12px;
+  padding:8px 14px;
+  border-radius:10px;
+  border:none;
+  text-decoration:none;
+  cursor:pointer;
+  display:inline-block;
+}
+.header-box{
+  background:linear-gradient(160deg,#16213f,#101830);
+  border:1.5px solid var(--border);
+  border-radius:18px;
+  padding:18px 14px;
+  text-align:center;
+  margin-bottom:14px;
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
+}
+.header-box h1{color:#fff;font-size:19px;font-weight:900;letter-spacing:0.5px}
+.header-box p{color:var(--ac);font-size:11.5px;font-weight:700;margin-top:4px}
+.form-card{
+  background:linear-gradient(160deg,#16213f,#101830);
+  border:1.5px solid var(--border);
+  border-radius:18px;
+  padding:18px 14px;
+  box-shadow:0 12px 32px rgba(0,0,0,.35);
+}
+.section-title{
+  color:var(--ac);
+  font-weight:900;
+  font-size:13px;
+  margin:16px 0 10px;
+  padding-bottom:4px;
+  border-bottom:1.5px dashed var(--border);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.section-title:first-of-type{margin-top:0}
+.field-group{margin-bottom:11px}
+label{display:block;font-size:11.5px;color:var(--mut);margin-bottom:4px;font-weight:700}
+label span{color:var(--er)}
+input,select,textarea{
+  width:100%;
+  background:#0B1226;
+  border:1.5px solid var(--border);
+  color:var(--tx);
+  padding:11px;
+  border-radius:10px;
+  font-size:13px;
+  outline:none;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--ac);
+  box-shadow:0 0 0 3px rgba(255,184,0,.15);
+}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.check-inline{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:#0B1226;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:8px 10px;
+  margin-top:4px;
+  cursor:pointer;
+  font-size:11.5px;
+  color:var(--ac);
+  font-weight:700;
+}
+.check-inline input{width:16px;height:16px;accent-color:var(--ac);cursor:pointer}
+.btn-submit{
+  width:100%;
+  background:linear-gradient(135deg,#22C55E,#16A34A);
+  color:#04210f;
+  font-weight:900;
+  font-size:15px;
+  padding:15px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  margin-top:16px;
+  box-shadow:0 6px 20px rgba(34,197,94,.25);
+  text-transform:uppercase;
+}
+.dynamic-box{
+  background:#0B1226;
+  border:1.5px solid #223052;
+  border-radius:12px;
+  padding:12px;
+  margin-top:6px;
+}
+.role-badge{
+  display:inline-block;
+  background:rgba(255,184,0,.12);
+  color:var(--ac);
+  border:1px solid var(--ac);
+  border-radius:6px;
+  padding:3px 8px;
+  font-size:11px;
+  font-weight:800;
+  margin-bottom:8px;
+}
+/* Modal print / slip */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99999;overflow-y:auto;padding:14px;align-items:center;justify-content:center}
+.modal-ov.show{display:flex}
+.slip-box{
+  background:#fff;
+  color:#000;
+  border-radius:16px;
+  padding:20px;
+  max-width:440px;
+  width:100%;
+  font-size:12px;
+  line-height:1.5;
+}
+.slip-header{text-align:center;border-bottom:2px dashed #000;padding-bottom:10px;margin-bottom:10px}
+.slip-header h2{font-size:18px;font-weight:900;margin:0}
+.slip-row{display:flex;justify-content:space-between;border-bottom:1px dotted #ccc;padding:4px 0}
+.slip-row b{color:#000}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="btn-back" href="index.html">← Master Dashboard</a>
+  <span style="font-size:11.5px;color:var(--ac);font-weight:800">STAFF ONBOARDING DESK</span>
+</div>
+
+<div class="header-box">
+  <div style="font-size:30px;margin-bottom:4px">🧑‍💼</div>
+  <h1 id="gymBrandTitle">5 BROTHER'S FITNESS CLUB</h1>
+  <p>आधिकारिक स्टाफ पंजीकरण एवं अनुबंध प्रपत्र (Staff Joining Form)</p>
+</div>
+
+<div class="form-card">
+  <form id="staffJoinForm" onsubmit="handleStaffJoinSubmit(event)">
+
+    <!-- 1. ROLE & DESIGNATION -->
+    <div class="section-title">💼 1. पद एवं वेतन संरचना (Designation & Role)</div>
+    
+    <div class="field-group">
+      <label>स्टाफ श्रेणी (Staff Category / Role) <span>*</span></label>
+      <select id="stfRole" required onchange="handleRoleChange()">
+        <option value="Trainer">🏋️ Class A: जिम ट्रेनर / फिटनेस कोच (Gym Trainer)</option>
+        <option value="Receptionist">👩‍💼 Class B: रिसेप्शन / फ्रंट डेस्क / बिलिंग (Front Desk / Receptionist)</option>
+        <option value="Support" selected>🧹 Class C: सफाई कर्मचारी / हेल्पर / प्यून (Housekeeping / Helper)</option>
+        <option value="Manager">👔 Class S: फ्लोर मैनेजर / ऑपरेशन हेड (Manager / Operations)</option>
+      </select>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>ज्वाइनिंग तिथि (Joining Date) <span>*</span></label>
+        <input type="date" id="stfJoinDate" required>
+      </div>
+      <div class="field-group">
+        <label>शिफ्ट (Assigned Shift) <span>*</span></label>
+        <select id="stfShift" required>
+          <option value="Morning">🌅 Morning (05:30 AM - 12:00 PM)</option>
+          <option value="Evening">🌙 Evening (04:00 PM - 10:00 PM)</option>
+          <option value="Full Day">⚡ Full Day (Morning + Evening)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>वेतन प्रकार (Salary Type) <span>*</span></label>
+        <select id="stfSalaryType" onchange="handleSalaryTypeChange()">
+          <option value="Fixed">मासिक फिक्स्ड वेतन (Fixed Monthly)</option>
+          <option value="Incentive">बेस + क्लाइंट इंसेंटिव (Base + Commission)</option>
+          <option value="Daily">दैनिक मजदूरी (Daily Wage Basis)</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label id="lblSalaryAmount">मासिक वेतन (Salary ₹) <span>*</span></label>
+        <input type="number" id="stfSalary" placeholder="उदा. 10000" required oninput="calcPerDayPreview()">
+      </div>
+    </div>
+
+    <div id="salaryPreviewLine" style="font-size:11.5px;color:var(--ok);font-weight:800;margin:-4px 0 10px;">
+      👉 Per Day Rate: ₹0 / दिन (Whole-Day लेजर के लिए)
+    </div>
+
+    <!-- 2. PERSONAL & FAMILY DETAILS -->
+    <div class="section-title">👤 2. व्यक्तिगत एवं पारिवारिक विवरण (Personal Details)</div>
+
+    <div class="field-group">
+      <label>पूरा नाम (Full Legal Name) <span>*</span></label>
+      <input type="text" id="stfName" placeholder="आधार कार्ड के अनुसार पूरा नाम" required>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>जन्म तिथि (DOB) <span>*</span></label>
+        <input type="date" id="stfDob" required onchange="calculateStaffAge()">
+      </div>
+      <div class="field-group">
+        <label>उम्र (Age)</label>
+        <input type="number" id="stfAge" placeholder="Auto" readonly style="color:var(--ac);font-weight:bold">
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>लिंग (Gender) <span>*</span></label>
+        <select id="stfGender" required>
+          <option value="Male">पुरुष (Male)</option>
+          <option value="Female">महिला (Female)</option>
+          <option value="Other">अन्य (Other)</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>वैवाहिक स्थिति (Marital Status) <span>*</span></label>
+        <select id="stfMarital" required onchange="handleMaritalChange()">
+          <option value="Single">अविवाहित (Single / Unmarried)</option>
+          <option value="Married">विवाहित (Married)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>पिता का नाम (Father's Name) <span>*</span></label>
+      <input type="text" id="stfFather" placeholder="पिता का पूरा नाम" required>
+    </div>
+
+    <!-- SPOUSE NAME DYNAMIC -->
+    <div class="field-group" id="spouseBox" style="display:none">
+      <label>पति / पत्नी का नाम (Spouse Name) <span>*</span></label>
+      <input type="text" id="stfSpouse" placeholder="जीवनसाथी का पूरा नाम">
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>मोबाइल नंबर (Calling/WhatsApp) <span>*</span></label>
+        <input type="tel" id="stfPhone" maxlength="10" placeholder="10 अंक मोबाइल नंबर" required>
+      </div>
+      <div class="field-group">
+        <label>ईमेल आईडी (Email Address)</label>
+        <input type="email" id="stfEmail" placeholder="optional@gmail.com">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>🚨 आपातकालीन संपर्क व्यक्ति (Emergency Contact Person) <span>*</span></label>
+      <div class="row-3">
+        <input type="text" id="stfEmName" placeholder="व्यक्ति का नाम" required>
+        <input type="text" id="stfEmRel" placeholder="संबंध (उदा. भाई/पिता/पत्नी)" required>
+        <input type="tel" id="stfEmPhone" maxlength="10" placeholder="इमरजेंसी मोबाइल" required>
+      </div>
+    </div>
+
+    <!-- 3. ADDRESS & GOVT IDS -->
+    <div class="section-title">🏠 3. पता एवं सरकारी पहचान (Address & Govt ID)</div>
+
+    <div class="field-group">
+      <label>स्थाई घर का पता (Permanent Address) <span>*</span></label>
+      <textarea id="stfPermAddr" rows="2" placeholder="मकान नंबर, गांव/गली, पोस्ट, जिला, राज्य, पिनकोड..." required></textarea>
+    </div>
+
+    <label class="check-inline">
+      <input type="checkbox" id="chkSameAddr" onchange="copyAddressIfSame()">
+      <span>वर्तमान पता (Current Address) स्थाई पते के समान है</span>
+    </label>
+
+    <div class="field-group" style="margin-top:8px">
+      <label>वर्तमान पता (Current Local Address) <span>*</span></label>
+      <textarea id="stfCurrAddr" rows="2" placeholder="अभी उन्नाव/लोकल में कहाँ रहते हैं..." required></textarea>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>सरकारी आईडी प्रकार (Govt ID Type) <span>*</span></label>
+        <select id="stfGovType" required>
+          <option value="Aadhaar">आधार कार्ड (Aadhaar Card)</option>
+          <option value="Voter ID">वोटर कार्ड (Voter ID)</option>
+          <option value="Driving License">ड्राइविंग लाइसेंस (DL)</option>
+          <option value="PAN Card">पैन कार्ड (PAN Card)</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>आईडी नंबर (Govt ID Number) <span>*</span></label>
+        <input type="text" id="stfGovNo" placeholder="पहचान पत्र संख्या" required>
+      </div>
+    </div>
+
+    <!-- 4. EXPERIENCE & PREVIOUS COMPANY (DYNAMIC LEVEL BASED) -->
+    <div id="experienceSection">
+      <div class="section-title">🏢 4. पिछला कार्य अनुभव (Previous Employment & Skills)</div>
+      <div class="role-badge" id="roleBadgeExp">Class A / B Onboarding Profile</div>
+      
+      <div class="row-2">
+        <div class="field-group">
+          <label>कार्य अनुभव स्थिति <span>*</span></label>
+          <select id="stfExpType" onchange="handleExpTypeChange()">
+            <option value="Experienced">अनुभवी (Experienced)</option>
+            <option value="Fresher">नया / फ्रेशर (Fresher)</option>
+          </select>
+        </div>
+        <div class="field-group" id="totalExpBox">
+          <label>कुल अनुभव (Total Experience)</label>
+          <input type="text" id="stfTotalExp" placeholder="उदा. 2 वर्ष 6 महीने">
+        </div>
+      </div>
+
+      <div id="prevCompanyBlock">
+        <div class="field-group">
+          <label>पिछली संस्था / कंपनी / जिम का नाम (Previous Company / Gym Name) <span>*</span></label>
+          <input type="text" id="stfPrevCompany" placeholder="उदा. Gold's Gym, ओम ऑटोमोबाइल, आदि">
+        </div>
+
+        <div class="row-2">
+          <div class="field-group">
+            <label>वहां आपका पद (Last Designation)</label>
+            <input type="text" id="stfPrevRole" placeholder="उदा. फ्लोर ट्रेनर / रिसेप्शनिस्ट">
+          </div>
+          <div class="field-group">
+            <label>छोड़ने का कारण (Reason for Leaving)</label>
+            <input type="text" id="stfLeaveReason" placeholder="उदा. बेहतर अवसर / दूरी">
+          </div>
+        </div>
+
+        <div class="field-group" id="specialSkillsBox">
+          <label id="lblSpecialSkills">विशेष योग्यता / सर्टिफिकेट्स (Specialization / Certificates)</label>
+          <input type="text" id="stfSkills" placeholder="उदा. CPR Certified, वेट लॉस कोच, कंप्यूटर एक्सेल, बिलिंग...">
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. BANKING & UAN DETAILS -->
+    <div class="section-title">🏦 5. बैंक खाता एवं UAN विवरण (Bank & Accounts)</div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>खाताधारक का नाम <span>*</span></label>
+        <input type="text" id="stfBankHolder" placeholder="पासबुक अनुसार नाम" required>
+      </div>
+      <div class="field-group">
+        <label>बैंक का नाम (Bank Name) <span>*</span></label>
+        <input type="text" id="stfBankName" placeholder="उदा. SBI, HDFC, PNB..." required>
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>खाता संख्या (Bank A/C Number) <span>*</span></label>
+        <input type="text" id="stfBankAcc" placeholder="Account Number" required>
+      </div>
+      <div class="field-group">
+        <label>IFSC कोड (IFSC Code) <span>*</span></label>
+        <input type="text" id="stfBankIfsc" placeholder="उदा. SBIN0001234" required style="text-transform:uppercase">
+      </div>
+    </div>
+
+    <div class="row-2">
+      <div class="field-group">
+        <label>UPI ID (GooglePay / PhonePe / Paytm)</label>
+        <input type="text" id="stfUpi" placeholder="उदा. 9140417259@upi">
+      </div>
+      <div class="field-group">
+        <label>UAN नंबर (EPF Universal Account Number)</label>
+        <input type="text" id="stfUan" placeholder="12 अंक UAN (यदि हो तो)">
+      </div>
+    </div>
+
+    <!-- SUBMIT BUTTON -->
+    <button type="submit" class="btn-submit" id="btnSubmitStaff">
+      💾 स्टाफ को रजिस्टर में सुरक्षित जोड़ें (Submit Joining Form)
+    </button>
+  </form>
+</div>
+
+<!-- OFFICIAL JOINING SLIP MODAL -->
+<div class="modal-ov" id="joiningSlipModal">
+  <div class="slip-box" id="printableSlipArea">
+    <div class="slip-header">
+      <div style="font-size:10px;font-weight:900;background:#000;color:#ffcc00;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:4px">OFFICIAL EMPLOYEE RECORD</div>
+      <h2 id="slipGymName">5 BROTHER'S FITNESS CLUB</h2>
+      <div style="font-size:11px;color:#555">Staff Joining &amp; Verification Slip</div>
+    </div>
+
+    <div class="slip-row"><span>कर्मचारी आईडी (Staff ID):</span><b id="slId">--</b></div>
+    <div class="slip-row"><span>पूरा नाम (Staff Name):</span><b id="slName">--</b></div>
+    <div class="slip-row"><span>पद (Designation):</span><b id="slRole" style="color:#0a7a2f">--</b></div>
+    <div class="slip-row"><span>मोबाइल नंबर:</span><b id="slPhone">--</b></div>
+    <div class="slip-row"><span>पिता / जीवनसाथी:</span><b id="slGuardian">--</b></div>
+    <div class="slip-row"><span>ज्वाइनिंग तिथि:</span><b id="slJoinDate">--</b></div>
+    <div class="slip-row"><span>शिफ्ट:</span><b id="slShift">--</b></div>
+    <div class="slip-row"><span>मासिक वेतन:</span><b id="slSalary" style="color:#0a7a2f">--</b></div>
+    <div class="slip-row"><span>प्रति दिन दर (Daily Rate):</span><b id="slDailyRate">--</b></div>
+    <div class="slip-row"><span>पहचान पत्र (Govt ID):</span><b id="slGovId">--</b></div>
+    <div class="slip-row" id="slPrevCompRow"><span>पिछली संस्था:</span><b id="slPrevCompany">--</b></div>
+    <div class="slip-row"><span>बैंक खाता:</span><b id="slBank">--</b></div>
+
+    <div style="margin-top:14px;border-top:1px dashed #000;padding-top:10px;font-size:10px;line-height:1.4;color:#444">
+      • यह कर्मचारी <b>अटेंडेंस कियोस्क (Selfie Portal)</b> और <b>डेली सैलरी लेजर</b> में सक्रिय कर दिया गया है।<br>
+      • कर्मचारी को प्रतिदिन सेल्फी उपस्थिति दर्ज करना अनिवार्य है।
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:20px;padding-top:8px">
+      <div style="font-size:10px;text-align:center">
+        ____________________<br>
+        <b>कर्मचारी के हस्ताक्षर</b>
+      </div>
+      <div style="font-size:10px;text-align:center">
+        ____________________<br>
+        <b>ओनर / अधिकृत हस्ताक्षर</b>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button type="button" onclick="window.print()" style="flex:1;background:#000;color:#ffcc00;border:none;padding:10px;border-radius:6px;font-weight:900;cursor:pointer">🖨️ प्रिंट / PDF</button>
+      <button type="button" onclick="closeSlipAndRedirect()" style="flex:1;background:#22C55E;color:#000;border:none;padding:10px;border-radius:6px;font-weight:900;cursor:pointer">✔ Dashboard पर जाएं</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- FIREBASE CLOUD SETUP ---
+const firebaseConfig = {
+  apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
+  authDomain: "bfc-gym-215ae.firebaseapp.com",
+  projectId: "bfc-gym-215ae",
+  storageBucket: "bfc-gym-215ae.firebasestorage.app",
+  messagingSenderId: "886920088571",
+  appId: "1:886920088571:web:c4bc478d246a2700b0d95e"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// LocalStorage Helper
+const LS = localStorage;
+function todayISO() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  // Set default date
+  document.getElementById("stfJoinDate").value = todayISO();
+  
+  // Set Gym Name Dynamically
+  const org = JSON.parse(LS.getItem("om_org_profile") || "{}");
+  const gName = org.orgName || org.gymName || "5 BROTHER'S FITNESS CLUB";
+  document.getElementById("gymBrandTitle").textContent = gName.toUpperCase();
+  document.getElementById("slipGymName").textContent = gName.toUpperCase();
+
+  handleRoleChange();
+  calcPerDayPreview();
+});
+
+// Dynamic Field Toggles Based on Roles
+function handleRoleChange() {
+  const role = document.getElementById("stfRole").value;
+  const expSection = document.getElementById("experienceSection");
+  const prevCompany = document.getElementById("stfPrevCompany");
+  const roleBadge = document.getElementById("roleBadgeExp");
+  const skillsLabel = document.getElementById("lblSpecialSkills");
+
+  if (role === "Support") {
+    // Class C: Peon, Sweeper, Helper -> Experience optional / minimal
+    roleBadge.textContent = "Class C: सपोर्ट एवं हाउसकीपिंग (अनुभव वैकल्पिक)";
+    prevCompany.required = false;
+    skillsLabel.textContent = "कार्य में विशेषज्ञता (जैसे सफाई, उपकरण रखरखाव, आदि)";
+  } else if (role === "Trainer") {
+    // Class A: Trainers
+    roleBadge.textContent = "Class A: जिम ट्रेनर / फिटनेस कोच (सर्टिफिकेशन व अनुभव ज़रूरी)";
+    prevCompany.required = true;
+    skillsLabel.textContent = "फिटनेस सर्टिफिकेशन (CPR, Personal Training, डाइट चार्ट विशेषज्ञता)";
+  } else if (role === "Receptionist") {
+    // Class B: Front Desk
+    roleBadge.textContent = "Class B: रिसेप्शन एवं बिलिंग (कंप्यूटर एवं कॉलिंग अनुभव)";
+    prevCompany.required = true;
+    skillsLabel.textContent = "कंप्यूटर योग्यता (MS Excel, सॉफ्टवेयर, बिलिंग, क्लाइंट डीलिंग)";
+  } else {
+    // Manager
+    roleBadge.textContent = "Class S: प्रबंधन एवं ऑपरेशन्स (पूर्व प्रबंधन अनुभव अनिवार्य)";
+    prevCompany.required = true;
+    skillsLabel.textContent = "टीम मैनेजमेंट, सेल्स क्लोजिंग एवं जिम ऑपरेशन्स";
+  }
+}
+
+function handleMaritalChange() {
+  const marital = document.getElementById("stfMarital").value;
+  const spouseBox = document.getElementById("spouseBox");
+  const spouseInput = document.getElementById("stfSpouse");
+  if (marital === "Married") {
+    spouseBox.style.display = "block";
+    spouseInput.required = true;
+  } else {
+    spouseBox.style.display = "none";
+    spouseInput.required = false;
+    spouseInput.value = "";
+  }
+}
+
+function copyAddressIfSame() {
+  const chk = document.getElementById("chkSameAddr");
+  const perm = document.getElementById("stfPermAddr");
+  const curr = document.getElementById("stfCurrAddr");
+  if (chk.checked) {
+    curr.value = perm.value;
+  }
+}
+
+function calculateStaffAge() {
+  const dobVal = document.getElementById("stfDob").value;
+  if (!dobVal) return;
+  const dob = new Date(dobVal);
+  const diff = Date.now() - dob.getTime();
+  const ageDate = new Date(diff);
+  const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+  document.getElementById("stfAge").value = age > 0 ? age : "";
+}
+
+function handleSalaryTypeChange() {
+  const type = document.getElementById("stfSalaryType").value;
+  const lbl = document.getElementById("lblSalaryAmount");
+  if (type === "Daily") {
+    lbl.innerHTML = 'दैनिक वेतन दर (Per Day ₹) <span>*</span>';
+  } else if (type === "Incentive") {
+    lbl.innerHTML = 'बेस मासिक वेतन (Base Salary ₹) <span>*</span>';
+  } else {
+    lbl.innerHTML = 'मासिक वेतन (Fixed Salary ₹) <span>*</span>';
+  }
+  calcPerDayPreview();
+}
+
+function calcPerDayPreview() {
+  const type = document.getElementById("stfSalaryType").value;
+  const sal = Number(document.getElementById("stfSalary").value) || 0;
+  let dailyRate = 0;
+  if (type === "Daily") {
+    dailyRate = sal;
+  } else {
+    dailyRate = Math.round((sal / 30) * 100) / 100;
+  }
+  document.getElementById("salaryPreviewLine").innerHTML = 
+    `👉 <b>Per Day Rate:</b> ₹${dailyRate} / दिन (हर शाम Whole-Day लेजर और सैलरी हिसाब के लिए)`;
+  return dailyRate;
+}
+
+function handleExpTypeChange() {
+  const type = document.getElementById("stfExpType").value;
+  const block = document.getElementById("prevCompanyBlock");
+  const totalExp = document.getElementById("totalExpBox");
+  if (type === "Fresher") {
+    block.style.display = "none";
+    totalExp.style.display = "none";
+  } else {
+    block.style.display = "block";
+    totalExp.style.display = "block";
+  }
+}
+
+// SUBMIT FORM & AUTO-LINK
+async function handleStaffJoinSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btnSubmitStaff");
+  btn.disabled = true;
+  btn.innerText = "⏳ स्टाफ का डेटा सेव हो रहा है...";
+
+  const staffId = "STF-" + Date.now().toString().slice(-6);
+  const role = document.getElementById("stfRole").value;
+  const name = document.getElementById("stfName").value.trim();
+  const phone = document.getElementById("stfPhone").value.trim();
+  const dob = document.getElementById("stfDob").value;
+  const age = document.getElementById("stfAge").value;
+  const gender = document.getElementById("stfGender").value;
+  const marital = document.getElementById("stfMarital").value;
+  const father = document.getElementById("stfFather").value.trim();
+  const spouse = document.getElementById("stfSpouse").value.trim();
+  const email = document.getElementById("stfEmail").value.trim();
+  const emName = document.getElementById("stfEmName").value.trim();
+  const emRel = document.getElementById("stfEmRel").value.trim();
+  const emPhone = document.getElementById("stfEmPhone").value.trim();
+  const permAddr = document.getElementById("stfPermAddr").value.trim();
+  const currAddr = document.getElementById("stfCurrAddr").value.trim();
+  const govType = document.getElementById("stfGovType").value;
+  const govNo = document.getElementById("stfGovNo").value.trim();
+  const joinDate = document.getElementById("stfJoinDate").value || todayISO();
+  const shift = document.getElementById("stfShift").value;
+  const salaryType = document.getElementById("stfSalaryType").value;
+  const salary = Number(document.getElementById("stfSalary").value) || 0;
+  const dailyRate = calcPerDayPreview();
+  const expType = document.getElementById("stfExpType").value;
+  const totalExp = document.getElementById("stfTotalExp").value.trim();
+  const prevCompany = document.getElementById("stfPrevCompany").value.trim();
+  const prevRole = document.getElementById("stfPrevRole").value.trim();
+  const leaveReason = document.getElementById("stfLeaveReason").value.trim();
+  const skills = document.getElementById("stfSkills").value.trim();
+  const bankHolder = document.getElementById("stfBankHolder").value.trim();
+  const bankName = document.getElementById("stfBankName").value.trim();
+  const bankAcc = document.getElementById("stfBankAcc").value.trim();
+  const bankIfsc = document.getElementById("stfBankIfsc").value.trim().toUpperCase();
+  const upi = document.getElementById("stfUpi").value.trim();
+  const uan = document.getElementById("stfUan").value.trim();
+
+  // Unified Staff Profile Object
+  const staffRecord = {
+    id: staffId,
+    name: name,
+    phone: phone,
+    role: role,
+    category: role === "Support" ? "Class C (Housekeeping)" : (role === "Trainer" ? "Class A (Trainer)" : (role === "Receptionist" ? "Class B (Desk)" : "Class S (Manager)")),
+    designation: role,
+    dob: dob,
+    age: age,
+    gender: gender,
+    maritalStatus: marital,
+    fatherName: father,
+    spouseName: spouse,
+    email: email,
+    emergency: { name: emName, relation: emRel, phone: emPhone },
+    permanentAddress: permAddr,
+    currentAddress: currAddr,
+    govId: { type: govType, number: govNo },
+    joiningDate: joinDate,
+    joinDate: joinDate,
+    shift: shift,
+    slot: shift === "Morning" ? "05:30 AM - 12:00 PM" : (shift === "Evening" ? "04:00 PM - 10:00 PM" : "Full Day"),
+    salaryType: salaryType,
+    monthlySalary: salary,
+    salary: salary,
+    dailyRate: dailyRate,
+    experience: { type: expType, totalExp: totalExp, prevCompany: prevCompany, prevRole: prevRole, leaveReason: leaveReason, skills: skills },
+    banking: { holder: bankHolder, bank: bankName, account: bankAcc, ifsc: bankIfsc, upi: upi, uan: uan },
+    status: "Active",
+    createdAt: new Date().toISOString()
+  };
+
+  // 1. Save to LocalStorage staff master lists (bfc_staff_list & om_staff_master_v2)
+  let staffList = JSON.parse(LS.getItem("bfc_staff_list") || "[]");
+  staffList.push(staffRecord);
+  LS.setItem("bfc_staff_list", JSON.stringify(staffList));
+  LS.setItem("om_staff_master_v2", JSON.stringify(staffList));
+
+  // 2. Sync directly to Cloud Firestore 'staff' collection
+  try {
+    await db.collection("staff").doc(staffId).set(staffRecord, { merge: true });
+  } catch (err) {
+    console.warn("Cloud staff sync notice:", err);
+  }
+
+  // 3. Populate Slip Modal
+  document.getElementById("slId").innerText = staffId;
+  document.getElementById("slName").innerText = name;
+  document.getElementById("slRole").innerText = `${role} (${staffRecord.category})`;
+  document.getElementById("slPhone").innerText = phone;
+  document.getElementById("slGuardian").innerText = marital === "Married" && spouse ? `${spouse} (पति/पत्नी)` : `${father} (पिता)`;
+  document.getElementById("slJoinDate").innerText = joinDate;
+  document.getElementById("slShift").innerText = `${shift} (${staffRecord.slot})`;
+  document.getElementById("slSalary").innerText = `₹${salary} (${salaryType})`;
+  document.getElementById("slDailyRate").innerText = `₹${dailyRate} / दिन`;
+  document.getElementById("slGovId").innerText = `${govType}: ${govNo}`;
+  document.getElementById("slPrevCompany").innerText = prevCompany || "फ्रेशर / एन.ए.";
+  document.getElementById("slBank").innerText = `${bankName} (A/C: ${bankAcc}, IFSC: ${bankIfsc})`;
+
+  btn.disabled = false;
+  btn.innerText = "💾 स्टाफ को रजिस्टर में सुरक्षित जोड़ें (Submit Joining Form)";
+
+  // Open Slip Modal
+  document.getElementById("joiningSlipModal").classList.add("show");
+}
+
+function closeSlipAndRedirect() {
+  document.getElementById("joiningSlipModal").classList.remove("show");
+  alert("🎉 स्टाफ सफलतापूर्वक जुड़ गया है! अब अटेंडेंस पोर्टल में इनका नाम एक्टिव है।");
+  window.location.href = "index.html";
+}
+</script>
+</body>
+</html>
