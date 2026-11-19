@@ -5,9 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Universal SaaS Portal - Login & Authentication</title>
   <!-- Firebase App & Auth SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js">
+  function openSecForgotModal() {
+    document.getElementById("fgEmailInput").value = document.getElementById("userEmailOrPhone").value.trim();
+    document.getElementById("fgOtpBox").style.display = "none";
+    document.getElementById("fgResultMsg").innerHTML = "";
+    document.getElementById("secForgotModal").style.display = "flex";
+  }
+  function closeSecForgotModal() {
+    document.getElementById("secForgotModal").style.display = "none";
+  }
+  async function sendSecVerificationOtp() {
+    const em = document.getElementById("fgEmailInput").value.trim().toLowerCase();
+    if (!em) { alert("Please enter registered email."); return; }
+    pendingSecOtp = String(Math.floor(100000 + Math.random() * 900000));
+    try { await auth.sendPasswordResetEmail(em); } catch (e) {}
+    document.getElementById("fgOtpBox").style.display = "block";
+    document.getElementById("fgOtpHint").innerHTML = "Email verification notification triggered for <b>" + em + "</b>. Demo Verification Code: <b style='color:#ffcc00'>" + pendingSecOtp + "</b>";
+  }
+  function confirmSecCodeReset() {
+    const em = document.getElementById("fgEmailInput").value.trim().toLowerCase();
+    const otp = document.getElementById("fgOtpInput").value.trim();
+    if (!pendingSecOtp || otp !== pendingSecOtp) {
+      document.getElementById("fgResultMsg").innerHTML = "<span style='color:#ff6b6b'>❌ Verification code match nahi hua.</span>";
+      return;
+    }
+    const res = typeof omRequestNewSecurityCode === "function" ? omRequestNewSecurityCode(em) : { ok: false, msg: "Unavailable" };
+    if (!res.ok) {
+      document.getElementById("fgResultMsg").innerHTML = "<span style='color:#ff6b6b'>" + res.msg + "</span>";
+      return;
+    }
+    document.getElementById("userSecurityCodeInput").value = res.code;
+    document.getElementById("fgResultMsg").innerHTML = "<span style='color:#2ecc71'>✅ Naya Security Code ban gaya: <b>" + res.code + "</b> (Remaining resets in active plan: <b>" + res.remaining + "</b>)</span>";
+  }
+  function openMasterSecLookupModal() {
+    document.getElementById("secLookupQuery").value = "";
+    renderSecLookupResults();
+    document.getElementById("secLookupModal").style.display = "flex";
+  }
+  function closeSecLookupModal() {
+    document.getElementById("secLookupModal").style.display = "none";
+  }
+  function renderSecLookupResults() {
+    const q = document.getElementById("secLookupQuery").value.trim();
+    const rows = typeof omSearchSecurityRegistry === "function" ? omSearchSecurityRegistry(q) : [];
+    const box = document.getElementById("secLookupResults");
+    if (!rows.length) {
+      box.innerHTML = "<div style='font-size:12px;color:#aaa;padding:8px;'>Koi record nahi mila.</div>";
+      return;
+    }
+    box.innerHTML = rows.map(function (r) {
+      return "<div style='background:#0b0b0d;border:1px solid #2c2c35;border-radius:10px;padding:10px;margin-bottom:8px;font-size:12px;line-height:1.5;'>" +
+        "<div><b>Gym:</b> <span style='color:#ffcc00'>" + (r.gymName || "-") + "</span></div>" +
+        "<div><b>Phone:</b> " + (r.phone || "-") + " | <b>Email:</b> " + (r.email || "-") + "</div>" +
+        "<div><b>License Key:</b> <b style='color:#2ecc71'>" + (r.licenseKey || "-") + "</b></div>" +
+        "<div><b>Unique Security Code:</b> <b style='color:#ffcc00;font-size:13.5px'>" + (r.code || "-") + "</b></div>" +
+        "<div style='font-size:10.5px;color:#888'>Plan Resets Used: " + (r.resetCountInCycle || 0) + "/3</div>" +
+        "</div>";
+    }).join("");
+  }
+</script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="auth-gate.js" data-mode="ondemand"></script>
   <style>
     :root { --bg: #0b0b0d; --card: #16161a; --border: #2c2c35; --ac: #ffcc00; --tx: #f0f0f5; --mut: #9999a8; --ok: #2ecc71; --err: #e74c3c; }
     body { background: var(--bg); color: var(--tx); font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
@@ -58,6 +118,18 @@
       <input type="password" id="userPassword" required placeholder="Enter secure password">
     </div>
 
+    
+    <div class="field" id="secCodeLoginField">
+      <label style="color:var(--ac)">Unique Security Code (Login ke liye zaroori) *</label>
+      <input type="text" id="userSecurityCodeInput" placeholder="SEC-XXXX-XXXX" style="border-color:var(--ac);color:var(--ac);font-weight:bold;">
+    </div>
+
+    <div id="signupSecCodeBanner" style="display:none;background:#102216;border:1.5px solid var(--ok);border-radius:10px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:11px;color:var(--ok);font-weight:800;">🔐 Aapka Unique Security Code (Non-Deletable &amp; Backed Up)</div>
+      <div id="generatedSecCodeBox" style="font-size:18px;font-weight:900;color:var(--ac);letter-spacing:1px;margin:6px 0;"></div>
+      <div style="font-size:10.5px;color:#ccc;line-height:1.4;">Is code ko surakshit rakhein. Aage login karte waqt Email + Password ke saath yeh code zaroori hoga. Isko delete karne ka option nahi hai.</div>
+    </div>
+
     <button type="submit" class="btn-main" id="submitBtn">Sign In ➔</button>
   </form>
 
@@ -65,7 +137,47 @@
     <a onclick="triggerForgotPassword()">Forgot Password?</a>
     <span id="toggleModeText">Need an account? <a onclick="toggleAuthMode()">Sign Up</a></span>
   </div>
+  <div class="links" style="margin-top:10px;">
+    <a onclick="openSecForgotModal()">Forgot Security Code? (Max 3/Plan)</a>
+    <a onclick="openMasterSecLookupModal()">🔎 Gym / License / Email Lookup</a>
+  </div>
 </div>
+
+<!-- FORGOT SECURITY CODE MODAL (EMAIL VERIFICATION + MAX 3 PER ACTIVE PLAN) -->
+<div id="secForgotModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;justify-content:center;align-items:center;padding:16px;">
+  <div style="background:#16161a;border:2px solid var(--ac);border-radius:16px;max-width:410px;width:100%;padding:20px;color:#fff;box-sizing:border-box;">
+    <h3 style="margin:0 0 6px;color:var(--ac);font-size:17px;">📧 Security Code Reset &amp; Verification</h3>
+    <p style="margin:0 0 12px;font-size:11.5px;color:var(--mut);line-height:1.45;">Email par verification notification/OTP bhejkar naya Security Code banayein. Active plan me sirf <b>3 baar</b> hi reset ho sakta hai.</p>
+    <div class="field">
+      <label>Registered Email *</label>
+      <input type="email" id="fgEmailInput" placeholder="admin@gym.com">
+    </div>
+    <button type="button" class="btn-main" style="margin-top:0;margin-bottom:10px;" onclick="sendSecVerificationOtp()">📨 Email Verification Code Bhejein</button>
+    <div id="fgOtpBox" style="display:none;background:#0b0b0d;border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:10px;">
+      <div id="fgOtpHint" style="font-size:11px;color:#8dffb0;margin-bottom:6px;"></div>
+      <label>Email Verification OTP *</label>
+      <input type="text" id="fgOtpInput" maxlength="6" placeholder="6-digit OTP">
+      <button type="button" class="btn-main" style="background:var(--ok);color:#000;margin-top:8px;" onclick="confirmSecCodeReset()">✔ Verify &amp; Generate New Security Code</button>
+    </div>
+    <div id="fgResultMsg" style="font-size:12px;margin-top:6px;line-height:1.45;"></div>
+    <button type="button" class="btn-main" style="background:#333;color:#fff;margin-top:12px;" onclick="closeSecForgotModal()">Close</button>
+  </div>
+</div>
+
+<!-- MASTER LOOKUP / AUTO-SEARCH MODAL (GYM NAME + PHONE / EMAIL / LICENSE KEY) -->
+<div id="secLookupModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;justify-content:center;align-items:center;padding:16px;">
+  <div style="background:#16161a;border:2px solid var(--ac);border-radius:16px;max-width:440px;width:100%;padding:20px;color:#fff;box-sizing:border-box;max-height:88vh;overflow-y:auto;">
+    <h3 style="margin:0 0 6px;color:var(--ac);font-size:17px;">🔎 Security Code &amp; License Auto-Search</h3>
+    <p style="margin:0 0 10px;font-size:11.5px;color:var(--mut);line-height:1.45;">Gym ka naam, Mobile No., Email ya License Key likhein — turant License Key aur Unique Security Code dikhega.</p>
+    <div class="field">
+      <label>Auto-Search (Gym Name / Phone / Email / License Key)</label>
+      <input type="text" id="secLookupQuery" oninput="renderSecLookupResults()" placeholder="Type gym name, phone, email or license key...">
+    </div>
+    <div id="secLookupResults" style="margin-top:10px;"></div>
+    <button type="button" class="btn-main" style="background:#333;color:#fff;margin-top:14px;" onclick="closeSecLookupModal()">Close</button>
+  </div>
+</div>
+
 
 <script>
   // Firebase Configuration Initialization
@@ -82,17 +194,26 @@
 
   let isSignUpMode = false;
 
+
+  let pendingSecOtp = "";
+
   function toggleAuthMode() {
     isSignUpMode = !isSignUpMode;
     document.getElementById("nameField").style.display = isSignUpMode ? "block" : "none";
+    document.getElementById("secCodeLoginField").style.display = isSignUpMode ? "none" : "block";
+    document.getElementById("signupSecCodeBanner").style.display = isSignUpMode ? "block" : "none";
+    if (isSignUpMode && typeof omGenUniqueSecCode === "function") {
+      document.getElementById("generatedSecCodeBox").innerText = omGenUniqueSecCode();
+    }
     document.getElementById("formTitle").innerText = isSignUpMode ? "Create Account" : "Welcome Back";
-    document.getElementById("formSub").innerText = isSignUpMode ? "Register your organization portal" : "Sign in with your credential";
-    document.getElementById("submitBtn").innerText = isSignUpMode ? "Register & Continue ➔" : "Sign In ➔";
-    document.getElementById("toggleModeText").innerHTML = isSignUpMode ? 
-      'Already registered? <a onclick="toggleAuthMode()">Sign In</a>' : 
+    document.getElementById("formSub").innerText = isSignUpMode ? "Register your organization portal & get Unique Security Code" : "Sign in with Email, Password & Unique Security Code";
+    document.getElementById("submitBtn").innerText = isSignUpMode ? "Register & Generate Code ➔" : "Sign In ➔";
+    document.getElementById("toggleModeText").innerHTML = isSignUpMode ?
+      'Already registered? <a onclick="toggleAuthMode()">Sign In</a>' :
       'Need an account? <a onclick="toggleAuthMode()">Sign Up</a>';
     hideAlerts();
   }
+
 
   function hideAlerts() {
     document.getElementById("errorAlert").style.display = "none";
@@ -138,18 +259,56 @@
       if (isSignUpMode) {
         const name = document.getElementById("userNameInput").value.trim();
         if (!name) { throw new Error("Please enter your organization name."); }
-        
+        const preCode = (document.getElementById("generatedSecCodeBox").innerText || "").trim() || (typeof omGenUniqueSecCode === "function" ? omGenUniqueSecCode() : "SEC-AUTO-2026");
+        const phoneVal = /^\d{10}$/.test(rawInput.trim()) ? rawInput.trim() : "";
         const userCred = await auth.createUserWithEmailAndPassword(credential, password);
         await userCred.user.updateProfile({ displayName: name });
-        
-        showSuccess("Account created successfully! Redirecting...");
-        setTimeout(() => { window.location.href = "category-select.html"; }, 1200);
+        const uid = userCred.user.uid;
+        if (typeof omEnsureUserSecurityRecord === "function") {
+          omEnsureUserSecurityRecord(credential, name, phoneVal, "TRIAL-7DAY", { forcedCode: preCode, uid: uid, orgId: uid });
+        }
+        const initProf = {
+          orgId: uid,
+          orgName: name,
+          gymName: name,
+          phone: phoneVal,
+          email: credential,
+          securityCode: preCode,
+          createdAt: new Date().toISOString()
+        };
+        try {
+          localStorage.setItem("om_org_profile", JSON.stringify(initProf));
+          localStorage.setItem("om_org_profile_saved_" + uid, JSON.stringify(initProf));
+          localStorage.setItem("om_last_org_profile", JSON.stringify(initProf));
+        } catch (x) {}
+        document.getElementById("generatedSecCodeBox").innerText = preCode;
+        document.getElementById("signupSecCodeBanner").style.display = "block";
+        showSuccess("Account created! Your Unique Security Code: " + preCode + " (Redirecting...)");
+        setTimeout(() => { window.location.href = "category-select.html"; }, 1800);
       } else {
+        const secCodeEntered = (document.getElementById("userSecurityCodeInput").value || "").trim().toUpperCase();
+        if (!secCodeEntered) {
+          throw new Error("Unique Security Code is mandatory to login.");
+        }
+        const existingRec = typeof omGetSecurityRecordStrict === "function" ? omGetSecurityRecordStrict(credential) : null;
+        if (existingRec && existingRec.code && String(existingRec.code).toUpperCase() !== secCodeEntered) {
+          throw new Error("Invalid Unique Security Code! Email & Password alone cannot bypass security code.");
+        }
         const uc = await auth.signInWithEmailAndPassword(credential, password);
+        const uid = uc.user.uid;
+        if (!existingRec && typeof omEnsureUserSecurityRecord === "function") {
+          const bound = omEnsureUserSecurityRecord(credential, uc.user.displayName || "Gym", "", "TRIAL-7DAY", { forcedCode: secCodeEntered, uid: uid, orgId: uid });
+          if (!bound || String(bound.code).toUpperCase() !== secCodeEntered) {
+            await auth.signOut();
+            throw new Error("Security code verification failed.");
+          }
+        }
         showSuccess("Login successful! Redirecting...");
         let saved = null;
-        try { saved = localStorage.getItem("om_org_profile_saved_" + uc.user.uid); } catch (x) {}
-        if (saved) {  // pehle se bani gym profile wapas lagao, dobara setup nahi
+        try {
+          saved = localStorage.getItem("om_org_profile_saved_" + uid) || localStorage.getItem("om_last_org_profile");
+        } catch (x) {}
+        if (saved) {
           try { localStorage.setItem("om_org_profile", saved); } catch (x) {}
           setTimeout(() => { window.location.href = "index.html"; }, 800);
         } else {
