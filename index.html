@@ -207,6 +207,7 @@
     <div class="nav-actions">
       <button type="button" class="btn-nav" onclick="askPin(viewLic)">🔑 License</button>
       <button type="button" class="btn-nav" onclick="askPin(viewSec)">🛡️ Code</button>
+      <button type="button" class="btn-nav" onclick="openBranchCodesDirectory()">📂 Staff Codes</button>
       <button type="button" class="btn-nav logout" onclick="omLogoutNow()">🚪 Logout</button>
     </div>
   </header>
@@ -330,6 +331,47 @@
       </div>
     </div>
     <button type="button" class="btn g" onclick="closeOv('upgOv')">Band</button>
+  </div>
+</div>
+
+
+<!-- BRANCH-WISE STAFF CODES DIRECTORY MODAL -->
+<div class="ov" id="branchCodesOv">
+  <div class="bx" style="max-width:560px">
+    <h3>
+      <span>📂 Branch-Wise Staff Codes (500+ Scale)</span>
+      <button type="button" onclick="closeOv('branchCodesOv')" style="background:none;border:0;color:var(--ac-gold);font-size:16px;cursor:pointer">✕</button>
+    </h3>
+    <div style="font-size:11.5px;color:var(--tx-muted);margin-bottom:8px">
+      Kisi bhi city, branch code, ya staff code ko search karein (jaise <b>Unnao</b>).
+    </div>
+    <input type="text" id="bcSearchInput" placeholder="Search city, branch code or staff code (e.g. Unnao)..." oninput="renderBranchCodesDirectory()">
+    <div id="bcResultsBox" style="margin-top:10px;max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:7px"></div>
+    <button type="button" class="btn g" onclick="closeOv('branchCodesOv')">Band Karein</button>
+  </div>
+</div>
+
+<!-- STAFF VIEW ONLY MODAL FOR THIS MONTH ADMISSIONS & VIEW-ONLY ATTENDANCE -->
+<div class="ov" id="staffMonthAdmOv">
+  <div class="bx" style="max-width:520px">
+    <h3>
+      <span>📝 Is Mahine Ke Admissions</span>
+      <button type="button" onclick="closeOv('staffMonthAdmOv')" style="background:none;border:0;color:var(--ac-gold);font-size:16px;cursor:pointer">✕</button>
+    </h3>
+    <div id="staffMonthAdmList" style="font-size:12px;display:flex;flex-direction:column;gap:7px"></div>
+    <button type="button" class="btn g" onclick="closeOv('staffMonthAdmOv')">Band Karein</button>
+  </div>
+</div>
+
+<div class="ov" id="staffAttViewOv">
+  <div class="bx" style="max-width:520px">
+    <h3>
+      <span>📋 Attendance (View Only — Edit Disabled)</span>
+      <button type="button" onclick="closeOv('staffAttViewOv')" style="background:none;border:0;color:var(--ac-gold);font-size:16px;cursor:pointer">✕</button>
+    </h3>
+    <div style="font-size:11px;color:var(--ac-gold);margin-bottom:8px">🔒 View-Only Mode: Staff attendance sirf dekh sakte hain, edit nahi kar sakte.</div>
+    <div id="staffAttViewList" style="font-size:12px;display:flex;flex-direction:column;gap:7px"></div>
+    <button type="button" class="btn g" onclick="closeOv('staffAttViewOv')">Band Karein</button>
   </div>
 </div>
 
@@ -830,43 +872,263 @@ function isStaffRole() {
   };
 });
 
+
+
+const ALL_INDIA_BRANCH_CODES = [
+  // Uttar Pradesh
+  { code: "001", state: "Uttar Pradesh", city: "Unnao", branchName: "5 Brother's Fitness Club - Unnao / Akrampur", staffCodes: ["STF-001-UNNAO-1", "STF-001-UNNAO-2"] },
+  { code: "002", state: "Uttar Pradesh", city: "Kanpur", branchName: "5 Brother's Fitness Club - Kanpur", staffCodes: ["STF-002-KANPUR-1", "STF-002-KANPUR-2"] },
+  { code: "003", state: "Uttar Pradesh", city: "Lucknow", branchName: "5 Brother's Fitness Club - Lucknow", staffCodes: ["STF-003-LUCKNOW-1", "STF-003-LUCKNOW-2"] },
+  { code: "004", state: "Uttar Pradesh", city: "Agra", branchName: "Om Fitness - Agra", staffCodes: ["STF-004-AGRA-1"] },
+  { code: "005", state: "Uttar Pradesh", city: "Varanasi", branchName: "Om Fitness - Varanasi", staffCodes: ["STF-005-VARANASI-1"] },
+  { code: "006", state: "Uttar Pradesh", city: "Noida", branchName: "Om Fitness - Noida", staffCodes: ["STF-006-NOIDA-1"] },
+  { code: "007", state: "Uttar Pradesh", city: "Ghaziabad", branchName: "Om Fitness - Ghaziabad", staffCodes: ["STF-007-GZB-1"] },
+  { code: "008", state: "Uttar Pradesh", city: "Meerut", branchName: "Om Fitness - Meerut", staffCodes: ["STF-008-MEERUT-1"] },
+  { code: "009", state: "Uttar Pradesh", city: "Prayagraj", branchName: "Om Fitness - Prayagraj", staffCodes: ["STF-009-PRAYAG-1"] },
+  { code: "010", state: "Uttar Pradesh", city: "Gorakhpur", branchName: "Om Fitness - Gorakhpur", staffCodes: ["STF-010-GKP-1"] },
+  // Delhi & NCR
+  { code: "011", state: "Delhi", city: "New Delhi", branchName: "Om Fitness - Connaught Place / South Delhi", staffCodes: ["STF-011-DELHI-1"] },
+  { code: "012", state: "Haryana", city: "Gurugram", branchName: "Om Fitness - Gurugram", staffCodes: ["STF-012-GGN-1"] },
+  { code: "013", state: "Haryana", city: "Faridabad", branchName: "Om Fitness - Faridabad", staffCodes: ["STF-013-FBD-1"] },
+  { code: "014", state: "Haryana", city: "Chandigarh", branchName: "Om Fitness - Chandigarh", staffCodes: ["STF-014-CHD-1"] },
+  // Maharashtra
+  { code: "015", state: "Maharashtra", city: "Mumbai", branchName: "Om Fitness - Mumbai", staffCodes: ["STF-015-MUM-1"] },
+  { code: "016", state: "Maharashtra", city: "Pune", branchName: "Om Fitness - Pune", staffCodes: ["STF-016-PUNE-1"] },
+  { code: "017", state: "Maharashtra", city: "Nagpur", branchName: "Om Fitness - Nagpur", staffCodes: ["STF-017-NAG-1"] },
+  // Rajasthan
+  { code: "018", state: "Rajasthan", city: "Jaipur", branchName: "Om Fitness - Jaipur", staffCodes: ["STF-018-JAI-1"] },
+  { code: "019", state: "Rajasthan", city: "Udaipur", branchName: "Om Fitness - Udaipur", staffCodes: ["STF-019-UDR-1"] },
+  { code: "020", state: "Rajasthan", city: "Jodhpur", branchName: "Om Fitness - Jodhpur", staffCodes: ["STF-020-JDH-1"] },
+  // Madhya Pradesh & Chhattisgarh
+  { code: "021", state: "Madhya Pradesh", city: "Indore", branchName: "Om Fitness - Indore", staffCodes: ["STF-021-IND-1"] },
+  { code: "022", state: "Madhya Pradesh", city: "Bhopal", branchName: "Om Fitness - Bhopal", staffCodes: ["STF-022-BPL-1"] },
+  { code: "023", state: "Chhattisgarh", city: "Raipur", branchName: "Om Fitness - Raipur", staffCodes: ["STF-023-RPR-1"] },
+  // Bihar & Jharkhand & West Bengal & Odisha
+  { code: "024", state: "Bihar", city: "Patna", branchName: "Om Fitness - Patna", staffCodes: ["STF-024-PAT-1"] },
+  { code: "025", state: "Jharkhand", city: "Ranchi", branchName: "Om Fitness - Ranchi", staffCodes: ["STF-025-RNC-1"] },
+  { code: "026", state: "West Bengal", city: "Kolkata", branchName: "Om Fitness - Kolkata", staffCodes: ["STF-026-KOL-1"] },
+  { code: "027", state: "Odisha", city: "Bhubaneswar", branchName: "Om Fitness - Bhubaneswar", staffCodes: ["STF-027-BBI-1"] },
+  // Gujarat
+  { code: "028", state: "Gujarat", city: "Ahmedabad", branchName: "Om Fitness - Ahmedabad", staffCodes: ["STF-028-AMD-1"] },
+  { code: "029", state: "Gujarat", city: "Surat", branchName: "Om Fitness - Surat", staffCodes: ["STF-029-SUR-1"] },
+  // South India (Karnataka, Telangana, Andhra Pradesh, Tamil Nadu, Kerala)
+  { code: "030", state: "Karnataka", city: "Bengaluru", branchName: "Om Fitness - Bengaluru", staffCodes: ["STF-030-BLR-1"] },
+  { code: "031", state: "Telangana", city: "Hyderabad", branchName: "Om Fitness - Hyderabad", staffCodes: ["STF-031-HYD-1"] },
+  { code: "032", state: "Andhra Pradesh", city: "Visakhapatnam", branchName: "Om Fitness - Visakhapatnam", staffCodes: ["STF-032-VIZ-1"] },
+  { code: "033", state: "Tamil Nadu", city: "Chennai", branchName: "Om Fitness - Chennai", staffCodes: ["STF-033-CHN-1"] },
+  { code: "034", state: "Kerala", city: "Kochi", branchName: "Om Fitness - Kochi", staffCodes: ["STF-034-COK-1"] },
+  // Punjab, Himachal Pradesh, Uttarakhand, J&K, North-East
+  { code: "035", state: "Punjab", city: "Ludhiana", branchName: "Om Fitness - Ludhiana", staffCodes: ["STF-035-LDH-1"] },
+  { code: "036", state: "Uttarakhand", city: "Dehradun", branchName: "Om Fitness - Dehradun", staffCodes: ["STF-036-DED-1"] },
+  { code: "037", state: "Himachal Pradesh", city: "Shimla", branchName: "Om Fitness - Shimla", staffCodes: ["STF-037-SML-1"] },
+  { code: "038", state: "Jammu and Kashmir", city: "Srinagar", branchName: "Om Fitness - Srinagar", staffCodes: ["STF-038-SXR-1"] },
+  { code: "039", state: "Assam", city: "Guwahati", branchName: "Om Fitness - Guwahati", staffCodes: ["STF-039-GAU-1"] }
+];
+
+const ALL_INDIA_STATES_AND_CITIES = {
+  "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Tirupati", "Nellore", "Kurnool"],
+  "Arunachal Pradesh": ["Itanagar", "Naharlagun", "Tawang"],
+  "Assam": ["Guwahati", "Dibrugarh", "Silchar", "Jorhat", "Tezpur"],
+  "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Darbhanga", "Purnia"],
+  "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba", "Durg"],
+  "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa"],
+  "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar"],
+  "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Hisar", "Rohtak", "Karnal"],
+  "Himachal Pradesh": ["Shimla", "Manali", "Dharamshala", "Solan", "Mandi"],
+  "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Hazaribagh"],
+  "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi", "Belagavi"],
+  "Kerala": ["Kochi", "Thiruvananthapuram", "Kozhikode", "Thrissur", "Kollam"],
+  "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Raipur (MP)"],
+  "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Aurangabad", "Solapur"],
+  "Manipur": ["Imphal"],
+  "Meghalaya": ["Shillong"],
+  "Mizoram": ["Aizawl"],
+  "Nagaland": ["Kohima", "Dimapur"],
+  "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri", "Sambalpur"],
+  "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali"],
+  "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner"],
+  "Sikkim": ["Gangtok"],
+  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli"],
+  "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
+  "Tripura": ["Agartala"],
+  "Uttar Pradesh": ["Unnao", "Kanpur", "Lucknow", "Agra", "Varanasi", "Noida", "Ghaziabad", "Meerut", "Prayagraj", "Gorakhpur", "Bareilly", "Aligarh", "Jhansi", "Mathura", "Ayodhya"],
+  "Uttarakhand": ["Dehradun", "Haridwar", "Haldwani", "Rishikesh", "Nainital"],
+  "West Bengal": ["Kolkata", "Howrah", "Siliguri", "Durgapur", "Asansol"],
+  "Andaman and Nicobar Islands": ["Port Blair"],
+  "Chandigarh": ["Chandigarh"],
+  "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Silvassa"],
+  "Delhi": ["New Delhi", "North Delhi", "South Delhi", "East Delhi", "West Delhi"],
+  "Jammu and Kashmir": ["Srinagar", "Jammu"],
+  "Ladakh": ["Leh", "Kargil"],
+  "Lakshadweep": ["Kavaratti"],
+  "Puducherry": ["Puducherry"]
+};
+
+function getAllBranchesDirectory() {
+  const custom = J("om_custom_branches_dir", []);
+  const combined = ALL_INDIA_BRANCH_CODES.concat(Array.isArray(custom) ? custom : []);
+  // Also generate city entries for any city/state in ALL_INDIA_STATES_AND_CITIES so searching ANY Indian city/state works!
+  const cityEntries = [];
+  let idx = 100;
+  Object.keys(ALL_INDIA_STATES_AND_CITIES).forEach(st => {
+    ALL_INDIA_STATES_AND_CITIES[st].forEach(ct => {
+      const already = combined.some(x => x.city.toLowerCase() === ct.toLowerCase() && x.state.toLowerCase() === st.toLowerCase());
+      if (!already) {
+        idx++;
+        const codeStr = String(idx).padStart(3, "0");
+        const cleanSlug = ct.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+        cityEntries.push({
+          code: codeStr,
+          state: st,
+          city: ct,
+          branchName: `Om Fitness - ${ct}, ${st}`,
+          staffCodes: [`STF-${codeStr}-${cleanSlug}-1`]
+        });
+      }
+    });
+  });
+  return combined.concat(cityEntries);
+}
+
+function addCustomAllIndiaBranch() {
+  const stateVal = prompt("State ka naam likhein (All India):", "Uttar Pradesh");
+  if (!stateVal) return;
+  const cityVal = prompt("City / District ka naam likhein:", "");
+  if (!cityVal) return;
+  const codeVal = prompt("Branch Code likhein (e.g. 501):", "501");
+  if (!codeVal) return;
+  const staffCodeVal = prompt("Staff Login Code likhein (e.g. STF-501-CITY-1):", `STF-${codeVal}-${cityVal.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8)}-1`);
+  const custom = J("om_custom_branches_dir", []);
+  custom.push({
+    code: codeVal.trim(),
+    state: stateVal.trim(),
+    city: cityVal.trim(),
+    branchName: `Om Fitness - ${cityVal.trim()}`,
+    staffCodes: [(staffCodeVal || `STF-${codeVal.trim()}-1`).trim().toUpperCase()]
+  });
+  LS.setItem("om_custom_branches_dir", JSON.stringify(custom));
+  renderBranchCodesDirectory();
+}
+
+function openBranchCodesDirectory() {
+  askPin(() => {
+    $("bcSearchInput").value = "";
+    renderBranchCodesDirectory();
+    $("branchCodesOv").classList.add("show");
+  });
+}
+
+function renderBranchCodesDirectory() {
+  const q = ($("bcSearchInput").value || "").trim().toLowerCase();
+  const allList = getAllBranchesDirectory();
+  const filtered = allList.filter(item => {
+    if (!q) return true;
+    const blob = `${item.code} ${item.state} ${item.city} ${item.branchName} ${item.staffCodes.join(" ")}`.toLowerCase();
+    return blob.includes(q);
+  }).slice(0, 60);
+
+  $("bcResultsBox").innerHTML = filtered.map(b => `
+    <div class="row" style="flex-direction:column;align-items:stretch;gap:4px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <b>${esc(b.city)} (${esc(b.state)}) — ${esc(b.branchName)}</b>
+        <span style="color:var(--ac-gold);font-weight:900">Branch Code: ${esc(b.code)}</span>
+      </div>
+      <div style="font-size:11.5px;color:#4ade80;font-weight:800">
+        Staff Login Codes: ${b.staffCodes.map(esc).join(", ")}
+      </div>
+    </div>
+  `).join("") || `<div class="row"><span>Koi state, city, branch code ya staff code nahi mila.</span></div>`;
+}
+
+function openStaffMonthAdmissions() {
+  const curYM = new Date().toISOString().slice(0, 7);
+  const rawMembers = J("5BFC_MEMBERS", []);
+  const monthAdms = rawMembers.filter(m => String(m.joinDate || "").startsWith(curYM));
+  if (!monthAdms.length) {
+    $("staffMonthAdmList").innerHTML = `<div class="row"><span>Is mahine (${curYM}) ke abhi koi naye admissions record mein nahi hain.</span></div>`;
+  } else {
+    $("staffMonthAdmList").innerHTML = monthAdms.map(m => `
+      <div class="row">
+        <div><b>${esc(m.name)}</b> <small style="color:var(--tx-muted)">(${esc(m.phone || "-")})</small></div>
+        <span style="color:#4ade80;font-weight:800">Joined: ${esc(m.joinDate || curYM)}</span>
+      </div>
+    `).join("");
+  }
+  $("staffMonthAdmOv").classList.add("show");
+}
+
+function openStaffAttendanceViewOnly() {
+  const staffRoster = J("bfc_staff_list", []);
+  if (!staffRoster.length) {
+    $("staffAttViewList").innerHTML = `<div class="row"><span>Attendance log khali hai (View-Only mode).</span></div>`;
+  } else {
+    $("staffAttViewList").innerHTML = staffRoster.map(s => `
+      <div class="row">
+        <div><b>${esc(s.name)}</b> <small style="color:var(--tx-muted)">(${esc(s.branch || "001")})</small></div>
+        <span style="color:#38BDF8;font-weight:800">Present • View Only</span>
+      </div>
+    `).join("");
+  }
+  $("staffAttViewOv").classList.add("show");
+}
+
 function applyStaffRoleRestrictionIfNeeded() {
   if (!isStaffRole()) return;
 
-  // Hide hero upgrade banner and admin nav buttons for staff
+  // Completely hide admin/owner banners, revenue, and admin controls
   const hero = document.querySelector(".hero-banner");
   if (hero) hero.style.display = "none";
+  const headline = document.querySelector(".section-headline h2");
+  if (headline) headline.textContent = "Staff Desk (Limited View)";
+
   document.querySelectorAll(".nav-actions .btn-nav:not(.logout)").forEach(b => b.style.display = "none");
+
+  let sess = {};
+  try { sess = JSON.parse(LS.getItem("om_staff_session") || "{}"); } catch (e) {}
+  $("orgTitle").innerHTML = `STAFF DESK (${esc(sess.code || "STAFF")}) <span class="brand-badge" style="background:rgba(56,189,248,.15);color:#38BDF8;border-color:rgba(56,189,248,.4)">LIMITED ACCESS</span>`;
 
   const grid = document.querySelector(".dashboard-grid");
   if (grid) {
     grid.innerHTML = `
-      <a href="join.html" class="mod-tile highlight-gold">
+      <button type="button" class="mod-tile highlight-gold" onclick="openStaffMonthAdmissions()">
+        <div class="mod-left">
+          <div class="mod-ico">📌</div>
+          <div class="mod-info">
+            <div class="mod-title">Is Mahine Ke Admissions</div>
+            <div class="mod-sub">Current month admissions only</div>
+          </div>
+        </div>
+        <div class="mod-go">&rarr;</div>
+      </button>
+
+      <button type="button" class="mod-tile highlight-cyan" onclick="openStaffAttendanceViewOnly()">
+        <div class="mod-left">
+          <div class="mod-ico">👁️</div>
+          <div class="mod-info">
+            <div class="mod-title">Attendance (View Only)</div>
+            <div class="mod-sub">Dekh sakte hain, edit nahi kar sakte</div>
+          </div>
+        </div>
+        <div class="mod-go">&rarr;</div>
+      </button>
+
+      <a href="join.html" class="mod-tile highlight-green">
         <div class="mod-left">
           <div class="mod-ico">📝</div>
           <div class="mod-info">
-            <div class="mod-title">1. Admission Form</div>
-            <div class="mod-sub">New member admission</div>
+            <div class="mod-title">Admission Form</div>
+            <div class="mod-sub">New member admission form</div>
           </div>
         </div>
         <div class="mod-go">&rarr;</div>
       </a>
-      <a href="pay.html" class="mod-tile highlight-green">
+
+      <a href="staff-join.html" class="mod-tile">
         <div class="mod-left">
-          <div class="mod-ico">💳</div>
+          <div class="mod-ico">🧑‍💼</div>
           <div class="mod-info">
-            <div class="mod-title">2. Pay Fees</div>
-            <div class="mod-sub">Member fee collection</div>
-          </div>
-        </div>
-        <div class="mod-go">&rarr;</div>
-      </a>
-      <a href="staff-salary.html" class="mod-tile highlight-cyan">
-        <div class="mod-left">
-          <div class="mod-ico">💼</div>
-          <div class="mod-info">
-            <div class="mod-title">3. Staff Joining &amp; Salary</div>
-            <div class="mod-sub">Staff joining &amp; salary desk</div>
+            <div class="mod-title">Staff Joining</div>
+            <div class="mod-sub">Staff joining desk</div>
           </div>
         </div>
         <div class="mod-go">&rarr;</div>
@@ -874,6 +1136,7 @@ function applyStaffRoleRestrictionIfNeeded() {
     `;
   }
 }
+
 
 function shareStaffAppLink(code) {
   const baseUrl = location.href.split("?")[0].split("#")[0];

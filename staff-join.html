@@ -1466,5 +1466,24 @@ window.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  var isStaff = (localStorage.getItem("bfc_role") === "staff") || !!localStorage.getItem("om_staff_session");
+  if (!isStaff) return;
+  var backBtn = document.querySelector(".top-bar .btn-back");
+  if (backBtn) {
+    backBtn.textContent = "← Staff Desk";
+    backBtn.href = "index.html";
+  }
+  var salField = document.getElementById("stfSalary");
+  if (salField) {
+    salField.closest(".field-group").style.display = "none";
+  }
+  var prevSal = document.getElementById("salaryPreviewLine");
+  if (prevSal) prevSal.style.display = "none";
+});
+</script>
+
 </body>
 </html>
