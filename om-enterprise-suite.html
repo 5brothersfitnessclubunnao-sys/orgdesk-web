@@ -461,6 +461,10 @@
       .menu-toggle-btn { display: block; }
     }
   </style>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
 </head>
 <body>
 
@@ -478,6 +482,9 @@
 
     <div class="sidebar-nav">
       <div class="nav-group-title">Master Intelligence</div>
+      <div class="nav-item" style="color:var(--gold);font-weight:900" onclick="openGeminiAiModal()">
+        <span class="icon">✨</span> Om Gemini AI Assistant
+      </div>
       <div class="nav-item active" onclick="switchMainTab('masterDashboardTab', this)">
         <span class="icon">📊</span> Master KPI Dashboard
       </div>
@@ -519,6 +526,7 @@
         <div class="page-title" id="pageTitleText">📊 Master KPI Dashboard</div>
       </div>
       <div class="bar-actions">
+        <button type="button" class="btn-action" style="background:linear-gradient(135deg,#FFB800,#F59E0B);color:#070B14;box-shadow:0 0 15px rgba(255,184,0,0.4)" onclick="openGeminiAiModal()">✨ Om Gemini AI</button>
         <button type="button" class="btn-action sec" onclick="location.href='index.html'">⬅️ Portal Desk</button>
         <button type="button" class="btn-action green" onclick="openAdmissionFormModal()">📝 + New Admission</button>
         <button type="button" class="btn-action" onclick="exportCurrentReportToCSV()">📥 Download Excel / CSV</button>
@@ -2089,6 +2097,414 @@ function closeModal(id) { document.getElementById(id).classList.remove("show"); 
 // Initial Boot
 window.addEventListener("DOMContentLoaded", () => {
   onDrillBranchSelect();
+});
+</script>
+
+
+<!-- OM GEMINI AI INTELLIGENCE ASSISTANT MODAL -->
+<div class="modal-overlay" id="geminiAiModal">
+  <div class="modal-box" style="max-width:720px;border-color:var(--gold);box-shadow:0 0 60px rgba(255,184,0,0.3)">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#FFB800,#F59E0B);color:#000;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900">✨</div>
+        <div>
+          <div class="modal-title" style="font-size:17px">Om Gemini AI Assistant</div>
+          <div style="font-size:11px;color:var(--mut)">Real-Time Gym Analytics &amp; Voice/Text Intelligence</div>
+        </div>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal('geminiAiModal')">✕</button>
+    </div>
+
+    <!-- AI Chat Messages Scrollbox -->
+    <div id="aiChatBox" style="background:#070D1A;border:1.5px solid var(--border);border-radius:14px;padding:14px;height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;font-size:13px;line-height:1.55">
+      <!-- Welcome Message -->
+      <div style="background:#0F172A;border:1px solid rgba(255,184,0,0.3);border-radius:12px;padding:12px;color:var(--tx-sub)">
+        <b style="color:var(--gold)">Namaste Saurabh Ji! Main aapka Om Gemini AI Assistant hoon.</b><br>
+        Aapko koi bhi file ya report alag se kholne ki zaroorat nahi hai. Bas Hindi ya English me type karein ya poochhein—jaise:
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="action-pill" style="color:var(--gold);border-color:rgba(255,184,0,0.35);font-size:11px" onclick="askAiQuick('Batao Unnao branch se aaj kitna collection hua?')">📍 Unnao Aaj Ka Collection?</button>
+          <button type="button" class="action-pill" style="color:var(--green);border-color:rgba(16,185,129,0.35);font-size:11px" onclick="askAiQuick('Aaj total fees kitni aayi aur total admission kitne hue?')">📝 Aaj Fees &amp; Admissions?</button>
+          <button type="button" class="action-pill" style="color:var(--red);border-color:rgba(239,68,68,0.35);font-size:11px" onclick="askAiQuick('Aaj ya is mahine kis cheez me kharcha hua?')">💸 Kharcha &amp; Expenses?</button>
+          <button type="button" class="action-pill" style="color:var(--cyan);border-color:rgba(56,189,248,0.35);font-size:11px" onclick="askAiQuick('Aaj tak Unnao branch se kul kitna collection hua?')">📈 Unnao Lifetime Collection?</button>
+          <button type="button" class="action-pill" style="color:var(--purple);border-color:rgba(168,85,247,0.35);font-size:11px" onclick="askAiQuick('Kaun sa supplement sabse zyada bik raha hai aur kaun sa near expiry hai?')">💊 Supplement Sales &amp; Expiry?</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Input Controls -->
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+      <input type="text" id="aiUserPromptInp" placeholder="Gemini AI se poochhein: e.g. Unnao branch me aaj kitna collection hua..." style="flex:1;background:var(--card-inner);border:1.5px solid var(--border);color:#fff;padding:12px 14px;border-radius:12px;font-size:13.5px;outline:none" onkeydown="if(event.key==='Enter')sendAiUserMessage()">
+      <button type="button" class="btn-action sec" style="padding:12px 14px;font-size:16px" onclick="startAiVoiceInput()" title="Voice Typing">🎤</button>
+      <button type="button" class="btn-action" style="padding:12px 18px" onclick="sendAiUserMessage()">Batao &rarr;</button>
+    </div>
+
+    <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mut)">
+      <span>⚡ Powered by Om Gemini Intelligence Engine (Live Database Connected)</span>
+      <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="promptGeminiApiKey()">⚙️ Gemini API Key (Optional)</span>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ================= OM GEMINI AI ANALYTICS ENGINE =================
+
+function openGeminiAiModal() {
+  document.getElementById("geminiAiModal").classList.add("show");
+  setTimeout(() => {
+    const inp = document.getElementById("aiUserPromptInp");
+    if (inp) inp.focus();
+  }, 100);
+}
+
+function promptGeminiApiKey() {
+  const cur = LS.getItem("om_gemini_api_key") || "";
+  const key = prompt("Google Gemini API Key enter karein (Optional - Live Cloud Model ke liye; bina key ke bhi built-in smart analytical engine live data se jawab dega):", cur);
+  if (key !== null) {
+    LS.setItem("om_gemini_api_key", key.trim());
+    alert(key ? "Gemini API Key successfully saved!" : "API Key cleared. Using built-in local analytics engine.");
+  }
+}
+
+function askAiQuick(q) {
+  const inp = document.getElementById("aiUserPromptInp");
+  if (inp) {
+    inp.value = q;
+    sendAiUserMessage();
+  }
+}
+
+function appendAiChatMsg(role, content) {
+  const box = document.getElementById("aiChatBox");
+  const msgEl = document.createElement("div");
+  const isUser = (role === "user");
+
+  msgEl.style.cssText = isUser
+    ? "align-self:flex-end;background:#1E293B;border:1px solid rgba(56,189,248,0.4);border-radius:12px;padding:10px 14px;max-width:85%;color:#fff"
+    : "align-self:flex-start;background:#0B1224;border:1.5px solid rgba(255,184,0,0.45);border-radius:12px;padding:12px 14px;max-width:92%;color:var(--tx-sub);box-shadow:0 0 15px rgba(255,184,0,0.1)";
+
+  msgEl.innerHTML = isUser
+    ? `<b>Aap:</b> ${content}`
+    : `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:var(--gold);font-weight:900">✨ Om Gemini AI:</span></div><div>${content}</div>`;
+
+  box.appendChild(msgEl);
+  box.scrollTop = box.scrollHeight;
+}
+
+// Speech Recognition for Voice
+function startAiVoiceInput() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Aapke browser me voice recognition support nahi hai. Kripya type karein.");
+    return;
+  }
+  const recognition = new SpeechRecognition();
+  recognition.lang = "hi-IN";
+  recognition.interimResults = false;
+  recognition.start();
+  appendAiChatMsg("user", "<i>🎤 Bol rahe hain, sun raha hoon...</i>");
+  recognition.onresult = function(event) {
+    const text = event.results[0][0].transcript;
+    document.getElementById("aiUserPromptInp").value = text;
+    sendAiUserMessage();
+  };
+  recognition.onerror = function() {
+    alert("Voice capture nahi ho saka, kripya type karke poochhein.");
+  };
+}
+
+async function sendAiUserMessage() {
+  const inp = document.getElementById("aiUserPromptInp");
+  const promptText = (inp.value || "").trim();
+  if (!promptText) return;
+  inp.value = "";
+
+  appendAiChatMsg("user", promptText);
+
+  // Show Typing Indicator
+  const typingId = "aiTyping_" + Date.now();
+  const box = document.getElementById("aiChatBox");
+  const typingDiv = document.createElement("div");
+  typingDiv.id = typingId;
+  typingDiv.style.cssText = "font-size:12px;color:var(--gold);font-style:italic";
+  typingDiv.textContent = "✨ Gemini live data analyze kar raha hai...";
+  box.appendChild(typingDiv);
+  box.scrollTop = box.scrollHeight;
+
+  const apiKey = LS.getItem("om_gemini_api_key");
+  let aiResponse = "";
+
+  if (apiKey) {
+    try {
+      aiResponse = await callLiveGeminiCloud(promptText, apiKey);
+    } catch (e) {
+      aiResponse = processLocalSmartQuery(promptText) + `<br><small style="color:var(--mut)">[Note: Cloud API error (${e.message}), answered via Om Engine]</small>`;
+    }
+  } else {
+    // Built-in intelligent analytics engine
+    aiResponse = processLocalSmartQuery(promptText);
+  }
+
+  const tEl = document.getElementById(typingId);
+  if (tEl) tEl.remove();
+
+  appendAiChatMsg("ai", aiResponse);
+}
+
+// Built-in Real-Time Gym Analytics Logic
+function processLocalSmartQuery(rawQ) {
+  const q = rawQ.toLowerCase();
+  const todayStr = iso();
+  const curYM = todayStr.slice(0, 7);
+
+  // Detect branch
+  let targetBranch = ACTIVE_BRANCH_CODE;
+  let branchName = "Active Branch (" + targetBranch + ")";
+  if (q.includes("unnao") || q.includes("akrampur") || q.includes("001")) {
+    targetBranch = "001";
+    branchName = "Unnao (Akrampur) Branch";
+  } else if (q.includes("kanpur") || q.includes("002")) {
+    targetBranch = "002";
+    branchName = "Kanpur Branch";
+  } else if (q.includes("lucknow") || q.includes("003")) {
+    targetBranch = "003";
+    branchName = "Lucknow Branch";
+  }
+
+  const bMems = MEMBERS.filter(m => m.branch === targetBranch);
+  const bExp = EXPENSES.filter(e => e.branch === targetBranch);
+  const bProds = PRODUCTS.filter(p => p.branch === targetBranch);
+
+  // 1. TODAY'S COLLECTION / FEES
+  if (q.includes("aaj") && (q.includes("collection") || q.includes("fees") || q.includes("fee") || q.includes("kamai") || q.includes("aaye"))) {
+    const todayJoined = bMems.filter(m => m.joinDate === todayStr);
+    const todayCollection = todayJoined.reduce((sum, m) => sum + Number(m.paid || 0), 0);
+    const todayAdmCount = todayJoined.length;
+    const todayExp = bExp.filter(e => e.date === todayStr).reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+    return `
+      <b>📍 ${branchName} — Aaj Ka Real-Time Update (${todayStr}):</b><br>
+      • <b>Aaj Ka Total Collection:</b> <span style="color:#4ADE80;font-weight:900">₹ ${todayCollection.toLocaleString("en-IN")}</span><br>
+      • <b>Aaj New Admissions:</b> <span style="color:var(--gold);font-weight:900">${todayAdmCount} members</span>${todayAdmCount > 0 ? ` (${todayJoined.map(x => x.name).join(", ")})` : ''}<br>
+      • <b>Aaj Ka Kharcha (Expense):</b> <span style="color:var(--red);font-weight:900">₹ ${todayExp.toLocaleString("en-IN")}</span><br>
+      • <b>Aaj Ka Net Munafa (Profit):</b> <span style="color:var(--cyan);font-weight:900">₹ ${(todayCollection - todayExp).toLocaleString("en-IN")}</span>
+    `;
+  }
+
+  // 2. LIFETIME / TOTAL COLLECTION "AAJ TAK"
+  if (q.includes("aaj tak") || q.includes("kul collection") || q.includes("lifetime") || q.includes("total collection")) {
+    const totalLifetime = bMems.reduce((acc, m) => {
+      const sp = (m.spendHistory || []).reduce((s, h) => s + Number(h.amt || 0), 0);
+      return acc + (sp > 0 ? sp : Number(m.paid || 0));
+    }, 0);
+    const totalDue = bMems.reduce((acc, m) => acc + Number(m.due || 0), 0);
+
+    return `
+      <b>📈 ${branchName} — Aaj Tak Ka Total Collection:</b><br>
+      • <b>Kul Fees &amp; Services Collection:</b> <span style="color:#4ADE80;font-weight:900;font-size:15px">₹ ${totalLifetime.toLocaleString("en-IN")}</span><br>
+      • <b>Total Members Registered:</b> ${bMems.length} members<br>
+      • <b>Market Me Pending Dues:</b> <span style="color:var(--red);font-weight:800">₹ ${totalDue.toLocaleString("en-IN")}</span><br>
+      • <b>Active VIP Members:</b> ${bMems.filter(m => m.status === "Active").length} members
+    `;
+  }
+
+  // 3. EXPENSES / KHARCHA
+  if (q.includes("kharch") || q.includes("expense") || q.includes("bill") || q.includes("rent")) {
+    const monthExpList = bExp.filter(e => String(e.date || "").startsWith(curYM));
+    const totalExp = monthExpList.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+    return `
+      <b>💸 ${branchName} — Kharcha (Expenses) Details (${curYM}):</b><br>
+      • <b>Is Mahine Ka Kul Kharcha:</b> <span style="color:var(--red);font-weight:900;font-size:15px">₹ ${totalExp.toLocaleString("en-IN")}</span><br>
+      • <b>Breakdown:</b><br>
+      ${monthExpList.map(e => `&nbsp;&nbsp;&bull; ${e.category}: <b>${e.desc}</b> — <span style="color:var(--red)">₹${Number(e.amount).toLocaleString("en-IN")}</span> (${e.date})`).join("<br>") || '&nbsp;&nbsp;Is mahine koi expense record nahi hai.'}
+    `;
+  }
+
+  // 4. ADMISSIONS
+  if (q.includes("admission") || q.includes("naye member") || q.includes("joining")) {
+    const monthAdms = bMems.filter(m => String(m.joinDate || "").startsWith(curYM));
+    const activeA = monthAdms.filter(m => m.status === "Active").length;
+    const expiredA = monthAdms.length - activeA;
+
+    return `
+      <b>📝 ${branchName} — Monthly Admissions Report (${curYM}):</b><br>
+      • <b>Is Mahine New Admissions:</b> <span style="color:var(--gold);font-weight:900;font-size:15px">${monthAdms.length}</span><br>
+      • <b>Active:</b> <span style="color:var(--green)">${activeA}</span> | <b>Left/Expired:</b> <span style="color:var(--red)">${expiredA}</span><br>
+      • <b>Admissions List:</b> ${monthAdms.map(m => `<b>${m.name}</b> (${m.plan}, ₹${m.paid})`).join(", ") || 'Koi admission nahi hua abhi tak.'}
+    `;
+  }
+
+  // 5. SUPPLEMENT STORE & EXPIRED INVENTORY
+  if (q.includes("supplement") || q.includes("protein") || q.includes("shaker") || q.includes("store") || q.includes("near expiry") || q.includes("stock")) {
+    const bestSeller = bProds.slice().sort((a,b) => b.salesLast30 - a.salesLast30)[0];
+    const lowSeller = bProds.slice().sort((a,b) => a.salesLast30 - b.salesLast30)[0];
+    const nearExp = bProds.filter(p => p.expiry && p.expiry.startsWith("2026-12"));
+    const stockVal = bProds.reduce((sum, p) => sum + (p.costPrice * p.stock), 0);
+
+    return `
+      <b>💊 ${branchName} — Supplement Store &amp; Inventory Report:</b><br>
+      • <b>Total Stock Valuation:</b> <span style="color:var(--gold);font-weight:900">₹ ${stockVal.toLocaleString("en-IN")}</span><br>
+      • <b>🔥 Highest Selling Product:</b> <span style="color:var(--green)">${bestSeller ? bestSeller.name + ' (' + bestSeller.salesLast30 + ' units sold)' : 'N/A'}</span><br>
+      • <b>⚠️ Lowest Selling Product:</b> <span style="color:var(--red)">${lowSeller ? lowSeller.name + ' (' + lowSeller.salesLast30 + ' units sold)' : 'N/A'}</span><br>
+      • <b>🚨 Near Expiry Alert:</b> ${nearExp.length ? nearExp.map(x => `<span style="color:#FCA5A5"><b>${x.name}</b> (Exp: ${x.expiry}, ${x.stock} in stock)</span>`).join(", ") : '<span style="color:var(--green)">Koi product expire hone wala nahi hai!</span>'}
+    `;
+  }
+
+  // 6. VIP / GOLD MEMBERS
+  if (q.includes("gold") || q.includes("vip") || q.includes("spend") || q.includes("elite")) {
+    const goldMems = bMems.filter(m => (m.services || []).length >= 3);
+    return `
+      <b>🥇 ${branchName} — Gold VIP Customer Intelligence:</b><br>
+      • <b>Gold VIP Members (3+ Services):</b> ${goldMems.length} members<br>
+      ${goldMems.map(m => {
+        const sp = (m.spendHistory || []).reduce((s, h) => s + Number(h.amt || 0), Number(m.paid || 0));
+        return `&nbsp;&nbsp;&bull; <b>${m.name}</b>: Lifetime Paid <b>₹${sp.toLocaleString("en-IN")}</b> | Services: ${m.services.join(", ")}`;
+      }).join("<br>") || '&nbsp;&nbsp;Abhi koi Gold VIP member nahi bana.'}
+    `;
+  }
+
+  // DEFAULT COMPREHENSIVE ANSWER
+  return `
+    <b>📊 ${branchName} — Live Overview:</b><br>
+    • <b>Total Members:</b> ${bMems.length} (${bMems.filter(m => m.status === 'Active').length} active)<br>
+    • <b>This Month Collection:</b> ₹ ${bMems.reduce((a,m)=>a+Number(m.paid||0),0).toLocaleString("en-IN")}<br>
+    • <b>This Month Expenses:</b> ₹ ${bExp.reduce((a,e)=>a+Number(e.amount||0),0).toLocaleString("en-IN")}<br>
+    • <i>Tip: Aap poochh sakte hain: "Unnao se aaj kitna collection hua?", "Aaj kisme kharcha hua?", ya "Total admission kitne hue?"</i>
+  `;
+}
+
+// Live Call to Google Gemini Cloud API
+async function callLiveGeminiCloud(userPrompt, apiKey) {
+  const gymContext = {
+    currentDate: iso(),
+    branch: ACTIVE_BRANCH_CODE,
+    members: MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE),
+    expenses: EXPENSES.filter(e => e.branch === ACTIVE_BRANCH_CODE),
+    inventory: PRODUCTS.filter(p => p.branch === ACTIVE_BRANCH_CODE),
+    staff: STAFF_ROSTER.filter(s => s.branch === ACTIVE_BRANCH_CODE)
+  };
+
+  const systemInstruction = `You are the executive AI analyst for Om Software (5 Brother's Fitness Club). 
+The gym owner is asking questions in Hindi/Hinglish. Use the provided real-time gym JSON database to give direct, crisp, financial and operational numbers (Collections, Admissions, Expenses, Dues, Supplement sales, etc.) in clean bullet points. Format currency in Indian Rupees (₹).`;
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [
+        { role: "user", parts: [{ text: `${systemInstruction}\n\nLive Gym Database:\n${JSON.stringify(gymContext)}\n\nUser Question: ${userPrompt}` }] }
+      ]
+    })
+  });
+
+  const resJson = await response.json();
+  if (resJson.candidates && resJson.candidates[0] && resJson.candidates[0].content) {
+    return resJson.candidates[0].content.parts[0].text.replace(/\n/g, "<br>");
+  }
+  throw new Error("Gemini cloud response not available.");
+}
+</script>
+
+
+<script>
+// ================= UNIVERSAL CLOUD SYNC + GEMINI AI UPGRADE =================
+
+const OM_FIREBASE_CFG = {
+  apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
+  authDomain: "bfc-gym-215ae.firebaseapp.com",
+  projectId: "bfc-gym-215ae",
+  storageBucket: "bfc-gym-215ae.firebasestorage.app",
+  messagingSenderId: "886920088571",
+  appId: "1:886920088571:web:c4bc478d246a2700b0d95e"
+};
+
+function getUniversalOrgId() {
+  try {
+    const prof = JSON.parse(LS.getItem("om_org_profile") || "{}");
+    if (prof && prof.orgId) return String(prof.orgId);
+  } catch (e) {}
+  return LS.getItem("bfc_org_id") || LS.getItem("om_universal_org_id") || "om_universal_org";
+}
+
+function getOmFirestoreDb() {
+  try {
+    if (!window.firebase) return null;
+    if (!firebase.apps || !firebase.apps.length) {
+      firebase.initializeApp(OM_FIREBASE_CFG);
+    }
+    return firebase.firestore();
+  } catch (e) {
+    return null;
+  }
+}
+
+async function saveDbCloud() {
+  saveDb(); // always update local cache fast
+  const db = getOmFirestoreDb();
+  if (!db) return false;
+  const orgId = getUniversalOrgId();
+  try {
+    await db.collection("universal_erp").doc(orgId).set({
+      orgId: orgId,
+      activeBranch: ACTIVE_BRANCH_CODE || "001",
+      members: MEMBERS,
+      expenses: EXPENSES,
+      products: PRODUCTS,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function loadDbFromCloud() {
+  const db = getOmFirestoreDb();
+  if (!db) return;
+  const orgId = getUniversalOrgId();
+  try {
+    const doc = await db.collection("universal_erp").doc(orgId).get();
+    if (doc.exists) {
+      const data = doc.data() || {};
+      if (Array.isArray(data.members) && data.members.length) {
+        MEMBERS = data.members;
+        LS.setItem("om_erp_mem_v2", JSON.stringify(MEMBERS));
+      }
+      if (Array.isArray(data.expenses) && data.expenses.length) {
+        EXPENSES = data.expenses;
+        LS.setItem("om_erp_exp_v2", JSON.stringify(EXPENSES));
+      }
+      if (Array.isArray(data.products) && data.products.length) {
+        PRODUCTS = data.products;
+        LS.setItem("om_erp_prod_v2", JSON.stringify(PRODUCTS));
+      }
+      updateMasterKPIs();
+      renderCurrentActiveView();
+    }
+  } catch (e) {}
+}
+
+// Wrap existing saveDb so every admission, renewal, expense, and service syncs to cloud too
+const _origSaveDbRef = typeof saveDb === "function" ? saveDb : null;
+window.saveDb = function() {
+  if (_origSaveDbRef) _origSaveDbRef();
+  const db = getOmFirestoreDb();
+  if (!db) return;
+  const orgId = getUniversalOrgId();
+  db.collection("universal_erp").doc(orgId).set({
+    orgId: orgId,
+    activeBranch: ACTIVE_BRANCH_CODE || "001",
+    members: MEMBERS,
+    expenses: EXPENSES,
+    products: PRODUCTS,
+    updatedAt: new Date().toISOString()
+  }, { merge: true }).catch(function(){});
+};
+
+window.addEventListener("DOMContentLoaded", function() {
+  loadDbFromCloud();
 });
 </script>
 
