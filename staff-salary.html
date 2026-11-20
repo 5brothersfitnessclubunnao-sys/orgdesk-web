@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Om Software - Staff & Salary Executive Desk</title>
+  <title>Om Software - Staff Salary Folders</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,10 +13,9 @@
       --bg: #070B14;
       --bg-grad: radial-gradient(1200px 600px at 50% -10%, #152244 0%, #080D1A 60%, #05070D 100%);
       --card: #0F172A;
-      --card-inner: #0B1224;
+      --sub: #0B1224;
       --border: #23355C;
       --gold: #FFB800;
-      --gold-glow: rgba(255, 184, 0, 0.25);
       --cyan: #38BDF8;
       --green: #22C55E;
       --red: #EF4444;
@@ -29,137 +28,57 @@
     html, body { width: 100%; max-width: 100vw; overflow-x: hidden; background: var(--bg-grad) fixed; color: var(--tx); min-height: 100vh; }
     body { padding: clamp(10px, 2vw, 18px) clamp(10px, 2.5vw, 20px) 70px; }
 
-    .wrap { max-width: 1200px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .wrap { max-width: 1160px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
-    /* Compact Top Bar */
-    .top-nav {
+    .top-bar {
       display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
-      background: rgba(15, 23, 42, 0.95); border: 1.5px solid var(--border); border-radius: 12px; padding: 8px 14px;
+      background: rgba(15, 23, 42, 0.95); border: 1.5px solid var(--border); border-radius: 12px; padding: 10px 14px;
     }
-    .top-nav h1 { font-size: 14.5px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 7px; }
-    .nav-actions { display: flex; align-items: center; gap: 6px; }
-    .btn-nav {
+    .top-bar h1 { font-size: 15px; font-weight: 900; color: #fff; }
+    .btn {
       background: #162340; color: #fff; border: 1px solid var(--border); padding: 6px 11px;
-      border-radius: 8px; font-size: 11px; font-weight: 800; text-decoration: none; cursor: pointer;
+      border-radius: 8px; font-size: 11.5px; font-weight: 800; text-decoration: none; cursor: pointer;
     }
-    .btn-nav:hover { border-color: var(--gold); }
-    .btn-nav.gold { background: var(--gold); color: #000; border: none; font-weight: 900; }
+    .btn:hover { border-color: var(--gold); }
+    .btn.gold { background: var(--gold); color: #000; border: none; font-weight: 900; }
+    .btn.green { background: var(--green); color: #04140C; border: none; font-weight: 900; }
 
-    /* 2x2 Executive Live Market Style KPI Grid */
-    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .kpi-box {
-      background: var(--card); border: 1.5px solid var(--border); border-radius: 12px;
-      padding: 12px 14px; display: flex; flex-direction: column; justify-content: space-between;
-      min-height: 86px; position: relative; overflow: hidden;
-    }
-    .kpi-box::after {
-      content: ''; position: absolute; top: 0; right: 0; width: 45px; height: 45px;
-      background: radial-gradient(circle, rgba(255,184,0,0.12) 0%, transparent 70%); pointer-events: none;
-    }
-    .kpi-tag { font-size: 10px; font-weight: 800; color: var(--mut); text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
-    .kpi-val { font-size: clamp(17px, 2.2vw, 24px); font-weight: 900; color: #fff; margin: 4px 0 2px; }
-    .kpi-sub { font-size: 11px; font-weight: 700; color: var(--tx-sub); }
-
-    /* Direct Branch Selector Bar */
-    .branch-bar {
-      background: var(--card); border: 1.5px solid var(--border); border-radius: 12px;
-      padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
-    }
-    .bb-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 240px; }
-    .bb-left label { font-size: 11px; font-weight: 800; color: var(--gold); text-transform: uppercase; white-space: nowrap; }
-    .bb-left select {
-      flex: 1; background: var(--card-inner); border: 1px solid var(--border); color: #fff;
-      padding: 7px 11px; border-radius: 8px; font-size: 12px; font-weight: 700; outline: none;
-    }
-    .bb-right { display: flex; align-items: center; gap: 8px; }
-    .badge-branch {
-      background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);
-      font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 6px;
-    }
-
-    /* Clean Folder Cards */
+    /* Folder Cards */
     .folder-card {
-      background: var(--card); border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden;
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 13px; overflow: hidden;
     }
     .folder-head {
-      padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
-      background: rgba(18, 28, 52, 0.9); cursor: pointer; user-select: none;
+      padding: 13px 15px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      background: rgba(18, 28, 52, 0.92); cursor: pointer; user-select: none;
     }
-    .folder-head:hover { background: rgba(25, 38, 70, 0.95); }
-    .fh-title { font-size: 13px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .fh-badge { font-size: 10.5px; font-weight: 800; color: var(--gold); }
-    .folder-body { padding: 12px 14px; border-top: 1px solid var(--border); display: none; flex-direction: column; gap: 10px; }
+    .folder-head:hover { background: rgba(25, 38, 70, 0.98); }
+    .fh-left { font-size: 13.5px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .fh-right { font-size: 11.5px; font-weight: 800; color: var(--gold); }
+
+    .folder-body { padding: 14px; border-top: 1px solid var(--border); display: none; flex-direction: column; gap: 11px; }
     .folder-body.open { display: flex; }
 
-    /* Department Filter Pill Bar inside Staff Folder */
-    .dept-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
-    .d-tab {
-      background: var(--card-inner); border: 1px solid var(--border); color: var(--tx-sub);
-      padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer;
+    .sel-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .sel-row label { font-size: 11px; font-weight: 800; color: var(--gold); text-transform: uppercase; }
+    .sel-row select {
+      flex: 1 1 240px; background: var(--sub); border: 1.5px solid var(--border); color: #fff;
+      padding: 9px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 700; outline: none;
     }
-    .d-tab.active { border-color: var(--gold); color: #fff; background: rgba(255, 184, 0, 0.15); }
 
-    /* Staff Roster Cards */
-    .staff-row {
-      background: var(--card-inner); border: 1px solid rgba(51, 78, 129, 0.4); border-radius: 10px;
-      padding: 11px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+    /* Professional Staff Name Card */
+    .staff-card {
+      background: var(--sub); border: 1.5px solid rgba(51, 78, 129, 0.45); border-radius: 11px;
+      padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+      cursor: pointer; transition: border-color 0.15s ease, transform 0.15s ease;
     }
-    .sr-info { min-width: 0; }
-    .sr-name { font-size: 13px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .sr-meta { font-size: 11px; color: var(--mut); margin-top: 3px; line-height: 1.4; }
-    .sr-meta b { color: var(--tx-sub); }
-    .sr-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-
-    .btn-action {
-      background: #162340; color: #fff; border: 1px solid var(--border); padding: 5px 10px;
-      border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer;
+    .staff-card:hover { border-color: var(--gold); transform: translateY(-1px); }
+    .sc-name { font-size: 14px; font-weight: 900; color: #fff; }
+    .sc-sub { font-size: 11.5px; color: var(--mut); margin-top: 3px; }
+    .sc-sub b { color: var(--tx-sub); }
+    .emp-badge {
+      background: rgba(56, 189, 248, 0.14); color: var(--cyan); border: 1px solid rgba(56, 189, 248, 0.35);
+      font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 6px;
     }
-    .btn-action:hover { border-color: var(--gold); }
-    .btn-action.cal { background: rgba(255, 184, 0, 0.14); color: var(--gold); border-color: rgba(255, 184, 0, 0.4); }
-    .btn-action.slip { background: rgba(34, 197, 94, 0.15); color: #4ade80; border-color: rgba(34, 197, 94, 0.4); }
-
-    /* Professional Dark Gold & Green Attendance Calendar */
-    .cal-box {
-      background: #090E1A; border: 2px solid var(--border); border-radius: 14px; padding: 14px;
-      display: flex; flex-direction: column; gap: 10px; max-width: 440px; margin: 0 auto;
-    }
-    .cal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    .cal-header h3 { font-size: 13.5px; font-weight: 900; color: var(--gold); }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
-    .cal-day-head { font-size: 9.5px; font-weight: 800; color: var(--mut); padding: 3px 0; }
-    .cal-cell {
-      aspect-ratio: 1; border-radius: 6px; font-size: 11px; font-weight: 800;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      border: 1px solid rgba(255,255,255,0.06); background: #0E1628; color: var(--tx-sub);
-    }
-    .cal-cell.present { background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.6); color: #4ade80; }
-    .cal-cell.absent { background: rgba(239, 68, 68, 0.22); border-color: rgba(239, 68, 68, 0.7); color: #fca5a5; }
-    .cal-sub-dot { width: 3px; height: 3px; border-radius: 50%; margin-top: 1px; }
-    .cal-cell.present .cal-sub-dot { background: #22C55E; }
-    .cal-cell.absent .cal-sub-dot { background: #EF4444; }
-
-    .cal-remark-panel {
-      background: #111B30; border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px;
-      font-size: 11px; line-height: 1.5; color: var(--tx-sub);
-    }
-    .cal-remark-panel b { color: #fff; }
-    .rem-absent-line { color: #fca5a5; font-weight: 700; margin-top: 2px; }
-
-    /* Corporate Printable Salary Sheet Layout (Like Admission Form Sheet) */
-    .salary-sheet-modal-body {
-      background: #FFFFFF; color: #111111; border: 3px solid #111111;
-      padding: 18px 20px; font-size: 11.5px; line-height: 1.45; border-radius: 4px;
-    }
-    .sheet-header-top {
-      text-align: center; border-bottom: 2px solid #111; padding-bottom: 8px; margin-bottom: 10px;
-    }
-    .sheet-header-top h2 { font-size: 18px; font-weight: 900; color: #000; letter-spacing: 0.5px; }
-    .sheet-header-top p { font-size: 11px; font-weight: 700; color: #444; margin-top: 2px; }
-
-    .sheet-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
-    .sheet-table th, .sheet-table td { border: 1px solid #222; padding: 6px 8px; text-align: left; }
-    .sheet-table th { background: #F3F4F6; font-weight: 900; color: #000; }
-    .sheet-total-row { font-weight: 900; background: #FFFBEB; }
 
     /* Modals */
     .ov {
@@ -168,391 +87,220 @@
     }
     .ov.show { display: flex; }
     .bx {
-      background: #101B33; border: 1.5px solid var(--gold); border-radius: 14px;
-      padding: 16px; max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto;
+      background: #101B33; border: 1.5px solid var(--gold); border-radius: 15px;
+      padding: 18px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto;
     }
-    .bx h3 { color: var(--gold); font-size: 14px; font-weight: 900; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .bx h3 { color: var(--gold); font-size: 15px; font-weight: 900; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Choice buttons (Joining Details vs See Salary Slip) */
+    .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .choice-btn {
+      background: var(--sub); border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 16px 12px; color: #fff; font-weight: 900; font-size: 13px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+    }
+    .choice-btn:hover { border-color: var(--gold); background: rgba(255, 184, 0, 0.1); }
+
+    /* Proper Corporate Salary Slip Sheet */
+    .slip-sheet {
+      background: #FFFFFF; color: #111111; border: 2.5px solid #111111;
+      border-radius: 4px; padding: 18px 20px; font-size: 12px; line-height: 1.5;
+    }
+    .slip-top {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+      border-bottom: 2px solid #111111; padding-bottom: 10px; margin-bottom: 12px;
+    }
+    .slip-top h2 { font-size: 17px; font-weight: 900; color: #000; }
+    .slip-top p { font-size: 11px; color: #444; font-weight: 700; margin-top: 2px; }
+    .slip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin-bottom: 12px; }
+    .slip-cell { border-bottom: 1px dotted #999; padding-bottom: 4px; }
+    .slip-cell .sl { font-size: 10px; color: #555; font-weight: 700; }
+    .slip-cell .sv { font-size: 12px; color: #000; font-weight: 800; margin-top: 1px; }
+    .slip-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11.5px; }
+    .slip-table th, .slip-table td { border: 1px solid #222; padding: 7px 9px; text-align: left; }
+    .slip-table th { background: #F3F4F6; color: #000; font-weight: 900; }
+    .slip-net-row { background: #FFFBEB; font-weight: 900; font-size: 13px; }
 
     @media (max-width: 600px) {
-      .kpi-grid { grid-template-columns: 1fr; }
-      .branch-bar { flex-direction: column; align-items: stretch; }
-      .bb-left { flex-direction: column; align-items: stretch; }
+      .choice-grid { grid-template-columns: 1fr; }
+      .slip-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
 <div class="wrap">
-  <!-- 1. Compact Top Bar -->
-  <header class="top-nav">
-    <h1>💼 Om Staff &amp; Salary Desk</h1>
-    <div class="nav-actions">
-      <button type="button" class="btn-nav gold" onclick="openAddStaffModal()">➕ Add Staff</button>
-      <a href="branch-report.html" class="btn-nav">📂 Branch ERP</a>
-      <a href="index.html" class="btn-nav">⬅️ Dashboard</a>
+  <header class="top-bar">
+    <h1>💼 Staff Salary Desk</h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="branch-report.html" class="btn">📂 Branch ERP</a>
+      <a href="index.html" class="btn">⬅️ Dashboard</a>
     </div>
   </header>
 
-  <!-- 2. Live Market Style 2x2 KPI Boxes -->
-  <section class="kpi-grid">
-    <!-- Box 1 (Row 1 Left): Total Active Members (Across All Branches) -->
-    <div class="kpi-box">
-      <div class="kpi-tag"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block"></span> Total Active Members (All Branches)</div>
-      <div class="kpi-val" id="kpiTotalActive" style="color:#4ade80">395</div>
-      <div class="kpi-sub">Across 50+ branches active subscriptions</div>
-    </div>
-
-    <!-- Box 2 (Row 1 Right): Best Performing Branch -->
-    <div class="kpi-box">
-      <div class="kpi-tag">⭐ Best Performing Branch</div>
-      <div class="kpi-val" id="kpiBestBranch" style="color:var(--gold);font-size:clamp(15px,1.9vw,20px)">002 - Kanpur</div>
-      <div class="kpi-sub" id="kpiBestActive">176 Active Members &bull; ₹1,18,000 Rev</div>
-    </div>
-
-    <!-- Box 3 (Row 2 Left): Total Month Collection -->
-    <div class="kpi-box">
-      <div class="kpi-tag">💰 Total Month Collection (Till Today)</div>
-      <div class="kpi-val" id="kpiMonthCollection" style="color:var(--cyan)">₹2,51,000</div>
-      <div class="kpi-sub">November 2026 realized collection</div>
-    </div>
-
-    <!-- Box 4 (Row 2 Right): Non-Performing / Low Branch -->
-    <div class="kpi-box">
-      <div class="kpi-tag">⚠️ Non-Performing / Needs Focus</div>
-      <div class="kpi-val" id="kpiLowBranch" style="color:#fca5a5;font-size:clamp(15px,1.9vw,20px)">003 - Lucknow</div>
-      <div class="kpi-sub" id="kpiLowActive">95 Active Members &bull; High OpEx deficit</div>
-    </div>
-  </section>
-
-  <!-- 3. Direct Branch Selector Bar (NO double search inputs!) -->
-  <section class="branch-bar">
-    <div class="bb-left">
-      <label>Selected Branch:</label>
-      <select id="mainBranchSelect" onchange="onBranchChange()">
-        <!-- Populated from branches array -->
-      </select>
-    </div>
-    <div class="bb-right">
-      <span class="badge-branch" id="activeBranchStatusPill">🟢 Active Branch Data Loaded</span>
-    </div>
-  </section>
-
-  <!-- 4. FOLDER 1: STAFF ROSTER & ATTENDANCE CALENDAR -->
+  <!-- FOLDER 1: BRANCH WISE SALARY -->
   <section class="folder-card">
-    <div class="folder-head" onclick="toggleFolder('fStaffBody', 'arrStaff')">
-      <div class="fh-title">
-        <span>📂 1. Staff Folder (<span id="fStaffBranchName">Akrampur</span>)</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="fh-badge" id="fStaffTotalBadge">4 Staff Members</span>
-        <span id="arrStaff" style="color:var(--gold);font-size:12px">▼ Open</span>
-      </div>
+    <div class="folder-head" onclick="toggleFolder('fBranchWiseBody', 'arrBranchWise')">
+      <div class="fh-left"><span>📂</span> <span>Branch Wise Salary</span></div>
+      <div class="fh-right" id="arrBranchWise">▼ Open</div>
     </div>
 
-    <div class="folder-body open" id="fStaffBody">
-      <!-- Department Filter Pills -->
-      <div class="dept-tabs">
-        <button type="button" class="d-tab active" id="tabAll" onclick="filterDept('All')">All Staff (<span id="cAll">0</span>)</button>
-        <button type="button" class="d-tab" id="tabG1" onclick="filterDept('Grade 1')">🧹 Grade 1: Support (<span id="cG1">0</span>)</button>
-        <button type="button" class="d-tab" id="tabTech" onclick="filterDept('Technical')">🏋️ Technical: Trainers (<span id="cTech">0</span>)</button>
-        <button type="button" class="d-tab" id="tabNonTech" onclick="filterDept('Non-Technical')">👩‍💼 Non-Technical: Desk (<span id="cNonTech">0</span>)</button>
-        <button type="button" class="d-tab" id="tabMgr" onclick="filterDept('Management')">👔 Management (<span id="cMgr">0</span>)</button>
+    <div class="folder-body open" id="fBranchWiseBody">
+      <div class="sel-row">
+        <label>Select Branch:</label>
+        <select id="branchSel" onchange="onBranchSelect()"></select>
       </div>
-
-      <!-- Staff List Rows (ONLY for the selected branch) -->
-      <div id="staffListContainer" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div id="branchStaffCardsBox" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </section>
 
-  <!-- 5. FOLDER 2: SALARY & SALARY SLIP (CORPORATE SALARY SHEET & DOWNLOAD) -->
+  <!-- FOLDER 2: TOTAL STAFF SALARY -->
   <section class="folder-card">
-    <div class="folder-head" onclick="toggleFolder('fSalaryBody', 'arrSalary')">
-      <div class="fh-title">
-        <span>📂 2. Salary &amp; Salary Slip Folder</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="fh-badge" id="fBranchSalTotal">Total Payout: ₹0</span>
-        <span id="arrSalary" style="color:var(--gold);font-size:12px">▼ Open</span>
-      </div>
+    <div class="folder-head" onclick="toggleFolder('fTotalStaffBody', 'arrTotalStaff')">
+      <div class="fh-left"><span>📂</span> <span>Total Staff Salary</span></div>
+      <div class="fh-right" id="arrTotalStaff">▶ Expand</div>
     </div>
 
-    <div class="folder-body open" id="fSalaryBody">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-        <div style="font-size:11.5px;color:var(--mut)">
-          Showing exact salary payout, advance deductions &amp; slips for <b id="salSheetBranchLabel" style="color:#fff">Akrampur</b>.
-        </div>
-        <div style="display:flex;gap:6px">
-          <button type="button" class="btn-nav" onclick="openBranchSalarySheetModal()">📄 Full Salary Sheet</button>
-          <button type="button" class="btn-nav gold" onclick="exportBranchExcel()">📥 Download Excel (.xlsx)</button>
-        </div>
-      </div>
-
-      <!-- Salary List Rows with Instant Download Slip Option -->
-      <div id="salaryListContainer" style="display:flex;flex-direction:column;gap:8px"></div>
-    </div>
-  </section>
-
-  <!-- 6. FOLDER 3: BRANCH-WISE TOTAL SALARY & GLOBAL BREAKDOWN -->
-  <section class="folder-card">
-    <div class="folder-head" onclick="toggleFolder('fBranchSummaryBody', 'arrBranchSummary')">
-      <div class="fh-title">
-        <span>📂 3. Branch-Wise Total Salary &amp; Advance Outflow</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="fh-badge" id="fGlobalPayrollTotal">All Branches: ₹0</span>
-        <span id="arrBranchSummary" style="color:var(--gold);font-size:12px">▶ Expand</span>
-      </div>
-    </div>
-
-    <div class="folder-body" id="fBranchSummaryBody">
-      <div style="font-size:11.5px;color:var(--mut);margin-bottom:2px">
-        Click any branch below to view its complete salary &amp; advance breakdown:
-      </div>
-      <div id="allBranchesSalarySummaryList" style="display:flex;flex-direction:column;gap:7px"></div>
+    <div class="folder-body" id="fTotalStaffBody">
+      <div id="totalStaffRegisterBox" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
   </section>
 </div>
 
-<!-- MODAL: DARK GOLD & GREEN ATTENDANCE CALENDAR (MATCHING 1001745208.jpg) -->
-<div class="modal-ov" id="calModal">
-  <div class="bx" style="max-width:480px">
+<!-- ACTION CHOICE MODAL: JOINING DETAILS vs SEE SALARY SLIP -->
+<div class="ov" id="staffActionOv">
+  <div class="bx" style="max-width:440px">
     <h3>
-      <span id="calStaffTitle">📅 Attendance Calendar</span>
-      <button type="button" onclick="closeModal('calModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
+      <span id="actionModalStaffName">Staff Name</span>
+      <button type="button" onclick="closeOv('staffActionOv')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
     </h3>
-    <div class="cal-box">
-      <div class="cal-header">
-        <h3 id="calMonthLabel">◀ November 2026 ▶</h3>
-        <span style="font-size:11px;color:#4ade80;font-weight:bold" id="calPresentSummary">Present: 28 Days</span>
-      </div>
-
-      <!-- 7 Days Grid -->
-      <div class="cal-grid">
-        <div class="cal-day-head">M</div>
-        <div class="cal-day-head">T</div>
-        <div class="cal-day-head">W</div>
-        <div class="cal-day-head">T</div>
-        <div class="cal-day-head">F</div>
-        <div class="cal-day-head">S</div>
-        <div class="cal-day-head">S</div>
-      </div>
-      <div class="cal-grid" id="calDaysGrid">
-        <!-- 30 Days generated dynamically -->
-      </div>
-
-      <div style="display:flex;gap:12px;font-size:10px;justify-content:center;margin-top:2px">
-        <span style="display:flex;align-items:center;gap:4px;color:#4ade80"><span style="width:7px;height:7px;border-radius:2px;background:#22C55E"></span> Paid / Present</span>
-        <span style="display:flex;align-items:center;gap:4px;color:#fca5a5"><span style="width:7px;height:7px;border-radius:2px;background:#EF4444"></span> Unpaid / Absent</span>
-      </div>
-
-      <!-- Remark Section: Absent Days & Exact Reason -->
-      <div class="cal-remark-panel">
-        <div><b>Attendance &amp; Leave Remarks:</b></div>
-        <div id="calAbsentRemarks" class="rem-absent-line">Absent: 2 Days &bull; 04-Nov (Bike puncture), 18-Nov (Morning fog)</div>
-      </div>
+    <div style="font-size:11.5px;color:var(--mut);margin-bottom:8px" id="actionModalStaffMeta"></div>
+    <div class="choice-grid">
+      <button type="button" class="choice-btn" onclick="openJoiningDetailsFromChoice()">
+        <span style="font-size:22px">📄</span>
+        <span>Joining Details</span>
+        <small style="font-weight:600;color:var(--mut);font-size:10.5px">Joining Form &amp; KYC</small>
+      </button>
+      <button type="button" class="choice-btn" onclick="openSalarySlipFromChoice()">
+        <span style="font-size:22px">🧾</span>
+        <span>See Salary Slip</span>
+        <small style="font-weight:600;color:var(--mut);font-size:10.5px">Month-Wise Slip &amp; Download</small>
+      </button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: CORPORATE SALARY SHEET (PRINTABLE & DOWNLOADABLE) -->
-<div class="modal-ov" id="salarySheetModal">
-  <div class="bx" style="max-width:760px">
+<!-- JOINING DETAILS MODAL -->
+<div class="ov" id="joiningDetailsOv">
+  <div class="bx" style="max-width:520px">
     <h3>
-      <span>📄 Official Branch Salary Sheet</span>
-      <button type="button" onclick="closeModal('salarySheetModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
+      <span>📄 Staff Joining Form &amp; Details</span>
+      <button type="button" onclick="closeOv('joiningDetailsOv')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
     </h3>
-    <div class="salary-sheet-modal-body" id="salarySheetPrintable">
-      <div class="sheet-header-top">
-        <h2 id="sheetGymTitle">5 BROTHER'S FITNESS CLUB &bull; UNNAO</h2>
-        <p id="sheetPeriodSub">MONTHLY STAFF SALARY REGISTER &bull; NOVEMBER 2026</p>
-      </div>
-      <table class="sheet-table">
-        <thead>
-          <tr>
-            <th>Staff Name</th>
-            <th>Posting / Grade</th>
-            <th>Base Salary</th>
-            <th>Present</th>
-            <th>TA / DA</th>
-            <th>PF / ESI</th>
-            <th>Late Penalty</th>
-            <th>Advance</th>
-            <th>Net Payable</th>
-          </tr>
-        </thead>
-        <tbody id="sheetTableBody"></tbody>
-      </table>
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:24px;padding-top:12px;border-top:1px dashed #222;font-size:11px;font-weight:900">
-        <div>Prepared By: <b>HR / Operations Desk</b></div>
-        <div>Authorized Signatory / Seal: ____________________</div>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
-      <button type="button" class="btn-nav" onclick="closeModal('salarySheetModal')">Close</button>
-      <button type="button" class="btn-nav gold" onclick="window.print()">🖨️ Print Sheet</button>
+    <div id="joiningDetailsContent" style="background:var(--sub);border:1px solid var(--border);border-radius:11px;padding:14px;font-size:12px;line-height:1.6"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+      <button type="button" class="btn" onclick="closeOv('joiningDetailsOv')">Close</button>
+      <a href="staff-join.html" class="btn gold">Full Joining Form</a>
     </div>
   </div>
 </div>
 
-<!-- MODAL: ADD STAFF -->
-<div class="modal-ov" id="addStaffModal">
-  <div class="bx" style="max-width:500px">
+<!-- SALARY SLIP MODAL (PROPER CORPORATE SLIP WITH MONTH SELECTOR + PRESENT/ABSENT/LATE DAYS) -->
+<div class="ov" id="salarySlipOv">
+  <div class="bx" style="max-width:650px">
     <h3>
-      <span>➕ Add Staff to Selected Branch</span>
-      <button type="button" onclick="closeModal('addStaffModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
+      <span>🧾 Official Staff Salary Slip</span>
+      <button type="button" onclick="closeOv('salarySlipOv')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
     </h3>
-    <form onsubmit="saveNewStaff(event)">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--mut)">Full Name *</label>
-          <input type="text" id="asName" required style="width:100%;background:var(--card-inner);border:1px solid var(--border);color:#fff;padding:8px;border-radius:7px">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--mut)">Posting / Role *</label>
-          <input type="text" id="asRole" required placeholder="e.g. Trainer, Cleaner" style="width:100%;background:var(--card-inner);border:1px solid var(--border);color:#fff;padding:8px;border-radius:7px">
-        </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:11px;font-weight:800;color:var(--gold)">Select Month:</label>
+        <select id="slipMonthSel" onchange="renderSelectedStaffSlip()" style="background:var(--sub);border:1px solid var(--border);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:700">
+          <option value="2026-11">November 2026 (Current Month)</option>
+          <option value="2026-10">October 2026</option>
+          <option value="2026-09">September 2026</option>
+          <option value="2026-08">August 2026</option>
+        </select>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--mut)">Department / Grade *</label>
-          <select id="asDept" style="width:100%;background:var(--card-inner);border:1px solid var(--border);color:#fff;padding:8px;border-radius:7px">
-            <option value="Grade 1">Grade 1: Support (Sweeper/Cleaner/Guard)</option>
-            <option value="Technical" selected>Technical: Trainers &amp; Coaches</option>
-            <option value="Non-Technical">Non-Technical: Desk &amp; Accounts</option>
-            <option value="Management">Management: Floor Managers</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--mut)">Monthly Base (₹) *</label>
-          <input type="number" id="asBase" required value="10000" style="width:100%;background:var(--card-inner);border:1px solid var(--border);color:#fff;padding:8px;border-radius:7px">
-        </div>
+      <div style="display:flex;gap:6px">
+        <button type="button" class="btn green" onclick="downloadProperSlipFile()">⬇ Download Slip</button>
+        <button type="button" class="btn gold" onclick="window.print()">🖨️ Print</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--mut)">Joining Date *</label>
-          <input type="date" id="asJoin" required style="width:100%;background:var(--card-inner);border:1px solid var(--border);color:#fff;padding:8px;border-radius:7px">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--mut)">Advance Given (₹)</label>
-          <input type="number" id="asAdv" value="0" style="width:100%;background:var(--card-inner);border:1px solid var(--border);color:#fff;padding:8px;border-radius:7px">
-        </div>
-      </div>
-      <button type="submit" class="btn-nav gold" style="width:100%;padding:10px;justify-content:center">💾 Save Staff Member</button>
-    </form>
+    </div>
+
+    <div class="slip-sheet" id="properSlipSheetBox"></div>
   </div>
 </div>
 
 <script>
-// Mock Branches Database
 const BRANCHES = [
-  { code: "001", name: "5 Brother's Fitness Club - Akrampur", city: "Unnao", activeMembers: 124, monthCollection: 82000 },
-  { code: "002", name: "5 Brother's Fitness Club - Kanpur", city: "Kanpur", activeMembers: 176, monthCollection: 118000 },
-  { code: "003", name: "5 Brother's Fitness Club - Lucknow", city: "Lucknow", activeMembers: 95, monthCollection: 51000 }
+  { code: "001", name: "5 Brother's Fitness Club - Akrampur", city: "Unnao" },
+  { code: "002", name: "5 Brother's Fitness Club - Kanpur", city: "Kanpur" },
+  { code: "003", name: "5 Brother's Fitness Club - Lucknow", city: "Lucknow" }
 ];
 
-// Rich Staff Database with Absent dates & exact reasons
-const INITIAL_STAFF = [
+const STAFF_RECORDS = [
   {
-    id: "STF-101", branchCode: "001", name: "Rameshwar Prasad", role: "Sweeper & Cleaner", dept: "Grade 1",
-    joinDate: "2024-03-15", phone: "9876501122", baseSalary: 8500, presentDays: 28, advance: 500,
-    ta: null, da: null, pf: null, esi: null, latePenalty: 0,
-    absentDaysCount: 2, absentSinceJoining: 14,
-    absentLogs: [
-      { day: 4, reason: "Bypass railway barrier jam" },
-      { day: 18, reason: "Heavy morning fog & bus delayed" }
-    ]
+    id: "EMP-001-01", branchCode: "001", branchName: "5 Brother's Fitness Club - Akrampur", city: "Unnao",
+    name: "Rameshwar Prasad", role: "Sweeper & Cleaner", joinDate: "2024-03-15", phone: "9876501122",
+    baseSalary: 8500, presentDays: 28, absentDays: 2, lateDays: 2, lateMinutes: 40,
+    ta: 0, da: 0, pf: 0, esi: 0, advance: 500,
+    history: {
+      "2026-11": { present: 28, absent: 2, lateDays: 2, lateMins: 40, base: 8500, adv: 500 },
+      "2026-10": { present: 29, absent: 2, lateDays: 1, lateMins: 15, base: 8500, adv: 0 },
+      "2026-09": { present: 27, absent: 3, lateDays: 2, lateMins: 30, base: 8500, adv: 500 },
+      "2026-08": { present: 30, absent: 1, lateDays: 0, lateMins: 0, base: 8500, adv: 0 }
+    }
   },
   {
-    id: "STF-102", branchCode: "001", name: "Devendra Singh", role: "Night Security Guard", dept: "Grade 1",
-    joinDate: "2024-06-10", phone: "9876502233", baseSalary: 9500, presentDays: 29, advance: 0,
-    ta: null, da: null, pf: null, esi: null, latePenalty: 0,
-    absentDaysCount: 1, absentSinceJoining: 9,
-    absentLogs: [
-      { day: 12, reason: "Bicycle flat tyre at Magarwara" }
-    ]
+    id: "EMP-001-02", branchCode: "001", branchName: "5 Brother's Fitness Club - Akrampur", city: "Unnao",
+    name: "Vikram Yadav", role: "Senior Strength Trainer", joinDate: "2023-08-01", phone: "9876503344",
+    baseSalary: 16000, presentDays: 28, absentDays: 2, lateDays: 1, lateMinutes: 30,
+    ta: 1200, da: 800, pf: 1800, esi: 250, advance: 1000,
+    history: {
+      "2026-11": { present: 28, absent: 2, lateDays: 1, lateMins: 30, base: 16000, adv: 1000 },
+      "2026-10": { present: 30, absent: 1, lateDays: 1, lateMins: 20, base: 16000, adv: 0 },
+      "2026-09": { present: 29, absent: 1, lateDays: 0, lateMins: 0, base: 16000, adv: 1000 },
+      "2026-08": { present: 28, absent: 3, lateDays: 2, lateMins: 35, base: 16000, adv: 0 }
+    }
   },
   {
-    id: "STF-103", branchCode: "001", name: "Vikram Yadav", role: "Senior Floor Trainer", dept: "Technical",
-    joinDate: "2023-08-01", phone: "9876503344", baseSalary: 16000, presentDays: 28, advance: 1000,
-    ta: 1200, da: 800, pf: 1800, esi: 250, latePenalty: 350,
-    absentDaysCount: 2, absentSinceJoining: 19,
-    absentLogs: [
-      { day: 9, reason: "Personal medical checkup" },
-      { day: 23, reason: "Family function in village" }
-    ]
+    id: "EMP-001-03", branchCode: "001", branchName: "5 Brother's Fitness Club - Akrampur", city: "Unnao",
+    name: "Pooja Sharma", role: "Front Desk & Billing", joinDate: "2024-01-10", phone: "9876504455",
+    baseSalary: 11000, presentDays: 27, absentDays: 3, lateDays: 1, lateMinutes: 15,
+    ta: 0, da: 0, pf: 0, esi: 0, advance: 0,
+    history: {
+      "2026-11": { present: 27, absent: 3, lateDays: 1, lateMins: 15, base: 11000, adv: 0 },
+      "2026-10": { present: 29, absent: 2, lateDays: 0, lateMins: 0, base: 11000, adv: 500 },
+      "2026-09": { present: 28, absent: 2, lateDays: 1, lateMins: 20, base: 11000, adv: 0 },
+      "2026-08": { present: 29, absent: 2, lateDays: 0, lateMins: 0, base: 11000, adv: 0 }
+    }
   },
   {
-    id: "STF-104", branchCode: "001", name: "Pooja Sharma", role: "Front Desk & Billing", dept: "Non-Technical",
-    joinDate: "2024-01-10", phone: "9876504455", baseSalary: 11000, presentDays: 27, advance: 0,
-    ta: null, da: null, pf: null, esi: null, latePenalty: 120,
-    absentDaysCount: 3, absentSinceJoining: 12,
-    absentLogs: [
-      { day: 14, reason: "University exam day" },
-      { day: 15, reason: "Exam preparation" },
-      { day: 26, reason: "Fever & doctor visit" }
-    ]
+    id: "EMP-002-01", branchCode: "002", branchName: "5 Brother's Fitness Club - Kanpur", city: "Kanpur",
+    name: "Arjun Verma", role: "Fitness & Crossfit Coach", joinDate: "2023-11-01", phone: "9876506677",
+    baseSalary: 18000, presentDays: 29, absentDays: 1, lateDays: 1, lateMinutes: 40,
+    ta: 1500, da: 1000, pf: 1800, esi: 300, advance: 1500,
+    history: {
+      "2026-11": { present: 29, absent: 1, lateDays: 1, lateMins: 40, base: 18000, adv: 1500 },
+      "2026-10": { present: 30, absent: 1, lateDays: 0, lateMins: 0, base: 18000, adv: 0 }
+    }
   },
   {
-    id: "STF-201", branchCode: "002", name: "Arjun Verma", role: "Fitness & Crossfit Coach", dept: "Technical",
-    joinDate: "2023-11-01", phone: "9876506677", baseSalary: 18000, presentDays: 29, advance: 1500,
-    ta: 1500, da: 1000, pf: 1800, esi: 300, latePenalty: 200,
-    absentDaysCount: 1, absentSinceJoining: 11,
-    absentLogs: [
-      { day: 16, reason: "Kanpur bridge traffic jam" }
-    ]
-  },
-  {
-    id: "STF-202", branchCode: "002", name: "Suresh Gupta", role: "Floor Operations Manager", dept: "Management",
-    joinDate: "2023-04-15", phone: "9876507788", baseSalary: 22000, presentDays: 30, advance: 0,
-    ta: 2000, da: 1500, pf: 1800, esi: 400, latePenalty: 0,
-    absentDaysCount: 0, absentSinceJoining: 6, absentLogs: []
-  },
-  {
-    id: "STF-301", branchCode: "003", name: "Kailash Chand", role: "Cleaner & Peon", dept: "Grade 1",
-    joinDate: "2024-07-01", phone: "9876508899", baseSalary: 9000, presentDays: 26, advance: 500,
-    ta: null, da: null, pf: null, esi: null, latePenalty: 0,
-    absentDaysCount: 4, absentSinceJoining: 15,
-    absentLogs: [
-      { day: 2, reason: "Village travel" }, { day: 3, reason: "Family event" },
-      { day: 10, reason: "Illness" }, { day: 11, reason: "Doctor appointment" }
-    ]
+    id: "EMP-003-01", branchCode: "003", branchName: "5 Brother's Fitness Club - Lucknow", city: "Lucknow",
+    name: "Kailash Chand", role: "Cleaner & Support", joinDate: "2024-07-01", phone: "9876508899",
+    baseSalary: 9000, presentDays: 26, absentDays: 4, lateDays: 0, lateMinutes: 0,
+    ta: 0, da: 0, pf: 0, esi: 0, advance: 500,
+    history: {
+      "2026-11": { present: 26, absent: 4, lateDays: 0, lateMins: 0, base: 9000, adv: 500 },
+      "2026-10": { present: 28, absent: 3, lateDays: 1, lateMins: 15, base: 9000, adv: 0 }
+    }
   }
 ];
 
-function getStoredStaff() {
-  try {
-    const raw = JSON.parse(localStorage.getItem("om_staff_master_db_v3") || "null");
-    if (Array.isArray(raw) && raw.length) return raw;
-  } catch (e) {}
-  localStorage.setItem("om_staff_master_db_v3", JSON.stringify(INITIAL_STAFF));
-  return INITIAL_STAFF.slice();
-}
-
-let staffData = getStoredStaff();
-let activeBranchCode = BRANCHES[0].code;
-let activeDeptFilter = "All";
-
-function saveStaff() {
-  localStorage.setItem("om_staff_master_db_v3", JSON.stringify(staffData));
-}
-
-function calcStaff(s) {
-  const daysBase = 30;
-  const base = Number(s.baseSalary) || 0;
-  const perDay = base / daysBase;
-  const presentDays = Math.min(daysBase, Number(s.presentDays) || daysBase);
-  const earned = perDay * presentDays;
-
-  const ta = Number(s.ta) || 0;
-  const da = Number(s.da) || 0;
-  const pf = Number(s.pf) || 0;
-  const esi = Number(s.esi) || 0;
-  const penalty = Number(s.latePenalty) || 0;
-  const adv = Number(s.advance) || 0;
-
-  const netPayable = Math.max(0, Math.round(earned + ta + da - pf - esi - penalty - adv));
-  return { daysBase, base, perDay, presentDays, earned, ta, da, pf, esi, penalty, adv, netPayable };
-}
+let selectedBranchCode = BRANCHES[0].code;
+let selectedStaffObj = null;
 
 function toggleFolder(bodyId, arrId) {
   const b = document.getElementById(bodyId);
@@ -567,361 +315,231 @@ function toggleFolder(bodyId, arrId) {
   }
 }
 
-function initBranchesDropdown() {
-  const sel = document.getElementById("mainBranchSelect");
-  sel.innerHTML = BRANCHES.map(b => `<option value="${b.code}">[${b.code}] ${b.name}</option>`).join("");
-  sel.value = activeBranchCode;
+function initBranchSelect() {
+  const sel = document.getElementById("branchSel");
+  sel.innerHTML = BRANCHES.map(b => `<option value="${b.code}">[${b.code}] ${b.name} (${b.city})</option>`).join("");
+  sel.value = selectedBranchCode;
 }
 
-function onBranchChange() {
-  activeBranchCode = document.getElementById("mainBranchSelect").value;
-  renderAll();
+function onBranchSelect() {
+  selectedBranchCode = document.getElementById("branchSel").value;
+  renderBranchWiseCards();
 }
 
-function filterDept(d) {
-  activeDeptFilter = d;
-  ["tabAll", "tabG1", "tabTech", "tabNonTech", "tabMgr"].forEach(id => document.getElementById(id).classList.remove("active"));
-  const map = { "All": "tabAll", "Grade 1": "tabG1", "Technical": "tabTech", "Non-Technical": "tabNonTech", "Management": "tabMgr" };
-  if (map[d]) document.getElementById(map[d]).classList.add("active");
-  renderStaffFolder();
+function calcSlipForMonth(s, ym) {
+  const hist = (s.history && s.history[ym]) ? s.history[ym] : {
+    present: s.presentDays, absent: s.absentDays, lateDays: s.lateDays, lateMins: s.lateMinutes, base: s.baseSalary, adv: s.advance
+  };
+  const daysInMonth = 30;
+  const perDay = hist.base / daysInMonth;
+  const earnedBase = Math.round(perDay * hist.present);
+  const perMin = (perDay / 8) / 60;
+  const latePenalty = Math.round((hist.lateMins || 0) * perMin);
+  const ta = s.ta || 0;
+  const da = s.da || 0;
+  const pf = s.pf || 0;
+  const esi = s.esi || 0;
+  const adv = hist.adv || 0;
+  const netPayable = Math.max(0, earnedBase + ta + da - pf - esi - latePenalty - adv);
+
+  return { ym, hist, earnedBase, ta, da, pf, esi, latePenalty, adv, netPayable };
 }
 
-function renderKPIs() {
-  const totalAct = BRANCHES.reduce((a, b) => a + b.activeMembers, 0);
-  const totalCol = BRANCHES.reduce((a, b) => a + b.monthCollection, 0);
-  const sorted = BRANCHES.slice().sort((a, b) => b.activeMembers - a.activeMembers);
-  const best = sorted[0];
-  const low = sorted[sorted.length - 1];
+function renderBranchWiseCards() {
+  const list = STAFF_RECORDS.filter(s => s.branchCode === selectedBranchCode);
+  const box = document.getElementById("branchStaffCardsBox");
 
-  document.getElementById("kpiTotalActive").textContent = totalAct;
-  document.getElementById("kpiMonthCollection").textContent = "₹" + totalCol.toLocaleString("en-IN");
-
-  if (best) {
-    document.getElementById("kpiBestBranch").textContent = `[${best.code}] ${best.city}`;
-    document.getElementById("kpiBestActive").textContent = `${best.activeMembers} Active Members • ₹${best.monthCollection.toLocaleString("en-IN")}`;
-  }
-  if (low) {
-    document.getElementById("kpiLowBranch").textContent = `[${low.code}] ${low.city}`;
-    document.getElementById("kpiLowActive").textContent = `${low.activeMembers} Active Members • Focus Needed`;
-  }
-}
-
-function renderStaffFolder() {
-  const curB = BRANCHES.find(x => x.code === activeBranchCode) || BRANCHES[0];
-  document.getElementById("fStaffBranchName").textContent = curB.city;
-
-  const branchStaff = staffData.filter(s => s.branchCode === activeBranchCode);
-  document.getElementById("fStaffTotalBadge").textContent = `${branchStaff.length} Staff Members`;
-
-  // Update Dept Counts
-  document.getElementById("cAll").textContent = branchStaff.length;
-  document.getElementById("cG1").textContent = branchStaff.filter(s => s.dept === "Grade 1").length;
-  document.getElementById("cTech").textContent = branchStaff.filter(s => s.dept === "Technical").length;
-  document.getElementById("cNonTech").textContent = branchStaff.filter(s => s.dept === "Non-Technical").length;
-  document.getElementById("cMgr").textContent = branchStaff.filter(s => s.dept === "Management").length;
-
-  const filtered = activeDeptFilter === "All" ? branchStaff : branchStaff.filter(s => s.dept === activeDeptFilter);
-  const box = document.getElementById("staffListContainer");
-
-  if (!filtered.length) {
-    box.innerHTML = `<div class="staff-row"><span>No staff members in this department for this branch.</span></div>`;
-    return;
-  }
-
-  box.innerHTML = filtered.map(s => {
-    const c = calcStaff(s);
-    return `
-      <div class="staff-row">
-        <div class="sr-info">
-          <div class="sr-name">
-            <span>${s.name}</span>
-            <span class="badge-branch">${s.role}</span>
-            <span style="font-size:10px;color:var(--gold);font-weight:800">${s.dept}</span>
-          </div>
-          <div class="sr-meta">
-            Branch: <b>${curB.name}</b> &bull; Joining: <b>${s.joinDate}</b><br>
-            Present Days: <b style="color:#4ade80">${c.presentDays} / ${c.daysBase}</b> &bull; Absent Since Joining: <b style="color:#fca5a5">${s.absentSinceJoining} Days</b> &bull; Base: <b>₹${c.base.toLocaleString("en-IN")}</b>
-          </div>
-        </div>
-        <div class="sr-actions">
-          <button type="button" class="btn-action cal" onclick="openStaffCalendar('${s.id}')">📅 Month Calendar</button>
-        </div>
+  box.innerHTML = list.map(s => `
+    <div class="staff-card" onclick="openStaffChoiceModal('${s.id}')">
+      <div>
+        <div class="sc-name">${s.name} <span class="emp-badge">Code: ${s.id}</span></div>
+        <div class="sc-sub">Branch: <b>${s.branchName}</b> &bull; Role: <b>${s.role}</b></div>
       </div>
-    `;
-  }).join("");
+      <div style="font-size:11.5px;font-weight:800;color:var(--gold)">Options →</div>
+    </div>
+  `).join("");
 }
 
-function renderSalaryFolder() {
-  const curB = BRANCHES.find(x => x.code === activeBranchCode) || BRANCHES[0];
-  document.getElementById("salSheetBranchLabel").textContent = curB.name;
+function renderTotalStaffFolder() {
+  const box = document.getElementById("totalStaffRegisterBox");
+  let grandSal = 0;
 
-  const branchStaff = staffData.filter(s => s.branchCode === activeBranchCode);
-  let branchTotal = 0;
-  branchStaff.forEach(s => { branchTotal += calcStaff(s).netPayable; });
-
-  document.getElementById("fBranchSalTotal").textContent = `Branch Payout: ₹${branchTotal.toLocaleString("en-IN")}`;
-
-  const box = document.getElementById("salaryListContainer");
-  if (!branchStaff.length) {
-    box.innerHTML = `<div class="staff-row"><span>No salary records found for this branch.</span></div>`;
-    return;
-  }
-
-  box.innerHTML = branchStaff.map(s => {
-    const c = calcStaff(s);
-    const taDaStr = (s.ta || s.da) ? `TA: ₹${c.ta} | DA: ₹${c.da}` : `<span style="color:var(--mut)">TA/DA: N/A</span>`;
-    const pfEsiStr = (s.pf || s.esi) ? `PF: ₹${c.pf} | ESI: ₹${c.esi}` : `<span style="color:var(--mut)">PF/ESI: N/A</span>`;
-
-    return `
-      <div class="staff-row">
-        <div class="sr-info">
-          <div class="sr-name">
-            <span>${s.name}</span>
-            <span style="font-size:11px;color:var(--mut)">(${s.role})</span>
-          </div>
-          <div class="sr-meta">
-            Base: <b>₹${c.base.toLocaleString("en-IN")}</b> &bull; Earned: <b>₹${Math.round(c.earned).toLocaleString("en-IN")}</b> &bull; ${taDaStr} &bull; ${pfEsiStr}<br>
-            Advance Deducted: <b style="color:#fca5a5">-₹${c.adv}</b> &bull; Late Penalty: <b style="color:#fca5a5">-₹${c.penalty}</b>
-          </div>
-        </div>
-        <div class="sr-actions">
-          <div style="font-size:14px;font-weight:900;color:#4ade80;margin-right:6px">₹${c.netPayable.toLocaleString("en-IN")}</div>
-          <button type="button" class="btn-action slip" onclick="downloadSingleSlip('${s.id}')">⬇ Download Slip</button>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-function renderBranchSummaryFolder() {
-  let globalTotal = 0;
-  const box = document.getElementById("allBranchesSalarySummaryList");
-
-  box.innerHTML = BRANCHES.map(b => {
-    const bStaff = staffData.filter(s => s.branchCode === b.code);
+  const rowsHtml = BRANCHES.map(b => {
+    const bStaff = STAFF_RECORDS.filter(s => s.branchCode === b.code);
     let bTotal = 0;
-    let bAdvTotal = 0;
-    const staffBreakdown = bStaff.map(s => {
-      const c = calcStaff(s);
-      bTotal += c.netPayable;
-      bAdvTotal += c.adv;
-      return `<div style="font-size:11px;color:var(--tx-sub);padding:2px 0">• ${s.name} (${s.role}): <b>₹${c.netPayable.toLocaleString("en-IN")}</b> ${c.adv > 0 ? '(Advance: ₹' + c.adv + ')' : ''}</div>`;
-    }).join("") || `<div style="font-size:11px;color:var(--mut)">No staff added</div>`;
-
-    globalTotal += bTotal;
+    const memberLines = bStaff.map(s => {
+      const calc = calcSlipForMonth(s, "2026-11");
+      bTotal += calc.netPayable;
+      return `<div style="font-size:11.5px;color:var(--tx-sub);padding:2px 0">• <b>${s.name}</b> (${s.id}, ${s.role}): <b>₹${calc.netPayable.toLocaleString("en-IN")}</b></div>`;
+    }).join("");
+    grandSal += bTotal;
 
     return `
-      <div class="staff-row" style="cursor:pointer;flex-direction:column;align-items:stretch" onclick="selectAndFocusBranch('${b.code}')">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div class="staff-card" style="cursor:default;flex-direction:column;align-items:stretch">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
           <div>
-            <b style="color:#fff;font-size:13px">[${b.code}] ${b.name}</b>
-            <div style="font-size:10.5px;color:var(--mut)">Staff: ${bStaff.length} employees &bull; Total Advance Given: ₹${bAdvTotal.toLocaleString("en-IN")}</div>
+            <b style="color:#fff;font-size:13px">${b.city} — ${b.name}</b>
+            <div style="font-size:11px;color:var(--mut)">Total Staff: ${bStaff.length}</div>
           </div>
-          <div style="font-size:13px;font-weight:900;color:var(--gold)">Total: ₹${bTotal.toLocaleString("en-IN")}</div>
+          <div style="font-size:13.5px;font-weight:900;color:var(--green)">Branch Salary: ₹${bTotal.toLocaleString("en-IN")}</div>
         </div>
         <div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)">
-          ${staffBreakdown}
+          ${memberLines}
         </div>
       </div>
     `;
   }).join("");
 
-  document.getElementById("fGlobalPayrollTotal").textContent = `All Branches: ₹${globalTotal.toLocaleString("en-IN")}`;
+  box.innerHTML = `
+    <div class="staff-card" style="cursor:default;background:#101C36;border-color:var(--gold)">
+      <div><b>Total Staff (All Branches):</b> <span style="color:var(--gold);font-weight:900">${STAFF_RECORDS.length} Employees</span></div>
+      <div><b>Grand Total Monthly Salary:</b> <span style="color:var(--green);font-weight:900">₹${grandSal.toLocaleString("en-IN")}</span></div>
+    </div>
+    ${rowsHtml}
+  `;
 }
 
-function selectAndFocusBranch(code) {
-  activeBranchCode = code;
-  document.getElementById("mainBranchSelect").value = code;
-  renderAll();
-  window.scrollTo({ top: 180, behavior: 'smooth' });
-}
-
-function openStaffCalendar(staffId) {
-  const s = staffData.find(x => x.id === staffId);
+function openStaffChoiceModal(staffId) {
+  const s = STAFF_RECORDS.find(x => x.id === staffId);
   if (!s) return;
-  const c = calcStaff(s);
+  selectedStaffObj = s;
+  document.getElementById("actionModalStaffName").textContent = s.name;
+  document.getElementById("actionModalStaffMeta").textContent = `${s.id} • ${s.role} • ${s.branchName}`;
+  document.getElementById("staffActionOv").classList.add("show");
+}
 
-  document.getElementById("calStaffTitle").textContent = `📅 ${s.name} (${s.role})`;
-  document.getElementById("calPresentSummary").textContent = `Present: ${c.presentDays} / ${c.daysBase} Days`;
+function openJoiningDetailsFromChoice() {
+  closeOv("staffActionOv");
+  if (!selectedStaffObj) return;
+  const s = selectedStaffObj;
+  document.getElementById("joiningDetailsContent").innerHTML = `
+    <div style="font-size:14px;font-weight:900;color:var(--gold);margin-bottom:6px">${s.name} (${s.id})</div>
+    <div><b>Branch:</b> ${s.branchName} (${s.city})</div>
+    <div><b>Designation / Role:</b> ${s.role}</div>
+    <div><b>Joining Date:</b> ${s.joinDate}</div>
+    <div><b>Contact Phone:</b> ${s.phone}</div>
+    <div><b>Monthly Base Salary:</b> ₹${Number(s.baseSalary).toLocaleString("en-IN")}</div>
+  `;
+  document.getElementById("joiningDetailsOv").classList.add("show");
+}
 
-  // Render 30 Days Grid
-  const daysGrid = document.getElementById("calDaysGrid");
-  const absentMap = {};
-  (s.absentLogs || []).forEach(log => { absentMap[log.day] = log.reason; });
+function openSalarySlipFromChoice() {
+  closeOv("staffActionOv");
+  if (!selectedStaffObj) return;
+  document.getElementById("slipMonthSel").value = "2026-11";
+  renderSelectedStaffSlip();
+  document.getElementById("salarySlipOv").classList.add("show");
+}
 
-  let gridHtml = "";
-  for (let d = 1; d <= 30; d++) {
-    const isAbsent = !!absentMap[d];
-    gridHtml += `
-      <div class="cal-cell ${isAbsent ? 'absent' : 'present'}">
-        <span>${d}</span>
-        <span class="cal-sub-dot"></span>
+function renderSelectedStaffSlip() {
+  if (!selectedStaffObj) return;
+  const s = selectedStaffObj;
+  const ym = document.getElementById("slipMonthSel").value;
+  const c = calcSlipForMonth(s, ym);
+
+  document.getElementById("properSlipSheetBox").innerHTML = `
+    <div class="slip-top">
+      <div>
+        <h2>${s.branchName.toUpperCase()}</h2>
+        <p>STAFF SALARY SLIP • PERIOD: ${ym} (${s.city})</p>
       </div>
-    `;
-  }
-  daysGrid.innerHTML = gridHtml;
+      <div style="text-align:right;font-size:11px;font-weight:800">
+        <div>Emp Code: ${s.id}</div>
+        <div>Joining: ${s.joinDate}</div>
+      </div>
+    </div>
 
-  // Render Absent Remarks
-  const remBox = document.getElementById("calAbsentRemarks");
-  if (s.absentLogs && s.absentLogs.length) {
-    const listStr = s.absentLogs.map(l => `${l.day}-Nov (${l.reason})`).join(", ");
-    remBox.innerHTML = `Absent: <b>${s.absentLogs.length} Days</b> &bull; ${listStr}`;
-  } else {
-    remBox.innerHTML = `Absent: <b>0 Days</b> &bull; 100% Full Attendance This Month`;
-  }
+    <div class="slip-grid">
+      <div class="slip-cell"><div class="sl">Employee Name</div><div class="sv">${s.name}</div></div>
+      <div class="slip-cell"><div class="sl">Designation / Role</div><div class="sv">${s.role}</div></div>
+      <div class="slip-cell"><div class="sl">Present / Absent Days</div><div class="sv">Present: ${c.hist.present} Days &bull; Absent: ${c.hist.absent} Days</div></div>
+      <div class="slip-cell"><div class="sl">Late Days &amp; Minutes</div><div class="sv">Late: ${c.hist.lateDays} Days (${c.hist.lateMins} mins)</div></div>
+    </div>
 
-  document.getElementById("calModal").classList.add("show");
+    <table class="slip-table">
+      <thead>
+        <tr>
+          <th>Earnings</th>
+          <th>Amount (₹)</th>
+          <th>Deductions</th>
+          <th>Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Earned Base Salary (${c.hist.present}/30d)</td>
+          <td>₹${c.earnedBase.toLocaleString("en-IN")}</td>
+          <td>Late Attendance Penalty (${c.hist.lateMins}m)</td>
+          <td>₹${c.latePenalty.toLocaleString("en-IN")}</td>
+        </tr>
+        <tr>
+          <td>TA / DA Allowance</td>
+          <td>${(c.ta + c.da) > 0 ? '₹' + (c.ta + c.da).toLocaleString("en-IN") : 'Not Applicable'}</td>
+          <td>PF / ESI</td>
+          <td>${(c.pf + c.esi) > 0 ? '₹' + (c.pf + c.esi).toLocaleString("en-IN") : 'Not Applicable'}</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>Advance Taken</td>
+          <td>₹${c.adv.toLocaleString("en-IN")}</td>
+        </tr>
+        <tr class="slip-net-row">
+          <td colspan="3">NET PAYABLE SALARY</td>
+          <td>₹${c.netPayable.toLocaleString("en-IN")}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="display:flex;justify-content:space-between;margin-top:20px;padding-top:8px;border-top:1px dashed #222;font-size:11px;font-weight:800">
+      <span>Employee Signature: _________________</span>
+      <span>Authorized Signatory: _________________</span>
+    </div>
+  `;
 }
 
-function downloadSingleSlip(staffId) {
-  const s = staffData.find(x => x.id === staffId);
-  if (!s) return;
-  const c = calcStaff(s);
-  const curB = BRANCHES.find(x => x.code === s.branchCode) || BRANCHES[0];
+function downloadProperSlipFile() {
+  if (!selectedStaffObj) return;
+  const s = selectedStaffObj;
+  const ym = document.getElementById("slipMonthSel").value;
+  const c = calcSlipForMonth(s, ym);
 
-  const slipContent = `
-=====================================================
-         ${curB.name.toUpperCase()}
-          STAFF SALARY SLIP - NOVEMBER 2026
-=====================================================
-Employee Name : ${s.name}
-Role / Posting: ${s.role} (${s.dept})
-Staff ID      : ${s.id}
-Branch Code   : ${s.branchCode}
-Joining Date  : ${s.joinDate}
------------------------------------------------------
-Working Days  : ${c.presentDays} / ${c.daysBase} Days
-Base Salary   : Rs. ${c.base.toLocaleString("en-IN")}
-Earned Salary : Rs. ${Math.round(c.earned).toLocaleString("en-IN")}
-TA / DA       : Rs. ${c.ta + c.da}
-PF / ESI      : Rs. ${c.pf + c.esi}
-Late Penalty  : Rs. ${c.penalty}
-Advance Deduct: Rs. ${c.adv}
------------------------------------------------------
-NET PAYABLE   : Rs. ${c.netPayable.toLocaleString("en-IN")}
-=====================================================
-Status: Approved & Paid
-Generated via Om Software Enterprise Desk
-`;
+  const slipText = [
+    s.branchName.toUpperCase(),
+    "SALARY SLIP - " + ym + " (" + s.city + ")",
+    "==========================================",
+    "Employee Name : " + s.name,
+    "Employee Code : " + s.id,
+    "Designation   : " + s.role,
+    "Joining Date  : " + s.joinDate,
+    "------------------------------------------",
+    "Present Days  : " + c.hist.present + " Days",
+    "Absent Days   : " + c.hist.absent + " Days",
+    "Late Days     : " + c.hist.lateDays + " Days (" + c.hist.lateMins + " mins)",
+    "------------------------------------------",
+    "Earned Base   : Rs. " + c.earnedBase,
+    "TA / DA       : " + ((c.ta + c.da) > 0 ? "Rs. " + (c.ta + c.da) : "Not Applicable"),
+    "PF / ESI      : " + ((c.pf + c.esi) > 0 ? "Rs. " + (c.pf + c.esi) : "Not Applicable"),
+    "Late Penalty  : Rs. " + c.latePenalty,
+    "Advance       : Rs. " + c.adv,
+    "------------------------------------------",
+    "NET PAYABLE   : Rs. " + c.netPayable,
+    "=========================================="
+  ].join("\n");
 
-  const b = new Blob([slipContent], { type: "text/plain;charset=utf-8" });
+  const blob = new Blob([slipText], { type: "text/plain;charset=utf-8" });
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(b);
-  a.download = `Salary_Slip_${s.name.replace(/\s+/g, '_')}_Nov2026.txt`;
+  a.href = URL.createObjectURL(blob);
+  a.download = `Salary_Slip_${s.name.replace(/\s+/g, "_")}_${ym}.txt`;
   a.click();
 }
 
-function openBranchSalarySheetModal() {
-  const curB = BRANCHES.find(x => x.code === activeBranchCode) || BRANCHES[0];
-  document.getElementById("sheetGymTitle").textContent = curB.name.toUpperCase();
-  document.getElementById("sheetPeriodSub").textContent = `MONTHLY STAFF SALARY REGISTER • NOVEMBER 2026 • BRANCH [${curB.code}]`;
-
-  const branchStaff = staffData.filter(s => s.branchCode === activeBranchCode);
-  const tbody = document.getElementById("sheetTableBody");
-
-  let sumBase = 0, sumNet = 0, sumAdv = 0;
-  tbody.innerHTML = branchStaff.map(s => {
-    const c = calcStaff(s);
-    sumBase += c.base;
-    sumNet += c.netPayable;
-    sumAdv += c.adv;
-    return `
-      <tr>
-        <td><b>${s.name}</b></td>
-        <td>${s.role} (${s.dept})</td>
-        <td>₹${c.base.toLocaleString("en-IN")}</td>
-        <td>${c.presentDays}/${c.daysBase}</td>
-        <td>${(c.ta || c.da) ? '₹' + (c.ta + c.da) : 'N/A'}</td>
-        <td>${(c.pf || c.esi) ? '₹' + (c.pf + c.esi) : 'N/A'}</td>
-        <td>₹${c.penalty}</td>
-        <td>₹${c.adv}</td>
-        <td><b>₹${c.netPayable.toLocaleString("en-IN")}</b></td>
-      </tr>
-    `;
-  }).join("") + `
-    <tr class="sheet-total-row">
-      <td colspan="2">TOTAL BRANCH PAYOUT</td>
-      <td>₹${sumBase.toLocaleString("en-IN")}</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
-      <td>₹${sumAdv.toLocaleString("en-IN")}</td>
-      <td>₹${sumNet.toLocaleString("en-IN")}</td>
-    </tr>
-  `;
-
-  document.getElementById("salarySheetModal").classList.add("show");
-}
-
-function exportBranchExcel() {
-  const curB = BRANCHES.find(x => x.code === activeBranchCode) || BRANCHES[0];
-  const branchStaff = staffData.filter(s => s.branchCode === activeBranchCode);
-  const rows = branchStaff.map(s => {
-    const c = calcStaff(s);
-    return {
-      "Staff ID": s.id,
-      "Name": s.name,
-      "Posting / Role": s.role,
-      "Department": s.dept,
-      "Joining Date": s.joinDate,
-      "Present Days": c.presentDays,
-      "Base Salary": c.base,
-      "TA": c.ta || "N/A",
-      "DA": c.da || "N/A",
-      "PF": c.pf || "N/A",
-      "ESI": c.esi || "N/A",
-      "Late Penalty": c.penalty,
-      "Advance": c.adv,
-      "Net Payable": c.netPayable
-    };
-  });
-  const ws = XLSX.utils.json_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Salary_Sheet");
-  XLSX.writeFile(wb, `Salary_Sheet_${curB.code}_${curB.city}.xlsx`);
-}
-
-function openAddStaffModal() {
-  document.getElementById("asJoin").value = new Date().toISOString().slice(0, 10);
-  document.getElementById("addStaffModal").classList.add("show");
-}
-
-function saveNewStaff(e) {
-  e.preventDefault();
-  const name = document.getElementById("asName").value.trim();
-  const role = document.getElementById("asRole").value.trim();
-  const dept = document.getElementById("asDept").value;
-  const baseSalary = Number(document.getElementById("asBase").value) || 0;
-  const joinDate = document.getElementById("asJoin").value;
-  const advance = Number(document.getElementById("asAdv").value) || 0;
-
-  staffData.push({
-    id: "STF-" + Date.now().toString().slice(-4),
-    branchCode: activeBranchCode,
-    name, role, dept, baseSalary, joinDate,
-    presentDays: 30, advance, ta: null, da: null, pf: null, esi: null, latePenalty: 0,
-    absentDaysCount: 0, absentSinceJoining: 0, absentLogs: []
-  });
-
-  saveStaff();
-  closeModal("addStaffModal");
-  renderAll();
-  alert(`Staff member ${name} added to Branch [${activeBranchCode}].`);
-}
-
-function closeModal(id) { document.getElementById(id).classList.remove("show"); }
-
-function renderAll() {
-  renderKPIs();
-  renderStaffFolder();
-  renderSalaryFolder();
-  renderBranchSummaryFolder();
-}
+function closeOv(id) { document.getElementById(id).classList.remove("show"); }
 
 window.addEventListener("DOMContentLoaded", () => {
-  initBranchesDropdown();
-  renderAll();
+  initBranchSelect();
+  renderBranchWiseCards();
+  renderTotalStaffFolder();
 });
 </script>
 </body>
