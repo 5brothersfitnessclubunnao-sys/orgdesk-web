@@ -751,6 +751,9 @@
 
     <div class="sidebar-nav">
       <div class="nav-group-title">Main Operations</div>
+      <div class="nav-item" onclick="switchMainTab('omStaffBranchTab', this); renderOmAutoLookup(); renderOmGalleryLookup();">
+        <span class="icon">🏢</span> Staff Login, Branches &amp; Gallery
+      </div>
       <div class="nav-item active" onclick="switchMainTab('membersTab', this)">
         <span class="icon">👥</span> All Members
       </div>
@@ -809,6 +812,42 @@
     </header>
 
     <div class="view-container">
+
+      <!-- ================= 8. OM STAFF, MULTI-BRANCH & GALLERY TAB ================= -->
+      <section class="tab-view" id="omStaffBranchTab">
+        <div class="expenses-summary-card" style="border-color:rgba(255,184,0,0.5)">
+          <div class="exp-left">
+            <div class="exp-label">Active Branch &amp; Access Mode</div>
+            <div class="exp-total" id="omActiveBranchBanner">Branch 001 (Unnao) • Full / Staff Suite</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select id="omSuiteBranchSel" class="filter-select" onchange="switchOmSuiteBranch()">
+              <option value="001">Branch 001 — Unnao / Akrampur</option>
+              <option value="002">Branch 002 — Kanpur</option>
+              <option value="003">Branch 003 — Lucknow</option>
+            </select>
+            <button type="button" class="btn-action" onclick="openStaffCodeLoginModal()">🔐 Staff Code Login</button>
+          </div>
+        </div>
+
+        <!-- Instant Auto-Search by Name / Father / Wife / Mobile / Branch -->
+        <div class="filter-card" style="flex-direction:column;align-items:stretch;gap:10px">
+          <div style="font-size:13px;font-weight:900;color:var(--gold)">🔍 Instant Auto-Search (Name / Father / Wife / Mobile / Branch / Code)</div>
+          <input type="text" id="omAutoLookupInp" placeholder="Type name, father's name, wife's name, mobile, branch or code..." oninput="renderOmAutoLookup()" style="width:100%;background:var(--card-inner);border:1.5px solid var(--border);color:#fff;padding:10px 12px;border-radius:10px;font-size:13px">
+          <div id="omAutoLookupResults" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+
+        <!-- View-Only Selfie Gallery & Attendance (Calendar Wise + Search) -->
+        <div class="filter-card" style="flex-direction:column;align-items:stretch;gap:10px;margin-top:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+            <div style="font-size:13px;font-weight:900;color:var(--cyan)">📸 View-Only Selfie &amp; Attendance Gallery (No Edit / No Delete)</div>
+            <input type="date" id="omGalleryDateInp" class="filter-select" onchange="renderOmGalleryLookup()">
+          </div>
+          <input type="text" id="omGallerySearchInp" placeholder="Search member/staff attendance by name or mobile..." oninput="renderOmGalleryLookup()" style="width:100%;background:var(--card-inner);border:1.5px solid var(--border);color:#fff;padding:10px 12px;border-radius:10px;font-size:13px">
+          <div id="omGalleryCardsBox" class="members-grid"></div>
+        </div>
+      </section>
+
 
       <!-- ================= 1. ALL MEMBERS TAB ================= -->
       <section class="tab-view active" id="membersTab">
@@ -1907,5 +1946,601 @@ window.addEventListener("DOMContentLoaded", () => {
   renderMembersList();
 });
 </script>
+
+<!-- MODAL 5: ONE-CLICK RENEW & DUE COLLECTION MODAL -->
+<div class="modal-overlay" id="renewDueModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🔄 Renew Plan &amp; Collect Due</div>
+      <button type="button" class="modal-close" onclick="closeModal('renewDueModal')">✕</button>
+    </div>
+
+    <form onsubmit="submitRenewAndDue(event)">
+      <div style="background:var(--card-inner);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:12.5px">
+        <div><b>Member:</b> <span id="rdMemName" style="color:var(--gold)">---</span> (<span id="rdMemPhone">---</span>)</div>
+        <div style="margin-top:4px"><b>Current Expiry:</b> <span id="rdCurExpiry">---</span> &bull; <b>Pending Due:</b> <span id="rdCurDue" style="color:var(--red);font-weight:800">₹ 0</span></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group">
+          <label>Renewal Plan *</label>
+          <select class="form-control" id="rdPlanSelect" onchange="onRdPlanChange()">
+            <option value="Monthly" data-fee="1000" data-days="30">Monthly (+30 Days / ₹1000)</option>
+            <option value="Quarterly" data-fee="2700" data-days="90">Quarterly (+90 Days / ₹2700)</option>
+            <option value="Half-Yearly" data-fee="5000" data-days="180">Half-Yearly (+180 Days / ₹5000)</option>
+            <option value="Yearly" data-fee="9000" data-days="365">Yearly (+365 Days / ₹9000)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>New Expiry Date *</label>
+          <input type="date" class="form-control" id="rdNewExpiry" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group">
+          <label>Plan + Previous Due (₹)</label>
+          <input type="number" class="form-control" id="rdGrossAmount" readonly style="background:#162340;color:#fff;font-weight:800">
+        </div>
+        <div class="form-group">
+          <label>Amount Collected Now (₹) *</label>
+          <input type="number" class="form-control" id="rdPaidNow" oninput="calcRdBalance()" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Remaining Due After Payment (₹)</label>
+        <input type="number" class="form-control" id="rdRemDue" readonly style="background:#162340;color:var(--red);font-weight:900">
+      </div>
+
+      <div class="form-group">
+        <label>WhatsApp Reminder Template</label>
+        <select class="form-control" id="rdWaTemplate">
+          <option value="hindi_renew">Hindi: Aapki gym membership renew/update ho gayi hai. Nayi expiry date: {EXPIRY}. Due: ₹{DUE}.</option>
+          <option value="hindi_due">Hindi Due Alert: Namaste {NAME}, aapki gym fees ₹{DUE} baaki hai. Kripya jald jama karein.</option>
+          <option value="english_renew">English: Hi {NAME}, your membership is active till {EXPIRY}. Pending due: ₹{DUE}.</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="submit" class="btn-action" style="flex:1 1 180px;justify-content:center;padding:12px">
+          ✔ Save Renewal &amp; Payment
+        </button>
+        <button type="button" class="btn-action sec" style="flex:1 1 160px;justify-content:center;padding:12px;color:#22C55E;border-color:rgba(34,197,94,0.45)" onclick="sendRenewDueWhatsApp()">
+          💬 Send WhatsApp
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+let ACTIVE_RENEW_MEMBER = null;
+
+function openRenewDueModalById(mId) {
+  const m = MEMBERS.find(x => x.id === mId);
+  if (!m) return;
+  ACTIVE_RENEW_MEMBER = m;
+
+  document.getElementById("rdMemName").textContent = m.name;
+  document.getElementById("rdMemPhone").textContent = m.phone;
+  document.getElementById("rdCurExpiry").textContent = m.expiryDate || iso();
+  document.getElementById("rdCurDue").textContent = "₹ " + Number(m.due || 0).toLocaleString("en-IN");
+
+  const planSel = document.getElementById("rdPlanSelect");
+  if (m.plan && Array.from(planSel.options).some(o => o.value === m.plan)) {
+    planSel.value = m.plan;
+  }
+  onRdPlanChange();
+  document.getElementById("renewDueModal").classList.add("show");
+}
+
+function promptRenewMemberById(mId) {
+  openRenewDueModalById(mId);
+}
+
+function onRdPlanChange() {
+  if (!ACTIVE_RENEW_MEMBER) return;
+  const sel = document.getElementById("rdPlanSelect");
+  const opt = sel.options[sel.selectedIndex];
+  const planFee = Number(opt.getAttribute("data-fee") || 1000);
+  const daysToAdd = Number(opt.getAttribute("data-days") || 30);
+
+  const baseDateStr = (ACTIVE_RENEW_MEMBER.expiryDate && new Date(ACTIVE_RENEW_MEMBER.expiryDate) > new Date())
+    ? ACTIVE_RENEW_MEMBER.expiryDate
+    : iso();
+  const baseDt = new Date(baseDateStr);
+  baseDt.setDate(baseDt.getDate() + daysToAdd);
+  document.getElementById("rdNewExpiry").value = baseDt.toISOString().slice(0, 10);
+
+  const prevDue = Number(ACTIVE_RENEW_MEMBER.due || 0);
+  const gross = planFee + prevDue;
+  document.getElementById("rdGrossAmount").value = gross;
+  document.getElementById("rdPaidNow").value = gross;
+  calcRdBalance();
+}
+
+function calcRdBalance() {
+  const gross = Number(document.getElementById("rdGrossAmount").value) || 0;
+  const paidNow = Number(document.getElementById("rdPaidNow").value) || 0;
+  const rem = Math.max(0, gross - paidNow);
+  document.getElementById("rdRemDue").value = rem;
+}
+
+function buildFollowUpMessage(m, newExp, remDue) {
+  const tplKey = document.getElementById("rdWaTemplate") ? document.getElementById("rdWaTemplate").value : "hindi_renew";
+  let msg = "";
+  if (tplKey === "hindi_due") {
+    msg = `Namaste ${m.name}, 5 Brother's Fitness Club se reminder: aapki fees ₹${remDue} baaki hai. Kripya samay par jama karein.`;
+  } else if (tplKey === "english_renew") {
+    msg = `Hi ${m.name}, your 5 Brother's Fitness Club plan is valid till ${newExp}. Pending due: ₹${remDue}.`;
+  } else {
+    msg = `Namaste ${m.name}, aapki gym membership renew/update ho gayi hai. Nayi expiry date: ${newExp} aur baaki due: ₹${remDue}.`;
+  }
+  return msg;
+}
+
+function submitRenewAndDue(e) {
+  e.preventDefault();
+  if (!ACTIVE_RENEW_MEMBER) return;
+  const m = ACTIVE_RENEW_MEMBER;
+
+  const newPlan = document.getElementById("rdPlanSelect").value;
+  const newExp = document.getElementById("rdNewExpiry").value || iso();
+  const gross = Number(document.getElementById("rdGrossAmount").value) || 0;
+  const paidNow = Number(document.getElementById("rdPaidNow").value) || 0;
+  const remDue = Math.max(0, gross - paidNow);
+
+  m.plan = newPlan;
+  m.expiryDate = newExp;
+  m.fee = gross;
+  m.paid = Number(m.paid || 0) + paidNow;
+  m.due = remDue;
+  m.status = "Active";
+
+  saveAllData();
+  renderMembersList();
+  if (document.getElementById("expiryTab") && document.getElementById("expiryTab").classList.contains("active")) {
+    renderExpiryView();
+  }
+  closeModal("renewDueModal");
+  closeModal("memberDetailModal");
+  alert(`${m.name} ka plan renew/update ho gaya!\nNayi Expiry: ${newExp}\nBaaki Due: ₹${remDue}`);
+}
+
+function sendRenewDueWhatsApp() {
+  if (!ACTIVE_RENEW_MEMBER) return;
+  const m = ACTIVE_RENEW_MEMBER;
+  const newExp = (document.getElementById("rdNewExpiry") && document.getElementById("rdNewExpiry").value) || m.expiryDate || iso();
+  const remDue = Number((document.getElementById("rdRemDue") && document.getElementById("rdRemDue").value) || m.due || 0);
+  const text = buildFollowUpMessage(m, newExp, remDue);
+  const url = `https://wa.me/91${m.phone}?text=${encodeURIComponent(text)}`;
+  window.open(url, "_blank");
+}
+</script>
+
+
+<!-- MODAL 6: STAFF & EMPLOYEE DUAL-CODE LOGIN MODAL -->
+<div class="modal-overlay" id="staffCodeLoginModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🔐 Staff &amp; Employee Code Login</div>
+      <button type="button" class="modal-close" onclick="closeModal('staffCodeLoginModal')">✕</button>
+    </div>
+    <form onsubmit="submitSuiteStaffLogin(event)">
+      <div class="form-group">
+        <label>Branch *</label>
+        <select class="form-control" id="suiteLoginBranch">
+          <option value="001">Branch 001 — Unnao / Akrampur</option>
+          <option value="002">Branch 002 — Kanpur</option>
+          <option value="003">Branch 003 — Lucknow</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Staff Login Code *</label>
+        <input type="text" class="form-control" id="suiteStfCode" placeholder="e.g. STF-001-NGXUS2" required>
+      </div>
+      <div class="form-group">
+        <label>Manager Employee Code *</label>
+        <input type="text" class="form-control" id="suiteEmpCode" placeholder="e.g. EMP-001-MGR" required>
+      </div>
+      <button type="submit" class="btn-action" style="width:100%;justify-content:center;padding:12px">
+        🔓 Activate Staff Session
+      </button>
+    </form>
+  </div>
+</div>
+
+
+<script>
+const OM_PROFILES_LOOKUP = [
+  { name: "Saurabh Singh Chandel", father: "Late Shri Chandel", wife: "Reet Singh", mobile: "9876501100", branch: "001 (Unnao)", empCode: "EMP-001-MGR", stfCode: "STF-001-NGXUS2" },
+  { name: "Vikram Yadav", father: "Ram Kishore Yadav", wife: "Sunita Yadav", mobile: "9876503344", branch: "001 (Unnao)", empCode: "EMP-001-02", stfCode: "STF-001-VIK02" },
+  { name: "Pooja Sharma", father: "Rajesh Sharma", wife: "-", mobile: "9876504455", branch: "001 (Unnao)", empCode: "EMP-001-03", stfCode: "STF-001-POJ03" },
+  { name: "Rohan Bajpai", father: "Anand Bajpai", wife: "Neha Bajpai", mobile: "9876502200", branch: "002 (Kanpur)", empCode: "EMP-002-MGR", stfCode: "STF-002-KNP01" },
+  { name: "Amit Srivastava", father: "Kailash Srivastava", wife: "Anjali Srivastava", mobile: "9876503300", branch: "003 (Lucknow)", empCode: "EMP-003-MGR", stfCode: "STF-003-LKO01" }
+];
+
+const OM_GALLERY_ITEMS = [
+  { name: "Saurabh Singh", mobile: "9876501100", time: "06:15 AM", batch: "Morning", status: "Present", photo: "🤳 Selfie #101" },
+  { name: "Vikram Yadav", mobile: "9876503344", time: "06:28 AM", batch: "Morning", status: "Present", photo: "🤳 Selfie #102" },
+  { name: "Pooja Sharma", mobile: "9876504455", time: "04:05 PM", batch: "Evening", status: "Present", photo: "🤳 Selfie #103" },
+  { name: "Rahul", mobile: "9687545249", time: "-", batch: "Evening", status: "Absent", photo: "🚫 No Selfie" }
+];
+
+function switchOmSuiteBranch() {
+  const bc = document.getElementById("omSuiteBranchSel").value || "001";
+  LS.setItem("om_suite_active_branch", bc);
+  document.getElementById("omActiveBranchBanner").textContent = `Branch ${bc} • Active Workspace`;
+  renderOmAutoLookup();
+}
+
+function openStaffCodeLoginModal() {
+  const bc = LS.getItem("om_suite_active_branch") || "001";
+  document.getElementById("suiteLoginBranch").value = bc;
+  document.getElementById("suiteStfCode").value = `STF-${bc}-`;
+  document.getElementById("suiteEmpCode").value = `EMP-${bc}-`;
+  document.getElementById("staffCodeLoginModal").classList.add("show");
+}
+
+function submitSuiteStaffLogin(e) {
+  e.preventDefault();
+  const bc = document.getElementById("suiteLoginBranch").value || "001";
+  const stf = String(document.getElementById("suiteStfCode").value || "").trim().toUpperCase();
+  const emp = String(document.getElementById("suiteEmpCode").value || "").trim().toUpperCase();
+  if (!stf || stf.endsWith("-") || !emp || emp.endsWith("-")) {
+    alert("Staff Login Code aur Manager Employee Code dono poore likhein.");
+    return;
+  }
+  const sess = { code: stf, employeeCode: emp, branchCode: bc, role: "staff", loggedInAt: new Date().toISOString() };
+  LS.setItem("om_suite_active_branch", bc);
+  LS.setItem("bfc_role", "staff");
+  LS.setItem("om_staff_session", JSON.stringify(sess));
+  document.getElementById("omActiveBranchBanner").textContent = `Branch ${bc} • Staff: ${stf} (${emp})`;
+  closeModal("staffCodeLoginModal");
+  alert(`Branch ${bc} ke liye Staff Session active ho gaya!\nStaff Code: ${stf}\nEmployee Code: ${emp}`);
+}
+
+function renderOmAutoLookup() {
+  const box = document.getElementById("omAutoLookupResults");
+  if (!box) return;
+  const q = String((document.getElementById("omAutoLookupInp") && document.getElementById("omAutoLookupInp").value) || "").trim().toLowerCase();
+  const matches = OM_PROFILES_LOOKUP.filter(p => {
+    if (!q) return true;
+    return `${p.name} ${p.father} ${p.wife} ${p.mobile} ${p.branch} ${p.empCode} ${p.stfCode}`.toLowerCase().includes(q);
+  });
+
+  box.innerHTML = matches.map(p => `
+    <div class="expense-card" style="padding:12px 14px">
+      <div>
+        <div style="font-size:14px;font-weight:900;color:#fff">${p.name} <span class="exp-cat-badge">${p.branch}</span></div>
+        <div class="exp-date">Father: <b>${p.father}</b> &bull; Wife: <b>${p.wife}</b> &bull; Mob: <b>${p.mobile}</b></div>
+        <div style="font-size:11.5px;color:var(--gold);margin-top:3px">Emp Code: <b>${p.empCode}</b> &bull; Staff Code: <b style="color:var(--cyan)">${p.stfCode}</b></div>
+      </div>
+      <a href="tel:${p.mobile}" class="action-pill call">📞 Call</a>
+    </div>
+  `).join("") || `<div style="color:var(--mut);font-size:12px">Koi match nahi mila.</div>`;
+}
+
+function renderOmGalleryLookup() {
+  const box = document.getElementById("omGalleryCardsBox");
+  if (!box) return;
+  const dtInp = document.getElementById("omGalleryDateInp");
+  if (dtInp && !dtInp.value) dtInp.value = iso();
+  const q = String((document.getElementById("omGallerySearchInp") && document.getElementById("omGallerySearchInp").value) || "").trim().toLowerCase();
+
+  const rows = OM_GALLERY_ITEMS.filter(r => {
+    if (!q) return true;
+    return `${r.name} ${r.mobile} ${r.batch} ${r.status}`.toLowerCase().includes(q);
+  });
+
+  box.innerHTML = rows.map(r => `
+    <div class="member-card">
+      <div class="member-top-row">
+        <div class="member-avatar">📸</div>
+        <div class="member-meta">
+          <div class="member-name"><span>${r.name}</span><span class="member-id-badge">${r.batch}</span></div>
+          <div class="member-phone">Mob: ${r.mobile} &bull; Time: <b>${r.time}</b></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
+        <span style="color:var(--cyan);font-weight:800">${r.photo}</span>
+        <span style="color:${r.status === 'Present' ? 'var(--green)' : 'var(--red)'};font-weight:900">${r.status} (View Only)</span>
+      </div>
+    </div>
+  `).join("");
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  renderOmAutoLookup();
+  renderOmGalleryLookup();
+});
+</script>
+
+
+<!-- MODAL 7: ADMISSION FORM + INSTANT RECEIPT GENERATOR (User Idea + Video Pattern) -->
+<div class="modal-overlay" id="admissionReceiptModal">
+  <div class="modal-box" style="max-width:660px">
+    <div class="modal-header">
+      <div class="modal-title">📝 Gym Admission Form &amp; Instant Receipt</div>
+      <button type="button" class="modal-close" onclick="closeModal('admissionReceiptModal')">✕</button>
+    </div>
+
+    <form id="fullAdmissionForm" onsubmit="submitFullAdmissionAndReceipt(event)">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+        <div class="form-group">
+          <label>Member Full Name *</label>
+          <input type="text" class="form-control" id="admFullName" placeholder="Full Name" required>
+        </div>
+        <div class="form-group">
+          <label>Father / Husband Name *</label>
+          <input type="text" class="form-control" id="admGuardianName" placeholder="Father / Husband Name" required>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+        <div class="form-group">
+          <label>Mobile Number (10 Digits) *</label>
+          <input type="tel" class="form-control" id="admMobile" placeholder="9876543210" pattern="[0-9]{10}" required>
+        </div>
+        <div class="form-group">
+          <label>State (All India) *</label>
+          <select class="form-control" id="admStateSel" onchange="populateAdmCities()"></select>
+        </div>
+        <div class="form-group">
+          <label>City / District *</label>
+          <select class="form-control" id="admCitySel"></select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+        <div class="form-group">
+          <label>Membership Plan *</label>
+          <select class="form-control" id="admPlanSel" onchange="calcAdmReceiptTotals()">
+            <option value="Monthly" data-fee="1000" data-days="30">Monthly (₹1000 / 30d)</option>
+            <option value="Quarterly" data-fee="2700" data-days="90">Quarterly (₹2700 / 90d)</option>
+            <option value="Half-Yearly" data-fee="5000" data-days="180">Half-Yearly (₹5000 / 180d)</option>
+            <option value="Yearly" data-fee="9000" data-days="365">Yearly (₹9000 / 365d)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Batch Timing *</label>
+          <select class="form-control" id="admBatchSel">
+            <option value="Morning">Morning Batch (06:00 AM - 10:00 AM)</option>
+            <option value="Evening">Evening Batch (04:00 PM - 09:00 PM)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Mode *</label>
+          <select class="form-control" id="admPayModeSel">
+            <option value="Cash">Cash (No UTR Required)</option>
+            <option value="UPI">UPI / Online</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+        <div class="form-group">
+          <label>Total Fee (₹)</label>
+          <input type="number" class="form-control" id="admTotalFee" value="1000" oninput="calcAdmReceiptTotals()">
+        </div>
+        <div class="form-group">
+          <label>Paid Now (₹) *</label>
+          <input type="number" class="form-control" id="admPaidFee" value="1000" oninput="calcAdmReceiptTotals()" required>
+        </div>
+        <div class="form-group">
+          <label>Due Balance (₹)</label>
+          <input type="number" class="form-control" id="admDueFee" value="0" readonly style="background:#162340;color:var(--red);font-weight:900">
+        </div>
+        <div class="form-group">
+          <label>Expiry Date</label>
+          <input type="date" class="form-control" id="admExpiryDate" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-action" style="width:100%;justify-content:center;padding:12px;font-size:14px">
+        ✔ Save Admission &amp; Generate Receipt
+      </button>
+    </form>
+
+    <!-- Instant Receipt Preview & Download Box -->
+    <div id="admGeneratedReceiptCard" style="display:none;margin-top:14px;background:#070D1A;border:1.5px solid var(--green);border-radius:14px;padding:14px;font-size:12.5px;line-height:1.6">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+        <b style="color:var(--green);font-size:14px">🧾 Admission Receipt Ready</b>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn-action" style="padding:6px 12px;font-size:11.5px" onclick="downloadAdmissionReceiptTxt()">⬇ Download Receipt</button>
+          <button type="button" class="btn-action sec" style="padding:6px 12px;font-size:11.5px" onclick="window.print()">🖨️ Print</button>
+        </div>
+      </div>
+      <div id="admReceiptBodyText" style="color:var(--tx-sub);white-space:pre-line;font-family:monospace;background:#0B1224;padding:10px;border-radius:10px;border:1px solid var(--border)"></div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const ALL_INDIA_STATES_CITIES = {
+  "Uttar Pradesh": ["Unnao", "Kanpur", "Lucknow", "Agra", "Varanasi", "Noida", "Ghaziabad", "Meerut", "Prayagraj", "Gorakhpur", "Bareilly", "Aligarh", "Jhansi", "Mathura", "Ayodhya"],
+  "Madhya Pradesh": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Rewa"],
+  "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Darbhanga", "Purnia"],
+  "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner", "Alwar"],
+  "Delhi": ["New Delhi", "North Delhi", "South Delhi", "East Delhi", "West Delhi"],
+  "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Aurangabad", "Solapur"],
+  "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar"],
+  "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi", "Belagavi"],
+  "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
+  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem"],
+  "West Bengal": ["Kolkata", "Howrah", "Siliguri", "Durgapur", "Asansol"],
+  "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Hisar", "Rohtak"],
+  "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali"],
+  "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro"],
+  "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba"],
+  "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri"],
+  "Kerala": ["Kochi", "Thiruvananthapuram", "Kozhikode", "Thrissur"],
+  "Assam": ["Guwahati", "Dibrugarh", "Silchar", "Jorhat"],
+  "Uttarakhand": ["Dehradun", "Haridwar", "Haldwani", "Rishikesh"],
+  "Himachal Pradesh": ["Shimla", "Manali", "Dharamshala", "Solan"],
+  "Jammu and Kashmir": ["Srinagar", "Jammu"],
+  "Goa": ["Panaji", "Margao", "Vasco da Gama"],
+  "Chandigarh": ["Chandigarh"],
+  "Puducherry": ["Puducherry"]
+};
+
+let LAST_ADM_RECEIPT_STR = "";
+let LAST_ADM_RECEIPT_ID = "";
+
+function openAddMemberModal() {
+  openAdmissionFormModal();
+}
+
+function openAdmissionFormModal() {
+  const stSel = document.getElementById("admStateSel");
+  if (stSel && !stSel.options.length) {
+    Object.keys(ALL_INDIA_STATES_CITIES).forEach(st => {
+      const opt = document.createElement("option");
+      opt.value = st;
+      opt.textContent = st;
+      stSel.appendChild(opt);
+    });
+    stSel.value = "Uttar Pradesh";
+  }
+  populateAdmCities();
+  const ctSel = document.getElementById("admCitySel");
+  if (ctSel && Array.from(ctSel.options).some(o => o.value === "Unnao")) {
+    ctSel.value = "Unnao";
+  }
+  calcAdmReceiptTotals();
+  document.getElementById("admGeneratedReceiptCard").style.display = "none";
+  document.getElementById("admissionReceiptModal").classList.add("show");
+}
+
+function populateAdmCities() {
+  const stVal = (document.getElementById("admStateSel") && document.getElementById("admStateSel").value) || "Uttar Pradesh";
+  const ctSel = document.getElementById("admCitySel");
+  if (!ctSel) return;
+  const cities = ALL_INDIA_STATES_CITIES[stVal] || ["Main City"];
+  ctSel.innerHTML = cities.map(c => `<option value="${c}">${c}</option>`).join("");
+}
+
+function calcAdmReceiptTotals() {
+  const planSel = document.getElementById("admPlanSel");
+  const opt = planSel ? planSel.options[planSel.selectedIndex] : null;
+  const days = opt ? Number(opt.getAttribute("data-days") || 30) : 30;
+  const totalFee = Number((document.getElementById("admTotalFee") && document.getElementById("admTotalFee").value) || 0);
+  const paidFee = Number((document.getElementById("admPaidFee") && document.getElementById("admPaidFee").value) || 0);
+
+  if (document.getElementById("admDueFee")) {
+    document.getElementById("admDueFee").value = Math.max(0, totalFee - paidFee);
+  }
+  const expDt = new Date();
+  expDt.setDate(expDt.getDate() + days);
+  if (document.getElementById("admExpiryDate") && !document.getElementById("admExpiryDate").value) {
+    document.getElementById("admExpiryDate").value = expDt.toISOString().slice(0, 10);
+  }
+}
+
+function submitFullAdmissionAndReceipt(e) {
+  e.preventDefault();
+  const name = document.getElementById("admFullName").value.trim();
+  const guardian = document.getElementById("admGuardianName").value.trim();
+  const phone = document.getElementById("admMobile").value.trim();
+  const stateVal = document.getElementById("admStateSel").value;
+  const cityVal = document.getElementById("admCitySel").value;
+  const plan = document.getElementById("admPlanSel").value;
+  const batch = document.getElementById("admBatchSel").value;
+  const mode = document.getElementById("admPayModeSel").value;
+  const totalFee = Number(document.getElementById("admTotalFee").value) || 0;
+  const paidFee = Number(document.getElementById("admPaidFee").value) || 0;
+  const dueFee = Math.max(0, totalFee - paidFee);
+  const expiry = document.getElementById("admExpiryDate").value || iso();
+
+  const newId = MEMBERS.length ? Math.max(...MEMBERS.map(x => x.id)) + 1 : 1;
+  MEMBERS.unshift({
+    id: newId,
+    name,
+    guardian,
+    phone,
+    state: stateVal,
+    city: cityVal,
+    plan,
+    batch,
+    joinDate: iso(),
+    expiryDate: expiry,
+    fee: totalFee,
+    paid: paidFee,
+    due: dueFee,
+    service: "None",
+    serviceFee: 0,
+    status: "Active",
+    punchedIn: false
+  });
+  saveAllData();
+  renderMembersList();
+
+  const rcptId = "ADM-" + Date.now().toString().slice(-6);
+  LAST_ADM_RECEIPT_ID = rcptId;
+  LAST_ADM_RECEIPT_STR = [
+    "5 BROTHER'S FITNESS CLUB / OM SOFTWARE",
+    "MEMBER ADMISSION RECEIPT",
+    "==========================================",
+    "Receipt No   : " + rcptId,
+    "Member ID    : #" + newId,
+    "Date         : " + iso(),
+    "Name         : " + name,
+    "Father/Husb. : " + guardian,
+    "Mobile       : " + phone,
+    "Location     : " + cityVal + ", " + stateVal + " (All India)",
+    "Plan & Batch : " + plan + " (" + batch + ")",
+    "Payment Mode : " + mode,
+    "------------------------------------------",
+    "Total Fee    : Rs. " + totalFee,
+    "Paid Amount  : Rs. " + paidFee,
+    "Due Balance  : Rs. " + dueFee,
+    "Valid Till   : " + expiry,
+    "=========================================="
+  ].join("\n");
+
+  document.getElementById("admReceiptBodyText").textContent = LAST_ADM_RECEIPT_STR;
+  document.getElementById("admGeneratedReceiptCard").style.display = "block";
+}
+
+function downloadAdmissionReceiptTxt() {
+  if (!LAST_ADM_RECEIPT_STR) return;
+  const blob = new Blob([LAST_ADM_RECEIPT_STR], { type: "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `Admission_Receipt_${LAST_ADM_RECEIPT_ID || "NEW"}.txt`;
+  a.click();
+}
+
+// Enhance All-India State/City branch filter in omStaffBranchTab
+(function enhanceAllIndiaBranchesInSuite() {
+  window.addEventListener("DOMContentLoaded", function() {
+    const sel = document.getElementById("omSuiteBranchSel");
+    if (sel && sel.options.length <= 3) {
+      const extraBranches = [
+        { code: "004", label: "Branch 004 — Agra, Uttar Pradesh" },
+        { code: "005", label: "Branch 005 — Indore, Madhya Pradesh" },
+        { code: "006", label: "Branch 006 — Patna, Bihar" },
+        { code: "007", label: "Branch 007 — Jaipur, Rajasthan" },
+        { code: "008", label: "Branch 008 — New Delhi, Delhi" },
+        { code: "009", label: "Branch 009 — Mumbai / Pune, Maharashtra" },
+        { code: "010", label: "Branch 010 — Bengaluru, Karnataka" }
+      ];
+      extraBranches.forEach(b => {
+        const opt = document.createElement("option");
+        opt.value = b.code;
+        opt.textContent = b.label;
+        sel.appendChild(opt);
+      });
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
