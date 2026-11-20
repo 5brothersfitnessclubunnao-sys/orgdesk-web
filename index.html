@@ -375,6 +375,11 @@
     <div class="sec-tag">Staff jodein</div>
     <input id="sn" placeholder="Staff ka naam">
     <input id="sp" placeholder="Mobile (optional)" inputmode="tel">
+    <select id="sb" style="width:100%;background:#0B1224;border:1px solid #22345C;color:#fff;padding:10px;border-radius:8px;font-size:13px;margin-top:6px">
+      <option value="001">📂 Branch 001 — Akrampur / Unnao</option>
+      <option value="002">📂 Branch 002 — Kanpur</option>
+      <option value="003">📂 Branch 003 — Lucknow</option>
+    </select>
     <input id="sj" type="date">
     <button type="button" class="btn" onclick="addStaff()">Save Staff</button>
 
@@ -436,6 +441,7 @@ const LS = localStorage;
 const J = (k, d) => { try { const v = JSON.parse(LS.getItem(k)); return v == null ? d : v; } catch (e) { return d; } };
 const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
 const iso = () => new Date().toISOString().slice(0, 10);
+try { if (window.firebase && !firebase.apps.length) firebase.initializeApp({ apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" }); } catch (e) {}
 const fdb = () => { try { return (window.firebase && firebase.apps && firebase.apps.length) ? firebase.firestore() : null; } catch (e) { return null; } };
 
 let pinNext = null;
@@ -469,33 +475,97 @@ function openAdmin() {
       STAFF = J("bfc_staff_list", []);
       if (!$("sj").value) $("sj").value = iso();
       renderStaff();
+      syncAllStaffCodes();
       $("admOv").classList.add("show");
     } catch (e) { alert("Admin open error: " + e.message); }
   });
 }
 
+const BRANCHES = [
+  { code: "001", name: "Akrampur / Unnao" },
+  { code: "002", name: "Kanpur" },
+  { code: "003", name: "Lucknow" }
+];
+function genStaffCode(branch) {
+  const used = new Set(J("bfc_staff_list", []).map(x => x && x.code));
+  let c;
+  do {
+    const ch = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", ar = new Uint8Array(6);
+    crypto.getRandomValues(ar);
+    c = "STF-" + branch + "-" + Array.prototype.map.call(ar, x => ch[x % 32]).join("");
+  } while (used.has(c));
+  return c;
+}
+const normCode = c => String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+function myOrgId() { const o = J("om_org_profile", {}); return o.orgId || LS.getItem("bfc_org_id") || ""; }
+async function registerStaffCode(s) {
+  if (!s || !s.code) return false;
+  try {
+    const d = fdb(); if (!d) return false;
+    await d.collection("staff_codes").doc("st_" + await sha256Hex("om|stf|" + normCode(s.code))).set({
+      orgId: myOrgId(), branch: s.branch || "001", name: s.name || "", id: String(s.id || ""), active: true, updatedAt: new Date().toISOString()
+    });
+    return true;
+  } catch (e) { return false; }
+}
+async function unregisterStaffCode(s) {
+  if (!s || !s.code) return;
+  try { const d = fdb(); if (d) await d.collection("staff_codes").doc("st_" + await sha256Hex("om|stf|" + normCode(s.code))).delete(); } catch (e) {}
+}
+async function syncAllStaffCodes() { for (const s of J("bfc_staff_list", [])) { if (s && s.code) await registerStaffCode(s); } }
+function staffRowsByBranch(withDelete) {
+  const list = J("bfc_staff_list", []);
+  let html = "";
+  BRANCHES.forEach(b => {
+    const rows = list.map((s, i) => ({ s: s, i: i })).filter(x => (x.s.branch || "001") === b.code);
+    html += '<div class="sec-tag" style="margin-top:10px">📂 Branch ' + b.code + ' — ' + esc(b.name) + '</div>';
+    html += rows.length ? rows.map(x => {
+      const s = x.s;
+      const codeTxt = s.code ? '<b style="color:var(--ac-gold);letter-spacing:.5px">' + esc(s.code) + '</b>' : '<small style="color:#fca5a5">Code nahi bana</small>';
+      const btn = withDelete
+        ? (s.code ? '' : '<button type="button" class="btn g" style="padding:4px 8px;font-size:11px;margin:0;width:auto" onclick="assignCode(' + x.i + ')">Code banao</button> ') +
+          '<button type="button" class="btn red" style="padding:4px 8px;font-size:11px;margin:0;width:auto" onclick="delStaff(' + x.i + ')">Delete</button>'
+        : "";
+      return '<div class="row"><span><b>' + esc(s.name) + '</b><br><small>' + esc(s.phone || "") + '</small><br>' + codeTxt + '</span><span>' + btn + '</span></div>';
+    }).join("") : '<div class="row"><small>Is branch me abhi koi staff nahi</small></div>';
+  });
+  return html;
+}
 function renderStaff() {
-  $("stList").innerHTML = STAFF.map((s, i) =>
-    '<div class="row"><span><b>' + esc(s.name) + '</b><br><small>' + esc(s.phone || "") + "</small></span>" +
-    '<button type="button" class="btn red" style="padding:4px 8px;font-size:11px;margin:0;width:auto" onclick="delStaff(' + i + ')">Delete</button></div>'
-  ).join("") || '<div class="row"><small>Abhi koi staff nahi</small></div>';
+  STAFF = J("bfc_staff_list", []);
+  $("stList").innerHTML = STAFF.length ? staffRowsByBranch(true) : '<div class="row"><small>Abhi koi staff nahi</small></div>';
+}
+async function assignCode(i) {
+  STAFF = J("bfc_staff_list", []);
+  const s = STAFF[i];
+  if (!s || s.code) return;
+  s.branch = s.branch || "001";
+  s.code = genStaffCode(s.branch);
+  LS.setItem("bfc_staff_list", JSON.stringify(STAFF));
+  try { const d = fdb(); if (d) await d.collection("staff").doc(String(s.id)).set(s, { merge: true }); } catch (e) {}
+  await registerStaffCode(s);
+  renderStaff();
 }
 
 async function addStaff() {
   const n = $("sn").value.trim();
   if (!n) { alert("Naam bharein"); return; }
-  const s = { id: "stf" + Date.now(), name: n, phone: $("sp").value.trim(), joinDate: $("sj").value || iso() };
+  STAFF = J("bfc_staff_list", []);
+  const br = ($("sb") && $("sb").value) || "001";
+  const s = { id: "stf" + Date.now(), name: n, phone: $("sp").value.trim(), joinDate: $("sj").value || iso(), branch: br, code: genStaffCode(br) };
   STAFF.push(s);
   LS.setItem("bfc_staff_list", JSON.stringify(STAFF));
   try { const d = fdb(); if (d) await d.collection("staff").doc(s.id).set(s); } catch (e) {}
+  const regOk = await registerStaffCode(s);
   $("sn").value = ""; $("sp").value = "";
   renderStaff();
-  alert("Staff save ho gaya");
+  alert("Staff save ho gaya\nStaff Login Code: " + s.code + (regOk ? "" : "\n\n⚠️ Code server par register nahi hua (internet / Firestore rules check karein). Tab tak staff is code se login nahi kar payega."));
 }
 
 async function delStaff(i) {
   const s = STAFF[i];
   if (!s || !confirm(s.name + " hatayein?")) return;
+  await unregisterStaffCode(s);
   STAFF.splice(i, 1);
   LS.setItem("bfc_staff_list", JSON.stringify(STAFF));
   try { const d = fdb(); if (d) await d.collection("staff").doc(String(s.id)).delete(); } catch (e) {}
@@ -666,16 +736,39 @@ function viewSec() {
     } catch(e) {}
   }
 
-  $("secBody").innerHTML = 
-    '<div class="row"><span><b>📂 Branch 001 Staff Code:</b><br><small style="color:var(--tx-muted)">Akrampur / Unnao</small></span><b style="color:var(--ac-gold)">STF-001</b></div>' +
-    '<div class="row"><span><b>📂 Branch 002 Staff Code:</b><br><small style="color:var(--tx-muted)">Kanpur</small></span><b style="color:var(--ac-gold)">STF-002</b></div>' +
-    '<div class="row"><span><b>📂 Branch 003 Staff Code:</b><br><small style="color:var(--tx-muted)">Lucknow</small></span><b style="color:var(--ac-gold)">STF-003</b></div>' +
-    '<button type="button" class="btn" style="margin-top:8px" onclick="shareStaffAppLink('001')">🔗 Share Staff App Link (3-Feature View)</button>' +
+  let shareBtns = BRANCHES.map(b =>
+    '<button type="button" class="btn" style="margin-top:6px" onclick="shareStaffAppLink(\'' + b.code + '\')">🔗 Share Staff App Link — Branch ' + b.code + '</button>'
+  ).join("");
+  $("secBody").innerHTML =
+    '<div style="font-size:11px;color:var(--tx-muted);margin-bottom:4px">Har staff ka apna alag Login Code. Staff ko code alag se dein, link me code nahi hota.</div>' +
+    staffRowsByBranch(false) +
+    shareBtns +
     '<div class="row"><span><b>Security Questions:</b></span><b>' + qaStatus + '</b></div>' +
-    '<div class="row"><span><b>Unique Security PIN:</b></span><b style="color:var(--ac-gold)">' + esc(o.securityCode || "SEC-S32D-PW4Z") + '</b></div>';
-  
+    '<div class="row"><span><b>Unique Security Code:</b></span><b style="color:var(--ac-gold)">' + esc(LS.getItem("om_security_code_" + orgId) || "Set nahi hai") + '</b></div>' +
+    '<button type="button" class="btn g" style="margin-top:6px" onclick="genSecurityCode()">🔑 Naya Security Code banao</button>';
+
   $("dashSqMsg").textContent = "";
   $("secOv").classList.add("show");
+}
+
+async function genSecurityCode() {
+  const orgId = myOrgId();
+  const d = fdb();
+  if (!orgId || !d) { alert("Server se connect nahi ho paya."); return; }
+  if (!confirm("Naya Security Code banega aur purana band ho jayega. Aage badhein?")) return;
+  try {
+    const old = LS.getItem("om_security_code_" + orgId);
+    const ch = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", ar = new Uint8Array(12);
+    crypto.getRandomValues(ar);
+    const t = Array.prototype.map.call(ar, x => ch[x % 32]).join("");
+    const code = "SEC-" + t.slice(0, 4) + "-" + t.slice(4, 8) + "-" + t.slice(8, 12);
+    await d.collection("security_codes").doc("sc_" + await sha256Hex("om|sec|" + normCode(code))).set({ orgId: orgId, createdAt: new Date().toISOString() });
+    await d.collection("orgs").doc(orgId).collection("private").doc("security_code").set({ code: code, updatedAt: new Date().toISOString() }, { merge: true });
+    if (old) { try { await d.collection("security_codes").doc("sc_" + await sha256Hex("om|sec|" + normCode(old))).delete(); } catch (e) {} }
+    LS.setItem("om_security_code_" + orgId, code);
+    alert("Naya Security Code:\n" + code + "\n\nIse save kar lein.");
+    viewSec();
+  } catch (e) { alert("Code nahi ban paya: " + (e.message || e) + "\n(Email se login karke dobara try karein)"); }
 }
 
 async function saveDashSecurityQA() {
@@ -723,9 +816,22 @@ if (typeof window.omLogoutNow !== "function") {
 }
 
 
+function isStaffRole() {
+  const r = LS.getItem("bfc_role");
+  if (r === "staff" || r === "owner") return r === "staff";
+  return !!LS.getItem("om_staff_session");
+}
+["openAdmin", "viewLic", "viewSec", "openImp", "openUpgradeModal", "saveDashSecurityQA", "genSecurityCode", "addStaff", "delStaff", "assignCode", "changePin", "doImport", "pickCsv"].forEach(function (n) {
+  const f = window[n];
+  if (typeof f !== "function") return;
+  window[n] = function () {
+    if (isStaffRole()) { alert("Ye option sirf Admin ke liye hai."); return; }
+    return f.apply(this, arguments);
+  };
+});
+
 function applyStaffRoleRestrictionIfNeeded() {
-  const role = LS.getItem("bfc_role") || "owner";
-  if (role !== "staff") return;
+  if (!isStaffRole()) return;
 
   // Hide hero upgrade banner and admin nav buttons for staff
   const hero = document.querySelector(".hero-banner");
@@ -770,10 +876,15 @@ function applyStaffRoleRestrictionIfNeeded() {
 }
 
 function shareStaffAppLink(code) {
-  const baseUrl = location.href.split("?")[0];
-  const link = `${baseUrl}?role=staff&branch=${encodeURIComponent(code || "001")}`;
-  try { navigator.clipboard.writeText(link); } catch (e) {}
-  alert("Staff App Link copied:\n" + link + "\n\nIs link se kholne/download karne par staff ko keval 3 option dikhenge.");
+  const baseUrl = location.href.split("?")[0].split("#")[0];
+  const link = baseUrl + "?role=staff&branch=" + encodeURIComponent(code || "001");
+  const msg = "5 Brother's Fitness Club - Staff App\nIs link se app kholo aur apna Staff Login Code daalo. Sirf Admission, Pay Fees aur Staff Joining & Salary dikhenge.";
+  if (navigator.share) {
+    navigator.share({ title: "Staff App", text: msg, url: link }).catch(function () {});
+  } else {
+    try { navigator.clipboard.writeText(link); } catch (e) {}
+    alert("Staff App Link copy ho gaya:\n" + link + "\n\nStaff ko apna Login Code alag se dein.");
+  }
 }
 
 window.addEventListener("DOMContentLoaded", () => {

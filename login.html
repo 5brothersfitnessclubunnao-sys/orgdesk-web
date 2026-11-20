@@ -30,6 +30,7 @@
     input:focus,select:focus{border-color:var(--ac)}
     .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;font-size:18px;cursor:pointer;color:#fff}
     .code-in{border:1.5px dashed var(--ac);font-weight:900;letter-spacing:1.2px;text-transform:uppercase}
+    .code-in::placeholder{text-transform:none;letter-spacing:0;font-weight:600;font-size:12px}
     .btn-main{width:100%;background:var(--ac);color:#000;font-weight:900;padding:13px;border:none;border-radius:12px;cursor:pointer;font-size:15px;margin-top:6px}
     .btn-main:disabled{opacity:.6}
     .links{display:flex;justify-content:space-between;gap:10px;margin-top:13px;font-size:12px;flex-wrap:wrap}
@@ -101,7 +102,7 @@
     <div class="field" id="secCodeField" style="display:none">
       <label style="color:var(--ac)">Enter Your Security Code Here *</label>
       <div class="wrap">
-        <input type="text" id="secCodeInput" class="code-in" placeholder="Enter Your Security Code Here (e.g. SEC-XXXX-XXXX-XXXX)" autocomplete="off">
+        <input type="text" id="secCodeInput" class="code-in" placeholder="SEC-XXXX-XXXX-XXXX" autocomplete="off">
       </div>
     </div>
 
@@ -109,7 +110,7 @@
     <div class="field" id="staffCodeField" style="display:none">
       <label style="color:var(--ac)">Staff Login Code *</label>
       <div class="wrap">
-        <input type="text" id="staffCodeInput" class="code-in" placeholder="Enter Staff Login Code (e.g. STF-101)" autocomplete="off">
+        <input type="text" id="staffCodeInput" class="code-in" placeholder="STF-001-XXXXXX" autocomplete="off">
       </div>
       <div class="hint" style="margin:6px 0 0">Staff login se sirf 3 kaam dikhenge: Admission Form, Pay Fees, aur Staff Joining &amp; Salary.</div>
     </div>
@@ -147,9 +148,7 @@
     <span id="swText">Naya account? <a onclick="setMode('up')">Sign Up</a></span>
   </div>
 
-  <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border);text-align:center">
-    <button type="button" onclick="quickPreviewLogin()" style="width:100%;background:#1e293b;color:var(--ac);border:1px solid var(--ac);padding:9px 12px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;">⚡ Quick Preview Login (Tablet / Test Mode)</button>
-  </div>
+
 </div>
 
 <!-- STRICT SECURITY QUESTION VERIFICATION MODAL (NO SILENT OVERWRITE!) -->
@@ -337,30 +336,76 @@
     }
   }
 
-  function loginWithSecurityCode(codeRaw) {
-    var code = String(codeRaw || '').trim().toUpperCase();
-    if (!code || code.length < 6) throw { message: 'Sahi Security Code likhein.' };
-    var orgId = 'sec_org_' + code.slice(-6);
+  // ---------- Code verification (Firestore se, koi bhi code seedha accept nahi hota) ----------
+  function normCode(c) { return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  async function codeDocId(kind, code) {
+    return (kind === 'sec' ? 'sc_' : 'st_') + await sha256Hex('om|' + kind + '|' + normCode(code));
+  }
+  function checkCodeLock() {
+    var until = Number(LS.getItem('om_code_lock_until') || '0');
+    if (Date.now() < until) {
+      throw { message: 'Bahut zyada galat koshish. ' + Math.ceil((until - Date.now()) / 1000) + ' second baad dobara try karein.' };
+    }
+  }
+  function failCode() {
+    var n = Number(LS.getItem('om_code_fail') || '0') + 1;
+    LS.setItem('om_code_fail', String(n));
+    if (n >= 5) { LS.setItem('om_code_lock_until', String(Date.now() + 60000)); LS.setItem('om_code_fail', '0'); }
+  }
+  function clearCodeFail() { LS.removeItem('om_code_fail'); LS.removeItem('om_code_lock_until'); }
+
+  async function lookupCode(collection, kind, code) {
+    var snap;
+    try { snap = await db.collection(collection).doc(await codeDocId(kind, code)).get(); }
+    catch (e) { throw { message: 'Server se code verify nahi ho paya. Internet check karein (ya Admin se Firestore rules set karwayein).' }; }
+    return snap.exists ? snap.data() : null;
+  }
+
+  function newSecCode() {
+    var ch = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', a = new Uint8Array(12);
+    crypto.getRandomValues(a);
+    var s = Array.prototype.map.call(a, function (x) { return ch[x % 32]; }).join('');
+    return 'SEC-' + s.slice(0, 4) + '-' + s.slice(4, 8) + '-' + s.slice(8, 12);
+  }
+  async function createSecurityCode(orgId) {
+    var code = newSecCode();
+    await db.collection('security_codes').doc(await codeDocId('sec', code)).set({ orgId: orgId, createdAt: new Date().toISOString() });
+    await db.collection('orgs').doc(orgId).collection('private').doc('security_code').set({ code: code, updatedAt: new Date().toISOString() }, { merge: true });
+    LS.setItem('om_security_code_' + orgId, code);
+    return code;
+  }
+
+  async function loginWithSecurityCode(codeRaw) {
+    var code = normCode(codeRaw);
+    if (code.length < 12) throw { message: 'Sahi Security Code likhein (SEC-XXXX-XXXX-XXXX).' };
+    checkCodeLock();
+    var d = await lookupCode('security_codes', 'sec', code);
+    if (!d || !d.orgId) { failCode(); throw { message: 'Security Code galat hai.' }; }
+    clearCodeFail();
+    LS.removeItem('om_staff_session');
     LS.setItem('bfc_role', 'owner');
-    LS.setItem('bfc_org_id', orgId);
-    LS.setItem('om_org_profile', JSON.stringify({ orgId: orgId, orgName: 'Om Software Owner', securityCode: code }));
+    LS.setItem('bfc_org_id', d.orgId);
+    LS.setItem('om_org_profile', JSON.stringify({ orgId: d.orgId, orgName: 'Om Software Owner' }));
     LS.setItem('om_last_active_url', 'index.html');
     location.href = 'index.html';
   }
 
-  function loginWithStaffCode(codeRaw) {
-    var code = String(codeRaw || '').trim().toUpperCase();
-    if (!code) throw { message: 'Staff Login Code likhein (jaise STF-101).' };
-
-    var branchCode = '001';
-    var m = code.match(/STF-(\d{3})/);
-    if (m && m[1]) branchCode = m[1];
-
+  async function loginWithStaffCode(codeRaw) {
+    var code = normCode(codeRaw);
+    if (code.length < 8) throw { message: 'Staff Login Code likhein (jaise STF-001-AB12CD).' };
+    checkCodeLock();
+    var d = await lookupCode('staff_codes', 'stf', code);
+    if (!d || d.active === false) { failCode(); throw { message: 'Staff Code galat hai ya band kar diya gaya hai.' }; }
+    clearCodeFail();
+    var branchCode = d.branch || '001';
     LS.setItem('bfc_role', 'staff');
-    LS.setItem('bfc_org_id', 'staff_org_' + branchCode);
+    LS.setItem('bfc_org_id', d.orgId || ('staff_org_' + branchCode));
     LS.setItem('om_staff_session', JSON.stringify({
-      code: code,
+      code: String(codeRaw).trim().toUpperCase(),
       branchCode: branchCode,
+      name: d.name || '',
+      staffId: d.id || '',
+      orgId: d.orgId || '',
       role: 'Staff',
       loggedInAt: new Date().toISOString()
     }));
@@ -373,21 +418,18 @@
     var base = { createdAt: new Date().toISOString(), ownerUid: orgId };
     if (justSignedUp && signupGym) { base.gymName = signupGym; base.category = 'gym'; }
     try { await db.collection('orgs').doc(orgId).set(base, { merge: true }); } catch (e) {}
-    if (justSignedUp) { await saveSecurityQuestions(orgId); }
+    if (justSignedUp) {
+      await saveSecurityQuestions(orgId);
+      try {
+        var sc = await createSecurityCode(orgId);
+        alert('Aapka Unique Security Code:\n\n' + sc + '\n\nIse abhi save kar lein. Ye Dashboard -> Code me bhi dikhega.');
+      } catch (e) {}
+    }
+    LS.removeItem('om_staff_session');
 
     LS.setItem('bfc_role', 'owner');
     LS.setItem('bfc_org_id', orgId);
     LS.setItem('om_org_profile', JSON.stringify({ orgId: orgId, orgName: signupGym || user.email || 'Om Software Owner' }));
-    LS.setItem('om_last_active_url', 'index.html');
-    location.href = 'index.html';
-  }
-
-  function quickPreviewLogin() {
-    hide();
-    var demoOrgId = 'preview_org_001';
-    LS.setItem('om_org_profile', JSON.stringify({ orgId: demoOrgId, orgName: 'Om Software Preview', category: 'gym' }));
-    LS.setItem('bfc_org_id', demoOrgId);
-    LS.setItem('bfc_role', 'owner');
     LS.setItem('om_last_active_url', 'index.html');
     location.href = 'index.html';
   }
@@ -398,11 +440,11 @@
     busy(true);
     try {
       if (mode === 'in' && method === 'code') {
-        loginWithSecurityCode($('secCodeInput').value);
+        await loginWithSecurityCode($('secCodeInput').value);
         return;
       }
       if (mode === 'in' && method === 'staff') {
-        loginWithStaffCode($('staffCodeInput').value);
+        await loginWithStaffCode($('staffCodeInput').value);
         return;
       }
       if (mode === 'up') {
@@ -443,6 +485,19 @@
     }
   })();
   setMode('in');
+
+  // Staff link se aaye ho (?staffonly=1): sirf Staff Code login dikhega
+  (function staffOnlyMode() {
+    var q = new URLSearchParams(location.search);
+    if (q.get('staffonly') !== '1') return;
+    $('seg').style.display = 'none';
+    $('tabIn').parentNode.style.display = 'none';
+    var links = document.querySelector('.links'); if (links) links.style.display = 'none';
+    $('formTitle').textContent = 'Staff Login';
+    $('formSub').textContent = 'Apna Staff Login Code daalein';
+    setMethod('staff');
+    setMode = function () {};
+  })();
 </script>
 </body>
 </html>

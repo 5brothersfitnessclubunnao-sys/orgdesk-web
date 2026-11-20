@@ -2,6 +2,7 @@
 <title>Reset Password & Security Code</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <style>:root{--bg:#0b0b0d;--card:#16161a;--bd:#2c2c35;--ac:#ffcc00;--ok:#2ecc71;--err:#e74c3c;--mut:#9999a8}
 body{background:var(--bg);color:#f0f0f5;font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh;box-sizing:border-box}
 .b{max-width:420px;width:100%;background:var(--card);border:2px solid var(--ac);border-radius:18px;padding:24px;box-sizing:border-box}h2{color:var(--ac);margin:0 0 6px}p{color:var(--mut);font-size:12px;line-height:1.5}
@@ -16,12 +17,29 @@ async function derive(p,c){const b=await crypto.subtle.digest("SHA-256",new Text
 function newCode(){const ch="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",a=new Uint8Array(12);crypto.getRandomValues(a);const s=Array.from(a).map(x=>ch[x%32]).join("");return"SEC-"+s.slice(0,4)+"-"+s.slice(4,8)+"-"+s.slice(8,12)}
 function eye(id,b){const i=$(id),s=i.type==='password';i.type=s?'text':'password';b.innerText=s?'🙈':'👁'}
 if(q.get('mode')!=='resetPassword'||!oob){$('m').innerText='Ye link galat ya adhoori hai. Login page par Forgot Password dobara dabayein.'}
-else auth.verifyPasswordResetCode(oob).then(email=>{
- $('m').innerHTML='Account: <b>'+email.replace(/[<>&]/g,'')+'</b><br>Naya Password likhein. Aapke liye naya Unique Security Code bhi ban jaayega.';
+else auth.verifyPasswordResetCode(oob).then(email=>{window.__email=email;
+ $('m').innerHTML='Account: <b>'+email.replace(/[<>&]/g,'')+'</b><br>Naya Password likhein. Aapka purana Security Code band ho jaayega aur naya Unique Security Code ban jaayega.';
  $('b').insertAdjacentHTML('beforeend','<label>Naya Password * (kam se kam 6 akshar)</label><div class="pw"><input type="password" id="p"><button type="button" onclick="eye(\'p\',this)">👁</button></div><div class="e" id="e"></div><button class="btn" id="go" onclick="go()">Naya Password & Code Banayein</button>');
 }).catch(()=>{$('m').innerText='Ye link purani ho chuki hai ya pehle use ho chuki hai. Login page par Forgot Password se nayi link mangwayein.'});
+async function sha(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
+const norm=c=>String(c||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
 async function go(){const p=$('p').value;if(p.length<6){$('e').innerText='Password kam se kam 6 akshar ka rakhein.';return}
- $('go').disabled=true;try{const c=newCode();await auth.confirmPasswordReset(oob,await derive(p,c));
- $('b').innerHTML='<h2>✅ Ho gaya!</h2><p>Aapka naya Unique Security Code:</p><div id="code">'+c+'</div><p>Ise abhi <b>save</b> kar lein — ye sirf ek baar dikhega. Ab Email + naya Password + ye code se Sign In karein.</p><button class="btn" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+c+'\');this.innerText=\'✅ Copy ho gaya\'">📋 Copy karein</button><button class="btn" style="background:#2ecc71" onclick="location.href=\'login.html\'">Sign In par jaayein</button>'}
- catch(e){$('e').innerText='Nahi ho paaya: '+(e.message||e);$('go').disabled=false}}
+ $('go').disabled=true;let step='password';
+ try{
+  // Login page seedha password se sign in karta hai, isliye password jaisa likha waisa hi set hoga
+  await auth.confirmPasswordReset(oob,p);
+  step='code';
+  const cred=await auth.signInWithEmailAndPassword(window.__email,p);
+  const db=firebase.firestore(),uid=cred.user.uid,c=newCode();
+  // purana code band karo
+  try{const old=await db.collection('orgs').doc(uid).collection('private').doc('security_code').get();
+   if(old.exists&&old.data().code){await db.collection('security_codes').doc('sc_'+await sha('om|sec|'+norm(old.data().code))).delete()}}catch(e){}
+  await db.collection('security_codes').doc('sc_'+await sha('om|sec|'+norm(c))).set({orgId:uid,createdAt:new Date().toISOString()});
+  await db.collection('orgs').doc(uid).collection('private').doc('security_code').set({code:c,updatedAt:new Date().toISOString()},{merge:true});
+  await auth.signOut();
+  $('b').innerHTML='<h2>✅ Ho gaya!</h2><p>Aapka naya Unique Security Code:</p><div id="code">'+c+'</div><p>Ise abhi <b>save</b> kar lein. Ye Dashboard -> Code me bhi dikhega. Ab Email + naya Password se, ya is code se Sign In karein.</p><button class="btn" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+c+'\');this.innerText=\'✅ Copy ho gaya\'">📋 Copy karein</button><button class="btn" style="background:#2ecc71" onclick="location.href=\'login.html\'">Sign In par jaayein</button>'
+ }catch(e){
+  if(step==='code'){$('b').innerHTML='<h2>✅ Password badal gaya</h2><p>Naya Password set ho gaya hai. Naya Security Code abhi nahi ban paya ('+(e.message||e)+'). Sign In karke Dashboard -> Code se naya code banayein.</p><button class="btn" style="background:#2ecc71" onclick="location.href=\'login.html\'">Sign In par jaayein</button>'}
+  else{$('e').innerText='Nahi ho paaya: '+(e.message||e);$('go').disabled=false}
+ }}
 </script></body></html>
