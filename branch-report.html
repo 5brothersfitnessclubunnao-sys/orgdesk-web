@@ -199,6 +199,7 @@
       </div>
     </div>
     <div class="nav-actions">
+      <button type="button" class="btn-sm green" onclick="showTop10EdgeSummary()">🏆 Top-10 Edge</button>
       <button type="button" class="btn-sm gold" onclick="openAddBranchModal()">➕ Add Branch</button>
       <a href="index.html" class="btn-sm">⬅️ Dashboard</a>
     </div>
@@ -1023,6 +1024,33 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 })();
+</script>
+
+
+<script>
+function showTop10EdgeSummary() {
+  const totalBranches = branches.length;
+  let totalRev = 0, totalProfit = 0, lossCount = 0;
+  branches.forEach(b => {
+    const st = calcBranch(b);
+    totalRev += st.totalRevenue;
+    totalProfit += st.netPl;
+    if (!st.isProfit) lossCount++;
+  });
+  alert(
+    "🏆 OM SOFTWARE — TOP-10 FITNESS SAAS EDGE\n" +
+    "--------------------------------------------\n" +
+    "• Active Branches Tracked : " + totalBranches + "\n" +
+    "• Combined Gross Revenue  : ₹" + totalRev.toLocaleString("en-IN") + "\n" +
+    "• Combined Net P&L        : " + (totalProfit >= 0 ? "+₹" + totalProfit.toLocaleString("en-IN") : "-₹" + Math.abs(totalProfit).toLocaleString("en-IN")) + "\n" +
+    "• Loss-Making Branches    : " + lossCount + "\n\n" +
+    "Hamara Edge:\n" +
+    "1) Supplement Buy/Sell Margin + Fees + Other Income ka ek jagah P&L\n" +
+    "2) Staff Code se strict limited access (Salary/Report block)\n" +
+    "3) Cash payment mein bina UTR ke turant receipt & Weekly/Monthly Owner Share\n" +
+    "4) All-India city/branch directory + Manager code instant WhatsApp share"
+  );
+}
 </script>
 
 </body>
