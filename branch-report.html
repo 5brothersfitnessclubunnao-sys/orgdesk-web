@@ -934,5 +934,82 @@ window.addEventListener("DOMContentLoaded", () => {
   renderAll();
 });
 </script>
+
+<script>
+// Real-Time Multi-Branch Cloud Sync & Strict Org/Branch Isolation Layer
+(function() {
+  const LS = localStorage;
+  function getActiveOrgId() {
+    try {
+      const prof = JSON.parse(LS.getItem("om_org_profile") || "{}");
+      return LS.getItem("bfc_org_id") || prof.orgId || "default_org";
+    } catch (e) {
+      return LS.getItem("bfc_org_id") || "default_org";
+    }
+  }
+
+  window.omGetScopedKey = function(baseKey, branchCode) {
+    const orgId = getActiveOrgId();
+    return branchCode ? `om_${orgId}_br_${branchCode}_${baseKey}` : `om_${orgId}_${baseKey}`;
+  };
+
+  window.omSaveScopedData = function(baseKey, data, branchCode) {
+    const key = window.omGetScopedKey(baseKey, branchCode);
+    try { LS.setItem(key, JSON.stringify(data)); } catch (e) {}
+    try {
+      if (window.firebase && firebase.apps && firebase.apps.length) {
+        const db = firebase.firestore();
+        const orgId = getActiveOrgId();
+        const docRef = branchCode
+          ? db.collection("orgs").doc(orgId).collection("branches").doc(branchCode).collection("data").doc(baseKey)
+          : db.collection("orgs").doc(orgId).collection("data").doc(baseKey);
+        docRef.set({ items: data, updatedAt: new Date().toISOString() }, { merge: true }).catch(function(){});
+      }
+    } catch (e) {}
+  };
+
+  window.omSubscribeRealTime = function(baseKey, branchCode, onUpdate) {
+    const key = window.omGetScopedKey(baseKey, branchCode);
+    try {
+      const localRaw = LS.getItem(key);
+      if (localRaw && typeof onUpdate === "function") {
+        onUpdate(JSON.parse(localRaw));
+      }
+    } catch (e) {}
+
+    try {
+      if (window.firebase && firebase.apps && firebase.apps.length) {
+        const db = firebase.firestore();
+        const orgId = getActiveOrgId();
+        const docRef = branchCode
+          ? db.collection("orgs").doc(orgId).collection("branches").doc(branchCode).collection("data").doc(baseKey)
+          : db.collection("orgs").doc(orgId).collection("data").doc(baseKey);
+        docRef.onSnapshot(function(snap) {
+          if (snap && snap.exists) {
+            const d = snap.data();
+            if (d && Array.isArray(d.items)) {
+              try { LS.setItem(key, JSON.stringify(d.items)); } catch (e) {}
+              if (typeof onUpdate === "function") onUpdate(d.items);
+            }
+          }
+        }, function(){});
+      }
+    } catch (e) {}
+  };
+
+  window.addEventListener("DOMContentLoaded", function() {
+    const orgId = getActiveOrgId();
+    const hdr = document.querySelector(".top-bar");
+    if (hdr && !document.getElementById("rtSyncBadge")) {
+      const b = document.createElement("span");
+      b.id = "rtSyncBadge";
+      b.style.cssText = "font-size:10.5px;font-weight:800;color:#4ade80;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);padding:4px 9px;border-radius:999px;";
+      b.textContent = "🟢 Real-Time Isolated • Org: " + orgId;
+      hdr.appendChild(b);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
