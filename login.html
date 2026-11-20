@@ -43,7 +43,7 @@
     .code-big{background:#0b0b0d;border:2px dashed var(--ac);border-radius:12px;color:var(--ac);font-size:20px;font-weight:900;letter-spacing:2px;padding:14px 6px;margin:12px 0;word-break:break-all}
     .btn2{width:100%;background:#222;color:#fff;border:1.5px solid var(--border);padding:11px;border-radius:10px;font-weight:800;cursor:pointer;margin-top:8px;font-size:13px}
   
-    /* Full-Screen 100% Solid Cosmic Galaxy + 3D Solar System + 3D Rotating Om */
+    /* Full-Screen 100% Solid Cosmic Galaxy + Grand 3D Solar System + Big Rotating Om */
     #omIntroOverlay {
       display: none;
       position: fixed;
@@ -57,17 +57,17 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: clamp(14px, 3vh, 32px) clamp(16px, 4vw, 40px);
+      padding: clamp(14px, 2.5vh, 28px) clamp(14px, 3vw, 36px);
       color: #fff;
-      perspective: 1200px;
+      perspective: 1400px;
     }
     #omIntroOverlay.show {
       display: flex !important;
       animation: cosmosEntrance 0.5s ease-out forwards;
     }
     @keyframes cosmosEntrance {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      from { opacity: 0; transform: scale(1.02); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     /* Cosmic Deep Space Background */
@@ -75,15 +75,15 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 50% 45%, rgba(217, 119, 6, 0.22) 0%, rgba(14, 165, 233, 0.12) 35%, rgba(15, 23, 42, 0.95) 75%, #02040a 100%);
+        radial-gradient(circle at 50% 48%, rgba(245, 158, 11, 0.28) 0%, rgba(14, 165, 233, 0.16) 35%, rgba(15, 23, 42, 0.96) 72%, #02040a 100%);
       pointer-events: none;
     }
 
     /* Spiral Galaxy Swirl Arms */
     .galaxy-spiral-mesh {
       position: absolute;
-      width: min(1500px, 200vmax);
-      height: min(1500px, 200vmax);
+      width: min(1700px, 220vmax);
+      height: min(1700px, 220vmax);
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) rotate(0deg);
@@ -91,18 +91,18 @@
       background:
         conic-gradient(
           from 0deg,
-          rgba(56, 189, 248, 0.16) 0deg 45deg,
-          rgba(168, 85, 247, 0.18) 45deg 110deg,
-          rgba(255, 184, 0, 0.22) 110deg 180deg,
-          rgba(14, 165, 233, 0.16) 180deg 260deg,
-          rgba(236, 72, 153, 0.15) 260deg 320deg,
-          rgba(56, 189, 248, 0.16) 320deg 360deg
+          rgba(56, 189, 248, 0.20) 0deg 45deg,
+          rgba(168, 85, 247, 0.22) 45deg 110deg,
+          rgba(255, 184, 0, 0.26) 110deg 180deg,
+          rgba(14, 165, 233, 0.20) 180deg 260deg,
+          rgba(236, 72, 153, 0.18) 260deg 320deg,
+          rgba(56, 189, 248, 0.20) 320deg 360deg
         );
-      filter: blur(34px);
-      animation: galaxySpinSlow 48s linear infinite;
+      filter: blur(40px);
+      animation: galaxySpinSlow 40s linear infinite;
       pointer-events: none;
-      mask-image: radial-gradient(circle, rgba(0,0,0,1) 20%, transparent 72%);
-      -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 20%, transparent 72%);
+      mask-image: radial-gradient(circle, rgba(0,0,0,1) 22%, transparent 74%);
+      -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 22%, transparent 74%);
     }
     @keyframes galaxySpinSlow {
       from { transform: translate(-50%, -50%) rotate(0deg); }
@@ -114,49 +114,49 @@
       position: absolute;
       inset: 0;
       background-image:
-        radial-gradient(2px 2px at 10% 12%, #ffffff 80%, transparent),
-        radial-gradient(1.5px 1.5px at 25% 75%, #fde68a 80%, transparent),
-        radial-gradient(2px 2px at 42% 18%, #93c5fd 80%, transparent),
-        radial-gradient(1.5px 1.5px at 65% 12%, #ffffff 80%, transparent),
-        radial-gradient(2.5px 2.5px at 85% 32%, #fef08a 80%, transparent),
-        radial-gradient(1.5px 1.5px at 92% 68%, #bae6fd 80%, transparent),
-        radial-gradient(2px 2px at 18% 46%, #e9d5ff 80%, transparent),
-        radial-gradient(1.5px 1.5px at 74% 82%, #ffffff 80%, transparent),
-        radial-gradient(2px 2px at 52% 88%, #fde68a 80%, transparent),
-        radial-gradient(2px 2px at 8% 85%, #7dd3fc 80%, transparent),
-        radial-gradient(1.5px 1.5px at 35% 35%, #ffffff 80%, transparent),
-        radial-gradient(2px 2px at 62% 60%, #fed7aa 80%, transparent);
+        radial-gradient(2.2px 2.2px at 10% 12%, #ffffff 90%, transparent),
+        radial-gradient(1.8px 1.8px at 25% 75%, #fde68a 90%, transparent),
+        radial-gradient(2.5px 2.5px at 42% 18%, #93c5fd 90%, transparent),
+        radial-gradient(1.6px 1.6px at 65% 12%, #ffffff 90%, transparent),
+        radial-gradient(3px 3px at 85% 32%, #fef08a 90%, transparent),
+        radial-gradient(1.8px 1.8px at 92% 68%, #bae6fd 90%, transparent),
+        radial-gradient(2.2px 2.2px at 18% 46%, #e9d5ff 90%, transparent),
+        radial-gradient(1.8px 1.8px at 74% 82%, #ffffff 90%, transparent),
+        radial-gradient(2.5px 2.5px at 52% 88%, #fde68a 90%, transparent),
+        radial-gradient(2.2px 2.2px at 8% 85%, #7dd3fc 90%, transparent),
+        radial-gradient(1.8px 1.8px at 35% 35%, #ffffff 90%, transparent),
+        radial-gradient(2.2px 2.2px at 62% 60%, #fed7aa 90%, transparent);
       animation: starsTwinkle 3.2s ease-in-out infinite alternate;
       pointer-events: none;
     }
     @keyframes starsTwinkle {
-      0% { opacity: 0.55; }
+      0% { opacity: 0.6; }
       100% { opacity: 1; }
     }
 
     /* Shooting Meteors */
     .shooting-star {
       position: absolute;
-      top: 15%;
-      left: 10%;
-      width: 120px;
+      top: 14%;
+      left: 8%;
+      width: 140px;
       height: 2px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.9), transparent);
+      background: linear-gradient(90deg, rgba(255,255,255,0.95), transparent);
       transform: rotate(-35deg);
       opacity: 0;
-      animation: meteorPass 6s ease-in infinite;
+      animation: meteorPass 5.5s ease-in infinite;
       pointer-events: none;
     }
     .shooting-star.s2 {
-      top: 45%;
-      left: 70%;
-      width: 150px;
-      animation-delay: 3.2s;
+      top: 42%;
+      left: 68%;
+      width: 160px;
+      animation-delay: 2.8s;
     }
     @keyframes meteorPass {
       0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 0; }
       10% { opacity: 1; }
-      20% { transform: translateX(260px) translateY(180px) rotate(-35deg); opacity: 0; }
+      20% { transform: translateX(280px) translateY(190px) rotate(-35deg); opacity: 0; }
       100% { opacity: 0; }
     }
 
@@ -165,40 +165,49 @@
       z-index: 10;
       text-align: center;
       width: 100%;
-      max-width: 980px;
+      max-width: 1080px;
     }
     .om-software-pill {
       display: inline-block;
       background: linear-gradient(135deg, #FFB800, #F59E0B);
       color: #090c14;
       font-weight: 900;
-      font-size: clamp(10px, 1.2vw, 12px);
-      padding: 4px 14px;
+      font-size: clamp(10px, 1.3vw, 13px);
+      padding: 4px 16px;
       border-radius: 999px;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.6px;
       text-transform: uppercase;
       margin-bottom: 6px;
-      box-shadow: 0 4px 16px rgba(255, 184, 0, 0.4);
+      box-shadow: 0 4px 18px rgba(255, 184, 0, 0.45);
     }
     .om-software-title {
-      font-size: clamp(26px, 4.6vw, 54px);
+      font-size: clamp(26px, 5.2vw, 56px);
       font-weight: 900;
-      letter-spacing: 2px;
-      line-height: 1.1;
-      background: linear-gradient(180deg, #FFFFFF 0%, #FFE066 50%, #F59E0B 100%);
+      letter-spacing: 1.5px;
+      line-height: 1.15;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FFE066 45%, #F59E0B 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-transform: uppercase;
-      filter: drop-shadow(0 4px 20px rgba(255, 184, 0, 0.4));
+      filter: drop-shadow(0 4px 24px rgba(255, 184, 0, 0.45));
+    }
+    .om-tagline-hero {
+      margin-top: 5px;
+      font-size: clamp(13px, 2vw, 20px);
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      color: #FACC15;
+      text-shadow: 0 0 16px rgba(250, 204, 21, 0.5);
+      text-transform: uppercase;
     }
     .om-org-sub {
       margin-top: 4px;
-      font-size: clamp(12px, 1.7vw, 17px);
-      font-weight: 700;
-      color: #E2E8F0;
+      font-size: clamp(12px, 1.6vw, 16px);
+      font-weight: 600;
+      color: #CBD5E1;
     }
 
-    /* Central 3D Cosmic Space Arena */
+    /* Central Grand 3D Cosmic Space Arena */
     .om-center-stage {
       position: relative;
       z-index: 10;
@@ -206,52 +215,52 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: clamp(10px, 2vh, 18px);
+      gap: clamp(8px, 1.6vh, 16px);
       flex: 1;
       width: 100%;
-      max-width: 1020px;
+      max-width: 1180px;
       text-align: center;
     }
 
     .solar-universe-stage {
       position: relative;
-      width: clamp(280px, 48vw, 480px);
-      height: clamp(230px, 36vw, 360px);
+      width: clamp(320px, 82vw, 680px);
+      height: clamp(250px, 58vw, 440px);
       display: flex;
       align-items: center;
       justify-content: center;
       transform-style: preserve-3d;
     }
 
-    /* Center Sun/Core Aura */
+    /* Giant Solar Core Aura */
     .om-solar-corona {
       position: absolute;
-      width: clamp(130px, 20vw, 210px);
-      height: clamp(130px, 20vw, 210px);
+      width: clamp(180px, 38vw, 320px);
+      height: clamp(180px, 38vw, 320px);
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 184, 0, 0.45) 0%, rgba(245, 158, 11, 0.18) 55%, transparent 75%);
-      box-shadow: 0 0 60px rgba(255, 184, 0, 0.5), 0 0 120px rgba(217, 119, 6, 0.3);
+      background: radial-gradient(circle, rgba(255, 184, 0, 0.52) 0%, rgba(245, 158, 11, 0.22) 55%, transparent 75%);
+      box-shadow: 0 0 70px rgba(255, 184, 0, 0.6), 0 0 140px rgba(217, 119, 6, 0.35);
       animation: coronaPulse 2.8s ease-in-out infinite alternate;
       pointer-events: none;
     }
     @keyframes coronaPulse {
-      0% { transform: scale(0.92); opacity: 0.8; }
-      100% { transform: scale(1.12); opacity: 1; }
+      0% { transform: scale(0.94); opacity: 0.85; }
+      100% { transform: scale(1.14); opacity: 1; }
     }
 
-    /* The Center 3D Y-Axis Rotating Om (Stays Upright, spins like a 3D Golden Emblem!) */
+    /* The Center Large 3D Y-Axis Rotating Om (Upright & Grand!) */
     .om-3d-glyph {
       position: relative;
       z-index: 8;
       display: inline-block;
-      font-size: clamp(86px, 14vw, 160px);
+      font-size: clamp(118px, 24vw, 210px);
       line-height: 1;
       font-weight: 900;
       color: #FFE066;
       text-shadow:
-        0 0 20px rgba(255, 184, 0, 0.95),
-        0 0 55px rgba(245, 158, 11, 0.75),
-        0 0 90px rgba(217, 119, 6, 0.5);
+        0 0 24px rgba(255, 184, 0, 1),
+        0 0 65px rgba(245, 158, 11, 0.85),
+        0 0 110px rgba(217, 119, 6, 0.6);
       transform-origin: center center;
       transform-style: preserve-3d;
       animation: omYRotate 8s linear infinite;
@@ -259,51 +268,51 @@
     }
     @keyframes omYRotate {
       0% { transform: rotateY(0deg) scale(1); }
-      50% { transform: rotateY(180deg) scale(1.05); }
+      50% { transform: rotateY(180deg) scale(1.06); }
       100% { transform: rotateY(360deg) scale(1); }
     }
 
-    /* 3D Cosmic Orbit Rings (Tilted 3D Ellipses around the Om) */
+    /* Large 3D Cosmic Orbit Rings */
     .planet-orbit {
       position: absolute;
       border-radius: 50%;
-      border: 1px dashed rgba(255, 255, 255, 0.22);
+      border: 1.5px dashed rgba(255, 255, 255, 0.26);
       transform-style: preserve-3d;
       pointer-events: none;
     }
 
-    /* Orbit 1: Inner Orbit - Mercury / Venus */
+    /* Orbit 1: Inner Orbit - Venus */
     .orbit-inner {
-      width: clamp(170px, 27vw, 270px);
-      height: clamp(80px, 13vw, 130px);
-      border-color: rgba(251, 191, 36, 0.32);
-      animation: orbitSpinH 5.5s linear infinite;
+      width: clamp(210px, 48vw, 360px);
+      height: clamp(100px, 22vw, 170px);
+      border-color: rgba(251, 191, 36, 0.38);
+      animation: orbitSpinH 5s linear infinite;
     }
     /* Orbit 2: Earth & Moon Orbit */
     .orbit-earth {
-      width: clamp(230px, 37vw, 370px);
-      height: clamp(110px, 18vw, 180px);
-      border-color: rgba(56, 189, 248, 0.4);
-      animation: orbitSpinH 9s linear infinite;
+      width: clamp(285px, 64vw, 480px);
+      height: clamp(135px, 30vw, 225px);
+      border-color: rgba(56, 189, 248, 0.5);
+      animation: orbitSpinH 8.5s linear infinite;
     }
-    /* Orbit 3: Mars & Asteroid Ring */
+    /* Orbit 3: Mars */
     .orbit-mars {
-      width: clamp(290px, 45vw, 440px);
-      height: clamp(140px, 23vw, 230px);
-      border-color: rgba(239, 68, 68, 0.32);
-      animation: orbitSpinH 13s linear infinite;
+      width: clamp(350px, 74vw, 580px);
+      height: clamp(165px, 36vw, 275px);
+      border-color: rgba(239, 68, 68, 0.38);
+      animation: orbitSpinH 12s linear infinite;
     }
-    /* Orbit 4: Outer Giant Planets (Jupiter & Saturn with Rings) */
+    /* Orbit 4: Jupiter & Saturn */
     .orbit-outer {
-      width: clamp(350px, 54vw, 530px);
-      height: clamp(170px, 28vw, 280px);
-      border-color: rgba(168, 85, 247, 0.3);
-      animation: orbitSpinH 18s linear infinite;
+      width: clamp(420px, 86vw, 680px);
+      height: clamp(200px, 42vw, 325px);
+      border-color: rgba(168, 85, 247, 0.36);
+      animation: orbitSpinH 16.5s linear infinite;
     }
 
     @keyframes orbitSpinH {
-      from { transform: rotateX(68deg) rotateZ(0deg); }
-      to { transform: rotateX(68deg) rotateZ(360deg); }
+      from { transform: rotateX(66deg) rotateZ(0deg); }
+      to { transform: rotateX(66deg) rotateZ(360deg); }
     }
 
     /* Planet Holders positioned along the orbit rim */
@@ -314,140 +323,132 @@
       transform: translate(-50%, -50%);
       transform-style: preserve-3d;
     }
-    .planet-anchor.right {
-      left: 100%;
-    }
-    .planet-anchor.top {
-      left: 50%;
-      top: 0;
-    }
-    .planet-anchor.bottom {
-      left: 50%;
-      top: 100%;
-    }
+    .planet-anchor.right { left: 100%; }
+    .planet-anchor.top { left: 50%; top: 0; }
+    .planet-anchor.bottom { left: 50%; top: 100%; }
 
     /* Keep planets spherical regardless of orbit 3D tilt */
     .planet-sphere {
       border-radius: 50%;
-      transform: rotateZ(0deg) rotateX(-68deg);
-      box-shadow: inset -3px -3px 8px rgba(0,0,0,0.8);
+      transform: rotateZ(0deg) rotateX(-66deg);
+      box-shadow: inset -4px -4px 10px rgba(0,0,0,0.85);
       position: relative;
     }
 
-    /* Venus (Golden Morning Star) */
+    /* Venus (Golden Morning Star) - Bigger */
     .planet-venus {
-      width: 16px;
-      height: 16px;
+      width: clamp(20px, 3.8vw, 30px);
+      height: clamp(20px, 3.8vw, 30px);
       background: radial-gradient(circle at 35% 35%, #fffbeb 0%, #fde047 50%, #d97706 100%);
-      box-shadow: 0 0 12px rgba(253, 224, 71, 0.8), inset -2px -2px 6px rgba(0,0,0,0.6);
+      box-shadow: 0 0 16px rgba(253, 224, 71, 0.9), inset -3px -3px 8px rgba(0,0,0,0.7);
     }
 
-    /* Earth (🌎 Vibrant Blue Ocean + Green Continents + Cloud Glow) */
+    /* Earth (🌎 Vibrant Blue Ocean + Green Continents + Cloud Glow) - Much Bigger */
     .planet-earth {
-      width: clamp(30px, 4.8vw, 46px);
-      height: clamp(30px, 4.8vw, 46px);
+      width: clamp(40px, 7.5vw, 62px);
+      height: clamp(40px, 7.5vw, 62px);
       background:
-        radial-gradient(circle at 30% 28%, rgba(255,255,255,0.6) 0%, transparent 25%),
-        radial-gradient(circle at 65% 40%, rgba(34,197,94,0.9) 0%, rgba(22,163,74,0.8) 28%, transparent 32%),
-        radial-gradient(circle at 30% 68%, rgba(74,222,128,0.85) 0%, rgba(21,128,61,0.8) 24%, transparent 28%),
+        radial-gradient(circle at 30% 28%, rgba(255,255,255,0.7) 0%, transparent 26%),
+        radial-gradient(circle at 65% 40%, rgba(34,197,94,0.95) 0%, rgba(22,163,74,0.85) 30%, transparent 34%),
+        radial-gradient(circle at 30% 68%, rgba(74,222,128,0.9) 0%, rgba(21,128,61,0.85) 26%, transparent 30%),
         radial-gradient(circle at 50% 50%, #38bdf8 0%, #0284c7 60%, #1e3a8a 100%);
       box-shadow:
-        0 0 16px rgba(56, 189, 248, 0.95),
-        0 0 32px rgba(34, 197, 94, 0.4),
-        inset -5px -5px 12px rgba(2, 6, 23, 0.85);
+        0 0 22px rgba(56, 189, 248, 1),
+        0 0 45px rgba(34, 197, 94, 0.45),
+        inset -6px -6px 14px rgba(2, 6, 23, 0.9);
       animation: planetSelfSpin 6s linear infinite;
     }
     @keyframes planetSelfSpin {
-      from { transform: rotateZ(0deg) rotateX(-68deg) rotate(0deg); }
-      to { transform: rotateZ(0deg) rotateX(-68deg) rotate(360deg); }
+      from { transform: rotateZ(0deg) rotateX(-66deg) rotate(0deg); }
+      to { transform: rotateZ(0deg) rotateX(-66deg) rotate(360deg); }
     }
 
     /* Moon orbiting near Earth */
     .planet-moon {
       position: absolute;
-      width: 9px;
-      height: 9px;
+      width: clamp(10px, 2vw, 15px);
+      height: clamp(10px, 2vw, 15px);
       border-radius: 50%;
       background: #e2e8f0;
-      box-shadow: 0 0 6px #ffffff;
-      top: -12px;
-      left: -8px;
+      box-shadow: 0 0 8px #ffffff;
+      top: -14px;
+      left: -10px;
     }
 
-    /* Mars (Red Planet) */
+    /* Mars (Red Planet) - Bigger */
     .planet-mars {
-      width: 18px;
-      height: 18px;
+      width: clamp(24px, 4.4vw, 36px);
+      height: clamp(24px, 4.4vw, 36px);
       background: radial-gradient(circle at 35% 35%, #fecaca 0%, #ef4444 55%, #991b1b 100%);
-      box-shadow: 0 0 14px rgba(239, 68, 68, 0.8), inset -3px -3px 6px rgba(0,0,0,0.7);
+      box-shadow: 0 0 18px rgba(239, 68, 68, 0.85), inset -4px -4px 8px rgba(0,0,0,0.75);
     }
 
-    /* Jupiter (Striped Gas Giant) */
+    /* Jupiter (Striped Gas Giant) - Much Bigger */
     .planet-jupiter {
-      width: clamp(34px, 5.2vw, 52px);
-      height: clamp(34px, 5.2vw, 52px);
+      width: clamp(44px, 8vw, 68px);
+      height: clamp(44px, 8vw, 68px);
       background:
         repeating-linear-gradient(
           to bottom,
           #fed7aa,
-          #fed7aa 6px,
-          #ea580c 6px,
-          #c2410c 11px,
-          #fde047 11px,
-          #d97706 17px
+          #fed7aa 7px,
+          #ea580c 7px,
+          #c2410c 13px,
+          #fde047 13px,
+          #d97706 20px
         );
-      box-shadow: 0 0 20px rgba(249, 115, 22, 0.7), inset -5px -5px 10px rgba(0,0,0,0.8);
+      box-shadow: 0 0 25px rgba(249, 115, 22, 0.75), inset -6px -6px 14px rgba(0,0,0,0.85);
     }
 
-    /* Saturn (Golden Planet with Iconic Cosmic Rings 🪐) */
+    /* Saturn (Golden Planet with Iconic Large Rings 🪐) - Much Bigger */
     .planet-saturn-wrap {
       position: relative;
-      width: clamp(48px, 7vw, 68px);
-      height: clamp(28px, 4.5vw, 42px);
+      width: clamp(64px, 11vw, 96px);
+      height: clamp(38px, 6.2vw, 56px);
       display: flex;
       align-items: center;
       justify-content: center;
-      transform: rotateZ(0deg) rotateX(-68deg);
+      transform: rotateZ(0deg) rotateX(-66deg);
     }
     .saturn-body {
-      width: clamp(22px, 3.4vw, 32px);
-      height: clamp(22px, 3.4vw, 32px);
+      width: clamp(30px, 5.2vw, 44px);
+      height: clamp(30px, 5.2vw, 44px);
       border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #f59e0b 60%, #78350f 100%);
-      box-shadow: 0 0 14px rgba(245, 158, 11, 0.7), inset -3px -3px 8px rgba(0,0,0,0.8);
+      box-shadow: 0 0 18px rgba(245, 158, 11, 0.8), inset -4px -4px 10px rgba(0,0,0,0.85);
       position: relative;
       z-index: 2;
     }
     .saturn-ring {
       position: absolute;
-      width: clamp(48px, 7vw, 68px);
-      height: clamp(14px, 2.2vw, 22px);
+      width: clamp(64px, 11vw, 96px);
+      height: clamp(18px, 3vw, 28px);
       border-radius: 50%;
-      border: 3.5px solid rgba(251, 191, 36, 0.85);
-      border-top-color: rgba(245, 158, 11, 0.45);
-      box-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+      border: 4px solid rgba(251, 191, 36, 0.9);
+      border-top-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.75);
       transform: rotate(-18deg);
       pointer-events: none;
     }
 
     /* High-contrast sacred Geeta Verse */
     .om-gita-lines {
-      max-width: 860px;
-      padding: 8px 18px;
-      font-size: clamp(15px, 2.3vw, 25px);
+      max-width: 900px;
+      padding: 6px 16px;
+      font-size: clamp(15px, 2.4vw, 26px);
       font-weight: 800;
       line-height: 1.5;
       color: #FDE68A;
       text-shadow:
-        0 2px 14px rgba(0, 0, 0, 0.95),
-        0 0 25px rgba(245, 158, 11, 0.4);
+        0 2px 16px rgba(0, 0, 0, 0.95),
+        0 0 25px rgba(245, 158, 11, 0.45);
     }
 
     .om-intro-bottom {
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 680px;
+      max-width: 720px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -464,7 +465,7 @@
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #38BDF8, #FFB800, #22C55E);
-      transition: width 0.25s linear;
+      transition: width 0.2s linear;
     }
     .om-bottom-row {
       width: 100%;
@@ -483,19 +484,19 @@
       background: linear-gradient(135deg, #22C55E, #16A34A);
       color: #041A0C;
       border: none;
-      padding: 9px 20px;
+      padding: 9px 22px;
       border-radius: 10px;
       font-size: 13px;
       font-weight: 900;
       cursor: pointer;
-      box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+      box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
     }
 </style>
 </head>
 <body>
 
-<!-- FULL-SCREEN 100% OPAQUE COSMIC GALAXY + 3D SOLAR SYSTEM + 3D ROTATING OM -->
-<div id="omIntroOverlay" role="dialog" aria-label="Om Software Cosmic Intro">
+<!-- FULL-SCREEN 100% OPAQUE COSMIC GALAXY + GRAND 3D SOLAR SYSTEM + BIG ROTATING OM -->
+<div id="omIntroOverlay" role="dialog" aria-label="Welcome To Om Software Cosmic Intro">
   <div class="cosmos-backdrop"></div>
   <div class="galaxy-spiral-mesh"></div>
   <div class="cosmos-stars-field"></div>
@@ -503,8 +504,9 @@
   <div class="shooting-star s2"></div>
 
   <div class="om-intro-top">
-    <div class="om-software-pill">ब्रह्माण्ड &bull; Cosmic Full Screen Experience</div>
-    <div class="om-software-title" id="introSoftwareName">OM SOFTWARE</div>
+    <div class="om-software-pill">Official Portal &bull; Enterprise Experience</div>
+    <div class="om-software-title" id="introSoftwareName">WELCOME TO OM SOFTWARE</div>
+    <div class="om-tagline-hero">Trust &bull; Technology &bull; Power of Innovation</div>
     <div class="om-org-sub" id="introOrgSubtitle">Universal Gym &amp; Business Management System</div>
   </div>
 
@@ -548,7 +550,7 @@
         </div>
       </div>
 
-      <!-- Center 3D Upright Rotating Om Symbol (Never Flips Upside Down!) -->
+      <!-- Center Big 3D Upright Rotating Om Symbol (Never Flips Upside Down!) -->
       <div class="om-3d-glyph" aria-hidden="true">ॐ</div>
     </div>
 
@@ -564,7 +566,7 @@
       <div class="om-progress-fill" id="omIntroProgress"></div>
     </div>
     <div class="om-bottom-row">
-      <div class="om-timer-status" id="omIntroStatus">ॐ ब्रह्माण्ड — Dashboard खुल रहा है… (20s)</div>
+      <div class="om-timer-status" id="omIntroStatus">ॐ ब्रह्माण्ड — Dashboard खुल रहा है… (10s)</div>
       <button type="button" class="om-btn-enter" onclick="finishOmIntroNow()">Dashboard पर चलें →</button>
     </div>
   </div>
@@ -762,7 +764,7 @@
   }
 
   
-  /* ---------- Full-Screen Cosmic Galaxy + 3D Solar System + 3D Rotating Om Intro ---------- */
+  /* ---------- Full-Screen Cosmic Galaxy + 3D Solar System + 3D Rotating Om Intro (10s) ---------- */
   var introTimer = null;
   var introInterval = null;
   var introTargetUrl = 'index.html';
@@ -787,7 +789,7 @@
     var prof = {};
     try { prof = JSON.parse(LS.getItem('om_org_profile') || '{}') || {}; } catch (e) {}
     var orgLabel = (prof.orgName || prof.gymName || '').trim();
-    if ($('introSoftwareName')) $('introSoftwareName').textContent = 'OM SOFTWARE';
+    if ($('introSoftwareName')) $('introSoftwareName').textContent = 'WELCOME TO OM SOFTWARE';
     if ($('introOrgSubtitle')) {
       $('introOrgSubtitle').textContent = orgLabel
         ? (orgLabel + ' • Universal Gym & Business Management System')
@@ -798,7 +800,8 @@
     if (!ov) { location.href = introTargetUrl; return; }
     ov.classList.add('show');
 
-    var durationSec = 20;
+    // Exactly 10 seconds duration
+    var durationSec = 10;
     var elapsedMs = 0;
     var bar = $('omIntroProgress');
     var st = $('omIntroStatus');
@@ -807,12 +810,12 @@
     if (introTimer) clearTimeout(introTimer);
 
     introInterval = setInterval(function () {
-      elapsedMs += 200;
+      elapsedMs += 100;
       var pct = Math.min(100, (elapsedMs / (durationSec * 1000)) * 100);
       var rem = Math.max(0, Math.ceil((durationSec * 1000 - elapsedMs) / 1000));
       if (bar) bar.style.width = pct + '%';
       if (st) st.textContent = 'ॐ ब्रह्माण्ड — Dashboard खुल रहा है… (' + rem + 's)';
-    }, 200);
+    }, 100);
 
     introTimer = setTimeout(function () {
       finishOmIntroNow();
