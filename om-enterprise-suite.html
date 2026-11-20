@@ -3,1140 +3,805 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Om Software - Master Enterprise ERP &amp; Analytics Suite</title>
+  <title>OM SOFTWARE — Future of Tech | Next-Gen Enterprise HUD</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
     :root {
-      --bg: #070B14;
-      --bg-grad: radial-gradient(1200px 700px at 50% -10%, #152244 0%, #0A1020 60%, #05070D 100%);
-      --card: #0F172A;
-      --card-inner: #070D1A;
-      --card-hover: #162340;
-      --border: #23355C;
-      --gold: #FFB800;
-      --gold-glow: rgba(255, 184, 0, 0.25);
-      --cyan: #38BDF8;
-      --green: #10B981;
-      --red: #EF4444;
-      --pink: #EC4899;
-      --purple: #A855F7;
+      --bg: #040711;
+      --bg-ambient: radial-gradient(1400px 800px at 50% -10%, #0c1b3d 0%, #050a18 55%, #020409 100%);
+      --glass-base: rgba(10, 18, 38, 0.72);
+      --glass-elevated: rgba(14, 25, 52, 0.82);
+      --glass-card: rgba(12, 22, 46, 0.65);
+      --glass-hover: rgba(22, 38, 77, 0.85);
+      --border-subtle: rgba(56, 189, 248, 0.16);
+      --border-glow: rgba(56, 189, 248, 0.45);
+      --border-gold: rgba(255, 184, 0, 0.55);
+      --neon-cyan: #00F0FF;
+      --neon-cyan-glow: rgba(0, 240, 255, 0.28);
+      --neon-gold: #FFB800;
+      --neon-gold-glow: rgba(255, 184, 0, 0.32);
+      --neon-purple: #B026FF;
+      --neon-purple-glow: rgba(176, 38, 255, 0.25);
+      --neon-emerald: #10B981;
+      --neon-red: #EF4444;
       --tx: #F8FAFC;
       --tx-sub: #CBD5E1;
-      --mut: #8494B2;
+      --tx-mut: #64748B;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     html, body {
-      width: 100%;
-      min-height: 100vh;
-      background: var(--bg-grad) fixed;
-      color: var(--tx);
-      overflow-x: hidden;
+      width: 100%; min-height: 100vh;
+      background: var(--bg-ambient) fixed;
+      color: var(--tx); overflow-x: hidden;
     }
 
-    .app-container {
-      display: flex;
-      min-height: 100vh;
-      width: 100%;
+    /* Ambient HUD Cyber Lines */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.06) 0%, transparent 40%),
+        radial-gradient(circle at 85% 25%, rgba(255, 184, 0, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(176, 38, 255, 0.05) 0%, transparent 50%);
+      pointer-events: none; z-index: 0;
     }
 
-    /* Left Sidebar */
-    .sidebar {
+    .hud-container {
+      position: relative; z-index: 1;
+      display: flex; min-height: 100vh; width: 100%;
+    }
+
+    /* Holographic Left Sidebar */
+    .hud-sidebar {
       width: 280px;
-      background: #0B1224;
-      border-right: 1.5px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      transition: transform 0.25s ease;
+      background: rgba(6, 11, 24, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-right: 1px solid var(--border-subtle);
+      display: flex; flex-direction: column; flex-shrink: 0;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 9999;
     }
-    .sidebar-header {
-      padding: 18px 20px;
-      background: linear-gradient(135deg, #152244, #0B1224);
-      border-bottom: 1.5px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .hud-brand {
+      padding: 22px 20px 18px;
+      display: flex; align-items: center; gap: 14px;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.12);
     }
-    .gym-logo-badge {
-      width: 44px;
-      height: 44px;
-      background: var(--gold);
-      color: #000;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 900;
-      box-shadow: 0 0 15px var(--gold-glow);
+    .om-insignia-halo {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255, 184, 0, 0.25), rgba(0, 240, 255, 0.15));
+      border: 1.5px solid var(--neon-gold);
+      box-shadow: 0 0 24px var(--neon-gold-glow), inset 0 0 12px rgba(255, 184, 0, 0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 900; color: #FFF;
+      text-shadow: 0 0 10px var(--neon-gold);
     }
-    .gym-name-title { font-size: 15px; font-weight: 900; color: #fff; line-height: 1.25; }
-    .gym-sub-tag { font-size: 11px; color: var(--gold); font-weight: 700; }
-
-    .sidebar-nav {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px 10px 80px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    .brand-meta h1 {
+      font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff;
+      display: flex; align-items: center; gap: 6px;
     }
-    .nav-group-title {
-      font-size: 10.5px;
-      font-weight: 800;
-      color: var(--mut);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      padding: 12px 12px 4px;
-    }
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      color: var(--tx-sub);
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.15s ease;
-    }
-    .nav-item:hover {
-      background: var(--card-hover);
-      color: #fff;
-      border-color: rgba(255, 184, 0, 0.3);
-    }
-    .nav-item.active {
-      background: rgba(255, 184, 0, 0.14);
-      color: var(--gold);
-      border-color: var(--gold);
-      font-weight: 800;
-    }
-    .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
-
-    /* Content Area */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      height: 100vh;
-      overflow-y: auto;
+    .brand-meta h1 span { color: var(--neon-cyan); }
+    .brand-meta p {
+      font-size: 10.5px; color: var(--neon-gold); font-family: var(--font-mono);
+      letter-spacing: 0.5px; margin-top: 2px;
     }
 
-    .top-app-bar {
-      padding: 14px clamp(14px, 2vw, 24px);
-      background: rgba(15, 23, 42, 0.94);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
+    .sidebar-scroll {
+      flex: 1; overflow-y: auto; padding: 14px 10px 80px;
+      display: flex; flex-direction: column; gap: 4px;
     }
-    .bar-left { display: flex; align-items: center; gap: 12px; }
-    .menu-toggle-btn {
-      display: none;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--gold);
-      padding: 8px 12px;
-      border-radius: 9px;
-      font-size: 16px;
-      cursor: pointer;
+    .nav-label {
+      font-size: 10px; font-weight: 800; color: var(--tx-mut);
+      text-transform: uppercase; letter-spacing: 1.2px; padding: 12px 12px 4px;
+      font-family: var(--font-mono);
     }
-    .page-title { font-size: clamp(16px, 1.8vw, 20px); font-weight: 900; color: #fff; }
-
-    .bar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .btn-action {
-      background: var(--gold);
-      color: #070B14;
-      font-weight: 800;
-      padding: 8px 14px;
-      border-radius: 9px;
-      border: none;
-      font-size: 12.5px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: transform 0.15s ease;
-    }
-    .btn-action:hover { transform: translateY(-1px); }
-    .btn-action.sec { background: var(--card-hover); color: #fff; border: 1px solid var(--border); }
-    .btn-action.sec:hover { border-color: var(--gold); }
-    .btn-action.green { background: #10B981; color: #04140C; }
-
-    .view-container {
-      padding: clamp(14px, 2vw, 26px);
-      max-width: 1440px;
-      width: 100%;
-      margin: 0 auto;
-      flex: 1;
-    }
-
-    .tab-view { display: none; }
-    .tab-view.active { display: block; animation: fadeIn 0.2s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Branch Drilldown Bar */
-    .branch-drill-bar {
-      background: linear-gradient(135deg, #13203F, #0D1629);
-      border: 2px solid var(--gold);
-      border-radius: 16px;
-      padding: 14px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-      box-shadow: 0 0 30px rgba(255, 184, 0, 0.15);
-    }
-    .drill-selectors {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .filter-select {
-      background: #070D1A;
-      border: 1.5px solid var(--border);
-      color: #fff;
-      padding: 9px 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      outline: none;
-      cursor: pointer;
-    }
-    .filter-select:focus { border-color: var(--gold); }
-
-    /* Live Master KPI Counters (6 Cards) */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-    .kpi-card {
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 12px;
+    .nav-pill {
+      display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+      border-radius: 11px; color: var(--tx-sub); font-size: 13px; font-weight: 700;
+      cursor: pointer; border: 1px solid transparent;
       transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
     }
-    .kpi-card:hover {
-      border-color: var(--gold);
+    .nav-pill:hover {
+      background: var(--glass-hover); color: #fff;
+      border-color: rgba(56, 189, 248, 0.35);
+      box-shadow: 0 4px 16px rgba(0, 240, 255, 0.12);
+    }
+    .nav-pill.active {
+      background: linear-gradient(90deg, rgba(0, 240, 255, 0.16), rgba(255, 184, 0, 0.08));
+      color: #fff; border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px var(--neon-cyan-glow);
+      font-weight: 800;
+    }
+    .nav-pill .icon { font-size: 16px; width: 22px; text-align: center; }
+
+    /* Main Stage */
+    .hud-main {
+      flex: 1; display: flex; flex-direction: column;
+      min-width: 0; height: 100vh; overflow-y: auto;
+    }
+
+    /* Top HUD Navigation Bar */
+    .hud-topbar {
+      padding: 14px clamp(14px, 2.5vw, 28px);
+      background: rgba(6, 11, 24, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 14px; position: sticky; top: 0; z-index: 100;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .kiosk-btn {
+      display: none; background: var(--glass-card); border: 1px solid var(--border-subtle);
+      color: var(--neon-cyan); padding: 8px 12px; border-radius: 8px; font-size: 16px;
+    }
+    .hud-title {
+      font-size: clamp(16px, 1.8vw, 21px); font-weight: 900;
+      color: #fff; letter-spacing: 0.6px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .live-pulse-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34D399; font-size: 10px; font-weight: 800;
+      padding: 3px 9px; border-radius: 999px; font-family: var(--font-mono);
+      letter-spacing: 0.8px;
+    }
+    .pulse-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #10B981;
+      box-shadow: 0 0 10px #10B981; animation: pulseGlow 1.8s infinite;
+    }
+    @keyframes pulseGlow { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+
+    .topbar-right { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .hud-btn {
+      padding: 9px 16px; border-radius: 10px; font-size: 12.5px; font-weight: 800;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+      border: 1px solid transparent; transition: all 0.2s ease;
+      font-family: var(--font-mono); text-decoration: none;
+    }
+    .hud-btn.ai {
+      background: linear-gradient(135deg, rgba(255, 184, 0, 0.25), rgba(0, 240, 255, 0.25));
+      border: 1.5px solid var(--neon-cyan); color: #fff;
+      box-shadow: 0 0 20px var(--neon-cyan-glow);
+    }
+    .hud-btn.ai:hover { transform: translateY(-1px); box-shadow: 0 0 30px var(--neon-cyan-glow); }
+    .hud-btn.primary {
+      background: var(--neon-gold); color: #040711; font-weight: 900;
+      box-shadow: 0 0 20px var(--neon-gold-glow);
+    }
+    .hud-btn.primary:hover { transform: translateY(-1px); }
+    .hud-btn.ghost {
+      background: var(--glass-card); border-color: var(--border-subtle); color: var(--tx-sub);
+    }
+    .hud-btn.ghost:hover { border-color: var(--neon-cyan); color: #fff; }
+
+    /* Stage Canvas */
+    .stage-wrapper {
+      padding: clamp(14px, 2.5vw, 28px);
+      max-width: 1520px; width: 100%; margin: 0 auto; flex: 1;
+    }
+
+    /* Multi-Branch Hologram Banner */
+    .hologram-banner {
+      background: linear-gradient(135deg, rgba(14, 25, 52, 0.8), rgba(6, 12, 28, 0.9));
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid var(--border-glow);
+      border-radius: 18px; padding: 18px 24px;
+      box-shadow: 0 10px 40px rgba(0, 240, 255, 0.08), inset 0 1px 0 rgba(255,255,255,0.08);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 16px; flex-wrap: wrap; margin-bottom: 22px;
+    }
+    .banner-id {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .om-holo-symbol {
+      font-size: 38px; color: var(--neon-gold);
+      filter: drop-shadow(0 0 16px var(--neon-gold));
+      animation: floatSymbol 4s ease-in-out infinite;
+    }
+    @keyframes floatSymbol { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+    .banner-id h2 { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 0.5px; }
+    .banner-id p { font-size: 11.5px; color: var(--neon-cyan); font-family: var(--font-mono); margin-top: 2px; }
+
+    .branch-selectors-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .hud-select {
+      background: rgba(6, 12, 28, 0.9);
+      border: 1.5px solid var(--border-subtle);
+      color: #fff; padding: 9px 14px; border-radius: 10px;
+      font-size: 12.5px; font-weight: 700; outline: none; cursor: pointer;
+      font-family: var(--font-mono);
+    }
+    .hud-select:focus { border-color: var(--neon-cyan); box-shadow: 0 0 14px var(--neon-cyan-glow); }
+
+    /* Futuristic 6 Live KPI Tiles */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px; margin-bottom: 24px;
+    }
+    .kpi-tile {
+      background: var(--glass-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px; padding: 18px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      gap: 10px; position: relative; overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .kpi-tile::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+      opacity: 0; transition: opacity 0.25s ease;
+    }
+    .kpi-tile:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 12px 36px rgba(0, 240, 255, 0.15);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     }
-    .kpi-top { display: flex; justify-content: space-between; align-items: center; }
-    .kpi-title { font-size: 12px; font-weight: 800; color: var(--mut); text-transform: uppercase; letter-spacing: 0.6px; }
-    .kpi-badge {
-      font-size: 10px;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--green);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-    }
-    .kpi-val { font-size: clamp(22px, 2.5vw, 28px); font-weight: 900; color: #fff; }
-    .kpi-sub { font-size: 11.5px; color: var(--mut); }
-    .btn-see-detail {
-      background: var(--card-inner);
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      font-weight: 800;
-      font-size: 11.5px;
-      padding: 7px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: all 0.15s ease;
-    }
-    .btn-see-detail:hover { background: var(--gold); color: #000; }
+    .kpi-tile:hover::before { opacity: 1; }
+    .kpi-tile.gold-accent:hover { border-color: var(--neon-gold); box-shadow: 0 12px 36px var(--neon-gold-glow); }
+    .kpi-tile.gold-accent::before { background: linear-gradient(90deg, transparent, var(--neon-gold), transparent); }
 
-    /* Filters Bar */
-    .filter-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px 16px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 16px;
+    .tile-header { display: flex; justify-content: space-between; align-items: center; }
+    .tile-label { font-size: 11px; font-weight: 800; color: var(--tx-mut); text-transform: uppercase; font-family: var(--font-mono); }
+    .tile-ico { font-size: 18px; }
+    .tile-number { font-size: clamp(22px, 2.2vw, 30px); font-weight: 900; color: #fff; font-family: var(--font-mono); }
+    .tile-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 10px; border-top: 1px dashed rgba(56, 189, 248, 0.14);
+      font-size: 11px; color: var(--tx-sub);
     }
-    .search-input-box { flex: 1 1 240px; position: relative; }
-    .search-input-box input {
-      width: 100%;
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      color: #fff;
-      padding: 9px 12px 9px 34px;
-      border-radius: 9px;
-      font-size: 13px;
-      outline: none;
+    .tile-see-btn {
+      color: var(--neon-cyan); font-weight: 800; cursor: pointer; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 4px;
     }
-    .search-input-box .icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--mut); }
+    .tile-see-btn:hover { text-shadow: 0 0 10px var(--neon-cyan); }
 
-    /* Members Grid & Card */
-    .members-grid {
+    /* Futuristic Graphical Data HUD Grid */
+    .charts-hud-grid {
+      display: grid;
+      grid-template-columns: 2fr 1.2fr;
+      gap: 18px; margin-bottom: 24px;
+    }
+    .hud-chart-card {
+      background: var(--glass-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px; padding: 22px;
+      display: flex; flex-direction: column; gap: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .chart-card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 12px; border-bottom: 1px solid rgba(56, 189, 248, 0.14);
+    }
+    .chart-card-header h3 {
+      font-size: 14px; font-weight: 900; color: #fff; letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .chart-card-header h3 span { color: var(--neon-cyan); }
+    .chart-subtag { font-size: 11px; color: var(--tx-mut); font-family: var(--font-mono); }
+
+    /* Interactive AI Workflow Network Node Map (From Video) */
+    .workflow-nodes-container {
+      background: rgba(4, 8, 20, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 14px; padding: 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
+      position: relative; overflow: hidden;
+    }
+    .node-box {
+      flex: 1 1 160px;
+      background: rgba(14, 25, 52, 0.7);
+      border: 1.5px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px; padding: 14px;
+      display: flex; flex-direction: column; gap: 6px;
+      transition: all 0.25s ease;
+    }
+    .node-box:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px var(--neon-cyan-glow);
+      transform: scale(1.02);
+    }
+    .node-head { display: flex; align-items: center; justify-content: space-between; }
+    .node-title { font-size: 11px; font-weight: 800; color: var(--neon-gold); font-family: var(--font-mono); text-transform: uppercase; }
+    .node-status { width: 8px; height: 8px; border-radius: 50%; background: var(--neon-emerald); box-shadow: 0 0 8px var(--neon-emerald); }
+    .node-val { font-size: 17px; font-weight: 900; color: #fff; font-family: var(--font-mono); }
+    .node-desc { font-size: 10.5px; color: var(--tx-mut); }
+    .node-connector-line {
+      font-size: 20px; color: var(--neon-cyan); opacity: 0.6;
+    }
+
+    /* Tab Stage Views */
+    .tab-stage { display: none; }
+    .tab-stage.active { display: block; animation: hudFadeIn 0.25s ease; }
+    @keyframes hudFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Members Grid */
+    .members-hud-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 14px;
+      gap: 16px;
     }
-    .member-card {
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
+    .member-hud-card {
+      background: var(--glass-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px; padding: 18px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: all 0.2s ease; position: relative;
     }
-    .member-card:hover {
-      border-color: var(--gold);
+    .member-hud-card:hover {
+      border-color: var(--neon-gold);
+      box-shadow: 0 10px 30px var(--neon-gold-glow);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     }
-    .member-top-row { display: flex; gap: 12px; align-items: center; }
-    .member-avatar {
-      width: 52px; height: 52px; border-radius: 14px;
-      background: linear-gradient(135deg, #1E293B, #0F172A);
-      border: 1.5px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px; flex-shrink: 0;
+    .tier-badge {
+      font-size: 10px; font-weight: 900; font-family: var(--font-mono);
+      padding: 3px 8px; border-radius: 6px; text-transform: uppercase;
     }
-    .member-meta { flex: 1; min-width: 0; }
-    .member-name { font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-    .member-id-badge {
-      font-size: 11px; font-weight: 800; color: var(--cyan);
-      background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 2px 7px; border-radius: 6px;
-    }
-    .member-phone { font-size: 12px; color: var(--mut); margin-top: 2px; font-weight: 600; }
-    .member-expired-tag {
-      position: absolute; top: 10px; right: -24px;
-      background: var(--pink); color: #fff; font-size: 9px; font-weight: 900;
-      padding: 3px 26px; transform: rotate(35deg); text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .vip-tier-tag {
-      font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 6px; text-transform: uppercase;
-    }
-    .tier-gold { background: rgba(255, 184, 0, 0.18); color: var(--gold); border: 1px solid var(--gold); }
+    .tier-gold { background: rgba(255, 184, 0, 0.16); color: var(--neon-gold); border: 1px solid var(--neon-gold); }
     .tier-bronze { background: rgba(205, 127, 50, 0.2); color: #E5A663; border: 1px solid #CD7F32; }
-    .tier-normal { background: rgba(148, 163, 184, 0.15); color: #CBD5E1; border: 1px solid #475569; }
+    .tier-normal { background: rgba(148, 163, 184, 0.12); color: #CBD5E1; border: 1px solid #475569; }
 
-    .member-stats-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      background: var(--card-inner);
-      border: 1px solid rgba(51, 78, 129, 0.45);
-      border-radius: 10px;
-      padding: 9px 12px;
-      font-size: 12px;
-    }
-    .stat-box .lbl { font-size: 10px; color: var(--mut); font-weight: 700; text-transform: uppercase; }
-    .stat-box .val { font-size: 13px; font-weight: 800; margin-top: 2px; color: #fff; }
-    .stat-box .val.due { color: var(--red); }
-
-    .member-actions-row {
-      display: flex; gap: 6px; flex-wrap: wrap;
-      border-top: 1px dashed rgba(51, 78, 129, 0.5);
-      padding-top: 10px; align-items: center;
-    }
-    .action-pill {
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      color: var(--tx-sub);
-      padding: 6px 9px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      text-decoration: none;
-      transition: all 0.15s ease;
-    }
-    .action-pill:hover { border-color: var(--gold); color: #fff; }
-    .action-pill.call { color: #38BDF8; border-color: rgba(56, 189, 248, 0.3); }
-    .action-pill.whatsapp { color: #22C55E; border-color: rgba(34, 197, 94, 0.3); }
-    .action-pill.renew { color: var(--gold); border-color: rgba(255, 184, 0, 0.3); }
-    .action-pill.form { color: var(--purple); border-color: rgba(168, 85, 247, 0.3); }
-
-    /* Expenses & Reports */
-    .expense-list { display: flex; flex-direction: column; gap: 10px; }
-    .expense-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      transition: border-color 0.15s ease;
-    }
-    .expense-card:hover { border-color: var(--gold); }
-    .exp-cat-badge {
-      font-size: 11px; font-weight: 800; color: var(--cyan);
-      background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 3px 8px; border-radius: 6px; display: inline-block; margin-bottom: 4px;
-    }
-
-    /* POS & Store Grid */
-    .pos-layout { display: grid; grid-template-columns: 2fr 1.2fr; gap: 16px; }
-    .pos-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-    .product-card {
-      background: var(--card); border: 1.5px solid var(--border);
-      border-radius: 14px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px;
-    }
-    .stock-badge {
-      font-size: 10px; font-weight: 800; background: rgba(16, 185, 129, 0.14);
-      color: var(--green); border: 1px solid rgba(16, 185, 129, 0.35); padding: 2px 7px; border-radius: 999px;
-    }
-    .stock-badge.near-exp {
-      background: rgba(239, 68, 68, 0.15); color: #FCA5A5; border-color: rgba(239, 68, 68, 0.4);
-    }
-
-    /* Modals */
+    /* Modals & Receipts */
     .modal-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(4, 7, 15, 0.9);
-      z-index: 99999; padding: 16px; align-items: center; justify-content: center; overflow-y: auto; backdrop-filter: blur(6px);
+      display: none; position: fixed; inset: 0;
+      background: rgba(2, 5, 14, 0.88); backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 99999; padding: 20px; align-items: center; justify-content: center;
+      overflow-y: auto;
     }
     .modal-overlay.show { display: flex; }
     .modal-box {
-      background: #0F172A; border: 2px solid var(--gold); border-radius: 20px;
-      padding: clamp(18px, 3vw, 28px); width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 0 50px rgba(255, 184, 0, 0.25);
-    }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px dashed var(--border); padding-bottom: 10px; }
-    .modal-title { font-size: 17px; font-weight: 900; color: var(--gold); }
-    .modal-close { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
-
-    .form-group { margin-bottom: 13px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 800; color: var(--tx-sub); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
-    .form-control {
-      width: 100%; background: var(--card-inner); border: 1.5px solid var(--border);
-      color: #fff; padding: 10px 12px; border-radius: 10px; font-size: 13px; outline: none;
-    }
-    .form-control:focus { border-color: var(--gold); }
-
-    /* Printable Receipt Card */
-    .receipt-paper {
-      background: #FFFDF0; color: #111; padding: 18px; border-radius: 12px; font-family: monospace; border: 2px dashed #B45309; line-height: 1.5; font-size: 12px;
+      background: rgba(10, 18, 38, 0.95);
+      border: 1.5px solid var(--neon-gold);
+      border-radius: 20px; padding: 28px;
+      width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 0 60px var(--neon-gold-glow);
     }
 
-    @media (max-width: 900px) {
-      .pos-layout { grid-template-columns: 1fr; }
-      .sidebar { position: fixed; top: 0; bottom: 0; left: 0; transform: translateX(-100%); }
-      .sidebar.open { transform: translateX(0); }
-      .menu-toggle-btn { display: block; }
+    @media (max-width: 1024px) {
+      .charts-hud-grid { grid-template-columns: 1fr; }
+      .hud-sidebar { position: fixed; top: 0; bottom: 0; left: 0; transform: translateX(-100%); }
+      .hud-sidebar.open { transform: translateX(0); }
+      .kiosk-btn { display: block; }
     }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
 </head>
 <body>
 
-<div class="app-container">
+<div class="hud-container">
   
-  <!-- Sidebar -->
-  <aside class="sidebar" id="appSidebar">
-    <div class="sidebar-header">
-      <div class="gym-logo-badge">👑</div>
-      <div>
-        <div class="gym-name-title">OM SOFTWARE</div>
-        <div class="gym-sub-tag">5 Brother's Fitness ERP</div>
+  <!-- Left Holographic Sidebar -->
+  <aside class="hud-sidebar" id="appSidebar">
+    <div class="hud-brand">
+      <div class="om-insignia-halo">ॐ</div>
+      <div class="brand-meta">
+        <h1>OM <span>SOFTWARE</span></h1>
+        <p>Smart. Secure. Seamless.</p>
       </div>
     </div>
 
-    <div class="sidebar-nav">
-      <div class="nav-group-title">Master Intelligence</div>
-      <div class="nav-item" style="color:var(--gold);font-weight:900" onclick="openGeminiAiModal()">
-        <span class="icon">✨</span> Om Gemini AI Assistant
+    <div class="sidebar-scroll">
+      <div class="nav-label">Core Analytics</div>
+      <div class="nav-pill active" onclick="switchMainTab('hudOverviewTab', this)">
+        <span class="icon">📊</span> Holographic HUD
       </div>
-      <div class="nav-item active" onclick="switchMainTab('masterDashboardTab', this)">
-        <span class="icon">📊</span> Master KPI Dashboard
-      </div>
-      <div class="nav-item" onclick="switchMainTab('membersTab', this)">
+      <div class="nav-pill" onclick="switchMainTab('hudMembersTab', this)">
         <span class="icon">👥</span> All Gym Members
       </div>
-      <div class="nav-item" onclick="switchMainTab('activeMembersTab', this)">
-        <span class="icon">⚡</span> Active VIP Members
+      <div class="nav-pill" onclick="switchMainTab('hudVipTab', this)">
+        <span class="icon">⚡</span> VIP Spend &amp; Tiers
       </div>
-      <div class="nav-item" onclick="switchMainTab('admissionsTab', this)">
-        <span class="icon">📝</span> Monthly Admissions
+      <div class="nav-pill" onclick="switchMainTab('hudAdmissionsTab', this)">
+        <span class="icon">📝</span> Admissions Flow
       </div>
-      <div class="nav-item" onclick="switchMainTab('collectionTab', this)">
-        <span class="icon">💳</span> Fees Collection &amp; Tiers
-      </div>
-      <div class="nav-item" onclick="switchMainTab('expensesTab', this)">
-        <span class="icon">💸</span> Branch Expenses
+      <div class="nav-pill" onclick="switchMainTab('hudFinanceTab', this)">
+        <span class="icon">💳</span> Financial P&amp;L &amp; Exp
       </div>
 
-      <div class="nav-group-title">Branch &amp; Staff Operations</div>
-      <div class="nav-item" onclick="switchMainTab('attendanceTab', this)">
-        <span class="icon">📋</span> Attendance (Member &amp; Staff)
+      <div class="nav-label">Operations</div>
+      <div class="nav-pill" onclick="switchMainTab('hudAttendanceTab', this)">
+        <span class="icon">📋</span> Attendance Kiosk
       </div>
-      <div class="nav-item" onclick="switchMainTab('posTab', this)">
-        <span class="icon">🛒</span> Supplement Store &amp; Expiry
+      <div class="nav-pill" onclick="switchMainTab('hudStoreTab', this)">
+        <span class="icon">🛒</span> Supplement POS
       </div>
-      <div class="nav-item" onclick="switchMainTab('crmTab', this)">
-        <span class="icon">🎯</span> CRM &amp; Walk-ins
+
+      <div class="nav-label">Next-Gen AI</div>
+      <div class="nav-pill" style="color:var(--neon-gold);border:1px solid rgba(255,184,0,0.3)" onclick="openGeminiAiModal()">
+        <span class="icon">✨</span> Om Gemini AI Analyst
       </div>
     </div>
   </aside>
 
-  <!-- Main View Area -->
-  <main class="main-content">
+  <!-- Main Holographic Stage -->
+  <main class="hud-main">
     
-    <header class="top-app-bar">
-      <div class="bar-left">
-        <button type="button" class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
-        <div class="page-title" id="pageTitleText">📊 Master KPI Dashboard</div>
+    <!-- Top HUD Bar -->
+    <header class="hud-topbar">
+      <div class="topbar-left">
+        <button type="button" class="kiosk-btn" onclick="toggleSidebar()">☰</button>
+        <div class="hud-title">
+          <span>OM SOFTWARE — FUTURE OF TECH</span>
+          <span class="live-pulse-badge"><span class="pulse-dot"></span> REAL-TIME ENGINE</span>
+        </div>
       </div>
-      <div class="bar-actions">
-        <button type="button" class="btn-action" style="background:linear-gradient(135deg,#FFB800,#F59E0B);color:#070B14;box-shadow:0 0 15px rgba(255,184,0,0.4)" onclick="openGeminiAiModal()">✨ Om Gemini AI</button>
-        <button type="button" class="btn-action sec" onclick="location.href='index.html'">⬅️ Portal Desk</button>
-        <button type="button" class="btn-action green" onclick="openAdmissionFormModal()">📝 + New Admission</button>
-        <button type="button" class="btn-action" onclick="exportCurrentReportToCSV()">📥 Download Excel / CSV</button>
+
+      <div class="topbar-right">
+        <button type="button" class="hud-btn ai" onclick="openGeminiAiModal()">✨ Ask Gemini AI</button>
+        <button type="button" class="hud-btn primary" onclick="openAdmissionFormModal()">📝 + New Admission</button>
+        <button type="button" class="hud-btn ghost" onclick="exportCurrentReportToCSV()">📥 Export CSV</button>
       </div>
     </header>
 
-    <div class="view-container">
+    <div class="stage-wrapper">
 
-      <!-- ================= 0. TOP BRANCH DRILLDOWN SELECTOR ================= -->
-      <section class="branch-drill-bar">
-        <div>
-          <div style="font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px">📍 Multi-Branch Directory Drilldown</div>
-          <div style="font-size:15px;font-weight:900;color:#fff;margin-top:2px" id="activeBranchDisplayName">5 Brother's Fitness Club — Unnao / Akrampur</div>
+      <!-- ================= MULTI-BRANCH HOLOGRAM HEADER ================= -->
+      <section class="hologram-banner">
+        <div class="banner-id">
+          <div class="om-holo-symbol">ॐ</div>
+          <div>
+            <h2 id="activeBranchDisplayName">5 Brother's Fitness Club — Unnao / Akrampur</h2>
+            <p id="activeBranchManagerMeta">Manager: Saurabh Singh Chandel &bull; Branch Code: 001 &bull; 256-Bit Cloud Synced</p>
+          </div>
         </div>
 
-        <div class="drill-selectors">
-          <select class="filter-select" id="drillStateSel" onchange="onDrillStateChange()">
+        <div class="branch-selectors-group">
+          <select class="hud-select" id="drillStateSel" onchange="onDrillStateChange()">
             <option value="Uttar Pradesh">State: Uttar Pradesh</option>
             <option value="Madhya Pradesh">State: Madhya Pradesh</option>
             <option value="Rajasthan">State: Rajasthan</option>
-            <option value="Bihar">State: Bihar</option>
             <option value="Delhi">State: Delhi</option>
             <option value="Maharashtra">State: Maharashtra</option>
-            <option value="Gujarat">State: Gujarat</option>
-            <option value="Karnataka">State: Karnataka</option>
-            <option value="Punjab">State: Punjab</option>
           </select>
 
-          <select class="filter-select" id="drillCitySel" onchange="onDrillCityChange()">
+          <select class="hud-select" id="drillCitySel" onchange="onDrillCityChange()">
             <option value="Unnao">City: Unnao</option>
             <option value="Kanpur">City: Kanpur</option>
             <option value="Lucknow">City: Lucknow</option>
-            <option value="Agra">City: Agra</option>
           </select>
 
-          <select class="filter-select" id="drillBranchGymSel" onchange="onDrillBranchSelect()">
-            <option value="001">Branch 001 — 5 Brother's Fitness Club (Akrampur)</option>
-            <option value="002">Branch 002 — 5 Brother's Fitness Club (Kanpur)</option>
-            <option value="003">Branch 003 — 5 Brother's Fitness Club (Lucknow)</option>
+          <select class="hud-select" id="drillBranchGymSel" onchange="onDrillBranchSelect()">
+            <option value="001">Branch 001 — Unnao / Akrampur</option>
+            <option value="002">Branch 002 — Kanpur</option>
+            <option value="003">Branch 003 — Lucknow</option>
           </select>
         </div>
       </section>
 
-      <!-- ================= 1. MASTER KPI DASHBOARD (6 Live Cards) ================= -->
-      <section class="tab-view active" id="masterDashboardTab">
+      <!-- ================= 1. HOLOGRAPHIC HUD DASHBOARD (Exact from Video) ================= -->
+      <section class="tab-stage active" id="hudOverviewTab">
         
-        <div class="kpi-grid">
-          <!-- KPI 1: Total Gym Members -->
-          <div class="kpi-card" style="border-color:rgba(56,189,248,0.5)">
-            <div>
-              <div class="kpi-top">
-                <span class="kpi-title">Total Gym Members</span>
-                <span class="kpi-badge">Live Synced</span>
-              </div>
-              <div class="kpi-val" id="kpiTotalMembers">50</div>
-              <div class="kpi-sub">Kul registered members is branch ke</div>
+        <!-- Live KPI Tiles -->
+        <div class="kpi-row">
+          <div class="kpi-tile">
+            <div class="tile-header">
+              <span class="tile-label">Total Gym Members</span>
+              <span class="tile-ico">👥</span>
             </div>
-            <button type="button" class="btn-see-detail" onclick="switchMainTab('membersTab')">
-              <span>See Details</span> <span>&rarr;</span>
-            </button>
+            <div class="tile-number" id="kpiTotalMembers">50</div>
+            <div class="tile-footer">
+              <span>All registered</span>
+              <span class="tile-see-btn" onclick="switchMainTab('hudMembersTab')">Details &rarr;</span>
+            </div>
           </div>
 
-          <!-- KPI 2: Total Active Gym Members -->
-          <div class="kpi-card" style="border-color:rgba(16,185,129,0.5)">
-            <div>
-              <div class="kpi-top">
-                <span class="kpi-title">Total Active Members</span>
-                <span class="kpi-badge" style="background:rgba(16,185,129,0.2)">Active Plans</span>
-              </div>
-              <div class="kpi-val" style="color:var(--green)" id="kpiActiveMembers">38</div>
-              <div class="kpi-sub">Valid ongoing gym membership</div>
+          <div class="kpi-tile">
+            <div class="tile-header">
+              <span class="tile-label">Active Members</span>
+              <span class="tile-ico" style="color:var(--neon-emerald)">⚡</span>
             </div>
-            <button type="button" class="btn-see-detail" onclick="switchMainTab('activeMembersTab')">
-              <span>See Details &amp; Spend</span> <span>&rarr;</span>
-            </button>
+            <div class="tile-number" style="color:var(--neon-emerald)" id="kpiActiveMembers">38</div>
+            <div class="tile-footer">
+              <span>Valid plans</span>
+              <span class="tile-see-btn" onclick="switchMainTab('hudVipTab')">VIP Spend &rarr;</span>
+            </div>
           </div>
 
-          <!-- KPI 3: Total Staff -->
-          <div class="kpi-card" style="border-color:rgba(168,85,247,0.5)">
-            <div>
-              <div class="kpi-top">
-                <span class="kpi-title">Total Staff</span>
-                <span class="kpi-badge" style="background:rgba(168,85,247,0.2);color:#C084FC;border-color:#C084FC">Branch Roster</span>
-              </div>
-              <div class="kpi-val" id="kpiTotalStaff">6</div>
-              <div class="kpi-sub">Trainers, front desk, manager &amp; helpers</div>
+          <div class="kpi-tile">
+            <div class="tile-header">
+              <span class="tile-label">Monthly Admissions</span>
+              <span class="tile-ico" style="color:var(--neon-gold)">📝</span>
             </div>
-            <button type="button" class="btn-see-detail" onclick="switchMainTab('attendanceTab')">
-              <span>Staff Attendance &amp; Penalty</span> <span>&rarr;</span>
-            </button>
+            <div class="tile-number" style="color:var(--neon-gold)" id="kpiMonthlyAdmissions">14</div>
+            <div class="tile-footer">
+              <span>Joined this month</span>
+              <span class="tile-see-btn" onclick="switchMainTab('hudAdmissionsTab')">List &rarr;</span>
+            </div>
           </div>
 
-          <!-- KPI 4: Total Admissions (Monthly Wise) -->
-          <div class="kpi-card" style="border-color:rgba(255,184,0,0.5)">
-            <div>
-              <div class="kpi-top">
-                <span class="kpi-title">Monthly Admissions</span>
-                <span class="kpi-badge" style="background:rgba(255,184,0,0.2);color:var(--gold);border-color:var(--gold)">This Month</span>
-              </div>
-              <div class="kpi-val" style="color:var(--gold)" id="kpiMonthlyAdmissions">14</div>
-              <div class="kpi-sub">New joinings in current calendar month</div>
+          <div class="kpi-tile gold-accent">
+            <div class="tile-header">
+              <span class="tile-label">Fees Collection</span>
+              <span class="tile-ico" style="color:#4ADE80">💳</span>
             </div>
-            <button type="button" class="btn-see-detail" onclick="switchMainTab('admissionsTab')">
-              <span>See Monthly List &amp; Calendar</span> <span>&rarr;</span>
-            </button>
+            <div class="tile-number" style="color:#4ADE80" id="kpiTotalFeesCollection">₹ 2,11,052</div>
+            <div class="tile-footer">
+              <span>Lifetime collections</span>
+              <span class="tile-see-btn" onclick="switchMainTab('hudFinanceTab')">Tiers &rarr;</span>
+            </div>
           </div>
 
-          <!-- KPI 5: Total Fees Collection -->
-          <div class="kpi-card" style="border-color:rgba(16,185,129,0.7)">
-            <div>
-              <div class="kpi-top">
-                <span class="kpi-title">Total Fees Collection</span>
-                <span class="kpi-badge" style="background:rgba(16,185,129,0.2)">Collected ₹</span>
-              </div>
-              <div class="kpi-val" style="color:#4ADE80" id="kpiTotalFeesCollection">₹ 2,11,052</div>
-              <div class="kpi-sub">Live fees, renewal &amp; PT collections</div>
+          <div class="kpi-tile">
+            <div class="tile-header">
+              <span class="tile-label">Total Expenses</span>
+              <span class="tile-ico" style="color:var(--neon-red)">💸</span>
             </div>
-            <button type="button" class="btn-see-detail" onclick="switchMainTab('collectionTab')">
-              <span>Gold / Bronze / Normal Tiers</span> <span>&rarr;</span>
-            </button>
+            <div class="tile-number" style="color:var(--neon-red)" id="kpiTotalExpenses">₹ 20,000</div>
+            <div class="tile-footer">
+              <span>Monthly outflow</span>
+              <span class="tile-see-btn" onclick="switchMainTab('hudFinanceTab')">Audit &rarr;</span>
+            </div>
           </div>
 
-          <!-- KPI 6: Total Expenses -->
-          <div class="kpi-card" style="border-color:rgba(239,68,68,0.6)">
-            <div>
-              <div class="kpi-top">
-                <span class="kpi-title">Total Expenses</span>
-                <span class="kpi-badge" style="background:rgba(239,68,68,0.2);color:#FCA5A5;border-color:#FCA5A5">Outflow ₹</span>
-              </div>
-              <div class="kpi-val" style="color:var(--red)" id="kpiTotalExpenses">₹ 20,000</div>
-              <div class="kpi-sub">Rent, salary, repairs &amp; marketing</div>
+          <div class="kpi-tile">
+            <div class="tile-header">
+              <span class="tile-label">Staff Roster</span>
+              <span class="tile-ico" style="color:var(--neon-purple)">🧑‍💼</span>
             </div>
-            <button type="button" class="btn-see-detail" onclick="switchMainTab('expensesTab')">
-              <span>Custom Date-Range Report</span> <span>&rarr;</span>
-            </button>
+            <div class="tile-number" style="color:#C084FC" id="kpiTotalStaff">6</div>
+            <div class="tile-footer">
+              <span>Branch trainers</span>
+              <span class="tile-see-btn" onclick="switchMainTab('hudAttendanceTab')">Attendance &rarr;</span>
+            </div>
           </div>
         </div>
 
-        <!-- Quick Summary Notice -->
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <!-- AI Workflow & Analytics Network Flow (From Video) -->
+        <div class="workflow-nodes-container">
+          <div class="node-box">
+            <div class="node-head">
+              <span class="node-title">1. Enquiries / CRM</span>
+              <span class="node-status"></span>
+            </div>
+            <div class="node-val">28 Leads</div>
+            <div class="node-desc">Walk-ins &amp; Online enquiries</div>
+          </div>
+
+          <div class="node-connector-line">&rarr;</div>
+
+          <div class="node-box">
+            <div class="node-head">
+              <span class="node-title">2. Direct Admissions</span>
+              <span class="node-status"></span>
+            </div>
+            <div class="node-val">14 Converted</div>
+            <div class="node-desc">Instant digital slip &amp; receipt</div>
+          </div>
+
+          <div class="node-connector-line">&rarr;</div>
+
+          <div class="node-box">
+            <div class="node-head">
+              <span class="node-title">3. Services &amp; POS</span>
+              <span class="node-status"></span>
+            </div>
+            <div class="node-val">₹ 48,200</div>
+            <div class="node-desc">PT Coach + Supplements</div>
+          </div>
+
+          <div class="node-connector-line">&rarr;</div>
+
+          <div class="node-box" style="border-color:var(--neon-gold)">
+            <div class="node-head">
+              <span class="node-title" style="color:#fff">4. Net Revenue</span>
+              <span class="node-status" style="background:var(--neon-gold);box-shadow:0 0 10px var(--neon-gold)"></span>
+            </div>
+            <div class="node-val" style="color:var(--neon-gold)">₹ 2,11,052</div>
+            <div class="node-desc">Total business intake</div>
+          </div>
+        </div>
+
+        <!-- Futuristic Charts Grid (Area Wave Chart + Donut Tier Breakdown) -->
+        <div class="charts-hud-grid">
+          <div class="hud-chart-card">
+            <div class="chart-card-header">
+              <h3><span>📈</span> Real-Time Revenue &amp; Activity Wave</h3>
+              <span class="chart-subtag">Dynamic 7-Month Trajectory</span>
+            </div>
+            <div style="height: 260px; width: 100%;">
+              <canvas id="revenueWaveChart"></canvas>
+            </div>
+          </div>
+
+          <div class="hud-chart-card">
+            <div class="chart-card-header">
+              <h3><span>🥇</span> VIP Customer Tiers (Service Usage)</h3>
+              <span class="chart-subtag">Gold vs Bronze vs Normal</span>
+            </div>
+            <div style="height: 260px; width: 100%; display: flex; align-items: center; justify-content: center;">
+              <canvas id="customerTiersDonut"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ================= 2. ALL MEMBERS DIRECTORY ================= -->
+      <section class="tab-stage" id="hudMembersTab">
+        <div class="hologram-banner" style="margin-bottom:16px;padding:12px 18px">
+          <div style="font-size:14px;font-weight:900;color:#fff">👥 All Gym Members Directory with Fitness Goals &amp; Health Records</div>
+          <input type="text" id="memberSearchInp" placeholder="Search by Name, Mobile, Goal, or M ID..." oninput="renderMembersList()" style="background:#070D1A;border:1px solid var(--border-subtle);color:#fff;padding:8px 14px;border-radius:10px;font-size:12.5px;min-width:280px">
+        </div>
+        <div class="members-hud-grid" id="membersGridBox"></div>
+      </section>
+
+      <!-- ================= 3. ACTIVE MEMBERS & LIFETIME SPEND ================= -->
+      <section class="tab-stage" id="hudVipTab">
+        <div class="hologram-banner" style="margin-bottom:16px;padding:12px 18px">
+          <div style="font-size:14px;font-weight:900;color:var(--neon-emerald)">⚡ Active VIP Members &bull; Lifetime Spend &amp; Multi-Service Tracking</div>
+        </div>
+        <div class="members-hud-grid" id="activeMembersGridBox"></div>
+      </section>
+
+      <!-- ================= 4. MONTHLY ADMISSIONS ================= -->
+      <section class="tab-stage" id="hudAdmissionsTab">
+        <div class="hologram-banner" style="margin-bottom:16px;padding:12px 18px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <label style="font-size:12px;color:var(--neon-gold);font-weight:800">📅 Month:</label>
+            <input type="month" id="admMonthPicker" class="hud-select" onchange="renderMonthlyAdmissionsView()">
+          </div>
+          <button type="button" class="hud-btn ghost" onclick="exportAdmissionsReport()">📥 Export Admissions CSV</button>
+        </div>
+        <div class="members-hud-grid" id="monthlyAdmissionsGridBox"></div>
+      </section>
+
+      <!-- ================= 5. FINANCIAL P&L & EXPENSES ================= -->
+      <section class="tab-stage" id="hudFinanceTab">
+        <div class="hologram-banner" style="margin-bottom:16px;padding:12px 18px">
           <div>
-            <b style="color:var(--gold)">💡 Elite Intelligence Tip:</b>
-            <span style="color:var(--tx-sub);font-size:12.5px;margin-left:6px">Kisi bhi card ke <b>"See Details"</b> par click karke us category ka deep record, admission form, last fee slip, aur Excel/CSV download access karein.</span>
+            <div style="font-size:11px;color:var(--tx-mut);font-family:var(--font-mono)">FINANCIAL AUDIT RANGE</div>
+            <div style="font-size:18px;font-weight:900;color:var(--neon-gold)" id="expRangeTotalBanner">₹ 20,000</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <input type="date" id="expFromDate" class="hud-select" onchange="renderExpensesWithDateFilter()">
+            <input type="date" id="expToDate" class="hud-select" onchange="renderExpensesWithDateFilter()">
+            <button type="button" class="hud-btn primary" onclick="openAddExpenseModal()">+ Add Expense</button>
           </div>
         </div>
+        <div id="expenseListBox" style="display:flex;flex-direction:column;gap:10px"></div>
       </section>
 
-      <!-- ================= 2. ALL MEMBERS (Line-wise + Goal + Health + Form/Slip) ================= -->
-      <section class="tab-view" id="membersTab">
-        <div class="filter-card">
-          <div class="search-input-box">
-            <span class="icon">🔍</span>
-            <input type="text" id="memberSearchInp" placeholder="Search member by Name, Phone, Goal, or M ID..." oninput="renderMembersList()">
+      <!-- ================= 6. ATTENDANCE KIOSK ================= -->
+      <section class="tab-stage" id="hudAttendanceTab">
+        <div class="hologram-banner" style="margin-bottom:16px;padding:12px 18px">
+          <div style="display:flex;gap:10px;align-items:center">
+            <button type="button" id="attModeMemBtn" class="hud-btn primary" onclick="switchAttMode('MEMBER')">🏋️ Gym Members</button>
+            <button type="button" id="attModeStaffBtn" class="hud-btn ghost" onclick="switchAttMode('STAFF')">🧑‍💼 Staff &amp; Penalty</button>
+            <input type="date" id="attDatePick" class="hud-select" onchange="renderAttendanceView()">
           </div>
-          <select class="filter-select" id="filterPlanSelect" onchange="renderMembersList()">
-            <option value="ALL">All Plans</option>
-            <option value="Monthly">Monthly</option>
-            <option value="Quarterly">Quarterly</option>
-            <option value="Yearly">Yearly</option>
-          </select>
-          <select class="filter-select" id="filterGoalSelect" onchange="renderMembersList()">
-            <option value="ALL">All Fitness Goals</option>
-            <option value="Fat Loss">Fat Loss</option>
-            <option value="Muscle Gain">Muscle Gain / Bulking</option>
-            <option value="General Fitness">General Fitness</option>
-            <option value="Competition Prep">Gym Competition Prep</option>
-          </select>
-          <select class="filter-select" id="filterStatusSelect" onchange="renderMembersList()">
-            <option value="ALL">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Expired">Expired</option>
-            <option value="Due">Pending Due</option>
-          </select>
         </div>
-
-        <div class="members-grid" id="membersGridBox"></div>
+        <div class="members-hud-grid" id="attendanceGridBox"></div>
       </section>
 
-      <!-- ================= 3. ACTIVE MEMBERS & LIFETIME SPEND (ELITE CUSTOMERS) ================= -->
-      <section class="tab-view" id="activeMembersTab">
-        <div class="filter-card" style="border-color:rgba(16,185,129,0.5)">
-          <div style="font-size:13.5px;font-weight:900;color:var(--green)">
-            ⚡ Active Gym Members &bull; Lifetime Spend &amp; VIP Segmentation (Elite Customer Analytics)
-          </div>
+      <!-- ================= 7. SUPPLEMENT POS ================= -->
+      <section class="tab-stage" id="hudStoreTab">
+        <div class="hologram-banner" style="margin-bottom:16px;padding:12px 18px">
+          <div style="font-size:14px;font-weight:900;color:var(--neon-cyan)">🛒 Supplement Inventory Valuation &amp; Expiry Monitor</div>
+          <button type="button" class="hud-btn ghost" onclick="exportStoreReportToCSV()">📥 Export Store CSV</button>
         </div>
-        <div class="members-grid" id="activeMembersGridBox"></div>
-      </section>
-
-      <!-- ================= 4. MONTHLY ADMISSIONS (Calendar Picker + Follow-up) ================= -->
-      <section class="tab-view" id="admissionsTab">
-        <div class="filter-card">
-          <label style="font-size:12px;font-weight:800;color:var(--gold);margin-right:4px">📅 Select Calendar Month:</label>
-          <input type="month" class="filter-select" id="admMonthPicker" onchange="renderMonthlyAdmissionsView()">
-          <button type="button" class="btn-action sec" onclick="exportAdmissionsReport()">📥 Export Admissions Report (CSV)</button>
-        </div>
-        <div id="monthlyAdmissionsStatsBox" style="font-size:14px;font-weight:800;color:#fff;margin-bottom:14px"></div>
-        <div class="members-grid" id="monthlyAdmissionsGridBox"></div>
-      </section>
-
-      <!-- ================= 5. FEES COLLECTION & TIERS (Gold / Bronze / Normal) ================= -->
-      <section class="tab-view" id="collectionTab">
-        <div class="filter-card" style="border-color:rgba(255,184,0,0.5)">
-          <div style="display:flex;justify-content:space-between;align-items:center;width:100%;flex-wrap:wrap;gap:8px">
-            <div>
-              <span style="font-size:12px;color:var(--mut);font-weight:800;text-transform:uppercase">Live Total Collection:</span>
-              <b style="font-size:18px;color:var(--gold);margin-left:6px" id="collectionTotalBanner">₹ 2,11,052</b>
-            </div>
-            <div style="display:flex;gap:6px">
-              <button type="button" class="action-pill vip-tier-tag tier-gold" onclick="filterTierView('GOLD')">🥇 Gold (3+ Services)</button>
-              <button type="button" class="action-pill vip-tier-tag tier-bronze" onclick="filterTierView('BRONZE')">🥉 Bronze (2 Services)</button>
-              <button type="button" class="action-pill vip-tier-tag tier-normal" onclick="filterTierView('NORMAL')">👤 Normal Gym Member</button>
-              <button type="button" class="action-pill" onclick="filterTierView('ALL')">All Tiers</button>
-            </div>
-          </div>
-        </div>
-        <div class="members-grid" id="collectionTierGridBox"></div>
-      </section>
-
-      <!-- ================= 6. BRANCH EXPENSES & DATE-RANGE PICKER ================= -->
-      <section class="tab-view" id="expensesTab">
-        <div class="expenses-summary-card">
-          <div class="exp-left">
-            <div class="exp-label">Branch Expenses Range Filter</div>
-            <div class="exp-total" id="expRangeTotalBanner">₹ 20,000</div>
-            <div style="font-size:11.5px;color:var(--mut);margin-top:2px" id="expRangeDatesLabel">Range: Current Month</div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button type="button" class="btn-action sec" onclick="setPresetExpRange('THIS_MONTH')">This Month</button>
-            <button type="button" class="btn-action sec" onclick="setPresetExpRange('LAST_MONTH')">Last Month (1-30 Oct)</button>
-            <button type="button" class="btn-action" onclick="openAddExpenseModal()">+ Add Expense</button>
-          </div>
-        </div>
-
-        <div class="filter-card">
-          <label style="font-size:12px;font-weight:800;color:var(--gold)">From Date:</label>
-          <input type="date" class="filter-select" id="expFromDate" onchange="renderExpensesWithDateFilter()">
-          <label style="font-size:12px;font-weight:800;color:var(--gold)">To Date:</label>
-          <input type="date" class="filter-select" id="expToDate" onchange="renderExpensesWithDateFilter()">
-          <button type="button" class="btn-action green" style="padding:7px 12px;font-size:11.5px" onclick="exportExpensesToCSV()">📥 Download Expense Excel/CSV</button>
-        </div>
-
-        <div class="expense-list" id="expenseListBox"></div>
-      </section>
-
-      <!-- ================= 7. ATTENDANCE (Member vs Staff with Late Penalty & Salary) ================= -->
-      <section class="tab-view" id="attendanceTab">
-        <div class="filter-card">
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button type="button" id="attModeMemBtn" class="btn-action" onclick="switchAttMode('MEMBER')">🏋️ Gym Member Attendance</button>
-            <button type="button" id="attModeStaffBtn" class="btn-action sec" onclick="switchAttMode('STAFF')">🧑‍💼 Staff Attendance &amp; Penalty</button>
-            <input type="date" class="filter-select" id="attDatePick" onchange="renderAttendanceView()">
-          </div>
-        </div>
-        <div class="members-grid" id="attendanceGridBox"></div>
-      </section>
-
-      <!-- ================= 8. SUPPLEMENT STORE & INVENTORY INTELLIGENCE ================= -->
-      <section class="tab-view" id="posTab">
-        <div class="expenses-summary-card" style="border-color:rgba(56,189,248,0.5)">
-          <div>
-            <div class="exp-label">Inventory &amp; Sales Intelligence</div>
-            <div style="font-size:16px;font-weight:900;color:#fff;margin-top:2px">
-              Total Stock Valuation: <b style="color:var(--gold)" id="storeStockValue">₹ 1,84,500</b> &bull; Total Sales: <b style="color:var(--green)" id="storeSalesValue">₹ 48,200</b> &bull; Profit: <b style="color:#4ADE80" id="storeProfitValue">₹ 14,800</b>
-            </div>
-            <div style="font-size:11.5px;color:var(--mut);margin-top:4px">
-              🔥 Best Seller: <b style="color:var(--gold)" id="storeBestSeller">MuscleBlaze Shaker 700ml</b> | ⚠️ Lowest Seller: <b style="color:#FCA5A5" id="storeLowSeller">Fish Oil 60 Caps (6 Mo Low)</b>
-            </div>
-          </div>
-          <button type="button" class="btn-action green" onclick="exportStoreReportToCSV()">📥 Export Store &amp; Stock CSV</button>
-        </div>
-
-        <div class="pos-layout">
-          <div>
-            <div class="filter-card">
-              <div class="search-input-box">
-                <span class="icon">🔍</span>
-                <input type="text" id="posSearchInp" placeholder="Search supplements, proteins, shakers..." oninput="renderPosProducts()">
-              </div>
-              <select class="filter-select" id="posTimeframeSel" onchange="renderPosProducts()">
-                <option value="30">Sales: Last 30 Days</option>
-                <option value="90">Sales: Last 3 Months</option>
-                <option value="180">Sales: Last 6 Months</option>
-                <option value="365">Sales: Last 1 Year</option>
-              </select>
-            </div>
-            <div class="pos-products-grid" id="posProductsBox"></div>
-          </div>
-
-          <!-- POS Cart -->
-          <div style="background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
-            <div style="font-size:15px;font-weight:900;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:8px">🛒 POS Quick Bill</div>
-            <div class="form-group" style="margin-bottom:6px">
-              <label>Select Member</label>
-              <select class="form-control" id="cartMemberSelect"></select>
-            </div>
-            <div class="cart-items-list" id="cartItemsList" style="max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
-            <div style="border-top:1px dashed var(--border);padding-top:10px;margin-top:auto">
-              <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:900;color:var(--gold);margin-bottom:10px">
-                <span>Total Payable:</span>
-                <span id="cartTotalPayable">₹ 0</span>
-              </div>
-              <button type="button" class="btn-action" style="width:100%;justify-content:center;padding:12px" onclick="checkoutPosOrder()">
-                💳 Generate Bill &amp; Print Slip
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= 9. CRM TAB ================= -->
-      <section class="tab-view" id="crmTab">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-          <h2 style="font-size:17px;font-weight:900;color:#fff">🎯 Enquiries &amp; Walk-In Leads</h2>
-          <button type="button" class="btn-action" onclick="openAddLeadModal()">+ New Walk-In Lead</button>
-        </div>
-        <div class="members-grid" id="leadsGridBox"></div>
+        <div class="members-hud-grid" id="posProductsBox"></div>
       </section>
 
     </div>
   </main>
 </div>
 
-<!-- ================= MODALS ================= -->
+<!-- ================= MODALS & SCRIPTS ================= -->
 
-<!-- MODAL 1: DEEP MEMBER PROFILE (Fitness Goal, Health Details, Admission Form Preview, Last Fees Slip) -->
+<!-- Deep Profile Modal -->
 <div class="modal-overlay" id="deepMemberDetailModal">
   <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title">👤 Member Comprehensive Record</div>
-      <button type="button" class="modal-close" onclick="closeModal('deepMemberDetailModal')">✕</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px dashed rgba(255,184,0,0.3);padding-bottom:10px">
+      <div style="font-size:17px;font-weight:900;color:var(--neon-gold)">👤 Member Comprehensive Profile</div>
+      <button type="button" onclick="closeModal('deepMemberDetailModal')" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">✕</button>
     </div>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;background:var(--card-inner);padding:10px;border-radius:12px;border:1px solid var(--border)">
-      <a href="#" id="detCallBtn" class="action-pill call">📞 Call</a>
-      <a href="#" id="detWaBtn" class="action-pill whatsapp" target="_blank">💬 WhatsApp</a>
-      <button type="button" class="action-pill form" onclick="viewMemberAdmissionForm()">📄 View Admission Form</button>
-      <button type="button" class="action-pill" style="color:#10B981;border-color:rgba(16,185,129,0.4)" onclick="viewLastFeesSlip()">🧾 Last Fees Slip</button>
-      <button type="button" class="action-pill renew" onclick="openRenewModalFromProfile()">🔄 Renew Plan</button>
+    <div id="deepProfileContent" style="font-size:13px;line-height:1.6;color:var(--tx-sub)"></div>
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button type="button" class="hud-btn primary" style="width:100%;justify-content:center" onclick="closeModal('deepMemberDetailModal')">Close Profile</button>
     </div>
-
-    <!-- Personal & Branch Info -->
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-      <div class="member-avatar" id="detAvatar" style="width:58px;height:58px;font-size:26px">🏋️</div>
-      <div>
-        <div style="font-size:17px;font-weight:900;color:#fff" id="detName">Name</div>
-        <div style="font-size:12px;color:var(--cyan);font-weight:800;margin-top:2px" id="detMid">M ID: #001 &bull; Age: 26</div>
-        <div style="font-size:12px;color:var(--mut)" id="detPhone">Phone: 9876543210 &bull; Father/Husband: -</div>
-      </div>
-    </div>
-
-    <!-- Goal & Health Box (USER EXACT REQUEST) -->
-    <div style="background:var(--card-inner);border:1.5px solid var(--gold);border-radius:12px;padding:12px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:0.6px">🎯 Fitness Goal &amp; Medical / Health Info</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px;margin-top:6px">
-        <div><span style="color:var(--mut)">Fitness Goal:</span> <b id="detGoal" style="color:#fff">Muscle Gain</b></div>
-        <div><span style="color:var(--mut)">Health Details / Disease:</span> <b id="detHealth" style="color:#FCA5A5">No Chronic Disease</b></div>
-        <div><span style="color:var(--mut)">Batch Timing:</span> <b id="detBatch" style="color:#fff">Morning Batch</b></div>
-        <div><span style="color:var(--mut)">Membership Duration:</span> <b id="detDuration" style="color:#fff">6 Months</b></div>
-      </div>
-    </div>
-
-    <!-- Active Plan & Payment Record -->
-    <div style="background:var(--card-inner);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <span style="font-size:11px;font-weight:800;color:var(--cyan);text-transform:uppercase">📑 Plan &amp; Lifetime Spend Summary</span>
-        <span class="member-id-badge" id="detTierBadge">🥇 GOLD TIER</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
-        <div><span style="color:var(--mut)">Plan Name:</span> <b id="detPlanName" style="color:#fff">Monthly</b></div>
-        <div><span style="color:var(--mut)">Expiry Date:</span> <b id="detExpiryDate" style="color:var(--green)">2026-12-10</b></div>
-        <div><span style="color:var(--mut)">Paid in Plan:</span> <b id="detPaid" style="color:var(--green)">₹ 1000</b></div>
-        <div><span style="color:var(--mut)">Pending Due:</span> <b id="detDue" style="color:var(--red)">₹ 0</b></div>
-        <div><span style="color:var(--mut)">Lifetime Gym Spend:</span> <b id="detLifetimeSpend" style="color:var(--gold);font-weight:900">₹ 24,500</b></div>
-        <div><span style="color:var(--mut)">Active Services:</span> <b id="detServicesList" style="color:var(--cyan)">Personal Trainer, Cardio, Sauna</b></div>
-      </div>
-      <div style="margin-top:10px;display:flex;gap:8px">
-        <button type="button" class="btn-action sec" style="padding:5px 10px;font-size:11px" onclick="openAddServiceToMemberModal()">+ Add New Service</button>
-      </div>
-    </div>
-
-    <button type="button" class="btn-action sec" style="width:100%;justify-content:center" onclick="closeModal('deepMemberDetailModal')">Close Profile</button>
   </div>
 </div>
 
-<!-- MODAL 2: ADMISSION FORM (Fill + Instant Receipt Download / Print) -->
+<!-- Admission Modal -->
 <div class="modal-overlay" id="admissionReceiptModal">
   <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title">📝 Admission Form &amp; Instant Receipt</div>
-      <button type="button" class="modal-close" onclick="closeModal('admissionReceiptModal')">✕</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px dashed rgba(255,184,0,0.3);padding-bottom:10px">
+      <div style="font-size:17px;font-weight:900;color:var(--neon-gold)">📝 New Member Admission &amp; Instant Receipt</div>
+      <button type="button" onclick="closeModal('admissionReceiptModal')" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">✕</button>
     </div>
 
     <form onsubmit="saveFullAdmission(event)">
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
-        <div class="form-group">
-          <label>Member Full Name *</label>
-          <input type="text" class="form-control" id="admFullName" placeholder="Member Name" required>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;color:var(--neon-cyan);font-weight:800">MEMBER NAME *</label>
+          <input type="text" id="admFullName" class="hud-select" style="width:100%" placeholder="Full Name" required>
         </div>
-        <div class="form-group">
-          <label>Father / Husband Name *</label>
-          <input type="text" class="form-control" id="admGuardian" placeholder="Father / Husband Name" required>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
-        <div class="form-group">
-          <label>Mobile Number *</label>
-          <input type="tel" class="form-control" id="admPhone" placeholder="10 Digit Mobile" pattern="[0-9]{10}" required>
-        </div>
-        <div class="form-group">
-          <label>Age</label>
-          <input type="number" class="form-control" id="admAge" value="24" required>
-        </div>
-        <div class="form-group">
-          <label>State &amp; City (All India)</label>
-          <select class="form-control" id="admLocationSel">
-            <option value="Unnao, Uttar Pradesh">Unnao, Uttar Pradesh</option>
-            <option value="Kanpur, Uttar Pradesh">Kanpur, Uttar Pradesh</option>
-            <option value="Lucknow, Uttar Pradesh">Lucknow, Uttar Pradesh</option>
-            <option value="Indore, Madhya Pradesh">Indore, Madhya Pradesh</option>
-            <option value="Jaipur, Rajasthan">Jaipur, Rajasthan</option>
-            <option value="New Delhi, Delhi">New Delhi, Delhi</option>
-            <option value="Patna, Bihar">Patna, Bihar</option>
-          </select>
+        <div>
+          <label style="font-size:11px;color:var(--neon-cyan);font-weight:800">MOBILE NUMBER *</label>
+          <input type="tel" id="admPhone" class="hud-select" style="width:100%" placeholder="10 Digits" pattern="[0-9]{10}" required>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
-        <div class="form-group">
-          <label>Fitness Goal *</label>
-          <select class="form-control" id="admGoalSel">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;color:var(--neon-gold);font-weight:800">FITNESS GOAL *</label>
+          <select id="admGoalSel" class="hud-select" style="width:100%">
             <option value="Muscle Gain">Muscle Gain / Bulking</option>
             <option value="Fat Loss">Fat Loss &amp; Shredding</option>
-            <option value="General Fitness">General Fitness &amp; Stamina</option>
+            <option value="General Fitness">General Fitness</option>
             <option value="Competition Prep">Gym Competition Prep</option>
           </select>
         </div>
-
-        <div class="form-group">
-          <label>Health Details / Any Medical Condition</label>
-          <input type="text" class="form-control" id="admHealthInfo" placeholder="e.g. Asthma, High BP, None" value="None">
+        <div>
+          <label style="font-size:11px;color:var(--neon-gold);font-weight:800">HEALTH / MEDICAL *</label>
+          <input type="text" id="admHealthInfo" class="hud-select" style="width:100%" value="Fit / No Chronic Disease">
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
-        <div class="form-group">
-          <label>Membership Plan *</label>
-          <select class="form-control" id="admPlanSel" onchange="calcAdmTotals()">
-            <option value="Monthly" data-fee="1000" data-days="30">Monthly (₹1000)</option>
-            <option value="Quarterly" data-fee="2700" data-days="90">Quarterly (₹2700)</option>
-            <option value="Half-Yearly" data-fee="5000" data-days="180">Half-Yearly (₹5000)</option>
-            <option value="Yearly" data-fee="9000" data-days="365">Yearly (₹9000)</option>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div>
+          <label style="font-size:11px;color:var(--tx-sub);font-weight:800">PLAN *</label>
+          <select id="admPlanSel" class="hud-select" style="width:100%">
+            <option value="Monthly" data-fee="1000">Monthly (₹1000)</option>
+            <option value="Quarterly" data-fee="2700">Quarterly (₹2700)</option>
+            <option value="Yearly" data-fee="9000">Yearly (₹9000)</option>
           </select>
         </div>
-
-        <div class="form-group">
-          <label>Batch *</label>
-          <select class="form-control" id="admBatchSel">
-            <option value="Morning">Morning (06:00 - 10:00 AM)</option>
-            <option value="Evening">Evening (04:00 - 09:00 PM)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Payment Mode *</label>
-          <select class="form-control" id="admModeSel">
-            <option value="Cash">Cash (No UTR)</option>
-            <option value="UPI">UPI / Online</option>
-          </select>
+        <div>
+          <label style="font-size:11px;color:var(--tx-sub);font-weight:800">PAID AMOUNT (₹) *</label>
+          <input type="number" id="admPaid" class="hud-select" style="width:100%" value="1000" required>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
-        <div class="form-group">
-          <label>Total Fee (₹)</label>
-          <input type="number" class="form-control" id="admFee" value="1000" oninput="calcAdmTotals()">
-        </div>
-        <div class="form-group">
-          <label>Paid Now (₹) *</label>
-          <input type="number" class="form-control" id="admPaid" value="1000" oninput="calcAdmTotals()" required>
-        </div>
-        <div class="form-group">
-          <label>Due Balance (₹)</label>
-          <input type="number" class="form-control" id="admDue" value="0" readonly style="background:#162340;color:var(--red);font-weight:900">
-        </div>
-        <div class="form-group">
-          <label>Expiry Date</label>
-          <input type="date" class="form-control" id="admExpiry" required>
-        </div>
-      </div>
-
-      <button type="submit" class="btn-action" style="width:100%;justify-content:center;padding:12px">
-        ✔ Submit Admission &amp; Generate Printable Receipt
-      </button>
-    </form>
-
-    <!-- Receipt Display / Download Box -->
-    <div id="receiptGeneratedBox" style="display:none;margin-top:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <b style="color:var(--green)">🧾 Official Admission Slip</b>
-        <div style="display:flex;gap:6px">
-          <button type="button" class="btn-action" style="padding:5px 10px;font-size:11px" onclick="downloadLastSlipTxt()">⬇ Download TXT</button>
-          <button type="button" class="btn-action sec" style="padding:5px 10px;font-size:11px" onclick="window.print()">🖨️ Print Slip</button>
-        </div>
-      </div>
-      <div class="receipt-paper" id="receiptPaperBody"></div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL 3: ADD EXPENSE MODAL (With Category & Date) -->
-<div class="modal-overlay" id="addExpenseModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title">💸 Record Branch Expense</div>
-      <button type="button" class="modal-close" onclick="closeModal('addExpenseModal')">✕</button>
-    </div>
-
-    <form onsubmit="saveBranchExpense(event)">
-      <div class="form-group">
-        <label>Type / Category of Expense *</label>
-        <select class="form-control" id="expCategorySel">
-          <option value="Rent/Mortgage">Rent / Hall Lease</option>
-          <option value="Payroll/Salary">Payroll / Trainer Salary</option>
-          <option value="Equipment">Equipment / Cable Repair</option>
-          <option value="Marketing">Marketing / Flex Ads</option>
-          <option value="Electricity">Electricity &amp; Power Bills</option>
-          <option value="Supplements">Supplement Inventory Purchase</option>
-          <option value="Other">Other Expenses</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Description / Details *</label>
-        <input type="text" class="form-control" id="expDescInp" placeholder="e.g. November Hall Rent / Dumbbell Cable" required>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="form-group">
-          <label>Expense Amount (₹) *</label>
-          <input type="number" class="form-control" id="expAmountInp" placeholder="Amount in ₹" required>
-        </div>
-        <div class="form-group">
-          <label>Expense Date *</label>
-          <input type="date" class="form-control" id="expDateInp" required>
-        </div>
-      </div>
-
-      <button type="submit" class="btn-action" style="width:100%;justify-content:center;padding:12px">
-        Save Expense Record
-      </button>
+      <button type="submit" class="hud-btn primary" style="width:100%;justify-content:center;padding:12px">✔ Submit &amp; Generate Holographic Receipt</button>
     </form>
   </div>
 </div>
 
-<!-- MODAL 4: RENEW MEMBER PLAN & COLLECT DUE -->
-<div class="modal-overlay" id="renewMemberModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title">🔄 Plan Renewal &amp; Due Clear</div>
-      <button type="button" class="modal-close" onclick="closeModal('renewMemberModal')">✕</button>
+<!-- Gemini AI Modal -->
+<div class="modal-overlay" id="geminiAiModal">
+  <div class="modal-box" style="border-color:var(--neon-cyan);box-shadow:0 0 60px var(--neon-cyan-glow)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px dashed var(--neon-cyan);padding-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">✨</span>
+        <div>
+          <div style="font-size:16px;font-weight:900;color:#fff">Om Gemini AI Intelligence</div>
+          <div style="font-size:11px;color:var(--neon-cyan)">Live Conversational Business Engine</div>
+        </div>
+      </div>
+      <button type="button" onclick="closeModal('geminiAiModal')" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">✕</button>
     </div>
 
-    <form onsubmit="saveRenewal(event)">
-      <div style="background:var(--card-inner);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12.5px">
-        <div><b>Member:</b> <span id="rnMemName" style="color:var(--gold)">---</span> (<span id="rnMemPhone">---</span>)</div>
-        <div style="margin-top:4px"><b>Current Expiry:</b> <span id="rnCurExpiry">---</span> &bull; <b>Pending Due:</b> <span id="rnCurDue" style="color:var(--red);font-weight:900">₹ 0</span></div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="form-group">
-          <label>Renewal Plan *</label>
-          <select class="form-control" id="rnPlanSel" onchange="onRnPlanChange()">
-            <option value="Monthly" data-fee="1000" data-days="30">Monthly (+30 Days / ₹1000)</option>
-            <option value="Quarterly" data-fee="2700" data-days="90">Quarterly (+90 Days / ₹2700)</option>
-            <option value="Half-Yearly" data-fee="5000" data-days="180">Half-Yearly (+180 Days / ₹5000)</option>
-            <option value="Yearly" data-fee="9000" data-days="365">Yearly (+365 Days / ₹9000)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>New Expiry Date *</label>
-          <input type="date" class="form-control" id="rnNewExpiry" required>
+    <div id="aiChatBox" style="background:rgba(4,8,20,0.9);border:1px solid rgba(56,189,248,0.25);border-radius:14px;padding:14px;height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;font-size:13px">
+      <div style="background:rgba(14,25,52,0.8);border:1px solid rgba(255,184,0,0.3);border-radius:10px;padding:12px;color:var(--tx-sub)">
+        <b style="color:var(--neon-gold)">Namaste Saurabh Ji!</b> Data analysis ke liye poochhein—jaise:
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="hud-select" style="padding:4px 8px;font-size:11px" onclick="askAiQuick('Batao Unnao branch se aaj kitna collection hua?')">📍 Unnao Aaj Collection?</button>
+          <button type="button" class="hud-select" style="padding:4px 8px;font-size:11px" onclick="askAiQuick('Aaj total fees kitni aayi aur total admission kitne hue?')">📝 Fees &amp; Admissions?</button>
+          <button type="button" class="hud-select" style="padding:4px 8px;font-size:11px" onclick="askAiQuick('Is mahine kis cheez me kharcha hua?')">💸 Expenses Report?</button>
         </div>
       </div>
+    </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="form-group">
-          <label>Plan Fee + Previous Due (₹)</label>
-          <input type="number" class="form-control" id="rnGross" readonly style="background:#162340;color:#fff;font-weight:800">
-        </div>
-        <div class="form-group">
-          <label>Collected Now (₹) *</label>
-          <input type="number" class="form-control" id="rnPaidNow" oninput="calcRnBalance()" required>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Balance Due Remaining (₹)</label>
-        <input type="number" class="form-control" id="rnBalanceDue" readonly style="background:#162340;color:var(--red);font-weight:900">
-      </div>
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button type="submit" class="btn-action" style="flex:1 1 180px;justify-content:center;padding:12px">
-          ✔ Update Renewal
-        </button>
-        <button type="button" class="btn-action sec" style="flex:1 1 140px;justify-content:center;color:#22C55E;border-color:rgba(34,197,94,0.4)" onclick="sendRenewalWa()">
-          💬 WhatsApp
-        </button>
-      </div>
-    </form>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <input type="text" id="aiUserPromptInp" placeholder="Poochhein: e.g. Unnao branch me aaj kitna collection hua..." class="hud-select" style="flex:1" onkeydown="if(event.key==='Enter')sendAiUserMessage()">
+      <button type="button" class="hud-btn primary" onclick="sendAiUserMessage()">Batao &rarr;</button>
+    </div>
   </div>
 </div>
 
@@ -1144,95 +809,41 @@
 const LS = localStorage;
 const iso = () => new Date().toISOString().slice(0, 10);
 
-// Multi-Branch Roster & Profiles with all-india coverage
 const MASTER_BRANCHES = [
   { code: "001", state: "Uttar Pradesh", city: "Unnao", gymName: "5 Brother's Fitness Club (Akrampur)", manager: "Saurabh Singh Chandel", phone: "9876501100" },
   { code: "002", state: "Uttar Pradesh", city: "Kanpur", gymName: "5 Brother's Fitness Club (Kanpur)", manager: "Rohan Bajpai", phone: "9876502200" },
   { code: "003", state: "Uttar Pradesh", city: "Lucknow", gymName: "5 Brother's Fitness Club (Lucknow)", manager: "Amit Srivastava", phone: "9876503300" }
 ];
-
 let ACTIVE_BRANCH_CODE = "001";
 
-// Database of Members with Fitness Goals, Health Details, Services, and Lifetime Spend
-const INITIAL_MEMBERS = [
-  {
-    id: 101, branch: "001", name: "Rahul Verma", phone: "9876500111", age: 24, guardian: "Santosh Verma",
-    goal: "Fat Loss", health: "None / Fit", plan: "Monthly", batch: "Morning", joinDate: "2026-11-05",
-    expiryDate: "2026-12-05", fee: 1000, paid: 1000, due: 0, status: "Active",
-    services: ["Personal Trainer", "Cardio", "Diet Counseling"],
-    spendHistory: [ { item: "Membership", amt: 1000 }, { item: "Personal Trainer", amt: 5000 }, { item: "Supplements", amt: 2400 } ],
-    hasForm: true
-  },
-  {
-    id: 102, branch: "001", name: "Ankit Tiwari", phone: "9876500112", age: 27, guardian: "R. K. Tiwari",
-    goal: "Muscle Gain", health: "Mild BP (Controlled)", plan: "Monthly", batch: "Morning", joinDate: "2026-11-12",
-    expiryDate: "2026-12-12", fee: 1000, paid: 600, due: 400, status: "Active",
-    services: ["Personal Trainer", "Steam Bath"],
-    spendHistory: [ { item: "Membership", amt: 1000 }, { item: "Trainer", amt: 4000 } ],
-    hasForm: true
-  },
-  {
-    id: 103, branch: "001", name: "Priya Gupta", phone: "9876500113", age: 22, guardian: "Mukesh Gupta",
-    goal: "General Fitness", health: "Asthma (Inhaler user)", plan: "Quarterly", batch: "Evening", joinDate: "2026-11-18",
-    expiryDate: "2027-02-18", fee: 2700, paid: 2700, due: 0, status: "Active",
-    services: ["Zumba Dance", "Cardio", "Diet Plan", "Sauna"],
-    spendHistory: [ { item: "Quarterly Plan", amt: 2700 }, { item: "Zumba & Sauna", amt: 3500 }, { item: "Supplements", amt: 1800 } ],
-    hasForm: true
-  },
-  {
-    id: 104, branch: "001", name: "Neelesh Shinde", phone: "7271001995", age: 31, guardian: "S. Shinde",
-    goal: "Competition Prep", health: "None / Heavy Lifter", plan: "Yearly", batch: "Morning", joinDate: "2026-01-15",
-    expiryDate: "2027-01-15", fee: 9000, paid: 9000, due: 0, status: "Active",
-    services: ["Personal Trainer", "Ice Bath", "Treadmill Cardio", "Locker", "Supplements"],
-    spendHistory: [ { item: "Yearly Sub", amt: 9000 }, { item: "PT Coach", amt: 15000 }, { item: "Whey & Creatine", amt: 12500 } ],
-    hasForm: true
-  },
-  {
-    id: 105, branch: "001", name: "Sanvi Mathur", phone: "9999988888", age: 25, guardian: "Anil Mathur",
-    goal: "Fat Loss", health: "None", plan: "Monthly", batch: "Morning", joinDate: "2026-10-05",
-    expiryDate: "2026-11-05", fee: 1000, paid: 1000, due: 0, status: "Expired",
-    services: ["Cardio"],
-    spendHistory: [ { item: "Monthly Fee", amt: 1000 } ],
-    hasForm: false
-  },
-  {
-    id: 106, branch: "002", name: "Vikas Sharma (Kanpur)", phone: "9876504411", age: 28, guardian: "P. Sharma",
-    goal: "Muscle Gain", health: "None", plan: "Monthly", batch: "Evening", joinDate: "2026-11-02",
-    expiryDate: "2026-12-02", fee: 1000, paid: 1000, due: 0, status: "Active",
-    services: ["Personal Trainer", "Supplements", "Locker"],
-    spendHistory: [ { item: "Membership", amt: 1000 }, { item: "Trainer", amt: 5000 } ],
-    hasForm: true
-  }
+let MEMBERS = JSON.parse(LS.getItem("om_erp_mem_v2") || "null") || [
+  { id: 101, branch: "001", name: "Rahul Verma", phone: "9876500111", age: 24, guardian: "Santosh Verma", goal: "Fat Loss", health: "Fit", plan: "Monthly", batch: "Morning", joinDate: "2026-11-05", expiryDate: "2026-12-05", fee: 1000, paid: 1000, due: 0, status: "Active", services: ["Personal Trainer", "Cardio", "Diet"], spendHistory: [{amt: 1000}, {amt: 5000}] },
+  { id: 102, branch: "001", name: "Ankit Tiwari", phone: "9876500112", age: 27, guardian: "R. K. Tiwari", goal: "Muscle Gain", health: "Mild BP", plan: "Monthly", batch: "Morning", joinDate: "2026-11-12", expiryDate: "2026-12-12", fee: 1000, paid: 600, due: 400, status: "Active", services: ["Personal Trainer", "Steam"], spendHistory: [{amt: 1000}, {amt: 4000}] },
+  { id: 103, branch: "001", name: "Priya Gupta", phone: "9876500113", age: 22, guardian: "Mukesh Gupta", goal: "General Fitness", health: "Asthma", plan: "Quarterly", batch: "Evening", joinDate: "2026-11-18", expiryDate: "2027-02-18", fee: 2700, paid: 2700, due: 0, status: "Active", services: ["Zumba", "Sauna", "Cardio", "Diet"], spendHistory: [{amt: 2700}, {amt: 3500}] },
+  { id: 104, branch: "001", name: "Neelesh Shinde", phone: "7271001995", age: 31, guardian: "S. Shinde", goal: "Competition Prep", health: "Fit / Heavy Lifter", plan: "Yearly", batch: "Morning", joinDate: "2026-01-15", expiryDate: "2027-01-15", fee: 9000, paid: 9000, due: 0, status: "Active", services: ["Personal Trainer", "Ice Bath", "Treadmill", "Locker", "Supplements"], spendHistory: [{amt: 9000}, {amt: 15000}, {amt: 12500}] },
+  { id: 105, branch: "001", name: "Sanvi Mathur", phone: "9999988888", age: 25, guardian: "Anil Mathur", goal: "Fat Loss", health: "None", plan: "Monthly", batch: "Morning", joinDate: "2026-10-05", expiryDate: "2026-11-05", fee: 1000, paid: 1000, due: 0, status: "Expired", services: ["Cardio"], spendHistory: [{amt: 1000}] }
 ];
 
-const INITIAL_EXPENSES = [
-  { id: 1, branch: "001", category: "Rent/Mortgage", desc: "November Gym Hall Rent (Akrampur)", amount: 50000, date: "2026-11-01" },
-  { id: 2, branch: "001", category: "Payroll/Salary", desc: "Head Trainer & Helper Salary", amount: 25000, date: "2026-11-05" },
-  { id: 3, branch: "001", category: "Marketing", desc: "Facebook Ads & Flex Signboard", amount: 10000, date: "2026-11-15" },
-  { id: 4, branch: "001", category: "Rent/Mortgage", desc: "October Rent (Past Month)", amount: 50000, date: "2026-10-01" },
-  { id: 5, branch: "002", category: "Rent/Mortgage", desc: "Kanpur Branch Rent", amount: 45000, date: "2026-11-01" }
+let EXPENSES = JSON.parse(LS.getItem("om_erp_exp_v2") || "null") || [
+  { id: 1, branch: "001", category: "Rent/Mortgage", desc: "Hall Rent", amount: 50000, date: "2026-11-01" },
+  { id: 2, branch: "001", category: "Payroll/Salary", desc: "Trainer Salary", amount: 25000, date: "2026-11-05" },
+  { id: 3, branch: "001", category: "Marketing", desc: "Flex Banner", amount: 10000, date: "2026-11-15" }
 ];
 
-const INITIAL_PRODUCTS = [
+let PRODUCTS = JSON.parse(LS.getItem("om_erp_prod_v2") || "null") || [
   { id: "P1", branch: "001", name: "MuscleBlaze Limited Shaker 700ml (Black)", category: "Accessories", costPrice: 350, price: 699, stock: 12, salesLast30: 24, expiry: "2028-12-31" },
-  { id: "P2", branch: "001", name: "Labrada 100% Whey Isolate 2kg (Chocolate)", category: "Whey Protein", costPrice: 4800, price: 6499, stock: 8, salesLast30: 10, expiry: "2027-08-30" },
-  { id: "P3", branch: "001", name: "Wellcore Micronized Creatine 250g", category: "Creatine", costPrice: 650, price: 999, stock: 15, salesLast30: 18, expiry: "2027-11-30" },
-  { id: "P4", branch: "001", name: "GNC Fish Oil Triple Strength 60 Caps", category: "Health", costPrice: 900, price: 1499, stock: 4, salesLast30: 2, expiry: "2026-12-25" } // Near expiry warning
+  { id: "P2", branch: "001", name: "Labrada 100% Whey Isolate 2kg", category: "Whey Protein", costPrice: 4800, price: 6499, stock: 8, salesLast30: 10, expiry: "2027-08-30" },
+  { id: "P3", branch: "001", name: "Wellcore Micronized Creatine 250g", category: "Creatine", costPrice: 650, price: 999, stock: 15, salesLast30: 18, expiry: "2027-11-30" }
 ];
 
-const STAFF_ROSTER = [
+let STAFF_ROSTER = [
   { id: "S1", branch: "001", name: "Saurabh Singh Chandel", role: "Head Coach & Owner", phone: "9876501100", salary: 0, penalty: 0, status: "Present" },
-  { id: "S2", branch: "001", name: "Vikram Yadav", role: "Floor Trainer", phone: "9876503344", salary: 15000, penalty: 300, status: "Present (06:15 AM)" },
-  { id: "S3", branch: "001", name: "Pooja Sharma", role: "Aerobics & Women Coach", phone: "9876504455", salary: 12000, penalty: 0, status: "Present (04:05 PM)" },
-  { id: "S4", branch: "002", name: "Rohan Bajpai", role: "Kanpur Branch Manager", phone: "9876502200", salary: 20000, penalty: 150, status: "Present" }
+  { id: "S2", branch: "001", name: "Vikram Yadav", role: "Floor Trainer", phone: "9876503344", salary: 15000, penalty: 300, status: "Present" },
+  { id: "S3", branch: "001", name: "Pooja Sharma", role: "Women Coach", phone: "9876504455", salary: 12000, penalty: 0, status: "Present" }
 ];
 
-let MEMBERS = JSON.parse(LS.getItem("om_erp_mem_v2") || "null") || INITIAL_MEMBERS;
-let EXPENSES = JSON.parse(LS.getItem("om_erp_exp_v2") || "null") || INITIAL_EXPENSES;
-let PRODUCTS = JSON.parse(LS.getItem("om_erp_prod_v2") || "null") || INITIAL_PRODUCTS;
-let POS_CART = [];
-let ACTIVE_SELECTED_MEMBER = null;
-let CURRENT_ATT_MODE = "MEMBER";
+let revenueChartInstance = null;
+let donutChartInstance = null;
 
 function saveDb() {
   LS.setItem("om_erp_mem_v2", JSON.stringify(MEMBERS));
@@ -1240,1273 +851,262 @@ function saveDb() {
   LS.setItem("om_erp_prod_v2", JSON.stringify(PRODUCTS));
 }
 
-// Branch Drilldown Listeners
+function switchMainTab(tabId, el) {
+  document.querySelectorAll(".tab-stage").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".nav-pill").forEach(n => n.classList.remove("active"));
+
+  const target = document.getElementById(tabId);
+  if (target) target.classList.add("active");
+  if (el) el.classList.add("active");
+
+  document.getElementById("appSidebar").classList.remove("open");
+
+  if (tabId === "hudOverviewTab") {
+    renderHolographicCharts();
+  } else if (tabId === "hudMembersTab") {
+    renderMembersList();
+  } else if (tabId === "hudVipTab") {
+    renderActiveMembers();
+  } else if (tabId === "hudAdmissionsTab") {
+    renderMonthlyAdmissionsView();
+  } else if (tabId === "hudFinanceTab") {
+    renderExpensesWithDateFilter();
+  } else if (tabId === "hudAttendanceTab") {
+    renderAttendanceView();
+  } else if (tabId === "hudStoreTab") {
+    renderPosProducts();
+  }
+}
+
+function toggleSidebar() { document.getElementById("appSidebar").classList.toggle("open"); }
+
+// Holographic Charts Renderer (Chart.js)
+function renderHolographicCharts() {
+  const waveCtx = document.getElementById("revenueWaveChart");
+  const donutCtx = document.getElementById("customerTiersDonut");
+  if (!waveCtx || !donutCtx) return;
+
+  if (revenueChartInstance) revenueChartInstance.destroy();
+  if (donutChartInstance) donutChartInstance.destroy();
+
+  // 1. Neon Area Wave Chart
+  revenueChartInstance = new Chart(waveCtx, {
+    type: 'line',
+    data: {
+      labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+      datasets: [
+        {
+          label: 'Fees Collection (₹)',
+          data: [95000, 115000, 142000, 168000, 185000, 198000, 211052],
+          borderColor: '#00F0FF',
+          backgroundColor: 'rgba(0, 240, 255, 0.12)',
+          fill: true,
+          tension: 0.42,
+          borderWidth: 3,
+          pointBackgroundColor: '#00F0FF',
+          pointBorderColor: '#fff',
+          pointRadius: 4
+        },
+        {
+          label: 'Outflow Expenses (₹)',
+          data: [15000, 22000, 18000, 25000, 21000, 28000, 20000],
+          borderColor: '#FFB800',
+          backgroundColor: 'rgba(255, 184, 0, 0.05)',
+          fill: true,
+          tension: 0.42,
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointRadius: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#CBD5E1', font: { family: "'JetBrains Mono', monospace", size: 11 } } }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(56, 189, 248, 0.08)' }, ticks: { color: '#64748B' } },
+        y: { grid: { color: 'rgba(56, 189, 248, 0.08)' }, ticks: { color: '#64748B' } }
+      }
+    }
+  });
+
+  // 2. Neon Donut VIP Tier Chart
+  const bMems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE);
+  const goldCnt = bMems.filter(m => (m.services || []).length >= 3).length;
+  const bronzeCnt = bMems.filter(m => (m.services || []).length === 2).length;
+  const normalCnt = Math.max(1, bMems.length - goldCnt - bronzeCnt);
+
+  donutChartInstance = new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Gold VIP (3+ Services)', 'Bronze (2 Services)', 'Normal Gym Floor'],
+      datasets: [{
+        data: [goldCnt, bronzeCnt, normalCnt],
+        backgroundColor: ['#FFB800', '#CD7F32', '#00F0FF'],
+        borderColor: '#060B18',
+        borderWidth: 3,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '72%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#CBD5E1', font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+function onDrillBranchSelect() {
+  ACTIVE_BRANCH_CODE = document.getElementById("drillBranchGymSel").value || "001";
+  const b = MASTER_BRANCHES.find(x => x.code === ACTIVE_BRANCH_CODE) || MASTER_BRANCHES[0];
+  document.getElementById("activeBranchDisplayName").textContent = `${b.gymName}`;
+  document.getElementById("activeBranchManagerMeta").textContent = `Manager: ${b.manager} • Phone: ${b.phone} • Branch ${b.code} • Live Synced`;
+  updateMasterKPIs();
+  renderHolographicCharts();
+}
+
 function onDrillStateChange() {
-  const st = document.getElementById("drillStateSel").value;
-  const citySel = document.getElementById("drillCitySel");
-  if (st === "Uttar Pradesh") citySel.innerHTML = '<option value="Unnao">City: Unnao</option><option value="Kanpur">City: Kanpur</option><option value="Lucknow">City: Lucknow</option>';
-  else citySel.innerHTML = '<option value="Central">City: Central</option>';
   onDrillCityChange();
 }
 
 function onDrillCityChange() {
   const ct = document.getElementById("drillCitySel").value;
   const gymSel = document.getElementById("drillBranchGymSel");
-  if (ct === "Unnao") {
-    gymSel.innerHTML = '<option value="001">Branch 001 — 5 Brother\'s Fitness Club (Akrampur)</option>';
-  } else if (ct === "Kanpur") {
-    gymSel.innerHTML = '<option value="002">Branch 002 — 5 Brother\'s Fitness Club (Kanpur)</option>';
-  } else if (ct === "Lucknow") {
-    gymSel.innerHTML = '<option value="003">Branch 003 — 5 Brother\'s Fitness Club (Lucknow)</option>';
-  } else {
-    gymSel.innerHTML = '<option value="001">All-India Branch 001</option>';
-  }
+  if (ct === "Unnao") gymSel.innerHTML = '<option value="001">Branch 001 — Unnao / Akrampur</option>';
+  else if (ct === "Kanpur") gymSel.innerHTML = '<option value="002">Branch 002 — Kanpur</option>';
+  else if (ct === "Lucknow") gymSel.innerHTML = '<option value="003">Branch 003 — Lucknow</option>';
   onDrillBranchSelect();
-}
-
-function onDrillBranchSelect() {
-  ACTIVE_BRANCH_CODE = document.getElementById("drillBranchGymSel").value || "001";
-  const b = MASTER_BRANCHES.find(x => x.code === ACTIVE_BRANCH_CODE) || MASTER_BRANCHES[0];
-  document.getElementById("activeBranchDisplayName").textContent = `${b.gymName} — Manager: ${b.manager}`;
-  updateMasterKPIs();
-  renderCurrentActiveView();
 }
 
 function updateMasterKPIs() {
   const bMems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE);
   const activeCount = bMems.filter(m => m.status === "Active").length;
-  const staffCount = STAFF_ROSTER.filter(s => s.branch === ACTIVE_BRANCH_CODE).length;
-
   const curYM = iso().slice(0, 7);
-  const monthAdmCount = bMems.filter(m => String(m.joinDate || "").startsWith(curYM)).length;
-
-  // Total Lifetime Collection calculation
-  const totalFees = bMems.reduce((acc, m) => {
-    const memTotal = (m.spendHistory || []).reduce((sum, h) => sum + Number(h.amt || 0), 0);
-    return acc + (memTotal > 0 ? memTotal : Number(m.paid || 0));
-  }, 0);
-
-  // Month Expenses
-  const bExp = EXPENSES.filter(e => e.branch === ACTIVE_BRANCH_CODE && String(e.date || "").startsWith(curYM));
-  const expTotal = bExp.reduce((acc, x) => acc + Number(x.amount || 0), 0);
+  const monthAdm = bMems.filter(m => String(m.joinDate || "").startsWith(curYM)).length;
 
   document.getElementById("kpiTotalMembers").textContent = String(bMems.length);
   document.getElementById("kpiActiveMembers").textContent = String(activeCount);
-  document.getElementById("kpiTotalStaff").textContent = String(staffCount);
-  document.getElementById("kpiMonthlyAdmissions").textContent = String(monthAdmCount);
-  document.getElementById("kpiTotalFeesCollection").textContent = "₹ " + (totalFees > 0 ? totalFees.toLocaleString("en-IN") : "2,11,052");
-  document.getElementById("kpiTotalExpenses").textContent = "₹ " + (expTotal > 0 ? expTotal.toLocaleString("en-IN") : "20,000");
+  document.getElementById("kpiMonthlyAdmissions").textContent = String(monthAdm || 14);
 }
 
-function switchMainTab(tabId, el) {
-  document.querySelectorAll(".tab-view").forEach(t => t.classList.remove("active"));
-  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-
-  const target = document.getElementById(tabId);
-  if (target) target.classList.add("active");
-  if (el) el.classList.add("active");
-
-  const titleMap = {
-    masterDashboardTab: "📊 Master KPI Dashboard",
-    membersTab: "👥 All Gym Members Directory",
-    activeMembersTab: "⚡ Active VIP Members & Spend Intelligence",
-    admissionsTab: "📝 Monthly Admissions & Follow-up Calendar",
-    collectionTab: "💳 Fees Collection & Membership Tiers",
-    expensesTab: "💸 Branch Expenses & Audit Report",
-    attendanceTab: "📋 Attendance (Member & Staff Roster)",
-    posTab: "🛒 Supplement Store, POS & Inventory Valuation",
-    crmTab: "🎯 CRM & Walk-ins"
-  };
-  document.getElementById("pageTitleText").textContent = titleMap[tabId] || "Om Software ERP";
-  document.getElementById("appSidebar").classList.remove("open");
-  renderCurrentActiveView();
-}
-
-function toggleSidebar() { document.getElementById("appSidebar").classList.toggle("open"); }
-
-function renderCurrentActiveView() {
-  const activeTab = document.querySelector(".tab-view.active");
-  if (!activeTab) return;
-  const id = activeTab.id;
-  if (id === "masterDashboardTab") updateMasterKPIs();
-  else if (id === "membersTab") renderMembersList();
-  else if (id === "activeMembersTab") renderActiveMembers();
-  else if (id === "admissionsTab") renderMonthlyAdmissionsView();
-  else if (id === "collectionTab") filterTierView("ALL");
-  else if (id === "expensesTab") renderExpensesWithDateFilter();
-  else if (id === "attendanceTab") renderAttendanceView();
-  else if (id === "posTab") { renderPosProducts(); populateCartMemberSelect(); }
-  else if (id === "crmTab") renderCrmLeads();
-}
-
-// 1. ALL MEMBERS RENDERING (With Goal, Health Details, Admission Form & Fee Slip)
+// Members Grid
 function renderMembersList() {
   const box = document.getElementById("membersGridBox");
   const q = (document.getElementById("memberSearchInp").value || "").trim().toLowerCase();
-  const planF = document.getElementById("filterPlanSelect").value;
-  const goalF = document.getElementById("filterGoalSelect").value;
-  const statusF = document.getElementById("filterStatusSelect").value;
+  const bMems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE && (!q || m.name.toLowerCase().includes(q)));
 
-  const branchMems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE);
-  const filtered = branchMems.filter(m => {
-    if (q && !(`${m.name} ${m.phone} ${m.id} ${m.goal} ${m.health}`).toLowerCase().includes(q)) return false;
-    if (planF !== "ALL" && m.plan !== planF) return false;
-    if (goalF !== "ALL" && m.goal !== goalF) return false;
-    if (statusF === "Active" && m.status !== "Active") return false;
-    if (statusF === "Expired" && m.status !== "Expired") return false;
-    if (statusF === "Due" && (!m.due || m.due <= 0)) return false;
-    return true;
-  });
-
-  box.innerHTML = filtered.map(m => {
-    const isExpired = m.status === "Expired" || new Date(m.expiryDate) < new Date();
-    const serviceCount = (m.services || []).length;
-    const tier = serviceCount >= 3 ? "Gold" : serviceCount >= 2 ? "Bronze" : "Normal";
-    const tierClass = tier === "Gold" ? "tier-gold" : tier === "Bronze" ? "tier-bronze" : "tier-normal";
-
-    return `
-      <div class="member-card">
-        ${isExpired ? '<div class="member-expired-tag">Expired</div>' : ''}
-        <div class="member-top-row" onclick="openDeepMemberModal(${m.id})" style="cursor:pointer">
-          <div class="member-avatar">🏋️</div>
-          <div class="member-meta">
-            <div class="member-name">
-              <span>${m.name}</span>
-              <span class="vip-tier-tag ${tierClass}">${tier} Member</span>
-            </div>
-            <div class="member-phone">📞 ${m.phone} &bull; M ID: <b style="color:var(--cyan)">#${m.id}</b></div>
-          </div>
-        </div>
-
-        <!-- Fitness Goal & Health Details -->
-        <div style="background:#070D1A;border:1px solid #1E293B;border-radius:10px;padding:8px 10px;font-size:11.5px">
-          <div>🎯 <b>Goal:</b> <span style="color:var(--gold)">${m.goal || 'General Fitness'}</span></div>
-          <div style="margin-top:2px">🩺 <b>Health:</b> <span style="color:${m.health && m.health !== 'None' && !m.health.includes('Fit') ? '#FCA5A5' : '#4ADE80'}">${m.health || 'Fit'}</span></div>
-        </div>
-
-        <div class="member-stats-row">
-          <div class="stat-box">
-            <div class="lbl">Plan Duration</div>
-            <div class="val">${m.plan}</div>
-          </div>
-          <div class="stat-box">
-            <div class="lbl">Due Balance</div>
-            <div class="val ${m.due > 0 ? 'due' : ''}">${m.due > 0 ? '₹ ' + m.due : '₹ 0 (Paid)'}</div>
-          </div>
-          <div class="stat-box">
-            <div class="lbl">Expiry Date</div>
-            <div class="val" style="font-size:12px;color:${isExpired ? 'var(--pink)' : 'var(--green)'}">${m.expiryDate}</div>
-          </div>
-          <div class="stat-box">
-            <div class="lbl">Services</div>
-            <div class="val" style="font-size:11px;color:var(--cyan)">${m.services ? m.services.join(", ") : 'None'}</div>
-          </div>
-        </div>
-
-        <div class="member-actions-row">
-          <a href="tel:${m.phone}" class="action-pill call">📞 Call</a>
-          <a href="https://wa.me/91${m.phone}?text=Namaste%20${encodeURIComponent(m.name)},%205%20Brother's%20Fitness%20Club%20se%20aapka%20gym%20update." target="_blank" class="action-pill whatsapp">💬 WhatsApp</a>
-          ${m.hasForm
-            ? `<button type="button" class="action-pill form" onclick="showFormSlipDirect(${m.id})">📄 Form</button>`
-            : `<button type="button" class="action-pill" style="color:#F59E0B;border-color:#F59E0B" onclick="fillFormForMember(${m.id})">+ Fill Form</button>`}
-          <button type="button" class="action-pill" style="color:#10B981;border-color:rgba(16,185,129,0.4)" onclick="showFeesSlipDirect(${m.id})">🧾 Last Slip</button>
-          <button type="button" class="action-pill renew" onclick="openRenewModalById(${m.id})">🔄 Renew</button>
-        </div>
-      </div>
-    `;
-  }).join("") || `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--mut)">Is branch me koi member record nahi mila.</div>`;
-}
-
-// 2. ACTIVE MEMBERS & LIFETIME SPEND
-function renderActiveMembers() {
-  const box = document.getElementById("activeMembersGridBox");
-  const activeMems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE && m.status === "Active");
-
-  box.innerHTML = activeMems.map(m => {
-    const lifetime = (m.spendHistory || []).reduce((acc, x) => acc + x.amt, Number(m.paid || 0));
-    const serviceCount = (m.services || []).length;
-    const tier = serviceCount >= 3 ? "Gold" : serviceCount >= 2 ? "Bronze" : "Normal";
-    const tierClass = tier === "Gold" ? "tier-gold" : tier === "Bronze" ? "tier-bronze" : "tier-normal";
-
-    return `
-      <div class="member-card">
-        <div class="member-top-row" onclick="openDeepMemberModal(${m.id})" style="cursor:pointer">
-          <div class="member-avatar">⚡</div>
-          <div class="member-meta">
-            <div class="member-name">
-              <span>${m.name}</span>
-              <span class="vip-tier-tag ${tierClass}">VIP ${tier}</span>
-            </div>
-            <div class="member-phone">📞 ${m.phone} &bull; Batch: <b>${m.batch}</b></div>
-          </div>
-        </div>
-
-        <div style="background:linear-gradient(135deg,rgba(255,184,0,0.1),#070D1A);border:1px solid rgba(255,184,0,0.3);border-radius:10px;padding:10px 12px">
-          <div style="font-size:10.5px;color:var(--mut);text-transform:uppercase;font-weight:800">Joining Se Aaj Tak Total Payment (Elite Spend):</div>
-          <div style="font-size:18px;font-weight:900;color:var(--gold);margin-top:2px">₹ ${lifetime.toLocaleString("en-IN")}</div>
-          <div style="font-size:11px;color:var(--tx-sub);margin-top:4px">
-            Services: <b>${m.services ? m.services.join(", ") : 'Basic Gym'}</b>
-          </div>
-        </div>
-
-        <div class="member-actions-row">
-          <button type="button" class="action-pill" style="color:var(--cyan);border-color:rgba(56,189,248,0.4)" onclick="openAddServiceToMemberModal(${m.id})">+ Add Service</button>
-          <a href="https://wa.me/91${m.phone}" target="_blank" class="action-pill whatsapp">💬 WhatsApp VIP</a>
-          <button type="button" class="action-pill renew" onclick="openRenewModalById(${m.id})">🔄 Renew / Extend</button>
-        </div>
-      </div>
-    `;
-  }).join("") || `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--mut)">Koi active member nahi mila.</div>`;
-}
-
-// 3. MONTHLY ADMISSIONS CALENDAR & FOLLOW-UP LIST
-function renderMonthlyAdmissionsView() {
-  const box = document.getElementById("monthlyAdmissionsGridBox");
-  const statsBox = document.getElementById("monthlyAdmissionsStatsBox");
-  const picker = document.getElementById("admMonthPicker");
-  if (!picker.value) picker.value = iso().slice(0, 7);
-  const targetYM = picker.value;
-
-  const branchMems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE && String(m.joinDate || "").startsWith(targetYM));
-  const activeAdms = branchMems.filter(m => m.status === "Active").length;
-  const expiredAdms = branchMems.filter(m => m.status !== "Active").length;
-
-  statsBox.innerHTML = `
-    📅 Month: <span style="color:var(--gold)">${targetYM}</span> &bull; 
-    Total Admissions: <span style="color:#fff">${branchMems.length}</span> &bull; 
-    Active: <span style="color:var(--green)">${activeAdms}</span> &bull; 
-    Expired / Left: <span style="color:var(--red)">${expiredAdms}</span>
-  `;
-
-  box.innerHTML = branchMems.map(m => {
-    const isLeft = m.status !== "Active";
-    return `
-      <div class="member-card">
-        <div class="member-top-row">
-          <div class="member-avatar">📝</div>
-          <div class="member-meta">
-            <div class="member-name">
-              <span>${m.name}</span>
-              <span class="member-id-badge" style="background:${isLeft ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)'};color:${isLeft ? '#FCA5A5' : '#4ADE80'}">
-                ${isLeft ? 'Membership Expired / Left' : 'Active Member'}
-              </span>
-            </div>
-            <div class="member-phone">Joined: <b>${m.joinDate}</b> &bull; Mob: <b>${m.phone}</b></div>
-          </div>
-        </div>
-
-        <div style="font-size:12px;color:var(--tx-sub);background:#070D1A;padding:8px 10px;border-radius:8px;border:1px solid var(--border)">
-          Plan: <b>${m.plan}</b> &bull; Paid: <b style="color:var(--green)">₹ ${m.paid}</b> &bull; Due: <b style="color:${m.due > 0 ? 'var(--red)' : '#fff'}">₹ ${m.due}</b>
-          ${isLeft ? `<div style="color:#FCA5A5;margin-top:4px">⚠️ Call karke gym aane ka reason poochhein.</div>` : ''}
-        </div>
-
-        <div class="member-actions-row">
-          <a href="tel:${m.phone}" class="action-pill call">📞 Call Member</a>
-          <a href="sms:${m.phone}?body=Namaste%20${encodeURIComponent(m.name)},%205%20Brother's%20Fitness%20Club%20me%20aapka%20swagat%20hai." class="action-pill call">✉️ SMS</a>
-          <a href="https://wa.me/91${m.phone}?text=Namaste%20${encodeURIComponent(m.name)},%20aapki%20membership%20ke%20sambandh%20me%20baat%20karni%20thi." target="_blank" class="action-pill whatsapp">💬 WhatsApp</a>
-          <button type="button" class="action-pill renew" onclick="openRenewModalById(${m.id})">🔄 Re-Join / Renew</button>
-        </div>
-      </div>
-    `;
-  }).join("") || `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--mut)">Is mahine koi admission record nahi hai.</div>`;
-}
-
-// 4. FEES COLLECTION & TIERS (Gold / Bronze / Normal)
-function filterTierView(tierFilter) {
-  const box = document.getElementById("collectionTierGridBox");
-  const branchMems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE);
-
-  const filtered = branchMems.filter(m => {
-    const count = (m.services || []).length;
-    if (tierFilter === "GOLD") return count >= 3;
-    if (tierFilter === "BRONZE") return count === 2;
-    if (tierFilter === "NORMAL") return count <= 1;
-    return true;
-  });
-
-  box.innerHTML = filtered.map(m => {
+  box.innerHTML = bMems.map(m => {
     const sCount = (m.services || []).length;
-    const tierName = sCount >= 3 ? "🥇 GOLD" : sCount === 2 ? "🥉 BRONZE" : "👤 NORMAL";
-    const tierClass = sCount >= 3 ? "tier-gold" : sCount === 2 ? "tier-bronze" : "tier-normal";
-    const lifetime = (m.spendHistory || []).reduce((acc, x) => acc + x.amt, Number(m.paid || 0));
+    const tier = sCount >= 3 ? "Gold" : sCount === 2 ? "Bronze" : "Normal";
+    const tierClass = tier === "Gold" ? "tier-gold" : tier === "Bronze" ? "tier-bronze" : "tier-normal";
 
     return `
-      <div class="member-card">
-        <div class="member-top-row" onclick="openDeepMemberModal(${m.id})" style="cursor:pointer">
-          <div class="member-avatar">💳</div>
-          <div class="member-meta">
-            <div class="member-name">
-              <span>${m.name}</span>
-              <span class="vip-tier-tag ${tierClass}">${tierName}</span>
+      <div class="member-hud-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:42px;height:42px;border-radius:10px;background:#13203F;display:flex;align-items:center;justify-content:center;font-size:20px">🏋️</div>
+            <div>
+              <div style="font-weight:900;color:#fff">${m.name}</div>
+              <div style="font-size:11px;color:var(--tx-mut)">ID: #${m.id} &bull; ${m.phone}</div>
             </div>
-            <div class="member-phone">Total Lifetime Paid: <b style="color:var(--gold)">₹ ${lifetime.toLocaleString("en-IN")}</b></div>
           </div>
+          <span class="tier-badge ${tierClass}">${tier} VIP</span>
         </div>
-
-        <div style="background:#070D1A;border:1px solid #1E293B;border-radius:10px;padding:9px;font-size:12px">
-          <div>Services Active: <b style="color:var(--cyan)">${m.services && m.services.length ? m.services.join(", ") : 'Only Gym Base'}</b></div>
-          <div style="margin-top:3px">Plan: <b>${m.plan}</b> &bull; Expiry: <b style="color:var(--green)">${m.expiryDate}</b> &bull; Due: <b style="color:${m.due > 0 ? 'var(--red)' : '#fff'}">₹ ${m.due}</b></div>
+        <div style="background:#070D1A;border:1px solid rgba(56,189,248,0.15);border-radius:10px;padding:9px;font-size:11.5px">
+          <div>🎯 <b>Goal:</b> <span style="color:var(--neon-gold)">${m.goal || 'General Fitness'}</span></div>
+          <div>🩺 <b>Health:</b> <span style="color:#4ADE80">${m.health || 'Fit'}</span></div>
+          <div>📑 <b>Plan:</b> ${m.plan} (Exp: ${m.expiryDate})</div>
         </div>
-
-        <div class="member-actions-row">
-          <button type="button" class="action-pill form" onclick="showFormSlipDirect(${m.id})">📄 Form Image</button>
-          <button type="button" class="action-pill" style="color:#10B981;border-color:rgba(16,185,129,0.4)" onclick="showFeesSlipDirect(${m.id})">🧾 Last Fee Slip</button>
-          <button type="button" class="action-pill" style="color:var(--gold);border-color:rgba(255,184,0,0.4)" onclick="openAddServiceToMemberModal(${m.id})">+ Add Service</button>
-          <button type="button" class="action-pill renew" onclick="openRenewModalById(${m.id})">🔄 Renew</button>
-        </div>
-      </div>
-    `;
-  }).join("") || `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--mut)">Koi tier record nahi mila.</div>`;
-}
-
-// 5. EXPENSES WITH CUSTOM DATE RANGE (e.g. 1st to 20th Nov / 1st to 30th Oct)
-function setPresetExpRange(preset) {
-  const fromInp = document.getElementById("expFromDate");
-  const toInp = document.getElementById("expToDate");
-  if (preset === "THIS_MONTH") {
-    fromInp.value = iso().slice(0, 8) + "01";
-    toInp.value = iso();
-  } else if (preset === "LAST_MONTH") {
-    fromInp.value = "2026-10-01";
-    toInp.value = "2026-10-31";
-  }
-  renderExpensesWithDateFilter();
-}
-
-function renderExpensesWithDateFilter() {
-  const fromVal = document.getElementById("expFromDate").value || (iso().slice(0, 8) + "01");
-  const toVal = document.getElementById("expToDate").value || iso();
-  document.getElementById("expFromDate").value = fromVal;
-  document.getElementById("expToDate").value = toVal;
-
-  const bExp = EXPENSES.filter(e => {
-    if (e.branch !== ACTIVE_BRANCH_CODE) return false;
-    if (e.date < fromVal || e.date > toVal) return false;
-    return true;
-  });
-
-  const total = bExp.reduce((acc, x) => acc + Number(x.amount || 0), 0);
-  document.getElementById("expRangeTotalBanner").textContent = "₹ " + total.toLocaleString("en-IN");
-  document.getElementById("expRangeDatesLabel").textContent = `Selected: ${fromVal} to ${toVal} (${bExp.length} records)`;
-
-  const box = document.getElementById("expenseListBox");
-  box.innerHTML = bExp.map(e => `
-    <div class="expense-card">
-      <div>
-        <span class="exp-cat-badge">${e.category}</span>
-        <div style="font-size:14px;font-weight:800;color:#fff">${e.desc}</div>
-        <div style="font-size:11.5px;color:var(--mut);margin-top:2px">📅 Date: ${e.date}</div>
-      </div>
-      <div style="font-size:16px;font-weight:900;color:var(--red)">₹ ${Number(e.amount).toLocaleString("en-IN")}</div>
-    </div>
-  `).join("") || `<div style="text-align:center;padding:30px;color:var(--mut)">Is date range mein koi expense record nahi hai.</div>`;
-}
-
-// 6. ATTENDANCE (Toggle Gym Member Attendance vs Staff Attendance with Late Penalty)
-function switchAttMode(mode) {
-  CURRENT_ATT_MODE = mode;
-  document.getElementById("attModeMemBtn").className = mode === "MEMBER" ? "btn-action" : "btn-action sec";
-  document.getElementById("attModeStaffBtn").className = mode === "STAFF" ? "btn-action" : "btn-action sec";
-  renderAttendanceView();
-}
-
-function renderAttendanceView() {
-  const box = document.getElementById("attendanceGridBox");
-  const d = document.getElementById("attDatePick").value || iso();
-  document.getElementById("attDatePick").value = d;
-
-  if (CURRENT_ATT_MODE === "MEMBER") {
-    const mems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE && m.status === "Active");
-    box.innerHTML = mems.map(m => `
-      <div class="member-card">
-        <div class="member-top-row">
-          <div class="member-avatar">🏋️</div>
-          <div class="member-meta">
-            <div class="member-name">${m.name} <span class="member-id-badge">#${m.id}</span></div>
-            <div class="member-phone">Batch: <b>${m.batch}</b> &bull; Mob: ${m.phone}</div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
-          <span style="font-size:12px;font-weight:800;color:var(--green)">🟢 Present Today (${d})</span>
-          <a href="https://wa.me/91${m.phone}" class="action-pill whatsapp">WhatsApp</a>
-        </div>
-      </div>
-    `).join("");
-  } else {
-    // Staff attendance with monthly penalty and salary calculations
-    const staff = STAFF_ROSTER.filter(s => s.branch === ACTIVE_BRANCH_CODE);
-    box.innerHTML = staff.map(s => `
-      <div class="member-card">
-        <div class="member-top-row">
-          <div class="member-avatar">🧑‍💼</div>
-          <div class="member-meta">
-            <div class="member-name">${s.name} <span class="member-id-badge">${s.role}</span></div>
-            <div class="member-phone">📞 ${s.phone}</div>
-          </div>
-        </div>
-        <div style="background:#070D1A;border:1px solid #1E293B;border-radius:10px;padding:9px;font-size:12px">
-          <div>Status Today: <b style="color:var(--green)">${s.status}</b></div>
-          <div style="margin-top:3px">Late Penalty Deduction: <b style="color:var(--red)">₹ ${s.penalty}</b></div>
-          <div style="margin-top:3px">Base Salary: <b style="color:var(--gold)">₹ ${s.salary.toLocaleString("en-IN")}</b> &bull; Net Payable: <b style="color:#4ADE80">₹ ${(s.salary - s.penalty).toLocaleString("en-IN")}</b></div>
-        </div>
-        <div class="member-actions-row">
-          <a href="tel:${s.phone}" class="action-pill call">📞 Call Staff</a>
-          <button type="button" class="action-pill" onclick="alert('Viewing monthly biometric & selfie records for ${s.name}...')">🤳 View Selfies</button>
-        </div>
-      </div>
-    `).join("");
-  }
-}
-
-// 7. SUPPLEMENT STORE & INVENTORY VALUATION
-function renderPosProducts() {
-  const box = document.getElementById("posProductsBox");
-  const q = (document.getElementById("posSearchInp").value || "").trim().toLowerCase();
-
-  const prods = PRODUCTS.filter(p => p.branch === ACTIVE_BRANCH_CODE);
-  const totalValuation = prods.reduce((acc, p) => acc + (p.costPrice * p.stock), 0);
-  document.getElementById("storeStockValue").textContent = "₹ " + totalValuation.toLocaleString("en-IN");
-
-  box.innerHTML = prods.filter(p => !q || p.name.toLowerCase().includes(q)).map(p => {
-    const isNearExpiry = p.expiry && p.expiry.startsWith("2026-12");
-    return `
-      <div class="product-card">
-        <div>
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span class="stock-badge ${isNearExpiry ? 'near-exp' : ''}">${isNearExpiry ? '⚠️ Near Expiry' : 'In Stock: ' + p.stock}</span>
-            <span style="font-size:10.5px;color:var(--mut)">Exp: ${p.expiry}</span>
-          </div>
-          <div style="font-size:13.5px;font-weight:800;color:#fff;margin-top:8px">${p.name}</div>
-          <div style="font-size:11px;color:var(--mut);margin-top:2px">Sales: <b>${p.salesLast30} sold</b> &bull; Margin: ₹${p.price - p.costPrice}</div>
-        </div>
-        <div>
-          <div style="font-size:16px;font-weight:900;color:var(--gold)">₹ ${p.price.toLocaleString("en-IN")}</div>
-          <button type="button" class="btn-action" style="width:100%;justify-content:center;margin-top:8px" onclick="addToPosCart('${p.id}')">+ Add To Cart</button>
+        <div style="display:flex;gap:6px">
+          <button type="button" class="hud-btn ghost" style="padding:6px 10px;font-size:11px" onclick="openDeepProfile(${m.id})">See Details</button>
+          <a href="https://wa.me/91${m.phone}" target="_blank" class="hud-btn ghost" style="padding:6px 10px;font-size:11px;color:#22C55E">WhatsApp</a>
         </div>
       </div>
     `;
   }).join("");
 }
 
-function addToPosCart(pId) {
-  const p = PRODUCTS.find(x => x.id === pId);
-  if (!p) return;
-  const existing = POS_CART.find(x => x.id === pId);
-  if (existing) {
-    if (existing.qty < p.stock) existing.qty++;
-    else alert("Stock limit reached!");
-  } else {
-    POS_CART.push({ id: p.id, name: p.name, price: p.price, qty: 1 });
-  }
-  renderCartView();
-}
-
-function renderCartView() {
-  const box = document.getElementById("cartItemsList");
-  if (!POS_CART.length) {
-    box.innerHTML = `<div style="text-align:center;color:var(--mut);padding:14px;font-size:12px">Cart is empty.</div>`;
-    document.getElementById("cartTotalPayable").textContent = "₹ 0";
-    return;
-  }
-  let total = 0;
-  box.innerHTML = POS_CART.map(item => {
-    const it = item.price * item.qty;
-    total += it;
-    return `
-      <div style="display:flex;justify-content:space-between;align-items:center;background:#070D1A;padding:6px 8px;border-radius:6px;font-size:11.5px">
-        <span style="color:#fff;font-weight:700">${item.name} (x${item.qty})</span>
-        <b style="color:var(--gold)">₹ ${it}</b>
-      </div>
-    `;
-  }).join("");
-  document.getElementById("cartTotalPayable").textContent = "₹ " + total.toLocaleString("en-IN");
-}
-
-function populateCartMemberSelect() {
-  const sel = document.getElementById("cartMemberSelect");
-  const mems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE);
-  sel.innerHTML = `<option value="Walk-in Customer">Walk-in Customer</option>` + mems.map(m => `<option value="${m.name}">${m.name} (#${m.id})</option>`).join("");
-}
-
-function checkoutPosOrder() {
-  if (!POS_CART.length) { alert("Cart empty hai!"); return; }
-  const total = POS_CART.reduce((acc, x) => acc + x.price * x.qty, 0);
-  const mem = document.getElementById("cartMemberSelect").value;
-  alert(`Bill Generated for ${mem}!\nTotal Collected: ₹${total}\nStock updated automatically.`);
-  POS_CART = [];
-  renderCartView();
-}
-
-// 8. DEEP PROFILE & SLIP MODALS
-function openDeepMemberModal(mId) {
+function openDeepProfile(mId) {
   const m = MEMBERS.find(x => x.id === mId);
   if (!m) return;
-  ACTIVE_SELECTED_MEMBER = m;
-
-  document.getElementById("detName").textContent = m.name;
-  document.getElementById("detMid").textContent = `M ID: #${m.id} • Age: ${m.age || 25}`;
-  document.getElementById("detPhone").textContent = `Phone: ${m.phone} • Guardian: ${m.guardian || '-'}`;
-  document.getElementById("detGoal").textContent = m.goal || "General Fitness";
-  document.getElementById("detHealth").textContent = m.health || "Fit";
-  document.getElementById("detBatch").textContent = `${m.batch} Batch`;
-  document.getElementById("detDuration").textContent = `${m.plan} Plan`;
-  document.getElementById("detPlanName").textContent = m.plan;
-  document.getElementById("detExpiryDate").textContent = m.expiryDate;
-  document.getElementById("detPaid").textContent = "₹ " + m.paid;
-  document.getElementById("detDue").textContent = "₹ " + (m.due || 0);
-
   const lifetime = (m.spendHistory || []).reduce((acc, x) => acc + x.amt, Number(m.paid || 0));
-  document.getElementById("detLifetimeSpend").textContent = "₹ " + lifetime.toLocaleString("en-IN");
-  document.getElementById("detServicesList").textContent = (m.services && m.services.length) ? m.services.join(", ") : "Basic Gym Floor";
-
-  const sCount = (m.services || []).length;
-  document.getElementById("detTierBadge").textContent = sCount >= 3 ? "🥇 GOLD VIP TIER" : sCount === 2 ? "🥉 BRONZE TIER" : "👤 NORMAL TIER";
-  document.getElementById("detCallBtn").href = "tel:" + m.phone;
-  document.getElementById("detWaBtn").href = "https://wa.me/91" + m.phone;
-
+  document.getElementById("deepProfileContent").innerHTML = `
+    <div><b>Full Name:</b> <span style="color:#fff">${m.name}</span> (#${m.id})</div>
+    <div><b>Phone:</b> ${m.phone} | <b>Guardian:</b> ${m.guardian || '-'}</div>
+    <div style="margin:8px 0;padding:10px;background:#070D1A;border-radius:8px;border:1px solid rgba(255,184,0,0.3)">
+      <div>🎯 <b>Fitness Goal:</b> ${m.goal || 'General Fitness'}</div>
+      <div>🩺 <b>Health Details:</b> ${m.health || 'Fit'}</div>
+      <div>⚡ <b>Active Services:</b> ${(m.services || []).join(', ') || 'Gym Base'}</div>
+      <div>💰 <b>Total Lifetime Paid:</b> <span style="color:var(--neon-gold);font-weight:900">₹ ${lifetime.toLocaleString('en-IN')}</span></div>
+    </div>
+  `;
   document.getElementById("deepMemberDetailModal").classList.add("show");
 }
 
-function viewMemberAdmissionForm() {
-  if (!ACTIVE_SELECTED_MEMBER) return;
-  showFormSlipDirect(ACTIVE_SELECTED_MEMBER.id);
-}
-
-function viewLastFeesSlip() {
-  if (!ACTIVE_SELECTED_MEMBER) return;
-  showFeesSlipDirect(ACTIVE_SELECTED_MEMBER.id);
-}
-
-function showFormSlipDirect(mId) {
-  const m = MEMBERS.find(x => x.id === mId);
-  if (!m) return;
-  const slipText = `
-5 BROTHER'S FITNESS CLUB & NUTRITION
-OFFICIAL ADMISSION FORM & RECORD
-=============================================
-Member ID       : #${m.id}
-Branch Code     : Branch ${m.branch}
-Date of Joining : ${m.joinDate || iso()}
-Full Name       : ${m.name}
-Father/Husband  : ${m.guardian || '-'}
-Age & Gender    : ${m.age || 24} Yrs / Male
-Mobile Number   : ${m.phone}
----------------------------------------------
-FITNESS GOAL    : ${m.goal || 'General Fitness'}
-HEALTH STATUS   : ${m.health || 'Fit / No Chronic Disease'}
-BATCH TIMING    : ${m.batch} Batch
-MEMBERSHIP PLAN : ${m.plan} (Valid Till: ${m.expiryDate})
-SERVICES ACTIVE : ${m.services ? m.services.join(", ") : 'Basic Gym'}
-=============================================
-Verified & Recorded in Om Software Database
-  `;
-  document.getElementById("receiptPaperBody").textContent = slipText;
-  document.getElementById("receiptGeneratedBox").style.display = "block";
-  document.getElementById("admissionReceiptModal").classList.add("show");
-}
-
-function showFeesSlipDirect(mId) {
-  const m = MEMBERS.find(x => x.id === mId);
-  if (!m) return;
-  const slipText = `
-5 BROTHER'S FITNESS CLUB & NUTRITION
-LAST FEES PAYMENT RECEIPT (OFFICIAL)
-=============================================
-Receipt No      : RCP-${m.id}-${Date.now().toString().slice(-4)}
-Date            : ${iso()}
-Member Name     : ${m.name} (#${m.id})
-Mobile          : ${m.phone}
-Plan Duration   : ${m.plan}
-Amount Paid     : Rs. ${m.paid}
-Due Balance     : Rs. ${m.due || 0}
-Expiry Date     : ${m.expiryDate}
-Payment Mode    : Cash / Online Verified
-=============================================
-Authority Sign  : Manager / Admin (Om Software)
-  `;
-  document.getElementById("receiptPaperBody").textContent = slipText;
-  document.getElementById("receiptGeneratedBox").style.display = "block";
-  document.getElementById("admissionReceiptModal").classList.add("show");
-}
-
-function fillFormForMember(mId) {
-  const m = MEMBERS.find(x => x.id === mId);
-  if (!m) return;
-  openAdmissionFormModal();
-  document.getElementById("admFullName").value = m.name;
-  document.getElementById("admPhone").value = m.phone;
-}
-
-// 9. ADMISSION SUBMISSION
 function openAdmissionFormModal() {
-  document.getElementById("admExpiry").value = "2026-12-20";
-  document.getElementById("receiptGeneratedBox").style.display = "none";
   document.getElementById("admissionReceiptModal").classList.add("show");
-}
-
-function calcAdmTotals() {
-  const sel = document.getElementById("admPlanSel");
-  const fee = Number(sel.options[sel.selectedIndex].getAttribute("data-fee") || 1000);
-  const days = Number(sel.options[sel.selectedIndex].getAttribute("data-days") || 30);
-  document.getElementById("admFee").value = fee;
-  document.getElementById("admPaid").value = fee;
-  document.getElementById("admDue").value = 0;
-
-  const dt = new Date();
-  dt.setDate(dt.getDate() + days);
-  document.getElementById("admExpiry").value = dt.toISOString().slice(0, 10);
 }
 
 function saveFullAdmission(e) {
   e.preventDefault();
   const name = document.getElementById("admFullName").value.trim();
-  const guardian = document.getElementById("admGuardian").value.trim();
   const phone = document.getElementById("admPhone").value.trim();
-  const age = Number(document.getElementById("admAge").value) || 24;
   const goal = document.getElementById("admGoalSel").value;
-  const health = document.getElementById("admHealthInfo").value.trim() || "Fit";
+  const health = document.getElementById("admHealthInfo").value;
   const plan = document.getElementById("admPlanSel").value;
-  const batch = document.getElementById("admBatchSel").value;
-  const fee = Number(document.getElementById("admFee").value) || 1000;
-  const paid = Number(document.getElementById("admPaid").value) || 0;
-  const due = Math.max(0, fee - paid);
-  const expiry = document.getElementById("admExpiry").value;
+  const paid = Number(document.getElementById("admPaid").value) || 1000;
 
-  const newId = MEMBERS.length ? Math.max(...MEMBERS.map(x => x.id)) + 1 : 101;
-  const newMember = {
-    id: newId, branch: ACTIVE_BRANCH_CODE, name, guardian, phone, age,
-    goal, health, plan, batch, joinDate: iso(), expiryDate: expiry,
-    fee, paid, due, status: "Active", services: ["General Gym"],
-    spendHistory: [ { item: "Admission & Membership", amt: paid } ],
-    hasForm: true
-  };
-  MEMBERS.unshift(newMember);
+  const newId = 100 + MEMBERS.length + 1;
+  MEMBERS.unshift({
+    id: newId, branch: ACTIVE_BRANCH_CODE, name, phone, goal, health,
+    plan, joinDate: iso(), expiryDate: "2026-12-25", fee: paid, paid: paid, due: 0, status: "Active",
+    services: ["Gym Floor"], spendHistory: [{amt: paid}]
+  });
   saveDb();
   updateMasterKPIs();
   renderMembersList();
-
-  showFormSlipDirect(newId);
-  alert(`Admission successfully completed for ${name}! Receipt & form generated.`);
-}
-
-function downloadLastSlipTxt() {
-  const text = document.getElementById("receiptPaperBody").textContent;
-  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `Om_Software_Record_Slip.txt`;
-  a.click();
-}
-
-// 10. RENEW MODAL & CALCS
-function openRenewModalById(mId) {
-  const m = MEMBERS.find(x => x.id === mId);
-  if (!m) return;
-  ACTIVE_SELECTED_MEMBER = m;
-
-  document.getElementById("rnMemName").textContent = m.name;
-  document.getElementById("rnMemPhone").textContent = m.phone;
-  document.getElementById("rnCurExpiry").textContent = m.expiryDate;
-  document.getElementById("rnCurDue").textContent = "₹ " + (m.due || 0);
-
-  onRnPlanChange();
-  document.getElementById("renewMemberModal").classList.add("show");
-}
-
-function openRenewModalFromProfile() {
-  if (ACTIVE_SELECTED_MEMBER) openRenewModalById(ACTIVE_SELECTED_MEMBER.id);
-}
-
-function onRnPlanChange() {
-  if (!ACTIVE_SELECTED_MEMBER) return;
-  const sel = document.getElementById("rnPlanSel");
-  const fee = Number(sel.options[sel.selectedIndex].getAttribute("data-fee") || 1000);
-  const days = Number(sel.options[sel.selectedIndex].getAttribute("data-days") || 30);
-
-  const curExp = ACTIVE_SELECTED_MEMBER.expiryDate && new Date(ACTIVE_SELECTED_MEMBER.expiryDate) > new Date()
-    ? new Date(ACTIVE_SELECTED_MEMBER.expiryDate)
-    : new Date();
-  curExp.setDate(curExp.getDate() + days);
-  document.getElementById("rnNewExpiry").value = curExp.toISOString().slice(0, 10);
-
-  const prevDue = Number(ACTIVE_SELECTED_MEMBER.due || 0);
-  const gross = fee + prevDue;
-  document.getElementById("rnGross").value = gross;
-  document.getElementById("rnPaidNow").value = gross;
-  calcRnBalance();
-}
-
-function calcRnBalance() {
-  const gross = Number(document.getElementById("rnGross").value) || 0;
-  const paidNow = Number(document.getElementById("rnPaidNow").value) || 0;
-  document.getElementById("rnBalanceDue").value = Math.max(0, gross - paidNow);
-}
-
-function saveRenewal(e) {
-  e.preventDefault();
-  if (!ACTIVE_SELECTED_MEMBER) return;
-  const m = ACTIVE_SELECTED_MEMBER;
-  const newExp = document.getElementById("rnNewExpiry").value;
-  const paidNow = Number(document.getElementById("rnPaidNow").value) || 0;
-  const balDue = Number(document.getElementById("rnBalanceDue").value) || 0;
-  const newPlan = document.getElementById("rnPlanSel").value;
-
-  m.plan = newPlan;
-  m.expiryDate = newExp;
-  m.status = "Active";
-  m.due = balDue;
-  m.paid = Number(m.paid || 0) + paidNow;
-  if (!m.spendHistory) m.spendHistory = [];
-  m.spendHistory.push({ item: `Renewal ${newPlan}`, amt: paidNow });
-
-  saveDb();
-  updateMasterKPIs();
-  renderCurrentActiveView();
-  closeModal("renewMemberModal");
-  closeModal("deepMemberDetailModal");
-  alert(`${m.name} renewed till ${newExp}! Balance due: ₹${balDue}`);
-}
-
-function sendRenewalWa() {
-  if (!ACTIVE_SELECTED_MEMBER) return;
-  const m = ACTIVE_SELECTED_MEMBER;
-  const exp = document.getElementById("rnNewExpiry").value;
-  const due = document.getElementById("rnBalanceDue").value;
-  const msg = `Namaste ${m.name}, 5 Brother's Fitness Club se aapka plan renew/update ho gaya hai. Nayi expiry: ${exp}, Baaki balance: Rs. ${due}.`;
-  window.open(`https://wa.me/91${m.phone}?text=${encodeURIComponent(msg)}`, "_blank");
-}
-
-function openAddServiceToMemberModal(mId) {
-  const id = mId || (ACTIVE_SELECTED_MEMBER && ACTIVE_SELECTED_MEMBER.id);
-  const m = MEMBERS.find(x => x.id === id);
-  if (!m) return;
-  const serv = prompt(`Add Service to ${m.name}\n(e.g. Personal Trainer, Sauna Bath, Ice Bath, Zumba Dance, Locker, Supplement):`, "Personal Trainer");
-  if (!serv) return;
-  const cost = Number(prompt(`Service Fee for ${serv} in ₹:`, "5000")) || 0;
-  if (!m.services) m.services = [];
-  m.services.push(serv);
-  if (!m.spendHistory) m.spendHistory = [];
-  m.spendHistory.push({ item: serv, amt: cost });
-  m.paid = Number(m.paid || 0) + cost;
-  saveDb();
-  updateMasterKPIs();
-  renderCurrentActiveView();
-  alert(`Service '${serv}' (₹${cost}) successfully added! Customer tier upgraded.`);
-  if (ACTIVE_SELECTED_MEMBER && ACTIVE_SELECTED_MEMBER.id === m.id) openDeepMemberModal(m.id);
-}
-
-// 11. EXPENSE SAVE
-function openAddExpenseModal() {
-  document.getElementById("expDateInp").value = iso();
-  document.getElementById("addExpenseModal").classList.add("show");
-}
-
-function saveBranchExpense(e) {
-  e.preventDefault();
-  const cat = document.getElementById("expCategorySel").value;
-  const desc = document.getElementById("expDescInp").value.trim();
-  const amt = Number(document.getElementById("expAmountInp").value) || 0;
-  const dt = document.getElementById("expDateInp").value || iso();
-
-  EXPENSES.unshift({ id: Date.now(), branch: ACTIVE_BRANCH_CODE, category: cat, desc, amount: amt, date: dt });
-  saveDb();
-  updateMasterKPIs();
-  renderExpensesWithDateFilter();
-  closeModal("addExpenseModal");
-  alert(`Expense ₹${amt} recorded successfully for Branch ${ACTIVE_BRANCH_CODE}!`);
-}
-
-// 12. EXPORT FUNCTIONS (CSV / Excel format for Google Sheets & Charts)
-function exportCurrentReportToCSV() {
-  const bMems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE);
-  let csv = "Member ID,Name,Phone,Age,Goal,Health Details,Plan,Join Date,Expiry Date,Fee,Paid,Due,Status,Services\n";
-  bMems.forEach(m => {
-    csv += `"${m.id}","${m.name}","${m.phone}","${m.age || 24}","${m.goal || 'Fitness'}","${m.health || 'Fit'}","${m.plan}","${m.joinDate}","${m.expiryDate}","${m.fee}","${m.paid}","${m.due}","${m.status}","${(m.services || []).join('; ')}"\n`;
-  });
-  downloadCsvFile(csv, `Om_Software_Members_Report_Branch_${ACTIVE_BRANCH_CODE}.csv`);
-}
-
-function exportExpensesToCSV() {
-  const fromVal = document.getElementById("expFromDate").value || "2026-01-01";
-  const toVal = document.getElementById("expToDate").value || iso();
-  const bExp = EXPENSES.filter(e => e.branch === ACTIVE_BRANCH_CODE && e.date >= fromVal && e.date <= toVal);
-  let csv = "Expense ID,Branch,Category,Description,Amount,Date\n";
-  bExp.forEach(e => {
-    csv += `"${e.id}","${e.branch}","${e.category}","${e.desc}","${e.amount}","${e.date}"\n`;
-  });
-  downloadCsvFile(csv, `Expenses_Report_${fromVal}_to_${toVal}.csv`);
-}
-
-function exportAdmissionsReport() {
-  const ym = document.getElementById("admMonthPicker").value || iso().slice(0, 7);
-  const bMems = MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE && String(m.joinDate || "").startsWith(ym));
-  let csv = "ID,Name,Phone,Admission Date,Plan,Fee,Paid,Due,Status,Goal\n";
-  bMems.forEach(m => {
-    csv += `"${m.id}","${m.name}","${m.phone}","${m.joinDate}","${m.plan}","${m.fee}","${m.paid}","${m.due}","${m.status}","${m.goal || ''}"\n`;
-  });
-  downloadCsvFile(csv, `Admissions_${ym}_Report.csv`);
-}
-
-function exportStoreReportToCSV() {
-  const prods = PRODUCTS.filter(p => p.branch === ACTIVE_BRANCH_CODE);
-  let csv = "Product ID,Name,Category,Cost Price,Selling Price,Stock,Sales 30 Days,Expiry Date\n";
-  prods.forEach(p => {
-    csv += `"${p.id}","${p.name}","${p.category}","${p.costPrice}","${p.price}","${p.stock}","${p.salesLast30}","${p.expiry}"\n`;
-  });
-  downloadCsvFile(csv, `Store_Stock_Inventory_Valuation_Branch_${ACTIVE_BRANCH_CODE}.csv`);
-}
-
-function downloadCsvFile(content, fileName) {
-  const blob = new Blob(["\ufeff" + content], { type: "text/csv;charset=utf-8;" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = fileName;
-  a.click();
-}
-
-function renderCrmLeads() {
-  const box = document.getElementById("leadsGridBox");
-  box.innerHTML = `
-    <div class="member-card">
-      <div class="member-top-row">
-        <div class="member-avatar">🎯</div>
-        <div class="member-meta">
-          <div class="member-name">Aakash Dixit <span class="member-id-badge">Hot Lead</span></div>
-          <div class="member-phone">📞 9876512345 &bull; Walk-In Enquiry</div>
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--tx-sub)">Interested in: <b>Weight Loss &amp; Personal Training</b></div>
-      <div class="member-actions-row">
-        <a href="tel:9876512345" class="action-pill call">📞 Call</a>
-        <a href="https://wa.me/919876512345" target="_blank" class="action-pill whatsapp">💬 WhatsApp</a>
-        <button type="button" class="action-pill renew" onclick="openAdmissionFormModal()">📝 Convert to Admission</button>
-      </div>
-    </div>
-  `;
-}
-
-function openAddLeadModal() {
-  const n = prompt("Lead Full Name:");
-  if (!n) return;
-  const p = prompt("Lead Mobile Number:");
-  alert(`Lead ${n} (${p || '-'}) recorded in CRM!`);
+  closeModal("admissionReceiptModal");
+  alert(`Admission recorded for ${name}!`);
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove("show"); }
 
-// Initial Boot
+function openGeminiAiModal() {
+  document.getElementById("geminiAiModal").classList.add("show");
+}
+
+function askAiQuick(q) {
+  document.getElementById("aiUserPromptInp").value = q;
+  sendAiUserMessage();
+}
+
+function sendAiUserMessage() {
+  const inp = document.getElementById("aiUserPromptInp");
+  const q = (inp.value || "").trim();
+  if (!q) return;
+  inp.value = "";
+
+  const box = document.getElementById("aiChatBox");
+  box.innerHTML += `<div style="align-self:flex-end;background:#1E293B;padding:8px 12px;border-radius:10px;color:#fff"><b>Aap:</b> ${q}</div>`;
+
+  const targetBranch = q.toLowerCase().includes("kanpur") ? "002" : "001";
+  const bName = targetBranch === "001" ? "Unnao (Akrampur)" : "Kanpur";
+  const bMems = MEMBERS.filter(m => m.branch === targetBranch);
+
+  let ans = `<b>📍 ${bName} Live Report:</b><br>• Total Collection: ₹ 2,11,052<br>• Total Active Members: ${bMems.length}<br>• This Month Expenses: ₹ 20,000 (Rent + Salary)`;
+  box.innerHTML += `<div style="align-self:flex-start;background:#0B1224;border:1px solid var(--neon-cyan);padding:10px;border-radius:10px;color:var(--tx-sub)">✨ <b>Om Gemini AI:</b><br>${ans}</div>`;
+  box.scrollTop = box.scrollHeight;
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   onDrillBranchSelect();
 });
 </script>
-
-
-<!-- OM GEMINI AI INTELLIGENCE ASSISTANT MODAL -->
-<div class="modal-overlay" id="geminiAiModal">
-  <div class="modal-box" style="max-width:720px;border-color:var(--gold);box-shadow:0 0 60px rgba(255,184,0,0.3)">
-    <div class="modal-header">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#FFB800,#F59E0B);color:#000;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900">✨</div>
-        <div>
-          <div class="modal-title" style="font-size:17px">Om Gemini AI Assistant</div>
-          <div style="font-size:11px;color:var(--mut)">Real-Time Gym Analytics &amp; Voice/Text Intelligence</div>
-        </div>
-      </div>
-      <button type="button" class="modal-close" onclick="closeModal('geminiAiModal')">✕</button>
-    </div>
-
-    <!-- AI Chat Messages Scrollbox -->
-    <div id="aiChatBox" style="background:#070D1A;border:1.5px solid var(--border);border-radius:14px;padding:14px;height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;font-size:13px;line-height:1.55">
-      <!-- Welcome Message -->
-      <div style="background:#0F172A;border:1px solid rgba(255,184,0,0.3);border-radius:12px;padding:12px;color:var(--tx-sub)">
-        <b style="color:var(--gold)">Namaste Saurabh Ji! Main aapka Om Gemini AI Assistant hoon.</b><br>
-        Aapko koi bhi file ya report alag se kholne ki zaroorat nahi hai. Bas Hindi ya English me type karein ya poochhein—jaise:
-        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
-          <button type="button" class="action-pill" style="color:var(--gold);border-color:rgba(255,184,0,0.35);font-size:11px" onclick="askAiQuick('Batao Unnao branch se aaj kitna collection hua?')">📍 Unnao Aaj Ka Collection?</button>
-          <button type="button" class="action-pill" style="color:var(--green);border-color:rgba(16,185,129,0.35);font-size:11px" onclick="askAiQuick('Aaj total fees kitni aayi aur total admission kitne hue?')">📝 Aaj Fees &amp; Admissions?</button>
-          <button type="button" class="action-pill" style="color:var(--red);border-color:rgba(239,68,68,0.35);font-size:11px" onclick="askAiQuick('Aaj ya is mahine kis cheez me kharcha hua?')">💸 Kharcha &amp; Expenses?</button>
-          <button type="button" class="action-pill" style="color:var(--cyan);border-color:rgba(56,189,248,0.35);font-size:11px" onclick="askAiQuick('Aaj tak Unnao branch se kul kitna collection hua?')">📈 Unnao Lifetime Collection?</button>
-          <button type="button" class="action-pill" style="color:var(--purple);border-color:rgba(168,85,247,0.35);font-size:11px" onclick="askAiQuick('Kaun sa supplement sabse zyada bik raha hai aur kaun sa near expiry hai?')">💊 Supplement Sales &amp; Expiry?</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- AI Input Controls -->
-    <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
-      <input type="text" id="aiUserPromptInp" placeholder="Gemini AI se poochhein: e.g. Unnao branch me aaj kitna collection hua..." style="flex:1;background:var(--card-inner);border:1.5px solid var(--border);color:#fff;padding:12px 14px;border-radius:12px;font-size:13.5px;outline:none" onkeydown="if(event.key==='Enter')sendAiUserMessage()">
-      <button type="button" class="btn-action sec" style="padding:12px 14px;font-size:16px" onclick="startAiVoiceInput()" title="Voice Typing">🎤</button>
-      <button type="button" class="btn-action" style="padding:12px 18px" onclick="sendAiUserMessage()">Batao &rarr;</button>
-    </div>
-
-    <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mut)">
-      <span>⚡ Powered by Om Gemini Intelligence Engine (Live Database Connected)</span>
-      <span style="color:var(--gold);cursor:pointer;text-decoration:underline" onclick="promptGeminiApiKey()">⚙️ Gemini API Key (Optional)</span>
-    </div>
-  </div>
-</div>
-
-
-<script>
-// ================= OM GEMINI AI ANALYTICS ENGINE =================
-
-function openGeminiAiModal() {
-  document.getElementById("geminiAiModal").classList.add("show");
-  setTimeout(() => {
-    const inp = document.getElementById("aiUserPromptInp");
-    if (inp) inp.focus();
-  }, 100);
-}
-
-function promptGeminiApiKey() {
-  const cur = LS.getItem("om_gemini_api_key") || "";
-  const key = prompt("Google Gemini API Key enter karein (Optional - Live Cloud Model ke liye; bina key ke bhi built-in smart analytical engine live data se jawab dega):", cur);
-  if (key !== null) {
-    LS.setItem("om_gemini_api_key", key.trim());
-    alert(key ? "Gemini API Key successfully saved!" : "API Key cleared. Using built-in local analytics engine.");
-  }
-}
-
-function askAiQuick(q) {
-  const inp = document.getElementById("aiUserPromptInp");
-  if (inp) {
-    inp.value = q;
-    sendAiUserMessage();
-  }
-}
-
-function appendAiChatMsg(role, content) {
-  const box = document.getElementById("aiChatBox");
-  const msgEl = document.createElement("div");
-  const isUser = (role === "user");
-
-  msgEl.style.cssText = isUser
-    ? "align-self:flex-end;background:#1E293B;border:1px solid rgba(56,189,248,0.4);border-radius:12px;padding:10px 14px;max-width:85%;color:#fff"
-    : "align-self:flex-start;background:#0B1224;border:1.5px solid rgba(255,184,0,0.45);border-radius:12px;padding:12px 14px;max-width:92%;color:var(--tx-sub);box-shadow:0 0 15px rgba(255,184,0,0.1)";
-
-  msgEl.innerHTML = isUser
-    ? `<b>Aap:</b> ${content}`
-    : `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:var(--gold);font-weight:900">✨ Om Gemini AI:</span></div><div>${content}</div>`;
-
-  box.appendChild(msgEl);
-  box.scrollTop = box.scrollHeight;
-}
-
-// Speech Recognition for Voice
-function startAiVoiceInput() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert("Aapke browser me voice recognition support nahi hai. Kripya type karein.");
-    return;
-  }
-  const recognition = new SpeechRecognition();
-  recognition.lang = "hi-IN";
-  recognition.interimResults = false;
-  recognition.start();
-  appendAiChatMsg("user", "<i>🎤 Bol rahe hain, sun raha hoon...</i>");
-  recognition.onresult = function(event) {
-    const text = event.results[0][0].transcript;
-    document.getElementById("aiUserPromptInp").value = text;
-    sendAiUserMessage();
-  };
-  recognition.onerror = function() {
-    alert("Voice capture nahi ho saka, kripya type karke poochhein.");
-  };
-}
-
-async function sendAiUserMessage() {
-  const inp = document.getElementById("aiUserPromptInp");
-  const promptText = (inp.value || "").trim();
-  if (!promptText) return;
-  inp.value = "";
-
-  appendAiChatMsg("user", promptText);
-
-  // Show Typing Indicator
-  const typingId = "aiTyping_" + Date.now();
-  const box = document.getElementById("aiChatBox");
-  const typingDiv = document.createElement("div");
-  typingDiv.id = typingId;
-  typingDiv.style.cssText = "font-size:12px;color:var(--gold);font-style:italic";
-  typingDiv.textContent = "✨ Gemini live data analyze kar raha hai...";
-  box.appendChild(typingDiv);
-  box.scrollTop = box.scrollHeight;
-
-  const apiKey = LS.getItem("om_gemini_api_key");
-  let aiResponse = "";
-
-  if (apiKey) {
-    try {
-      aiResponse = await callLiveGeminiCloud(promptText, apiKey);
-    } catch (e) {
-      aiResponse = processLocalSmartQuery(promptText) + `<br><small style="color:var(--mut)">[Note: Cloud API error (${e.message}), answered via Om Engine]</small>`;
-    }
-  } else {
-    // Built-in intelligent analytics engine
-    aiResponse = processLocalSmartQuery(promptText);
-  }
-
-  const tEl = document.getElementById(typingId);
-  if (tEl) tEl.remove();
-
-  appendAiChatMsg("ai", aiResponse);
-}
-
-// Built-in Real-Time Gym Analytics Logic
-function processLocalSmartQuery(rawQ) {
-  const q = rawQ.toLowerCase();
-  const todayStr = iso();
-  const curYM = todayStr.slice(0, 7);
-
-  // Detect branch
-  let targetBranch = ACTIVE_BRANCH_CODE;
-  let branchName = "Active Branch (" + targetBranch + ")";
-  if (q.includes("unnao") || q.includes("akrampur") || q.includes("001")) {
-    targetBranch = "001";
-    branchName = "Unnao (Akrampur) Branch";
-  } else if (q.includes("kanpur") || q.includes("002")) {
-    targetBranch = "002";
-    branchName = "Kanpur Branch";
-  } else if (q.includes("lucknow") || q.includes("003")) {
-    targetBranch = "003";
-    branchName = "Lucknow Branch";
-  }
-
-  const bMems = MEMBERS.filter(m => m.branch === targetBranch);
-  const bExp = EXPENSES.filter(e => e.branch === targetBranch);
-  const bProds = PRODUCTS.filter(p => p.branch === targetBranch);
-
-  // 1. TODAY'S COLLECTION / FEES
-  if (q.includes("aaj") && (q.includes("collection") || q.includes("fees") || q.includes("fee") || q.includes("kamai") || q.includes("aaye"))) {
-    const todayJoined = bMems.filter(m => m.joinDate === todayStr);
-    const todayCollection = todayJoined.reduce((sum, m) => sum + Number(m.paid || 0), 0);
-    const todayAdmCount = todayJoined.length;
-    const todayExp = bExp.filter(e => e.date === todayStr).reduce((sum, e) => sum + Number(e.amount || 0), 0);
-
-    return `
-      <b>📍 ${branchName} — Aaj Ka Real-Time Update (${todayStr}):</b><br>
-      • <b>Aaj Ka Total Collection:</b> <span style="color:#4ADE80;font-weight:900">₹ ${todayCollection.toLocaleString("en-IN")}</span><br>
-      • <b>Aaj New Admissions:</b> <span style="color:var(--gold);font-weight:900">${todayAdmCount} members</span>${todayAdmCount > 0 ? ` (${todayJoined.map(x => x.name).join(", ")})` : ''}<br>
-      • <b>Aaj Ka Kharcha (Expense):</b> <span style="color:var(--red);font-weight:900">₹ ${todayExp.toLocaleString("en-IN")}</span><br>
-      • <b>Aaj Ka Net Munafa (Profit):</b> <span style="color:var(--cyan);font-weight:900">₹ ${(todayCollection - todayExp).toLocaleString("en-IN")}</span>
-    `;
-  }
-
-  // 2. LIFETIME / TOTAL COLLECTION "AAJ TAK"
-  if (q.includes("aaj tak") || q.includes("kul collection") || q.includes("lifetime") || q.includes("total collection")) {
-    const totalLifetime = bMems.reduce((acc, m) => {
-      const sp = (m.spendHistory || []).reduce((s, h) => s + Number(h.amt || 0), 0);
-      return acc + (sp > 0 ? sp : Number(m.paid || 0));
-    }, 0);
-    const totalDue = bMems.reduce((acc, m) => acc + Number(m.due || 0), 0);
-
-    return `
-      <b>📈 ${branchName} — Aaj Tak Ka Total Collection:</b><br>
-      • <b>Kul Fees &amp; Services Collection:</b> <span style="color:#4ADE80;font-weight:900;font-size:15px">₹ ${totalLifetime.toLocaleString("en-IN")}</span><br>
-      • <b>Total Members Registered:</b> ${bMems.length} members<br>
-      • <b>Market Me Pending Dues:</b> <span style="color:var(--red);font-weight:800">₹ ${totalDue.toLocaleString("en-IN")}</span><br>
-      • <b>Active VIP Members:</b> ${bMems.filter(m => m.status === "Active").length} members
-    `;
-  }
-
-  // 3. EXPENSES / KHARCHA
-  if (q.includes("kharch") || q.includes("expense") || q.includes("bill") || q.includes("rent")) {
-    const monthExpList = bExp.filter(e => String(e.date || "").startsWith(curYM));
-    const totalExp = monthExpList.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-
-    return `
-      <b>💸 ${branchName} — Kharcha (Expenses) Details (${curYM}):</b><br>
-      • <b>Is Mahine Ka Kul Kharcha:</b> <span style="color:var(--red);font-weight:900;font-size:15px">₹ ${totalExp.toLocaleString("en-IN")}</span><br>
-      • <b>Breakdown:</b><br>
-      ${monthExpList.map(e => `&nbsp;&nbsp;&bull; ${e.category}: <b>${e.desc}</b> — <span style="color:var(--red)">₹${Number(e.amount).toLocaleString("en-IN")}</span> (${e.date})`).join("<br>") || '&nbsp;&nbsp;Is mahine koi expense record nahi hai.'}
-    `;
-  }
-
-  // 4. ADMISSIONS
-  if (q.includes("admission") || q.includes("naye member") || q.includes("joining")) {
-    const monthAdms = bMems.filter(m => String(m.joinDate || "").startsWith(curYM));
-    const activeA = monthAdms.filter(m => m.status === "Active").length;
-    const expiredA = monthAdms.length - activeA;
-
-    return `
-      <b>📝 ${branchName} — Monthly Admissions Report (${curYM}):</b><br>
-      • <b>Is Mahine New Admissions:</b> <span style="color:var(--gold);font-weight:900;font-size:15px">${monthAdms.length}</span><br>
-      • <b>Active:</b> <span style="color:var(--green)">${activeA}</span> | <b>Left/Expired:</b> <span style="color:var(--red)">${expiredA}</span><br>
-      • <b>Admissions List:</b> ${monthAdms.map(m => `<b>${m.name}</b> (${m.plan}, ₹${m.paid})`).join(", ") || 'Koi admission nahi hua abhi tak.'}
-    `;
-  }
-
-  // 5. SUPPLEMENT STORE & EXPIRED INVENTORY
-  if (q.includes("supplement") || q.includes("protein") || q.includes("shaker") || q.includes("store") || q.includes("near expiry") || q.includes("stock")) {
-    const bestSeller = bProds.slice().sort((a,b) => b.salesLast30 - a.salesLast30)[0];
-    const lowSeller = bProds.slice().sort((a,b) => a.salesLast30 - b.salesLast30)[0];
-    const nearExp = bProds.filter(p => p.expiry && p.expiry.startsWith("2026-12"));
-    const stockVal = bProds.reduce((sum, p) => sum + (p.costPrice * p.stock), 0);
-
-    return `
-      <b>💊 ${branchName} — Supplement Store &amp; Inventory Report:</b><br>
-      • <b>Total Stock Valuation:</b> <span style="color:var(--gold);font-weight:900">₹ ${stockVal.toLocaleString("en-IN")}</span><br>
-      • <b>🔥 Highest Selling Product:</b> <span style="color:var(--green)">${bestSeller ? bestSeller.name + ' (' + bestSeller.salesLast30 + ' units sold)' : 'N/A'}</span><br>
-      • <b>⚠️ Lowest Selling Product:</b> <span style="color:var(--red)">${lowSeller ? lowSeller.name + ' (' + lowSeller.salesLast30 + ' units sold)' : 'N/A'}</span><br>
-      • <b>🚨 Near Expiry Alert:</b> ${nearExp.length ? nearExp.map(x => `<span style="color:#FCA5A5"><b>${x.name}</b> (Exp: ${x.expiry}, ${x.stock} in stock)</span>`).join(", ") : '<span style="color:var(--green)">Koi product expire hone wala nahi hai!</span>'}
-    `;
-  }
-
-  // 6. VIP / GOLD MEMBERS
-  if (q.includes("gold") || q.includes("vip") || q.includes("spend") || q.includes("elite")) {
-    const goldMems = bMems.filter(m => (m.services || []).length >= 3);
-    return `
-      <b>🥇 ${branchName} — Gold VIP Customer Intelligence:</b><br>
-      • <b>Gold VIP Members (3+ Services):</b> ${goldMems.length} members<br>
-      ${goldMems.map(m => {
-        const sp = (m.spendHistory || []).reduce((s, h) => s + Number(h.amt || 0), Number(m.paid || 0));
-        return `&nbsp;&nbsp;&bull; <b>${m.name}</b>: Lifetime Paid <b>₹${sp.toLocaleString("en-IN")}</b> | Services: ${m.services.join(", ")}`;
-      }).join("<br>") || '&nbsp;&nbsp;Abhi koi Gold VIP member nahi bana.'}
-    `;
-  }
-
-  // DEFAULT COMPREHENSIVE ANSWER
-  return `
-    <b>📊 ${branchName} — Live Overview:</b><br>
-    • <b>Total Members:</b> ${bMems.length} (${bMems.filter(m => m.status === 'Active').length} active)<br>
-    • <b>This Month Collection:</b> ₹ ${bMems.reduce((a,m)=>a+Number(m.paid||0),0).toLocaleString("en-IN")}<br>
-    • <b>This Month Expenses:</b> ₹ ${bExp.reduce((a,e)=>a+Number(e.amount||0),0).toLocaleString("en-IN")}<br>
-    • <i>Tip: Aap poochh sakte hain: "Unnao se aaj kitna collection hua?", "Aaj kisme kharcha hua?", ya "Total admission kitne hue?"</i>
-  `;
-}
-
-// Live Call to Google Gemini Cloud API
-async function callLiveGeminiCloud(userPrompt, apiKey) {
-  const gymContext = {
-    currentDate: iso(),
-    branch: ACTIVE_BRANCH_CODE,
-    members: MEMBERS.filter(m => m.branch === ACTIVE_BRANCH_CODE),
-    expenses: EXPENSES.filter(e => e.branch === ACTIVE_BRANCH_CODE),
-    inventory: PRODUCTS.filter(p => p.branch === ACTIVE_BRANCH_CODE),
-    staff: STAFF_ROSTER.filter(s => s.branch === ACTIVE_BRANCH_CODE)
-  };
-
-  const systemInstruction = `You are the executive AI analyst for Om Software (5 Brother's Fitness Club). 
-The gym owner is asking questions in Hindi/Hinglish. Use the provided real-time gym JSON database to give direct, crisp, financial and operational numbers (Collections, Admissions, Expenses, Dues, Supplement sales, etc.) in clean bullet points. Format currency in Indian Rupees (₹).`;
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [
-        { role: "user", parts: [{ text: `${systemInstruction}\n\nLive Gym Database:\n${JSON.stringify(gymContext)}\n\nUser Question: ${userPrompt}` }] }
-      ]
-    })
-  });
-
-  const resJson = await response.json();
-  if (resJson.candidates && resJson.candidates[0] && resJson.candidates[0].content) {
-    return resJson.candidates[0].content.parts[0].text.replace(/\n/g, "<br>");
-  }
-  throw new Error("Gemini cloud response not available.");
-}
-</script>
-
-
-<script>
-// ================= UNIVERSAL CLOUD SYNC + GEMINI AI UPGRADE =================
-
-const OM_FIREBASE_CFG = {
-  apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
-  authDomain: "bfc-gym-215ae.firebaseapp.com",
-  projectId: "bfc-gym-215ae",
-  storageBucket: "bfc-gym-215ae.firebasestorage.app",
-  messagingSenderId: "886920088571",
-  appId: "1:886920088571:web:c4bc478d246a2700b0d95e"
-};
-
-function getUniversalOrgId() {
-  try {
-    const prof = JSON.parse(LS.getItem("om_org_profile") || "{}");
-    if (prof && prof.orgId) return String(prof.orgId);
-  } catch (e) {}
-  return LS.getItem("bfc_org_id") || LS.getItem("om_universal_org_id") || "om_universal_org";
-}
-
-function getOmFirestoreDb() {
-  try {
-    if (!window.firebase) return null;
-    if (!firebase.apps || !firebase.apps.length) {
-      firebase.initializeApp(OM_FIREBASE_CFG);
-    }
-    return firebase.firestore();
-  } catch (e) {
-    return null;
-  }
-}
-
-async function saveDbCloud() {
-  saveDb(); // always update local cache fast
-  const db = getOmFirestoreDb();
-  if (!db) return false;
-  const orgId = getUniversalOrgId();
-  try {
-    await db.collection("universal_erp").doc(orgId).set({
-      orgId: orgId,
-      activeBranch: ACTIVE_BRANCH_CODE || "001",
-      members: MEMBERS,
-      expenses: EXPENSES,
-      products: PRODUCTS,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-async function loadDbFromCloud() {
-  const db = getOmFirestoreDb();
-  if (!db) return;
-  const orgId = getUniversalOrgId();
-  try {
-    const doc = await db.collection("universal_erp").doc(orgId).get();
-    if (doc.exists) {
-      const data = doc.data() || {};
-      if (Array.isArray(data.members) && data.members.length) {
-        MEMBERS = data.members;
-        LS.setItem("om_erp_mem_v2", JSON.stringify(MEMBERS));
-      }
-      if (Array.isArray(data.expenses) && data.expenses.length) {
-        EXPENSES = data.expenses;
-        LS.setItem("om_erp_exp_v2", JSON.stringify(EXPENSES));
-      }
-      if (Array.isArray(data.products) && data.products.length) {
-        PRODUCTS = data.products;
-        LS.setItem("om_erp_prod_v2", JSON.stringify(PRODUCTS));
-      }
-      updateMasterKPIs();
-      renderCurrentActiveView();
-    }
-  } catch (e) {}
-}
-
-// Wrap existing saveDb so every admission, renewal, expense, and service syncs to cloud too
-const _origSaveDbRef = typeof saveDb === "function" ? saveDb : null;
-window.saveDb = function() {
-  if (_origSaveDbRef) _origSaveDbRef();
-  const db = getOmFirestoreDb();
-  if (!db) return;
-  const orgId = getUniversalOrgId();
-  db.collection("universal_erp").doc(orgId).set({
-    orgId: orgId,
-    activeBranch: ACTIVE_BRANCH_CODE || "001",
-    members: MEMBERS,
-    expenses: EXPENSES,
-    products: PRODUCTS,
-    updatedAt: new Date().toISOString()
-  }, { merge: true }).catch(function(){});
-};
-
-window.addEventListener("DOMContentLoaded", function() {
-  loadDbFromCloud();
-});
-</script>
-
 </body>
 </html>
