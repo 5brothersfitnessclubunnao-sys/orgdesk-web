@@ -4,16 +4,16 @@
   const DEFAULT_BRANCH_MANAGERS = {
     "001": {
       branchCode: "001",
-      branchName: "Branch 001",
-      city: "Branch 001",
+      branchName: "5 Brother's Fitness Club - Akrampur / Unnao",
+      city: "Unnao",
       staffCode: "STF-001-OPS",
       employeeCode: "EMP-001-MGR",
       managerName: "Branch Manager 001"
     },
     "002": {
       branchCode: "002",
-      branchName: "Branch 002",
-      city: "Branch 002",
+      branchName: "5 Brother's Fitness Club - Kanpur",
+      city: "Kanpur",
       staffCode: "STF-002-OPS",
       employeeCode: "EMP-002-MGR",
       managerName: "Branch Manager 002"
@@ -94,32 +94,6 @@
     return reg[bc];
   }
 
-  function getAuditLogs() {
-    try {
-      const arr = JSON.parse(LS.getItem("om_manager_login_audit_v1") || "[]");
-      return Array.isArray(arr) ? arr : [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function pushAuditLog(entry) {
-    const logs = getAuditLogs();
-    logs.unshift(Object.assign({
-      id: "LOG-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
-      at: new Date().toISOString(),
-      device: navigator.userAgent || "Unknown Device"
-    }, entry));
-    const trimmed = logs.slice(0, 100);
-    try { LS.setItem("om_manager_login_audit_v1", JSON.stringify(trimmed)); } catch (e) {}
-    try {
-      if (window.firebase && firebase.apps && firebase.apps.length) {
-        firebase.firestore().collection("manager_login_audit").add(trimmed[0]).catch(function(){});
-      }
-    } catch (e) {}
-    return trimmed[0];
-  }
-
   function isVerifiedForBranch(branchCode, staffCode, employeeCode) {
     const bc = normBranch(branchCode);
     try {
@@ -155,13 +129,6 @@
         loggedInAt: sess.verifiedAt
       }));
     } catch (e) {}
-
-    pushAuditLog({
-      status: "DUAL_CODE_LOGIN",
-      branchCode: bc,
-      staffCode: sess.staffCode,
-      employeeCode: sess.employeeCode
-    });
   }
 
   function applyStrictStaffUrlLock() {
@@ -201,52 +168,77 @@
     });
 
     if (!isVerifiedForBranch(bc)) {
-      showDualCodeGateModal(bc, entry);
+      showFullScreenGate(bc, entry);
     }
   }
 
-  function showDualCodeGateModal(branchCode, entry) {
+  function showFullScreenGate(branchCode, entry) {
     if (document.getElementById("omDualCodeGate")) return;
 
     const overlay = document.createElement("div");
     overlay.id = "omDualCodeGate";
-    overlay.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:rgba(5,8,17,0.97);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;font-family:Arial,sans-serif;";
-
-    const isWide = window.innerWidth >= 768;
-    const cardStyle = isWide
-      ? "max-width:740px;width:94%;background:#111827;border:2px solid #f59e0b;border-radius:18px;padding:24px;color:#f8fafc;box-shadow:0 24px 60px rgba(0,0,0,0.8)"
-      : "max-width:440px;width:100%;background:#111827;border:2px solid #f59e0b;border-radius:16px;padding:20px;color:#f8fafc;box-shadow:0 20px 50px rgba(0,0,0,0.75)";
-
-    const gridStyle = isWide
-      ? "display:grid;grid-template-columns:1fr 1fr;gap:14px"
-      : "display:block";
+    overlay.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;z-index:2147483647;background:#070B14;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(16px, 3vw, 40px);box-sizing:border-box;overflow-y:auto;font-family:'Plus Jakarta Sans','Segoe UI',sans-serif;color:#F8FAFC;";
 
     overlay.innerHTML = `
-      <div style="${cardStyle}">
-        <div style="font-size:11px;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:0.6px">Branch ${branchCode} • Staff &amp; Employee Code Login</div>
-        <h2 style="margin:6px 0 6px;font-size:19px;color:#fff">Login With Staff Code &amp; Employee Code</h2>
-        <p style="margin:0 0 14px;font-size:12px;color:#94a3b8;line-height:1.45">
-          Login karne ke liye apna <b>Staff Code</b> (<code>STF-</code>) aur <b>Employee Code</b> (<code>EMP-</code>) dono daalein.
-        </p>
-
-        <div id="gateMsg" style="display:none;padding:10px 12px;border-radius:9px;font-size:12px;margin-bottom:12px;line-height:1.45"></div>
-
-        <div style="${gridStyle}">
-          <div style="margin-bottom:12px">
-            <label style="display:block;font-size:11.5px;font-weight:700;color:#cbd5e1;margin-bottom:4px">1. Staff Code *</label>
-            <input id="gateStaffCode" type="text" value="STF-${branchCode}-" placeholder="STF-${branchCode}-CODE" style="width:100%;padding:11px;border-radius:9px;border:1px solid #334155;background:#0b1220;color:#fff;font-size:13px;box-sizing:border-box">
+      <div style="width:100%;max-width:1100px;min-height:min(680px, 92vh);background:radial-gradient(1000px 500px at 50% -10%, #152244 0%, #0D1527 60%, #070B14 100%);border:2px solid #FFB800;border-radius:24px;padding:clamp(20px, 4vw, 48px);box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 0 60px rgba(255,184,0,0.22);">
+        
+        <!-- Header -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:1.5px dashed rgba(51,78,129,0.6);padding-bottom:16px;margin-bottom:24px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;background:#FFB800;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#000;">🏋️</div>
+              <div>
+                <h1 style="font-size:clamp(18px, 2.2vw, 26px);font-weight:900;color:#FFFFFF;margin:0;letter-spacing:0.5px;">OM SOFTWARE • STAFF PORTAL</h1>
+                <div style="font-size:12px;color:#8494B2;margin-top:2px;">Branch <b>${branchCode}</b> &bull; Dual-Code Staff &amp; Manager Security</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,184,0,0.15);border:1px solid #FFB800;color:#FFB800;padding:6px 14px;border-radius:999px;font-size:11.5px;font-weight:800;letter-spacing:0.8px;">
+              STAFF SIGN IN ONLY
+            </div>
           </div>
 
-          <div style="margin-bottom:12px">
-            <label style="display:block;font-size:11.5px;font-weight:700;color:#cbd5e1;margin-bottom:4px">2. Employee Code *</label>
-            <input id="gateEmpCode" type="text" value="EMP-${branchCode}-" placeholder="EMP-${branchCode}-MGR" style="width:100%;padding:11px;border-radius:9px;border:1px solid #334155;background:#0b1220;color:#fff;font-size:13px;box-sizing:border-box">
+          <p style="font-size:clamp(13px, 1.3vw, 15px);color:#CBD5E1;line-height:1.6;margin:0 0 24px;">
+            Is branch mein login karne ke liye apna <b>Staff Code</b> (<code>STF-</code>) aur <b>Employee Code</b> (<code>EMP-</code>) darj karein. Verification ke baad sirf <b>Admission Form</b>, <b>Pay Fees Desk</b>, aur <b>Staff Joining &amp; Attendance</b> open hoga.
+          </p>
+
+          <div id="gateMsg" style="display:none;padding:14px 18px;border-radius:12px;font-size:13.5px;margin-bottom:20px;line-height:1.5;"></div>
+
+          <!-- Dual Code Inputs (Full-width grid on tablet/PC) -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:clamp(16px, 2.5vw, 28px);margin-bottom:28px;">
+            
+            <div style="background:#0F172A;border:1.5px solid #23355C;border-radius:16px;padding:clamp(16px, 2vw, 22px);">
+              <label style="display:block;font-size:13px;font-weight:800;color:#FFB800;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">
+                1. Staff Login Code *
+              </label>
+              <input id="gateStaffCode" type="text" value="STF-${branchCode}-" placeholder="STF-${branchCode}-CODE" 
+                style="width:100%;padding:clamp(12px, 1.5vw, 16px);border-radius:12px;border:1.5px solid #334E81;background:#070B14;color:#FFFFFF;font-size:clamp(15px, 1.4vw, 18px);font-weight:800;letter-spacing:1px;box-sizing:border-box;outline:none;">
+              <div style="font-size:11px;color:#8494B2;margin-top:7px;">Prefix <code>STF-${branchCode}-</code> pre-filled hai, aage ka code likhein.</div>
+            </div>
+
+            <div style="background:#0F172A;border:1.5px solid #23355C;border-radius:16px;padding:clamp(16px, 2vw, 22px);">
+              <label style="display:block;font-size:13px;font-weight:800;color:#FFB800;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">
+                2. Manager Employee Code *
+              </label>
+              <input id="gateEmpCode" type="text" value="EMP-${branchCode}-" placeholder="EMP-${branchCode}-MGR" 
+                style="width:100%;padding:clamp(12px, 1.5vw, 16px);border-radius:12px;border:1.5px solid #334E81;background:#070B14;color:#FFFFFF;font-size:clamp(15px, 1.4vw, 18px);font-weight:800;letter-spacing:1px;box-sizing:border-box;outline:none;">
+              <div style="font-size:11px;color:#8494B2;margin-top:7px;">Prefix <code>EMP-${branchCode}-</code> pre-filled hai, aage ka code likhein.</div>
+            </div>
+
           </div>
         </div>
 
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
-          <button type="button" id="gateLoginBtn" style="flex:1 1 200px;padding:12px;border-radius:10px;border:none;background:#fbbf24;color:#050811;font-weight:900;font-size:13.5px;cursor:pointer">Login</button>
-          <button type="button" id="gateExitBtn" style="padding:12px 16px;border-radius:10px;border:1px solid #475569;background:#1e293b;color:#f8fafc;font-weight:700;font-size:12px;cursor:pointer">Login Page</button>
+        <!-- Buttons Area -->
+        <div style="display:flex;gap:14px;flex-wrap:wrap;padding-top:16px;border-top:1px solid rgba(51,78,129,0.5);">
+          <button type="button" id="gateLoginBtn" 
+            style="flex:2 1 240px;padding:clamp(14px, 1.6vw, 18px);border-radius:14px;border:none;background:#FFB800;color:#070B14;font-weight:900;font-size:clamp(15px, 1.3vw, 17px);cursor:pointer;letter-spacing:0.5px;transition:transform 0.15s ease;">
+            🔓 Verify &amp; Open Staff App
+          </button>
+          <button type="button" id="gateExitBtn" 
+            style="flex:1 1 140px;padding:clamp(14px, 1.6vw, 18px);border-radius:14px;border:1.5px solid #334E81;background:#162340;color:#FFFFFF;font-weight:800;font-size:clamp(13px, 1.1vw, 15px);cursor:pointer;">
+            ⬅️ Main Login
+          </button>
         </div>
+
       </div>
     `;
 
@@ -265,9 +257,9 @@
     function setGateErr(text) {
       const box = document.getElementById("gateMsg");
       box.style.display = "block";
-      box.style.background = "rgba(239,68,68,0.16)";
-      box.style.border = "1px solid #ef4444";
-      box.style.color = "#fca5a5";
+      box.style.background = "rgba(239,68,68,0.18)";
+      box.style.border = "1.5px solid #EF4444";
+      box.style.color = "#FCA5A5";
       box.textContent = text;
     }
 
@@ -276,7 +268,7 @@
       const emp = normCode(empInp.value);
 
       if (!stf || stf.endsWith("-") || !emp || emp.endsWith("-")) {
-        setGateErr("Staff Code aur Employee Code dono dalna zaroori hai.");
+        setGateErr("Staff Code aur Employee Code dono poore dalna zaroori hai.");
         return;
       }
 
@@ -296,7 +288,6 @@
     getRegistry: getRegistry,
     saveRegistry: saveRegistry,
     ensureBranchEntry: ensureBranchEntry,
-    getAuditLogs: getAuditLogs,
     isVerifiedForBranch: isVerifiedForBranch,
     markVerifiedForBranch: markVerifiedForBranch,
     applyStrictStaffUrlLock: applyStrictStaffUrlLock
