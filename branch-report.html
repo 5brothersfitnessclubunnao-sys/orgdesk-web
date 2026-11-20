@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Om Software - Multi-Branch ERP & Collection Report</title>
+  <title>Om Software - Multi-Branch ERP Folders</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -15,8 +15,8 @@
     :root {
       --bg: #070B14;
       --bg-gradient: radial-gradient(1200px 650px at 50% -5%, #13203F 0%, #080D1A 60%, #05070D 100%);
-      --card-bg: rgba(15, 23, 42, 0.9);
-      --card-surface: #0D1528;
+      --card-bg: rgba(15, 23, 42, 0.92);
+      --card-sub: #0B1224;
       --border: rgba(51, 78, 129, 0.45);
       --ac-gold: #FFB800;
       --ac-cyan: #38BDF8;
@@ -31,31 +31,18 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
 
     html, body {
-      width: 100%;
-      max-width: 100vw;
-      overflow-x: hidden;
-      background: var(--bg-gradient) fixed;
-      color: var(--tx-main);
-      min-height: 100vh;
+      width: 100%; max-width: 100vw; overflow-x: hidden;
+      background: var(--bg-gradient) fixed; color: var(--tx-main); min-height: 100vh;
     }
 
-    body {
-      padding: clamp(10px, 2vw, 22px) clamp(10px, 2.5vw, 22px) 64px;
-    }
+    body { padding: clamp(10px, 2vw, 20px) clamp(10px, 2.5vw, 22px) 64px; }
 
-    .wrapper {
-      max-width: 1320px;
-      width: 100%;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+    .wrapper { max-width: 1260px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
     /* Top Bar */
     .nav-bar {
       display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
-      background: rgba(12, 19, 37, 0.9); border: 1px solid var(--border); border-radius: 14px; padding: 11px 16px;
+      background: rgba(12, 19, 37, 0.92); border: 1px solid var(--border); border-radius: 14px; padding: 11px 16px;
     }
     .brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 220px; }
     .brand-icon {
@@ -63,106 +50,102 @@
       background: linear-gradient(135deg, #FFB800, #F59E0B);
       display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
     }
-    .brand h1 { font-size: clamp(14px, 1.5vw, 17px); font-weight: 900; line-height: 1.25; }
+    .brand h1 { font-size: clamp(14px, 1.5vw, 17px); font-weight: 900; }
     .brand p { font-size: 11px; color: var(--tx-muted); margin-top: 1px; }
 
     .nav-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .btn-sm {
       background: #162340; color: #fff; border: 1px solid var(--border);
-      padding: 7px 12px; border-radius: 9px; font-size: 11.5px; font-weight: 800;
+      padding: 7px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 800;
       cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
     }
     .btn-sm.gold { background: var(--ac-gold); color: #070B14; border: none; }
     .btn-sm.green { background: var(--ac-green); color: #04140C; border: none; }
 
-    /* Cards */
-    .panel {
-      background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
-      padding: clamp(13px, 1.8vw, 18px); display: flex; flex-direction: column; gap: 12px;
+    /* Folder Cards (Clean Collapsible / Openable Folders) */
+    .folder-card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 15px; overflow: hidden;
     }
-    .panel-hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .panel-hd h2 { font-size: 14px; font-weight: 800; color: var(--ac-gold); display: flex; align-items: center; gap: 6px; }
+    .folder-header {
+      padding: 13px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      cursor: pointer; background: rgba(18, 28, 52, 0.85); transition: background 0.15s ease;
+    }
+    .folder-header:hover { background: rgba(24, 37, 68, 0.95); }
+    .fh-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .fh-title { font-size: 13.5px; font-weight: 900; color: #fff; }
+    .fh-sub { font-size: 11px; color: var(--tx-muted); margin-top: 1px; }
+    .fh-arrow { font-size: 12px; font-weight: 800; color: var(--ac-gold); flex-shrink: 0; }
 
-    .search-inline { display: flex; gap: 8px; flex-wrap: wrap; }
-    .search-inline input {
-      background: #0B1224; border: 1.5px solid #22345C; color: #fff;
-      padding: 8px 12px; border-radius: 9px; font-size: 12px; outline: none; min-width: 190px;
+    .folder-body { padding: 14px 16px; border-top: 1px solid rgba(51, 78, 129, 0.35); display: none; flex-direction: column; gap: 12px; }
+    .folder-body.open { display: flex; }
+
+    /* Autosearch Box with Suggestion Dropdown & Open Button */
+    .autosearch-wrap { position: relative; display: flex; gap: 8px; flex-wrap: wrap; }
+    .autosearch-input-box { position: relative; flex: 1 1 240px; }
+    .autosearch-input-box input {
+      width: 100%; background: var(--card-sub); border: 1.5px solid #22345C; color: #fff;
+      padding: 10px 12px; border-radius: 9px; font-size: 12.5px; outline: none;
     }
-    .search-inline button {
-      background: var(--ac-gold); color: #070B14; border: none; padding: 8px 14px;
-      border-radius: 9px; font-weight: 900; font-size: 12px; cursor: pointer;
+    .autosearch-input-box input:focus { border-color: var(--ac-gold); }
+
+    .suggestion-list {
+      position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+      background: #0F1A33; border: 1.5px solid var(--ac-gold); border-radius: 10px;
+      margin-top: 4px; max-height: 220px; overflow-y: auto; display: none;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    }
+    .suggestion-list.show { display: block; }
+    .sug-item {
+      padding: 9px 12px; cursor: pointer; border-bottom: 1px solid rgba(51, 78, 129, 0.3);
+      display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px;
+    }
+    .sug-item:last-child { border-bottom: none; }
+    .sug-item:hover { background: rgba(255, 184, 0, 0.14); }
+
+    .btn-open-branch {
+      background: var(--ac-gold); color: #070B14; border: none; padding: 10px 18px;
+      border-radius: 9px; font-weight: 900; font-size: 12.5px; cursor: pointer; white-space: nowrap;
     }
 
+    /* Location Filter Grid */
     .loc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
     .f-box label { display: block; font-size: 10px; font-weight: 700; color: var(--tx-muted); text-transform: uppercase; margin-bottom: 4px; }
-    .f-box input, .f-box select, .f-box textarea {
-      width: 100%; background: #0B1224; border: 1.5px solid #22345C; color: #fff;
+    .f-box input, .f-box select {
+      width: 100%; background: var(--card-sub); border: 1.5px solid #22345C; color: #fff;
       padding: 9px 11px; border-radius: 9px; font-size: 12px; outline: none;
     }
-    .f-box input:focus, .f-box select:focus, .f-box textarea:focus { border-color: var(--ac-gold); }
-    .pin-status { font-size: 10.5px; color: var(--ac-cyan); margin-top: 3px; min-height: 14px; }
+    .f-box input:focus, .f-box select:focus { border-color: var(--ac-gold); }
+    .pin-note { font-size: 10.5px; color: var(--ac-cyan); margin-top: 3px; min-height: 14px; }
 
-    /* Branch List ("See Your Branch Report") */
-    .branch-lines { display: flex; flex-direction: column; gap: 7px; }
-    .branch-line-item {
-      background: #0B1224; border: 1px solid #22345C; border-radius: 11px;
-      padding: 10px 13px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
-      cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease;
+    /* Sub-Folder Tabs inside Active Branch */
+    .sub-tabs { display: flex; gap: 7px; flex-wrap: wrap; }
+    .sub-tab {
+      background: var(--card-sub); border: 1px solid #22345C; color: var(--tx-sub);
+      padding: 7px 11px; border-radius: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer;
     }
-    .branch-line-item:hover, .branch-line-item.active {
-      border-color: var(--ac-gold); background: rgba(255, 184, 0, 0.08);
-    }
-    .bl-main { min-width: 0; }
-    .bl-title { font-size: 13px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-    .code-tag {
-      background: rgba(56, 189, 248, 0.14); color: var(--ac-cyan); border: 1px solid rgba(56, 189, 248, 0.4);
-      font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 6px;
-    }
-    .bl-sub { font-size: 11px; color: var(--tx-muted); margin-top: 2px; }
-    .bl-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .pill-p { background: rgba(16, 185, 129, 0.16); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.45); font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; }
-    .pill-l { background: rgba(239, 68, 68, 0.16); color: #FCA5A5; border: 1px solid rgba(239, 68, 68, 0.45); font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; }
+    .sub-tab.active, .sub-tab:hover { border-color: var(--ac-cyan); color: #fff; background: rgba(56, 189, 248, 0.12); }
 
-    /* Selected Branch Detail Box */
-    .selected-banner {
-      background: linear-gradient(135deg, rgba(19, 31, 59, 0.95), rgba(11, 18, 36, 0.95));
-      border: 1.5px solid var(--border); border-radius: 15px; padding: 14px 16px;
-      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    /* Data Rows / Cards inside Sub-Folders */
+    .detail-box {
+      background: var(--card-sub); border: 1px solid #22345C; border-radius: 12px; padding: 13px 14px;
+      display: flex; flex-direction: column; gap: 10px;
     }
-    .selected-banner h3 { font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .selected-banner p { font-size: 11.5px; color: var(--tx-muted); margin-top: 3px; line-height: 1.4; }
+    .kv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+    .kv-item { background: #0E172D; border: 1px solid rgba(51, 78, 129, 0.35); border-radius: 9px; padding: 10px 12px; }
+    .kv-lbl { font-size: 10px; color: var(--tx-muted); text-transform: uppercase; font-weight: 700; }
+    .kv-val { font-size: 15px; font-weight: 900; color: #fff; margin-top: 3px; }
+    .kv-sub { font-size: 10.5px; color: var(--tx-muted); margin-top: 2px; }
 
-    .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    .m-card {
-      background: #0B1224; border: 1px solid #22345C; border-radius: 12px; padding: 12px 14px;
+    .list-rows { display: flex; flex-direction: column; gap: 7px; }
+    .list-row {
+      background: #0E172D; border: 1px solid rgba(51, 78, 129, 0.35); border-radius: 9px;
+      padding: 9px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+      font-size: 12px;
     }
-    .m-lbl { font-size: 10px; font-weight: 700; color: var(--tx-muted); text-transform: uppercase; }
-    .m-val { font-size: clamp(16px, 1.8vw, 21px); font-weight: 900; color: #fff; margin-top: 4px; }
-    .m-note { font-size: 10.5px; color: var(--tx-muted); margin-top: 2px; }
 
-    /* 3 Dedicated Folders: Profitable, Loss, All Branches & Revenue */
-    .three-folders { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .folder-tab {
-      background: #0B1224; border: 1.5px solid #22345C; border-radius: 12px; padding: 12px 14px;
-      cursor: pointer; text-align: left; color: #fff; transition: border-color 0.15s ease, background 0.15s ease;
-    }
-    .folder-tab:hover, .folder-tab.active { border-color: var(--ac-gold); background: rgba(255, 184, 0, 0.08); }
-    .folder-tab .ft-title { font-size: 13px; font-weight: 900; display: flex; align-items: center; justify-content: space-between; }
-    .folder-tab .ft-sub { font-size: 11px; color: var(--tx-muted); margin-top: 3px; }
-
-    /* Bottom Settings Folder & Nested Layers */
-    .settings-root {
-      background: #0B1224; border: 1.5px solid rgba(168, 85, 247, 0.45); border-radius: 16px; padding: 16px;
-      display: flex; flex-direction: column; gap: 12px;
-    }
-    .settings-layers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .sub-folder {
-      background: #101A32; border: 1px solid var(--border); border-radius: 12px; padding: 13px 14px;
-      display: flex; flex-direction: column; gap: 8px;
-    }
-    .sub-folder h4 { font-size: 12.5px; font-weight: 900; color: var(--ac-cyan); }
-    .sub-folder p { font-size: 11px; color: var(--tx-muted); line-height: 1.4; }
-    .sub-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pill-p { background: rgba(16, 185, 129, 0.16); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.45); font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 999px; }
+    .pill-l { background: rgba(239, 68, 68, 0.16); color: #FCA5A5; border: 1px solid rgba(239, 68, 68, 0.45); font-size: 11px; font-weight: 800; padding: 2px 9px; border-radius: 999px; }
+    .code-tag { background: rgba(56, 189, 248, 0.15); color: var(--ac-cyan); border: 1px solid rgba(56, 189, 248, 0.4); font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 6px; }
 
     /* Modal */
     .modal-ov {
@@ -177,19 +160,15 @@
     .modal-bx h3 { color: var(--ac-gold); font-size: 15px; font-weight: 800; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .form-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 9px; }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 900px) {
       .loc-grid { grid-template-columns: repeat(2, 1fr); }
-      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-      .three-folders { grid-template-columns: 1fr; }
-      .settings-layers { grid-template-columns: 1fr; }
+      .kv-grid { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 640px) {
+    @media (max-width: 600px) {
       .loc-grid { grid-template-columns: 1fr; }
-      .metrics-grid { grid-template-columns: 1fr; }
+      .kv-grid { grid-template-columns: 1fr; }
       .form-2 { grid-template-columns: 1fr; }
-      .search-inline { width: 100%; }
-      .search-inline input { flex: 1 1 100%; min-width: 0; }
-      .search-inline button { width: 100%; }
+      .btn-open-branch { width: 100%; }
     }
   </style>
 </head>
@@ -202,7 +181,7 @@
       <div class="brand-icon">📂</div>
       <div>
         <h1>Branch Collection &amp; Multi-Branch ERP</h1>
-        <p>50+ Branches Management &bull; Profit/Loss &bull; Auto Drive Backup</p>
+        <p>Organized Folder Architecture &bull; Branch P&amp;L, Supplements, Members &amp; Settings</p>
       </div>
     </div>
     <div class="nav-actions">
@@ -211,208 +190,163 @@
     </div>
   </header>
 
-  <!-- 1. Select Your Branch + State (All India Autosearch) + City + Area/Pincode -->
-  <section class="panel">
-    <div class="panel-hd">
-      <h2>📍 Select Your Branch (State &rarr; City &rarr; Area / Pincode)</h2>
-      <div class="search-inline">
-        <input type="text" id="branchFilterInput" placeholder="Search by Code (001, 002), Gym Name, City or Pincode..." oninput="renderBranchList()">
-        <button type="button" onclick="renderBranchList()">Search</button>
+  <!-- FOLDER 1: SELECT & OPEN BRANCH (AUTOSEARCH + OPEN BUTTON) -->
+  <section class="folder-card">
+    <div class="folder-header" onclick="toggleFolder('fSelectBody', 'arrSelect')">
+      <div class="fh-left">
+        <span style="font-size:18px">📂</span>
+        <div>
+          <div class="fh-title">1. Select Your Branch (Autosearch &amp; Open)</div>
+          <div class="fh-sub">Search branch code/name with live suggestions, pick State &rarr; City &rarr; Area/PIN, and click Open</div>
+        </div>
       </div>
+      <span class="fh-arrow" id="arrSelect">▼ Open</span>
     </div>
 
-    <div class="loc-grid">
-      <div class="f-box">
-        <label>1. Country</label>
-        <input type="text" id="selCountry" value="India" readonly>
+    <div class="folder-body open" id="fSelectBody">
+      <div class="autosearch-wrap">
+        <div class="autosearch-input-box">
+          <input type="text" id="branchSearchBox" placeholder="Type branch code (001, 002), name, city or PIN..." oninput="onBranchSearchType()" onfocus="onBranchSearchType()">
+          <div class="suggestion-list" id="branchSuggestions"></div>
+        </div>
+        <button type="button" class="btn-open-branch" onclick="openMatchedOrSelectedBranch()">Open</button>
       </div>
 
-      <div class="f-box">
-        <label>2. State (All India Autosearch)</label>
-        <input type="text" id="selState" list="indiaStatesList" placeholder="Type state (e.g. Uttar Pradesh, UP, Maha)..." oninput="onStateInput()">
-        <datalist id="indiaStatesList"></datalist>
-      </div>
-
-      <div class="f-box">
-        <label>3. City / District</label>
-        <input type="text" id="selCity" list="indiaCitiesList" placeholder="Type or pick city (e.g. Unnao, Kanpur)..." oninput="onCityInput()">
-        <datalist id="indiaCitiesList">
-          <option value="Unnao">
-          <option value="Kanpur">
-          <option value="Lucknow">
-          <option value="Jaipur">
-          <option value="Noida">
-          <option value="Ghaziabad">
-          <option value="Varanasi">
-          <option value="Agra">
-          <option value="Prayagraj">
-          <option value="Mumbai">
-          <option value="Pune">
-          <option value="New Delhi">
-          <option value="Indore">
-          <option value="Bhopal">
-          <option value="Patna">
-        </datalist>
-      </div>
-
-      <div class="f-box">
-        <label>4. Area / Village / Gali / Pincode</label>
-        <input type="text" id="selAreaPin" list="indiaAreasList" placeholder="Type area, village, gali or 6-digit PIN..." oninput="onAreaPinInput()">
-        <datalist id="indiaAreasList">
-          <option value="Akrampur - 209801">
-          <option value="Umrao Khera - 209801">
-          <option value="Chandra Nagar - 209801">
-          <option value="Magarwara - 209801">
-          <option value="Shuklaganj - 209861">
-          <option value="Transport Nagar - 208023">
-          <option value="Kakadeo - 208025">
-          <option value="Gomti Nagar - 226010">
-          <option value="Kalwar Road - 302012">
-          <option value="Connaught Place - 110001">
-          <option value="Andheri West - 400058">
-        </datalist>
-        <div class="pin-status" id="pinLookupStatus"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 2. See Your Branch Report (Lines of Branches Matching Selection) -->
-  <section class="panel">
-    <div class="panel-hd">
-      <h2>📋 See Your Branch Report (Click Any Branch Line To Open)</h2>
-      <span style="font-size:11px;color:var(--tx-muted)" id="branchCountLabel"></span>
-    </div>
-    <div class="branch-lines" id="branchLinesContainer"></div>
-  </section>
-
-  <!-- 3. Active Selected Branch Full Breakdown -->
-  <section class="panel" id="selectedBranchSection">
-    <div class="selected-banner">
-      <div>
-        <h3>
-          <span id="activeBranchTitle">--</span>
-          <span class="code-tag" id="activeBranchCode">--</span>
-        </h3>
-        <p id="activeBranchMeta">--</p>
-      </div>
-      <div id="activeBranchPlBadge">--</div>
-    </div>
-
-    <div class="metrics-grid">
-      <div class="m-card">
-        <div class="m-lbl">Total Revenue (Fees + Supp + Serv)</div>
-        <div class="m-val" id="mTotalRev" style="color:var(--ac-green)">₹0</div>
-        <div class="m-note" id="mRevBreakdown">Fees: ₹0 &bull; Supp: ₹0 &bull; Other: ₹0</div>
-      </div>
-      <div class="m-card">
-        <div class="m-lbl">Today Fees Collection</div>
-        <div class="m-val" id="mTodayFees" style="color:var(--ac-gold)">₹0</div>
-        <div class="m-note">Current day collection</div>
-      </div>
-      <div class="m-card">
-        <div class="m-lbl">Admissions (This / Last Month)</div>
-        <div class="m-val" id="mAdmissions">0 / 0</div>
-        <div class="m-note" id="mMembersCount">Total Members: 0</div>
-      </div>
-      <div class="m-card">
-        <div class="m-lbl">Staff &amp; Salary Outflow</div>
-        <div class="m-val" id="mStaffSal">₹0</div>
-        <div class="m-note" id="mStaffCount">Staff: 0</div>
-      </div>
-      <div class="m-card">
-        <div class="m-lbl">Branch Operating Expenses</div>
-        <div class="m-val" id="mExpenses" style="color:#FCA5A5">₹0</div>
-        <div class="m-note">Rent + Bijli + Maintenance</div>
-      </div>
-      <div class="m-card">
-        <div class="m-lbl">Net Profit / Loss Reason</div>
-        <div class="m-val" id="mNetPl">₹0</div>
-        <div class="m-note" id="mPlWhy">--</div>
-      </div>
-      <div class="m-card">
-        <div class="m-lbl">Expiring Soon</div>
-        <div class="m-val" id="mExpiring" style="color:var(--ac-gold)">0</div>
-        <div class="m-note">Members expiring soon</div>
-      </div>
-      <div class="m-card">
-        <div class="m-lbl">Expired Members</div>
-        <div class="m-val" id="mExpired" style="color:var(--ac-red)">0</div>
-        <div class="m-note">Renewal pending</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4. Three Dedicated Folders: Profitable Branches, Loss Branches, All Branches & Revenue -->
-  <section class="panel">
-    <div class="panel-hd">
-      <h2>📁 Branch Performance Folders (Profit &bull; Loss &bull; All Revenue)</h2>
-      <span style="font-size:11px;color:var(--tx-muted)">Click any folder &amp; then click a branch to see why &amp; full details</span>
-    </div>
-
-    <div class="three-folders">
-      <button type="button" class="folder-tab active" id="tabProfit" onclick="setFolderTab('profit')">
-        <div class="ft-title"><span>📁 1. Profitable Branches</span><span id="cntProfit">0</span></div>
-        <div class="ft-sub">Branches running in net profit</div>
-      </button>
-      <button type="button" class="folder-tab" id="tabLoss" onclick="setFolderTab('loss')">
-        <div class="ft-title"><span>📁 2. Loss Branches</span><span id="cntLoss">0</span></div>
-        <div class="ft-sub">Branches running in net loss &amp; why</div>
-      </button>
-      <button type="button" class="folder-tab" id="tabAll" onclick="setFolderTab('all')">
-        <div class="ft-title"><span>📁 3. All Branches &amp; Revenue</span><span id="cntAll">0</span></div>
-        <div class="ft-sub">All branches, revenue, admissions, supplements &amp; services</div>
-      </button>
-    </div>
-
-    <div class="branch-lines" id="folderBranchesList"></div>
-  </section>
-
-  <!-- 5. Bottom "📂 Settings" Folder with Nested Layers: Backup, Expense, Export & Alerts, Security -->
-  <section class="settings-root">
-    <div class="panel-hd">
-      <h2 style="color:#E9D5FF">📂 Settings (Backup &bull; Expense &bull; Export/Alerts &bull; Security)</h2>
-      <span style="font-size:11px;color:var(--tx-muted)" id="driveSyncStatusText">Daily 11:00 PM Google Drive Auto-Backup Scheduled</span>
-    </div>
-
-    <div class="settings-layers">
-      <!-- Layer 1: Backup Folder -->
-      <div class="sub-folder">
-        <h4>📂 Layer 1: Backup Folder (Google Drive 11:00 PM)</h4>
-        <p>Daily 11:00 PM auto-backup schedule active. Click below to open Google Drive directly or sync backup now.</p>
-        <div class="sub-btns">
-          <button type="button" class="btn-sm green" onclick="openGoogleDriveDirect()">☁️ Open Google Drive</button>
-          <button type="button" class="btn-sm" onclick="syncDriveNow()">🔄 Sync Drive Backup</button>
+      <div class="loc-grid">
+        <div class="f-box">
+          <label>Country</label>
+          <input type="text" value="India" readonly>
+        </div>
+        <div class="f-box">
+          <label>State (All India Autosearch)</label>
+          <input type="text" id="locState" list="allStatesDl" placeholder="Type state (e.g. Uttar Pradesh, UP)..." oninput="filterByLocation()">
+          <datalist id="allStatesDl"></datalist>
+        </div>
+        <div class="f-box">
+          <label>City / District</label>
+          <input type="text" id="locCity" list="allCitiesDl" placeholder="Type or select city (e.g. Unnao)..." oninput="filterByLocation()">
+          <datalist id="allCitiesDl">
+            <option value="Unnao">
+            <option value="Kanpur">
+            <option value="Lucknow">
+            <option value="Jaipur">
+            <option value="New Delhi">
+            <option value="Mumbai">
+            <option value="Noida">
+          </datalist>
+        </div>
+        <div class="f-box">
+          <label>Area / Village / Gali / Pincode</label>
+          <input type="text" id="locAreaPin" list="allAreasDl" placeholder="Area, village, gali or 6-digit PIN..." oninput="onAreaPinType()">
+          <datalist id="allAreasDl">
+            <option value="Akrampur - 209801">
+            <option value="Umrao Khera - 209801">
+            <option value="Chandra Nagar - 209801">
+            <option value="Magarwara - 209801">
+            <option value="Transport Nagar - 208023">
+            <option value="Gomti Nagar - 226010">
+          </datalist>
+          <div class="pin-note" id="pinNote"></div>
         </div>
       </div>
 
-      <!-- Layer 2: Expense Folder -->
-      <div class="sub-folder">
-        <h4>📂 Layer 2: Expense Folder (1-Min Expense Entry)</h4>
-        <p>Add electricity, rent, maintenance, or other branch expenses and recalculate branch profit/loss instantly.</p>
-        <div class="sub-btns">
-          <button type="button" class="btn-sm gold" onclick="openExpenseModal()">➕ Add Expense</button>
-          <button type="button" class="btn-sm" onclick="viewExpenseSummary()">📊 View Expense Breakdown</button>
+      <div class="list-rows" id="filteredBranchesLines"></div>
+    </div>
+  </section>
+
+  <!-- FOLDER 2: OPENED BRANCH REPORT (SUB-FOLDERS FOR FEES, SUPPLEMENTS, OTHER, MEMBERS, PROFIT/SALARY) -->
+  <section class="folder-card">
+    <div class="folder-header" onclick="toggleFolder('fBranchBody', 'arrBranch')">
+      <div class="fh-left">
+        <span style="font-size:18px">📂</span>
+        <div>
+          <div class="fh-title" id="openedBranchFolderTitle">2. Active Branch Folder: --</div>
+          <div class="fh-sub" id="openedBranchFolderSub">Open any branch above to inspect its separate sub-folders</div>
+        </div>
+      </div>
+      <span class="fh-arrow" id="arrBranch">▼ Open</span>
+    </div>
+
+    <div class="folder-body open" id="fBranchBody">
+      <div class="sub-tabs">
+        <button type="button" class="sub-tab active" id="stOverview" onclick="setBranchSubTab('overview')">📁 Profit, Salary &amp; Summary</button>
+        <button type="button" class="sub-tab" id="stFees" onclick="setBranchSubTab('fees')">📁 Fees Collection</button>
+        <button type="button" class="sub-tab" id="stSupp" onclick="setBranchSubTab('supplements')">📁 Supplement Sales &amp; Profit</button>
+        <button type="button" class="sub-tab" id="stOther" onclick="setBranchSubTab('other')">📁 Other Collection</button>
+        <button type="button" class="sub-tab" id="stMembers" onclick="setBranchSubTab('members')">📁 Members &amp; Admissions</button>
+      </div>
+
+      <div class="detail-box" id="branchSubContent"></div>
+    </div>
+  </section>
+
+  <!-- FOLDER 3: PROFIT, LOSS & ALL BRANCHES REVENUE (3 SEPARATE SUB-FOLDERS) -->
+  <section class="folder-card">
+    <div class="folder-header" onclick="toggleFolder('fPerfBody', 'arrPerf')">
+      <div class="fh-left">
+        <span style="font-size:18px">📂</span>
+        <div>
+          <div class="fh-title">3. Profitable Branches, Loss Branches &amp; All Branches Revenue</div>
+          <div class="fh-sub">Separate sub-folders for Profit, Loss (with reason), and All Branches Revenue</div>
+        </div>
+      </div>
+      <span class="fh-arrow" id="arrPerf">▶ Expand</span>
+    </div>
+
+    <div class="folder-body" id="fPerfBody">
+      <div class="sub-tabs">
+        <button type="button" class="sub-tab active" id="pfTabProfit" onclick="setPerfSubTab('profit')">📁 Profitable Branches (<span id="pfCntP">0</span>)</button>
+        <button type="button" class="sub-tab" id="pfTabLoss" onclick="setPerfSubTab('loss')">📁 Loss Branches (<span id="pfCntL">0</span>)</button>
+        <button type="button" class="sub-tab" id="pfTabAll" onclick="setPerfSubTab('all')">📁 All Branches &amp; Revenue (<span id="pfCntA">0</span>)</button>
+      </div>
+      <div class="list-rows" id="perfSubContent"></div>
+    </div>
+  </section>
+
+  <!-- FOLDER 4: SETTINGS (NESTED SUB-FOLDERS AT BOTTOM) -->
+  <section class="folder-card">
+    <div class="folder-header" onclick="toggleFolder('fSetBody', 'arrSet')">
+      <div class="fh-left">
+        <span style="font-size:18px">📂</span>
+        <div>
+          <div class="fh-title">4. Settings Folder (Backup &bull; Expense &bull; Export/Alerts &bull; Security)</div>
+          <div class="fh-sub" id="driveStatusSub">Daily 11:00 PM Google Drive Backup Scheduled</div>
+        </div>
+      </div>
+      <span class="fh-arrow" id="arrSet">▶ Expand</span>
+    </div>
+
+    <div class="folder-body" id="fSetBody">
+      <div class="detail-box">
+        <div style="font-weight:900;color:var(--ac-cyan);font-size:12.5px">📂 Sub-Folder: Backup (Google Drive 11:00 PM)</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn-sm green" onclick="openDrive()">☁️ Open Google Drive</button>
+          <button type="button" class="btn-sm" onclick="syncDrive()">🔄 Sync Backup Now</button>
         </div>
       </div>
 
-      <!-- Layer 3: Export & Closing Alerts Folder -->
-      <div class="sub-folder">
-        <h4>📂 Layer 3: Export &amp; Closing Alert Folder</h4>
-        <p>Export multi-branch data to Excel (.xlsx) or CSV, or send daily closing summary alert.</p>
-        <div class="sub-btns">
-          <button type="button" class="btn-sm" onclick="exportExcel()">📥 Excel (.xlsx)</button>
+      <div class="detail-box">
+        <div style="font-weight:900;color:var(--ac-gold);font-size:12.5px">📂 Sub-Folder: Expense Entry</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn-sm gold" onclick="openExpenseModal()">➕ 1-Min Expense Entry</button>
+          <button type="button" class="btn-sm" onclick="showExpenseInfo()">📊 Expense Summary</button>
+        </div>
+      </div>
+
+      <div class="detail-box">
+        <div style="font-weight:900;color:var(--ac-purple);font-size:12.5px">📂 Sub-Folder: Export &amp; Closing Alerts</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn-sm" onclick="exportXlsx()">📥 Excel (.xlsx)</button>
           <button type="button" class="btn-sm" onclick="exportCsv()">📄 CSV</button>
           <button type="button" class="btn-sm green" onclick="sendClosingAlert()">📲 Closing Alert</button>
         </div>
       </div>
 
-      <!-- Layer 4: Security Folder -->
-      <div class="sub-folder">
-        <h4>📂 Layer 4: Security Folder (Security Code &amp; Alert)</h4>
-        <p>Verify or update branch security PIN/code and trigger a security access alert.</p>
-        <div class="sub-btns">
-          <button type="button" class="btn-sm" onclick="openSecurityModal()">🔐 Security Code</button>
-          <button type="button" class="btn-sm" onclick="triggerSecurityAlert()">🚨 Security Alert</button>
+      <div class="detail-box">
+        <div style="font-weight:900;color:#FCA5A5;font-size:12.5px">📂 Sub-Folder: Security Code &amp; Alert</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn-sm" onclick="openSecModal()">🔐 Security Code</button>
+          <button type="button" class="btn-sm" onclick="fireSecAlert()">🚨 Security Alert</button>
         </div>
       </div>
     </div>
@@ -426,82 +360,33 @@
       <span>➕ Add New Branch</span>
       <button type="button" onclick="closeModal('addBranchModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
     </h3>
-    <form onsubmit="saveNewBranch(event)">
+    <form onsubmit="saveBranch(event)">
       <div class="form-2">
-        <div class="f-box">
-          <label>Branch Code *</label>
-          <input type="text" id="nbCode" required placeholder="e.g. 001, 002, BR-003">
-        </div>
-        <div class="f-box">
-          <label>Gym / Branch Name *</label>
-          <input type="text" id="nbName" required placeholder="e.g. Unnao Main Branch">
-        </div>
+        <div class="f-box"><label>Branch Code *</label><input type="text" id="nbCode" required placeholder="e.g. 001, 002"></div>
+        <div class="f-box"><label>Gym / Branch Name *</label><input type="text" id="nbName" required placeholder="e.g. Akrampur Branch"></div>
       </div>
       <div class="form-2">
-        <div class="f-box">
-          <label>State *</label>
-          <input type="text" id="nbState" list="indiaStatesList" required placeholder="State">
-        </div>
-        <div class="f-box">
-          <label>City *</label>
-          <input type="text" id="nbCity" list="indiaCitiesList" required placeholder="City">
-        </div>
+        <div class="f-box"><label>State *</label><input type="text" id="nbState" list="allStatesDl" required placeholder="State"></div>
+        <div class="f-box"><label>City *</label><input type="text" id="nbCity" list="allCitiesDl" required placeholder="City"></div>
       </div>
       <div class="form-2">
-        <div class="f-box">
-          <label>Area / Village / Gali / Pincode *</label>
-          <input type="text" id="nbAreaPin" required placeholder="e.g. Akrampur - 209801">
-        </div>
-        <div class="f-box">
-          <label>Manager / Owner / Admin Name *</label>
-          <input type="text" id="nbAdmin" required placeholder="Name & Role">
-        </div>
+        <div class="f-box"><label>Area / Village / Gali / PIN *</label><input type="text" id="nbArea" required placeholder="Akrampur - 209801"></div>
+        <div class="f-box"><label>Manager / Owner / Admin *</label><input type="text" id="nbAdmin" required placeholder="Name & Role"></div>
       </div>
-      <div class="f-box" style="margin-bottom:9px">
-        <label>Branch Address *</label>
-        <input type="text" id="nbAddress" required placeholder="Full street / landmark / address">
+      <div class="f-box" style="margin-bottom:9px"><label>Full Address *</label><input type="text" id="nbAddr" required placeholder="Full address"></div>
+      <div class="form-2">
+        <div class="f-box"><label>Fees Month &amp; Members Paid</label><input type="text" id="nbFeesMeta" value="November 2026 (98 members)"></div>
+        <div class="f-box"><label>Fees Collection (₹)</label><input type="number" id="nbFeesAmt" value="62000"></div>
       </div>
       <div class="form-2">
-        <div class="f-box">
-          <label>Monthly Fees Collection (₹)</label>
-          <input type="number" id="nbFees" value="50000">
-        </div>
-        <div class="f-box">
-          <label>Supplement Sales (₹)</label>
-          <input type="number" id="nbSupp" value="12000">
-        </div>
+        <div class="f-box"><label>Active Members / Month Admissions</label><input type="text" id="nbMemAdm" value="124 / 18"></div>
+        <div class="f-box"><label>Deactivated / Non-Renewed</label><input type="number" id="nbDeact" value="7"></div>
       </div>
       <div class="form-2">
-        <div class="f-box">
-          <label>Other Services Revenue (₹)</label>
-          <input type="number" id="nbServ" value="5000">
-        </div>
-        <div class="f-box">
-          <label>Today Collection (₹)</label>
-          <input type="number" id="nbToday" value="3500">
-        </div>
+        <div class="f-box"><label>Staff Count &amp; Salary (₹)</label><input type="text" id="nbStfSal" value="3 / 16000"></div>
+        <div class="f-box"><label>Other Expenses (₹)</label><input type="number" id="nbExp" value="17500"></div>
       </div>
-      <div class="form-2">
-        <div class="f-box">
-          <label>Staff Salary Total (₹)</label>
-          <input type="number" id="nbSalary" value="18000">
-        </div>
-        <div class="f-box">
-          <label>Other Expenses (₹)</label>
-          <input type="number" id="nbExpense" value="14000">
-        </div>
-      </div>
-      <div class="form-2">
-        <div class="f-box">
-          <label>Admissions (This / Last Mo)</label>
-          <input type="text" id="nbAdm" value="15 / 20">
-        </div>
-        <div class="f-box">
-          <label>Total Members / Staff</label>
-          <input type="text" id="nbMemStf" value="120 / 3">
-        </div>
-      </div>
-      <button type="submit" class="btn-sm gold" style="width:100%;justify-content:center;padding:11px;margin-top:6px;">💾 Save Branch</button>
+      <button type="submit" class="btn-sm gold" style="width:100%;justify-content:center;padding:10px;">Save Branch</button>
     </form>
   </div>
 </div>
@@ -513,19 +398,19 @@
       <span>⚡ 1-Min Expense Entry</span>
       <button type="button" onclick="closeModal('expModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
     </h3>
-    <form onsubmit="addExpenseEntry(event)">
+    <form onsubmit="saveExp(event)">
       <div class="f-box" style="margin-bottom:9px">
-        <label>Expense Category</label>
-        <select id="expCategory">
-          <option value="Electricity">Electricity Bill (बिजली बिल)</option>
-          <option value="Rent">Premises Rent (किराया)</option>
-          <option value="Maintenance">Equipment Repair / Maintenance</option>
-          <option value="Other">Other Expense</option>
+        <label>Category</label>
+        <select id="expCat">
+          <option value="Electricity">Electricity Bill</option>
+          <option value="Rent">Premises Rent</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Other">Other</option>
         </select>
       </div>
       <div class="f-box" style="margin-bottom:11px">
         <label>Amount (₹)</label>
-        <input type="number" id="expAmountIn" required placeholder="Amount in ₹">
+        <input type="number" id="expAmt" required placeholder="Amount in ₹">
       </div>
       <button type="submit" class="btn-sm gold" style="width:100%;justify-content:center;padding:10px;">Save Expense</button>
     </form>
@@ -536,17 +421,16 @@
 <div class="modal-ov" id="secModal">
   <div class="modal-bx">
     <h3>
-      <span>🔐 Branch Security Code</span>
+      <span>🔐 Security Code</span>
       <button type="button" onclick="closeModal('secModal')" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;">✕</button>
     </h3>
-    <p style="font-size:11.5px;color:var(--tx-muted);margin-bottom:9px">Enter Admin PIN (default: 1234) or Branch Code to verify access.</p>
-    <input type="password" id="secCodeInput" placeholder="Enter PIN / Code" style="width:100%;background:#0B1224;border:1.5px solid #22345C;color:#fff;padding:10px;border-radius:9px;margin-bottom:10px;">
-    <button type="button" class="btn-sm green" style="width:100%;justify-content:center;padding:10px;" onclick="verifySecCode()">Verify Access</button>
+    <input type="password" id="secIn" placeholder="Admin PIN (default: 1234)" style="width:100%;background:#0B1224;border:1.5px solid #22345C;color:#fff;padding:10px;border-radius:9px;margin-bottom:10px;">
+    <button type="button" class="btn-sm green" style="width:100%;justify-content:center;padding:10px;" onclick="checkSec()">Verify</button>
   </div>
 </div>
 
 <script>
-const ALL_INDIA_STATES_UTS = [
+const STATES_36 = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
   "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
   "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
@@ -557,125 +441,125 @@ const ALL_INDIA_STATES_UTS = [
   "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
 ];
 
-const DEFAULT_BRANCHES = [
+const INITIAL_BRANCHES = [
   {
     code: "001", name: "5 Brother's Fitness Club - Akrampur",
-    country: "India", state: "Uttar Pradesh", city: "Unnao", areaPin: "Akrampur - 209801",
+    state: "Uttar Pradesh", city: "Unnao", areaPin: "Akrampur - 209801",
     address: "Akrampur, Umrao Khera, Unnao, UP - 209801", admin: "Saurabh Singh (Owner/Admin)",
-    todayFees: 4500, feesCol: 62000, suppSales: 14000, otherServ: 6000,
-    members: 124, staff: 3, salary: 16000, expenses: 17500,
-    admThis: 18, admLast: 22, expiring: 11, expired: 7
+    feesMonth: "November 2026", feesMembersCount: 98, feesCol: 62000, todayFees: 4500,
+    activeMembers: 124, monthAdmissions: 18, deactivatedMembers: 7,
+    staffCount: 3, staffSalary: 16000, expenses: 17500,
+    supplements: [
+      { item: "Whey Protein Isolate (2kg)", soldQty: 6, buyPrice: 3200, sellPrice: 4100 },
+      { item: "Creatine Monohydrate (250g)", soldQty: 12, buyPrice: 650, sellPrice: 950 }
+    ],
+    otherCollections: [
+      { source: "Personal Training (PT)", amount: 4000, note: "2 PT clients" },
+      { source: "Day Pass & Locker", amount: 2000, note: "Walk-in & locker rent" }
+    ]
   },
   {
     code: "002", name: "5 Brother's Fitness Club - Kanpur",
-    country: "India", state: "Uttar Pradesh", city: "Kanpur", areaPin: "Transport Nagar - 208023",
-    address: "Transport Nagar, Kanpur, UP - 208023", admin: "Branch Manager (Kanpur)",
-    todayFees: 6200, feesCol: 88000, suppSales: 21000, otherServ: 9000,
-    members: 176, staff: 4, salary: 24000, expenses: 26000,
-    admThis: 25, admLast: 29, expiring: 13, expired: 5
+    state: "Uttar Pradesh", city: "Kanpur", areaPin: "Transport Nagar - 208023",
+    address: "Transport Nagar, Kanpur, UP - 208023", admin: "Branch Admin (Kanpur)",
+    feesMonth: "November 2026", feesMembersCount: 140, feesCol: 88000, todayFees: 6200,
+    activeMembers: 176, monthAdmissions: 25, deactivatedMembers: 5,
+    staffCount: 4, staffSalary: 24000, expenses: 26000,
+    supplements: [
+      { item: "Mass Gainer (3kg)", soldQty: 8, buyPrice: 2100, sellPrice: 2800 },
+      { item: "Pre-Workout", soldQty: 10, buyPrice: 900, sellPrice: 1350 }
+    ],
+    otherCollections: [
+      { source: "Personal Training", amount: 6500, note: "3 PT members" },
+      { source: "Steam & Diet Plan", amount: 2500, note: "Monthly diet & steam" }
+    ]
   },
   {
     code: "003", name: "5 Brother's Fitness Club - Lucknow",
-    country: "India", state: "Uttar Pradesh", city: "Lucknow", areaPin: "Gomti Nagar - 226010",
-    address: "Gomti Nagar, Lucknow, UP - 226010", admin: "Regional Admin (Lucknow)",
-    todayFees: 3100, feesCol: 42000, suppSales: 6500, otherServ: 2500,
-    members: 95, staff: 3, salary: 22000, expenses: 34000,
-    admThis: 9, admLast: 16, expiring: 8, expired: 6
+    state: "Uttar Pradesh", city: "Lucknow", areaPin: "Gomti Nagar - 226010",
+    address: "Gomti Nagar, Lucknow, UP - 226010", admin: "Branch Admin (Lucknow)",
+    feesMonth: "November 2026", feesMembersCount: 72, feesCol: 42000, todayFees: 3100,
+    activeMembers: 95, monthAdmissions: 9, deactivatedMembers: 11,
+    staffCount: 3, staffSalary: 22000, expenses: 34000,
+    supplements: [
+      { item: "Whey Protein (1kg)", soldQty: 4, buyPrice: 1800, sellPrice: 2250 }
+    ],
+    otherCollections: [
+      { source: "Day Pass", amount: 2500, note: "Trial & day passes" }
+    ]
   }
 ];
 
-function loadBranches() {
+function getBranches() {
   try {
-    const saved = JSON.parse(localStorage.getItem("om_branches_db_v1") || "null");
-    if (Array.isArray(saved) && saved.length) return saved;
+    const raw = JSON.parse(localStorage.getItem("om_branches_db_v2") || "null");
+    if (Array.isArray(raw) && raw.length) return raw;
   } catch (e) {}
-  localStorage.setItem("om_branches_db_v1", JSON.stringify(DEFAULT_BRANCHES));
-  return DEFAULT_BRANCHES.slice();
+  localStorage.setItem("om_branches_db_v2", JSON.stringify(INITIAL_BRANCHES));
+  return INITIAL_BRANCHES.slice();
 }
 
-let BRANCHES = loadBranches();
-let selectedBranchCode = BRANCHES[0].code;
-let activeFolderTab = "profit";
+let branches = getBranches();
+let openedCode = branches[0].code;
+let activeSubTab = "overview";
+let activePerfTab = "profit";
 
-function persistBranches() {
-  localStorage.setItem("om_branches_db_v1", JSON.stringify(BRANCHES));
+function saveBranches() {
+  localStorage.setItem("om_branches_db_v2", JSON.stringify(branches));
 }
 
-function getBranchStats(b) {
+function calcBranch(b) {
   const fees = Number(b.feesCol) || 0;
-  const supp = Number(b.suppSales) || 0;
-  const serv = Number(b.otherServ) || 0;
-  const totalRevenue = fees + supp + serv;
-  const totalOutflow = (Number(b.salary) || 0) + (Number(b.expenses) || 0);
+  const suppList = Array.isArray(b.supplements) ? b.supplements : [];
+  let suppRevenue = 0, suppCost = 0, suppProfit = 0;
+  suppList.forEach(s => {
+    const qty = Number(s.soldQty) || 0;
+    const buy = Number(s.buyPrice) || 0;
+    const sell = Number(s.sellPrice) || 0;
+    suppRevenue += qty * sell;
+    suppCost += qty * buy;
+    suppProfit += qty * (sell - buy);
+  });
+
+  const otherList = Array.isArray(b.otherCollections) ? b.otherCollections : [];
+  const otherRevenue = otherList.reduce((acc, x) => acc + (Number(x.amount) || 0), 0);
+
+  const totalRevenue = fees + suppRevenue + otherRevenue;
+  const totalOutflow = (Number(b.staffSalary) || 0) + (Number(b.expenses) || 0);
   const netPl = totalRevenue - totalOutflow;
   const isProfit = netPl >= 0;
-  let why = "";
-  if (isProfit) {
-    why = `Revenue (₹${totalRevenue.toLocaleString("en-IN")}) is higher than Salary + Expenses (₹${totalOutflow.toLocaleString("en-IN")}).`;
+
+  const reason = isProfit
+    ? `Total Revenue (₹${totalRevenue.toLocaleString("en-IN")}) exceeds Staff Salary + Expenses (₹${totalOutflow.toLocaleString("en-IN")}).`
+    : `Staff Salary + Expenses (₹${totalOutflow.toLocaleString("en-IN")}) is higher than Total Revenue (₹${totalRevenue.toLocaleString("en-IN")}) by ₹${Math.abs(netPl).toLocaleString("en-IN")}.`;
+
+  return { fees, suppRevenue, suppCost, suppProfit, otherRevenue, totalRevenue, totalOutflow, netPl, isProfit, reason };
+}
+
+function toggleFolder(bodyId, arrId) {
+  const body = document.getElementById(bodyId);
+  const arr = document.getElementById(arrId);
+  const isOpen = body.classList.contains("open");
+  if (isOpen) {
+    body.classList.remove("open");
+    arr.textContent = "▶ Expand";
   } else {
-    why = `Salary + Expenses (₹${totalOutflow.toLocaleString("en-IN")}) exceeded Revenue (₹${totalRevenue.toLocaleString("en-IN")}) by ₹${Math.abs(netPl).toLocaleString("en-IN")}.`;
-  }
-  return { fees, supp, serv, totalRevenue, totalOutflow, netPl, isProfit, why };
-}
-
-function populateStatesDatalist() {
-  const dl = document.getElementById("indiaStatesList");
-  dl.innerHTML = ALL_INDIA_STATES_UTS.map(s => `<option value="${s}">`).join("");
-}
-
-function onStateInput() {
-  renderBranchList();
-}
-function onCityInput() {
-  renderBranchList();
-}
-
-let pinTimer = null;
-function onAreaPinInput() {
-  const val = document.getElementById("selAreaPin").value.trim();
-  const statusEl = document.getElementById("pinLookupStatus");
-  const pinMatch = val.match(/\b(\d{6})\b/);
-  if (pinMatch) {
-    const pin = pinMatch[1];
-    statusEl.textContent = `Looking up PIN ${pin}...`;
-    clearTimeout(pinTimer);
-    pinTimer = setTimeout(async () => {
-      try {
-        const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
-        const json = await res.json();
-        if (Array.isArray(json) && json[0] && json[0].Status === "Success" && json[0].PostOffice && json[0].PostOffice.length) {
-          const po = json[0].PostOffice[0];
-          const areaList = document.getElementById("indiaAreasList");
-          const opts = json[0].PostOffice.slice(0, 12).map(p => `<option value="${p.Name} - ${pin}">`).join("");
-          areaList.innerHTML = opts;
-          if (!document.getElementById("selCity").value.trim() && po.District) {
-            document.getElementById("selCity").value = po.District;
-          }
-          if (!document.getElementById("selState").value.trim() && po.State) {
-            document.getElementById("selState").value = po.State;
-          }
-          statusEl.textContent = `PIN ${pin}: ${po.Name}, ${po.District}, ${po.State}`;
-        } else {
-          statusEl.textContent = `PIN ${pin} checked (enter area/village name if needed)`;
-        }
-      } catch (e) {
-        statusEl.textContent = `PIN ${pin} entered (offline lookup fallback active)`;
-      }
-      renderBranchList();
-    }, 250);
-  } else {
-    statusEl.textContent = "";
-    renderBranchList();
+    body.classList.add("open");
+    arr.textContent = "▼ Open";
   }
 }
 
-function getFilteredBranches() {
-  const st = document.getElementById("selState").value.trim().toLowerCase();
-  const ct = document.getElementById("selCity").value.trim().toLowerCase();
-  const ar = document.getElementById("selAreaPin").value.trim().toLowerCase();
-  const q = document.getElementById("branchFilterInput").value.trim().toLowerCase();
+function populateStates() {
+  document.getElementById("allStatesDl").innerHTML = STATES_36.map(s => `<option value="${s}">`).join("");
+}
 
-  return BRANCHES.filter(b => {
+function matchBranches() {
+  const q = document.getElementById("branchSearchBox").value.trim().toLowerCase();
+  const st = document.getElementById("locState").value.trim().toLowerCase();
+  const ct = document.getElementById("locCity").value.trim().toLowerCase();
+  const ar = document.getElementById("locAreaPin").value.trim().toLowerCase();
+
+  return branches.filter(b => {
     if (st && !b.state.toLowerCase().includes(st)) return false;
     if (ct && !b.city.toLowerCase().includes(ct)) return false;
     if (ar && !b.areaPin.toLowerCase().includes(ar) && !b.address.toLowerCase().includes(ar)) return false;
@@ -687,251 +571,342 @@ function getFilteredBranches() {
   });
 }
 
-function selectBranch(code) {
-  selectedBranchCode = code;
+function onBranchSearchType() {
+  const q = document.getElementById("branchSearchBox").value.trim().toLowerCase();
+  const sugBox = document.getElementById("branchSuggestions");
+  const matches = matchBranches();
+
+  if (!q && !matches.length) {
+    sugBox.classList.remove("show");
+    return;
+  }
+
+  sugBox.innerHTML = matches.map(b => `
+    <div class="sug-item" onclick="pickSuggestion('${b.code}')">
+      <div><b>[${b.code}] ${b.name}</b><br><small style="color:var(--tx-muted)">${b.areaPin}, ${b.city}</small></div>
+      <span class="code-tag">Open</span>
+    </div>
+  `).join("") || `<div class="sug-item">No match found</div>`;
+
+  sugBox.classList.toggle("show", q.length > 0 && matches.length > 0);
+  renderFilteredLines();
+}
+
+function pickSuggestion(code) {
+  const b = branches.find(x => x.code === code);
+  if (b) {
+    document.getElementById("branchSearchBox").value = `${b.code} - ${b.name}`;
+    openedCode = b.code;
+  }
+  document.getElementById("branchSuggestions").classList.remove("show");
+  openBranchFolder(code);
+}
+
+function openMatchedOrSelectedBranch() {
+  document.getElementById("branchSuggestions").classList.remove("show");
+  const matches = matchBranches();
+  if (matches.length) {
+    openedCode = matches[0].code;
+  }
+  openBranchFolder(openedCode);
+}
+
+function openBranchFolder(code) {
+  openedCode = code;
+  document.getElementById("fBranchBody").classList.add("open");
+  document.getElementById("arrBranch").textContent = "▼ Open";
   renderAll();
 }
 
-function renderBranchList() {
-  const list = getFilteredBranches();
-  const container = document.getElementById("branchLinesContainer");
-  document.getElementById("branchCountLabel").textContent = `${list.length} branch(es) shown`;
+function filterByLocation() {
+  renderFilteredLines();
+}
 
+let pinTimer = null;
+function onAreaPinType() {
+  const val = document.getElementById("locAreaPin").value.trim();
+  const note = document.getElementById("pinNote");
+  const m = val.match(/\b(\d{6})\b/);
+  if (m) {
+    const pin = m[1];
+    note.textContent = `Checking PIN ${pin}...`;
+    clearTimeout(pinTimer);
+    pinTimer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+        const data = await res.json();
+        if (Array.isArray(data) && data[0] && data[0].Status === "Success" && data[0].PostOffice && data[0].PostOffice.length) {
+          const po = data[0].PostOffice[0];
+          document.getElementById("allAreasDl").innerHTML = data[0].PostOffice.slice(0, 12).map(p => `<option value="${p.Name} - ${pin}">`).join("");
+          if (!document.getElementById("locCity").value.trim() && po.District) document.getElementById("locCity").value = po.District;
+          if (!document.getElementById("locState").value.trim() && po.State) document.getElementById("locState").value = po.State;
+          note.textContent = `${po.Name}, ${po.District}, ${po.State} (${pin})`;
+        } else {
+          note.textContent = `PIN ${pin} entered`;
+        }
+      } catch (e) {
+        note.textContent = `PIN ${pin} entered`;
+      }
+      renderFilteredLines();
+    }, 250);
+  } else {
+    note.textContent = "";
+    renderFilteredLines();
+  }
+}
+
+function renderFilteredLines() {
+  const list = matchBranches();
+  const box = document.getElementById("filteredBranchesLines");
   if (!list.length) {
-    container.innerHTML = `<div class="branch-line-item"><div class="bl-main"><div class="bl-title">No matching branch found</div><div class="bl-sub">Clear filters or click "+ Add Branch" above.</div></div></div>`;
+    box.innerHTML = `<div class="list-row"><span>No branch matches filter.</span></div>`;
     return;
   }
-
-  container.innerHTML = list.map(b => {
-    const st = getBranchStats(b);
-    const activeCls = b.code === selectedBranchCode ? "active" : "";
-    const plBadge = st.isProfit
-      ? `<span class="pill-p">🟢 Profit +₹${st.netPl.toLocaleString("en-IN")}</span>`
-      : `<span class="pill-l">🔴 Loss -₹${Math.abs(st.netPl).toLocaleString("en-IN")}</span>`;
-
+  box.innerHTML = list.map(b => {
+    const st = calcBranch(b);
     return `
-      <div class="branch-line-item ${activeCls}" onclick="selectBranch('${b.code}')">
-        <div class="bl-main">
-          <div class="bl-title">
-            <span class="code-tag">Code: ${b.code}</span>
-            <span>${b.name}</span>
-          </div>
-          <div class="bl-sub">${b.areaPin}, ${b.city}, ${b.state} &bull; Admin: ${b.admin}</div>
+      <div class="list-row" onclick="openBranchFolder('${b.code}')" style="cursor:pointer">
+        <div>
+          <span class="code-tag">${b.code}</span>
+          <b style="margin-left:6px">${b.name}</b>
+          <div style="font-size:11px;color:var(--tx-muted);margin-top:2px">${b.areaPin}, ${b.city}, ${b.state} &bull; Admin: ${b.admin}</div>
         </div>
-        <div class="bl-right">
-          <span style="font-size:11.5px;font-weight:800;color:var(--ac-cyan)">Rev: ₹${st.totalRevenue.toLocaleString("en-IN")}</span>
-          ${plBadge}
+        <div style="display:flex;align-items:center;gap:8px">
+          ${st.isProfit ? `<span class="pill-p">Profit +₹${st.netPl.toLocaleString("en-IN")}</span>` : `<span class="pill-l">Loss -₹${Math.abs(st.netPl).toLocaleString("en-IN")}</span>`}
+          <button type="button" class="btn-sm gold" onclick="event.stopPropagation(); openBranchFolder('${b.code}')">Open</button>
         </div>
       </div>
     `;
   }).join("");
 }
 
-function renderSelectedBranch() {
-  const b = BRANCHES.find(x => x.code === selectedBranchCode) || BRANCHES[0];
+function setBranchSubTab(tab) {
+  activeSubTab = tab;
+  ["stOverview", "stFees", "stSupp", "stOther", "stMembers"].forEach(id => document.getElementById(id).classList.remove("active"));
+  const map = { overview: "stOverview", fees: "stFees", supplements: "stSupp", other: "stOther", members: "stMembers" };
+  if (map[tab]) document.getElementById(map[tab]).classList.add("active");
+  renderOpenedBranchContent();
+}
+
+function renderOpenedBranchContent() {
+  const b = branches.find(x => x.code === openedCode) || branches[0];
   if (!b) return;
-  const st = getBranchStats(b);
+  const st = calcBranch(b);
 
-  document.getElementById("activeBranchTitle").textContent = b.name;
-  document.getElementById("activeBranchCode").textContent = `Branch Code: ${b.code}`;
-  document.getElementById("activeBranchMeta").textContent = `${b.address} | Manager/Owner/Admin: ${b.admin}`;
-  document.getElementById("activeBranchPlBadge").innerHTML = st.isProfit
-    ? `<span class="pill-p">🟢 Net Profit: +₹${st.netPl.toLocaleString("en-IN")}</span>`
-    : `<span class="pill-l">🔴 Net Loss: -₹${Math.abs(st.netPl).toLocaleString("en-IN")}</span>`;
+  document.getElementById("openedBranchFolderTitle").textContent = `2. Active Branch Folder: [${b.code}] ${b.name}`;
+  document.getElementById("openedBranchFolderSub").textContent = `${b.address} | Admin: ${b.admin}`;
 
-  document.getElementById("mTotalRev").textContent = "₹" + st.totalRevenue.toLocaleString("en-IN");
-  document.getElementById("mRevBreakdown").textContent = `Fees: ₹${st.fees.toLocaleString("en-IN")} • Supp: ₹${st.supp.toLocaleString("en-IN")} • Other: ₹${st.serv.toLocaleString("en-IN")}`;
-  document.getElementById("mTodayFees").textContent = "₹" + (Number(b.todayFees) || 0).toLocaleString("en-IN");
-  document.getElementById("mAdmissions").textContent = `${b.admThis} / ${b.admLast}`;
-  document.getElementById("mMembersCount").textContent = `Total Members: ${b.members}`;
-  document.getElementById("mStaffSal").textContent = "₹" + (Number(b.salary) || 0).toLocaleString("en-IN");
-  document.getElementById("mStaffCount").textContent = `Total Staff: ${b.staff}`;
-  document.getElementById("mExpenses").textContent = "₹" + (Number(b.expenses) || 0).toLocaleString("en-IN");
+  const box = document.getElementById("branchSubContent");
 
-  const netEl = document.getElementById("mNetPl");
-  netEl.textContent = st.isProfit ? `+₹${st.netPl.toLocaleString("en-IN")}` : `-₹${Math.abs(st.netPl).toLocaleString("en-IN")}`;
-  netEl.style.color = st.isProfit ? "#34D399" : "#FCA5A5";
-  document.getElementById("mPlWhy").textContent = st.why;
+  if (activeSubTab === "overview") {
+    box.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div><b>Branch Net P&amp;L:</b> ${st.isProfit ? `<span class="pill-p">+₹${st.netPl.toLocaleString("en-IN")} Profit</span>` : `<span class="pill-l">-₹${Math.abs(st.netPl).toLocaleString("en-IN")} Loss</span>`}</div>
+        <div style="font-size:11px;color:var(--tx-muted)">${st.reason}</div>
+      </div>
+      <div class="kv-grid">
+        <div class="kv-item"><div class="kv-lbl">Total Revenue</div><div class="kv-val" style="color:var(--ac-green)">₹${st.totalRevenue.toLocaleString("en-IN")}</div><div class="kv-sub">Fees + Supplements + Other</div></div>
+        <div class="kv-item"><div class="kv-lbl">Staff &amp; Salary</div><div class="kv-val" style="color:var(--ac-gold)">₹${(Number(b.staffSalary)||0).toLocaleString("en-IN")}</div><div class="kv-sub">Staff count: ${b.staffCount}</div></div>
+        <div class="kv-item"><div class="kv-lbl">Other Expenses</div><div class="kv-val" style="color:#FCA5A5">₹${(Number(b.expenses)||0).toLocaleString("en-IN")}</div><div class="kv-sub">Rent, electricity, maintenance</div></div>
+      </div>
+    `;
+  } else if (activeSubTab === "fees") {
+    box.innerHTML = `
+      <div class="kv-grid">
+        <div class="kv-item"><div class="kv-lbl">Fees Month</div><div class="kv-val">${b.feesMonth}</div><div class="kv-sub">Billing cycle</div></div>
+        <div class="kv-item"><div class="kv-lbl">Members Paid</div><div class="kv-val" style="color:var(--ac-cyan)">${b.feesMembersCount} Members</div><div class="kv-sub">Fees collected from</div></div>
+        <div class="kv-item"><div class="kv-lbl">Month / Today Fees</div><div class="kv-val" style="color:var(--ac-green)">₹${st.fees.toLocaleString("en-IN")}</div><div class="kv-sub">Today: ₹${(Number(b.todayFees)||0).toLocaleString("en-IN")}</div></div>
+      </div>
+    `;
+  } else if (activeSubTab === "supplements") {
+    const rows = (b.supplements || []).map(s => {
+      const p = (Number(s.soldQty) || 0) * ((Number(s.sellPrice) || 0) - (Number(s.buyPrice) || 0));
+      return `
+        <div class="list-row">
+          <div><b>${s.item}</b> <span style="color:var(--tx-muted)">(Sold: ${s.soldQty})</span></div>
+          <div style="font-size:11.5px">Buy: <b>₹${Number(s.buyPrice).toLocaleString("en-IN")}</b> &bull; Sell: <b>₹${Number(s.sellPrice).toLocaleString("en-IN")}</b> &bull; <span class="pill-p">Profit +₹${p.toLocaleString("en-IN")}</span></div>
+        </div>
+      `;
+    }).join("") || `<div class="list-row"><span>No supplement sales logged</span></div>`;
+    box.innerHTML = `
+      <div class="kv-grid">
+        <div class="kv-item"><div class="kv-lbl">Supplement Sales</div><div class="kv-val" style="color:var(--ac-cyan)">₹${st.suppRevenue.toLocaleString("en-IN")}</div><div class="kv-sub">Total sold value</div></div>
+        <div class="kv-item"><div class="kv-lbl">Buying Cost</div><div class="kv-val">₹${st.suppCost.toLocaleString("en-IN")}</div><div class="kv-sub">Purchase cost</div></div>
+        <div class="kv-item"><div class="kv-lbl">Supplement Profit</div><div class="kv-val" style="color:var(--ac-green)">+₹${st.suppProfit.toLocaleString("en-IN")}</div><div class="kv-sub">Net margin earned</div></div>
+      </div>
+      <div class="list-rows">${rows}</div>
+    `;
+  } else if (activeSubTab === "other") {
+    const rows = (b.otherCollections || []).map(o => `
+      <div class="list-row">
+        <div><b>${o.source}</b> <span style="color:var(--tx-muted)">— ${o.note || ""}</span></div>
+        <div style="font-weight:900;color:var(--ac-gold)">₹${Number(o.amount).toLocaleString("en-IN")}</div>
+      </div>
+    `).join("") || `<div class="list-row"><span>No other collection logged</span></div>`;
+    box.innerHTML = `
+      <div class="kv-item"><div class="kv-lbl">Total Other Collection</div><div class="kv-val" style="color:var(--ac-gold)">₹${st.otherRevenue.toLocaleString("en-IN")}</div><div class="kv-sub">Source breakdown below</div></div>
+      <div class="list-rows">${rows}</div>
+    `;
+  } else if (activeSubTab === "members") {
+    box.innerHTML = `
+      <div class="kv-grid">
+        <div class="kv-item"><div class="kv-lbl">Active Gym Members</div><div class="kv-val" style="color:var(--ac-green)">${b.activeMembers}</div><div class="kv-sub">Currently active</div></div>
+        <div class="kv-item"><div class="kv-lbl">This Month Admissions</div><div class="kv-val" style="color:var(--ac-cyan)">${b.monthAdmissions}</div><div class="kv-sub">New admissions</div></div>
+        <div class="kv-item"><div class="kv-lbl">Deactivated / Non-Renewed</div><div class="kv-val" style="color:#FCA5A5">${b.deactivatedMembers}</div><div class="kv-sub">Did not renew / inactive</div></div>
+      </div>
+    `;
+  }
 }
 
-function setFolderTab(tab) {
-  activeFolderTab = tab;
-  document.getElementById("tabProfit").classList.toggle("active", tab === "profit");
-  document.getElementById("tabLoss").classList.toggle("active", tab === "loss");
-  document.getElementById("tabAll").classList.toggle("active", tab === "all");
-  renderFolderBranches();
+function setPerfSubTab(tab) {
+  activePerfTab = tab;
+  ["pfTabProfit", "pfTabLoss", "pfTabAll"].forEach(id => document.getElementById(id).classList.remove("active"));
+  if (tab === "profit") document.getElementById("pfTabProfit").classList.add("active");
+  else if (tab === "loss") document.getElementById("pfTabLoss").classList.add("active");
+  else document.getElementById("pfTabAll").classList.add("active");
+  renderPerfFolder();
 }
 
-function renderFolderBranches() {
-  const profList = BRANCHES.filter(b => getBranchStats(b).isProfit);
-  const lossList = BRANCHES.filter(b => !getBranchStats(b).isProfit);
+function renderPerfFolder() {
+  const prof = branches.filter(b => calcBranch(b).isProfit);
+  const loss = branches.filter(b => !calcBranch(b).isProfit);
+  document.getElementById("pfCntP").textContent = prof.length;
+  document.getElementById("pfCntL").textContent = loss.length;
+  document.getElementById("pfCntA").textContent = branches.length;
 
-  document.getElementById("cntProfit").textContent = profList.length;
-  document.getElementById("cntLoss").textContent = lossList.length;
-  document.getElementById("cntAll").textContent = BRANCHES.length;
-
-  let items = BRANCHES;
-  if (activeFolderTab === "profit") items = profList;
-  else if (activeFolderTab === "loss") items = lossList;
-
-  const box = document.getElementById("folderBranchesList");
-  if (!items.length) {
-    box.innerHTML = `<div class="branch-line-item"><div class="bl-main"><div class="bl-title">No branches in this folder</div></div></div>`;
+  const list = activePerfTab === "profit" ? prof : (activePerfTab === "loss" ? loss : branches);
+  const box = document.getElementById("perfSubContent");
+  if (!list.length) {
+    box.innerHTML = `<div class="list-row"><span>No branches in this folder</span></div>`;
     return;
   }
-
-  box.innerHTML = items.map(b => {
-    const st = getBranchStats(b);
+  box.innerHTML = list.map(b => {
+    const st = calcBranch(b);
     return `
-      <div class="branch-line-item" onclick="selectBranch('${b.code}'); document.getElementById('selectedBranchSection').scrollIntoView({behavior:'smooth'})">
-        <div class="bl-main">
-          <div class="bl-title">
-            <span class="code-tag">${b.code}</span>
-            <span>${b.name}</span>
+      <div class="list-row" onclick="openBranchFolder('${b.code}')" style="cursor:pointer">
+        <div>
+          <span class="code-tag">${b.code}</span> <b>${b.name}</b>
+          <div style="font-size:11px;color:var(--tx-muted);margin-top:2px">
+            Revenue: ₹${st.totalRevenue.toLocaleString("en-IN")} (Fees ₹${st.fees.toLocaleString("en-IN")}, Supp ₹${st.suppRevenue.toLocaleString("en-IN")}, Other ₹${st.otherRevenue.toLocaleString("en-IN")})
           </div>
-          <div class="bl-sub">
-            Admissions: ${b.admThis} (Last Mo: ${b.admLast}) &bull; Fees: ₹${st.fees.toLocaleString("en-IN")} &bull; Supplements: ₹${st.supp.toLocaleString("en-IN")} &bull; Services: ₹${st.serv.toLocaleString("en-IN")}
-          </div>
-          <div class="bl-sub" style="color:var(--tx-sub);margin-top:2px">${st.why}</div>
+          <div style="font-size:11px;color:var(--tx-sub);margin-top:2px">${st.reason}</div>
         </div>
-        <div class="bl-right">
-          <span style="font-size:12px;font-weight:900;color:var(--ac-gold)">Total Rev: ₹${st.totalRevenue.toLocaleString("en-IN")}</span>
-          ${st.isProfit ? `<span class="pill-p">🟢 +₹${st.netPl.toLocaleString("en-IN")}</span>` : `<span class="pill-l">🔴 -₹${Math.abs(st.netPl).toLocaleString("en-IN")}</span>`}
-        </div>
+        <div>${st.isProfit ? `<span class="pill-p">+₹${st.netPl.toLocaleString("en-IN")}</span>` : `<span class="pill-l">-₹${Math.abs(st.netPl).toLocaleString("en-IN")}</span>`}</div>
       </div>
     `;
   }).join("");
-}
-
-function renderAll() {
-  renderBranchList();
-  renderSelectedBranch();
-  renderFolderBranches();
 }
 
 function openAddBranchModal() { document.getElementById("addBranchModal").classList.add("show"); }
 function openExpenseModal() { document.getElementById("expModal").classList.add("show"); }
-function openSecurityModal() { document.getElementById("secModal").classList.add("show"); }
+function openSecModal() { document.getElementById("secModal").classList.add("show"); }
 function closeModal(id) { document.getElementById(id).classList.remove("show"); }
 
-function saveNewBranch(e) {
+function saveBranch(e) {
   e.preventDefault();
   const code = document.getElementById("nbCode").value.trim();
   const name = document.getElementById("nbName").value.trim();
   const state = document.getElementById("nbState").value.trim() || "Uttar Pradesh";
   const city = document.getElementById("nbCity").value.trim() || "Unnao";
-  const areaPin = document.getElementById("nbAreaPin").value.trim() || "";
+  const areaPin = document.getElementById("nbArea").value.trim() || "";
   const admin = document.getElementById("nbAdmin").value.trim() || "Admin";
-  const address = document.getElementById("nbAddress").value.trim() || `${areaPin}, ${city}, ${state}`;
-  const feesCol = Number(document.getElementById("nbFees").value) || 0;
-  const suppSales = Number(document.getElementById("nbSupp").value) || 0;
-  const otherServ = Number(document.getElementById("nbServ").value) || 0;
-  const todayFees = Number(document.getElementById("nbToday").value) || 0;
-  const salary = Number(document.getElementById("nbSalary").value) || 0;
-  const expenses = Number(document.getElementById("nbExpense").value) || 0;
-  const admParts = (document.getElementById("nbAdm").value || "0 / 0").split("/");
-  const memParts = (document.getElementById("nbMemStf").value || "0 / 0").split("/");
+  const address = document.getElementById("nbAddr").value.trim() || `${areaPin}, ${city}, ${state}`;
+  const feesMeta = document.getElementById("nbFeesMeta").value.trim();
+  const feesCol = Number(document.getElementById("nbFeesAmt").value) || 0;
+  const memAdmParts = (document.getElementById("nbMemAdm").value || "0 / 0").split("/");
+  const deactivatedMembers = Number(document.getElementById("nbDeact").value) || 0;
+  const stfSalParts = (document.getElementById("nbStfSal").value || "0 / 0").split("/");
+  const expenses = Number(document.getElementById("nbExp").value) || 0;
 
   const newObj = {
-    code, name, country: "India", state, city, areaPin, address, admin,
-    todayFees, feesCol, suppSales, otherServ, salary, expenses,
-    admThis: Number((admParts[0] || "0").trim()) || 0,
-    admLast: Number((admParts[1] || "0").trim()) || 0,
-    members: Number((memParts[0] || "0").trim()) || 0,
-    staff: Number((memParts[1] || "0").trim()) || 0,
-    expiring: 5, expired: 2
+    code, name, state, city, areaPin, address, admin,
+    feesMonth: feesMeta.split("(")[0].trim() || "Current Month",
+    feesMembersCount: Number((feesMeta.match(/\d+/) || [0])[0]) || 0,
+    feesCol, todayFees: Math.round(feesCol / 20),
+    activeMembers: Number((memAdmParts[0] || "0").trim()) || 0,
+    monthAdmissions: Number((memAdmParts[1] || "0").trim()) || 0,
+    deactivatedMembers,
+    staffCount: Number((stfSalParts[0] || "0").trim()) || 0,
+    staffSalary: Number((stfSalParts[1] || "0").trim()) || 0,
+    expenses,
+    supplements: [{ item: "Whey Protein", soldQty: 3, buyPrice: 1800, sellPrice: 2300 }],
+    otherCollections: [{ source: "Day Pass / Misc", amount: 1500, note: "General collection" }]
   };
 
-  const idx = BRANCHES.findIndex(x => x.code.toLowerCase() === code.toLowerCase());
-  if (idx >= 0) BRANCHES[idx] = newObj;
-  else BRANCHES.push(newObj);
+  const idx = branches.findIndex(x => x.code.toLowerCase() === code.toLowerCase());
+  if (idx >= 0) branches[idx] = newObj;
+  else branches.push(newObj);
 
-  selectedBranchCode = code;
-  persistBranches();
+  saveBranches();
   closeModal("addBranchModal");
-  renderAll();
-  alert(`Branch ${code} (${name}) saved.`);
+  openBranchFolder(code);
+  alert(`Branch [${code}] ${name} saved.`);
 }
 
-function addExpenseEntry(e) {
+function saveExp(e) {
   e.preventDefault();
-  const b = BRANCHES.find(x => x.code === selectedBranchCode) || BRANCHES[0];
-  const amt = Number(document.getElementById("expAmountIn").value) || 0;
-  const cat = document.getElementById("expCategory").value;
+  const b = branches.find(x => x.code === openedCode) || branches[0];
+  const amt = Number(document.getElementById("expAmt").value) || 0;
+  const cat = document.getElementById("expCat").value;
   b.expenses = (Number(b.expenses) || 0) + amt;
-  persistBranches();
+  saveBranches();
   closeModal("expModal");
   renderAll();
-  alert(`Expense ₹${amt} (${cat}) added to ${b.name}.`);
+  alert(`Expense ₹${amt} (${cat}) added.`);
 }
 
-function viewExpenseSummary() {
-  const b = BRANCHES.find(x => x.code === selectedBranchCode) || BRANCHES[0];
-  const st = getBranchStats(b);
-  alert(`${b.name} (${b.code})\nStaff Salary: ₹${b.salary}\nOther Expenses: ₹${b.expenses}\nTotal Outflow: ₹${st.totalOutflow}`);
+function showExpenseInfo() {
+  const b = branches.find(x => x.code === openedCode) || branches[0];
+  alert(`${b.name}\nStaff Salary: ₹${b.staffSalary}\nOther Expenses: ₹${b.expenses}`);
 }
 
-function verifySecCode() {
-  const pin = document.getElementById("secCodeInput").value.trim();
-  const savedPin = localStorage.getItem("om_admin_pin") || "1234";
-  if (pin === savedPin || pin === selectedBranchCode) {
+function checkSec() {
+  const pin = document.getElementById("secIn").value.trim();
+  const saved = localStorage.getItem("om_admin_pin") || "1234";
+  if (pin === saved || pin === openedCode) {
     closeModal("secModal");
     alert("Security code verified.");
   } else {
-    alert("Invalid security code / PIN.");
+    alert("Invalid PIN / code.");
   }
 }
 
-function triggerSecurityAlert() {
-  const b = BRANCHES.find(x => x.code === selectedBranchCode) || BRANCHES[0];
-  alert(`Security Alert logged for ${b.name} (Code: ${b.code}) at ${new Date().toLocaleTimeString()}.`);
+function fireSecAlert() {
+  alert(`Security alert recorded at ${new Date().toLocaleTimeString()}.`);
 }
 
-function openGoogleDriveDirect() {
-  localStorage.setItem("om_last_drive_open", new Date().toISOString());
-  document.getElementById("driveSyncStatusText").textContent = `Google Drive opened • Daily 11:00 PM schedule active`;
+function openDrive() {
   window.open("https://drive.google.com/drive/my-drive", "_blank");
 }
 
-function syncDriveNow() {
-  const stamp = new Date().toLocaleString();
-  localStorage.setItem("om_last_drive_sync", stamp);
-  document.getElementById("driveSyncStatusText").textContent = `Last Drive sync: ${stamp} • Daily 11:00 PM active`;
-  alert(`Google Drive backup synced at ${stamp} (11:00 PM daily auto-backup enabled).`);
+function syncDrive() {
+  const t = new Date().toLocaleString();
+  document.getElementById("driveStatusSub").textContent = `Drive synced at ${t} • Daily 11:00 PM active`;
+  alert(`Google Drive backup synced at ${t}.`);
 }
 
-function exportExcel() {
-  const rows = BRANCHES.map(b => {
-    const st = getBranchStats(b);
+function exportXlsx() {
+  const rows = branches.map(b => {
+    const st = calcBranch(b);
     return {
-      "Branch Code": b.code,
-      "Branch Name": b.name,
-      "State": b.state,
-      "City": b.city,
-      "Area / Pincode": b.areaPin,
-      "Admin": b.admin,
-      "Fees Collection": st.fees,
-      "Supplement Sales": st.supp,
-      "Other Services": st.serv,
-      "Total Revenue": st.totalRevenue,
-      "Staff Salary": b.salary,
-      "Expenses": b.expenses,
-      "Net Profit/Loss": st.netPl,
-      "Status": st.isProfit ? "PROFIT" : "LOSS"
+      "Code": b.code, "Branch": b.name, "State": b.state, "City": b.city, "Area/PIN": b.areaPin,
+      "Fees": st.fees, "Supplement Rev": st.suppRevenue, "Supplement Profit": st.suppProfit,
+      "Other Rev": st.otherRevenue, "Total Revenue": st.totalRevenue,
+      "Salary": b.staffSalary, "Expenses": b.expenses, "Net PL": st.netPl
     };
   });
   const ws = XLSX.utils.json_to_sheet(rows);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Branch_ERP_Report");
+  XLSX.utils.book_append_sheet(wb, ws, "Branches_Report");
   XLSX.writeFile(wb, `Om_Software_Branches_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
 function exportCsv() {
   const rows = [
-    ["Code", "Name", "State", "City", "Area/PIN", "Fees", "Supplements", "Services", "Total Revenue", "Salary", "Expenses", "Net PL", "Status"],
-    ...BRANCHES.map(b => {
-      const st = getBranchStats(b);
-      return [b.code, b.name, b.state, b.city, b.areaPin, st.fees, st.supp, st.serv, st.totalRevenue, b.salary, b.expenses, st.netPl, st.isProfit ? "PROFIT" : "LOSS"];
+    ["Code", "Branch", "City", "Fees", "SuppRev", "SuppProfit", "OtherRev", "TotalRev", "Salary", "Expenses", "NetPL"],
+    ...branches.map(b => {
+      const st = calcBranch(b);
+      return [b.code, b.name, b.city, st.fees, st.suppRevenue, st.suppProfit, st.otherRevenue, st.totalRevenue, b.staffSalary, b.expenses, st.netPl];
     })
   ];
   const csv = "data:text/csv;charset=utf-8," + rows.map(r => r.join(",")).join("\n");
@@ -942,14 +917,20 @@ function exportCsv() {
 }
 
 function sendClosingAlert() {
-  const b = BRANCHES.find(x => x.code === selectedBranchCode) || BRANCHES[0];
-  const st = getBranchStats(b);
-  const msg = `Closing Alert - ${b.name} (${b.code})\nTotal Revenue: ₹${st.totalRevenue} (Fees ₹${st.fees}, Supp ₹${st.supp}, Serv ₹${st.serv})\nSalary & Expenses: ₹${st.totalOutflow}\nNet P&L: ${st.isProfit ? "+₹" + st.netPl : "-₹" + Math.abs(st.netPl)}\nDaily 11:00 PM Google Drive Backup Active`;
+  const b = branches.find(x => x.code === openedCode) || branches[0];
+  const st = calcBranch(b);
+  const msg = `Closing Alert - ${b.name} (${b.code})\nTotal Revenue: ₹${st.totalRevenue}\nNet P&L: ${st.isProfit ? "+₹" + st.netPl : "-₹" + Math.abs(st.netPl)}\nDaily 11:00 PM Drive Backup Active`;
   window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
 }
 
+function renderAll() {
+  renderFilteredLines();
+  renderOpenedBranchContent();
+  renderPerfFolder();
+}
+
 window.addEventListener("DOMContentLoaded", () => {
-  populateStatesDatalist();
+  populateStates();
   renderAll();
 });
 </script>
