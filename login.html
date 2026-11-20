@@ -241,11 +241,11 @@
 
   function loginWithStaffCode(codeRaw) {
     var code = String(codeRaw || '').trim().toUpperCase();
-    if (!code) throw { message: 'Staff Login Code likhein (jaise STF-001-UNNAO-1 ya All-India Staff Code).' };
+    if (!code) throw { message: 'Staff ya Manager Login Code likhein (jaise MGR-001-UNNAO ya STF-001-UNNAO-1).' };
 
     var branchCode = '001';
     var cityName = 'All India Branch';
-    var m = code.match(/STF-(\d{3})/);
+    var m = code.match(/(?:STF|MGR)-(\d{3})/);
     if (m && m[1]) branchCode = m[1];
     var parts = code.split('-');
     if (parts.length >= 3) cityName = parts[2];

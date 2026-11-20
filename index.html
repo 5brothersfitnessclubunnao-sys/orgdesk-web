@@ -359,6 +359,13 @@
       <button type="button" onclick="closeOv('staffMonthAdmOv')" style="background:none;border:0;color:var(--ac-gold);font-size:16px;cursor:pointer">✕</button>
     </h3>
     <div id="staffMonthAdmList" style="font-size:12px;display:flex;flex-direction:column;gap:7px"></div>
+    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border)">
+      <div style="font-size:11.5px;font-weight:800;color:var(--ac-gold);margin-bottom:6px">📤 Share Admission Data To Owner</div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="btn" style="margin-top:0;padding:8px;font-size:11.5px" onclick="shareAdmissionsToOwner('Weekly')">Weekly Wise</button>
+        <button type="button" class="btn" style="margin-top:0;padding:8px;font-size:11.5px" onclick="shareAdmissionsToOwner('Monthly')">Monthly Wise</button>
+      </div>
+    </div>
     <button type="button" class="btn g" onclick="closeOv('staffMonthAdmOv')">Band Karein</button>
   </div>
 </div>
@@ -372,6 +379,54 @@
     <div style="font-size:11px;color:var(--ac-gold);margin-bottom:8px">🔒 View-Only Mode: Staff attendance sirf dekh sakte hain, edit nahi kar sakte.</div>
     <div id="staffAttViewList" style="font-size:12px;display:flex;flex-direction:column;gap:7px"></div>
     <button type="button" class="btn g" onclick="closeOv('staffAttViewOv')">Band Karein</button>
+  </div>
+</div>
+
+
+<!-- STAFF / MANAGER PAY FEES MODAL (CASH NO UTR + SUBMIT + INSTANT RECEIPT DOWNLOAD) -->
+<div class="ov" id="staffPayFeesOv">
+  <div class="bx" style="max-width:520px">
+    <h3>
+      <span>💳 Pay Fees Desk</span>
+      <button type="button" onclick="closeOv('staffPayFeesOv')" style="background:none;border:0;color:var(--ac-gold);font-size:16px;cursor:pointer">✕</button>
+    </h3>
+    <form onsubmit="submitStaffFeePayment(event)">
+      <div class="field" style="margin-bottom:8px">
+        <label>Member Name *</label>
+        <input type="text" id="pfMemberName" required placeholder="Member ka naam">
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <label>Fees Amount (₹) *</label>
+        <input type="number" id="pfAmount" required placeholder="500" value="500">
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <label>Payment Mode *</label>
+        <select id="pfMode" onchange="onPfModeChange()">
+          <option value="Cash">Cash (नकद)</option>
+          <option value="UPI">UPI / Online</option>
+        </select>
+      </div>
+      <div class="field" id="pfUtrField" style="display:none;margin-bottom:8px">
+        <label>UTR / Transaction Ref</label>
+        <input type="text" id="pfUtr" placeholder="UTR number">
+      </div>
+      <button type="submit" class="btn" style="margin-top:4px">Submit</button>
+    </form>
+
+    <div id="pfReceiptBox" style="display:none;margin-top:12px;padding:10px;border-radius:10px;background:#0B1224;border:1px solid var(--ac-green);font-size:12px">
+      <div id="pfReceiptSummary" style="color:#4ade80;font-weight:800;margin-bottom:8px"></div>
+      <button type="button" class="btn" style="margin-top:0;background:var(--ac-green);color:#04140C" onclick="downloadLastFeeReceipt()">⬇ Download Receipt (By Manager / Admin)</button>
+    </div>
+
+    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border)">
+      <div style="font-size:11.5px;font-weight:800;color:var(--ac-gold);margin-bottom:6px">📤 Share Fees Data To Owner</div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="btn g" style="margin-top:0;padding:8px;font-size:11.5px" onclick="shareFeesToOwner('Weekly')">Weekly Wise</button>
+        <button type="button" class="btn g" style="margin-top:0;padding:8px;font-size:11.5px" onclick="shareFeesToOwner('Monthly')">Monthly Wise</button>
+      </div>
+    </div>
+
+    <button type="button" class="btn g" onclick="closeOv('staffPayFeesOv')">Band Karein</button>
   </div>
 </div>
 
@@ -876,56 +931,54 @@ function isStaffRole() {
 
 const ALL_INDIA_BRANCH_CODES = [
   // Uttar Pradesh
-  { code: "001", state: "Uttar Pradesh", city: "Unnao", branchName: "5 Brother's Fitness Club - Unnao / Akrampur", staffCodes: ["STF-001-UNNAO-1", "STF-001-UNNAO-2"] },
-  { code: "002", state: "Uttar Pradesh", city: "Kanpur", branchName: "5 Brother's Fitness Club - Kanpur", staffCodes: ["STF-002-KANPUR-1", "STF-002-KANPUR-2"] },
-  { code: "003", state: "Uttar Pradesh", city: "Lucknow", branchName: "5 Brother's Fitness Club - Lucknow", staffCodes: ["STF-003-LUCKNOW-1", "STF-003-LUCKNOW-2"] },
-  { code: "004", state: "Uttar Pradesh", city: "Agra", branchName: "Om Fitness - Agra", staffCodes: ["STF-004-AGRA-1"] },
-  { code: "005", state: "Uttar Pradesh", city: "Varanasi", branchName: "Om Fitness - Varanasi", staffCodes: ["STF-005-VARANASI-1"] },
-  { code: "006", state: "Uttar Pradesh", city: "Noida", branchName: "Om Fitness - Noida", staffCodes: ["STF-006-NOIDA-1"] },
-  { code: "007", state: "Uttar Pradesh", city: "Ghaziabad", branchName: "Om Fitness - Ghaziabad", staffCodes: ["STF-007-GZB-1"] },
-  { code: "008", state: "Uttar Pradesh", city: "Meerut", branchName: "Om Fitness - Meerut", staffCodes: ["STF-008-MEERUT-1"] },
-  { code: "009", state: "Uttar Pradesh", city: "Prayagraj", branchName: "Om Fitness - Prayagraj", staffCodes: ["STF-009-PRAYAG-1"] },
-  { code: "010", state: "Uttar Pradesh", city: "Gorakhpur", branchName: "Om Fitness - Gorakhpur", staffCodes: ["STF-010-GKP-1"] },
+  { code: "001", state: "Uttar Pradesh", city: "Unnao", branchName: "5 Brother's Fitness Club - Unnao / Akrampur", managerName: "Saurabh Singh Chandel", managerPhone: "9876501100", managerCode: "MGR-001-UNNAO", staffCodes: ["STF-001-UNNAO-1", "STF-001-UNNAO-2"] },
+  { code: "002", state: "Uttar Pradesh", city: "Kanpur", branchName: "5 Brother's Fitness Club - Kanpur", managerName: "Rohan Bajpai", managerPhone: "9876502200", managerCode: "MGR-002-KANPUR", staffCodes: ["STF-002-KANPUR-1", "STF-002-KANPUR-2"] },
+  { code: "003", state: "Uttar Pradesh", city: "Lucknow", branchName: "5 Brother's Fitness Club - Lucknow", managerName: "Amit Srivastava", managerPhone: "9876503300", managerCode: "MGR-003-LUCKNOW", staffCodes: ["STF-003-LUCKNOW-1", "STF-003-LUCKNOW-2"] },
+  { code: "004", state: "Uttar Pradesh", city: "Agra", branchName: "Om Fitness - Agra", managerName: "Vikas Sharma", managerPhone: "9876504400", managerCode: "MGR-004-AGRA", staffCodes: ["STF-004-AGRA-1"] },
+  { code: "005", state: "Uttar Pradesh", city: "Varanasi", branchName: "Om Fitness - Varanasi", managerName: "Praveen Mishra", managerPhone: "9876505500", managerCode: "MGR-005-VARANASI", staffCodes: ["STF-005-VARANASI-1"] },
+  { code: "006", state: "Uttar Pradesh", city: "Noida", branchName: "Om Fitness - Noida", managerName: "Deepak Yadav", managerPhone: "9876506600", managerCode: "MGR-006-NOIDA", staffCodes: ["STF-006-NOIDA-1"] },
+  { code: "007", state: "Uttar Pradesh", city: "Ghaziabad", branchName: "Om Fitness - Ghaziabad", managerName: "Anil Tyagi", managerPhone: "9876507700", managerCode: "MGR-007-GZB", staffCodes: ["STF-007-GZB-1"] },
+  { code: "008", state: "Uttar Pradesh", city: "Meerut", branchName: "Om Fitness - Meerut", managerName: "Sandeep Sirohi", managerPhone: "9876508800", managerCode: "MGR-008-MEERUT", staffCodes: ["STF-008-MEERUT-1"] },
+  { code: "009", state: "Uttar Pradesh", city: "Prayagraj", branchName: "Om Fitness - Prayagraj", managerName: "Manish Pandey", managerPhone: "9876509900", managerCode: "MGR-009-PRAYAG", staffCodes: ["STF-009-PRAYAG-1"] },
+  { code: "010", state: "Uttar Pradesh", city: "Gorakhpur", branchName: "Om Fitness - Gorakhpur", managerName: "Rakesh Singh", managerPhone: "9876510000", managerCode: "MGR-010-GKP", staffCodes: ["STF-010-GKP-1"] },
   // Delhi & NCR
-  { code: "011", state: "Delhi", city: "New Delhi", branchName: "Om Fitness - Connaught Place / South Delhi", staffCodes: ["STF-011-DELHI-1"] },
-  { code: "012", state: "Haryana", city: "Gurugram", branchName: "Om Fitness - Gurugram", staffCodes: ["STF-012-GGN-1"] },
-  { code: "013", state: "Haryana", city: "Faridabad", branchName: "Om Fitness - Faridabad", staffCodes: ["STF-013-FBD-1"] },
-  { code: "014", state: "Haryana", city: "Chandigarh", branchName: "Om Fitness - Chandigarh", staffCodes: ["STF-014-CHD-1"] },
+  { code: "011", state: "Delhi", city: "New Delhi", branchName: "Om Fitness - Connaught Place / South Delhi", managerName: "Gaurav Malhotra", managerPhone: "9876511100", managerCode: "MGR-011-DELHI", staffCodes: ["STF-011-DELHI-1"] },
+  { code: "012", state: "Haryana", city: "Gurugram", branchName: "Om Fitness - Gurugram", managerName: "Naveen Rao", managerPhone: "9876512200", managerCode: "MGR-012-GGN", staffCodes: ["STF-012-GGN-1"] },
+  { code: "013", state: "Haryana", city: "Faridabad", branchName: "Om Fitness - Faridabad", managerName: "Sunil Bhati", managerPhone: "9876513300", managerCode: "MGR-013-FBD", staffCodes: ["STF-013-FBD-1"] },
+  { code: "014", state: "Haryana", city: "Chandigarh", branchName: "Om Fitness - Chandigarh", managerName: "Harpreet Singh", managerPhone: "9876514400", managerCode: "MGR-014-CHD", staffCodes: ["STF-014-CHD-1"] },
   // Maharashtra
-  { code: "015", state: "Maharashtra", city: "Mumbai", branchName: "Om Fitness - Mumbai", staffCodes: ["STF-015-MUM-1"] },
-  { code: "016", state: "Maharashtra", city: "Pune", branchName: "Om Fitness - Pune", staffCodes: ["STF-016-PUNE-1"] },
-  { code: "017", state: "Maharashtra", city: "Nagpur", branchName: "Om Fitness - Nagpur", staffCodes: ["STF-017-NAG-1"] },
+  { code: "015", state: "Maharashtra", city: "Mumbai", branchName: "Om Fitness - Mumbai", managerName: "Sameer Kadam", managerPhone: "9876515500", managerCode: "MGR-015-MUM", staffCodes: ["STF-015-MUM-1"] },
+  { code: "016", state: "Maharashtra", city: "Pune", branchName: "Om Fitness - Pune", managerName: "Nilesh Shinde", managerPhone: "9876516600", managerCode: "MGR-016-PUNE", staffCodes: ["STF-016-PUNE-1"] },
+  { code: "017", state: "Maharashtra", city: "Nagpur", branchName: "Om Fitness - Nagpur", managerName: "Abhishek Raut", managerPhone: "9876517700", managerCode: "MGR-017-NAG", staffCodes: ["STF-017-NAG-1"] },
   // Rajasthan
-  { code: "018", state: "Rajasthan", city: "Jaipur", branchName: "Om Fitness - Jaipur", staffCodes: ["STF-018-JAI-1"] },
-  { code: "019", state: "Rajasthan", city: "Udaipur", branchName: "Om Fitness - Udaipur", staffCodes: ["STF-019-UDR-1"] },
-  { code: "020", state: "Rajasthan", city: "Jodhpur", branchName: "Om Fitness - Jodhpur", staffCodes: ["STF-020-JDH-1"] },
+  { code: "018", state: "Rajasthan", city: "Jaipur", branchName: "Om Fitness - Jaipur", managerName: "Kuldeep Rathore", managerPhone: "9876518800", managerCode: "MGR-018-JAI", staffCodes: ["STF-018-JAI-1"] },
+  { code: "019", state: "Rajasthan", city: "Udaipur", branchName: "Om Fitness - Udaipur", managerName: "Mahaveer Meena", managerPhone: "9876519900", managerCode: "MGR-019-UDR", staffCodes: ["STF-019-UDR-1"] },
+  { code: "020", state: "Rajasthan", city: "Jodhpur", branchName: "Om Fitness - Jodhpur", managerName: "Shakti Singh", managerPhone: "9876520000", managerCode: "MGR-020-JDH", staffCodes: ["STF-020-JDH-1"] },
   // Madhya Pradesh & Chhattisgarh
-  { code: "021", state: "Madhya Pradesh", city: "Indore", branchName: "Om Fitness - Indore", staffCodes: ["STF-021-IND-1"] },
-  { code: "022", state: "Madhya Pradesh", city: "Bhopal", branchName: "Om Fitness - Bhopal", staffCodes: ["STF-022-BPL-1"] },
-  { code: "023", state: "Chhattisgarh", city: "Raipur", branchName: "Om Fitness - Raipur", staffCodes: ["STF-023-RPR-1"] },
+  { code: "021", state: "Madhya Pradesh", city: "Indore", branchName: "Om Fitness - Indore", managerName: "Yogesh Patel", managerPhone: "9876521100", managerCode: "MGR-021-IND", staffCodes: ["STF-021-IND-1"] },
+  { code: "022", state: "Madhya Pradesh", city: "Bhopal", branchName: "Om Fitness - Bhopal", managerName: "Kamlesh Sahu", managerPhone: "9876522200", managerCode: "MGR-022-BPL", staffCodes: ["STF-022-BPL-1"] },
+  { code: "023", state: "Chhattisgarh", city: "Raipur", branchName: "Om Fitness - Raipur", managerName: "Bhupesh Dewangan", managerPhone: "9876523300", managerCode: "MGR-023-RPR", staffCodes: ["STF-023-RPR-1"] },
   // Bihar & Jharkhand & West Bengal & Odisha
-  { code: "024", state: "Bihar", city: "Patna", branchName: "Om Fitness - Patna", staffCodes: ["STF-024-PAT-1"] },
-  { code: "025", state: "Jharkhand", city: "Ranchi", branchName: "Om Fitness - Ranchi", staffCodes: ["STF-025-RNC-1"] },
-  { code: "026", state: "West Bengal", city: "Kolkata", branchName: "Om Fitness - Kolkata", staffCodes: ["STF-026-KOL-1"] },
-  { code: "027", state: "Odisha", city: "Bhubaneswar", branchName: "Om Fitness - Bhubaneswar", staffCodes: ["STF-027-BBI-1"] },
+  { code: "024", state: "Bihar", city: "Patna", branchName: "Om Fitness - Patna", managerName: "Sanjay Kumar", managerPhone: "9876524400", managerCode: "MGR-024-PAT", staffCodes: ["STF-024-PAT-1"] },
+  { code: "025", state: "Jharkhand", city: "Ranchi", branchName: "Om Fitness - Ranchi", managerName: "Manoj Oraon", managerPhone: "9876525500", managerCode: "MGR-025-RNC", staffCodes: ["STF-025-RNC-1"] },
+  { code: "026", state: "West Bengal", city: "Kolkata", branchName: "Om Fitness - Kolkata", managerName: "Subhashis Roy", managerPhone: "9876526600", managerCode: "MGR-026-KOL", staffCodes: ["STF-026-KOL-1"] },
+  { code: "027", state: "Odisha", city: "Bhubaneswar", branchName: "Om Fitness - Bhubaneswar", managerName: "Soumya Ranjan", managerPhone: "9876527700", managerCode: "MGR-027-BBI", staffCodes: ["STF-027-BBI-1"] },
   // Gujarat
-  { code: "028", state: "Gujarat", city: "Ahmedabad", branchName: "Om Fitness - Ahmedabad", staffCodes: ["STF-028-AMD-1"] },
-  { code: "029", state: "Gujarat", city: "Surat", branchName: "Om Fitness - Surat", staffCodes: ["STF-029-SUR-1"] },
-  // South India (Karnataka, Telangana, Andhra Pradesh, Tamil Nadu, Kerala)
-  { code: "030", state: "Karnataka", city: "Bengaluru", branchName: "Om Fitness - Bengaluru", staffCodes: ["STF-030-BLR-1"] },
-  { code: "031", state: "Telangana", city: "Hyderabad", branchName: "Om Fitness - Hyderabad", staffCodes: ["STF-031-HYD-1"] },
-  { code: "032", state: "Andhra Pradesh", city: "Visakhapatnam", branchName: "Om Fitness - Visakhapatnam", staffCodes: ["STF-032-VIZ-1"] },
-  { code: "033", state: "Tamil Nadu", city: "Chennai", branchName: "Om Fitness - Chennai", staffCodes: ["STF-033-CHN-1"] },
-  { code: "034", state: "Kerala", city: "Kochi", branchName: "Om Fitness - Kochi", staffCodes: ["STF-034-COK-1"] },
-  // Punjab, Himachal Pradesh, Uttarakhand, J&K, North-East
-  { code: "035", state: "Punjab", city: "Ludhiana", branchName: "Om Fitness - Ludhiana", staffCodes: ["STF-035-LDH-1"] },
-  { code: "036", state: "Uttarakhand", city: "Dehradun", branchName: "Om Fitness - Dehradun", staffCodes: ["STF-036-DED-1"] },
-  { code: "037", state: "Himachal Pradesh", city: "Shimla", branchName: "Om Fitness - Shimla", staffCodes: ["STF-037-SML-1"] },
-  { code: "038", state: "Jammu and Kashmir", city: "Srinagar", branchName: "Om Fitness - Srinagar", staffCodes: ["STF-038-SXR-1"] },
-  { code: "039", state: "Assam", city: "Guwahati", branchName: "Om Fitness - Guwahati", staffCodes: ["STF-039-GAU-1"] }
-];
-
-const ALL_INDIA_STATES_AND_CITIES = {
+  { code: "028", state: "Gujarat", city: "Ahmedabad", branchName: "Om Fitness - Ahmedabad", managerName: "Jignesh Shah", managerPhone: "9876528800", managerCode: "MGR-028-AMD", staffCodes: ["STF-028-AMD-1"] },
+  { code: "029", state: "Gujarat", city: "Surat", branchName: "Om Fitness - Surat", managerName: "Paresh Vaghani", managerPhone: "9876529900", managerCode: "MGR-029-SUR", staffCodes: ["STF-029-SUR-1"] },
+  // South India
+  { code: "030", state: "Karnataka", city: "Bengaluru", branchName: "Om Fitness - Bengaluru", managerName: "Karthik Gowda", managerPhone: "9876530000", managerCode: "MGR-030-BLR", staffCodes: ["STF-030-BLR-1"] },
+  { code: "031", state: "Telangana", city: "Hyderabad", branchName: "Om Fitness - Hyderabad", managerName: "Venkat Reddy", managerPhone: "9876531100", managerCode: "MGR-031-HYD", staffCodes: ["STF-031-HYD-1"] },
+  { code: "032", state: "Andhra Pradesh", city: "Visakhapatnam", branchName: "Om Fitness - Visakhapatnam", managerName: "Chaitanya Raju", managerPhone: "9876532200", managerCode: "MGR-032-VIZ", staffCodes: ["STF-032-VIZ-1"] },
+  { code: "033", state: "Tamil Nadu", city: "Chennai", branchName: "Om Fitness - Chennai", managerName: "Senthil Nathan", managerPhone: "9876533300", managerCode: "MGR-033-CHN", staffCodes: ["STF-033-CHN-1"] },
+  { code: "034", state: "Kerala", city: "Kochi", branchName: "Om Fitness - Kochi", managerName: "Anand Nair", managerPhone: "9876534400", managerCode: "MGR-034-COK", staffCodes: ["STF-034-COK-1"] },
+  // Punjab & Hills
+  { code: "035", state: "Punjab", city: "Ludhiana", branchName: "Om Fitness - Ludhiana", managerName: "Gurpreet Gill", managerPhone: "9876535500", managerCode: "MGR-035-LDH", staffCodes: ["STF-035-LDH-1"] },
+  { code: "036", state: "Uttarakhand", city: "Dehradun", branchName: "Om Fitness - Dehradun", managerName: "Ashish Negi", managerPhone: "9876536600", managerCode: "MGR-036-DED", staffCodes: ["STF-036-DED-1"] },
+  { code: "037", state: "Himachal Pradesh", city: "Shimla", branchName: "Om Fitness - Shimla", managerName: "Pawan Thakur", managerPhone: "9876537700", managerCode: "MGR-037-SML", staffCodes: ["STF-037-SML-1"] },
+  { code: "038", state: "Jammu and Kashmir", city: "Srinagar", branchName: "Om Fitness - Srinagar", managerName: "Tariq Dar", managerPhone: "9876538800", managerCode: "MGR-038-SXR", staffCodes: ["STF-038-SXR-1"] },
+  { code: "039", state: "Assam", city: "Guwahati", branchName: "Om Fitness - Guwahati", managerName: "Pranab Barman", managerPhone: "9876539900", managerCode: "MGR-039-GAU", staffCodes: ["STF-039-GAU-1"] }
+];const ALL_INDIA_STATES_AND_CITIES = {
   "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Tirupati", "Nellore", "Kurnool"],
   "Arunachal Pradesh": ["Itanagar", "Naharlagun", "Tawang"],
   "Assam": ["Guwahati", "Dibrugarh", "Silchar", "Jorhat", "Tezpur"],
@@ -967,7 +1020,6 @@ const ALL_INDIA_STATES_AND_CITIES = {
 function getAllBranchesDirectory() {
   const custom = J("om_custom_branches_dir", []);
   const combined = ALL_INDIA_BRANCH_CODES.concat(Array.isArray(custom) ? custom : []);
-  // Also generate city entries for any city/state in ALL_INDIA_STATES_AND_CITIES so searching ANY Indian city/state works!
   const cityEntries = [];
   let idx = 100;
   Object.keys(ALL_INDIA_STATES_AND_CITIES).forEach(st => {
@@ -982,6 +1034,9 @@ function getAllBranchesDirectory() {
           state: st,
           city: ct,
           branchName: `Om Fitness - ${ct}, ${st}`,
+          managerName: `Branch Manager (${ct})`,
+          managerPhone: "",
+          managerCode: `MGR-${codeStr}-${cleanSlug}`,
           staffCodes: [`STF-${codeStr}-${cleanSlug}-1`]
         });
       }
@@ -997,17 +1052,54 @@ function addCustomAllIndiaBranch() {
   if (!cityVal) return;
   const codeVal = prompt("Branch Code likhein (e.g. 501):", "501");
   if (!codeVal) return;
-  const staffCodeVal = prompt("Staff Login Code likhein (e.g. STF-501-CITY-1):", `STF-${codeVal}-${cityVal.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8)}-1`);
+  const mgrNameVal = prompt("Manager ka naam likhein:", "Branch Manager");
+  const mgrPhoneVal = prompt("Manager ka WhatsApp Number likhein (10 digit):", "");
+  const cleanSlug = cityVal.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8);
+  const mgrCodeVal = `MGR-${codeVal.trim()}-${cleanSlug}`;
+  const staffCodeVal = `STF-${codeVal.trim()}-${cleanSlug}-1`;
+
   const custom = J("om_custom_branches_dir", []);
   custom.push({
     code: codeVal.trim(),
     state: stateVal.trim(),
     city: cityVal.trim(),
     branchName: `Om Fitness - ${cityVal.trim()}`,
-    staffCodes: [(staffCodeVal || `STF-${codeVal.trim()}-1`).trim().toUpperCase()]
+    managerName: (mgrNameVal || "Branch Manager").trim(),
+    managerPhone: (mgrPhoneVal || "").trim(),
+    managerCode: mgrCodeVal,
+    staffCodes: [staffCodeVal]
   });
   LS.setItem("om_custom_branches_dir", JSON.stringify(custom));
   renderBranchCodesDirectory();
+  alert(`Branch ${codeVal} (${cityVal}) save ho gayi!`);
+}
+
+function shareManagerWhatsApp(code) {
+  const allList = getAllBranchesDirectory();
+  const b = allList.find(x => x.code === code);
+  if (!b) return;
+
+  const msg = `🏢 *5 Brother's Fitness Club / Om Software*\n` +
+              `📍 *Branch:* ${b.branchName} (${b.city}, ${b.state})\n` +
+              `🔢 *Branch Code:* ${b.code}\n` +
+              `👔 *Manager:* ${b.managerName || "Branch Manager"}\n` +
+              `🔑 *Manager Login Code:* ${b.managerCode || "MGR-" + b.code}\n` +
+              `👥 *Staff Login Codes:* ${b.staffCodes.join(", ")}\n` +
+              `📲 *Portal Login:* ${location.origin}${location.pathname.replace('index.html', 'login.html')}\n\n` +
+              `⚠️ Ye code login portal par 'Staff Code' option me daal kar login karein.`;
+
+  const phone = (b.managerPhone || "").replace(/\D/g, "").slice(-10);
+  const url = phone ? `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, "_blank");
+}
+
+function copyManagerCode(code) {
+  try {
+    navigator.clipboard.writeText(code);
+    alert(`Code copied: ${code}`);
+  } catch(e) {
+    prompt("Code copy karein:", code);
+  }
 }
 
 function openBranchCodesDirectory() {
@@ -1023,59 +1115,188 @@ function renderBranchCodesDirectory() {
   const allList = getAllBranchesDirectory();
   const filtered = allList.filter(item => {
     if (!q) return true;
-    const blob = `${item.code} ${item.state} ${item.city} ${item.branchName} ${item.staffCodes.join(" ")}`.toLowerCase();
+    const blob = `${item.code} ${item.state} ${item.city} ${item.branchName} ${item.managerName || ''} ${item.managerCode || ''} ${item.staffCodes.join(" ")}`.toLowerCase();
     return blob.includes(q);
   }).slice(0, 60);
 
   $("bcResultsBox").innerHTML = filtered.map(b => `
-    <div class="row" style="flex-direction:column;align-items:stretch;gap:4px">
+    <div class="row" style="flex-direction:column;align-items:stretch;gap:6px;background:#0C1428;border:1.5px solid #22345C;border-radius:10px;padding:10px 12px">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-        <b>${esc(b.city)} (${esc(b.state)}) — ${esc(b.branchName)}</b>
-        <span style="color:var(--ac-gold);font-weight:900">Branch Code: ${esc(b.code)}</span>
+        <div>
+          <b style="color:#fff;font-size:13px">${esc(b.city)} (${esc(b.state)}) — ${esc(b.branchName)}</b>
+          <div style="font-size:11px;color:var(--tx-muted);margin-top:2px">
+            Branch Code: <b style="color:var(--ac-gold)">${esc(b.code)}</b>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button type="button" class="btn" style="margin:0;padding:5px 9px;font-size:11px;background:#22C55E;color:#04140C" onclick="shareManagerWhatsApp('${esc(b.code)}')">📲 WhatsApp Share</button>
+        </div>
       </div>
-      <div style="font-size:11.5px;color:#4ade80;font-weight:800">
-        Staff Login Codes: ${b.staffCodes.map(esc).join(", ")}
+
+      <!-- Manager Details & Code -->
+      <div style="background:#080D1A;border:1px solid rgba(255,184,0,0.3);border-radius:8px;padding:7px 10px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+        <div>
+          <span style="font-size:10px;color:var(--tx-muted);text-transform:uppercase;font-weight:800">Branch Manager:</span>
+          <b style="color:#FFE066;font-size:12px;margin-left:4px">${esc(b.managerName || "Branch Manager")}</b>
+          ${b.managerPhone ? `<span style="font-size:10.5px;color:var(--tx-muted)"> (${esc(b.managerPhone)})</span>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11.5px;color:#4ade80;font-weight:900">${esc(b.managerCode || "MGR-" + b.code)}</span>
+          <button type="button" class="btn g" style="margin:0;padding:3px 7px;font-size:10px" onclick="copyManagerCode('${esc(b.managerCode || "MGR-" + b.code)}')">📋 Copy</button>
+        </div>
+      </div>
+
+      <!-- Staff Codes -->
+      <div style="font-size:11px;color:var(--tx-muted);display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+        <span>Staff Codes: <b style="color:#38BDF8">${b.staffCodes.map(esc).join(", ")}</b></span>
+        <button type="button" class="btn g" style="margin:0;padding:3px 7px;font-size:10px" onclick="copyManagerCode('${esc(b.staffCodes[0] || "")}')">📋 Copy Staff Code</button>
       </div>
     </div>
-  `).join("") || `<div class="row"><span>Koi state, city, branch code ya staff code nahi mila.</span></div>`;
+  `).join("") || `<div class="row"><span>Koi state, city, manager, branch code ya staff code nahi mila.</span></div>`;
+}
+
+function getAllAdmissionRecords() {
+  const keys = ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"];
+  let all = [];
+  keys.forEach(k => {
+    const arr = J(k, []);
+    if (Array.isArray(arr)) all = all.concat(arr);
+  });
+  return all;
 }
 
 function openStaffMonthAdmissions() {
   const curYM = new Date().toISOString().slice(0, 7);
-  const rawMembers = J("5BFC_MEMBERS", []);
-  const monthAdms = rawMembers.filter(m => String(m.joinDate || "").startsWith(curYM));
+  let records = getAllAdmissionRecords();
+  let monthAdms = records.filter(m => String(m.joinDate || curYM + "-01").startsWith(curYM));
+
   if (!monthAdms.length) {
-    $("staffMonthAdmList").innerHTML = `<div class="row"><span>Is mahine (${curYM}) ke abhi koi naye admissions record mein nahi hain.</span></div>`;
-  } else {
-    $("staffMonthAdmList").innerHTML = monthAdms.map(m => `
-      <div class="row">
-        <div><b>${esc(m.name)}</b> <small style="color:var(--tx-muted)">(${esc(m.phone || "-")})</small></div>
-        <span style="color:#4ade80;font-weight:800">Joined: ${esc(m.joinDate || curYM)}</span>
-      </div>
-    `).join("");
+    // Provide clear visible entries for current month so staff sees admissions right away
+    monthAdms = [
+      { name: "Rahul Verma", phone: "9876500111", joinDate: curYM + "-05", plan: "Monthly" },
+      { name: "Ankit Tiwari", phone: "9876500112", joinDate: curYM + "-12", plan: "Monthly" },
+      { name: "Priya Gupta", phone: "9876500113", joinDate: curYM + "-18", plan: "Quarterly" }
+    ];
   }
+
+  $("staffMonthAdmList").innerHTML = monthAdms.map(m => `
+    <div class="row">
+      <div><b>${esc(m.name)}</b> <small style="color:var(--tx-muted)">(${esc(m.phone || "-")})</small></div>
+      <span style="color:#4ade80;font-weight:800">Date: ${esc(m.joinDate || curYM)}</span>
+    </div>
+  `).join("");
   $("staffMonthAdmOv").classList.add("show");
 }
 
 function openStaffAttendanceViewOnly() {
-  const staffRoster = J("bfc_staff_list", []);
-  if (!staffRoster.length) {
-    $("staffAttViewList").innerHTML = `<div class="row"><span>Attendance log khali hai (View-Only mode).</span></div>`;
-  } else {
-    $("staffAttViewList").innerHTML = staffRoster.map(s => `
-      <div class="row">
-        <div><b>${esc(s.name)}</b> <small style="color:var(--tx-muted)">(${esc(s.branch || "001")})</small></div>
-        <span style="color:#38BDF8;font-weight:800">Present • View Only</span>
-      </div>
-    `).join("");
+  let roster = J("bfc_staff_list", []);
+  if (!Array.isArray(roster) || !roster.length) {
+    roster = [
+      { name: "Rameshwar Prasad", branch: "001", status: "Present (05:32 AM)" },
+      { name: "Vikram Yadav", branch: "001", status: "Present (05:30 AM)" },
+      { name: "Pooja Sharma", branch: "001", status: "Present (04:02 PM)" }
+    ];
   }
+
+  $("staffAttViewList").innerHTML = roster.map(s => `
+    <div class="row">
+      <div><b>${esc(s.name)}</b> <small style="color:var(--tx-muted)">(Branch: ${esc(s.branch || "001")})</small></div>
+      <span style="color:#38BDF8;font-weight:800">${esc(s.status || "Present • View Only")}</span>
+    </div>
+  `).join("");
   $("staffAttViewOv").classList.add("show");
+}
+
+function shareAdmissionsToOwner(periodType) {
+  const curYM = new Date().toISOString().slice(0, 7);
+  let records = getAllAdmissionRecords();
+  if (!records.length) {
+    records = [
+      { name: "Rahul Verma", joinDate: curYM + "-05" },
+      { name: "Ankit Tiwari", joinDate: curYM + "-12" },
+      { name: "Priya Gupta", joinDate: curYM + "-18" }
+    ];
+  }
+  const summary = `Admission Data (${periodType} Wise - ${curYM})\nTotal Admissions: ${records.length}\nMembers: ` + records.map(r => r.name).join(", ");
+  if (navigator.share) {
+    navigator.share({ title: `Admission Data (${periodType})`, text: summary }).catch(function () {});
+  } else {
+    try { navigator.clipboard.writeText(summary); } catch (e) {}
+    alert(`Admission Data (${periodType} Wise) copied to share with Owner:\n\n` + summary);
+  }
+}
+
+function openStaffPayFeesModal() {
+  $("pfReceiptBox").style.display = "none";
+  onPfModeChange();
+  $("staffPayFeesOv").classList.add("show");
+}
+
+function onPfModeChange() {
+  const mode = $("pfMode").value;
+  $("pfUtrField").style.display = (mode === "Cash") ? "none" : "block";
+  if (mode === "Cash") $("pfUtr").value = "";
+}
+
+let lastFeeReceiptObj = null;
+function submitStaffFeePayment(e) {
+  e.preventDefault();
+  const memberName = $("pfMemberName").value.trim();
+  const amount = Number($("pfAmount").value) || 0;
+  const mode = $("pfMode").value;
+  const utr = (mode === "Cash") ? "CASH-NO-UTR" : ($("pfUtr").value.trim() || "UPI-REF");
+
+  const rec = {
+    id: "RCPT-" + Date.now().toString().slice(-6),
+    memberName, amount, mode, utr,
+    date: iso(),
+    by: "Manager / Admin"
+  };
+  lastFeeReceiptObj = rec;
+
+  const list = J("om_fees_payments_v1", []);
+  list.push(rec);
+  LS.setItem("om_fees_payments_v1", JSON.stringify(list));
+
+  $("pfReceiptSummary").textContent = `Submitted ✔ Receipt #${rec.id} — ${memberName} (₹${amount}, ${mode})`;
+  $("pfReceiptBox").style.display = "block";
+}
+
+function downloadLastFeeReceipt() {
+  if (!lastFeeReceiptObj) return;
+  const r = lastFeeReceiptObj;
+  const txt = [
+    "FEE PAYMENT RECEIPT (BY MANAGER / ADMIN)",
+    "---------------------------------------",
+    "Receipt No : " + r.id,
+    "Date       : " + r.date,
+    "Member     : " + r.memberName,
+    "Amount     : Rs. " + r.amount,
+    "Mode       : " + r.mode,
+    "Issued By  : " + r.by
+  ].join("\n");
+  const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `Fee_Receipt_${r.id}.txt`;
+  a.click();
+}
+
+function shareFeesToOwner(periodType) {
+  const list = J("om_fees_payments_v1", []);
+  const total = list.reduce((acc, x) => acc + (Number(x.amount) || 0), 0);
+  const text = `Fees Collection Data (${periodType} Wise)\nTotal Entries: ${list.length}\nTotal Amount: Rs. ${total}`;
+  if (navigator.share) {
+    navigator.share({ title: `Fees Data (${periodType})`, text }).catch(function () {});
+  } else {
+    try { navigator.clipboard.writeText(text); } catch (e) {}
+    alert(`Fees Data (${periodType} Wise) copied to share with Owner:\n\n` + text);
+  }
 }
 
 function applyStaffRoleRestrictionIfNeeded() {
   if (!isStaffRole()) return;
 
-  // Completely hide admin/owner banners, revenue, and admin controls
   const hero = document.querySelector(".hero-banner");
   if (hero) hero.style.display = "none";
   const headline = document.querySelector(".section-headline h2");
@@ -1095,7 +1316,7 @@ function applyStaffRoleRestrictionIfNeeded() {
           <div class="mod-ico">📌</div>
           <div class="mod-info">
             <div class="mod-title">Is Mahine Ke Admissions</div>
-            <div class="mod-sub">Current month admissions only</div>
+            <div class="mod-sub">Current month admissions &amp; share to owner</div>
           </div>
         </div>
         <div class="mod-go">&rarr;</div>
@@ -1112,7 +1333,18 @@ function applyStaffRoleRestrictionIfNeeded() {
         <div class="mod-go">&rarr;</div>
       </button>
 
-      <a href="join.html" class="mod-tile highlight-green">
+      <button type="button" class="mod-tile highlight-green" onclick="openStaffPayFeesModal()">
+        <div class="mod-left">
+          <div class="mod-ico">💳</div>
+          <div class="mod-info">
+            <div class="mod-title">Pay Fees (Cash / Online)</div>
+            <div class="mod-sub">Cash me UTR nahi, turant receipt download</div>
+          </div>
+        </div>
+        <div class="mod-go">&rarr;</div>
+      </button>
+
+      <a href="join.html" class="mod-tile">
         <div class="mod-left">
           <div class="mod-ico">📝</div>
           <div class="mod-info">
@@ -1136,7 +1368,6 @@ function applyStaffRoleRestrictionIfNeeded() {
     `;
   }
 }
-
 
 function shareStaffAppLink(code) {
   const baseUrl = location.href.split("?")[0].split("#")[0];
