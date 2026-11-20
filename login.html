@@ -43,7 +43,7 @@
     .code-big{background:#0b0b0d;border:2px dashed var(--ac);border-radius:12px;color:var(--ac);font-size:20px;font-weight:900;letter-spacing:2px;padding:14px 6px;margin:12px 0;word-break:break-all}
     .btn2{width:100%;background:#222;color:#fff;border:1.5px solid var(--border);padding:11px;border-radius:10px;font-weight:800;cursor:pointer;margin-top:8px;font-size:13px}
   
-    /* Full-Screen Cinematic Om & Shri Krishna Shankh Intro (Mobile + Laptop/PC) */
+    /* Full-Screen Rotating Om Intro (Mobile + Laptop/PC) */
     #omIntroOverlay {
       display: none;
       position: fixed;
@@ -52,43 +52,21 @@
       height: 100vh;
       height: 100dvh;
       z-index: 999999;
-      background: radial-gradient(circle at 50% 35%, #2c1d04 0%, #110d07 48%, #05070e 100%);
+      background: radial-gradient(circle at 50% 42%, #2a1c04 0%, #110d07 52%, #05070e 100%);
       overflow: hidden;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: clamp(16px, 3.5vh, 36px) clamp(16px, 4vw, 48px);
+      padding: clamp(20px, 4vh, 44px) clamp(16px, 4vw, 48px);
       color: #fff;
     }
     #omIntroOverlay.show {
       display: flex;
-      animation: introFadeIn 0.65s ease-out forwards;
+      animation: omFadeIn 0.55s ease-out forwards;
     }
-    @keyframes introFadeIn {
-      from { opacity: 0; transform: scale(1.03); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .om-rays {
-      position: absolute;
-      width: min(1100px, 140vw);
-      height: min(1100px, 140vw);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: repeating-conic-gradient(
-        from 0deg,
-        rgba(255, 184, 0, 0.08) 0deg 8deg,
-        transparent 8deg 20deg
-      );
-      border-radius: 50%;
-      animation: slowSpinRays 36s linear infinite;
-      pointer-events: none;
-      mask-image: radial-gradient(circle, rgba(0,0,0,0.9) 15%, transparent 70%);
-      -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,0.9) 15%, transparent 70%);
-    }
-    @keyframes slowSpinRays {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
+    @keyframes omFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
     .om-intro-top {
       position: relative;
@@ -102,157 +80,106 @@
       background: linear-gradient(135deg, #FFB800, #F59E0B);
       color: #090c14;
       font-weight: 900;
-      font-size: clamp(10px, 1.4vw, 13px);
+      font-size: clamp(10px, 1.3vw, 12px);
       padding: 4px 14px;
       border-radius: 999px;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.4px;
       text-transform: uppercase;
       margin-bottom: 8px;
-      box-shadow: 0 4px 18px rgba(255, 184, 0, 0.4);
     }
     .om-software-title {
-      font-size: clamp(28px, 5.2vw, 62px);
+      font-size: clamp(28px, 5vw, 58px);
       font-weight: 900;
       letter-spacing: 2px;
-      line-height: 1.1;
-      background: linear-gradient(180deg, #FFF7CC 0%, #FFD038 48%, #D97706 100%);
+      line-height: 1.12;
+      background: linear-gradient(180deg, #FFF7CC 0%, #FFD038 50%, #D97706 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 6px 24px rgba(255, 184, 0, 0.35));
       text-transform: uppercase;
     }
     .om-org-sub {
       margin-top: 6px;
-      font-size: clamp(13px, 2vw, 20px);
+      font-size: clamp(13px, 1.8vw, 18px);
       font-weight: 700;
-      color: #E2E8F0;
-      letter-spacing: 0.4px;
+      color: #CBD5E1;
     }
 
     .om-center-stage {
       position: relative;
       z-index: 2;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: clamp(18px, 5vw, 72px);
-      flex: 1;
-      width: 100%;
-      max-width: 1120px;
-      flex-wrap: wrap;
-    }
-
-    .om-symbol-wrap {
-      position: relative;
-      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px;
+      gap: clamp(16px, 3vh, 28px);
+      flex: 1;
+      width: 100%;
+      max-width: 920px;
+      text-align: center;
+    }
+    .om-symbol-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: clamp(170px, 26vw, 280px);
+      height: clamp(170px, 26vw, 280px);
     }
     .om-halo {
       position: absolute;
-      width: clamp(150px, 22vw, 260px);
-      height: clamp(150px, 22vw, 260px);
+      inset: 0;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 200, 30, 0.35) 0%, rgba(255, 140, 0, 0.1) 55%, transparent 72%);
-      animation: omPulseHalo 2.4s ease-in-out infinite;
+      background: radial-gradient(circle, rgba(255, 200, 30, 0.32) 0%, rgba(255, 140, 0, 0.08) 60%, transparent 75%);
+      animation: omHaloPulse 2.6s ease-in-out infinite;
     }
-    @keyframes omPulseHalo {
-      0%, 100% { transform: scale(0.92); opacity: 0.75; }
-      50% { transform: scale(1.14); opacity: 1; }
+    @keyframes omHaloPulse {
+      0%, 100% { transform: scale(0.94); opacity: 0.75; }
+      50% { transform: scale(1.08); opacity: 1; }
     }
-    .om-glyph {
+    .om-rotating-glyph {
       position: relative;
-      font-size: clamp(96px, 16vw, 190px);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(104px, 17vw, 196px);
       line-height: 1;
       font-weight: 900;
       color: #FFE066;
       text-shadow:
-        0 0 22px rgba(255, 184, 0, 0.95),
-        0 0 55px rgba(245, 158, 11, 0.65),
-        0 8px 24px rgba(0, 0, 0, 0.8);
-      animation: omFloatGlow 3s ease-in-out infinite;
+        0 0 24px rgba(255, 184, 0, 0.9),
+        0 0 56px rgba(245, 158, 11, 0.55);
+      animation: omRotate360 8s linear infinite;
+      transform-origin: center center;
       user-select: none;
     }
-    @keyframes omFloatGlow {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-10px) scale(1.04); }
-    }
-    .om-mantra-caption {
-      position: relative;
-      margin-top: 8px;
-      font-size: clamp(12px, 1.7vw, 16px);
-      font-weight: 800;
-      color: #FCD34D;
-      letter-spacing: 1px;
+    @keyframes omRotate360 {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    .krishna-stage {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .krishna-svg-box {
-      position: relative;
-      width: clamp(210px, 32vw, 350px);
-      height: clamp(200px, 30vw, 330px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .sound-wave-ring {
-      position: absolute;
-      right: clamp(8px, 2vw, 24px);
-      top: clamp(22px, 5vw, 48px);
-      width: clamp(36px, 6vw, 72px);
-      height: clamp(36px, 6vw, 72px);
-      border: 2.5px solid rgba(255, 215, 70, 0.85);
-      border-radius: 50%;
-      animation: shankhWave 2.2s ease-out infinite;
-      pointer-events: none;
-    }
-    .sound-wave-ring.r2 {
-      animation-delay: 0.75s;
-    }
-    .sound-wave-ring.r3 {
-      animation-delay: 1.5s;
-    }
-    @keyframes shankhWave {
-      0% { transform: scale(0.35); opacity: 0.95; }
-      100% { transform: scale(1.9); opacity: 0; }
-    }
-    .krishna-blow-anim {
-      transform-origin: 50% 60%;
-      animation: krishnaBreath 2.6s ease-in-out infinite;
-    }
-    @keyframes krishnaBreath {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-4px) rotate(-1.2deg); }
-    }
-    .krishna-label {
-      margin-top: 4px;
-      font-size: clamp(12px, 1.6vw, 15px);
+    .om-gita-lines {
+      max-width: 820px;
+      padding: 12px 20px;
+      font-size: clamp(16px, 2.5vw, 28px);
       font-weight: 800;
-      color: #93C5FD;
-      text-align: center;
+      line-height: 1.55;
+      color: #FDE68A;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.75);
     }
 
     .om-intro-bottom {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 720px;
+      max-width: 680px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .om-progress-track {
       width: 100%;
-      height: 6px;
+      height: 5px;
       background: rgba(255, 255, 255, 0.14);
       border-radius: 999px;
       overflow: hidden;
@@ -260,7 +187,7 @@
     .om-progress-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #38BDF8, #FFB800, #22C55E);
+      background: linear-gradient(90deg, #FFB800, #22C55E);
       transition: width 0.25s linear;
     }
     .om-bottom-row {
@@ -276,21 +203,6 @@
       color: #CBD5E1;
       font-weight: 700;
     }
-    .om-btn-group {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .om-btn-sound {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      color: #FDE047;
-      padding: 9px 14px;
-      border-radius: 10px;
-      font-size: 12.5px;
-      font-weight: 800;
-      cursor: pointer;
-    }
     .om-btn-enter {
       background: linear-gradient(135deg, #22C55E, #16A34A);
       color: #041A0C;
@@ -300,30 +212,16 @@
       font-size: 13px;
       font-weight: 900;
       cursor: pointer;
-      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
     }
 
-    @media (max-width: 720px) {
-      .om-center-stage {
-        flex-direction: column;
-        gap: 10px;
-      }
-      .om-bottom-row {
-        justify-content: center;
-        text-align: center;
-      }
-    }
-
-  </style>
+</style>
 </head>
 <body>
 
-<!-- FULL-SCREEN OM & SHRI KRISHNA SHANKH INTRO OVERLAY -->
+<!-- FULL-SCREEN ROTATING OM INTRO OVERLAY -->
 <div id="omIntroOverlay" role="dialog" aria-label="Om Software Welcome Intro">
-  <div class="om-rays"></div>
-
   <div class="om-intro-top">
-    <div class="om-software-pill">Divine Launch &bull; Full Screen Experience</div>
+    <div class="om-software-pill">Full Screen Experience</div>
     <div class="om-software-title" id="introSoftwareName">OM SOFTWARE</div>
     <div class="om-org-sub" id="introOrgSubtitle">Universal Gym &amp; Business Management System</div>
   </div>
@@ -331,95 +229,12 @@
   <div class="om-center-stage">
     <div class="om-symbol-wrap">
       <div class="om-halo"></div>
-      <div class="om-glyph" aria-hidden="true">ॐ</div>
-      <div class="om-mantra-caption">ॐ नमः शिवाय &bull; ॐ श्री कृष्णाय नमः</div>
+      <div class="om-rotating-glyph" aria-hidden="true">ॐ</div>
     </div>
 
-    <div class="krishna-stage">
-      <div class="krishna-svg-box">
-        <div class="sound-wave-ring"></div>
-        <div class="sound-wave-ring r2"></div>
-        <div class="sound-wave-ring r3"></div>
-        <!-- Artistic SVG of Lord Shri Krishna seated blowing the Mahabharat Shankh -->
-        <svg viewBox="0 0 320 300" width="100%" height="100%" class="krishna-blow-anim" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="krishnaAura" cx="50%" cy="45%" r="50%">
-              <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.35"/>
-              <stop offset="60%" stop-color="#FFB800" stop-opacity="0.14"/>
-              <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
-            </radialGradient>
-            <linearGradient id="krishnaSkin" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#38BDF8"/>
-              <stop offset="55%" stop-color="#0284C7"/>
-              <stop offset="100%" stop-color="#0369A1"/>
-            </linearGradient>
-            <linearGradient id="pitambarGold" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#FDE047"/>
-              <stop offset="100%" stop-color="#D97706"/>
-            </linearGradient>
-            <linearGradient id="shankhPearl" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#FFFFFF"/>
-              <stop offset="65%" stop-color="#FEF3C7"/>
-              <stop offset="100%" stop-color="#FDE68A"/>
-            </linearGradient>
-          </defs>
-
-          <!-- Divine Aura Circle -->
-          <circle cx="155" cy="145" r="120" fill="url(#krishnaAura)"/>
-
-          <!-- Seated Lotus / Royal Cushion Base -->
-          <ellipse cx="145" cy="252" rx="92" ry="20" fill="#451A03" stroke="#FBBF24" stroke-width="2"/>
-          <path d="M72 244 Q145 266 218 244 Q195 224 145 224 Q95 224 72 244 Z" fill="url(#pitambarGold)"/>
-
-          <!-- Seated Legs (Padmasana / Crossed) -->
-          <path d="M84 236 Q115 215 148 232 Q178 214 206 236 Q180 250 145 244 Q110 250 84 236 Z" fill="url(#krishnaSkin)" stroke="#7DD3FC" stroke-width="1.2"/>
-          <path d="M92 234 L198 234" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round"/>
-
-          <!-- Torso & Pitambar -->
-          <path d="M118 150 Q145 142 172 150 L182 225 Q145 234 108 225 Z" fill="url(#krishnaSkin)"/>
-          <path d="M112 195 Q145 205 178 195 L182 226 Q145 235 108 226 Z" fill="url(#pitambarGold)"/>
-
-          <!-- Garland / Mala -->
-          <path d="M122 153 Q145 186 168 153" fill="none" stroke="#FDE047" stroke-width="3" stroke-dasharray="5 3"/>
-
-          <!-- Right Arm Raised Holding Shankh -->
-          <path d="M168 158 Q198 135 212 106" fill="none" stroke="url(#krishnaSkin)" stroke-width="13" stroke-linecap="round"/>
-          <!-- Left Arm Supporting -->
-          <path d="M122 160 Q105 188 124 212" fill="none" stroke="url(#krishnaSkin)" stroke-width="12" stroke-linecap="round"/>
-          <!-- Gold Bangles / Armlets -->
-          <ellipse cx="188" cy="132" rx="7" ry="4" fill="#FBBF24" transform="rotate(-35 188 132)"/>
-          <ellipse cx="112" cy="186" rx="7" ry="4" fill="#FBBF24" transform="rotate(25 112 186)"/>
-
-          <!-- Sacred Mahabharat Shankh (Conch Shell) -->
-          <g transform="translate(212, 92) rotate(-22)">
-            <path d="M-12 4 C-8 -16 20 -22 36 -8 C46 1 42 16 26 20 C8 24 -8 16 -12 4 Z" fill="url(#shankhPearl)" stroke="#F59E0B" stroke-width="2"/>
-            <path d="M34 -6 L48 -14 L44 2 Z" fill="#FFFBEB" stroke="#F59E0B" stroke-width="1.5"/>
-            <path d="M2 2 Q16 -8 28 4" fill="none" stroke="#D97706" stroke-width="1.5" opacity="0.65"/>
-          </g>
-
-          <!-- Head & Face -->
-          <circle cx="145" cy="116" r="24" fill="url(#krishnaSkin)"/>
-          <!-- Tilak on Forehead -->
-          <path d="M145 97 L145 111" stroke="#EF4444" stroke-width="2.2" stroke-linecap="round"/>
-          <path d="M141 102 Q145 109 149 102" fill="none" stroke="#FBBF24" stroke-width="2"/>
-          <!-- Eyes & Expression -->
-          <ellipse cx="137" cy="115" rx="3.2" ry="2.2" fill="#FFFFFF"/>
-          <circle cx="137.5" cy="115" r="1.4" fill="#0F172A"/>
-          <ellipse cx="153" cy="115" rx="3.2" ry="2.2" fill="#FFFFFF"/>
-          <circle cx="153.5" cy="115" r="1.4" fill="#0F172A"/>
-          <!-- Mouth blowing Shankh -->
-          <circle cx="156" cy="125" r="3" fill="#991B1B"/>
-
-          <!-- Royal Mukut (Crown) & Mor Pankh (Peacock Feather) -->
-          <path d="M122 102 L127 76 L145 86 L163 76 L168 102 Z" fill="url(#pitambarGold)" stroke="#FEF08A" stroke-width="1.5"/>
-          <circle cx="145" cy="90" r="4" fill="#EF4444"/>
-          <!-- Peacock Feather -->
-          <path d="M156 78 Q182 54 192 68 Q180 84 156 78 Z" fill="#0EA5E9" stroke="#FBBF24" stroke-width="1.2"/>
-          <circle cx="180" cy="67" r="5" fill="#1E3A8A"/>
-          <circle cx="180" cy="67" r="2.5" fill="#FACC15"/>
-        </svg>
-      </div>
-      <div class="krishna-label">श्री कृष्ण शंखनाद &bull; शुभ आरंभ</div>
+    <div class="om-gita-lines">
+      यदा यदा हि धर्मस्य ग्लानिर्भवति भारत।<br>
+      अभ्युत्थानमधर्मस्य तदात्मानं सृजामहम्।।
     </div>
   </div>
 
@@ -429,10 +244,7 @@
     </div>
     <div class="om-bottom-row">
       <div class="om-timer-status" id="omIntroStatus">Dashboard खुल रहा है… (20s)</div>
-      <div class="om-btn-group">
-        <button type="button" class="om-btn-sound" id="btnToggleShankh" onclick="toggleShankhSound()">🔊 शंख ध्वनि: ON</button>
-        <button type="button" class="om-btn-enter" onclick="finishOmIntroNow()">Dashboard पर चलें →</button>
-      </div>
+      <button type="button" class="om-btn-enter" onclick="finishOmIntroNow()">Dashboard पर चलें →</button>
     </div>
   </div>
 </div>
@@ -630,64 +442,14 @@
   }
 
   
-  /* ---------- Full-Screen Om + Shri Krishna Shankh Intro (up to 20s) ---------- */
+  /* ---------- Full-Screen Rotating Om Intro (no sound, up to 20s) ---------- */
   var introTimer = null;
   var introInterval = null;
   var introTargetUrl = 'index.html';
-  var shankhAudioCtx = null;
-  var shankhMuted = false;
-
-  function playShankhResonance() {
-    if (shankhMuted) return;
-    try {
-      var AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      if (!shankhAudioCtx) shankhAudioCtx = new AudioCtx();
-      if (shankhAudioCtx.state === 'suspended') shankhAudioCtx.resume();
-
-      var now = shankhAudioCtx.currentTime;
-      var osc1 = shankhAudioCtx.createOscillator();
-      var osc2 = shankhAudioCtx.createOscillator();
-      var gain = shankhAudioCtx.createGain();
-
-      osc1.type = 'sawtooth';
-      osc2.type = 'sine';
-      osc1.frequency.setValueAtTime(165, now);
-      osc1.frequency.exponentialRampToValueAtTime(220, now + 0.6);
-      osc1.frequency.setValueAtTime(220, now + 0.6);
-      osc1.frequency.exponentialRampToValueAtTime(196, now + 2.8);
-
-      osc2.frequency.setValueAtTime(330, now);
-      osc2.frequency.exponentialRampToValueAtTime(440, now + 0.6);
-      osc2.frequency.exponentialRampToValueAtTime(392, now + 2.8);
-
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.linearRampToValueAtTime(0.09, now + 0.45);
-      gain.gain.setValueAtTime(0.09, now + 2.0);
-      gain.gain.exponentialRampToValueAtTime(0.0008, now + 3.2);
-
-      osc1.connect(gain);
-      osc2.connect(gain);
-      gain.connect(shankhAudioCtx.destination);
-
-      osc1.start(now);
-      osc2.start(now);
-      osc1.stop(now + 3.3);
-      osc2.stop(now + 3.3);
-    } catch (e) {}
-  }
-
-  function toggleShankhSound() {
-    shankhMuted = !shankhMuted;
-    var b = $('btnToggleShankh');
-    if (b) b.textContent = shankhMuted ? '🔇 शंख ध्वनि: OFF' : '🔊 शंख ध्वनि: ON';
-    if (!shankhMuted) playShankhResonance();
-  }
 
   function finishOmIntroNow() {
     if (introTimer) { clearTimeout(introTimer); introTimer = null; }
     if (introInterval) { clearInterval(introInterval); introInterval = null; }
-    try { if (shankhAudioCtx && shankhAudioCtx.close) { shankhAudioCtx.close().catch(function(){}); shankhAudioCtx = null; } } catch (e) {}
     location.href = introTargetUrl || 'index.html';
   }
 
@@ -707,12 +469,6 @@
     if (!ov) { location.href = introTargetUrl; return; }
     ov.classList.add('show');
 
-    playShankhResonance();
-    var soundLoop = setInterval(function () {
-      if (!ov.classList.contains('show')) { clearInterval(soundLoop); return; }
-      playShankhResonance();
-    }, 4500);
-
     var durationSec = 20;
     var elapsedMs = 0;
     var bar = $('omIntroProgress');
@@ -726,11 +482,10 @@
       var pct = Math.min(100, (elapsedMs / (durationSec * 1000)) * 100);
       var rem = Math.max(0, Math.ceil((durationSec * 1000 - elapsedMs) / 1000));
       if (bar) bar.style.width = pct + '%';
-      if (st) st.textContent = 'ॐ स्वागत है — Dashboard खुल रहा है… (' + rem + 's)';
+      if (st) st.textContent = 'ॐ — Dashboard खुल रहा है… (' + rem + 's)';
     }, 200);
 
     introTimer = setTimeout(function () {
-      clearInterval(soundLoop);
       finishOmIntroNow();
     }, durationSec * 1000);
   }
