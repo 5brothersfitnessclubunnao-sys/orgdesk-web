@@ -7,18 +7,19 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="branch-manager-security.js"></script>
   <style>
-    :root { --bg:#0b0b0d; --card:#16161a; --border:#2c2c35; --ac:#ffcc00; --tx:#f0f0f5; --mut:#9999a8; --ok:#2ecc71; --err:#e74c3c; }
+    :root { --bg:#0b0b0d; --card:#16161a; --border:#2c2c35; --ac:#ffcc00; --tx:#f0f0f5; --mut:#9999a8; --ok:#2ecc71; --err:#e74c3c; --cyan:#38bdf8; }
     *{box-sizing:border-box}
     body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',Arial,sans-serif;margin:0;padding:18px;display:flex;justify-content:center;align-items:center;min-height:100vh}
-    .auth-box{max-width:430px;width:100%;background:var(--card);border:2px solid var(--ac);border-radius:20px;padding:22px;box-shadow:0 0 30px rgba(255,204,0,.14)}
+    .auth-box{max-width:440px;width:100%;background:var(--card);border:2px solid var(--ac);border-radius:20px;padding:22px;box-shadow:0 0 30px rgba(255,204,0,.14)}
     .header{text-align:center;margin-bottom:14px;border-bottom:1.5px dashed var(--border);padding-bottom:10px}
     .badge{background:var(--ac);color:#000;font-size:9px;font-weight:900;padding:2px 10px;border-radius:10px;display:inline-block;margin-bottom:5px}
     .header h2{color:var(--ac);margin:0;font-size:20px;font-weight:900}
     .header p{color:var(--mut);font-size:11.5px;margin:4px 0 0}
-    .tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:14px}
-    .tab{flex:1;text-align:center;padding:8px;font-weight:800;font-size:14.5px;color:var(--mut);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
-    .tab.on{color:var(--ac);border-bottom-color:var(--ac)}
+    .code-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .btn-code-top{flex:1 1 150px;background:#0b0b0d;color:var(--ac);border:1.5px solid rgba(255,204,0,.55);border-radius:10px;padding:8px 10px;font-size:11.5px;font-weight:800;cursor:pointer;text-align:center}
+    .btn-code-top:hover{background:rgba(255,204,0,.12)}
     .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
     .seg button{background:#0b0b0d;border:2px solid var(--border);color:#fff;font-weight:800;font-size:12px;padding:9px 6px;border-radius:10px;cursor:pointer}
     .seg button.on{background:var(--ac);color:#000;border-color:var(--ac)}
@@ -35,68 +36,59 @@
     .msg{padding:9px;border-radius:8px;font-size:12px;margin-bottom:11px;display:none;text-align:center;line-height:1.45}
     .err{background:rgba(231,76,60,.15);border:1px solid var(--err);color:#ff7b6b}
     .okm{background:rgba(46,204,113,.15);border:1px solid var(--ok);color:var(--ok)}
-    .links{display:flex;justify-content:space-between;gap:10px;margin-top:12px;font-size:12px;flex-wrap:wrap}
+    .links{display:flex;justify-content:flex-start;gap:10px;margin-top:12px;font-size:12px;flex-wrap:wrap}
     .links a{color:var(--ac);cursor:pointer;text-decoration:underline}
-    .resume-card{background:#0b0b0d;border:1.5px solid var(--ac);border-radius:12px;padding:12px;margin-bottom:12px;display:none}
-    .resume-card.show{display:block}
-    .btn2{background:#222;color:#fff;border:1.5px solid var(--border);padding:9px 12px;border-radius:10px;font-weight:800;cursor:pointer;font-size:12px}
+
+    /* Code Viewer Modal */
+    .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.86);z-index:99999;padding:16px;align-items:center;justify-content:center}
+    .ov.show{display:flex}
+    .bx{max-width:400px;width:100%;background:#16161a;border:2px solid var(--ac);border-radius:16px;padding:18px;color:var(--tx)}
+    .bx h3{margin:0 0 10px;color:var(--ac);font-size:15px;display:flex;justify-content:space-between;align-items:center}
+    .code-box{background:#0b0b0d;border:1.5px dashed var(--ac);border-radius:10px;padding:12px;text-align:center;margin:10px 0}
+    .code-val{font-size:17px;font-weight:900;color:var(--ok);letter-spacing:1.2px;word-break:break-all}
+    .btn-gen{width:100%;background:var(--cyan);color:#050811;border:none;border-radius:10px;padding:10px;font-weight:900;font-size:13px;cursor:pointer;margin-top:6px}
+    .btn-cls{width:100%;background:#222;color:#fff;border:1px solid var(--border);border-radius:10px;padding:9px;font-weight:800;font-size:12px;cursor:pointer;margin-top:8px}
   </style>
 </head>
 <body>
 
 <div class="auth-box">
   <div class="header">
-    <div class="badge">OM SOFTWARE • SECURE LOGIN</div>
-    <h2 id="formTitle">Welcome Back</h2>
-    <p id="formSub">Email / Mobile + Password + Security Answer se login karein</p>
+    <div class="badge" id="topBadge">OM SOFTWARE • SIGN IN</div>
+    <h2 id="formTitle">Sign In</h2>
+    <p id="formSub">Apne credentials ya Staff Code se sign in karein</p>
   </div>
 
-  <!-- Last Session vs New Session Choice Box -->
-  <div class="resume-card" id="resumeSessionBox">
-    <div style="font-size:12px;font-weight:900;color:var(--ac);margin-bottom:4px">🔄 Active Session Detected</div>
-    <div style="font-size:11px;color:var(--mut);margin-bottom:8px">
-      Last screen: <b id="lastSessionScreenLabel" style="color:#fff">index.html</b>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button type="button" class="btn-main" style="margin-top:0;padding:9px;font-size:12px" onclick="continueLastSession()">▶ Last Session</button>
-      <button type="button" class="btn2" style="padding:9px;font-size:12px" onclick="startNewSessionFresh()">✨ New Session</button>
-    </div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab on" id="tabIn" onclick="setMode('in')">Sign In</div>
-    <div class="tab" id="tabUp" onclick="setMode('up')">Sign Up</div>
+  <!-- Top Code Buttons (Shown after login on phone/PC or for quick code check) -->
+  <div class="code-toolbar" id="postLoginCodeBar" style="display:none">
+    <button type="button" class="btn-code-top" onclick="openCodeModal('employee')">🆔 View Your Employee Code</button>
+    <button type="button" class="btn-code-top" onclick="openCodeModal('staff')">🎫 View Your Staff Code</button>
   </div>
 
   <div id="errBox" class="msg err"></div>
   <div id="okBox" class="msg okm"></div>
 
-  <form id="authForm" onsubmit="submitForm(event)" autocomplete="on">
-    <div class="field" id="nameField" style="display:none">
-      <label>Gym / Organization Name *</label>
-      <input type="text" id="gymName" placeholder="अपने जिम / कंपनी का नाम">
-    </div>
-
+  <form id="authForm" onsubmit="submitForm(event)" autocomplete="off">
     <div class="seg" id="seg">
       <button type="button" id="mEmail" class="on" onclick="setMethod('email')">📧 Email / Mobile</button>
       <button type="button" id="mStaff" onclick="setMethod('staff')">🧑‍💼 Staff Code</button>
     </div>
 
-    <!-- Owner / Admin Email or Mobile -->
+    <!-- Admin / Owner Email or Mobile -->
     <div class="field" id="idField">
       <label id="idLabel">Email या 10-अंक Mobile *</label>
-      <input type="text" id="idInput" placeholder="name@example.com या 9876543210" autocomplete="username">
+      <input type="text" id="idInput" placeholder="name@example.com या 9876543210" autocomplete="off">
     </div>
 
     <div class="field" id="pwField">
       <label>Password *</label>
       <div class="wrap">
-        <input type="password" id="pwInput" placeholder="Password" autocomplete="current-password">
+        <input type="password" id="pwInput" placeholder="Password" autocomplete="off">
         <button type="button" class="eye" onclick="eye('pwInput',this)">👁</button>
       </div>
     </div>
 
-    <!-- Right below Email/Mobile & Password on First Screen: Security Question & Answer -->
+    <!-- Security Question & Answer -->
     <div class="sec-box" id="loginSecBox">
       <div class="sec-box-title">🛡️ Security Question (Bina Jawab Ke Login Nahi Hoga)</div>
       <div class="field" style="margin-bottom:8px">
@@ -114,12 +106,25 @@
       </div>
     </div>
 
-    <!-- Staff Dedicated Access Code -->
+    <!-- Staff Dedicated Access Code + Manager Employee Code + Email Verification -->
     <div class="field" id="staffCodeField" style="display:none">
       <label style="color:var(--ac)">Staff Login Code *</label>
       <input type="text" id="staffCodeInput" placeholder="Enter Staff Login Code (e.g. STF-001-UNNAO)" autocomplete="off">
-      <div style="font-size:11px;color:var(--mut);margin-top:5px">
-        Staff login se sirf Is Mahine ke Admissions, View-Only Attendance, aur Admission/Staff Joining dikhenge.
+
+      <label style="color:var(--ac);margin-top:10px">Manager Employee Code *</label>
+      <input type="text" id="empCodeInput" placeholder="Enter Manager Employee Code (e.g. EMP-001-MGR)" autocomplete="off">
+
+      <label style="color:var(--ac);margin-top:10px">Manager Email (Email Verification Code Ke Liye) *</label>
+      <div style="display:flex;gap:8px;margin-top:2px">
+        <input type="email" id="mgrVerifyEmailInput" placeholder="manager@example.com" autocomplete="off" style="flex:1">
+        <button type="button" id="sendMgrOtpBtn" onclick="sendManagerLoginOtp()" style="background:#38bdf8;color:#0b0b0d;border:none;border-radius:10px;padding:0 12px;font-weight:900;font-size:12px;cursor:pointer;white-space:nowrap">Send Code</button>
+      </div>
+
+      <label style="color:var(--ac);margin-top:10px">6-Digit Email Verification Code *</label>
+      <input type="text" id="mgrOtpInput" maxlength="6" placeholder="Email mein aaya 6-digit code likhein" autocomplete="off">
+
+      <div style="font-size:11px;color:var(--mut);margin-top:6px">
+        Staff login se sirf Admission, Pay Fees aur Staff Joining &amp; Salary ka scope open hoga; bina Employee Code aur Email Verification ke login nahi hoga.
       </div>
     </div>
 
@@ -128,7 +133,26 @@
 
   <div class="links">
     <a onclick="showSecHint()">Security Question Info</a>
-    <span id="swText">Naya account? <a onclick="setMode('up')">Sign Up</a></span>
+  </div>
+</div>
+
+<!-- PIN Protected Employee Code / Staff Code Viewer Modal -->
+<div class="ov" id="codeViewOv">
+  <div class="bx">
+    <h3>
+      <span id="codeModalTitle">Your Code</span>
+      <button type="button" onclick="closeCodeModal()" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer">✕</button>
+    </h3>
+    <div style="font-size:11.5px;color:var(--mut)" id="codeModalDesc">PIN daal kar apna code dekhein (Admin dwara assign kiya hua code).</div>
+    <div id="codePinStep">
+      <input type="password" id="codeViewPinInput" inputmode="numeric" placeholder="Apna PIN daalein (default: 1234)" style="margin-top:10px" onkeydown="if(event.key==='Enter')unlockCodeWithPin()">
+      <div id="codePinErr" style="color:#ff7b6b;font-size:11.5px;margin-top:6px;min-height:14px"></div>
+      <button type="button" class="btn-gen" onclick="unlockCodeWithPin()">🔓 PIN Verify &amp; View Code</button>
+    </div>
+    <div class="code-box" id="codeRevealBox" style="display:none">
+      <div class="code-val" id="codeModalValue">---</div>
+    </div>
+    <button type="button" class="btn-cls" onclick="closeCodeModal()">Close</button>
   </div>
 </div>
 
@@ -136,7 +160,7 @@
   var CFG = { apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" };
   if (!firebase.apps.length) firebase.initializeApp(CFG);
   var auth = firebase.auth(), db = firebase.firestore();
-  var LS = localStorage, mode = 'in', method = 'email';
+  var LS = localStorage, method = 'email', isStaffLinkOnly = false, activeBranchParam = '001';
   var $ = function (i) { return document.getElementById(i); };
 
   function normAns(s) {
@@ -148,35 +172,12 @@
     return Array.prototype.map.call(new Uint8Array(buf), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
   }
 
-  function continueLastSession() {
-    var lastUrl = LS.getItem('om_last_active_url') || 'index.html';
-    location.href = lastUrl;
-  }
-
-  function startNewSessionFresh() {
-    ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role', 'om_staff_session', 'om_last_active_url'].forEach(function (k) { LS.removeItem(k); });
-    $('resumeSessionBox').classList.remove('show');
-    ok('New session ready. Credentials aur Security Answer darj karein.');
-  }
-
-  function setMode(m) {
-    mode = m; hide();
-    $('tabIn').classList.toggle('on', m === 'in');
-    $('tabUp').classList.toggle('on', m === 'up');
-    $('nameField').style.display = m === 'up' ? 'block' : 'none';
-    $('seg').style.display = m === 'in' ? 'grid' : 'none';
-    if (m === 'up') method = 'email';
-    $('formTitle').textContent = m === 'up' ? 'Create Owner Account' : 'Welcome Back';
-    $('formSub').textContent = m === 'up' ? 'Account + Security Question set karein' : 'Email / Mobile + Password + Security Answer se login karein';
-    $('submitBtn').textContent = m === 'up' ? 'Create Account' : 'Sign In';
-    $('swText').innerHTML = m === 'up' ? 'Pehle se account hai? <a onclick="setMode(\'in\')">Sign In</a>' : 'Naya account? <a onclick="setMode(\'up\')">Sign Up</a>';
-    setMethod(method);
-  }
-
   function setMethod(x) {
-    method = x; hide();
-    $('mEmail').classList.toggle('on', x === 'email');
-    $('mStaff').classList.toggle('on', x === 'staff');
+    if (isStaffLinkOnly) x = 'staff';
+    method = x;
+    hide();
+    if ($('mEmail')) $('mEmail').classList.toggle('on', x === 'email');
+    if ($('mStaff')) $('mStaff').classList.toggle('on', x === 'staff');
 
     var isStaff = (x === 'staff');
     $('idField').style.display = isStaff ? 'none' : 'block';
@@ -193,7 +194,7 @@
   function hide() { $('errBox').style.display = 'none'; $('okBox').style.display = 'none'; }
   function err(t) { var e = $('errBox'); e.textContent = t; e.style.display = 'block'; $('okBox').style.display = 'none'; }
   function ok(t) { var e = $('okBox'); e.textContent = t; e.style.display = 'block'; $('errBox').style.display = 'none'; }
-  function busy(b) { var s = $('submitBtn'); s.disabled = b; s.textContent = b ? 'Please wait…' : (mode === 'up' ? 'Create Account' : 'Sign In'); }
+  function busy(b) { var s = $('submitBtn'); s.disabled = b; s.textContent = b ? 'Please wait…' : 'Sign In'; }
 
   function showSecHint() {
     ok('Apna Security Question chunein aur uska jawab likhein. Bina Security Answer ke login nahi hoga.');
@@ -221,13 +222,20 @@
       await auth.sendSignInLinkToEmail(cred, actionCodeSettings);
       LS.setItem('om_last_login_email_sent', JSON.stringify({ email: cred, at: new Date().toISOString() }));
     } catch (e) {
-      // Fallback record in Firestore for trigger-based email delivery
       try {
+        var loginLinkUrl = window.location.href.split('?')[0];
+        var subjTxt = 'Om Software Login Notification & Link';
+        var bodyTxt = 'A login occurred on Om Software account ' + cred + ' at ' + new Date().toISOString() + '. Portal link: ' + loginLinkUrl;
         await db.collection('email_notifications').add({
           to: cred,
           type: 'LOGIN_LINK_ALERT',
-          subject: 'Om Software Login Notification & Link',
-          body: 'A login occurred on Om Software account ' + cred + ' at ' + new Date().toISOString() + '. Portal link: ' + window.location.href.split('?')[0],
+          subject: subjTxt,
+          body: bodyTxt,
+          message: {
+            subject: subjTxt,
+            text: bodyTxt,
+            html: '<p>' + bodyTxt + '</p><p><a href="' + loginLinkUrl + '">Open Om Software Portal</a></p>'
+          },
           createdAt: new Date().toISOString()
         });
       } catch (err2) {}
@@ -244,11 +252,21 @@
       var alertMsg = 'Unauthorised access attempt detected! Please change your password immediately.';
       var targetEmail = isRealEmail(idToCred(cleanId)) ? idToCred(cleanId) : cleanId;
       try {
+        var alertSubj = 'SECURITY ALERT: Unauthorised Access Attempt (' + cnt + ' Failed Attempts)';
+        var alertBody = alertMsg + ' Account: ' + cleanId + ' | Failed Attempts: ' + cnt + ' | Time: ' + new Date().toISOString();
         await db.collection('security_alerts').add({
+          to: targetEmail,
           target: cleanId,
           email: targetEmail,
           attempts: cnt,
+          subject: alertSubj,
+          body: alertBody,
           message: alertMsg,
+          emailPayload: {
+            subject: alertSubj,
+            text: alertBody,
+            html: '<p><strong style="color:#d9534f;">' + alertMsg + '</strong></p><p>Account: ' + cleanId + '<br>Failed Attempts: ' + cnt + '</p>'
+          },
           createdAt: new Date().toISOString()
         });
       } catch (e) {}
@@ -267,7 +285,7 @@
     return (e && e.message) || 'कुछ गड़बड़ हुई।';
   }
 
-  async function enforceSecurityQuestion(orgId, isSignUp) {
+  async function enforceSecurityQuestion(orgId) {
     var qSel = $('loginSecQ').value;
     var ansNorm = normAns($('loginSecAns').value);
     if (!ansNorm) {
@@ -278,7 +296,7 @@
     var storageKey = 'om_login_sq_' + orgId;
     var existingRaw = LS.getItem(storageKey);
 
-    if (!isSignUp && !existingRaw) {
+    if (!existingRaw) {
       try {
         var cloudSnap = await db.collection('orgs').doc(orgId).collection('private').doc('login_sq').get();
         if (cloudSnap && cloudSnap.exists && cloudSnap.data() && cloudSnap.data().h) {
@@ -288,7 +306,7 @@
       } catch (e) {}
     }
 
-    if (isSignUp || !existingRaw) {
+    if (!existingRaw) {
       var payload = { q: qSel, h: hashVal, updatedAt: new Date().toISOString() };
       LS.setItem(storageKey, JSON.stringify(payload));
       try { await db.collection('orgs').doc(orgId).collection('private').doc('login_sq').set(payload, { merge: true }); } catch (e) {}
@@ -302,44 +320,97 @@
     }
   }
 
+  var pendingMgrOtp = '';
+
+  async function sendManagerLoginOtp() {
+    hide();
+    var code = String($('staffCodeInput').value || '').trim().toUpperCase();
+    var empCode = String($('empCodeInput').value || '').trim().toUpperCase();
+    var mgrEmail = String($('mgrVerifyEmailInput').value || '').trim();
+    if (!code || !empCode) {
+      err('Pehle Staff Login Code aur Manager Employee Code dono likhein.');
+      return;
+    }
+    if (!mgrEmail || mgrEmail.indexOf('@') === -1) {
+      err('Verification code bhejne ke liye sahi Manager Email likhein.');
+      return;
+    }
+    var branchCode = activeBranchParam || '001';
+    var m = code.match(/(?:STF|MGR|EMP)-(\d{3})/) || empCode.match(/(?:STF|MGR|EMP)-(\d{3})/);
+    if (m && m[1]) branchCode = m[1];
+
+    if (window.OmBranchSecurity) {
+      var entry = window.OmBranchSecurity.ensureBranchEntry(branchCode);
+      if (entry.managerEmail && entry.managerEmail.toLowerCase() !== mgrEmail.toLowerCase()) {
+        err('Yeh email is branch ke registered manager email se match nahi karta!');
+        return;
+      }
+      if (!entry.managerEmail) {
+        window.OmBranchSecurity.ensureBranchEntry(branchCode, { managerEmail: mgrEmail, staffCode: code, employeeCode: empCode });
+      }
+      pendingMgrOtp = String(Math.floor(100000 + Math.random() * 900000));
+      await window.OmBranchSecurity.queueVerificationEmail(mgrEmail, branchCode, code, empCode, pendingMgrOtp);
+    } else {
+      pendingMgrOtp = String(Math.floor(100000 + Math.random() * 900000));
+    }
+    ok('Verification code ' + mgrEmail + ' par bhej diya gaya hai. 6-digit code daal kar Sign In karein.');
+  }
+
   function loginWithStaffCode(codeRaw) {
     var code = String(codeRaw || '').trim().toUpperCase();
-    if (!code) throw { message: 'Staff ya Manager Login Code likhein (jaise MGR-001-UNNAO ya STF-001-UNNAO-1).' };
+    var empCode = String($('empCodeInput') ? $('empCodeInput').value : '').trim().toUpperCase();
+    var mgrEmail = String($('mgrVerifyEmailInput') ? $('mgrVerifyEmailInput').value : '').trim();
+    var otpVal = String($('mgrOtpInput') ? $('mgrOtpInput').value : '').trim();
 
-    var branchCode = '001';
+    if (!code) throw { message: 'Staff Login Code likhein (jaise STF-001-UNNAO).' };
+    if (!empCode) throw { message: 'Manager Employee Code likhein (jaise EMP-001-MGR).' };
+    if (!mgrEmail || mgrEmail.indexOf('@') === -1) throw { message: 'Verification ke liye Manager Email likhein.' };
+    if (!pendingMgrOtp || otpVal !== pendingMgrOtp) throw { message: '6-digit Email Verification Code sahi nahi hai — pehle "Send Code" dabakar email verify karein.' };
+
+    var branchCode = activeBranchParam || '001';
     var cityName = 'All India Branch';
-    var m = code.match(/(?:STF|MGR)-(\d{3})/);
+    var m = code.match(/(?:STF|MGR|EMP)-(\d{3})/) || empCode.match(/(?:STF|MGR|EMP)-(\d{3})/);
     if (m && m[1]) branchCode = m[1];
     var parts = code.split('-');
     if (parts.length >= 3) cityName = parts[2];
+
+    if (window.OmBranchSecurity) {
+      var entry = window.OmBranchSecurity.ensureBranchEntry(branchCode);
+      if (entry.employeeCode && empCode !== window.OmBranchSecurity.normCode(entry.employeeCode)) {
+        throw { message: 'Employee Code is branch ke liye valid nahi hai!' };
+      }
+      window.OmBranchSecurity.markVerifiedForBranch(branchCode, code, empCode, mgrEmail);
+    }
+
+    LS.setItem('om_device_logged_in', '1');
+    LS.setItem('om_my_staff_code_' + branchCode, code);
+    LS.setItem('om_my_emp_code_' + branchCode, empCode);
 
     LS.removeItem('om_org_profile');
     LS.setItem('bfc_role', 'staff');
     LS.setItem('bfc_org_id', 'staff_org_' + branchCode);
     LS.setItem('om_staff_session', JSON.stringify({
       code: code,
+      employeeCode: empCode,
       branchCode: branchCode,
       city: cityName,
       role: 'staff',
+      verifiedEmail: mgrEmail,
       loggedInAt: new Date().toISOString()
     }));
-    LS.setItem('om_last_active_url', 'index.html');
-    location.href = 'index.html';
+    LS.setItem('om_last_active_url', 'index.html?role=staff&branch=' + encodeURIComponent(branchCode));
+    location.href = 'index.html?role=staff&branch=' + encodeURIComponent(branchCode);
   }
 
-  async function afterAuth(user, justSignedUp, signupGym, credEmail) {
+  async function afterAuth(user, credEmail) {
     var orgId = user.uid;
-    await enforceSecurityQuestion(orgId, justSignedUp);
+    await enforceSecurityQuestion(orgId);
     await dispatchLoginLinkEmail(user, credEmail);
 
-    // Reset failed counter on successful login
     LS.removeItem('om_fail_cnt_' + String(credEmail || '').trim().toLowerCase());
+    LS.setItem('om_device_logged_in', '1');
 
-    var base = { createdAt: new Date().toISOString(), ownerUid: orgId };
-    if (justSignedUp && signupGym) { base.gymName = signupGym; base.category = 'gym'; }
-    try { await db.collection('orgs').doc(orgId).set(base, { merge: true }); } catch (e) {}
-
-    var resolvedOrgName = signupGym || user.email || 'Om Software Owner';
+    var resolvedOrgName = user.email || 'Om Software Owner';
     try {
       var orgSnap = await db.collection('orgs').doc(orgId).get();
       if (orgSnap && orgSnap.exists && orgSnap.data()) {
@@ -361,7 +432,7 @@
     busy(true);
     var rawInput = $('idInput').value.trim();
     try {
-      if (mode === 'in' && method === 'staff') {
+      if (isStaffLinkOnly || method === 'staff') {
         loginWithStaffCode($('staffCodeInput').value);
         return;
       }
@@ -370,22 +441,11 @@
         throw { message: 'Security Answer bharna zaroori hai — bina security answer ke login nahi hoga.' };
       }
 
-      if (mode === 'up') {
-        var gym = $('gymName').value.trim();
-        if (!gym) throw { message: 'Gym / Organization का नाम लिखें।' };
-        var raw = $('idInput').value.trim(), pw = $('pwInput').value;
-        if (!raw) throw { message: 'Email या 10-अंक Mobile लिखें।' };
-        if (!pw || pw.length < 6) throw { message: 'Password कम से कम 6 अक्षर का रखें।' };
-        var credUp = idToCred(raw);
-        var cred = await auth.createUserWithEmailAndPassword(credUp, pw);
-        await afterAuth(cred.user, true, gym, credUp);
-      } else {
-        var raw2 = $('idInput').value.trim(), pw2 = $('pwInput').value;
-        if (!raw2 || !pw2) throw { message: 'Email/Mobile और Password दोनों लिखें।' };
-        var credIn = idToCred(raw2);
-        var c3 = await auth.signInWithEmailAndPassword(credIn, pw2);
-        await afterAuth(c3.user, false, null, credIn);
-      }
+      var raw2 = $('idInput').value.trim(), pw2 = $('pwInput').value;
+      if (!raw2 || !pw2) throw { message: 'Email/Mobile और Password दोनों लिखें।' };
+      var credIn = idToCred(raw2);
+      var c3 = await auth.signInWithEmailAndPassword(credIn, pw2);
+      await afterAuth(c3.user, credIn);
     } catch (x) {
       var alertBanner = await recordFailedAttemptAndAlert(rawInput);
       var msgText = friendly(x);
@@ -395,21 +455,79 @@
     }
   }
 
-  (function init() {
-    var q = new URLSearchParams(location.search);
-    if (q.get('logout')) {
-      ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role', 'om_staff_session', 'om_last_active_url'].forEach(function (k) { LS.removeItem(k); });
-      auth.signOut().catch(function () {});
+  // PIN-Protected Code Viewer Modal Logic (No self-generation by staff)
+  var currentCodeKind = 'employee';
+  function getCodeStorageKey(kind) {
+    var bc = activeBranchParam || '001';
+    return kind === 'employee' ? ('om_my_emp_code_' + bc) : ('om_my_staff_code_' + bc);
+  }
+
+  function getViewPin() {
+    return LS.getItem('om_code_view_pin') || LS.getItem('om_admin_pin') || '1234';
+  }
+
+  function openCodeModal(kind) {
+    currentCodeKind = kind;
+    var bc = activeBranchParam || '001';
+    $('codeModalTitle').textContent = (kind === 'employee' ? '🆔 Your Employee Code' : '🎫 Your Staff Code') + ' (Branch ' + bc + ')';
+    $('codeModalDesc').textContent = 'PIN daalein taaki koi aur aapka code na dekh sake.';
+    $('codeViewPinInput').value = '';
+    $('codePinErr').textContent = '';
+    $('codePinStep').style.display = 'block';
+    $('codeRevealBox').style.display = 'none';
+    $('codeViewOv').classList.add('show');
+    setTimeout(function() { if ($('codeViewPinInput')) $('codeViewPinInput').focus(); }, 60);
+  }
+
+  function unlockCodeWithPin() {
+    var pinEntered = String(($('codeViewPinInput') && $('codeViewPinInput').value) || '').trim();
+    if (pinEntered !== getViewPin()) {
+      $('codePinErr').textContent = 'Galat PIN! Sahi PIN daalein.';
       return;
     }
-    var lastUrl = LS.getItem('om_last_active_url');
-    var orgId = LS.getItem('bfc_org_id');
-    if (orgId && lastUrl) {
-      $('lastSessionScreenLabel').textContent = lastUrl;
-      $('resumeSessionBox').classList.add('show');
+    var bc = activeBranchParam || '001';
+    var savedVal = LS.getItem(getCodeStorageKey(currentCodeKind));
+    if (!savedVal && window.OmBranchSecurity) {
+      var entry = window.OmBranchSecurity.ensureBranchEntry(bc);
+      savedVal = currentCodeKind === 'employee' ? entry.employeeCode : entry.staffCode;
+    }
+    $('codeModalValue').textContent = savedVal || 'Admin dwara abhi assign nahi kiya gaya';
+    $('codePinStep').style.display = 'none';
+    $('codeRevealBox').style.display = 'block';
+  }
+
+  function closeCodeModal() {
+    $('codeViewOv').classList.remove('show');
+  }
+
+  (function init() {
+    var q = new URLSearchParams(location.search);
+    if (q.get('branch')) activeBranchParam = String(q.get('branch')).trim();
+    if (q.get('role') === 'staff' || q.get('staffonly') === '1' || q.get('mode') === 'staff') {
+      isStaffLinkOnly = true;
+    }
+
+    if (q.get('logout')) {
+      ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role', 'om_staff_session', 'om_last_active_url', 'om_device_logged_in'].forEach(function (k) { LS.removeItem(k); });
+      auth.signOut().catch(function () {});
+    }
+
+    // Never show "Active Session Detected / Last Session" box; always open fresh form
+    if (isStaffLinkOnly) {
+      if ($('seg')) $('seg').style.display = 'none';
+      $('topBadge').textContent = 'STAFF APP • STAFF LOGIN ONLY';
+      $('formTitle').textContent = 'Staff Login';
+      $('formSub').textContent = 'Keval Staff Login Code + Manager Employee Code + Email Verification se login karein';
+      setMethod('staff');
+    } else {
+      setMethod('email');
+    }
+
+    // If already logged in once on this phone/PC, show the top code buttons
+    if (LS.getItem('om_device_logged_in') === '1' || LS.getItem('bfc_org_id') || LS.getItem('om_staff_session')) {
+      $('postLoginCodeBar').style.display = 'flex';
     }
   })();
-  setMode('in');
 </script>
 </body>
 </html>

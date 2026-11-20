@@ -192,6 +192,7 @@
       .mod-sub { white-space: normal; font-size: 10px; }
     }
   </style>
+  <script src="branch-manager-security.js"></script>
 </head>
 <body>
 
@@ -208,6 +209,8 @@
       <button type="button" class="btn-nav" onclick="askPin(viewLic)">🔑 License</button>
       <button type="button" class="btn-nav" onclick="askPin(viewSec)">🛡️ Code</button>
       <button type="button" class="btn-nav" onclick="openBranchCodesDirectory()">📂 Staff Codes</button>
+            <button type="button" class="btn-nav" onclick="openDashboardCodeModal('employee')">🆔 View Your Employee Code</button>
+      <button type="button" class="btn-nav" onclick="openDashboardCodeModal('staff')">🎫 View Your Staff Code</button>
       <button type="button" class="btn-nav logout" onclick="omLogoutNow()">🚪 Logout</button>
     </div>
   </header>
