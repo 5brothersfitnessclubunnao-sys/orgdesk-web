@@ -1,3 +1,15 @@
+
+  // Anti-Tamper Check: If someone manually tries to change localStorage bfc_role to 'owner' while staff session exists
+  function verifyRoleIntegrity() {
+    var hasStaffSess = !!staffSess();
+    var r = LS.getItem("bfc_role");
+    if (hasStaffSess && r === "owner") {
+      // Tampering detected: staff session cannot claim owner privileges
+      console.warn("Security Alert: Role tampering detected! Resetting to staff.");
+      LS.setItem("bfc_role", "staff");
+    }
+  }
+
 // auth-gate.js v2 - Role Lock, Staff Page Allowlist, Background Lock & Continue/New Session
 (function () {
   var LS = localStorage;
@@ -46,10 +58,17 @@
   }
 
   // Staff ko sirf ye pages: Dashboard (3 option), Admission, Pay Fees, Staff Joining, Staff Salary
+    // Staff ko sirf ye limited pages allowed hain:
+  // Dashboard (limited 4-tile view), Admission Form, Pay Fees, Staff Joining
+  // Staff-Salary aur Branch-Report kisi bhi keemat par staff ke liye khula nahi rahega!
   function staffAllowed(file) {
-    file = (file || "").toLowerCase();
-    return file === "" || file === "index.html" || file === "staff-join.html" || file === "staff-salary.html" ||
-      file.indexOf("join") === 0 || file.indexOf("pay") === 0;
+    file = (file || "").toLowerCase().split("?")[0];
+    if (file === "" || file === "index.html") return true;
+    if (file === "staff-join.html") return true;
+    if (file.indexOf("join") === 0) return true;
+    if (file.indexOf("pay") === 0) return true;
+    // Disallow staff-salary.html and branch-report.html
+    return false;
   }
 
   window.bfcLogin = async function () {
@@ -145,6 +164,7 @@
 
   // ---------- Guard (page load par turant) ----------
   function guard() {
+    verifyRoleIntegrity();
     if (IS_AUTH_PAGE) return true;
     var params = new URLSearchParams(window.location.search);
 

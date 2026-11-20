@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
+<script>
+// Immediate Hard Role Lock: Block staff from multi-branch salary & branch revenue reports
+(function() {
+  try {
+    var role = localStorage.getItem("bfc_role");
+    var staffSess = localStorage.getItem("om_staff_session");
+    if (role === "staff" || staffSess) {
+      alert("🔒 Access Denied: Staff login ke paas Master Salary ya Branch Revenue dekhne ki anumati nahi hai.");
+      window.location.replace("index.html");
+    }
+  } catch(e) {}
+})();
+</script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Om Software - Staff Salary Folders</title>

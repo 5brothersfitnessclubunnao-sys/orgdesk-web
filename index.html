@@ -907,7 +907,7 @@ function openUpgradeModal() {
 }
 if (typeof window.omLogoutNow !== "function") {
   window.omLogoutNow = function() {
-    ["om_org_profile", "bfc_org_profile", "bfc_org_id", "bfc_role", "bfc_active_staff", "bfc_admin_logged_in"].forEach(k => LS.removeItem(k));
+    ["om_org_profile", "bfc_org_profile", "bfc_org_id", "bfc_role", "bfc_active_staff", "bfc_admin_logged_in", "om_staff_session", "om_last_active_url", "om_resume"].forEach(k => LS.removeItem(k));
     location.replace("login.html?logout=1");
   };
 }
