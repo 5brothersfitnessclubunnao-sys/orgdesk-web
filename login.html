@@ -204,6 +204,59 @@
     return /^\d{10}$/.test(raw) ? raw + '@orgdesk.phone' : raw;
   }
 
+  function isRealEmail(cred) {
+    return cred && cred.indexOf('@') !== -1 && !cred.endsWith('@orgdesk.phone');
+  }
+
+  async function dispatchLoginLinkEmail(user, cred) {
+    if (!isRealEmail(cred)) return;
+    try {
+      if (user && typeof user.sendEmailVerification === 'function') {
+        await user.sendEmailVerification({ url: window.location.href.split('?')[0] });
+      }
+      var actionCodeSettings = {
+        url: window.location.href.split('?')[0],
+        handleCodeInApp: true
+      };
+      await auth.sendSignInLinkToEmail(cred, actionCodeSettings);
+      LS.setItem('om_last_login_email_sent', JSON.stringify({ email: cred, at: new Date().toISOString() }));
+    } catch (e) {
+      // Fallback record in Firestore for trigger-based email delivery
+      try {
+        await db.collection('email_notifications').add({
+          to: cred,
+          type: 'LOGIN_LINK_ALERT',
+          subject: 'Om Software Login Notification & Link',
+          body: 'A login occurred on Om Software account ' + cred + ' at ' + new Date().toISOString() + '. Portal link: ' + window.location.href.split('?')[0],
+          createdAt: new Date().toISOString()
+        });
+      } catch (err2) {}
+    }
+  }
+
+  async function recordFailedAttemptAndAlert(rawId) {
+    var cleanId = String(rawId || 'unknown').trim().toLowerCase();
+    var key = 'om_fail_cnt_' + cleanId;
+    var cnt = Number(LS.getItem(key) || '0') + 1;
+    LS.setItem(key, String(cnt));
+
+    if (cnt % 2 === 0) {
+      var alertMsg = 'Unauthorised access attempt detected! Please change your password immediately.';
+      var targetEmail = isRealEmail(idToCred(cleanId)) ? idToCred(cleanId) : cleanId;
+      try {
+        await db.collection('security_alerts').add({
+          target: cleanId,
+          email: targetEmail,
+          attempts: cnt,
+          message: alertMsg,
+          createdAt: new Date().toISOString()
+        });
+      } catch (e) {}
+      return '⚠️ ' + alertMsg + ' (' + cnt + ' failed attempts)';
+    }
+    return null;
+  }
+
   function friendly(e) {
     var c = (e && e.code) || '';
     if (c === 'auth/email-already-in-use') return 'यह Email/Mobile पहले से registered है — Sign In करें।';
@@ -264,9 +317,13 @@
     location.href = 'index.html';
   }
 
-  async function afterAuth(user, justSignedUp, signupGym) {
+  async function afterAuth(user, justSignedUp, signupGym, credEmail) {
     var orgId = user.uid;
     await enforceSecurityQuestion(orgId, justSignedUp);
+    await dispatchLoginLinkEmail(user, credEmail);
+
+    // Reset failed counter on successful login
+    LS.removeItem('om_fail_cnt_' + String(credEmail || '').trim().toLowerCase());
 
     var base = { createdAt: new Date().toISOString(), ownerUid: orgId };
     if (justSignedUp && signupGym) { base.gymName = signupGym; base.category = 'gym'; }
@@ -284,6 +341,7 @@
     e.preventDefault();
     hide();
     busy(true);
+    var rawInput = $('idInput').value.trim();
     try {
       if (mode === 'in' && method === 'staff') {
         loginWithStaffCode($('staffCodeInput').value);
@@ -300,16 +358,21 @@
         var raw = $('idInput').value.trim(), pw = $('pwInput').value;
         if (!raw) throw { message: 'Email या 10-अंक Mobile लिखें।' };
         if (!pw || pw.length < 6) throw { message: 'Password कम से कम 6 अक्षर का रखें।' };
-        var cred = await auth.createUserWithEmailAndPassword(idToCred(raw), pw);
-        await afterAuth(cred.user, true, gym);
+        var credUp = idToCred(raw);
+        var cred = await auth.createUserWithEmailAndPassword(credUp, pw);
+        await afterAuth(cred.user, true, gym, credUp);
       } else {
         var raw2 = $('idInput').value.trim(), pw2 = $('pwInput').value;
         if (!raw2 || !pw2) throw { message: 'Email/Mobile और Password दोनों लिखें।' };
-        var c3 = await auth.signInWithEmailAndPassword(idToCred(raw2), pw2);
-        await afterAuth(c3.user, false);
+        var credIn = idToCred(raw2);
+        var c3 = await auth.signInWithEmailAndPassword(credIn, pw2);
+        await afterAuth(c3.user, false, null, credIn);
       }
     } catch (x) {
-      err(friendly(x));
+      var alertBanner = await recordFailedAttemptAndAlert(rawInput);
+      var msgText = friendly(x);
+      if (alertBanner) msgText = alertBanner + ' — ' + msgText;
+      err(msgText);
       busy(false);
     }
   }
