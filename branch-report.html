@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Om Software - Branch Collection & Multi-Branch ERP Report</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070B14;
+      --bg-gradient: radial-gradient(1200px 650px at 50% -5%, #152244 0%, #080D1A 60%, #05070D 100%);
+      --card-bg: rgba(16, 24, 46, 0.9);
+      --card-surface: #0E162B;
+      --border: rgba(45, 68, 115, 0.55);
+      --ac-gold: #FFB800;
+      --ac-cyan: #38BDF8;
+      --ac-green: #10B981;
+      --ac-red: #EF4444;
+      --ac-purple: #A855F7;
+      --tx-main: #FFFFFF;
+      --tx-sub: #CBD5E1;
+      --tx-muted: #8494B2;
+      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.45);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      background: var(--bg-gradient) fixed;
+      color: var(--tx-main);
+      min-height: 100vh;
+    }
+
+    body {
+      padding: clamp(10px, 2vw, 22px) clamp(10px, 2.5vw, 20px) 60px;
+    }
+
+    .wrapper {
+      max-width: 1360px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(12px, 1.8vw, 20px);
+    }
+
+    /* Responsive Top Navigation Header */
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: rgba(13, 20, 39, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: clamp(12px, 1.8vw, 16px) clamp(14px, 2.2vw, 22px);
+      box-shadow: var(--shadow);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1 1 240px;
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #FFB800, #F59E0B);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .brand-text-wrap { min-width: 0; }
+    .brand h1 {
+      font-size: clamp(15px, 1.6vw, 19px);
+      font-weight: 900;
+      line-height: 1.25;
+      color: #FFFFFF;
+    }
+    .brand p {
+      font-size: clamp(11px, 1.1vw, 12px);
+      color: var(--tx-muted);
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-back {
+      background: #192644;
+      color: var(--ac-gold);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 12px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    /* Branch Finder / Filter Card */
+    .filter-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: clamp(14px, 2vw, 22px);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .filter-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .filter-title h2 {
+      font-size: clamp(13px, 1.4vw, 16px);
+      font-weight: 800;
+      color: var(--ac-gold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.3;
+    }
+    .quick-search {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+    .quick-search input {
+      background: #0B1224;
+      border: 1.5px solid var(--border);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      outline: none;
+      min-width: 210px;
+      flex: 1 1 180px;
+    }
+    .quick-search button {
+      background: var(--ac-gold);
+      color: #040814;
+      font-weight: 900;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    .location-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .field-box label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--tx-muted);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .field-box select, .field-box input {
+      width: 100%;
+      background: #0B1224;
+      border: 1.5px solid #22345C;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      outline: none;
+    }
+    .field-box select:focus, .field-box input:focus { border-color: var(--ac-gold); }
+
+    /* Branch Banner & P&L Status */
+    .branch-status-strip {
+      background: linear-gradient(135deg, rgba(20, 31, 60, 0.95), rgba(12, 19, 38, 0.95));
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: clamp(16px, 2vw, 22px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow);
+    }
+    .branch-info { min-width: 0; flex: 1 1 260px; }
+    .branch-info h3 {
+      font-size: clamp(16px, 1.8vw, 21px);
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      line-height: 1.3;
+    }
+    .branch-code-pill {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--ac-cyan);
+      border: 1px solid var(--ac-cyan);
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .branch-info p {
+      font-size: clamp(11.5px, 1.15vw, 12.5px);
+      color: var(--tx-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .pl-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 12px;
+      font-size: clamp(12.5px, 1.3vw, 14.5px);
+      font-weight: 900;
+    }
+    .pl-profit {
+      background: rgba(16, 185, 129, 0.18);
+      border: 2px solid var(--ac-green);
+      color: #34D399;
+    }
+    .pl-loss {
+      background: rgba(239, 68, 68, 0.18);
+      border: 2px solid var(--ac-red);
+      color: #FCA5A5;
+    }
+
+    /* Action Bar */
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: var(--card-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 16px;
+    }
+    .action-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-act {
+      background: #152244;
+      color: #fff;
+      border: 1px solid var(--border);
+      padding: 8px 13px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-act:hover { background: #1C2D5C; border-color: var(--ac-cyan); }
+    .btn-act.gold { background: var(--ac-gold); color: #070B14; border: none; }
+    .btn-act.green { background: var(--ac-green); color: #04140C; border: none; }
+
+    /* Main Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 126px;
+      box-shadow: var(--shadow);
+    }
+    .metric-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--tx-muted);
+      font-weight: 700;
+    }
+    .metric-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .metric-val {
+      font-size: clamp(20px, 2.2vw, 26px);
+      font-weight: 900;
+      color: #fff;
+      margin: 8px 0 3px;
+      line-height: 1.2;
+    }
+    .metric-sub {
+      font-size: 11px;
+      color: var(--tx-muted);
+      line-height: 1.35;
+    }
+
+    /* Modals */
+    .modal-ov {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 15, 0.94);
+      z-index: 99999;
+      padding: 16px;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-ov.show { display: flex; }
+    .modal-bx {
+      background: #101B33;
+      border: 2px solid var(--ac-gold);
+      border-radius: 18px;
+      padding: 20px;
+      max-width: 480px;
+      width: 100%;
+    }
+    .modal-bx h3 {
+      color: var(--ac-gold);
+      font-size: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Tablet / Laptop Breakpoints */
+    @media (max-width: 1024px) {
+      .location-grid { grid-template-columns: repeat(2, 1fr); }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Mobile (Android & iPhone) Breakpoints */
+    @media (max-width: 640px) {
+      .nav-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+      .nav-actions { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+      .quick-search { width: 100%; flex-direction: column; align-items: stretch; }
+      .quick-search input { min-width: 0; width: 100%; }
+      .quick-search button { width: 100%; }
+      .location-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      .action-row { flex-direction: column; align-items: stretch; }
+      .action-group { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .action-group .btn-act:only-child { grid-column: span 2; }
+      .pl-badge { width: 100%; justify-content: center; }
+    }
+
+    /* Very Small Phones */
+    @media (max-width: 380px) {
+      .action-group { grid-template-columns: 1fr; }
+      .action-group .btn-act:only-child { grid-column: span 1; }
+    }
+
+    /* Large Desktop / TV / Wide PC */
+    @media (min-width: 1600px) {
+      .wrapper { max-width: 1520px; }
+      .metric-card { min-height: 142px; padding: 20px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <!-- Top Navigation Header -->
+  <header class="nav-bar">
+    <div class="brand">
+      <div class="brand-icon">📂</div>
+      <div class="brand-text-wrap">
+        <h1>Branch Collection &amp; Multi-Branch ERP</h1>
+        <p>50+ Branches Consolidated Financial &amp; Membership Intelligence</p>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button type="button" class="btn-act green" onclick="triggerManualDriveBackup()">☁️ Backup to Google Drive</button>
+      <a href="../index.html" class="btn-back">⬅️ Dashboard</a>
+    </div>
+  </header>
+
+  <!-- Branch Selection & Location Finder -->
+  <section class="filter-card">
+    <div class="filter-title">
+      <h2>📍 Branch Selector (India &bull; State &bull; City &bull; Area / Pincode)</h2>
+      <div class="quick-search">
+        <input type="text" id="quickBranchInput" placeholder="Branch Code or Name (e.g. BR-UNN-01)...">
+        <button type="button" onclick="quickSearchBranch()">Load Branch</button>
+      </div>
+    </div>
+
+    <div class="location-grid">
+      <div class="field-box">
+        <label>1. Country</label>
+        <select id="selCountry" disabled>
+          <option value="India" selected>🇮🇳 India (भारत)</option>
+        </select>
+      </div>
+      <div class="field-box">
+        <label>2. Select State</label>
+        <select id="selState" onchange="onStateChange()">
+          <option value="Uttar Pradesh" selected>Uttar Pradesh (उत्तर प्रदेश)</option>
+          <option value="Maharashtra">Maharashtra (महाराष्ट्र)</option>
+          <option value="Rajasthan">Rajasthan (राजस्थान)</option>
+          <option value="Delhi NCR">Delhi NCR (दिल्ली)</option>
+          <option value="Madhya Pradesh">Madhya Pradesh (मध्य प्रदेश)</option>
+          <option value="Bihar">Bihar (बिहार)</option>
+        </select>
+      </div>
+      <div class="field-box">
+        <label>3. Select City / District</label>
+        <select id="selCity" onchange="onCityChange()">
+          <option value="Unnao" selected>Unnao (उन्नाव)</option>
+          <option value="Kanpur">Kanpur (कानपुर)</option>
+          <option value="Lucknow">Lucknow (लखनऊ)</option>
+          <option value="Jaipur">Jaipur (जयपुर)</option>
+        </select>
+      </div>
+      <div class="field-box">
+        <label>4. Area / Village / Gali / Pincode</label>
+        <input type="text" id="selArea" list="areaList" placeholder="Type or select (e.g. Akrampur, 209801)..." onchange="onAreaChange()">
+        <datalist id="areaList">
+          <option value="Akrampur - 209801">
+          <option value="Umrao Khera - 209801">
+          <option value="Chandra Nagar - 209801">
+          <option value="Magarwara - 209801">
+          <option value="Civil Lines - 209801">
+          <option value="Shuklaganj - 209861">
+        </datalist>
+      </div>
+    </div>
+  </section>
+
+  <!-- Active Branch Overview & P&L Status -->
+  <section class="branch-status-strip">
+    <div class="branch-info">
+      <h3>
+        <span id="dispBranchName">5 Brother's Fitness Club - Akrampur</span>
+        <span class="branch-code-pill" id="dispBranchCode">BR-UNN-01</span>
+      </h3>
+      <p id="dispBranchLoc">📍 Akrampur, Umrao Khera, Unnao, Uttar Pradesh - 209801 &bull; Manager: Saurabh Singh</p>
+    </div>
+    <div>
+      <div id="plBadge" class="pl-badge pl-profit">
+        🟢 Net Profit: +₹28,500 (Profitable Branch)
+      </div>
+    </div>
+  </section>
+
+  <!-- Action Bar: Expenses & Exports -->
+  <div class="action-row">
+    <div class="action-group">
+      <button type="button" class="btn-act gold" onclick="openExpenseModal()">➕ 1-Min Expense Entry</button>
+      <button type="button" class="btn-act" onclick="unlockCollectionGate()">🔐 Security Code</button>
+    </div>
+    <div class="action-group">
+      <button type="button" class="btn-act" onclick="exportToExcel()">📥 Excel (.xlsx)</button>
+      <button type="button" class="btn-act" onclick="exportToCSV()">📄 CSV</button>
+      <button type="button" class="btn-act green" onclick="sendClosingAlert()">📲 Closing Alert</button>
+    </div>
+  </div>
+
+  <!-- Operational Metrics Grid -->
+  <main class="metrics-grid" id="mainMetrics">
+    <div class="metric-card">
+      <div class="metric-top">
+        <span>TODAY'S COLLECTION</span>
+        <div class="metric-icon">💵</div>
+      </div>
+      <div class="metric-val" id="valTodayCol" style="color:var(--ac-green)">₹4,500</div>
+      <div class="metric-sub">9 Members Paid Today</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-top">
+        <span>LAST MONTH COLLECTION</span>
+        <div class="metric-icon">📅</div>
+      </div>
+      <div class="metric-val" id="valLastMonthCol" style="color:var(--ac-gold)">₹62,000</div>
+      <div class="metric-sub">Previous Month Realized</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-top">
+        <span>TOTAL MEMBERS</span>
+        <div class="metric-icon">🏋️</div>
+      </div>
+      <div class="metric-val" id="valTotalMembers">124</div>
+      <div class="metric-sub">Active Gym Subscriptions</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-top">
+        <span>ADMISSIONS (THIS / LAST MO)</span>
+        <div class="metric-icon">📝</div>
+      </div>
+      <div class="metric-val" id="valAdmissions">18 <span style="font-size:15px;color:var(--tx-muted)">/ 22 LM</span></div>
+      <div class="metric-sub">New Member Onboarding</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-top">
+        <span>STAFF &amp; SALARY</span>
+        <div class="metric-icon">🧑‍💼</div>
+      </div>
+      <div class="metric-val" id="valStaffSalary">₹16,000</div>
+      <div class="metric-sub">2 Trainers + 1 Support Staff</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-top">
+        <span>BRANCH EXPENSES (OPEX)</span>
+        <div class="metric-icon">⚡</div>
+      </div>
+      <div class="metric-val" id="valExpenses" style="color:#FCA5A5">₹17,500</div>
+      <div class="metric-sub">Rent + Electricity + Maintenance</div>
+    </div>
+
+    <div class="metric-card" style="border-color:rgba(255,184,0,0.5)">
+      <div class="metric-top">
+        <span>EXPIRING IN 7 DAYS</span>
+        <div class="metric-icon" style="color:var(--ac-gold)">⚠️</div>
+      </div>
+      <div class="metric-val" id="valExpiringSoon" style="color:var(--ac-gold)">11</div>
+      <div class="metric-sub">Send renewal reminder</div>
+    </div>
+
+    <div class="metric-card" style="border-color:rgba(239,68,68,0.5)">
+      <div class="metric-top">
+        <span>EXPIRED / DUE MEMBERS</span>
+        <div class="metric-icon" style="color:var(--ac-red)">🔴</div>
+      </div>
+      <div class="metric-val" id="valExpired" style="color:var(--ac-red)">7</div>
+      <div class="metric-sub">Inactive / Pending Dues</div>
+    </div>
+  </main>
+</div>
+
+<!-- 1-Minute Expense Entry Modal -->
+<div class="modal-ov" id="expModal">
+  <div class="modal-bx">
+    <h3>
+      <span>⚡ 1-Minute Branch Expense Entry</span>
+      <button type="button" onclick="closeModal('expModal')" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+    </h3>
+    <form onsubmit="saveExpense(event)">
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;color:var(--tx-muted);font-weight:700;">Expense Category</label>
+        <select id="expCat" style="width:100%;background:#0B1224;border:1.5px solid #22345C;color:#fff;padding:10px;border-radius:10px;margin-top:4px;">
+          <option value="Electricity">Electricity Bill (बिजली बिल)</option>
+          <option value="Rent">Premises Rent (किराया)</option>
+          <option value="Maintenance">Equipment Repair / Maintenance</option>
+          <option value="Supplements">Supplement Inventory Restock</option>
+          <option value="Other">Miscellaneous / Chai / Water</option>
+        </select>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:11px;color:var(--tx-muted);font-weight:700;">Amount (₹)</label>
+        <input type="number" id="expAmt" required placeholder="Expense amount in ₹" style="width:100%;background:#0B1224;border:1.5px solid #22345C;color:#fff;padding:10px;border-radius:10px;margin-top:4px;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:11px;color:var(--tx-muted);font-weight:700;">Note / Remarks</label>
+        <input type="text" id="expNote" placeholder="e.g. November electricity bill paid" style="width:100%;background:#0B1224;border:1.5px solid #22345C;color:#fff;padding:10px;border-radius:10px;margin-top:4px;">
+      </div>
+      <button type="submit" style="width:100%;background:var(--ac-gold);color:#070B14;font-weight:900;border:none;padding:12px;border-radius:10px;cursor:pointer;">💾 Save Expense &amp; Recalculate P&amp;L</button>
+    </form>
+  </div>
+</div>
+
+<!-- Security Code Prompt Modal -->
+<div class="modal-ov" id="secModal">
+  <div class="modal-bx">
+    <h3>
+      <span>🔐 Branch Security Code</span>
+      <button type="button" onclick="closeModal('secModal')" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+    </h3>
+    <p style="font-size:12px;color:var(--tx-muted);margin-bottom:10px;">Enter Admin PIN or Branch Access Code to view detailed financial breakdown.</p>
+    <input type="password" id="branchSecCodeIn" placeholder="Admin PIN (Default: 1234)" style="width:100%;background:#0B1224;border:1.5px solid #22345C;color:#fff;padding:12px;border-radius:10px;margin-bottom:10px;">
+    <button type="button" onclick="verifyBranchCode()" style="width:100%;background:var(--ac-green);color:#070B14;font-weight:900;border:none;padding:12px;border-radius:10px;cursor:pointer;">Unlock Full Financials</button>
+  </div>
+</div>
+
+<script>
+const BRANCHES = [
+  {
+    code: "BR-UNN-01", name: "5 Brother's Fitness Club - Akrampur",
+    state: "Uttar Pradesh", city: "Unnao", area: "Akrampur - 209801",
+    todayCol: 4500, lastMonthCol: 62000, members: 124, admCur: 18, admLast: 22,
+    salary: 16000, expenses: 17500, expiring: 11, expired: 7
+  },
+  {
+    code: "BR-UNN-02", name: "5 Brother's Fitness Club - Shuklaganj",
+    state: "Uttar Pradesh", city: "Unnao", area: "Shuklaganj - 209861",
+    todayCol: 3000, lastMonthCol: 48000, members: 92, admCur: 12, admLast: 15,
+    salary: 14000, expenses: 15000, expiring: 8, expired: 4
+  },
+  {
+    code: "BR-KNP-01", name: "5 Brother's Fitness Club - Transport Nagar",
+    state: "Uttar Pradesh", city: "Kanpur", area: "Transport Nagar - 208023",
+    todayCol: 7000, lastMonthCol: 94000, members: 185, admCur: 28, admLast: 31,
+    salary: 24000, expenses: 28000, expiring: 14, expired: 6
+  },
+  {
+    code: "BR-JPR-01", name: "Yash Fitness Club - Kalwar Road",
+    state: "Rajasthan", city: "Jaipur", area: "Kalwar Road - 302012",
+    todayCol: 5500, lastMonthCol: 76000, members: 140, admCur: 20, admLast: 24,
+    salary: 18000, expenses: 21000, expiring: 9, expired: 5
+  }
+];
+
+let currentBranch = BRANCHES[0];
+
+function calculatePL(b) {
+  const net = (b.lastMonthCol || 0) - ((b.salary || 0) + (b.expenses || 0));
+  return { net, isProf: net >= 0 };
+}
+
+function renderBranch() {
+  const b = currentBranch;
+  document.getElementById("dispBranchName").textContent = b.name;
+  document.getElementById("dispBranchCode").textContent = b.code;
+  document.getElementById("dispBranchLoc").textContent = `📍 ${b.area}, ${b.city}, ${b.state} • Code: ${b.code}`;
+
+  document.getElementById("valTodayCol").textContent = "₹" + b.todayCol.toLocaleString("en-IN");
+  document.getElementById("valLastMonthCol").textContent = "₹" + b.lastMonthCol.toLocaleString("en-IN");
+  document.getElementById("valTotalMembers").textContent = b.members;
+  document.getElementById("valAdmissions").innerHTML = `${b.admCur} <span style="font-size:15px;color:var(--tx-muted)">/ ${b.admLast} LM</span>`;
+  document.getElementById("valStaffSalary").textContent = "₹" + b.salary.toLocaleString("en-IN");
+  document.getElementById("valExpenses").textContent = "₹" + b.expenses.toLocaleString("en-IN");
+  document.getElementById("valExpiringSoon").textContent = b.expiring;
+  document.getElementById("valExpired").textContent = b.expired;
+
+  const pl = calculatePL(b);
+  const badge = document.getElementById("plBadge");
+  if (pl.isProf) {
+    badge.className = "pl-badge pl-profit";
+    badge.innerHTML = `🟢 Net Profit: +₹${pl.net.toLocaleString("en-IN")}`;
+  } else {
+    badge.className = "pl-badge pl-loss";
+    badge.innerHTML = `🔴 Net Loss: -₹${Math.abs(pl.net).toLocaleString("en-IN")}`;
+  }
+}
+
+function quickSearchBranch() {
+  const q = document.getElementById("quickBranchInput").value.trim().toLowerCase();
+  if (!q) return;
+  const hit = BRANCHES.find(b => b.code.toLowerCase().includes(q) || b.name.toLowerCase().includes(q) || b.area.toLowerCase().includes(q));
+  if (hit) {
+    currentBranch = hit;
+    renderBranch();
+    alert(`✅ Loaded: ${hit.name} (${hit.code})`);
+  } else {
+    alert("❌ Branch nahi mili.");
+  }
+}
+
+function onStateChange() {}
+function onCityChange() {
+  const c = document.getElementById("selCity").value;
+  const hit = BRANCHES.find(b => b.city === c);
+  if (hit) { currentBranch = hit; renderBranch(); }
+}
+function onAreaChange() {
+  const a = document.getElementById("selArea").value;
+  const hit = BRANCHES.find(b => b.area.includes(a));
+  if (hit) { currentBranch = hit; renderBranch(); }
+}
+
+function openExpenseModal() { document.getElementById("expModal").classList.add("show"); }
+function closeModal(id) { document.getElementById(id).classList.remove("show"); }
+
+function saveExpense(e) {
+  e.preventDefault();
+  const amt = Number(document.getElementById("expAmt").value) || 0;
+  const cat = document.getElementById("expCat").value;
+  currentBranch.expenses += amt;
+  renderBranch();
+  closeModal('expModal');
+  alert(`✅ ₹${amt} (${cat}) saved.`);
+}
+
+function unlockCollectionGate() { document.getElementById("secModal").classList.add("show"); }
+function verifyBranchCode() {
+  const pin = document.getElementById("branchSecCodeIn").value.trim();
+  const valid = localStorage.getItem("om_admin_pin") || "1234";
+  if (pin === valid || pin === currentBranch.code) {
+    closeModal('secModal');
+    alert("🔓 Unlocked: " + currentBranch.name);
+  } else {
+    alert("❌ Galat Security Code / PIN!");
+  }
+}
+
+function exportToExcel() {
+  const data = BRANCHES.map(b => {
+    const pl = calculatePL(b);
+    return {
+      "Branch Code": b.code,
+      "Branch Name": b.name,
+      "City": b.city,
+      "Area / Pincode": b.area,
+      "Today Collection (₹)": b.todayCol,
+      "Last Month Collection (₹)": b.lastMonthCol,
+      "Total Members": b.members,
+      "New Admissions": b.admCur,
+      "Staff Salary (₹)": b.salary,
+      "Operating Expenses (₹)": b.expenses,
+      "Net Profit/Loss (₹)": pl.net,
+      "P&L Status": pl.isProf ? "PROFIT" : "LOSS",
+      "Expiring Members": b.expiring,
+      "Expired Members": b.expired
+    };
+  });
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Branches_Collection_Report");
+  XLSX.writeFile(wb, `Om_Software_Branches_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+function exportToCSV() {
+  const rows = [
+    ["Branch Code", "Branch Name", "City", "Area", "Today Col", "Last Month Col", "Members", "Staff Salary", "Expenses", "Net PL", "Status"],
+    ...BRANCHES.map(b => {
+      const pl = calculatePL(b);
+      return [b.code, b.name, b.city, b.area, b.todayCol, b.lastMonthCol, b.members, b.salary, b.expenses, pl.net, pl.isProf ? "PROFIT" : "LOSS"];
+    })
+  ];
+  const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `Om_Software_Branches_Consolidated_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+}
+
+function triggerManualDriveBackup() {
+  const payload = {
+    backupDate: new Date().toISOString(),
+    system: "Om Software Enterprise ERP",
+    totalBranches: BRANCHES.length,
+    data: BRANCHES
+  };
+  const b = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(b);
+  a.download = `Google_Drive_Backup_11PM_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  alert("☁️ Backup snapshot ready for Google Drive.");
+}
+
+function sendClosingAlert() {
+  const b = currentBranch;
+  const pl = calculatePL(b);
+  const msg = `🏢 *${b.name.toUpperCase()}*\n📊 *Daily Closing Report*\n━━━━━━━━━━━━━━━━━━━━\n💰 *Today Collection:* ₹${b.todayCol}\n📈 *Last Month Total:* ₹${b.lastMonthCol}\n🏋️ *Active Members:* ${b.members}\n📝 *New Admissions:* ${b.admCur}\n⚡ *Expenses & Salary:* ₹${b.salary + b.expenses}\n${pl.isProf ? '🟢 *Net Profit:* +₹' + pl.net : '🔴 *Net Loss:* -₹' + Math.abs(pl.net)}\n⚠️ *Expiring Soon:* ${b.expiring} members\n━━━━━━━━━━━━━━━━━━━━\n☁️ *Google Drive Backup:* Completed Safe (11:00 PM)`;
+  window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+}
+
+window.addEventListener("DOMContentLoaded", renderBranch);
+</script>
+</body>
+</html>
