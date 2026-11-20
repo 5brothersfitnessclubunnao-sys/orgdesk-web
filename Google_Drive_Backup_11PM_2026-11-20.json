@@ -1,0 +1,71 @@
+{
+  "backupDate": "2026-11-20T03:17:07.409Z",
+  "system": "Om Software Enterprise ERP",
+  "totalBranches": 4,
+  "data": [
+    {
+      "code": "BR-UNN-01",
+      "name": "5 Brother's Fitness Club - Akrampur",
+      "state": "Uttar Pradesh",
+      "city": "Unnao",
+      "area": "Akrampur - 209801",
+      "todayCol": 4500,
+      "lastMonthCol": 62000,
+      "members": 124,
+      "admCur": 18,
+      "admLast": 22,
+      "salary": 16000,
+      "expenses": 17500,
+      "expiring": 11,
+      "expired": 7
+    },
+    {
+      "code": "BR-UNN-02",
+      "name": "5 Brother's Fitness Club - Shuklaganj",
+      "state": "Uttar Pradesh",
+      "city": "Unnao",
+      "area": "Shuklaganj - 209861",
+      "todayCol": 3000,
+      "lastMonthCol": 48000,
+      "members": 92,
+      "admCur": 12,
+      "admLast": 15,
+      "salary": 14000,
+      "expenses": 15000,
+      "expiring": 8,
+      "expired": 4
+    },
+    {
+      "code": "BR-KNP-01",
+      "name": "5 Brother's Fitness Club - Transport Nagar",
+      "state": "Uttar Pradesh",
+      "city": "Kanpur",
+      "area": "Transport Nagar - 208023",
+      "todayCol": 7000,
+      "lastMonthCol": 94000,
+      "members": 185,
+      "admCur": 28,
+      "admLast": 31,
+      "salary": 24000,
+      "expenses": 28000,
+      "expiring": 14,
+      "expired": 6
+    },
+    {
+      "code": "BR-JPR-01",
+      "name": "Yash Fitness Club - Kalwar Road",
+      "state": "Rajasthan",
+      "city": "Jaipur",
+      "area": "Kalwar Road - 302012",
+      "todayCol": 5500,
+      "lastMonthCol": 76000,
+      "members": 140,
+      "admCur": 20,
+      "admLast": 24,
+      "salary": 18000,
+      "expenses": 21000,
+      "expiring": 9,
+      "expired": 5
+    }
+  ]
+}
