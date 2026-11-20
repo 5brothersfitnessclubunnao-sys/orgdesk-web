@@ -622,6 +622,9 @@
     <a onclick="forgot()">Forgot Password / Security Code?</a>
     <span id="swText">Naya account? <a onclick="setMode('up')">Sign Up</a></span>
   </div>
+  <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border);text-align:center">
+    <button type="button" onclick="quickPreviewLogin()" style="width:100%;background:#1e293b;color:var(--ac);border:1px solid var(--ac);padding:9px 12px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;">⚡ Quick Preview Login (Tablet / Test Mode)</button>
+  </div>
 </div>
 
 <!-- SECURITY CODE POPUP -->
@@ -822,7 +825,25 @@
     }, durationSec * 1000);
   }
 
-  function showCode(c) { $('codeShow').textContent = c; $('codeOv').classList.add('show'); }
+
+  function quickPreviewLogin() {
+    hide();
+    var demoOrgId = "preview_org_001";
+    var demoProfile = {
+      orgId: demoOrgId,
+      orgName: "Om Software Preview",
+      gymName: "Om Software Preview",
+      category: "gym",
+      createdAt: new Date().toISOString()
+    };
+    LS.setItem("om_org_profile", JSON.stringify(demoProfile));
+    LS.setItem("bfc_org_id", demoOrgId);
+    LS.setItem("bfc_role", "owner");
+    ok("Preview session active — ॐ intro shuru ho raha hai…");
+    launchOmIntroAndRedirect("index.html");
+  }
+
+    function showCode(c) { $('codeShow').textContent = c; $('codeOv').classList.add('show'); }
   function goNext() { $('codeOv').classList.remove('show'); launchOmIntroAndRedirect(nextUrl); }
   function copyCode() { try { navigator.clipboard.writeText(pendingCode); } catch (e) {} ok('Copy हो गया ✔'); }
   function shareCode() { var t = 'मेरा Security Code: ' + pendingCode; if (navigator.share) navigator.share({ text: t }).catch(function () {}); else window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank'); }
