@@ -1453,5 +1453,18 @@ function downloadJoiningFormPDF() {
   renderPage(0);
 }
 </script>
+
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  if ((localStorage.getItem("bfc_role") || "owner") === "staff") {
+    var backBtn = document.querySelector(".top-bar .btn-back");
+    if (backBtn) {
+      backBtn.textContent = "← Staff Desk";
+      backBtn.href = "index.html";
+    }
+  }
+});
+</script>
+
 </body>
 </html>

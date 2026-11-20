@@ -1,4 +1,4 @@
-// auth-gate.js - Session Lock, 1-Minute Idle Auto-Logout & Clean Logout
+// auth-gate.js - Session Lock, Role Enforcement, Last-Session Tracker & Clean Logout
 (function () {
   var LS = localStorage;
   var IDLE_MS = 60 * 1000; // 1 minute inactivity timeout
@@ -14,7 +14,7 @@
   };
 
   window.bfcIsAdmin = async function () {
-    return true;
+    return (LS.getItem("bfc_role") || "owner") !== "staff";
   };
 
   function clearSessionAndGoLogin() {
@@ -24,7 +24,7 @@
       }
     } catch (e) {}
 
-    ["om_org_profile", "bfc_org_profile", "bfc_org_id", "bfc_role", "bfc_active_staff", "bfc_admin_logged_in"].forEach(function (k) {
+    ["om_org_profile", "bfc_org_profile", "bfc_org_id", "bfc_role", "bfc_active_staff", "bfc_admin_logged_in", "om_staff_session", "om_last_active_url"].forEach(function (k) {
       LS.removeItem(k);
     });
 
@@ -61,6 +61,19 @@
   }
 
   function setupBackLock() {
+    var params = new URLSearchParams(window.location.search);
+    if (params.get("role") === "staff") {
+      LS.setItem("bfc_role", "staff");
+      if (!LS.getItem("bfc_org_id")) LS.setItem("bfc_org_id", "staff_link_org");
+      if (!LS.getItem("om_staff_session")) {
+        LS.setItem("om_staff_session", JSON.stringify({
+          code: params.get("code") || "STF-LINK",
+          branchCode: params.get("branch") || "001",
+          role: "Staff"
+        }));
+      }
+    }
+
     var p = window.location.pathname.toLowerCase();
     var isAuthPage = p.endsWith("login.html") || p.endsWith("reset.html");
     var isPublicJoin = p.endsWith("join.html") || p.endsWith("join10000.html") || window.location.search.includes("doc=");
@@ -71,11 +84,12 @@
       return;
     }
 
-    if (orgId && isAuthPage && !window.location.search.includes("logout=1")) {
-      window.location.replace("index.html");
-      return;
+    if (orgId && !isAuthPage) {
+      var curFile = window.location.pathname.split("/").pop() || "index.html";
+      LS.setItem("om_last_active_url", curFile + window.location.search);
     }
 
+    // Prevent back button from leaving system without explicit logout
     if (orgId && !isAuthPage && window.history && window.history.pushState) {
       window.history.pushState({ locked: true }, "", window.location.href);
       window.onpopstate = function () {

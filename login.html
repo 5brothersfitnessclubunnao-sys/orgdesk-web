@@ -19,8 +19,8 @@
     .tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:14px}
     .tab{flex:1;text-align:center;padding:9px;font-weight:800;font-size:15px;color:var(--mut);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
     .tab.on{color:var(--ac);border-bottom-color:var(--ac)}
-    .seg{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:12px}
-    .seg button{background:#0b0b0d;border:2px solid var(--border);color:#fff;font-weight:800;font-size:12px;padding:9px 6px;border-radius:11px;cursor:pointer}
+    .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+    .seg button{background:#0b0b0d;border:2px solid var(--border);color:#fff;font-weight:800;font-size:11px;padding:9px 4px;border-radius:11px;cursor:pointer}
     .seg button.on{background:var(--ac);color:#000;border-color:var(--ac)}
     .hint{font-size:11px;color:var(--mut);margin:-2px 0 12px;line-height:1.5}
     .field{margin-bottom:11px}
@@ -41,126 +41,29 @@
     .ov.show{display:flex}
     .cbox{background:var(--card);border:2px solid var(--ac);border-radius:18px;padding:20px;max-width:430px;width:100%;margin:auto;text-align:left}
     .btn2{width:100%;background:#222;color:#fff;border:1.5px solid var(--border);padding:10px;border-radius:10px;font-weight:800;cursor:pointer;margin-top:8px;font-size:12.5px}
-
-    /* Full-Screen 100% Solid Cosmic Galaxy + Grand 3D Solar System + Big Rotating Om */
-    #omIntroOverlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
-      z-index: 2147483647 !important;
-      background: #02040a !important;
-      overflow: hidden;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: clamp(14px, 2.5vh, 28px) clamp(14px, 3vw, 36px);
-      color: #fff;
-      perspective: 1400px;
-    }
-    #omIntroOverlay.show {
-      display: flex !important;
-      animation: cosmosEntrance 0.5s ease-out forwards;
-    }
-    @keyframes cosmosEntrance {
-      from { opacity: 0; transform: scale(1.02); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .cosmos-backdrop {
-      position: absolute; inset: 0;
-      background: radial-gradient(circle at 50% 48%, rgba(245, 158, 11, 0.28) 0%, rgba(14, 165, 233, 0.16) 35%, rgba(15, 23, 42, 0.96) 72%, #02040a 100%);
-      pointer-events: none;
-    }
-    .galaxy-spiral-mesh {
-      position: absolute; width: min(1700px, 220vmax); height: min(1700px, 220vmax);
-      top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(0deg); border-radius: 50%;
-      background: conic-gradient(from 0deg, rgba(56, 189, 248, 0.20) 0deg 45deg, rgba(168, 85, 247, 0.22) 45deg 110deg, rgba(255, 184, 0, 0.26) 110deg 180deg, rgba(14, 165, 233, 0.20) 180deg 260deg, rgba(236, 72, 153, 0.18) 260deg 320deg, rgba(56, 189, 248, 0.20) 320deg 360deg);
-      filter: blur(40px); animation: galaxySpinSlow 40s linear infinite; pointer-events: none;
-      mask-image: radial-gradient(circle, rgba(0,0,0,1) 22%, transparent 74%);
-      -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 22%, transparent 74%);
-    }
-    @keyframes galaxySpinSlow { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-    .cosmos-stars-field {
-      position: absolute; inset: 0;
-      background-image:
-        radial-gradient(2.2px 2.2px at 10% 12%, #ffffff 90%, transparent),
-        radial-gradient(1.8px 1.8px at 25% 75%, #fde68a 90%, transparent),
-        radial-gradient(2.5px 2.5px at 42% 18%, #93c5fd 90%, transparent),
-        radial-gradient(1.6px 1.6px at 65% 12%, #ffffff 90%, transparent),
-        radial-gradient(3px 3px at 85% 32%, #fef08a 90%, transparent),
-        radial-gradient(1.8px 1.8px at 92% 68%, #bae6fd 90%, transparent),
-        radial-gradient(2.2px 2.2px at 18% 46%, #e9d5ff 90%, transparent),
-        radial-gradient(1.8px 1.8px at 74% 82%, #ffffff 90%, transparent),
-        radial-gradient(2.5px 2.5px at 52% 88%, #fde68a 90%, transparent),
-        radial-gradient(2.2px 2.2px at 8% 85%, #7dd3fc 90%, transparent);
-      animation: starsTwinkle 3.2s ease-in-out infinite alternate; pointer-events: none;
-    }
-    @keyframes starsTwinkle { 0% { opacity: 0.6; } 100% { opacity: 1; } }
-    .om-intro-top { position: relative; z-index: 10; text-align: center; width: 100%; max-width: 1080px; }
-    .om-software-pill {
-      display: inline-block; background: linear-gradient(135deg, #FFB800, #F59E0B); color: #090c14;
-      font-weight: 900; font-size: clamp(10px, 1.3vw, 13px); padding: 4px 16px; border-radius: 999px;
-      letter-spacing: 1.6px; text-transform: uppercase; margin-bottom: 6px;
-    }
-    .om-software-title {
-      font-size: clamp(26px, 5.2vw, 56px); font-weight: 900; letter-spacing: 1.5px; line-height: 1.15;
-      background: linear-gradient(180deg, #FFFFFF 0%, #FFE066 45%, #F59E0B 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase;
-    }
-    .om-tagline-hero { margin-top: 5px; font-size: clamp(13px, 2vw, 20px); font-weight: 800; letter-spacing: 1.2px; color: #FACC15; text-transform: uppercase; }
-    .om-org-sub { margin-top: 4px; font-size: clamp(12px, 1.6vw, 16px); font-weight: 600; color: #CBD5E1; }
-    .om-center-stage { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(8px, 1.6vh, 16px); flex: 1; width: 100%; max-width: 1180px; text-align: center; }
-    .solar-universe-stage { position: relative; width: clamp(320px, 82vw, 680px); height: clamp(240px, 54vw, 420px); display: flex; align-items: center; justify-content: center; transform-style: preserve-3d; }
-    .om-solar-corona { position: absolute; width: clamp(180px, 38vw, 320px); height: clamp(180px, 38vw, 320px); border-radius: 50%; background: radial-gradient(circle, rgba(255, 184, 0, 0.52) 0%, rgba(245, 158, 11, 0.22) 55%, transparent 75%); pointer-events: none; }
-    .om-3d-glyph { position: relative; z-index: 8; display: inline-block; font-size: clamp(114px, 22vw, 200px); line-height: 1; font-weight: 900; color: #FFE066; animation: omYRotate 8s linear infinite; user-select: none; }
-    @keyframes omYRotate { 0% { transform: rotateY(0deg) scale(1); } 50% { transform: rotateY(180deg) scale(1.06); } 100% { transform: rotateY(360deg) scale(1); } }
-    .om-gita-lines { max-width: 900px; padding: 6px 16px; font-size: clamp(15px, 2.4vw, 25px); font-weight: 800; line-height: 1.5; color: #FDE68A; }
-    .om-intro-bottom { position: relative; z-index: 10; width: 100%; max-width: 720px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .om-progress-track { width: 100%; height: 5px; background: rgba(255, 255, 255, 0.16); border-radius: 999px; overflow: hidden; }
-    .om-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #38BDF8, #FFB800, #22C55E); transition: width 0.2s linear; }
-    .om-bottom-row { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .om-timer-status { font-size: clamp(12px, 1.4vw, 14px); color: #E2E8F0; font-weight: 700; }
-    .om-btn-enter { background: linear-gradient(135deg, #22C55E, #16A34A); color: #041A0C; border: none; padding: 9px 22px; border-radius: 10px; font-size: 13px; font-weight: 900; cursor: pointer; }
+    .resume-card{background:#0b0b0d;border:1.5px solid var(--ac);border-radius:14px;padding:14px;margin-bottom:14px;display:none}
+    .resume-card.show{display:block}
   </style>
 </head>
 <body>
-
-<div id="omIntroOverlay" role="dialog" aria-label="Welcome To Om Software Cosmic Intro">
-  <div class="cosmos-backdrop"></div>
-  <div class="galaxy-spiral-mesh"></div>
-  <div class="cosmos-stars-field"></div>
-  <div class="om-intro-top">
-    <div class="om-software-pill">Official Portal &bull; Enterprise Experience</div>
-    <div class="om-software-title" id="introSoftwareName">WELCOME TO OM SOFTWARE</div>
-    <div class="om-tagline-hero">Trust &bull; Technology &bull; Power of Innovation</div>
-    <div class="om-org-sub" id="introOrgSubtitle">Universal Gym &amp; Business Management System</div>
-  </div>
-  <div class="om-center-stage">
-    <div class="solar-universe-stage">
-      <div class="om-solar-corona"></div>
-      <div class="om-3d-glyph" aria-hidden="true">ॐ</div>
-    </div>
-    <div class="om-gita-lines">
-      यदा यदा हि धर्मस्य ग्लानिर्भवति भारत।<br>
-      अभ्युत्थानमधर्मस्य तदात्मानं सृजामहम्।।
-    </div>
-  </div>
-  <div class="om-intro-bottom">
-    <div class="om-progress-track"><div class="om-progress-fill" id="omIntroProgress"></div></div>
-    <div class="om-bottom-row">
-      <div class="om-timer-status" id="omIntroStatus">ॐ ब्रह्माण्ड — Dashboard खुल रहा है… (10s)</div>
-      <button type="button" class="om-btn-enter" onclick="finishOmIntroNow()">Dashboard पर चलें →</button>
-    </div>
-  </div>
-</div>
 
 <div class="auth-box">
   <div class="header">
     <div class="badge">OM SOFTWARE • SECURE ACCESS</div>
     <h2 id="formTitle">Welcome Back</h2>
-    <p id="formSub">Owner / Admin ya Staff Code se login karein</p>
+    <p id="formSub">Email/Mobile, Security Code ya Staff Code se login karein</p>
+  </div>
+
+  <!-- Last Session vs New Session Choice Box -->
+  <div class="resume-card" id="resumeSessionBox">
+    <div style="font-size:12.5px;font-weight:900;color:var(--ac);margin-bottom:4px">🔄 Active Session Detected</div>
+    <div style="font-size:11.5px;color:var(--mut);margin-bottom:10px">
+      Last screen: <b id="lastSessionScreenLabel" style="color:#fff">index.html</b>. Kya aap pichhla session continue karna chahte hain ya naya session shuru karna chahte hain?
+    </div>
+    <div style="display:flex;gap:8px">
+      <button type="button" class="btn-main" style="margin-top:0;padding:10px;font-size:12.5px" onclick="continueLastSession()">▶ Last Session</button>
+      <button type="button" class="btn2" style="margin-top:0;padding:10px;font-size:12.5px" onclick="startNewSessionFresh()">✨ New Session</button>
+    </div>
   </div>
 
   <div class="tabs">
@@ -178,11 +81,12 @@
     </div>
 
     <div class="seg" id="seg">
-      <button type="button" id="mEmail" class="on" onclick="setMethod('email')">📧 Email / Mobile</button>
-      <button type="button" id="mStaff" onclick="setMethod('staff')">🧑‍💼 Staff Code Login</button>
+      <button type="button" id="mEmail" class="on" onclick="setMethod('email')">📧 Email/Mobile</button>
+      <button type="button" id="mCode" onclick="setMethod('code')">🔑 Security Code</button>
+      <button type="button" id="mStaff" onclick="setMethod('staff')">🧑‍💼 Staff Code</button>
     </div>
 
-    <!-- Owner / Admin Credentials -->
+    <!-- Owner / Admin Email or Mobile -->
     <div class="field" id="idField">
       <label id="idLabel">Email या 10-अंक Mobile *</label>
       <input type="text" id="idInput" placeholder="name@example.com या 9876543210" autocomplete="username">
@@ -193,43 +97,47 @@
       <div class="wrap"><input type="password" id="pwInput" placeholder="Password" autocomplete="current-password"><button type="button" class="eye" onclick="eye('pwInput',this)">👁</button></div>
     </div>
 
+    <!-- Dedicated Security Code Box (Visible when Security Code is selected) -->
+    <div class="field" id="secCodeField" style="display:none">
+      <label style="color:var(--ac)">Enter Your Security Code Here *</label>
+      <div class="wrap">
+        <input type="text" id="secCodeInput" class="code-in" placeholder="Enter Your Security Code Here (e.g. SEC-XXXX-XXXX-XXXX)" autocomplete="off">
+      </div>
+    </div>
+
     <!-- Staff Dedicated Access Code -->
     <div class="field" id="staffCodeField" style="display:none">
-      <label style="color:var(--ac)">Staff Access Code *</label>
+      <label style="color:var(--ac)">Staff Login Code *</label>
       <div class="wrap">
-        <input type="text" id="staffCodeInput" class="code-in" placeholder="उदा. STF-101, STF-102 या Staff Code" autocomplete="off">
+        <input type="text" id="staffCodeInput" class="code-in" placeholder="Enter Staff Login Code (e.g. STF-101)" autocomplete="off">
       </div>
-      <div class="hint" style="margin:6px 0 0">Staff code se login karne par keval 3 kaam dikhenge: Admission Form, Fees Pay, aur Staff Joining &amp; Salary.</div>
+      <div class="hint" style="margin:6px 0 0">Staff login se sirf 3 kaam dikhenge: Admission Form, Pay Fees, aur Staff Joining &amp; Salary.</div>
     </div>
 
     <!-- Security Questions Setup (Sign Up) -->
     <div id="secQuestionsUpBox" style="display:none;background:#0b0b0d;border:1px solid var(--border);border-radius:12px;padding:11px;margin-bottom:11px">
-      <div style="font-size:12px;font-weight:900;color:var(--ac);margin-bottom:8px">🛡️ Owner Security Questions (Code Yaad Rakhne Ki Zaroorat Nahi)</div>
-
+      <div style="font-size:12px;font-weight:900;color:var(--ac);margin-bottom:8px">🛡️ Owner Security Questions</div>
       <div class="field">
         <label>Question 1 *</label>
         <select id="sq1Question">
-          <option value="Favourite Person">Favourite Person (आपका सबसे खास / पसंदीदा व्यक्ति)</option>
-          <option value="Favourite Song">Favourite Song (आपका पसंदीदा गाना)</option>
-          <option value="Favourite Pet">Favourite Pet (आपका पसंदीदा पालतू जानवर)</option>
-          <option value="Childhood Nickname">Childhood Nickname (बचपन का निकनेम)</option>
+          <option value="Favourite Person">Favourite Person</option>
+          <option value="Favourite Song">Favourite Song</option>
+          <option value="Favourite Pet">Favourite Pet</option>
+          <option value="Childhood Nickname">Childhood Nickname</option>
         </select>
-        <input type="text" id="sq1Answer" placeholder="अपना जवाब लिखें (sirf aapko pata ho)" style="margin-top:6px">
+        <input type="text" id="sq1Answer" placeholder="Answer 1" style="margin-top:6px">
       </div>
-
       <div class="field" style="margin-bottom:0">
         <label>Question 2 *</label>
         <select id="sq2Question">
-          <option value="Favourite Song">Favourite Song (आपका पसंदीदा गाना)</option>
-          <option value="Favourite Pet">Favourite Pet (आपका पसंदीदा पालतू जानवर)</option>
-          <option value="Favourite Person">Favourite Person (आपका सबसे खास / पसंदीदा व्यक्ति)</option>
-          <option value="Birth Place / Gali">Birth Place / Gali (जन्म स्थान या पसंदीदा जगह)</option>
+          <option value="Favourite Song">Favourite Song</option>
+          <option value="Favourite Pet">Favourite Pet</option>
+          <option value="Favourite Person">Favourite Person</option>
+          <option value="Birth Place / Gali">Birth Place / Gali</option>
         </select>
-        <input type="text" id="sq2Answer" placeholder="दूसरा जवाब लिखें" style="margin-top:6px">
+        <input type="text" id="sq2Answer" placeholder="Answer 2" style="margin-top:6px">
       </div>
     </div>
-
-    <div class="hint" id="upHint" style="display:none">Security Questions ke jawab hashed form mein save honge taaki recovery/verification aasan aur safe rahe.</div>
 
     <button type="submit" class="btn-main" id="submitBtn">Sign In</button>
   </form>
@@ -244,13 +152,13 @@
   </div>
 </div>
 
-<!-- SECURITY QUESTION RECOVERY / VERIFICATION MODAL -->
+<!-- STRICT SECURITY QUESTION VERIFICATION MODAL (NO SILENT OVERWRITE!) -->
 <div class="ov" id="recOv">
   <div class="cbox">
-    <div class="badge">SECURITY QUESTION VERIFICATION</div>
-    <h3 style="color:var(--ac);margin:6px 0 6px">🛡️ Security Question Se Verify Karein</h3>
+    <div class="badge">STRICT VERIFICATION</div>
+    <h3 style="color:var(--ac);margin:6px 0 6px">🛡️ Verify Security Question</h3>
     <div style="font-size:11.5px;color:var(--mut);margin-bottom:10px;line-height:1.45">
-      Apna saved Security Question chunein aur jawab dein. Lagatar 3 galat jawab par temporary lock lagega.
+      Pehle se saved Security Question ka sahi jawab verify hoga. Bina verified answer ke naya question/answer set nahi hoga.
     </div>
     <div id="recLockMsg" class="msg err"></div>
     <div id="recOkMsg" class="msg okm"></div>
@@ -280,16 +188,25 @@
   var CFG = { apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" };
   if (!firebase.apps.length) firebase.initializeApp(CFG);
   var auth = firebase.auth(), db = firebase.firestore();
-  var LS = localStorage, mode = 'in', method = 'email', nextUrl = 'index.html';
+  var LS = localStorage, mode = 'in', method = 'email';
   var $ = function (i) { return document.getElementById(i); };
 
-  function normAns(s) {
-    return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
-  }
+  function normAns(s) { return String(s || '').trim().toLowerCase().replace(/\s+/g, ' '); }
 
   async function sha256Hex(str) {
     var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.prototype.map.call(new Uint8Array(buf), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+  }
+
+  function continueLastSession() {
+    var lastUrl = LS.getItem('om_last_active_url') || 'index.html';
+    location.href = lastUrl;
+  }
+
+  function startNewSessionFresh() {
+    ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role', 'om_staff_session', 'om_last_active_url'].forEach(function (k) { LS.removeItem(k); });
+    $('resumeSessionBox').classList.remove('show');
+    ok('New session ready. Credentials ya code darj karein.');
   }
 
   function setMode(m) {
@@ -298,11 +215,10 @@
     $('tabUp').classList.toggle('on', m === 'up');
     $('nameField').style.display = m === 'up' ? 'block' : 'none';
     $('secQuestionsUpBox').style.display = m === 'up' ? 'block' : 'none';
-    $('upHint').style.display = m === 'up' ? 'block' : 'none';
-    $('mStaff').style.display = m === 'up' ? 'none' : 'block';
-    if (m === 'up' && method === 'staff') method = 'email';
+    $('seg').style.display = m === 'in' ? 'grid' : 'none';
+    if (m === 'up') method = 'email';
     $('formTitle').textContent = m === 'up' ? 'Create Owner Account' : 'Welcome Back';
-    $('formSub').textContent = m === 'up' ? 'Account + Security Questions set karein' : 'Owner login ya Staff Code se login karein';
+    $('formSub').textContent = m === 'up' ? 'Account + Security Questions set karein' : 'Email/Mobile, Security Code ya Staff Code se login karein';
     $('submitBtn').textContent = m === 'up' ? 'Create Account' : 'Sign In';
     $('pwHint').textContent = m === 'up' ? '(कम से कम 6 अक्षर)' : '';
     $('swText').innerHTML = m === 'up' ? 'Pehle se account hai? <a onclick="setMode(\'in\')">Sign In</a>' : 'Naya account? <a onclick="setMode(\'up\')">Sign Up</a>';
@@ -312,11 +228,13 @@
   function setMethod(x) {
     method = x; hide();
     $('mEmail').classList.toggle('on', x === 'email');
+    $('mCode').classList.toggle('on', x === 'code');
     $('mStaff').classList.toggle('on', x === 'staff');
-    var isStaff = (x === 'staff');
-    $('idField').style.display = isStaff ? 'none' : 'block';
-    $('pwField').style.display = isStaff ? 'none' : 'block';
-    $('staffCodeField').style.display = isStaff ? 'block' : 'none';
+
+    $('idField').style.display = (x === 'email') ? 'block' : 'none';
+    $('pwField').style.display = (x === 'email') ? 'block' : 'none';
+    $('secCodeField').style.display = (x === 'code') ? 'block' : 'none';
+    $('staffCodeField').style.display = (x === 'staff') ? 'block' : 'none';
   }
 
   function eye(id, b) {
@@ -352,15 +270,9 @@
     if (!a1 || !a2) throw { message: 'Dono Security Questions ke jawab likhna zaroori hai.' };
     var h1 = await sha256Hex(orgId + '|' + q1 + '|' + a1);
     var h2 = await sha256Hex(orgId + '|' + q2 + '|' + a2);
-    var payload = {
-      q1: q1, h1: h1,
-      q2: q2, h2: h2,
-      updatedAt: new Date().toISOString()
-    };
+    var payload = { q1: q1, h1: h1, q2: q2, h2: h2, updatedAt: new Date().toISOString() };
     LS.setItem('om_security_qa_' + orgId, JSON.stringify(payload));
-    try {
-      await db.collection('orgs').doc(orgId).collection('private').doc('security_qa').set(payload, { merge: true });
-    } catch (e) {}
+    try { await db.collection('orgs').doc(orgId).collection('private').doc('security_qa').set(payload, { merge: true }); } catch (e) {}
   }
 
   function openRecoveryModal() {
@@ -370,37 +282,33 @@
     $('recOv').classList.add('show');
   }
 
-  function closeRecModal() {
-    $('recOv').classList.remove('show');
-  }
+  function closeRecModal() { $('recOv').classList.remove('show'); }
 
+  // Strict verification: never overwrites unverified QA!
   async function verifySecurityQuestionAnswer() {
     var lockUntil = Number(LS.getItem('om_sq_lock_until') || '0');
     if (Date.now() < lockUntil) {
       var secs = Math.ceil((lockUntil - Date.now()) / 1000);
-      $('recLockMsg').textContent = 'Bahut galat koshishein hui hain. ' + secs + ' second baad try karein.';
+      $('recLockMsg').textContent = '3 galat jawab ke baad ' + secs + ' second ka cooldown lock active hai.';
       $('recLockMsg').style.display = 'block';
       return;
     }
 
-    var orgId = LS.getItem('bfc_org_id') || 'preview_org_001';
-    var savedRaw = LS.getItem('om_security_qa_' + orgId);
+    var orgId = LS.getItem('bfc_org_id') || '';
+    var savedRaw = orgId ? LS.getItem('om_security_qa_' + orgId) : null;
     var qSel = $('recQuestionSel').value;
     var ansNorm = normAns($('recAnswerInput').value);
 
     if (!ansNorm) {
-      $('recLockMsg').textContent = 'Jawab khali nahi ho sakta.';
+      $('recLockMsg').textContent = 'Jawab darj karna zaroori hai.';
       $('recLockMsg').style.display = 'block';
       return;
     }
 
     if (!savedRaw) {
-      // Fallback if user has not set custom QA yet in localStorage: allow setting it now
-      var hNew = await sha256Hex(orgId + '|' + qSel + '|' + ansNorm);
-      LS.setItem('om_security_qa_' + orgId, JSON.stringify({ q1: qSel, h1: hNew }));
-      $('recOkMsg').textContent = 'Security Question & Answer surakshit save ho gaya ✔';
-      $('recOkMsg').style.display = 'block';
-      $('recLockMsg').style.display = 'none';
+      $('recLockMsg').textContent = 'Is account/session ke liye pehle se koi Security Question set nahi mila. Pehle Owner account se login karke Dashboard -> 🛡️ Code se set karein.';
+      $('recLockMsg').style.display = 'block';
+      $('recOkMsg').style.display = 'none';
       return;
     }
 
@@ -412,7 +320,7 @@
       LS.removeItem('om_sq_wrong_count');
       LS.removeItem('om_sq_lock_until');
       $('recLockMsg').style.display = 'none';
-      $('recOkMsg').textContent = 'Security Question verified! Aapka identity check pass ho gaya ✔';
+      $('recOkMsg').textContent = 'Verified ✔ Security Question ka jawab bilkul sahi hai.';
       $('recOkMsg').style.display = 'block';
     } else {
       var wrong = Number(LS.getItem('om_sq_wrong_count') || '0') + 1;
@@ -429,119 +337,59 @@
     }
   }
 
-  function loginWithStaffCode(codeRaw) {
+  function loginWithSecurityCode(codeRaw) {
     var code = String(codeRaw || '').trim().toUpperCase();
-    if (!code) throw { message: 'Staff Access Code likhein (jaise STF-101).' };
-
-    var knownStaff = [];
-    try {
-      knownStaff = JSON.parse(LS.getItem('om_staff_master_db_v3') || '[]');
-    } catch (e) {}
-
-    var matched = knownStaff.find(function (s) {
-      return String(s.id || '').toUpperCase() === code || String(s.code || '').toUpperCase() === code;
-    });
-
-    var orgId = (matched && matched.branchCode) ? ('branch_' + matched.branchCode) : 'preview_org_001';
-    LS.setItem('bfc_role', 'staff');
+    if (!code || code.length < 6) throw { message: 'Sahi Security Code likhein.' };
+    var orgId = 'sec_org_' + code.slice(-6);
+    LS.setItem('bfc_role', 'owner');
     LS.setItem('bfc_org_id', orgId);
-    LS.setItem('om_staff_session', JSON.stringify({
-      code: code,
-      name: matched ? matched.name : ('Staff (' + code + ')'),
-      role: matched ? matched.role : 'Gym Staff',
-      branchCode: matched ? matched.branchCode : '001',
-      loggedInAt: new Date().toISOString()
-    }));
-
-    ok('Staff login successful — Limited 3-module staff desk khul raha hai…');
-    launchOmIntroAndRedirect('staff-join.html');
+    LS.setItem('om_org_profile', JSON.stringify({ orgId: orgId, orgName: 'Om Software Owner', securityCode: code }));
+    LS.setItem('om_last_active_url', 'index.html');
+    location.href = 'index.html';
   }
 
-  function saveLocalProfile(orgId, cloud) {
-    var prev = {}; try { prev = JSON.parse(LS.getItem('om_org_profile') || '{}') || {}; } catch (e) {}
-    if (prev.orgId && prev.orgId !== orgId) prev = {};
-    cloud = cloud || {};
-    var o = Object.assign({}, prev, cloud, {
-      orgId: orgId,
-      orgName: cloud.gymName || prev.orgName || prev.gymName || '',
-      createdAt: cloud.createdAt || prev.createdAt || new Date().toISOString()
-    });
-    LS.setItem('om_org_profile', JSON.stringify(o));
-    LS.setItem('bfc_org_id', orgId);
-    LS.setItem('bfc_role', 'owner');
-    return o;
+  function loginWithStaffCode(codeRaw) {
+    var code = String(codeRaw || '').trim().toUpperCase();
+    if (!code) throw { message: 'Staff Login Code likhein (jaise STF-101).' };
+
+    var branchCode = '001';
+    var m = code.match(/STF-(\d{3})/);
+    if (m && m[1]) branchCode = m[1];
+
+    LS.setItem('bfc_role', 'staff');
+    LS.setItem('bfc_org_id', 'staff_org_' + branchCode);
+    LS.setItem('om_staff_session', JSON.stringify({
+      code: code,
+      branchCode: branchCode,
+      role: 'Staff',
+      loggedInAt: new Date().toISOString()
+    }));
+    LS.setItem('om_last_active_url', 'index.html');
+    location.href = 'index.html';
   }
 
   async function afterAuth(user, justSignedUp, signupGym) {
     var orgId = user.uid;
-    var cloud = null;
-    try { var s = await db.collection('orgs').doc(orgId).get(); if (s.exists) cloud = s.data(); } catch (e) {}
-    if (justSignedUp && signupGym) cloud = Object.assign({}, cloud || {}, { gymName: signupGym });
-
-    var base = { createdAt: (cloud && cloud.createdAt) || new Date().toISOString(), ownerUid: orgId };
+    var base = { createdAt: new Date().toISOString(), ownerUid: orgId };
     if (justSignedUp && signupGym) { base.gymName = signupGym; base.category = 'gym'; }
     try { await db.collection('orgs').doc(orgId).set(base, { merge: true }); } catch (e) {}
+    if (justSignedUp) { await saveSecurityQuestions(orgId); }
 
-    if (justSignedUp) {
-      await saveSecurityQuestions(orgId);
-    }
-
-    saveLocalProfile(orgId, Object.assign({}, cloud || {}, base));
-    launchOmIntroAndRedirect('index.html');
-  }
-
-  var introTimer = null, introInterval = null, introTargetUrl = 'index.html';
-
-  function finishOmIntroNow() {
-    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-    if (introInterval) { clearInterval(introInterval); introInterval = null; }
-    location.href = introTargetUrl || 'index.html';
-  }
-
-  function launchOmIntroAndRedirect(targetUrl) {
-    introTargetUrl = targetUrl || 'index.html';
-    try {
-      var authBox = document.querySelector('.auth-box');
-      if (authBox) authBox.style.display = 'none';
-      var recOv = $('recOv');
-      if (recOv) recOv.classList.remove('show');
-    } catch (e) {}
-
-    var ov = $('omIntroOverlay');
-    if (!ov) { location.href = introTargetUrl; return; }
-    ov.classList.add('show');
-
-    var durationSec = 10, elapsedMs = 0;
-    var bar = $('omIntroProgress'), st = $('omIntroStatus');
-    if (introInterval) clearInterval(introInterval);
-    if (introTimer) clearTimeout(introTimer);
-
-    introInterval = setInterval(function () {
-      elapsedMs += 100;
-      var pct = Math.min(100, (elapsedMs / (durationSec * 1000)) * 100);
-      var rem = Math.max(0, Math.ceil((durationSec * 1000 - elapsedMs) / 1000));
-      if (bar) bar.style.width = pct + '%';
-      if (st) st.textContent = 'ॐ ब्रह्माण्ड — Portal खुल रहा है… (' + rem + 's)';
-    }, 100);
-
-    introTimer = setTimeout(function () { finishOmIntroNow(); }, durationSec * 1000);
+    LS.setItem('bfc_role', 'owner');
+    LS.setItem('bfc_org_id', orgId);
+    LS.setItem('om_org_profile', JSON.stringify({ orgId: orgId, orgName: signupGym || user.email || 'Om Software Owner' }));
+    LS.setItem('om_last_active_url', 'index.html');
+    location.href = 'index.html';
   }
 
   function quickPreviewLogin() {
     hide();
-    var demoOrgId = "preview_org_001";
-    var demoProfile = {
-      orgId: demoOrgId,
-      orgName: "Om Software Preview",
-      gymName: "Om Software Preview",
-      category: "gym",
-      createdAt: new Date().toISOString()
-    };
-    LS.setItem("om_org_profile", JSON.stringify(demoProfile));
-    LS.setItem("bfc_org_id", demoOrgId);
-    LS.setItem("bfc_role", "owner");
-    ok("Preview session active — ॐ intro shuru ho raha hai…");
-    launchOmIntroAndRedirect("index.html");
+    var demoOrgId = 'preview_org_001';
+    LS.setItem('om_org_profile', JSON.stringify({ orgId: demoOrgId, orgName: 'Om Software Preview', category: 'gym' }));
+    LS.setItem('bfc_org_id', demoOrgId);
+    LS.setItem('bfc_role', 'owner');
+    LS.setItem('om_last_active_url', 'index.html');
+    location.href = 'index.html';
   }
 
   async function submitForm(e) {
@@ -549,11 +397,14 @@
     hide();
     busy(true);
     try {
+      if (mode === 'in' && method === 'code') {
+        loginWithSecurityCode($('secCodeInput').value);
+        return;
+      }
       if (mode === 'in' && method === 'staff') {
         loginWithStaffCode($('staffCodeInput').value);
         return;
       }
-
       if (mode === 'up') {
         var gym = $('gymName').value.trim();
         if (!gym) throw { message: 'Gym / Organization का नाम लिखें।' };
@@ -564,7 +415,6 @@
           throw { message: 'Security Questions ke dono jawab likhna zaroori hai.' };
         }
         var cred = await auth.createUserWithEmailAndPassword(idToCred(raw), pw);
-        try { await cred.user.updateProfile({ displayName: gym }); } catch (x) {}
         await afterAuth(cred.user, true, gym);
       } else {
         var raw2 = $('idInput').value.trim(), pw2 = $('pwInput').value;
@@ -581,8 +431,15 @@
   (function init() {
     var q = new URLSearchParams(location.search);
     if (q.get('logout')) {
-      ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role', 'om_staff_session'].forEach(function (k) { LS.removeItem(k); });
+      ['om_org_profile', 'bfc_org_profile', 'bfc_org_id', 'bfc_role', 'om_staff_session', 'om_last_active_url'].forEach(function (k) { LS.removeItem(k); });
       auth.signOut().catch(function () {});
+      return;
+    }
+    var lastUrl = LS.getItem('om_last_active_url');
+    var orgId = LS.getItem('bfc_org_id');
+    if (orgId && lastUrl) {
+      $('lastSessionScreenLabel').textContent = lastUrl;
+      $('resumeSessionBox').classList.add('show');
     }
   })();
   setMode('in');

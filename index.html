@@ -667,8 +667,11 @@ function viewSec() {
   }
 
   $("secBody").innerHTML = 
-    '<div class="row"><span><b>Staff Access Code:</b><br><small style="color:var(--tx-muted)">Staff login ke liye code</small></span><b style="color:var(--ac-gold)">STF-101 / Staff ID</b></div>' +
-    '<div class="row"><span><b>Security Questions:</b><br><small style="color:var(--tx-muted)">Recovery status</small></span><b>' + qaStatus + '</b></div>' +
+    '<div class="row"><span><b>📂 Branch 001 Staff Code:</b><br><small style="color:var(--tx-muted)">Akrampur / Unnao</small></span><b style="color:var(--ac-gold)">STF-001</b></div>' +
+    '<div class="row"><span><b>📂 Branch 002 Staff Code:</b><br><small style="color:var(--tx-muted)">Kanpur</small></span><b style="color:var(--ac-gold)">STF-002</b></div>' +
+    '<div class="row"><span><b>📂 Branch 003 Staff Code:</b><br><small style="color:var(--tx-muted)">Lucknow</small></span><b style="color:var(--ac-gold)">STF-003</b></div>' +
+    '<button type="button" class="btn" style="margin-top:8px" onclick="shareStaffAppLink('001')">🔗 Share Staff App Link (3-Feature View)</button>' +
+    '<div class="row"><span><b>Security Questions:</b></span><b>' + qaStatus + '</b></div>' +
     '<div class="row"><span><b>Unique Security PIN:</b></span><b style="color:var(--ac-gold)">' + esc(o.securityCode || "SEC-S32D-PW4Z") + '</b></div>';
   
   $("dashSqMsg").textContent = "";
@@ -719,7 +722,62 @@ if (typeof window.omLogoutNow !== "function") {
   };
 }
 
+
+function applyStaffRoleRestrictionIfNeeded() {
+  const role = LS.getItem("bfc_role") || "owner";
+  if (role !== "staff") return;
+
+  // Hide hero upgrade banner and admin nav buttons for staff
+  const hero = document.querySelector(".hero-banner");
+  if (hero) hero.style.display = "none";
+  document.querySelectorAll(".nav-actions .btn-nav:not(.logout)").forEach(b => b.style.display = "none");
+
+  const grid = document.querySelector(".dashboard-grid");
+  if (grid) {
+    grid.innerHTML = `
+      <a href="join.html" class="mod-tile highlight-gold">
+        <div class="mod-left">
+          <div class="mod-ico">📝</div>
+          <div class="mod-info">
+            <div class="mod-title">1. Admission Form</div>
+            <div class="mod-sub">New member admission</div>
+          </div>
+        </div>
+        <div class="mod-go">&rarr;</div>
+      </a>
+      <a href="pay.html" class="mod-tile highlight-green">
+        <div class="mod-left">
+          <div class="mod-ico">💳</div>
+          <div class="mod-info">
+            <div class="mod-title">2. Pay Fees</div>
+            <div class="mod-sub">Member fee collection</div>
+          </div>
+        </div>
+        <div class="mod-go">&rarr;</div>
+      </a>
+      <a href="staff-salary.html" class="mod-tile highlight-cyan">
+        <div class="mod-left">
+          <div class="mod-ico">💼</div>
+          <div class="mod-info">
+            <div class="mod-title">3. Staff Joining &amp; Salary</div>
+            <div class="mod-sub">Staff joining &amp; salary desk</div>
+          </div>
+        </div>
+        <div class="mod-go">&rarr;</div>
+      </a>
+    `;
+  }
+}
+
+function shareStaffAppLink(code) {
+  const baseUrl = location.href.split("?")[0];
+  const link = `${baseUrl}?role=staff&branch=${encodeURIComponent(code || "001")}`;
+  try { navigator.clipboard.writeText(link); } catch (e) {}
+  alert("Staff App Link copied:\n" + link + "\n\nIs link se kholne/download karne par staff ko keval 3 option dikhenge.");
+}
+
 window.addEventListener("DOMContentLoaded", () => {
+  applyStaffRoleRestrictionIfNeeded();
   const o = J("om_org_profile", {});
   if (o.gymName || o.orgName) $("orgTitle").textContent = String(o.gymName || o.orgName).toUpperCase();
   if (window.omLicenseStatus) {
