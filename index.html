@@ -211,6 +211,8 @@
       <button type="button" class="btn-nav" onclick="openBranchCodesDirectory()">📂 Staff Codes</button>
             <button type="button" class="btn-nav" onclick="openDashboardCodeModal('employee')">🆔 View Your Employee Code</button>
       <button type="button" class="btn-nav" onclick="openDashboardCodeModal('staff')">🎫 View Your Staff Code</button>
+            <button type="button" class="btn-nav" onclick="openEmpCodeAutoSearchModal()">🔍 Branch &amp; Staff Codes</button>
+      <button type="button" class="btn-nav" onclick="openViewOnlyAttendanceGallery()">📸 Selfie Gallery</button>
       <button type="button" class="btn-nav logout" onclick="omLogoutNow()">🚪 Logout</button>
     </div>
   </header>
@@ -1325,7 +1327,7 @@ function applyStaffRoleRestrictionIfNeeded() {
         <div class="mod-go">&rarr;</div>
       </button>
 
-      <button type="button" class="mod-tile highlight-cyan" onclick="openStaffAttendanceViewOnly()">
+      <button type="button" class="mod-tile highlight-cyan" onclick="openViewOnlyAttendanceGallery()">
         <div class="mod-left">
           <div class="mod-ico">👁️</div>
           <div class="mod-info">
@@ -1394,5 +1396,323 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
+
+<!-- VIEW BRANCH WISE EMPLOYEE / STAFF CODES + AUTO-SEARCH + FORGET EMAIL VERIFICATION MODAL -->
+<div class="ov" id="empCodeAutoSearchOv">
+  <div class="bx" style="max-width:640px">
+    <h3>
+      <span>🆔 View Branch Wise Employee Code &amp; Staff Code</span>
+      <button type="button" onclick="closeOv('empCodeAutoSearchOv')" style="background:none;border:0;color:var(--ac-gold);font-size:16px;cursor:pointer">✕</button>
+    </h3>
+    <div style="font-size:11.5px;color:var(--tx-muted);margin-bottom:8px">
+      Naam, Father ka naam, Wife ka naam, Mobile number, Branch ya Manager ke naam se turant auto-search karein.
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <input type="text" id="empAutoQuery" placeholder="Search Name / Father / Wife / Mobile / Branch / Code..." oninput="renderEmpAutoSearch()" style="flex:1 1 240px;margin-top:0">
+      <select id="empBranchFilter" onchange="renderEmpAutoSearch()" style="width:auto;min-width:150px;margin-top:0">
+        <option value="ALL">All Branches</option>
+        <option value="001">Branch 001 (Unnao)</option>
+        <option value="002">Branch 002 (Kanpur)</option>
+        <option value="003">Branch 003 (Lucknow)</option>
+      </select>
+    </div>
+
+    <!-- Forget Email ID Verification Requests Sent to Admin -->
+    <div id="adminForgetEmailReqBox" style="background:#0B1224;border:1px solid rgba(255,184,0,0.4);border-radius:10px;padding:10px;margin-bottom:10px;font-size:11.5px"></div>
+
+    <!-- Auto-Search Results -->
+    <div id="empAutoResultsBox" style="max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:7px"></div>
+
+    <!-- Selected Record Detail Card -->
+    <div id="empSelectedDetailCard" style="display:none;margin-top:10px;background:#080D1A;border:1.5px solid var(--ac-green);border-radius:11px;padding:12px;font-size:12px;line-height:1.55"></div>
+
+    <button type="button" class="btn g" onclick="closeOv('empCodeAutoSearchOv')">Band Karein</button>
+  </div>
+</div>
+
+<!-- VIEW-ONLY ATTENDANCE + SELFIE GALLERY (CALENDAR WISE) + MEMBER/STAFF SEARCH MODAL -->
+<div class="ov" id="viewOnlyAttGalleryOv">
+  <div class="bx" style="max-width:680px">
+    <h3>
+      <span>📸 Attendance &amp; Selfie Gallery (View Only)</span>
+      <button type="button" onclick="closeOv('viewOnlyAttGalleryOv')" style="background:none;border:0;color:var(--ac-gold);font-size:16px;cursor:pointer">✕</button>
+    </h3>
+    <div style="font-size:11px;color:var(--ac-gold);margin-bottom:10px">
+      🔒 View-Only Access: Koi bhi member, staff ya manager attendance aur selfie gallery dekh sakta hai (Edit / Delete disabled).
+    </div>
+
+    <!-- Live Summary Counts -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;text-align:center">
+      <div style="background:#0B1224;border:1px solid var(--border);border-radius:9px;padding:8px">
+        <div style="font-size:10px;color:var(--tx-muted)">TOTAL</div>
+        <div id="voTotalCnt" style="font-size:16px;font-weight:900;color:#fff">48</div>
+      </div>
+      <div style="background:#0B1224;border:1px solid rgba(16,185,129,0.5);border-radius:9px;padding:8px">
+        <div style="font-size:10px;color:#6ee7b7">PRESENT</div>
+        <div id="voPresentCnt" style="font-size:16px;font-weight:900;color:#10B981">14</div>
+      </div>
+      <div style="background:#0B1224;border:1px solid rgba(239,68,68,0.5);border-radius:9px;padding:8px">
+        <div style="font-size:10px;color:#fca5a5">ABSENT</div>
+        <div id="voAbsentCnt" style="font-size:16px;font-weight:900;color:#EF4444">34</div>
+      </div>
+    </div>
+
+    <!-- Calendar Date Wise + Name/Mobile Auto Search -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <input type="date" id="voCalendarDate" onchange="renderViewOnlyAttAndGallery()" style="flex:0 0 175px;margin-top:0">
+      <input type="text" id="voMemberSearch" placeholder="Auto-search Member / Staff name ya mobile..." oninput="renderViewOnlyAttAndGallery()" style="flex:1 1 220px;margin-top:0">
+    </div>
+
+    <!-- Selfie Gallery & Attendance Rows -->
+    <div id="voAttendanceRowsBox" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px"></div>
+
+    <button type="button" class="btn g" onclick="closeOv('viewOnlyAttGalleryOv')">Band Karein</button>
+  </div>
+</div>
+
+
+<script>
+const STAFF_DIRECTORY_PROFILES = [
+  {
+    name: "Saurabh Singh Chandel",
+    fatherName: "Late Shri Chandel",
+    wifeName: "Reet Singh",
+    mobile: "9876501100",
+    branchCode: "001",
+    branchName: "5 Brother's Fitness Club - Unnao / Akrampur",
+    managerName: "Saurabh Singh Chandel",
+    employeeCode: "EMP-001-MGR",
+    staffCode: "STF-001-NGXUS2",
+    registeredEmail: "saurabhsingh16215@gmail.com"
+  },
+  {
+    name: "Vikram Yadav",
+    fatherName: "Ram Kishore Yadav",
+    wifeName: "Sunita Yadav",
+    mobile: "9876503344",
+    branchCode: "001",
+    branchName: "5 Brother's Fitness Club - Unnao / Akrampur",
+    managerName: "Saurabh Singh Chandel",
+    employeeCode: "EMP-001-02",
+    staffCode: "STF-001-VIK02",
+    registeredEmail: "vikram.unnao@example.com"
+  },
+  {
+    name: "Pooja Sharma",
+    fatherName: "Rajesh Sharma",
+    wifeName: "-",
+    mobile: "9876504455",
+    branchCode: "001",
+    branchName: "5 Brother's Fitness Club - Unnao / Akrampur",
+    managerName: "Saurabh Singh Chandel",
+    employeeCode: "EMP-001-03",
+    staffCode: "STF-001-POJ03",
+    registeredEmail: "pooja.unnao@example.com"
+  },
+  {
+    name: "Rohan Bajpai",
+    fatherName: "Anand Bajpai",
+    wifeName: "Neha Bajpai",
+    mobile: "9876502200",
+    branchCode: "002",
+    branchName: "5 Brother's Fitness Club - Kanpur",
+    managerName: "Rohan Bajpai",
+    employeeCode: "EMP-002-MGR",
+    staffCode: "STF-002-KNP01",
+    registeredEmail: "rohan.kanpur@example.com"
+  }
+];
+
+function getCombinedStaffDirectory() {
+  const customList = J("bfc_staff_list", []).map(function(s, idx) {
+    const bc = s.branch || "001";
+    return {
+      name: s.name || ("Staff " + (idx + 1)),
+      fatherName: s.fatherName || "-",
+      wifeName: s.wifeName || "-",
+      mobile: s.phone || "-",
+      branchCode: bc,
+      branchName: "Branch " + bc,
+      managerName: s.managerName || "Branch Manager",
+      employeeCode: s.employeeCode || ("EMP-" + bc + "-" + String(idx + 1).padStart(2, "0")),
+      staffCode: s.code || ("STF-" + bc + "-" + String(idx + 1).padStart(2, "0")),
+      registeredEmail: s.email || "Not Registered Yet"
+    };
+  });
+
+  // Also merge any updated emails from OmBranchSecurity registry
+  const base = STAFF_DIRECTORY_PROFILES.map(function(p) {
+    if (window.OmBranchSecurity) {
+      const regEntry = window.OmBranchSecurity.ensureBranchEntry(p.branchCode);
+      if (regEntry && regEntry.managerEmail && p.branchCode === "001" && p.employeeCode === "EMP-001-MGR") {
+        return Object.assign({}, p, { registeredEmail: regEntry.managerEmail, staffCode: regEntry.staffCode || p.staffCode });
+      }
+    }
+    return p;
+  });
+
+  return base.concat(customList);
+}
+
+function openEmpCodeAutoSearchModal() {
+  $("empAutoQuery").value = "";
+  $("empSelectedDetailCard").style.display = "none";
+  renderForgetEmailRequestsForAdmin();
+  renderEmpAutoSearch();
+  $("empCodeAutoSearchOv").classList.add("show");
+}
+
+function renderForgetEmailRequestsForAdmin() {
+  const box = $("adminForgetEmailReqBox");
+  if (!box) return;
+  const reqs = window.OmBranchSecurity ? window.OmBranchSecurity.getForgetRequests() : J("om_email_forget_requests_v1", []);
+  if (!reqs || !reqs.length) {
+    box.innerHTML = '<b style="color:var(--ac-gold)">📩 Forget Email Verification Requests:</b> <span style="color:var(--tx-muted)">Abhi koi pending request nahi hai.</span>';
+    return;
+  }
+  box.innerHTML = '<b style="color:var(--ac-gold)">📩 Forget Email ID Requests (Sent to Admin for Verifying):</b>' +
+    reqs.map(function(r) {
+      return `
+        <div style="margin-top:6px;padding:8px;border-radius:8px;background:#080D1A;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div>
+            <div><b>Branch ${esc(r.branchCode)}</b> • Status: <span style="color:#fbbf24">${esc(r.status)}</span></div>
+            <div style="color:var(--tx-muted)">Staff Code: <b style="color:#38bdf8">${esc(r.staffCode)}</b> | Emp Code: <b style="color:#fbbf24">${esc(r.employeeCode)}</b></div>
+            <div style="color:#4ade80">Registered Email ID: <b>${esc(r.registeredEmail)}</b></div>
+          </div>
+          <button type="button" class="btn" style="margin:0;padding:6px 10px;width:auto;font-size:11px;background:#10B981;color:#04140C" onclick="approveForgetEmailRequest('${esc(r.id)}')">✔ Verify &amp; Approve</button>
+        </div>
+      `;
+    }).join("");
+}
+
+function approveForgetEmailRequest(reqId) {
+  const reqs = window.OmBranchSecurity ? window.OmBranchSecurity.getForgetRequests() : J("om_email_forget_requests_v1", []);
+  const updated = reqs.map(function(r) {
+    if (r.id === reqId) return Object.assign({}, r, { status: "VERIFIED_BY_ADMIN", verifiedAt: new Date().toISOString() });
+    return r;
+  });
+  LS.setItem("om_email_forget_requests_v1", JSON.stringify(updated));
+  renderForgetEmailRequestsForAdmin();
+  alert("Request verify ho gayi! Ab user apni Registered Email ID aur Staff Code se login kar sakta hai.");
+}
+
+function renderEmpAutoSearch() {
+  const q = String(($("empAutoQuery") && $("empAutoQuery").value) || "").trim().toLowerCase();
+  const br = ($("empBranchFilter") && $("empBranchFilter").value) || "ALL";
+  const all = getCombinedStaffDirectory();
+
+  const matches = all.filter(function(item) {
+    if (br !== "ALL" && String(item.branchCode) !== String(br)) return false;
+    if (!q) return true;
+    const hay = [
+      item.name, item.fatherName, item.wifeName, item.mobile,
+      item.branchCode, item.branchName, item.managerName,
+      item.employeeCode, item.staffCode, item.registeredEmail
+    ].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+
+  $("empAutoResultsBox").innerHTML = matches.map(function(m, idx) {
+    return `
+      <div class="row" style="cursor:pointer" onclick="selectEmpSearchItem(${idx})">
+        <div>
+          <b>${esc(m.name)}</b> <span style="color:#38BDF8;font-size:11px">[Branch ${esc(m.branchCode)}]</span>
+          <div style="font-size:11px;color:var(--tx-muted)">
+            Father: ${esc(m.fatherName)} &bull; Wife: ${esc(m.wifeName)} &bull; Mob: ${esc(m.mobile)}
+          </div>
+          <div style="font-size:11px;color:var(--ac-gold)">
+            Emp ID: <b>${esc(m.employeeCode)}</b> &bull; Staff Code: <b>${esc(m.staffCode)}</b>
+          </div>
+        </div>
+        <span style="color:#4ade80;font-weight:800;font-size:11px">Load &rarr;</span>
+      </div>
+    `;
+  }).join("") || '<div class="row"><span>Koi record match nahi hua.</span></div>';
+
+  window._lastEmpMatches = matches;
+}
+
+function selectEmpSearchItem(idx) {
+  const matches = window._lastEmpMatches || [];
+  const item = matches[idx];
+  if (!item) return;
+  const card = $("empSelectedDetailCard");
+  card.style.display = "block";
+  card.innerHTML = `
+    <div style="font-size:14px;font-weight:900;color:var(--ac-gold);margin-bottom:4px">${esc(item.name)} (Branch ${esc(item.branchCode)})</div>
+    <div><b>Branch:</b> ${esc(item.branchName)}</div>
+    <div><b>Manager:</b> ${esc(item.managerName)}</div>
+    <div><b>Father's Name:</b> ${esc(item.fatherName)} &bull; <b>Wife's Name:</b> ${esc(item.wifeName)}</div>
+    <div><b>Mobile:</b> ${esc(item.mobile)}</div>
+    <div><b>Employee ID Code:</b> <span style="color:#fbbf24;font-weight:900">${esc(item.employeeCode)}</span></div>
+    <div><b>Staff Login Code:</b> <span style="color:#38BDF8;font-weight:900">${esc(item.staffCode)}</span></div>
+    <div><b>Registered Email ID:</b> <span style="color:#4ade80;font-weight:900">${esc(item.registeredEmail)}</span></div>
+  `;
+}
+
+// View-Only Attendance & Selfie Gallery (Calendar Date Wise + Member/Staff Auto Search)
+const SAMPLE_ATTENDANCE_GALLERY = [
+  { date: iso(), time: "06:15 AM", batch: "Morning", name: "Saurabh Singh", type: "Manager / Staff", mobile: "9876501100", status: "Present", selfieLabel: "Selfie #101 (Morning Batch)" },
+  { date: iso(), time: "06:28 AM", batch: "Morning", name: "Vikram Yadav", type: "Staff", mobile: "9876503344", status: "Present", selfieLabel: "Selfie #102 (Morning Batch)" },
+  { date: iso(), time: "07:05 AM", batch: "Morning", name: "Rahul Verma", type: "Member", mobile: "9876500111", status: "Present", selfieLabel: "Selfie #103 (Morning Batch)" },
+  { date: iso(), time: "05:10 PM", batch: "Evening", name: "Pooja Sharma", type: "Staff", mobile: "9876504455", status: "Present", selfieLabel: "Selfie #104 (Evening Batch)" },
+  { date: iso(), time: "05:25 PM", batch: "Evening", name: "Ankit Tiwari", type: "Member", mobile: "9876500112", status: "Present", selfieLabel: "Selfie #105 (Evening Batch)" },
+  { date: iso(), time: "-", batch: "Evening", name: "Priya Gupta", type: "Member", mobile: "9876500113", status: "Absent", selfieLabel: "No Selfie (Absent)" }
+];
+
+function openViewOnlyAttendanceGallery() {
+  if ($("voCalendarDate") && !$("voCalendarDate").value) {
+    $("voCalendarDate").value = iso();
+  }
+  if ($("voMemberSearch")) {
+    $("voMemberSearch").value = "";
+  }
+  renderViewOnlyAttAndGallery();
+  $("viewOnlyAttGalleryOv").classList.add("show");
+}
+
+function renderViewOnlyAttAndGallery() {
+  const chosenDate = ($("voCalendarDate") && $("voCalendarDate").value) || iso();
+  const q = String(($("voMemberSearch") && $("voMemberSearch").value) || "").trim().toLowerCase();
+
+  const rows = SAMPLE_ATTENDANCE_GALLERY.filter(function(r) {
+    if (q) {
+      return `${r.name} ${r.mobile} ${r.type} ${r.batch} ${r.status}`.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  const presentCnt = rows.filter(function(x) { return x.status === "Present"; }).length;
+  const absentCnt = rows.filter(function(x) { return x.status !== "Present"; }).length;
+
+  if ($("voTotalCnt")) $("voTotalCnt").textContent = String(rows.length);
+  if ($("voPresentCnt")) $("voPresentCnt").textContent = String(presentCnt);
+  if ($("voAbsentCnt")) $("voAbsentCnt").textContent = String(absentCnt);
+
+  $("voAttendanceRowsBox").innerHTML = rows.map(function(r) {
+    const isP = r.status === "Present";
+    return `
+      <div class="row" style="align-items:flex-start;gap:10px">
+        <div style="width:46px;height:46px;border-radius:9px;background:#162340;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
+          ${isP ? "🤳" : "🚫"}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+            <b>${esc(r.name)}</b>
+            <span style="font-size:11px;font-weight:800;color:${isP ? "#10B981" : "#FCA5A5"}">${esc(r.status)}</span>
+          </div>
+          <div style="font-size:11px;color:var(--tx-muted);margin-top:2px">
+            ${esc(r.type)} &bull; ${esc(r.batch)} &bull; Mob: ${esc(r.mobile)}
+          </div>
+          <div style="font-size:11px;color:#38BDF8;margin-top:2px">
+            Date: ${esc(chosenDate)} &bull; Time: <b>${esc(r.time)}</b> &bull; ${esc(r.selfieLabel)}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("") || '<div class="row"><span>Koi attendance record nahi mila.</span></div>';
+}
+</script>
+
 </body>
 </html>

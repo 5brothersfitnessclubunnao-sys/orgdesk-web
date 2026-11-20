@@ -71,7 +71,7 @@
   <form id="authForm" onsubmit="submitForm(event)" autocomplete="off">
     <div class="seg" id="seg">
       <button type="button" id="mEmail" class="on" onclick="setMethod('email')">📧 Email / Mobile</button>
-      <button type="button" id="mStaff" onclick="setMethod('staff')">🧑‍💼 Staff Code</button>
+      <button type="button" id="mStaff" class="on" onclick="setMethod('staff')">🧑‍💼 Staff Sign In</button>
     </div>
 
     <!-- Admin / Owner Email or Mobile -->
@@ -512,12 +512,19 @@
       auth.signOut().catch(function () {});
     }
 
+    if (q.get('role') === 'staff' || q.get('staffonly') === '1' || q.get('mode') === 'staff' || LS.getItem('om_staff_link_branch')) {
+      isStaffLinkOnly = true;
+      if (q.get('branch')) LS.setItem('om_staff_link_branch', String(q.get('branch')).trim());
+      else if (LS.getItem('om_staff_link_branch')) activeBranchParam = LS.getItem('om_staff_link_branch');
+    }
+
     // Never show "Active Session Detected / Last Session" box; always open fresh form
     if (isStaffLinkOnly) {
-      if ($('seg')) $('seg').style.display = 'none';
-      $('topBadge').textContent = 'STAFF APP • STAFF LOGIN ONLY';
-      $('formTitle').textContent = 'Staff Login';
-      $('formSub').textContent = 'Keval Staff Login Code + Manager Employee Code + Email Verification se login karein';
+      if ($('mEmail')) $('mEmail').remove();
+      if ($('seg')) $('seg').remove();
+      $('topBadge').textContent = 'STAFF APP • STAFF SIGN IN ONLY';
+      $('formTitle').textContent = 'Staff Sign In';
+      $('formSub').textContent = 'Keval Staff Login Code + Manager Employee Code + Email Verification se sign in karein';
       setMethod('staff');
     } else {
       setMethod('email');
