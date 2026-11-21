@@ -1,20 +1,6 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<script>
-// Immediate Hard Role Lock: Block staff from multi-branch salary & branch revenue reports
-(function() {
-  try {
-    var role = localStorage.getItem("bfc_role");
-    var staffSess = localStorage.getItem("om_staff_session");
-    if (role === "staff" || staffSess) {
-      alert("🔒 Access Denied: Staff login ke paas Master Salary ya Branch Revenue dekhne ki anumati nahi hai.");
-      window.location.replace("index.html");
-    }
-  } catch(e) {}
-})();
-</script>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Om Software - Multi-Branch ERP Folders</title>
@@ -185,6 +171,7 @@
       .btn-open-branch { width: 100%; }
     }
   </style>
+<script src="auth-gate.js"></script>
 </head>
 <body>
 
@@ -199,7 +186,6 @@
       </div>
     </div>
     <div class="nav-actions">
-      <button type="button" class="btn-sm green" onclick="showTop10EdgeSummary()">🏆 Top-10 Edge</button>
       <button type="button" class="btn-sm gold" onclick="openAddBranchModal()">➕ Add Branch</button>
       <a href="index.html" class="btn-sm">⬅️ Dashboard</a>
     </div>
@@ -949,109 +935,5 @@ window.addEventListener("DOMContentLoaded", () => {
   renderAll();
 });
 </script>
-
-<script>
-// Real-Time Multi-Branch Cloud Sync & Strict Org/Branch Isolation Layer
-(function() {
-  const LS = localStorage;
-  function getActiveOrgId() {
-    try {
-      const prof = JSON.parse(LS.getItem("om_org_profile") || "{}");
-      return LS.getItem("bfc_org_id") || prof.orgId || "default_org";
-    } catch (e) {
-      return LS.getItem("bfc_org_id") || "default_org";
-    }
-  }
-
-  window.omGetScopedKey = function(baseKey, branchCode) {
-    const orgId = getActiveOrgId();
-    return branchCode ? `om_${orgId}_br_${branchCode}_${baseKey}` : `om_${orgId}_${baseKey}`;
-  };
-
-  window.omSaveScopedData = function(baseKey, data, branchCode) {
-    const key = window.omGetScopedKey(baseKey, branchCode);
-    try { LS.setItem(key, JSON.stringify(data)); } catch (e) {}
-    try {
-      if (window.firebase && firebase.apps && firebase.apps.length) {
-        const db = firebase.firestore();
-        const orgId = getActiveOrgId();
-        const docRef = branchCode
-          ? db.collection("orgs").doc(orgId).collection("branches").doc(branchCode).collection("data").doc(baseKey)
-          : db.collection("orgs").doc(orgId).collection("data").doc(baseKey);
-        docRef.set({ items: data, updatedAt: new Date().toISOString() }, { merge: true }).catch(function(){});
-      }
-    } catch (e) {}
-  };
-
-  window.omSubscribeRealTime = function(baseKey, branchCode, onUpdate) {
-    const key = window.omGetScopedKey(baseKey, branchCode);
-    try {
-      const localRaw = LS.getItem(key);
-      if (localRaw && typeof onUpdate === "function") {
-        onUpdate(JSON.parse(localRaw));
-      }
-    } catch (e) {}
-
-    try {
-      if (window.firebase && firebase.apps && firebase.apps.length) {
-        const db = firebase.firestore();
-        const orgId = getActiveOrgId();
-        const docRef = branchCode
-          ? db.collection("orgs").doc(orgId).collection("branches").doc(branchCode).collection("data").doc(baseKey)
-          : db.collection("orgs").doc(orgId).collection("data").doc(baseKey);
-        docRef.onSnapshot(function(snap) {
-          if (snap && snap.exists) {
-            const d = snap.data();
-            if (d && Array.isArray(d.items)) {
-              try { LS.setItem(key, JSON.stringify(d.items)); } catch (e) {}
-              if (typeof onUpdate === "function") onUpdate(d.items);
-            }
-          }
-        }, function(){});
-      }
-    } catch (e) {}
-  };
-
-  window.addEventListener("DOMContentLoaded", function() {
-    const orgId = getActiveOrgId();
-    const hdr = document.querySelector(".top-bar");
-    if (hdr && !document.getElementById("rtSyncBadge")) {
-      const b = document.createElement("span");
-      b.id = "rtSyncBadge";
-      b.style.cssText = "font-size:10.5px;font-weight:800;color:#4ade80;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);padding:4px 9px;border-radius:999px;";
-      b.textContent = "🟢 Real-Time Isolated • Org: " + orgId;
-      hdr.appendChild(b);
-    }
-  });
-})();
-</script>
-
-
-<script>
-function showTop10EdgeSummary() {
-  const totalBranches = branches.length;
-  let totalRev = 0, totalProfit = 0, lossCount = 0;
-  branches.forEach(b => {
-    const st = calcBranch(b);
-    totalRev += st.totalRevenue;
-    totalProfit += st.netPl;
-    if (!st.isProfit) lossCount++;
-  });
-  alert(
-    "🏆 OM SOFTWARE — TOP-10 FITNESS SAAS EDGE\n" +
-    "--------------------------------------------\n" +
-    "• Active Branches Tracked : " + totalBranches + "\n" +
-    "• Combined Gross Revenue  : ₹" + totalRev.toLocaleString("en-IN") + "\n" +
-    "• Combined Net P&L        : " + (totalProfit >= 0 ? "+₹" + totalProfit.toLocaleString("en-IN") : "-₹" + Math.abs(totalProfit).toLocaleString("en-IN")) + "\n" +
-    "• Loss-Making Branches    : " + lossCount + "\n\n" +
-    "Hamara Edge:\n" +
-    "1) Supplement Buy/Sell Margin + Fees + Other Income ka ek jagah P&L\n" +
-    "2) Staff Code se strict limited access (Salary/Report block)\n" +
-    "3) Cash payment mein bina UTR ke turant receipt & Weekly/Monthly Owner Share\n" +
-    "4) All-India city/branch directory + Manager code instant WhatsApp share"
-  );
-}
-</script>
-
 </body>
 </html>
