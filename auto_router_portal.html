@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Om Software ERP — Universal Auto-Router &amp; Isolated Data</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #060A14;
+      --card: #0D1424;
+      --border: #1E2D4A;
+      --gold: #F5A623;
+      --cyan: #22D3EE;
+      --emerald: #34D399;
+      --tx: #FFFFFF;
+      --muted: #94A3B8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--tx); padding: 20px; line-height: 1.5; }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+    h1 { font-size: 20px; color: var(--gold); margin-bottom: 6px; }
+    .sub { font-size: 12.5px; color: var(--muted); margin-bottom: 14px; }
+    .row-flex { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    input[type="text"], input[type="file"] {
+      background: #080D1A; border: 1px solid var(--border); color: #fff;
+      padding: 10px 12px; border-radius: 10px; font-size: 13px;
+    }
+    .btn {
+      background: var(--gold); color: #080D1A; border: 0; border-radius: 10px;
+      padding: 10px 14px; font-size: 13px; font-weight: 800; cursor: pointer;
+    }
+    .btn.sec { background: #162238; color: var(--cyan); border: 1px solid var(--border); }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    .panel { background: #080D1A; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .panel h3 { font-size: 14px; color: var(--cyan); margin-bottom: 8px; }
+    .item { font-size: 12px; padding: 7px 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .item:last-child { border-bottom: 0; }
+    .badge { color: var(--emerald); font-weight: 700; }
+    #statusMsg { margin-top: 10px; font-size: 12.5px; color: var(--emerald); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="box">
+      <h1>Universal Data Auto-Router (Isolated Per Gym)</h1>
+      <p class="sub">
+        Kisi bhi Excel (<code>.xlsx</code> / <code>.xls</code>) ya CSV file ko upload karein—har row automatic <b>Members</b>, <b>Staff</b>, <b>Collection</b>, ya <b>Expense</b> mein apne sahi section mein chali jayegi, sirf active Gym ID ke andar.
+      </p>
+
+      <div class="row-flex" style="margin-bottom:12px">
+        <label style="font-size:12.5px;color:var(--muted)">Active Gym / Tenant ID:</label>
+        <input type="text" id="tenantInput" value="GYM_001" onchange="switchGymTenant(this.value)">
+        <button class="btn sec" type="button" onclick="downloadSampleExcel()">Download Sample Excel</button>
+      </div>
+
+      <div class="row-flex">
+        <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" onchange="handleAutoFileUpload(event)">
+        <button class="btn" type="button" onclick="document.getElementById('excelFileInput').click()">Upload Excel / CSV File</button>
+      </div>
+
+      <div id="statusMsg"></div>
+    </div>
+
+    <div class="grid-4">
+      <div class="panel">
+        <h3>Members (<span id="cntMembers">0</span>)</h3>
+        <div id="listMembers"></div>
+      </div>
+      <div class="panel">
+        <h3>Staff (<span id="cntStaff">0</span>)</h3>
+        <div id="listStaff"></div>
+      </div>
+      <div class="panel">
+        <h3>Collection (<span id="cntCollection">0</span>)</h3>
+        <div id="listCollection"></div>
+      </div>
+      <div class="panel">
+        <h3>Expense (<span id="cntExpense">0</span>)</h3>
+        <div id="listExpense"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getTenantId() {
+      const inp = document.getElementById("tenantInput");
+      let val = inp && inp.value ? inp.value.trim() : (localStorage.getItem("om_active_tenant_id") || "GYM_001");
+      val = "TENANT_" + val.replace(/[^A-Za-z0-9_]/g, "_").toUpperCase();
+      localStorage.setItem("om_active_tenant_id", val);
+      return val;
+    }
+
+    function switchGymTenant(newVal) {
+      const clean = String(newVal || "GYM_001").trim() || "GYM_001";
+      localStorage.setItem("om_active_tenant_id", "TENANT_" + clean.replace(/[^A-Za-z0-9_]/g, "_").toUpperCase());
+      renderAllSections();
+    }
+
+    function readBucket(sec) {
+      const key = "om_router_" + getTenantId() + "_" + sec;
+      try {
+        const d = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(d) ? d : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function writeBucket(sec, arr) {
+      const key = "om_router_" + getTenantId() + "_" + sec;
+      localStorage.setItem(key, JSON.stringify(arr));
+    }
+
+    function detectTargetSection(row) {
+      const norm = {};
+      Object.keys(row || {}).forEach(k => {
+        norm[String(k).trim().toLowerCase()] = row[k];
+      });
+
+      const secHint = String(norm.section || norm.category || norm.type || norm.vibhag || "").toLowerCase();
+      const fullText = (secHint + " " + JSON.stringify(norm)).toLowerCase();
+
+      if (secHint.includes("expense") || secHint.includes("kharcha") || secHint.includes("bill") || fullText.includes("electricity") || fullText.includes("rent") || fullText.includes("maintenance")) {
+        return "expense";
+      }
+      if (secHint.includes("collection") || secHint.includes("fees") || secHint.includes("payment") || secHint.includes("sale") || fullText.includes("renewal") || fullText.includes("admission") || fullText.includes("supplement")) {
+        return "collection";
+      }
+      if (secHint.includes("staff") || secHint.includes("employee") || secHint.includes("trainer") || fullText.includes("salary") || fullText.includes("trainer") || fullText.includes("grade")) {
+        return "staff";
+      }
+      return "members";
+    }
+
+    function normalizeRowData(rawRow, idx) {
+      const r = {};
+      Object.keys(rawRow || {}).forEach(k => {
+        r[String(k).trim().toLowerCase()] = rawRow[k];
+      });
+      return {
+        id: "ROW_" + Date.now() + "_" + idx,
+        name: String(r.name || r.member_name || r.staff_name || r.title || r.item || ("Record #" + (idx + 1))).trim(),
+        phone: String(r.phone || r.mobile || r.contact || "").trim(),
+        planOrRole: String(r.role_or_plan || r.role || r.plan || r.designation || r.mode || "").trim(),
+        amount: Number(String(r.amount_or_salary || r.amount || r.salary || r.fees || r.paid || 0).replace(/[^0-9.]/g, "")) || 0,
+        extra: String(r.notes || r.remark || r.history || r.service || "").trim()
+      };
+    }
+
+    function handleAutoFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const wb = XLSX.read(data, { type: "array" });
+          const firstSheet = wb.Sheets[wb.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+          const buckets = {
+            members: readBucket("members"),
+            staff: readBucket("staff"),
+            collection: readBucket("collection"),
+            expense: readBucket("expense")
+          };
+
+          let counts = { members: 0, staff: 0, collection: 0, expense: 0 };
+
+          rows.forEach((rawRow, idx) => {
+            const target = detectTargetSection(rawRow);
+            const cleanItem = normalizeRowData(rawRow, idx);
+            buckets[target].unshift(cleanItem);
+            counts[target]++;
+          });
+
+          Object.keys(buckets).forEach(sec => writeBucket(sec, buckets[sec]));
+          renderAllSections();
+
+          document.getElementById("statusMsg").textContent =
+            `Uploaded (${file.name}) into ${getTenantId()}: Members +${counts.members}, Staff +${counts.staff}, Collection +${counts.collection}, Expense +${counts.expense}`;
+        } catch (err) {
+          document.getElementById("statusMsg").textContent = "File read error: " + err.message;
+        }
+      };
+      reader.readAsArrayBuffer(file);
+      event.target.value = "";
+    }
+
+    function renderAllSections() {
+      const secs = ["members", "staff", "collection", "expense"];
+      const capMap = { members: "Members", staff: "Staff", collection: "Collection", expense: "Expense" };
+      secs.forEach(sec => {
+        const list = readBucket(sec);
+        document.getElementById("cnt" + capMap[sec]).textContent = list.length;
+        const container = document.getElementById("list" + capMap[sec]);
+        if (!list.length) {
+          container.innerHTML = '<div class="item" style="color:var(--muted)">No records yet</div>';
+          return;
+        }
+        container.innerHTML = list.map(item => `
+          <div class="item">
+            <b>${escapeHtml(item.name)}</b>
+            ${item.amount ? `<span class="badge"> — ₹${item.amount}</span>` : ""}
+            ${item.planOrRole ? `<div style="color:var(--muted)">${escapeHtml(item.planOrRole)}</div>` : ""}
+            ${item.phone ? `<div style="color:var(--muted)">Ph: ${escapeHtml(item.phone)}</div>` : ""}
+          </div>
+        `).join("");
+      });
+    }
+
+    function downloadSampleExcel() {
+      const sampleRows = [
+        { Section: "Member", Name: "Rahul Verma", Phone: "9876543210", Plan: "Monthly", Amount: 1200, Notes: "Old member" },
+        { Section: "Staff", Name: "Suresh Yadav", Phone: "9876500011", Role: "Trainer", Amount: 15000, Notes: "Morning batch" },
+        { Section: "Collection", Name: "Fee Collection - Rahul", Phone: "9876543210", Plan: "UPI", Amount: 1200, Notes: "Nov fee" },
+        { Section: "Expense", Name: "Electricity Bill", Phone: "", Role: "Utility", Amount: 8500, Notes: "Monthly meter" }
+      ];
+      const ws = XLSX.utils.json_to_sheet(sampleRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Gym_Data");
+      XLSX.writeFile(wb, "Om_Software_Auto_Router_Sample.xlsx");
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    renderAllSections();
+  </script>
+</body>
+</html>
