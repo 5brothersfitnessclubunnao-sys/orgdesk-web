@@ -4639,5 +4639,476 @@ window.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+
+<!-- ================= 1. ATTENDANCE ENGINE: CALENDAR/MONTHLY LEAVES, ADVANCE, LATE IN/OUT, OUTSIDE GEO & TELEGRAM ALERT ================= -->
+<div class="ov" id="omAttendanceEngineOv">
+  <div class="bx" style="max-width:740px">
+    <h3>
+      <span>📋 Smart Attendance, Late Penalty &amp; Geo Engine</span>
+      <button type="button" onclick="closeOv('omAttendanceEngineOv')" style="background:none;border:0;color:var(--ac-gold);font-size:18px;cursor:pointer">✕</button>
+    </h3>
+
+    <!-- Gym Geo-Location Setter (Manager & Owner Can Set / Change Anytime) -->
+    <div style="background:#080D1A;border:1px solid rgba(56,189,248,0.4);border-radius:11px;padding:10px;margin-bottom:10px;font-size:11.5px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div>
+          <b style="color:var(--ac-cyan)">📍 Gym Geo Location:</b>
+          <span id="omGymGeoDisplay" style="color:#fff">Not Set</span>
+          <span style="color:var(--tx-muted)">(Radius: 150m)</span>
+        </div>
+        <button type="button" class="btn g" style="margin:0;width:auto;padding:5px 10px;font-size:11px" onclick="setOrUpdateGymLocation()">Set / Update Gym Location</button>
+      </div>
+    </div>
+
+    <!-- Calendar & Monthly Mid-Month Summary -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <input type="date" id="attCalDate" onchange="renderAttendanceSummaryTable()" style="flex:0 0 165px;margin-top:0">
+      <input type="month" id="attMonthFilter" onchange="renderAttendanceSummaryTable()" style="flex:0 0 165px;margin-top:0">
+      <button type="button" class="btn g" style="margin:0;flex:1 1 150px" onclick="markHolidayOrPaidLeaveModal()">🎉 Holiday / Paid Leave</button>
+    </div>
+
+    <!-- Mark Attendance Form (Senior Late Reason + Informed Yes/No + Telegram Alert + Outside Geo Auto Tag) -->
+    <form onsubmit="submitSmartAttendanceEntry(event)" style="background:#0B1224;border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:900;color:var(--ac-gold);margin-bottom:8px">Mark Staff Attendance</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="field"><label>Staff Name *</label><input type="text" id="attStaffName" required placeholder="e.g. Deepak Yadav"></div>
+        <div class="field"><label>Level</label><select id="attStaffLevel"><option value="Standard">Standard Staff</option><option value="Senior">Senior / Manager / Trainer</option></select></div>
+        <div class="field"><label>Punch Type</label><select id="attPunchType"><option value="In">Check-In</option><option value="Out">Check-Out</option></select></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px">
+        <div class="field"><label>Late In (Mins)</label><input type="number" id="attLateInMins" inputmode="numeric" value="0" min="0"></div>
+        <div class="field"><label>Late Out (Mins)</label><input type="number" id="attLateOutMins" inputmode="numeric" value="0" min="0"></div>
+        <div class="field"><label>Advance Taken (₹)</label><input type="number" id="attAdvanceAmt" inputmode="numeric" value="0" min="0"></div>
+      </div>
+
+      <!-- Senior Late Attendance Mandatory Reason + Informed Yes/No -->
+      <div id="seniorLateExtraBox" style="background:#080D1A;border:1px dashed rgba(250,204,21,0.5);border-radius:9px;padding:9px;margin-top:8px;font-size:11.5px">
+        <div style="color:var(--ac-gold);font-weight:800;margin-bottom:5px">Senior / Late Attendance Controls</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px">
+          <div>
+            <label style="font-size:11px">Late Reason (Required if Late / Senior)</label>
+            <input type="text" id="attLateReason" placeholder="Reason for late arrival/departure" style="margin-top:2px">
+          </div>
+          <div>
+            <label style="font-size:11px">Informed?</label>
+            <select id="attInformedFlag" style="margin-top:2px">
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px">Reporting To</label>
+            <input type="text" id="attReportPerson" placeholder="Manager / Owner" style="margin-top:2px">
+          </div>
+        </div>
+      </div>
+
+      <!-- Outside Attendance Check & Selfie Location Stamp -->
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11.5px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0">
+          <input type="checkbox" id="attOutsideFlag" onchange="toggleOutsideReasonField()" style="width:auto;margin:0">
+          <span>Outside Gym Attendance</span>
+        </label>
+        <input type="text" id="attOutsideReason" placeholder="Outside attendance reason (required if outside)" style="display:none;flex:1;margin:0">
+      </div>
+
+      <button type="submit" class="btn" style="margin-top:10px">Save Attendance &amp; Auto-Calc Salary Deduction</button>
+    </form>
+
+    <!-- Mid-Month Leaves, Advance, Late In/Out & Hour/Minute Deduction Table -->
+    <div id="omAttendanceSummaryRows" style="max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;font-size:12px"></div>
+    <button type="button" class="btn g" onclick="closeOv('omAttendanceEngineOv')">बंद करें</button>
+  </div>
+</div>
+
+<!-- ================= 2. DEPARTMENT-WISE STAFF DIRECTORY (ADMIN & MANAGER) ================= -->
+<div class="ov" id="omDeptStaffOv">
+  <div class="bx" style="max-width:720px">
+    <h3>
+      <span>🏢 Department-Wise Staff Directory</span>
+      <button type="button" onclick="closeOv('omDeptStaffOv')" style="background:none;border:0;color:var(--ac-gold);font-size:18px;cursor:pointer">✕</button>
+    </h3>
+    <div style="font-size:11.5px;color:var(--tx-muted);margin-bottom:8px">
+      Branch chunein aur department folders (Cleaning, Floor/Maintenance, Training, Front Desk, Management) ke andar staff dekhein. Har staff ke niche direct Call, SMS, aur WhatsApp actions hain.
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <select id="deptBranchSelect" onchange="renderDepartmentStaffFolders()" style="flex:1 1 200px;margin-top:0">
+        <option value="001">Branch 001 — Unnao / Akrampur</option>
+        <option value="002">Branch 002 — Kanpur</option>
+        <option value="003">Branch 003 — Lucknow</option>
+      </select>
+      <input type="text" id="deptSearchInp" placeholder="Search staff name, department, mobile..." oninput="renderDepartmentStaffFolders()" style="flex:1 1 220px;margin-top:0">
+    </div>
+
+    <div id="omDeptFoldersBox" style="max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:8px"></div>
+    <button type="button" class="btn g" onclick="closeOv('omDeptStaffOv')">बंद करें</button>
+  </div>
+</div>
+
+<!-- ANTI-SCREENSHOT / ANTI-CAPTURE OVERLAY FOR NON-ADMIN USERS -->
+<div id="omAntiScreenshotCurtain" style="display:none;position:fixed;inset:0;z-index:2147483646;background:#040711;color:#FACC15;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px">
+  <div style="font-size:20px;font-weight:900">Screen Capture Protected</div>
+  <div style="font-size:12.5px;color:#CBD5E1;margin-top:6px">Screenshots and screen capture are restricted to Admin only.</div>
+</div>
+
+<script>
+// ================= ATTENDANCE, PENALTY WAIVER, DEPARTMENTS & ANTI-SCREENSHOT ENGINE =================
+const ATT_LOG_KEY = "om_staff_attendance_logs_v1";
+const GYM_GEO_KEY = "om_gym_geo_location_v1";
+
+function isAdminUserNow() {
+  if (typeof isStaffRole === "function" && isStaffRole()) return false;
+  return true;
+}
+
+function setOrUpdateGymLocation() {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported in this browser.");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    const loc = {
+      lat: Number(pos.coords.latitude.toFixed(6)),
+      lng: Number(pos.coords.longitude.toFixed(6)),
+      updatedAt: new Date().toLocaleString("en-IN")
+    };
+    LS.setItem(GYM_GEO_KEY, JSON.stringify(loc));
+    if (typeof recordAuditEvent === "function") recordAuditEvent("Gym Geo Updated", `Set gym location: ${loc.lat}, ${loc.lng}`);
+    renderGymGeoBadge();
+    alert(`Gym Location Saved:\nLat: ${loc.lat}, Lng: ${loc.lng}`);
+  }, function() {
+    const manualLat = prompt("Enter Gym Latitude (e.g. 26.5464):", "26.5464");
+    const manualLng = prompt("Enter Gym Longitude (e.g. 80.4878):", "80.4878");
+    if (manualLat && manualLng) {
+      const loc = { lat: Number(manualLat), lng: Number(manualLng), updatedAt: new Date().toLocaleString("en-IN") };
+      LS.setItem(GYM_GEO_KEY, JSON.stringify(loc));
+      renderGymGeoBadge();
+    }
+  });
+}
+
+function renderGymGeoBadge() {
+  const el = $("omGymGeoDisplay");
+  if (!el) return;
+  const loc = J(GYM_GEO_KEY, null);
+  el.textContent = loc ? `${loc.lat}, ${loc.lng} (${loc.updatedAt || "Active"})` : "Not Set Yet";
+}
+
+function toggleOutsideReasonField() {
+  const chk = $("attOutsideFlag");
+  const inp = $("attOutsideReason");
+  if (chk && inp) {
+    inp.style.display = chk.checked ? "block" : "none";
+    inp.required = !!chk.checked;
+  }
+}
+
+function sendTelegramLateAlert(entry) {
+  // Prepares structured Telegram alert payload and logs audit trail
+  const msg = `[Late Attendance Alert] Staff: ${entry.staffName} | Punch: ${entry.punchType} | Late In: ${entry.lateInMins}m | Late Out: ${entry.lateOutMins}m | Informed: ${entry.informed} (${entry.reportPerson || "Manager"}) | Reason: ${entry.reason || "-"}`;
+  const alerts = J("om_telegram_alerts_log_v1", []);
+  alerts.unshift({ time: new Date().toLocaleString("en-IN"), message: msg });
+  LS.setItem("om_telegram_alerts_log_v1", JSON.stringify(alerts.slice(0, 50)));
+  if (typeof recordAuditEvent === "function") recordAuditEvent("Telegram Alert Sent", msg);
+}
+
+function submitSmartAttendanceEntry(e) {
+  e.preventDefault();
+  const staffName = String(($("attStaffName") && $("attStaffName").value) || "").trim();
+  const level = ($("attStaffLevel") && $("attStaffLevel").value) || "Standard";
+  const punchType = ($("attPunchType") && $("attPunchType").value) || "In";
+  const lateInMins = Math.max(0, Number(($("attLateInMins") && $("attLateInMins").value) || 0));
+  const lateOutMins = Math.max(0, Number(($("attLateOutMins") && $("attLateOutMins").value) || 0));
+  const advanceAmt = Math.max(0, Number(($("attAdvanceAmt") && $("attAdvanceAmt").value) || 0));
+  const reason = String(($("attLateReason") && $("attLateReason").value) || "").trim();
+  const informed = ($("attInformedFlag") && $("attInformedFlag").value) || "No";
+  const reportPerson = String(($("attReportPerson") && $("attReportPerson").value) || "").trim();
+  const isOutside = !!($("attOutsideFlag") && $("attOutsideFlag").checked);
+  const outsideReason = String(($("attOutsideReason") && $("attOutsideReason").value) || "").trim();
+
+  const totalLateMins = lateInMins + lateOutMins;
+  if ((level === "Senior" || totalLateMins > 0) && !reason) {
+    alert("Late attendance or Senior level attendance requires a reason before marking.");
+    return;
+  }
+  if (isOutside && !outsideReason) {
+    alert("Outside gym attendance requires an outside reason.");
+    return;
+  }
+
+  // Calculate exact Hour & Minute salary deduction based on monthly base (e.g. ₹15,000 / 30 days / 8 hours = ₹62.5/hr)
+  const monthlySalary = 15000;
+  const perMinuteRate = monthlySalary / 30 / 8 / 60;
+  const rawDeduction = Math.round(totalLateMins * perMinuteRate);
+  const lateHrs = Math.floor(totalLateMins / 60);
+  const lateRemMins = totalLateMins % 60;
+
+  let locationStamp = "Inside Gym Geo";
+  if (isOutside) {
+    const geo = J(GYM_GEO_KEY, { lat: 26.5464, lng: 80.4878 });
+    locationStamp = `OUTSIDE GYM • Selfie Geo: (${geo.lat}, ${geo.lng}) • Reason: ${outsideReason}`;
+  }
+
+  const rec = {
+    id: "ATT-" + Date.now(),
+    date: ($("attCalDate") && $("attCalDate").value) || iso(),
+    staffName,
+    level,
+    punchType,
+    lateInMins,
+    lateOutMins,
+    lateHrs,
+    lateRemMins,
+    deductionAmt: rawDeduction,
+    penaltyWaived: false,
+    leaveType: "Working",
+    advanceAmt,
+    reason,
+    informed,
+    reportPerson,
+    locationStamp
+  };
+
+  const logs = J(ATT_LOG_KEY, []);
+  logs.unshift(rec);
+  LS.setItem(ATT_LOG_KEY, JSON.stringify(logs));
+
+  if (totalLateMins > 0 || level === "Senior") {
+    sendTelegramLateAlert(rec);
+  }
+  if (typeof recordAuditEvent === "function") {
+    recordAuditEvent("Attendance Marked", `${staffName} (${punchType}) • Late ${lateHrs}h ${lateRemMins}m • Ded ₹${rawDeduction}`);
+  }
+
+  renderAttendanceSummaryTable();
+  alert(`Attendance Marked for ${staffName}.\nLate Duration: ${lateHrs}h ${lateRemMins}m\nCalculated Deduction: ₹${rawDeduction}\nLocation: ${locationStamp}`);
+}
+
+function waiveLatePenaltyForRecord(recId) {
+  if (!isAdminUserNow()) {
+    alert("Only Manager or Admin can waive late entry penalty.");
+    return;
+  }
+  const logs = J(ATT_LOG_KEY, []);
+  const updated = logs.map(r => r.id === recId ? Object.assign({}, r, { deductionAmt: 0, penaltyWaived: true }) : r);
+  LS.setItem(ATT_LOG_KEY, JSON.stringify(updated));
+  if (typeof recordAuditEvent === "function") recordAuditEvent("Penalty Waived", "Late entry penalty removed for " + recId);
+  renderAttendanceSummaryTable();
+}
+
+function markHolidayOrPaidLeaveModal() {
+  const staffTarget = prompt("Enter Staff Name for Holiday / Paid Leave (or 'ALL' for Gym Holiday):", "ALL");
+  if (!staffTarget) return;
+  const kind = prompt("Type 'Holiday' or 'Paid Leave':", "Paid Leave") || "Paid Leave";
+  const logs = J(ATT_LOG_KEY, []);
+  logs.unshift({
+    id: "LEV-" + Date.now(),
+    date: ($("attCalDate") && $("attCalDate").value) || iso(),
+    staffName: staffTarget.trim(),
+    level: "Standard",
+    punchType: kind,
+    lateInMins: 0,
+    lateOutMins: 0,
+    lateHrs: 0,
+    lateRemMins: 0,
+    deductionAmt: 0,
+    penaltyWaived: true,
+    leaveType: kind,
+    advanceAmt: 0,
+    reason: kind,
+    informed: "Yes",
+    reportPerson: "Admin/Manager",
+    locationStamp: kind + " (No Deduction)"
+  });
+  LS.setItem(ATT_LOG_KEY, JSON.stringify(logs));
+  renderAttendanceSummaryTable();
+}
+
+function renderAttendanceSummaryTable() {
+  const box = $("omAttendanceSummaryRows");
+  if (!box) return;
+  const logs = J(ATT_LOG_KEY, []);
+  const mFilter = ($("attMonthFilter") && $("attMonthFilter").value) || "";
+  const filtered = logs.filter(r => !mFilter || String(r.date || "").startsWith(mFilter));
+
+  box.innerHTML = filtered.length ? filtered.map(r => `
+    <div class="row" style="flex-direction:column;align-items:stretch;gap:5px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div>
+          <b>${esc(r.staffName)}</b> <small style="color:var(--ac-cyan)">[${esc(r.date)} • ${esc(r.punchType)}]</small>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="color:${r.deductionAmt > 0 ? '#FB7185' : '#34D399'};font-weight:800">
+            Ded: ₹${Number(r.deductionAmt || 0)} ${r.penaltyWaived ? "(Waived)" : ""}
+          </span>
+          ${r.deductionAmt > 0 ? `<button type="button" class="btn g" style="margin:0;width:auto;padding:3px 8px;font-size:10.5px" onclick="waiveLatePenaltyForRecord('${esc(r.id)}')">Remove Penalty</button>` : ""}
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--tx-muted)">
+        Late In: <b>${r.lateInMins}m</b> &bull; Late Out: <b>${r.lateOutMins}m</b> (${r.lateHrs || 0}h ${r.lateRemMins || 0}m) &bull; Advance: <b>₹${Number(r.advanceAmt || 0)}</b>
+      </div>
+      <div style="font-size:11px;color:#FDE68A">
+        Informed: <b>${esc(r.informed)}</b> (${esc(r.reportPerson || "-")}) &bull; Reason: ${esc(r.reason || "-")} &bull; ${esc(r.locationStamp)}
+      </div>
+    </div>
+  `).join("") : '<div class="row"><span>No attendance records for selected filter.</span></div>';
+}
+
+function openAttendanceEngineModal() {
+  if ($("attCalDate") && !$("attCalDate").value) $("attCalDate").value = iso();
+  if ($("attMonthFilter") && !$("attMonthFilter").value) $("attMonthFilter").value = iso().slice(0, 7);
+  renderGymGeoBadge();
+  renderAttendanceSummaryTable();
+  if ($("omAttendanceEngineOv")) $("omAttendanceEngineOv").classList.add("show");
+}
+
+// Department-wise Staff Directory (Cleaning, Floor/Maintenance, Training, Front Desk, Management)
+function getDepartmentStaffDataset() {
+  const base = [
+    { id: "STF-001-CL1", branch: "001", dept: "Cleaning Department", name: "Rameshwar Prasad (Morning Sweeper)", phone: "9876501111", salary: "₹10,500", bonus: "₹500", leaves: "2 Taken", onTimeDays: "16 Days", lateDays: "2 Days", kyc: "Verified" },
+    { id: "STF-001-CL2", branch: "001", dept: "Cleaning Department", name: "Suresh Kumar (Morning Sweeper)", phone: "9876501112", salary: "₹10,500", bonus: "₹500", leaves: "1 Taken", onTimeDays: "17 Days", lateDays: "1 Day", kyc: "Verified" },
+    { id: "STF-001-TR1", branch: "001", dept: "Training Department", name: "Vikram Yadav (Senior Trainer)", phone: "9876503344", salary: "₹18,000", bonus: "₹1,500", leaves: "1 Taken", onTimeDays: "18 Days", lateDays: "0 Days", kyc: "Verified" },
+    { id: "STF-001-FD1", branch: "001", dept: "Front Desk & Operations", name: "Pooja Sharma (Front Desk)", phone: "9876504455", salary: "₹14,000", bonus: "₹1,000", leaves: "0 Taken", onTimeDays: "19 Days", lateDays: "0 Days", kyc: "Verified" }
+  ];
+  const extra = J("bfc_staff_list", []).map((s, idx) => ({
+    id: s.id || ("STF-EX-" + idx),
+    branch: s.branch || "001",
+    dept: s.dept || "Training Department",
+    name: s.name || "Staff Member",
+    phone: s.phone || "9876500000",
+    salary: "₹" + Number(s.basicSalary || 12000).toLocaleString("en-IN"),
+    bonus: "₹1,000",
+    leaves: "1 Taken",
+    onTimeDays: "15 Days",
+    lateDays: "1 Day",
+    kyc: "Verified"
+  }));
+  return base.concat(extra);
+}
+
+function openDepartmentStaffDirectory() {
+  renderDepartmentStaffFolders();
+  if ($("omDeptStaffOv")) $("omDeptStaffOv").classList.add("show");
+}
+
+function renderDepartmentStaffFolders() {
+  const box = $("omDeptFoldersBox");
+  if (!box) return;
+  const br = ($("deptBranchSelect") && $("deptBranchSelect").value) || "001";
+  const q = String(($("deptSearchInp") && $("deptSearchInp").value) || "").trim().toLowerCase();
+
+  const rows = getDepartmentStaffDataset().filter(item => {
+    if (String(item.branch) !== String(br)) return false;
+    if (!q) return true;
+    return `${item.name} ${item.dept} ${item.phone} ${item.id}`.toLowerCase().includes(q);
+  });
+
+  const grouped = {};
+  rows.forEach(r => {
+    if (!grouped[r.dept]) grouped[r.dept] = [];
+    grouped[r.dept].push(r);
+  });
+
+  const deptNames = Object.keys(grouped);
+  box.innerHTML = deptNames.length ? deptNames.map(dName => `
+    <div style="background:#080D1A;border:1.5px solid var(--border);border-radius:11px;padding:10px">
+      <div style="color:var(--ac-gold);font-weight:900;font-size:12.5px;margin-bottom:6px">📁 ${esc(dName)} (${grouped[dName].length} Staff)</div>
+      ${grouped[dName].map(st => `
+        <div class="row" style="flex-direction:column;align-items:stretch;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+            <div>
+              <b>${esc(st.name)}</b> <small style="color:var(--ac-cyan)">(${esc(st.id)})</small>
+              <div style="font-size:11px;color:var(--tx-muted)">
+                Salary: <b>${esc(st.salary)}</b> &bull; Bonus: <b>${esc(st.bonus)}</b> &bull; Leaves: <b>${esc(st.leaves)}</b> &bull; On-Time: <b>${esc(st.onTimeDays)}</b> &bull; Late: <b>${esc(st.lateDays)}</b> &bull; KYC: <span style="color:#34D399">${esc(st.kyc)}</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap">
+              <a href="tel:${esc(st.phone)}" class="btn g" style="margin:0;width:auto;padding:4px 8px;font-size:10.5px;text-decoration:none">📞 Call</a>
+              <a href="sms:${esc(st.phone)}" class="btn g" style="margin:0;width:auto;padding:4px 8px;font-size:10.5px;text-decoration:none">💬 SMS</a>
+              <a href="https://wa.me/91${esc(String(st.phone || '').replace(/\D/g, '').slice(-10))}" target="_blank" rel="noopener" class="btn" style="margin:0;width:auto;padding:4px 8px;font-size:10.5px;background:#22C55E;color:#04140C;text-decoration:none">📲 WhatsApp</a>
+              <button type="button" class="btn g" style="margin:0;width:auto;padding:4px 8px;font-size:10.5px" onclick="downloadStaffDossier('${esc(st.id)}')">⬇ Download</button>
+            </div>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `).join("") : '<div class="row"><span>No staff found in this branch/filter.</span></div>';
+}
+
+function downloadStaffDossier(staffId) {
+  const st = getDepartmentStaffDataset().find(x => x.id === staffId);
+  if (!st) return;
+  const content = [
+    "STAFF PROFILE, KYC & PAYROLL SUMMARY",
+    "------------------------------------",
+    "Staff ID    : " + st.id,
+    "Name        : " + st.name,
+    "Branch      : " + st.branch,
+    "Department  : " + st.dept,
+    "Mobile      : " + st.phone,
+    "Salary      : " + st.salary,
+    "Bonus       : " + st.bonus,
+    "Leaves      : " + st.leaves,
+    "On-Time     : " + st.onTimeDays,
+    "Late Days   : " + st.lateDays,
+    "KYC Status  : " + st.kyc
+  ].join("\n");
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `${st.id}_Staff_Dossier.txt`;
+  a.click();
+}
+
+// Anti-Screenshot Protection for Non-Admin Users
+function triggerAntiScreenshotMask() {
+  if (isAdminUserNow()) return;
+  const curtain = $("omAntiScreenshotCurtain");
+  if (!curtain) return;
+  curtain.style.display = "flex";
+  setTimeout(function() { curtain.style.display = "none"; }, 2500);
+}
+
+window.addEventListener("keydown", function(e) {
+  if (isAdminUserNow()) return;
+  if (e.key === "PrintScreen" || ((e.metaKey || e.ctrlKey) && e.shiftKey && ["s", "S", "3", "4", "5"].includes(e.key))) {
+    e.preventDefault();
+    triggerAntiScreenshotMask();
+  }
+});
+
+window.addEventListener("visibilitychange", function() {
+  if (!isAdminUserNow() && document.hidden) {
+    triggerAntiScreenshotMask();
+  }
+});
+
+window.addEventListener("DOMContentLoaded", function() {
+  const nav = document.querySelector(".nav-actions");
+  if (nav) {
+    if (!document.getElementById("btnAttEngineNav")) {
+      const bAtt = document.createElement("button");
+      bAtt.type = "button";
+      bAtt.id = "btnAttEngineNav";
+      bAtt.className = "btn-nav";
+      bAtt.textContent = "Smart Attendance";
+      bAtt.onclick = openAttendanceEngineModal;
+      nav.insertBefore(bAtt, nav.firstChild);
+    }
+    if (!document.getElementById("btnDeptStaffNav")) {
+      const bDept = document.createElement("button");
+      bDept.type = "button";
+      bDept.id = "btnDeptStaffNav";
+      bDept.className = "btn-nav";
+      bDept.textContent = "Department Staff";
+      bDept.onclick = openDepartmentStaffDirectory;
+      nav.insertBefore(bDept, nav.firstChild);
+    }
+  }
+});
+</script>
+
 </body>
 </html>

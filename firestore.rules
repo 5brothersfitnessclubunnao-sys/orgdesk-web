@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    match /members/{docId} {
+      allow read, write: if isSignedIn();
+    }
+    match /attendance/{docId} {
+      allow read, write: if isSignedIn();
+    }
+    match /attendance_attempts/{docId} {
+      allow read, write: if isSignedIn();
+    }
+    match /om_cloud_state/{docId} {
+      allow read, write: if isSignedIn();
+    }
+    match /staff_codes/{docId} {
+      allow read, write: if isSignedIn();
+    }
+    match /orgs/{orgId}/{document=**} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}
