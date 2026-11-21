@@ -645,6 +645,27 @@
       box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
     }
 
+
+/* ================= PAYTM-STYLE UNIVERSAL DEVICE ADAPTIVE SYSTEM ================= */
+html, body {
+  width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+@media (max-width: 600px) {
+  .auth-box {
+    width: 95% !important;
+    margin: 12px auto !important;
+    padding: 18px 14px !important;
+  }
+  input, select, button {
+    font-size: 14px !important;
+  }
+}
+
 </style>
 </head>
 <body>
