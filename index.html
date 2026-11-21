@@ -5110,5 +5110,422 @@ window.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+
+<!-- ================= DEEP MAINTENANCE, UTILITIES, KYC & SESSION GUARD SUITE ================= -->
+<div class="ov" id="omDeepMaintenanceOv">
+  <div class="bx" style="max-width:780px">
+    <h3>
+      <span>🔧 Maintenance, Utilities &amp; Vendor Command</span>
+      <button type="button" onclick="closeOv('omDeepMaintenanceOv')" style="background:none;border:0;color:var(--ac-gold);font-size:18px;cursor:pointer">✕</button>
+    </h3>
+
+    <!-- Branch Selector + Utility Bill Meter & Load Breakdown -->
+    <div style="background:#080D1A;border:1px solid rgba(56,189,248,0.4);border-radius:12px;padding:12px;margin-bottom:12px;font-size:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <b style="color:var(--ac-cyan)">⚡ Electricity &amp; Meter Expense Tracker (Branch-Wise)</b>
+        <select id="dmBranchSel" onchange="renderDeepMaintenanceAndBills()" style="width:auto;min-width:190px;margin:0;padding:6px 10px">
+          <option value="001">Branch 001 — Unnao / Akrampur</option>
+          <option value="002">Branch 002 — Kanpur</option>
+          <option value="003">Branch 003 — Lucknow</option>
+        </select>
+      </div>
+      <div id="dmElectricityCard" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:11.5px"></div>
+    </div>
+
+    <!-- Log Maintenance / Repair / Vendor Expense -->
+    <form onsubmit="saveMaintenanceVendorLog(event)" style="background:#0B1224;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:900;color:var(--ac-gold);margin-bottom:8px">Log Equipment / Electrician / Vendor Service</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="field"><label>Department / Category *</label>
+          <select id="dmCategory">
+            <option value="Gym Equipment Mechanic">Gym Equipment Mechanic</option>
+            <option value="Electrician">Electrician</option>
+            <option value="Plumber / Water Supply">Plumber / Water Supply</option>
+            <option value="AC / DG Technician">AC / DG Technician</option>
+            <option value="Cleaning / Sweeper">Cleaning / Sweeper</option>
+            <option value="Pooja / Hawan / Flowers">Pooja / Hawan / Flowers</option>
+            <option value="Peon / Security / Driver">Peon / Security / Driver</option>
+          </select>
+        </div>
+        <div class="field"><label>Vendor / Technician Name *</label><input type="text" id="dmVendorName" required placeholder="e.g. Rajesh Electrician"></div>
+        <div class="field"><label>Mobile (Call/WhatsApp)</label><input type="tel" id="dmVendorPhone" inputmode="numeric" placeholder="9876543210"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px">
+        <div class="field"><label>Equipment / Item *</label><input type="text" id="dmItemName" required placeholder="e.g. Treadmill / Main DB"></div>
+        <div class="field"><label>Part Cost (₹)</label><input type="number" id="dmPartCost" inputmode="numeric" value="0" min="0"></div>
+        <div class="field"><label>Service Fee (₹)</label><input type="number" id="dmServiceFee" inputmode="numeric" value="0" min="0"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+        <div class="field"><label>Issue Reported &amp; Work Done</label><input type="text" id="dmWorkSummary" placeholder="What fault came & what was fixed"></div>
+        <div class="field"><label>Working With Gym Since</label><input type="text" id="dmSinceText" placeholder="e.g. Since Jan 2024"></div>
+      </div>
+
+      <button type="submit" class="btn" style="margin-top:10px">Save Maintenance &amp; Vendor Record</button>
+    </form>
+
+    <!-- Maintenance History with Repeat-Issue Warning & Direct Call/WhatsApp -->
+    <div class="sec-tag">Maintenance &amp; Vendor Service Log (Repeat Fault Detection)</div>
+    <div id="dmLogsListBox" style="max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;font-size:12px"></div>
+
+    <button type="button" class="btn g" onclick="closeOv('omDeepMaintenanceOv')">बंद करें</button>
+  </div>
+</div>
+
+<!-- 1-CLICK STAFF KYC & DOCUMENTS MODAL -->
+<div class="ov" id="omStaffKycDocsOv">
+  <div class="bx" style="max-width:620px">
+    <h3>
+      <span>🪪 Staff KYC, Joining Info &amp; Documents</span>
+      <button type="button" onclick="closeOv('omStaffKycDocsOv')" style="background:none;border:0;color:var(--ac-gold);font-size:18px;cursor:pointer">✕</button>
+    </h3>
+    <div id="omKycDocsBody" style="font-size:12px;line-height:1.6"></div>
+    <button type="button" class="btn g" onclick="closeOv('omStaffKycDocsOv')">बंद करें</button>
+  </div>
+</div>
+
+<!-- 1-MINUTE IDLE TIMEOUT WARNING / LOGOUT OVERLAY -->
+<div class="ov" id="omIdleLockOv">
+  <div class="bx" style="max-width:420px;text-align:center">
+    <h3><span>⏱ 1-Minute Inactivity Lock</span></h3>
+    <div style="font-size:12.5px;color:var(--tx-sub);line-height:1.55">
+      System was inactive for 1 minute. Session is locked for security.
+    </div>
+    <button type="button" class="btn" onclick="resumeSessionFromIdleLock()">Continue Session</button>
+    <button type="button" class="btn red" onclick="confirmMainPageLogoutNow()">Logout Now</button>
+  </div>
+</div>
+
+<script>
+// ================= DEEP MAINTENANCE, ELECTRICITY METER, KYC DOCS & 60s IDLE LOCK =================
+const MAINT_LOGS_KEY = "om_deep_maintenance_logs_v1";
+
+const BRANCH_BILL_PROFILES = {
+  "001": {
+    currentBill: 14850,
+    previousBill: 13200,
+    billGeneratedOn: "2026-11-05",
+    prevMeterReading: "18420 kWh",
+    currMeterReading: "20185 kWh",
+    sanctionedLoad: "4 kW"
+  },
+  "002": {
+    currentBill: 16400,
+    previousBill: 15900,
+    billGeneratedOn: "2026-11-06",
+    prevMeterReading: "24110 kWh",
+    currMeterReading: "26050 kWh",
+    sanctionedLoad: "5 kW"
+  },
+  "003": {
+    currentBill: 12100,
+    previousBill: 11500,
+    billGeneratedOn: "2026-11-04",
+    prevMeterReading: "11900 kWh",
+    currMeterReading: "13250 kWh",
+    sanctionedLoad: "3 kW"
+  }
+};
+
+function openDeepMaintenanceModal() {
+  renderDeepMaintenanceAndBills();
+  if ($("omDeepMaintenanceOv")) $("omDeepMaintenanceOv").classList.add("show");
+}
+
+function renderDeepMaintenanceAndBills() {
+  const br = ($("dmBranchSel") && $("dmBranchSel").value) || "001";
+  const bInfo = BRANCH_BILL_PROFILES[br] || BRANCH_BILL_PROFILES["001"];
+  const elCard = $("dmElectricityCard");
+  if (elCard) {
+    elCard.innerHTML = `
+      <div style="background:#0B1224;border:1px solid var(--border);border-radius:9px;padding:8px">
+        <div style="color:var(--tx-muted);font-size:10.5px">Current Bill</div>
+        <div style="color:#FACC15;font-size:15px;font-weight:900">₹${Number(bInfo.currentBill).toLocaleString("en-IN")}</div>
+        <div style="color:var(--tx-muted);font-size:10.5px">Prev Bill: ₹${Number(bInfo.previousBill).toLocaleString("en-IN")}</div>
+      </div>
+      <div style="background:#0B1224;border:1px solid var(--border);border-radius:9px;padding:8px">
+        <div style="color:var(--tx-muted);font-size:10.5px">Meter Reading</div>
+        <div style="color:#22D3EE;font-size:12.5px;font-weight:800">${esc(bInfo.prevMeterReading)} &rarr; ${esc(bInfo.currMeterReading)}</div>
+        <div style="color:var(--tx-muted);font-size:10.5px">Generated: ${esc(bInfo.billGeneratedOn)}</div>
+      </div>
+      <div style="background:#0B1224;border:1px solid var(--border);border-radius:9px;padding:8px">
+        <div style="color:var(--tx-muted);font-size:10.5px">Connection Load</div>
+        <div style="color:#34D399;font-size:15px;font-weight:900">${esc(bInfo.sanctionedLoad)}</div>
+        <div style="color:var(--tx-muted);font-size:10.5px">Branch ${esc(br)}</div>
+      </div>
+    `;
+  }
+
+  const logs = J(MAINT_LOGS_KEY, []);
+  const box = $("dmLogsListBox");
+  if (!box) return;
+
+  const itemCountMap = {};
+  logs.forEach(x => {
+    const key = String(x.itemName || "").trim().toLowerCase();
+    if (key) itemCountMap[key] = (itemCountMap[key] || 0) + 1;
+  });
+
+  box.innerHTML = logs.length ? logs.map(item => {
+    const k = String(item.itemName || "").trim().toLowerCase();
+    const repeatCount = itemCountMap[k] || 1;
+    const totalCost = Number(item.partCost || 0) + Number(item.serviceFee || 0);
+    const cleanPhone = String(item.vendorPhone || "").replace(/\D/g, "").slice(-10);
+    return `
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:5px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div>
+            <b>${esc(item.vendorName)}</b> <small style="color:var(--ac-cyan)">[${esc(item.category)} &bull; ${esc(item.itemName)}]</small>
+            ${repeatCount > 1 ? `<span style="color:#FB7185;font-weight:900;font-size:11px"> &bull; Repeat Issue (${repeatCount}x)</span>` : ""}
+          </div>
+          <b style="color:#34D399">Total: ₹${totalCost.toLocaleString("en-IN")}</b>
+        </div>
+        <div style="font-size:11px;color:var(--tx-muted)">
+          Part: ₹${Number(item.partCost || 0)} &bull; Service Fee: ₹${Number(item.serviceFee || 0)} &bull; Since: ${esc(item.sinceText || "-")} &bull; Date: ${esc(item.date || iso())}
+        </div>
+        <div style="font-size:11px;color:#FDE68A">Work: ${esc(item.workSummary || "-")}</div>
+        ${cleanPhone ? `
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
+            <a href="tel:${esc(cleanPhone)}" class="btn g" style="margin:0;width:auto;padding:3px 8px;font-size:10.5px;text-decoration:none">📞 Call</a>
+            <a href="sms:${esc(cleanPhone)}" class="btn g" style="margin:0;width:auto;padding:3px 8px;font-size:10.5px;text-decoration:none">💬 SMS</a>
+            <a href="https://wa.me/91${esc(cleanPhone)}" target="_blank" rel="noopener" class="btn" style="margin:0;width:auto;padding:3px 8px;font-size:10.5px;background:#22C55E;color:#04140C;text-decoration:none">📲 WhatsApp</a>
+          </div>
+        ` : ""}
+      </div>
+    `;
+  }).join("") : '<div class="row"><span>No maintenance or vendor service records logged yet.</span></div>';
+}
+
+function saveMaintenanceVendorLog(e) {
+  e.preventDefault();
+  const entry = {
+    id: "MNT-" + Date.now(),
+    branch: ($("dmBranchSel") && $("dmBranchSel").value) || "001",
+    category: ($("dmCategory") && $("dmCategory").value) || "Gym Equipment Mechanic",
+    vendorName: String(($("dmVendorName") && $("dmVendorName").value) || "").trim(),
+    vendorPhone: String(($("dmVendorPhone") && $("dmVendorPhone").value) || "").trim(),
+    itemName: String(($("dmItemName") && $("dmItemName").value) || "").trim(),
+    partCost: Math.max(0, Number(($("dmPartCost") && $("dmPartCost").value) || 0)),
+    serviceFee: Math.max(0, Number(($("dmServiceFee") && $("dmServiceFee").value) || 0)),
+    workSummary: String(($("dmWorkSummary") && $("dmWorkSummary").value) || "").trim(),
+    sinceText: String(($("dmSinceText") && $("dmSinceText").value) || "").trim(),
+    date: iso()
+  };
+  const logs = J(MAINT_LOGS_KEY, []);
+  logs.unshift(entry);
+  LS.setItem(MAINT_LOGS_KEY, JSON.stringify(logs));
+  if (typeof recordAuditEvent === "function") {
+    recordAuditEvent("Maintenance Logged", `${entry.vendorName} (${entry.category}) on ${entry.itemName}`);
+  }
+  renderDeepMaintenanceAndBills();
+  alert("Maintenance & vendor entry saved.");
+}
+
+// 1-Click Staff KYC & Document Viewer (Never outputs raw Aadhaar digits)
+function openStaffKycDocuments(staffObj) {
+  const s = staffObj || {};
+  const body = $("omKycDocsBody");
+  if (body) {
+    body.innerHTML = `
+      <div class="row"><span><b>Name:</b></span><b>${esc(s.name || "Staff Member")}</b></div>
+      <div class="row"><span><b>Branch &amp; Department:</b></span><b>Branch ${esc(s.branch || "001")} &bull; ${esc(s.dept || "Operations")}</b></div>
+      <div class="row"><span><b>Hiring Manager:</b></span><b>${esc(s.hiringManager || "Branch Manager")}</b></div>
+      <div class="row"><span><b>Qualification:</b></span><b>${esc(s.qualification || "Verified on File")}</b></div>
+      <div class="row"><span><b>Aadhaar Document:</b></span><span style="color:#34D399;font-weight:800">Uploaded (ID Protected / Redacted)</span></div>
+      <div class="row"><span><b>PAN Card:</b></span><span style="color:#34D399;font-weight:800">Uploaded &amp; Verified</span></div>
+      <div class="row"><span><b>Bank Details:</b></span><b>${esc(s.bankDetails || "Bank Passbook / Cheque Attached")}</b></div>
+      <div class="row"><span><b>UAN / PF / ESI:</b></span><b>UAN: ${esc(s.uanNo || "N/A")} &bull; PF: ${esc(s.pfStatus || "Not Applicable")} &bull; ESI: ${esc(s.esiStatus || "Not Applicable")}</b></div>
+    `;
+  }
+  if ($("omStaffKycDocsOv")) $("omStaffKycDocsOv").classList.add("show");
+}
+
+// 1-Minute (60-Second) Inactivity Auto-Lock Timer
+let _omIdleTimeoutRef = null;
+function resetOneMinuteIdleTimer() {
+  if (_omIdleTimeoutRef) clearTimeout(_omIdleTimeoutRef);
+  _omIdleTimeoutRef = setTimeout(function() {
+    if ($("omIdleLockOv")) $("omIdleLockOv").classList.add("show");
+  }, 60000);
+}
+
+function resumeSessionFromIdleLock() {
+  if ($("omIdleLockOv")) $("omIdleLockOv").classList.remove("show");
+  resetOneMinuteIdleTimer();
+}
+
+["pointerdown", "keydown", "scroll", "touchstart"].forEach(function(evName) {
+  window.addEventListener(evName, resetOneMinuteIdleTimer, { passive: true });
+});
+
+window.addEventListener("DOMContentLoaded", function() {
+  resetOneMinuteIdleTimer();
+  const nav = document.querySelector(".nav-actions");
+  if (nav && !document.getElementById("btnDeepMaintNav")) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "btnDeepMaintNav";
+    btn.className = "btn-nav";
+    btn.textContent = "Maintenance & Bills";
+    btn.onclick = openDeepMaintenanceModal;
+    nav.insertBefore(btn, nav.firstChild);
+  }
+});
+</script>
+
+
+<!-- ================= EXTRA SERVICE COLLECTION TRACKER MODAL ================= -->
+<div class="ov" id="omExtraServiceOv">
+  <div class="bx" style="max-width:640px">
+    <h3>
+      <span>✨ Extra Service Collection</span>
+      <button type="button" onclick="closeOv('omExtraServiceOv')" style="background:none;border:0;color:var(--ac-gold);font-size:18px;cursor:pointer">✕</button>
+    </h3>
+    <div style="font-size:11.5px;color:var(--tx-muted);margin-bottom:8px">
+      Agar koi member ya customer extra service leta hai (jaise PT session, steam/sauna, diet/workout consultation, locker/towel extra service), to uski collection yahan record aur total hoti hai.
+    </div>
+
+    <form onsubmit="saveExtraServiceEntry(event)" style="background:#0B1224;border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="field"><label>Member / Client Name *</label><input type="text" id="esClientName" required placeholder="Naam"></div>
+        <div class="field"><label>Extra Service *</label><input type="text" id="esServiceName" required placeholder="PT / Steam / Diet / Locker"></div>
+        <div class="field"><label>Amount (₹) *</label><input type="number" id="esAmount" inputmode="numeric" required placeholder="1000" min="1"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+        <div class="field"><label>Branch</label>
+          <select id="esBranch">
+            <option value="001">Branch 001 — Unnao / Akrampur</option>
+            <option value="002">Branch 002 — Kanpur</option>
+            <option value="003">Branch 003 — Lucknow</option>
+          </select>
+        </div>
+        <div class="field"><label>Payment Mode</label>
+          <select id="esMode">
+            <option value="Cash">Cash</option>
+            <option value="UPI / Online">UPI / Online</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn" style="margin-top:10px">Add Extra Service Collection</button>
+    </form>
+
+    <div id="esTotalBanner" style="background:#080D1A;border:1px solid rgba(250,204,21,0.45);border-radius:10px;padding:10px;font-size:13px;font-weight:900;color:var(--ac-gold);margin-bottom:8px"></div>
+    <div id="esRowsList" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;font-size:12px"></div>
+    <button type="button" class="btn g" onclick="closeOv('omExtraServiceOv')">बंद करें</button>
+  </div>
+</div>
+
+<script>
+const EXTRA_SVC_KEY = "om_extra_service_collection_v1";
+
+function openExtraServiceCollectionModal() {
+  renderExtraServiceCollection();
+  if ($("omExtraServiceOv")) $("omExtraServiceOv").classList.add("show");
+}
+
+function saveExtraServiceEntry(e) {
+  e.preventDefault();
+  const entry = {
+    id: "EXS-" + Date.now(),
+    clientName: String(($("esClientName") && $("esClientName").value) || "").trim(),
+    serviceName: String(($("esServiceName") && $("esServiceName").value) || "").trim(),
+    amount: Math.max(0, Number(($("esAmount") && $("esAmount").value) || 0)),
+    branch: ($("esBranch") && $("esBranch").value) || "001",
+    mode: ($("esMode") && $("esMode").value) || "Cash",
+    date: iso()
+  };
+  const list = J(EXTRA_SVC_KEY, []);
+  list.unshift(entry);
+  LS.setItem(EXTRA_SVC_KEY, JSON.stringify(list));
+
+  // Also reflect in live owner stats if available
+  if (typeof getOwnerLiveStats === "function" && typeof saveOwnerLiveStats === "function" && typeof renderOwnerMiniGraphs === "function") {
+    const prev = Object.assign({}, getOwnerLiveStats());
+    const next = Object.assign({}, prev, {
+      totalCollection: Number(prev.totalCollection || 0) + entry.amount
+    });
+    saveOwnerLiveStats(next);
+    renderOwnerMiniGraphs(prev);
+  }
+  if (typeof recordAuditEvent === "function") {
+    recordAuditEvent("Extra Service Added", `${entry.serviceName} for ${entry.clientName} (₹${entry.amount})`);
+  }
+
+  if ($("esClientName")) $("esClientName").value = "";
+  if ($("esServiceName")) $("esServiceName").value = "";
+  if ($("esAmount")) $("esAmount").value = "";
+  renderExtraServiceCollection();
+}
+
+function renderExtraServiceCollection() {
+  const list = J(EXTRA_SVC_KEY, []);
+  const total = list.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+  if ($("esTotalBanner")) {
+    $("esTotalBanner").textContent = `Total Extra Service Collection: ₹${total.toLocaleString("en-IN")} (${list.length} Entries)`;
+  }
+
+  const cardVal = document.getElementById("mgExtraServiceVal");
+  if (cardVal) {
+    cardVal.textContent = `₹${total.toLocaleString("en-IN")}`;
+  }
+
+  if ($("esRowsList")) {
+    $("esRowsList").innerHTML = list.length ? list.map(item => `
+      <div class="row">
+        <div>
+          <b>${esc(item.serviceName)}</b> — <small style="color:var(--ac-cyan)">${esc(item.clientName)}</small>
+          <div style="font-size:10.5px;color:var(--tx-muted)">Branch ${esc(item.branch)} &bull; ${esc(item.mode)} &bull; ${esc(item.date)}</div>
+        </div>
+        <b style="color:#34D399">+₹${Number(item.amount || 0).toLocaleString("en-IN")}</b>
+      </div>
+    `).join("") : '<div class="row"><span>Abhi koi extra service collection darj nahi hai.</span></div>';
+  }
+}
+
+window.addEventListener("DOMContentLoaded", function() {
+  const list = J(EXTRA_SVC_KEY, []);
+  const total = list.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+  // Add a mini summary card in #ownerMiniGraphsGrid if present
+  const grid = document.getElementById("ownerMiniGraphsGrid");
+  if (grid && !document.getElementById("mgExtraServiceCard")) {
+    const card = document.createElement("div");
+    card.className = "mini-graph-card";
+    card.id = "mgExtraServiceCard";
+    card.style.cursor = "pointer";
+    card.onclick = openExtraServiceCollectionModal;
+    card.innerHTML = `
+      <div class="mg-top">
+        <div class="mg-ico-title"><span class="mg-ico">✨</span> Extra Service Collection</div>
+        <span class="mg-branch-pill">Add-On</span>
+      </div>
+      <div class="mg-mid">
+        <div>
+          <div class="mg-num" id="mgExtraServiceVal" style="color:#FACC15">₹${total.toLocaleString("en-IN")}</div>
+          <div class="mg-sub">PT, steam, diet &amp; extra services</div>
+        </div>
+        <svg class="mg-spark" viewBox="0 0 68 26">
+          <polyline fill="none" stroke="#FACC15" stroke-width="2.2" points="2,21 18,16 32,19 48,10 66,5" />
+        </svg>
+      </div>
+    `;
+    grid.appendChild(card);
+  }
+
+  const nav = document.querySelector(".nav-actions");
+  if (nav && !document.getElementById("btnExtraSvcNav")) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = "btnExtraSvcNav";
+    btn.className = "btn-nav";
+    btn.textContent = "Extra Service Collection";
+    btn.onclick = openExtraServiceCollectionModal;
+    nav.insertBefore(btn, nav.firstChild);
+  }
+});
+</script>
+
 </body>
 </html>
