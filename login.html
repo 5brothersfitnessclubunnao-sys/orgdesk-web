@@ -3,1098 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>OM SOFTWARE — Trust, Technology &amp; Innovation</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <title>Om Software ERP — Secure Login</title>
   <style>
     :root {
-      --bg: #050811;
-      --card: #0B1120;
-      --card-2: #111A2E;
-      --gold: #FACC15;
-      --gold-2: #EAB308;
-      --cyan: #22D3EE;
+      --bg: #060A14;
+      --card-bg: #0D1424;
+      --border: #1E2D4A;
+      --gold: #F5A623;
       --emerald: #34D399;
       --rose: #FB7185;
-      --bd: #1E2D4A;
-      --tx: #F8FAFC;
-      --mut: #94A3B8;
+      --tx-main: #FFFFFF;
+      --tx-muted: #8E9BAE;
+      --input-bg: #0A0F1D;
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body {
-      margin: 0;
+      background: radial-gradient(1000px 600px at 50% -10%, #152238 0%, #060A14 70%);
+      color: var(--tx-main);
       min-height: 100vh;
-      background: radial-gradient(960px 540px at 50% -5%, #152342 0%, #070C18 62%, #04060C 100%);
-      color: var(--tx);
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 18px;
-    }
-    .auth-box {
-      width: 100%;
-      max-width: 430px;
-      background: var(--card);
-      border: 1.5px solid rgba(250, 204, 21, 0.75);
-      border-radius: 22px;
-      padding: 26px 22px;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.65), 0 0 28px rgba(34, 211, 238, 0.08);
-    }
-    .top-pill {
-      display: inline-block;
-      background: rgba(34, 211, 238, 0.14);
-      color: var(--cyan);
-      border: 1px solid rgba(34, 211, 238, 0.35);
-      font-size: 10.5px;
-      font-weight: 800;
-      padding: 4px 12px;
-      border-radius: 999px;
-      letter-spacing: 0.9px;
-      text-transform: uppercase;
-    }
-    .hdr { text-align: center; margin-bottom: 18px; }
-    .hdr h1 { margin: 10px 0 4px; font-size: 25px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.6px; }
-    .tagline { margin: 0; font-size: 12.5px; color: var(--gold); font-weight: 700; letter-spacing: 0.4px; }
-
-    .tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      border-bottom: 1.5px solid var(--bd);
-      margin-bottom: 16px;
-    }
-    .tab {
-      background: none;
-      border: 0;
-      color: var(--mut);
-      padding: 10px;
-      font-size: 13.5px;
-      font-weight: 800;
-      cursor: pointer;
-      border-bottom: 2.5px solid transparent;
-    }
-    .tab.active {
-      color: var(--gold);
-      border-bottom-color: var(--gold);
-    }
-
-    .mode-switch {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-    .mode-btn {
-      background: var(--card-2);
-      border: 1.5px solid var(--bd);
-      color: #E2E8F0;
-      padding: 9px 10px;
-      border-radius: 11px;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      padding: 16px;
     }
-    .mode-btn.active {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: #090C12;
-    }
-
-    .field { margin-bottom: 12px; }
-    .field label {
-      display: block;
-      font-size: 11.5px;
-      font-weight: 700;
-      color: #CBD5E1;
-      margin-bottom: 5px;
-      letter-spacing: 0.2px;
-    }
-    .pw-wrap { position: relative; }
-    input, select {
+    .login-card {
       width: 100%;
-      padding: 11px 12px;
-      border-radius: 11px;
-      border: 1.5px solid var(--bd);
-      background: var(--card-2);
-      color: #FFFFFF;
-      font-size: 13.5px;
-      outline: none;
-    }
-    input:focus, select:focus {
-      border-color: var(--cyan);
-      box-shadow: 0 0 12px rgba(34, 211, 238, 0.16);
-    }
-    .eye {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: 0;
-      color: var(--mut);
-      cursor: pointer;
-      font-size: 15px;
-    }
-
-    .btn-gold {
-      width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: 0;
-      background: linear-gradient(135deg, var(--gold), var(--gold-2));
-      color: #090C12;
-      font-size: 14.5px;
-      font-weight: 900;
-      cursor: pointer;
-      margin-top: 4px;
-    }
-    .btn-demo {
-      width: 100%;
-      padding: 11px 12px;
-      border-radius: 12px;
-      border: 1.5px solid rgba(34, 211, 238, 0.45);
-      background: linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(250, 204, 21, 0.08));
-      color: var(--gold);
-      font-size: 12.5px;
-      font-weight: 800;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .btn-demo:hover {
-      border-color: var(--gold);
-      color: #FFFFFF;
-    }
-
-    .msg {
-      display: none;
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 12px;
-      margin-bottom: 12px;
-      line-height: 1.45;
-    }
-    .err { background: rgba(251, 113, 133, 0.14); border: 1px solid var(--rose); color: #FECDD3; }
-    .ok { background: rgba(52, 211, 153, 0.14); border: 1px solid var(--emerald); color: #A7F3D0; }
-
-    .links {
-      text-align: center;
-      margin-top: 14px;
-      font-size: 12px;
-      line-height: 1.8;
-      color: var(--mut);
-    }
-    .links a {
-      color: var(--gold);
-      text-decoration: underline;
-      cursor: pointer;
-      font-weight: 700;
-    }
-  
-
-    /* Full-Screen 100% Solid Cosmic Galaxy + Grand 3D Solar System + Big Rotating Om */
-    #omIntroOverlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
-      z-index: 2147483647 !important;
-      background: #02040a !important;
-      overflow: hidden;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: clamp(14px, 2.5vh, 28px) clamp(14px, 3vw, 36px);
-      color: #fff;
-      perspective: 1400px;
-    }
-    #omIntroOverlay.show {
-      display: flex !important;
-      animation: cosmosEntrance 0.5s ease-out forwards;
-    }
-    @keyframes cosmosEntrance {
-      from { opacity: 0; transform: scale(1.02); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    /* Cosmic Deep Space Background */
-    .cosmos-backdrop {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 50% 48%, rgba(245, 158, 11, 0.28) 0%, rgba(14, 165, 233, 0.16) 35%, rgba(15, 23, 42, 0.96) 72%, #02040a 100%);
-      pointer-events: none;
-    }
-
-    /* Spiral Galaxy Swirl Arms */
-    .galaxy-spiral-mesh {
-      position: absolute;
-      width: min(1700px, 220vmax);
-      height: min(1700px, 220vmax);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(0deg);
-      border-radius: 50%;
-      background:
-        conic-gradient(
-          from 0deg,
-          rgba(56, 189, 248, 0.20) 0deg 45deg,
-          rgba(168, 85, 247, 0.22) 45deg 110deg,
-          rgba(255, 184, 0, 0.26) 110deg 180deg,
-          rgba(14, 165, 233, 0.20) 180deg 260deg,
-          rgba(236, 72, 153, 0.18) 260deg 320deg,
-          rgba(56, 189, 248, 0.20) 320deg 360deg
-        );
-      filter: blur(40px);
-      animation: galaxySpinSlow 40s linear infinite;
-      pointer-events: none;
-      mask-image: radial-gradient(circle, rgba(0,0,0,1) 22%, transparent 74%);
-      -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 22%, transparent 74%);
-    }
-    @keyframes galaxySpinSlow {
-      from { transform: translate(-50%, -50%) rotate(0deg); }
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    /* Twinkling Cosmic Stars Field */
-    .cosmos-stars-field {
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(2.2px 2.2px at 10% 12%, #ffffff 90%, transparent),
-        radial-gradient(1.8px 1.8px at 25% 75%, #fde68a 90%, transparent),
-        radial-gradient(2.5px 2.5px at 42% 18%, #93c5fd 90%, transparent),
-        radial-gradient(1.6px 1.6px at 65% 12%, #ffffff 90%, transparent),
-        radial-gradient(3px 3px at 85% 32%, #fef08a 90%, transparent),
-        radial-gradient(1.8px 1.8px at 92% 68%, #bae6fd 90%, transparent),
-        radial-gradient(2.2px 2.2px at 18% 46%, #e9d5ff 90%, transparent),
-        radial-gradient(1.8px 1.8px at 74% 82%, #ffffff 90%, transparent),
-        radial-gradient(2.5px 2.5px at 52% 88%, #fde68a 90%, transparent),
-        radial-gradient(2.2px 2.2px at 8% 85%, #7dd3fc 90%, transparent),
-        radial-gradient(1.8px 1.8px at 35% 35%, #ffffff 90%, transparent),
-        radial-gradient(2.2px 2.2px at 62% 60%, #fed7aa 90%, transparent);
-      animation: starsTwinkle 3.2s ease-in-out infinite alternate;
-      pointer-events: none;
-    }
-    @keyframes starsTwinkle {
-      0% { opacity: 0.6; }
-      100% { opacity: 1; }
-    }
-
-    /* Shooting Meteors */
-    .shooting-star {
-      position: absolute;
-      top: 14%;
-      left: 8%;
-      width: 140px;
-      height: 2px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.95), transparent);
-      transform: rotate(-35deg);
-      opacity: 0;
-      animation: meteorPass 5.5s ease-in infinite;
-      pointer-events: none;
-    }
-    .shooting-star.s2 {
-      top: 42%;
-      left: 68%;
-      width: 160px;
-      animation-delay: 2.8s;
-    }
-    @keyframes meteorPass {
-      0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 0; }
-      10% { opacity: 1; }
-      20% { transform: translateX(280px) translateY(190px) rotate(-35deg); opacity: 0; }
-      100% { opacity: 0; }
-    }
-
-    .om-intro-top {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      width: 100%;
-      max-width: 1080px;
-    }
-    .om-software-pill {
-      display: inline-block;
-      background: linear-gradient(135deg, #FFB800, #F59E0B);
-      color: #090c14;
-      font-weight: 900;
-      font-size: clamp(10px, 1.3vw, 13px);
-      padding: 4px 16px;
-      border-radius: 999px;
-      letter-spacing: 1.6px;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      box-shadow: 0 4px 18px rgba(255, 184, 0, 0.45);
-    }
-    .om-software-title {
-      font-size: clamp(26px, 5.2vw, 56px);
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      line-height: 1.15;
-      background: linear-gradient(180deg, #FFFFFF 0%, #FFE066 45%, #F59E0B 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-transform: uppercase;
-      filter: drop-shadow(0 4px 24px rgba(255, 184, 0, 0.45));
-    }
-    .om-tagline-hero {
-      margin-top: 5px;
-      font-size: clamp(13px, 2vw, 20px);
-      font-weight: 800;
-      letter-spacing: 1.2px;
-      color: #FACC15;
-      text-shadow: 0 0 16px rgba(250, 204, 21, 0.5);
-      text-transform: uppercase;
-    }
-    .om-org-sub {
-      margin-top: 4px;
-      font-size: clamp(12px, 1.6vw, 16px);
-      font-weight: 600;
-      color: #CBD5E1;
-    }
-
-    /* Central Grand 3D Cosmic Space Arena */
-    .om-center-stage {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: clamp(8px, 1.6vh, 16px);
-      flex: 1;
-      width: 100%;
-      max-width: 1180px;
+      max-width: 410px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px 22px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
       text-align: center;
     }
-
-    .solar-universe-stage {
-      position: relative;
-      width: clamp(320px, 82vw, 680px);
-      height: clamp(250px, 58vw, 440px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transform-style: preserve-3d;
+    .brand-icon {
+      width: 58px; height: 58px; margin: 0 auto 14px;
+      background: linear-gradient(135deg, #F5A623, #D97706);
+      border-radius: 16px; display: flex; align-items: center; justify-content: center;
+      font-size: 21px; font-weight: 900; color: #0B0F19;
     }
-
-    /* Giant Solar Core Aura */
-    .om-solar-corona {
-      position: absolute;
-      width: clamp(180px, 38vw, 320px);
-      height: clamp(180px, 38vw, 320px);
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 184, 0, 0.52) 0%, rgba(245, 158, 11, 0.22) 55%, transparent 75%);
-      box-shadow: 0 0 70px rgba(255, 184, 0, 0.6), 0 0 140px rgba(217, 119, 6, 0.35);
-      animation: coronaPulse 2.8s ease-in-out infinite alternate;
-      pointer-events: none;
-    }
-    @keyframes coronaPulse {
-      0% { transform: scale(0.94); opacity: 0.85; }
-      100% { transform: scale(1.14); opacity: 1; }
-    }
-
-    /* The Center Large 3D Y-Axis Rotating Om (Upright & Grand!) */
-    .om-3d-glyph {
-      position: relative;
-      z-index: 8;
-      display: inline-block;
-      font-size: clamp(118px, 24vw, 210px);
-      line-height: 1;
-      font-weight: 900;
-      color: #FFE066;
-      text-shadow:
-        0 0 24px rgba(255, 184, 0, 1),
-        0 0 65px rgba(245, 158, 11, 0.85),
-        0 0 110px rgba(217, 119, 6, 0.6);
-      transform-origin: center center;
-      transform-style: preserve-3d;
-      animation: omYRotate 8s linear infinite;
-      user-select: none;
-    }
-    @keyframes omYRotate {
-      0% { transform: rotateY(0deg) scale(1); }
-      50% { transform: rotateY(180deg) scale(1.06); }
-      100% { transform: rotateY(360deg) scale(1); }
-    }
-
-    /* Large 3D Cosmic Orbit Rings */
-    .planet-orbit {
-      position: absolute;
-      border-radius: 50%;
-      border: 1.5px dashed rgba(255, 255, 255, 0.26);
-      transform-style: preserve-3d;
-      pointer-events: none;
-    }
-
-    /* Orbit 1: Inner Orbit - Venus */
-    .orbit-inner {
-      width: clamp(210px, 48vw, 360px);
-      height: clamp(100px, 22vw, 170px);
-      border-color: rgba(251, 191, 36, 0.38);
-      animation: orbitSpinH 5s linear infinite;
-    }
-    /* Orbit 2: Earth & Moon Orbit */
-    .orbit-earth {
-      width: clamp(285px, 64vw, 480px);
-      height: clamp(135px, 30vw, 225px);
-      border-color: rgba(56, 189, 248, 0.5);
-      animation: orbitSpinH 8.5s linear infinite;
-    }
-    /* Orbit 3: Mars */
-    .orbit-mars {
-      width: clamp(350px, 74vw, 580px);
-      height: clamp(165px, 36vw, 275px);
-      border-color: rgba(239, 68, 68, 0.38);
-      animation: orbitSpinH 12s linear infinite;
-    }
-    /* Orbit 4: Jupiter & Saturn */
-    .orbit-outer {
-      width: clamp(420px, 86vw, 680px);
-      height: clamp(200px, 42vw, 325px);
-      border-color: rgba(168, 85, 247, 0.36);
-      animation: orbitSpinH 16.5s linear infinite;
-    }
-
-    @keyframes orbitSpinH {
-      from { transform: rotateX(66deg) rotateZ(0deg); }
-      to { transform: rotateX(66deg) rotateZ(360deg); }
-    }
-
-    /* Planet Holders positioned along the orbit rim */
-    .planet-anchor {
-      position: absolute;
-      top: 50%;
-      left: 0;
-      transform: translate(-50%, -50%);
-      transform-style: preserve-3d;
-    }
-    .planet-anchor.right { left: 100%; }
-    .planet-anchor.top { left: 50%; top: 0; }
-    .planet-anchor.bottom { left: 50%; top: 100%; }
-
-    /* Keep planets spherical regardless of orbit 3D tilt */
-    .planet-sphere {
-      border-radius: 50%;
-      transform: rotateZ(0deg) rotateX(-66deg);
-      box-shadow: inset -4px -4px 10px rgba(0,0,0,0.85);
-      position: relative;
-    }
-
-    /* Venus (Golden Morning Star) - Bigger */
-    .planet-venus {
-      width: clamp(20px, 3.8vw, 30px);
-      height: clamp(20px, 3.8vw, 30px);
-      background: radial-gradient(circle at 35% 35%, #fffbeb 0%, #fde047 50%, #d97706 100%);
-      box-shadow: 0 0 16px rgba(253, 224, 71, 0.9), inset -3px -3px 8px rgba(0,0,0,0.7);
-    }
-
-    /* Earth (🌎 Vibrant Blue Ocean + Green Continents + Cloud Glow) - Much Bigger */
-    .planet-earth {
-      width: clamp(40px, 7.5vw, 62px);
-      height: clamp(40px, 7.5vw, 62px);
-      background:
-        radial-gradient(circle at 30% 28%, rgba(255,255,255,0.7) 0%, transparent 26%),
-        radial-gradient(circle at 65% 40%, rgba(34,197,94,0.95) 0%, rgba(22,163,74,0.85) 30%, transparent 34%),
-        radial-gradient(circle at 30% 68%, rgba(74,222,128,0.9) 0%, rgba(21,128,61,0.85) 26%, transparent 30%),
-        radial-gradient(circle at 50% 50%, #38bdf8 0%, #0284c7 60%, #1e3a8a 100%);
-      box-shadow:
-        0 0 22px rgba(56, 189, 248, 1),
-        0 0 45px rgba(34, 197, 94, 0.45),
-        inset -6px -6px 14px rgba(2, 6, 23, 0.9);
-      animation: planetSelfSpin 6s linear infinite;
-    }
-    @keyframes planetSelfSpin {
-      from { transform: rotateZ(0deg) rotateX(-66deg) rotate(0deg); }
-      to { transform: rotateZ(0deg) rotateX(-66deg) rotate(360deg); }
-    }
-
-    /* Moon orbiting near Earth */
-    .planet-moon {
-      position: absolute;
-      width: clamp(10px, 2vw, 15px);
-      height: clamp(10px, 2vw, 15px);
-      border-radius: 50%;
-      background: #e2e8f0;
-      box-shadow: 0 0 8px #ffffff;
-      top: -14px;
-      left: -10px;
-    }
-
-    /* Mars (Red Planet) - Bigger */
-    .planet-mars {
-      width: clamp(24px, 4.4vw, 36px);
-      height: clamp(24px, 4.4vw, 36px);
-      background: radial-gradient(circle at 35% 35%, #fecaca 0%, #ef4444 55%, #991b1b 100%);
-      box-shadow: 0 0 18px rgba(239, 68, 68, 0.85), inset -4px -4px 8px rgba(0,0,0,0.75);
-    }
-
-    /* Jupiter (Striped Gas Giant) - Much Bigger */
-    .planet-jupiter {
-      width: clamp(44px, 8vw, 68px);
-      height: clamp(44px, 8vw, 68px);
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          #fed7aa,
-          #fed7aa 7px,
-          #ea580c 7px,
-          #c2410c 13px,
-          #fde047 13px,
-          #d97706 20px
-        );
-      box-shadow: 0 0 25px rgba(249, 115, 22, 0.75), inset -6px -6px 14px rgba(0,0,0,0.85);
-    }
-
-    /* Saturn (Golden Planet with Iconic Large Rings 🪐) - Much Bigger */
-    .planet-saturn-wrap {
-      position: relative;
-      width: clamp(64px, 11vw, 96px);
-      height: clamp(38px, 6.2vw, 56px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transform: rotateZ(0deg) rotateX(-66deg);
-    }
-    .saturn-body {
-      width: clamp(30px, 5.2vw, 44px);
-      height: clamp(30px, 5.2vw, 44px);
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #fef3c7 0%, #f59e0b 60%, #78350f 100%);
-      box-shadow: 0 0 18px rgba(245, 158, 11, 0.8), inset -4px -4px 10px rgba(0,0,0,0.85);
-      position: relative;
-      z-index: 2;
-    }
-    .saturn-ring {
-      position: absolute;
-      width: clamp(64px, 11vw, 96px);
-      height: clamp(18px, 3vw, 28px);
-      border-radius: 50%;
-      border: 4px solid rgba(251, 191, 36, 0.9);
-      border-top-color: rgba(245, 158, 11, 0.5);
-      box-shadow: 0 0 14px rgba(251, 191, 36, 0.75);
-      transform: rotate(-18deg);
-      pointer-events: none;
-    }
-
-    /* High-contrast sacred Geeta Verse */
-    .om-gita-lines {
-      max-width: 900px;
-      padding: 6px 16px;
-      font-size: clamp(15px, 2.4vw, 26px);
-      font-weight: 800;
-      line-height: 1.5;
-      color: #FDE68A;
-      text-shadow:
-        0 2px 16px rgba(0, 0, 0, 0.95),
-        0 0 25px rgba(245, 158, 11, 0.45);
-    }
-
-    .om-intro-bottom {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      max-width: 720px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .om-progress-track {
-      width: 100%;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.16);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-    .om-progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #38BDF8, #FFB800, #22C55E);
-      transition: width 0.2s linear;
-    }
-    .om-bottom-row {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .om-timer-status {
-      font-size: clamp(12px, 1.4vw, 14px);
-      color: #E2E8F0;
-      font-weight: 700;
-    }
-    .om-btn-enter {
-      background: linear-gradient(135deg, #22C55E, #16A34A);
-      color: #041A0C;
-      border: none;
-      padding: 9px 22px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 900;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
-    }
-
-
-/* ================= PAYTM-STYLE UNIVERSAL DEVICE ADAPTIVE SYSTEM ================= */
-html, body {
-  width: 100vw;
-  min-height: 100vh;
-  min-height: 100dvh;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-@media (max-width: 600px) {
-  .auth-box {
-    width: 95% !important;
-    margin: 12px auto !important;
-    padding: 18px 14px !important;
-  }
-  input, select, button {
-    font-size: 14px !important;
-  }
-}
-
-</style>
+    .brand-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .brand-sub { font-size: 12px; color: var(--tx-muted); margin-bottom: 18px; }
+    .form-group { text-align: left; margin-bottom: 13px; }
+    .form-label { display: block; font-size: 11.5px; font-weight: 600; color: var(--tx-muted); margin-bottom: 5px; }
+    .form-control { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 11px 13px; color: #FFFFFF; font-size: 13.5px; outline: none; }
+    .btn-submit { width: 100%; background: linear-gradient(135deg, #F5A623, #E09612); color: #0B0F19; font-size: 14px; font-weight: 900; border: none; border-radius: 12px; padding: 12px; margin-top: 10px; cursor: pointer; }
+    .session-banner { display: none; background: rgba(34,211,238,0.12); border: 1px solid #22D3EE; color: #E0F2FE; border-radius: 12px; padding: 10px; font-size: 12px; margin-bottom: 14px; text-align: left; }
+  </style>
 </head>
 <body>
-<!-- FULL-SCREEN 100% OPAQUE COSMIC GALAXY + GRAND 3D SOLAR SYSTEM + BIG ROTATING OM -->
-<div id="omIntroOverlay" role="dialog" aria-label="Welcome To Om Software Cosmic Intro">
-  <div class="cosmos-backdrop"></div>
-  <div class="galaxy-spiral-mesh"></div>
-  <div class="cosmos-stars-field"></div>
-  <div class="shooting-star"></div>
-  <div class="shooting-star s2"></div>
+  <div class="login-card">
+    <div class="brand-icon">OM</div>
+    <h1 class="brand-title">Om Software ERP</h1>
+    <p class="brand-sub">Multi-Branch Secure Access Portal</p>
 
-  <div class="om-intro-top">
-    <div class="om-software-pill">Official Portal &bull; Enterprise Experience</div>
-    <div class="om-software-title" id="introSoftwareName">WELCOME TO OM SOFTWARE</div>
-    <div class="om-tagline-hero">Trust &bull; Technology &bull; Power of Innovation</div>
-    <div class="om-org-sub" id="introOrgSubtitle">Universal Gym &amp; Business Management System</div>
-  </div>
-
-  <div class="om-center-stage">
-    <div class="solar-universe-stage">
-      <div class="om-solar-corona"></div>
-
-      <!-- Orbit 1: Inner Orbit (Venus 🌕) -->
-      <div class="planet-orbit orbit-inner">
-        <div class="planet-anchor">
-          <div class="planet-sphere planet-venus" title="Venus"></div>
-        </div>
+    <!-- Last session detection prompt -->
+    <div id="sessionRecoveryBox" class="session-banner">
+      <b>Last Session Detected:</b>
+      <div id="sessionUserDesc" style="font-size:11px;color:#94A3B8;margin:4px 0 8px;">Logged in previously.</div>
+      <div style="display:flex;gap:8px;">
+        <button type="button" onclick="continueLastSession()" style="flex:1;background:#22D3EE;color:#000;border:0;border-radius:8px;padding:6px;font-size:11px;font-weight:bold;cursor:pointer;">Resume Session</button>
+        <button type="button" onclick="clearPreviousSession()" style="flex:1;background:#162238;color:#fff;border:1px solid #1E2D4A;border-radius:8px;padding:6px;font-size:11px;cursor:pointer;">New Session</button>
       </div>
-
-      <!-- Orbit 2: Earth & Moon Orbit (Earth 🌎 + Moon 🌑) -->
-      <div class="planet-orbit orbit-earth">
-        <div class="planet-anchor right">
-          <div class="planet-earth" title="Earth 🌎">
-            <div class="planet-moon" title="Moon"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Orbit 3: Mars (Red Planet 🔴) -->
-      <div class="planet-orbit orbit-mars">
-        <div class="planet-anchor top">
-          <div class="planet-sphere planet-mars" title="Mars 🔴"></div>
-        </div>
-      </div>
-
-      <!-- Orbit 4: Jupiter 🟠 & Saturn with Rings 🪐 -->
-      <div class="planet-orbit orbit-outer">
-        <div class="planet-anchor bottom">
-          <div class="planet-sphere planet-jupiter" title="Jupiter 🟠"></div>
-        </div>
-        <div class="planet-anchor left">
-          <div class="planet-saturn-wrap" title="Saturn 🪐">
-            <div class="saturn-ring"></div>
-            <div class="saturn-body"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Center Big 3D Upright Rotating Om Symbol (Never Flips Upside Down!) -->
-      <div class="om-3d-glyph" aria-hidden="true">ॐ</div>
     </div>
 
-    <!-- Sacred Gita Verse -->
-    <div class="om-gita-lines">
-      यदा यदा हि धर्मस्य ग्लानिर्भवति भारत।<br>
-      अभ्युत्थानमधर्मस्य तदात्मानं सृजाम्यहम्।।
-    </div>
-  </div>
-
-  <div class="om-intro-bottom">
-    <div class="om-progress-track">
-      <div class="om-progress-fill" id="omIntroProgress"></div>
-    </div>
-    <div class="om-bottom-row">
-      <div class="om-timer-status" id="omIntroStatus">ॐ ब्रह्माण्ड — Dashboard खुल रहा है… (5s)</div>
-      <button type="button" class="om-btn-enter" onclick="finishOmIntroNow()">Dashboard पर चलें →</button>
-    </div>
-  </div>
-</div>
-
-
-
-<div class="auth-box">
-  <div class="hdr">
-    <span class="top-pill">ENTERPRISE FITNESS PLATFORM</span>
-    <h1>OM SOFTWARE</h1>
-    <p class="tagline">Trust, Technology &amp; Innovation</p>
-  </div>
-
-  <div class="tabs">
-    <button type="button" class="tab active" id="tabSignIn" onclick="switchAuthTab('signin')">Sign In</button>
-    <button type="button" class="tab" id="tabSignUp" onclick="switchAuthTab('signup')">Create Account</button>
-  </div>
-
-  <div id="errBox" class="msg err"></div>
-  <div id="okBox" class="msg ok"></div>
-
-  <!-- SIGN IN -->
-  <div id="viewSignIn">
-    <div class="mode-switch">
-      <button type="button" class="mode-btn active" id="btnModeEmail" onclick="setLoginMode('email')">📧 Email / Mobile</button>
-      <button type="button" class="mode-btn" id="btnModeStaff" onclick="setLoginMode('staff')">🎫 Staff Code</button>
-    </div>
-
-    <form id="formSignIn" onsubmit="handleSignIn(event)">
-      <div id="emailLoginFields">
-        <div class="field">
-          <label>Email or 10-Digit Mobile *</label>
-          <input type="text" id="siIdentity" placeholder="name@example.com or 9876543210" autocomplete="username">
-        </div>
-        <div class="field">
-          <label>Password *</label>
-          <div class="pw-wrap">
-            <input type="password" id="siPassword" placeholder="Enter your password" autocomplete="current-password">
-            <button type="button" class="eye" onclick="togglePw('siPassword', this)">👁</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>Security Question *</label>
-          <select id="siSecQuestion">
-            <option value="Favourite Person">Favourite Person</option>
-            <option value="Favourite Song">Favourite Song</option>
-            <option value="Favourite Pet">Favourite Pet</option>
-            <option value="Birth Place">Birth Place / City</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Security Answer *</label>
-          <input type="text" id="siSecAnswerDirect" placeholder="Enter security answer" autocomplete="off">
-        </div>
-      </div>
-
-      <div id="staffLoginFields" style="display:none">
-        <div class="field">
-          <label>Staff Access Code *</label>
-          <input type="text" id="siStaffCode" placeholder="STF-001-XXXXXX" style="text-transform:uppercase" autocapitalize="characters" autocomplete="off">
-        </div>
-        <div class="field">
-          <label>Employee Code (Optional)</label>
-          <input type="text" id="siEmpCode" placeholder="EMP-001-MGR" style="text-transform:uppercase" autocapitalize="characters" autocomplete="off">
-        </div>
-      </div>
-
-
-
-      <button type="submit" class="btn-gold" id="btnSubmitSignIn">Sign In</button>
-    </form>
-
-    <div class="links">
-      <div><a onclick="alert('Use your registered security question or contact your administrator for account recovery.')">Forgot Password or Security Question?</a></div>
-      <div>First-time setup? <a onclick="switchAuthTab('signup')">Create Account</a></div>
-    </div>
-
-    <button type="button" class="btn-demo" onclick="startCleanZeroDataDemo()">
-      🎬 Quick Demo (Zero Personal Data)
-    </button>
-  </div>
-
-  <!-- CREATE ACCOUNT (ADMIN / FIRST-TIME SETUP) -->
-  <div id="viewSignUp" style="display:none">
-    <form id="formSignUp" onsubmit="handleSignUp(event)">
-      <div class="field">
-        <label>Organization / Gym Name *</label>
-        <input type="text" id="suOrgName" placeholder="e.g. Om Fitness Club" required>
-      </div>
-      <div class="field">
-        <label>Email or 10-Digit Mobile *</label>
-        <input type="text" id="suIdentity" placeholder="admin@example.com or 9876543210" required>
-      </div>
-      <div class="field">
-        <label>Create Password (Min. 6 Characters) *</label>
-        <input type="password" id="suPassword" placeholder="Create strong password" minlength="6" required>
-      </div>
-      <div class="field">
-        <label>Security Question *</label>
-        <select id="suSecQ" required>
-          <option value="Favourite Person">Favourite Person</option>
-          <option value="Favourite Song">Favourite Song</option>
-          <option value="Favourite Pet">Favourite Pet</option>
-          <option value="Birth Place">Birth Place / City</option>
+    <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select id="loginRole" class="form-control">
+          <option value="owner">Admin / Owner (Full Access)</option>
+          <option value="manager">Branch Manager</option>
+          <option value="staff">Staff Desk</option>
         </select>
       </div>
-      <div class="field">
-        <label>Security Answer *</label>
-        <input type="text" id="suSecA" placeholder="Required answer for login verification" required>
+      <div class="form-group">
+        <label class="form-label">Username / Mobile</label>
+        <input type="text" id="loginUser" class="form-control" placeholder="Enter username or mobile" required autocomplete="username">
       </div>
-      <button type="submit" class="btn-gold">Create Account &amp; Password</button>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-submit">Sign In to ERP Portal</button>
     </form>
-    <div class="links">
-      <div>Already registered? <a onclick="switchAuthTab('signin')">Sign In</a></div>
-    </div>
   </div>
-</div>
 
-<script>
-// ================= CLOUD-FIRST / MEMORY STORE (NO BROWSER LOCALSTORAGE FOR APP STATE) =================
-const __OM_CLOUD_MEMORY_STORE__ = Object.create(null);
-const CLOUD_STORE = {
-  getItem(k) {
-    return Object.prototype.hasOwnProperty.call(__OM_CLOUD_MEMORY_STORE__, k) ? __OM_CLOUD_MEMORY_STORE__[k] : null;
-  },
-  setItem(k, v) {
-    __OM_CLOUD_MEMORY_STORE__[k] = String(v);
-    try {
-      if (window.firebase && firebase.apps && firebase.apps.length) {
-        firebase.firestore().collection("om_cloud_state").doc("active_session").set({
-          entries: { [k]: String(v) },
-          updatedAt: new Date().toISOString()
-        }, { merge: true }).catch(function(){});
+  <script>
+    window.addEventListener("DOMContentLoaded", function() {
+      const lastUser = localStorage.getItem("om_logged_user");
+      const lastRole = localStorage.getItem("bfc_role");
+      if (lastUser) {
+        document.getElementById("sessionRecoveryBox").style.display = "block";
+        document.getElementById("sessionUserDesc").textContent = `User: ${lastUser} (${lastRole || 'Staff'})`;
       }
-    } catch (e) {}
-  },
-  removeItem(k) {
-    delete __OM_CLOUD_MEMORY_STORE__[k];
-  }
-};
-const LS = CLOUD_STORE;
+    });
 
-async function hydrateCloudStoreFromFirestore() {
-  try {
-    if (!window.firebase || !firebase.apps || !firebase.apps.length) return;
-    const snap = await firebase.firestore().collection("om_cloud_state").doc("active_session").get();
-    if (snap && snap.exists) {
-      const data = snap.data() || {};
-      const entries = data.entries || {};
-      Object.keys(entries).forEach(function(k) {
-        if (!Object.prototype.hasOwnProperty.call(__OM_CLOUD_MEMORY_STORE__, k)) {
-          __OM_CLOUD_MEMORY_STORE__[k] = String(entries[k]);
-        }
-      });
+    function continueLastSession() {
+      localStorage.setItem("om_last_active_time", String(Date.now()));
+      location.replace("index.html");
     }
-  } catch (e) {}
-}
 
-window.addEventListener('DOMContentLoaded', function() { hydrateCloudStoreFromFirestore(); });
-const $ = id => document.getElementById(id);
-let currentMode = "email";
-
-function showErr(t) { $("errBox").textContent = t; $("errBox").style.display = "block"; $("okBox").style.display = "none"; }
-function showOk(t) { $("okBox").textContent = t; $("okBox").style.display = "block"; $("errBox").style.display = "none"; }
-function clearMsgs() { $("errBox").style.display = "none"; $("okBox").style.display = "none"; }
-
-function switchAuthTab(tab) {
-  clearMsgs();
-  $("tabSignIn").classList.toggle("active", tab === "signin");
-  $("tabSignUp").classList.toggle("active", tab === "signup");
-  $("viewSignIn").style.display = tab === "signin" ? "block" : "none";
-  $("viewSignUp").style.display = tab === "signup" ? "block" : "none";
-}
-
-function setLoginMode(mode) {
-  clearMsgs();
-  currentMode = mode;
-  $("btnModeEmail").classList.toggle("active", mode === "email");
-  $("btnModeStaff").classList.toggle("active", mode === "staff");
-  $("emailLoginFields").style.display = mode === "email" ? "block" : "none";
-  $("staffLoginFields").style.display = mode === "staff" ? "block" : "none";
-}
-
-function togglePw(id, btn) {
-  const inp = $(id);
-  if (inp.type === "password") { inp.type = "text"; btn.textContent = "🙈"; }
-  else { inp.type = "password"; btn.textContent = "👁"; }
-}
-
-function startCleanZeroDataDemo() {
-  clearMsgs();
-  ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions", "bfc_staff_list", "om_fees_payments_v1", "om_erp_members_v1", "om_erp_expenses_v1", "om_erp_orders_v1", "om_erp_mem_v2", "om_erp_exp_v2", "om_erp_prod_v2"].forEach(k => LS.removeItem(k));
-  LS.removeItem("om_staff_session");
-  LS.setItem("bfc_role", "owner");
-  LS.setItem("om_demo_mode", "1");
-  LS.setItem("bfc_org_id", "demo_clean_workspace");
-  LS.setItem("om_org_profile", JSON.stringify({ orgId: "demo_clean_workspace", orgName: "OM SOFTWARE", role: "demo" }));
-  showOk("Quick Demo initialized with zero personal data.");
-  launchOmIntroAndRedirect("index.html?demo=1", 5);
-}
-
-async function handleSignIn(e) {
-  e.preventDefault();
-  clearMsgs();
-  if (currentMode === "staff") {
-    const code = String($("siStaffCode").value || "").trim().toUpperCase();
-    if (!code) { showErr("Please enter your Staff Access Code."); return; }
-    const emp = String(($("siEmpCode") && $("siEmpCode").value) || "").trim().toUpperCase();
-    const norm = code.replace(/[^A-Z0-9]/g, "");
-    if (norm.length < 8) { showErr("Sahi Staff Code likhein (jaise STF-001-AB12CD)."); return; }
-    const lockUntil = Number(LS.getItem("om_code_lock_until") || "0");
-    if (Date.now() < lockUntil) { showErr("Bahut zyada galat koshish. " + Math.ceil((lockUntil - Date.now()) / 1000) + " second baad dobara try karein."); return; }
-    let d = null;
-    try {
-      if (!firebase.apps.length) firebase.initializeApp({ apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" });
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("om|stf|" + norm));
-      const hex = Array.prototype.map.call(new Uint8Array(buf), function (x) { return ("0" + x.toString(16)).slice(-2); }).join("");
-      const snap = await firebase.firestore().collection("staff_codes").doc("st_" + hex).get();
-      d = snap.exists ? snap.data() : null;
-    } catch (err) {
-      showErr("Server se code verify nahi ho paya. Internet check karein (ya Firestore rules).");
-      return;
+    function clearPreviousSession() {
+      localStorage.removeItem("om_logged_user");
+      localStorage.removeItem("bfc_role");
+      document.getElementById("sessionRecoveryBox").style.display = "none";
     }
-    if (!d || d.active === false) {
-      const n = Number(LS.getItem("om_code_fail") || "0") + 1;
-      LS.setItem("om_code_fail", String(n));
-      if (n >= 5) { LS.setItem("om_code_lock_until", String(Date.now() + 60000)); LS.setItem("om_code_fail", "0"); }
-      showErr("Staff Code galat hai ya band kar diya gaya hai.");
-      return;
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const role = document.getElementById("loginRole").value;
+      const user = document.getElementById("loginUser").value.trim();
+      localStorage.setItem("om_logged_user", user);
+      localStorage.setItem("bfc_role", role);
+      localStorage.setItem("om_last_active_time", String(Date.now()));
+      location.replace("index.html");
     }
-    LS.removeItem("om_code_fail"); LS.removeItem("om_code_lock_until");
-    const br = d.branch || "001";
-    const sess = { code, employeeCode: emp, branchCode: br, name: d.name || "", staffId: d.id || "", orgId: d.orgId || "", role: "staff", verifiedAt: new Date().toISOString() };
-    LS.setItem("bfc_role", "staff");
-    LS.setItem("bfc_org_id", d.orgId || ("staff_org_" + br));
-    LS.setItem("om_staff_session", JSON.stringify(sess));
-    LS.setItem("om_verified_mgr_session_" + br, JSON.stringify(sess));
-    showOk("Staff access verified.");
-    launchOmIntroAndRedirect("index.html", 5);
-    return;
-  }
-
-  const rawId = String($("siIdentity").value || "").trim();
-  const pw = String($("siPassword").value || "");
-  if (!rawId || !pw) { showErr("Please enter both Email/Mobile and Password."); return; }
-
-  const secQVal = String(($("siSecQuestion") && $("siSecQuestion").value) || "").trim();
-  const directAns = String(($("siSecAnswerDirect") && $("siSecAnswerDirect").value) || "").trim().toLowerCase();
-  if (!secQVal || !directAns) {
-    showErr("Please select a Security Question and enter its answer.");
-    return;
-  }
-  let savedSec = null;
-  try { savedSec = JSON.parse(LS.getItem("om_last_sec_setup") || "null"); } catch(e) {}
-  if (savedSec && savedSec.a && directAns !== String(savedSec.a).trim().toLowerCase()) {
-    showErr("Incorrect security question answer.");
-    return;
-  }
-
-  try {
-    const CFG = { apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" };
-    if (!firebase.apps.length) firebase.initializeApp(CFG);
-    const emailCred = /^\d{10}$/.test(rawId) ? rawId + "@orgdesk.phone" : rawId;
-    const res = await firebase.auth().signInWithEmailAndPassword(emailCred, pw);
-    LS.removeItem("om_staff_session");
-    LS.setItem("bfc_role", "owner");
-    LS.setItem("bfc_org_id", res.user.uid);
-    LS.setItem("om_org_profile", JSON.stringify({ orgId: res.user.uid, orgName: "OM SOFTWARE", email: res.user.email || rawId }));
-    showOk("Signed in successfully.");
-    launchOmIntroAndRedirect("index.html", 5);
-  } catch (err) {
-    showErr((err && err.message) || "Authentication failed.");
-  }
-}
-
-async function handleSignUp(e) {
-  e.preventDefault();
-  clearMsgs();
-  const orgName = String($("suOrgName").value || "").trim();
-  const rawId = String($("suIdentity").value || "").trim();
-  const pw = String($("suPassword").value || "");
-  const secQ = String(($("suSecQ") && $("suSecQ").value) || "Favourite Person");
-  const secA = String(($("suSecA") && $("suSecA").value) || "").trim().toLowerCase();
-  if (!orgName || !rawId || pw.length < 6 || !secA) { showErr("Please complete all required fields including password and security answer."); return; }
-
-  try {
-    const CFG = { apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" };
-    if (!firebase.apps.length) firebase.initializeApp(CFG);
-    const emailCred = /^\d{10}$/.test(rawId) ? rawId + "@orgdesk.phone" : rawId;
-    const res = await firebase.auth().createUserWithEmailAndPassword(emailCred, pw);
-    LS.removeItem("om_staff_session");
-    LS.setItem("bfc_role", "owner");
-    LS.setItem("bfc_org_id", res.user.uid);
-    LS.setItem("om_org_profile", JSON.stringify({ orgId: res.user.uid, orgName: orgName, email: emailCred }));
-    LS.setItem("om_first_time_sec_" + res.user.uid, JSON.stringify({ q: secQ, a: secA, mustAnswerOnLogin: true }));
-    LS.setItem("om_last_sec_setup", JSON.stringify({ q: secQ, a: secA, mustAnswerOnLogin: true }));
-    showOk("Account and password configured.");
-    launchOmIntroAndRedirect("index.html", 5);
-  } catch (err) {
-    showErr((err && err.message) || "Account creation failed.");
-  }
-}
-</script>
-
-
-
-<script>
-  /* ---------- Full-Screen Cosmic Galaxy + 3D Solar System + 3D Rotating Om Intro ---------- */
-  var introTimer = null;
-  var introInterval = null;
-  var introTargetUrl = 'index.html';
-
-  function finishOmIntroNow() {
-    if (introTimer) { clearTimeout(introTimer); introTimer = null; }
-    if (introInterval) { clearInterval(introInterval); introInterval = null; }
-    location.href = introTargetUrl || 'index.html';
-  }
-
-  function launchOmIntroAndRedirect(targetUrl, durationSec) {
-    introTargetUrl = targetUrl || 'index.html';
-    durationSec = durationSec || 5;
-
-    try {
-      var authBox = document.querySelector('.auth-box');
-      if (authBox) authBox.style.display = 'none';
-      var codeOv = document.getElementById('codeOv');
-      if (codeOv) codeOv.style.display = 'none';
-    } catch(e) {}
-
-    var ov = document.getElementById('omIntroOverlay');
-    if (!ov) { location.href = introTargetUrl; return; }
-    ov.classList.add('show');
-
-    var elapsedMs = 0;
-    var bar = document.getElementById('omIntroProgress');
-    var st = document.getElementById('omIntroStatus');
-
-    if (introInterval) clearInterval(introInterval);
-    if (introTimer) clearTimeout(introTimer);
-
-    introInterval = setInterval(function () {
-      elapsedMs += 100;
-      var pct = Math.min(100, (elapsedMs / (durationSec * 1000)) * 100);
-      var rem = Math.max(0, Math.ceil((durationSec * 1000 - elapsedMs) / 1000));
-      if (bar) bar.style.width = pct + '%';
-      if (st) st.textContent = 'ॐ ब्रह्माण्ड — Dashboard खुल रहा है… (' + rem + 's)';
-    }, 100);
-
-    introTimer = setTimeout(function () {
-      finishOmIntroNow();
-    }, durationSec * 1000);
-  }
-</script>
-
+  </script>
 </body>
 </html>
