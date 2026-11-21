@@ -3973,5 +3973,272 @@ window.addEventListener("DOMContentLoaded", function() {
   });
 </script>
 
+
+<!-- EMPLOYEE JOINING FORM (ADMISSION CARD STYLE + LIVE PHOTO/UPLOAD + UAN/PF/ESI/TA/DA) -->
+<div class="ov" id="staffJoiningCardOv">
+  <div class="bx" style="max-width:600px">
+    <h3>
+      <span>Employee Joining Form (Admission Card)</span>
+      <button type="button" onclick="closeOv('staffJoiningCardOv')" style="background:none;border:0;color:var(--ac-gold);font-size:16px;cursor:pointer">✕</button>
+    </h3>
+    <form onsubmit="saveEmployeeJoiningCard(event)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="field" style="margin-bottom:6px">
+          <label>Employee Name *</label>
+          <input type="text" id="sjcName" required placeholder="Full Name">
+        </div>
+        <div class="field" style="margin-bottom:6px">
+          <label>Mobile Number *</label>
+          <input type="tel" id="sjcMobile" inputmode="numeric" required placeholder="10-digit mobile">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="field" style="margin-bottom:6px">
+          <label>Father's Name</label>
+          <input type="text" id="sjcFather" placeholder="Father Name">
+        </div>
+        <div class="field" style="margin-bottom:6px">
+          <label>Mother's Name</label>
+          <input type="text" id="sjcMother" placeholder="Mother Name">
+        </div>
+        <div class="field" style="margin-bottom:6px">
+          <label>Wife's Name (If Married)</label>
+          <input type="text" id="sjcWife" placeholder="Wife Name (if married)">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="field" style="margin-bottom:6px">
+          <label>Role / Designation *</label>
+          <input type="text" id="sjcRole" required placeholder="Trainer / Manager / Grade 1">
+        </div>
+        <div class="field" style="margin-bottom:6px">
+          <label>Bank Account &amp; IFSC</label>
+          <input type="text" id="sjcBank" placeholder="Bank A/C & IFSC">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="field" style="margin-bottom:6px">
+          <label>UAN Number</label>
+          <input type="text" id="sjcUan" inputmode="numeric" placeholder="12-digit UAN">
+        </div>
+        <div class="field" style="margin-bottom:6px">
+          <label>PF Status</label>
+          <select id="sjcPfStatus">
+            <option value="Applicable">Applicable</option>
+            <option value="Not Applicable">Not Applicable</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:6px">
+          <label>ESI Status</label>
+          <select id="sjcEsiStatus">
+            <option value="Applicable">Applicable</option>
+            <option value="Not Applicable">Not Applicable</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="field" style="margin-bottom:6px">
+          <label>Basic Salary (₹)</label>
+          <input type="number" id="sjcBasic" inputmode="numeric" placeholder="15000" value="15000">
+        </div>
+        <div class="field" style="margin-bottom:6px">
+          <label>TA Allowance (₹)</label>
+          <input type="number" id="sjcTa" inputmode="numeric" placeholder="1000" value="1000">
+        </div>
+        <div class="field" style="margin-bottom:6px">
+          <label>DA Allowance (₹)</label>
+          <input type="number" id="sjcDa" inputmode="numeric" placeholder="1500" value="1500">
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:8px">
+        <label>Photo (Live Camera Capture or Upload)</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <button type="button" class="btn g" style="margin-top:0;width:auto;padding:7px 11px;font-size:11.5px" onclick="captureLivePhotoForJoining()">Live Camera Photo</button>
+          <input type="file" id="sjcPhotoFile" accept="image/*" onchange="handleJoiningFilePhoto(this)" style="flex:1;margin-top:0;padding:6px">
+        </div>
+        <div id="sjcPhotoPreview" style="margin-top:8px;font-size:11.5px;color:#34D399"></div>
+      </div>
+      <button type="submit" class="btn">Save Joining Card</button>
+    </form>
+
+    <div class="sec-tag">Saved Joining Cards (Click to View Full Joining Form &amp; Salary Slip)</div>
+    <div id="sjcSavedCardsList" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;font-size:12px"></div>
+    <button type="button" class="btn g" onclick="closeOv('staffJoiningCardOv')">Close</button>
+  </div>
+</div>
+
+<!-- PROFESSIONAL SALARY SLIP MODAL -->
+<div class="ov" id="omSalarySlipOv">
+  <div class="bx" style="max-width:600px">
+    <h3>
+      <span>Professional Salary Slip</span>
+      <button type="button" onclick="closeOv('omSalarySlipOv')" style="background:none;border:0;color:var(--ac-gold);font-size:16px;cursor:pointer">✕</button>
+    </h3>
+    <div id="omSalarySlipContent" style="background:#080D1A;border:1.5px solid var(--border);border-radius:12px;padding:14px;font-size:12px;line-height:1.65"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button type="button" class="btn" style="margin-top:0" onclick="window.print()">Print / Save PDF</button>
+      <button type="button" class="btn g" style="margin-top:0" onclick="closeOv('omSalarySlipOv')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================= SMART KEYPAD/CASING + JOINING FORM + PROFESSIONAL SALARY SLIP =================
+
+function applySmartInputModesAndCasing() {
+  document.querySelectorAll("input").forEach(function(inp) {
+    const idLow = String(inp.id || "").toLowerCase();
+    const phLow = String(inp.placeholder || "").toLowerCase();
+    const typeLow = String(inp.type || "").toLowerCase();
+
+    if (idLow.includes("code") || idLow.includes("lic") || phLow.includes("code") || phLow.includes("lic")) {
+      inp.style.textTransform = "uppercase";
+      inp.setAttribute("autocapitalize", "characters");
+    }
+
+    if (
+      typeLow === "number" ||
+      idLow.includes("pin") || phLow.includes("pin") ||
+      idLow.includes("mobile") || idLow.includes("phone") ||
+      idLow.includes("uan") || idLow.includes("amount") ||
+      idLow.includes("basic") || idLow.includes("ta") || idLow.includes("da")
+    ) {
+      inp.setAttribute("inputmode", "numeric");
+    }
+
+    // After 2 digits in numeric/code prefix fields, keep numeric keypad active seamlessly
+    inp.addEventListener("input", function() {
+      const val = String(inp.value || "");
+      if (idLow.includes("code") || idLow.includes("lic")) {
+        inp.value = val.toUpperCase();
+      }
+      if (/^\d{2,}$/.test(val.trim()) && (idLow.includes("code") || idLow.includes("pin") || idLow.includes("mobile"))) {
+        inp.setAttribute("inputmode", "numeric");
+      }
+    });
+  });
+}
+
+function saveEmployeeJoiningCard(e) {
+  e.preventDefault();
+  const card = {
+    id: "JOIN-" + Date.now(),
+    name: String(($("sjcName") && $("sjcName").value) || "").trim(),
+    mobile: String(($("sjcMobile") && $("sjcMobile").value) || "").trim(),
+    fatherName: String(($("sjcFather") && $("sjcFather").value) || "-").trim(),
+    motherName: String(($("sjcMother") && $("sjcMother").value) || "-").trim(),
+    wifeName: String(($("sjcWife") && $("sjcWife").value) || "-").trim(),
+    role: String(($("sjcRole") && $("sjcRole").value) || "").trim(),
+    bankDetails: String(($("sjcBank") && $("sjcBank").value) || "-").trim(),
+    uanNo: String(($("sjcUan") && $("sjcUan").value) || "N/A").trim(),
+    pfStatus: ($("sjcPfStatus") && $("sjcPfStatus").value) || "Not Applicable",
+    esiStatus: ($("sjcEsiStatus") && $("sjcEsiStatus").value) || "Not Applicable",
+    basicSalary: Number(($("sjcBasic") && $("sjcBasic").value) || 0),
+    taAllowance: Number(($("sjcTa") && $("sjcTa").value) || 0),
+    daAllowance: Number(($("sjcDa") && $("sjcDa").value) || 0),
+    photo: _currentJoiningPhotoData || "",
+    joinedOn: iso()
+  };
+
+  const arr = J("om_staff_joining_cards_v1", []);
+  arr.unshift(card);
+  LS.setItem("om_staff_joining_cards_v1", JSON.stringify(arr));
+  if (typeof recordAuditEvent === "function") recordAuditEvent("Joining Card Saved", "Saved employee joining form for " + card.name);
+
+  ["sjcName", "sjcMobile", "sjcFather", "sjcMother", "sjcWife", "sjcRole", "sjcBank", "sjcUan"].forEach(function(id) {
+    if ($(id)) $(id).value = "";
+  });
+  _currentJoiningPhotoData = "";
+  if ($("sjcPhotoPreview")) $("sjcPhotoPreview").textContent = "Joining card saved.";
+  renderSavedJoiningCards();
+}
+
+function viewSingleJoiningCard(idx) {
+  const arr = J("om_staff_joining_cards_v1", []);
+  const c = arr[idx];
+  if (!c) return;
+  openSalarySlipForEmployee(c);
+}
+
+function openSalarySlipForEmployee(emp) {
+  const basic = Number(emp.basicSalary || 15000);
+  const ta = Number(emp.taAllowance || 1000);
+  const da = Number(emp.daAllowance || 1500);
+  const pfElig = (emp.pfStatus === "Applicable");
+  const esiElig = (emp.esiStatus === "Applicable");
+  const pfDed = pfElig ? Math.round(basic * 0.12) : 0;
+  const esiDed = esiElig ? Math.round((basic + ta + da) * 0.0075) : 0;
+  const gross = basic + ta + da;
+  const netPay = gross - pfDed - esiDed;
+
+  const box = $("omSalarySlipContent");
+  if (box) {
+    box.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--border);padding-bottom:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:15px;font-weight:900;color:var(--ac-gold)">${esc(emp.name || "Employee")}</div>
+          <div style="font-size:11px;color:var(--tx-muted)">Role: <b>${esc(emp.role || "Staff")}</b> &bull; Joined: ${esc(emp.joinedOn || iso())}</div>
+        </div>
+        ${emp.photo ? `<img src="${emp.photo}" style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--ac-gold)">` : `<span style="font-size:24px">🪪</span>`}
+      </div>
+      <div><b>Father's Name:</b> ${esc(emp.fatherName || "-")} &bull; <b>Mother's Name:</b> ${esc(emp.motherName || "-")}</div>
+      <div><b>Wife's Name (If Married):</b> ${esc(emp.wifeName || "-")}</div>
+      <div><b>Mobile:</b> ${esc(emp.mobile || "-")} &bull; <b>Bank:</b> ${esc(emp.bankDetails || "-")}</div>
+      <div><b>UAN No:</b> <span style="color:var(--ac-cyan);font-weight:800">${esc(emp.uanNo || "N/A")}</span></div>
+      <div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)">
+        <div><b>PF Eligibility:</b> <span style="color:${pfElig ? '#34D399' : '#FACC15'};font-weight:800">${pfElig ? 'Applicable (₹' + pfDed + ')' : 'Not Applicable'}</span></div>
+        <div><b>ESI Eligibility:</b> <span style="color:${esiElig ? '#34D399' : '#FACC15'};font-weight:800">${esiElig ? 'Applicable (₹' + esiDed + ')' : 'Not Applicable'}</span></div>
+        <div><b>Basic Salary:</b> ₹${basic.toLocaleString("en-IN")} &bull; <b>TA:</b> ₹${ta.toLocaleString("en-IN")} &bull; <b>DA:</b> ₹${da.toLocaleString("en-IN")}</div>
+        <div style="margin-top:6px;font-size:14px;font-weight:900;color:#34D399">Net Payable Salary: ₹${netPay.toLocaleString("en-IN")}</div>
+      </div>
+    `;
+  }
+  if ($("omSalarySlipOv")) $("omSalarySlipOv").classList.add("show");
+}
+
+window.addEventListener("DOMContentLoaded", function() {
+  applySmartInputModesAndCasing();
+
+  // Add a quick "Salary Slip" button in top nav for Admin/Owner
+  const nav = document.querySelector(".nav-actions");
+  if (nav && !document.getElementById("btnSalarySlipNav")) {
+    const bSlip = document.createElement("button");
+    bSlip.type = "button";
+    bSlip.id = "btnSalarySlipNav";
+    bSlip.className = "btn-nav";
+    bSlip.textContent = "Salary Slip";
+    bSlip.onclick = function() {
+      const cards = J("om_staff_joining_cards_v1", []);
+      if (cards && cards.length) {
+        openSalarySlipForEmployee(cards[0]);
+      } else {
+        openSalarySlipForEmployee({
+          name: "Saurabh Singh Chandel",
+          role: "Founder / Branch 001",
+          fatherName: "-",
+          motherName: "-",
+          wifeName: "Reet",
+          mobile: "-",
+          bankDetails: "Configured",
+          uanNo: "N/A",
+          pfStatus: "Not Applicable",
+          esiStatus: "Not Applicable",
+          basicSalary: 25000,
+          taAllowance: 2000,
+          daAllowance: 3000,
+          joinedOn: iso()
+        });
+      }
+    };
+    nav.insertBefore(bSlip, nav.firstChild);
+  }
+});
+</script>
+
 </body>
 </html>
