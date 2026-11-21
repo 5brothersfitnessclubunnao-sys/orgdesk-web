@@ -251,11 +251,11 @@
       <div id="staffLoginFields" style="display:none">
         <div class="field">
           <label>Staff Access Code *</label>
-          <input type="text" id="siStaffCode" placeholder="STF-001-XXXXXX" autocomplete="off">
+          <input type="text" id="siStaffCode" placeholder="STF-001-XXXXXX" style="text-transform:uppercase" autocapitalize="characters" autocomplete="off">
         </div>
         <div class="field">
           <label>Employee Code (Optional)</label>
-          <input type="text" id="siEmpCode" placeholder="EMP-001-MGR" autocomplete="off">
+          <input type="text" id="siEmpCode" placeholder="EMP-001-MGR" style="text-transform:uppercase" autocapitalize="characters" autocomplete="off">
         </div>
       </div>
 
@@ -311,7 +311,46 @@
 </div>
 
 <script>
-const LS = localStorage;
+// ================= CLOUD-FIRST / MEMORY STORE (NO BROWSER LOCALSTORAGE FOR APP STATE) =================
+const __OM_CLOUD_MEMORY_STORE__ = Object.create(null);
+const CLOUD_STORE = {
+  getItem(k) {
+    return Object.prototype.hasOwnProperty.call(__OM_CLOUD_MEMORY_STORE__, k) ? __OM_CLOUD_MEMORY_STORE__[k] : null;
+  },
+  setItem(k, v) {
+    __OM_CLOUD_MEMORY_STORE__[k] = String(v);
+    try {
+      if (window.firebase && firebase.apps && firebase.apps.length) {
+        firebase.firestore().collection("om_cloud_state").doc("active_session").set({
+          entries: { [k]: String(v) },
+          updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(function(){});
+      }
+    } catch (e) {}
+  },
+  removeItem(k) {
+    delete __OM_CLOUD_MEMORY_STORE__[k];
+  }
+};
+const LS = CLOUD_STORE;
+
+async function hydrateCloudStoreFromFirestore() {
+  try {
+    if (!window.firebase || !firebase.apps || !firebase.apps.length) return;
+    const snap = await firebase.firestore().collection("om_cloud_state").doc("active_session").get();
+    if (snap && snap.exists) {
+      const data = snap.data() || {};
+      const entries = data.entries || {};
+      Object.keys(entries).forEach(function(k) {
+        if (!Object.prototype.hasOwnProperty.call(__OM_CLOUD_MEMORY_STORE__, k)) {
+          __OM_CLOUD_MEMORY_STORE__[k] = String(entries[k]);
+        }
+      });
+    }
+  } catch (e) {}
+}
+
+window.addEventListener('DOMContentLoaded', function() { hydrateCloudStoreFromFirestore(); });
 const $ = id => document.getElementById(id);
 let currentMode = "email";
 
@@ -434,5 +473,61 @@ async function handleSignUp(e) {
 }
 </script>
 
+
+<!-- 5-SECOND OM UNIVERSE ROTATING SPLASH OVERLAY -->
+<div id="omUniverseSplash5s" style="display:none;position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at 50% 35%,#1A2B56 0%,#070C1A 65%,#03050A 100%);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px">
+  <style>
+    @keyframes omOrbitSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .om-ring-outer {
+      width: 132px; height: 132px; border-radius: 50%;
+      border: 3px dashed rgba(250,204,21,0.75);
+      display: flex; align-items: center; justify-content: center;
+      animation: omOrbitSpin 5s linear infinite;
+      box-shadow: 0 0 36px rgba(250,204,21,0.22), inset 0 0 24px rgba(34,211,238,0.18);
+    }
+    .om-glyph-center {
+      position: absolute;
+      font-size: 54px;
+      font-weight: 900;
+      color: #FACC15;
+      text-shadow: 0 0 24px rgba(250,204,21,0.65);
+      line-height: 1;
+    }
+  </style>
+  <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center;margin-bottom:18px">
+    <div class="om-ring-outer"></div>
+    <div class="om-glyph-center">ॐ</div>
+  </div>
+  <div style="font-size:20px;font-weight:900;color:#FFFFFF;letter-spacing:1px">OM SOFTWARE</div>
+  <div style="font-size:12px;color:#22D3EE;font-weight:700;margin-top:4px">Universe &bull; Trust, Technology &amp; Innovation</div>
+  <div id="omSplashCountdownTxt" style="font-size:11.5px;color:#FACC15;margin-top:10px;font-weight:800">Entering in 5s...</div>
+</div>
+
+
+<script>
+// ================= 5-SECOND OM UNIVERSE SPLASH ON LOGIN / LOGOUT / RE-ENTRY =================
+function playOmUniverseSplash5s(onDone) {
+  const el = document.getElementById("omUniverseSplash5s");
+  if (!el) { if (typeof onDone === "function") onDone(); return; }
+  el.style.display = "flex";
+  let left = 5;
+  const cd = document.getElementById("omSplashCountdownTxt");
+  if (cd) cd.textContent = "Entering in " + left + "s...";
+  const iv = setInterval(function() {
+    left -= 1;
+    if (cd && left > 0) cd.textContent = "Entering in " + left + "s...";
+  }, 1000);
+  setTimeout(function() {
+    clearInterval(iv);
+    el.style.display = "none";
+    if (typeof onDone === "function") onDone();
+  }, 5000);
+}
+</script>
+
+<script>window.addEventListener('DOMContentLoaded', function(){ playOmUniverseSplash5s(); });</script>
 </body>
 </html>
