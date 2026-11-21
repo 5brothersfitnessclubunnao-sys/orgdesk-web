@@ -3,1196 +3,899 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Om Software ERP — Enterprise Gym Management</title>
-  <!-- Chart.js for High-End Financial & Age Breakdown Charts -->
+  <title>Om Software ERP — Live Control Desk</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- SheetJS for Excel Import/Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="auth-gate.js"></script>
   <style>
     :root {
-      --bg: #060A14;
-      --card: #0D1424;
-      --card-hover: #131E36;
-      --border: #1E2D4A;
+      --bg: #050914;
+      --card: #0B1326;
+      --card-2: #0E172E;
+      --border: #1C2D4E;
       --gold: #F5A623;
-      --gold-dark: #D97706;
       --cyan: #22D3EE;
       --emerald: #34D399;
       --rose: #FB7185;
       --purple: #A78BFA;
-      --tx-main: #FFFFFF;
-      --tx-muted: #8E9BAE;
-      --input-bg: #0A0F1D;
+      --tx: #FFFFFF;
+      --muted: #94A3B8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--tx-main); padding-bottom: 80px; overflow-x: hidden; }
-    .header { background: #080D1A; border-bottom: 1px solid var(--border); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-    .header-brand { display: flex; align-items: center; gap: 10px; }
-    .header-logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #000; font-size: 15px; }
-    .header-title { font-size: 16px; font-weight: 800; color: #fff; }
-    .header-sub { font-size: 11px; color: var(--tx-muted); }
-    .header-actions { display: flex; align-items: center; gap: 8px; }
-    .badge-role { font-size: 11px; padding: 4px 8px; border-radius: 6px; background: rgba(245,166,35,0.15); color: var(--gold); border: 1px solid var(--gold); font-weight: 700; text-transform: uppercase; }
-    .btn-hdr { background: #162238; border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
-    .btn-hdr.danger { background: rgba(251,113,133,0.15); color: var(--rose); border-color: var(--rose); }
+    body { background: var(--bg); color: var(--tx); padding: 14px 14px 90px; max-width: 560px; margin: 0 auto; }
 
-    .container { max-width: 1080px; margin: 0 auto; padding: 16px; }
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px; margin-bottom: 12px;
+    }
+    .page-switch { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pg-btn {
+      background: #111C36; color: var(--muted); border: 1px solid var(--border);
+      border-radius: 9px; padding: 7px 11px; font-size: 12px; font-weight: 800; cursor: pointer;
+    }
+    .pg-btn.active { background: var(--gold); color: #060A14; border-color: var(--gold); }
+    .pg-btn.next-hl { border-color: var(--cyan); color: var(--cyan); }
+    .hdr-right { display: flex; gap: 6px; align-items: center; }
+    .mini-btn {
+      background: #111C36; color: #fff; border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 9px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .mini-btn.out { border-color: var(--rose); color: var(--rose); background: rgba(251,113,133,0.12); }
 
-    /* Alert Banner for Terminations or Updates */
-    #notificationTicker { display: none; background: rgba(251,113,133,0.12); border: 1px solid var(--rose); color: #FECDD3; border-radius: 12px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; }
+    .page-view { display: none; }
+    .page-view.active { display: block; }
 
-    /* Top Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; cursor: pointer; transition: 0.2s; position: relative; }
-    .stat-card:hover { border-color: var(--gold); transform: translateY(-2px); }
-    .stat-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--tx-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.06); color: var(--cyan); }
-    .stat-value { font-size: 24px; font-weight: 800; margin: 10px 0 4px; }
-    .stat-desc { font-size: 11px; color: var(--tx-muted); }
+    /* Page 1 Live Cards */
+    .live-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 15px 16px; margin-bottom: 11px; cursor: pointer; transition: 0.15s;
+    }
+    .live-card:hover { border-color: var(--gold); background: var(--card-2); }
+    .lc-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .lc-left { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; }
+    .lc-pill {
+      font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px;
+      background: rgba(34,211,238,0.12); color: var(--cyan); border: 1px solid rgba(34,211,238,0.28);
+    }
+    .lc-val { font-size: 24px; font-weight: 900; margin: 10px 0 3px; }
+    .lc-sub { font-size: 12px; color: var(--muted); }
+    .lc-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; }
+    .spark { font-size: 18px; letter-spacing: 1px; opacity: 0.9; }
 
-    /* Core Modules Section */
-    .sec-title { font-size: 13px; font-weight: 800; color: var(--tx-muted); text-transform: uppercase; letter-spacing: 1px; margin: 24px 0 12px; }
-    .module-list { display: flex; flex-direction: column; gap: 10px; }
-    .module-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
-    .module-card:hover { border-color: var(--cyan); background: var(--card-hover); }
-    .module-info { display: flex; align-items: center; gap: 14px; }
-    .module-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: #0A0F1D; border: 1px solid var(--border); }
-    .module-title { font-size: 15px; font-weight: 700; color: #fff; }
-    .module-sub { font-size: 11.5px; color: var(--tx-muted); margin-top: 2px; }
-    .arrow-icon { color: var(--gold); font-size: 16px; font-weight: bold; }
+    .next-page-footer { margin-top: 14px; display: flex; gap: 10px; }
+    .big-next-btn {
+      width: 100%; background: linear-gradient(135deg, #F5A623, #D97706); color: #060A14;
+      border: 0; border-radius: 14px; padding: 13px 16px; font-size: 14px; font-weight: 900; cursor: pointer;
+    }
 
-    /* Overlays / Modals */
-    .ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); z-index: 2000; align-items: center; justify-content: center; padding: 14px; }
+    /* Page 2 & Page 3 Panels */
+    .panel {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 15px; margin-bottom: 12px;
+    }
+    .panel h2 { font-size: 16px; color: var(--gold); margin-bottom: 6px; }
+    .panel p.desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .sec-label {
+      font-size: 11.5px; font-weight: 800; color: var(--muted); letter-spacing: 0.9px;
+      text-transform: uppercase; margin: 14px 0 9px;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .tile-btn {
+      background: var(--card-2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 10px; color: #fff; font-size: 12.5px; font-weight: 700; text-align: left;
+      cursor: pointer; line-height: 1.35;
+    }
+    .tile-btn:hover { border-color: var(--cyan); }
+    .mod-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 15px;
+      padding: 13px 15px; margin-bottom: 10px; display: flex; justify-content: space-between;
+      align-items: center; gap: 10px; cursor: pointer;
+    }
+    .mod-card:hover { border-color: var(--gold); background: var(--card-2); }
+    .mod-title { font-size: 14.5px; font-weight: 800; }
+    .mod-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+    .mod-arr { color: var(--gold); font-size: 16px; font-weight: 900; }
+
+    /* Modal / Drawer */
+    .ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 3000; align-items: center; justify-content: center; padding: 12px; }
     .ov.show { display: flex; }
-    .bx { background: var(--card); border: 1.5px solid var(--border); border-radius: 20px; max-width: 820px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 22px; position: relative; }
-    .bx-hdr { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
-    .bx-title { font-size: 18px; font-weight: 800; color: var(--gold); }
-    .btn-close { background: none; border: 0; color: var(--rose); font-size: 20px; font-weight: 900; cursor: pointer; }
-
-    /* Form Styles */
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 14px; }
-    .form-group { display: flex; flex-direction: column; gap: 5px; }
-    .form-group.full { grid-column: 1 / -1; }
-    label { font-size: 11.5px; font-weight: 700; color: var(--tx-muted); }
-    input, select, textarea { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none; }
-    input:focus, select:focus, textarea:focus { border-color: var(--cyan); }
-    .btn-submit { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #000; border: 0; border-radius: 12px; padding: 12px 18px; font-size: 14px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; }
-    .btn-sec { background: #162238; color: var(--cyan); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; }
-
-    /* Table Styles */
-    .table-wrap { overflow-x: auto; margin-top: 12px; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th { background: #0A0F1D; color: var(--tx-muted); text-align: left; padding: 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; font-size: 10.5px; }
-    td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-
-    /* Salary Slip Output */
-    .salary-slip { background: #FFFFFF; color: #111827; border-radius: 12px; padding: 24px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin-top: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    .slip-header { border-bottom: 2px solid #1E293B; padding-bottom: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
-    .slip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; font-size: 12px; }
-    .slip-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; }
-    .slip-table th, .slip-table td { border: 1px solid #CBD5E1; padding: 8px; color: #1E293B; }
-    .slip-table th { background: #F1F5F9; font-weight: 800; }
+    .bx {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 18px;
+      width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; padding: 18px;
+    }
+    .bx-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+    .bx-top h3 { font-size: 16px; color: var(--gold); }
+    .x-btn { background: none; border: 0; color: var(--rose); font-size: 18px; font-weight: 900; cursor: pointer; }
+    .fg { margin-bottom: 10px; }
+    .fg label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 4px; font-weight: 700; }
+    .fg input, .fg select, .fg textarea {
+      width: 100%; background: #070C18; border: 1px solid var(--border); color: #fff;
+      border-radius: 10px; padding: 9px 11px; font-size: 13px;
+    }
+    .act-btn {
+      width: 100%; background: var(--gold); color: #060A14; border: 0; border-radius: 11px;
+      padding: 11px; font-size: 13px; font-weight: 900; cursor: pointer; margin-top: 6px;
+    }
+    .sub-btn {
+      background: #13213E; color: var(--cyan); border: 1px solid var(--border); border-radius: 9px;
+      padding: 7px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+    }
+    .list-item {
+      background: #080E1C; border: 1px solid var(--border); border-radius: 11px;
+      padding: 10px; margin-bottom: 8px; font-size: 12px;
+    }
+    .alert-strip {
+      display: none; background: rgba(251,113,133,0.14); border: 1px solid var(--rose);
+      color: #FECDD3; border-radius: 12px; padding: 10px 12px; font-size: 12px; margin-bottom: 10px;
+    }
+    .slip-box {
+      background: #fff; color: #0F172A; border-radius: 12px; padding: 16px; margin-top: 12px; font-size: 12px;
+    }
+    .slip-box table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+    .slip-box th, .slip-box td { border: 1px solid #CBD5E1; padding: 6px 8px; text-align: left; }
   </style>
-<script src="auth-gate.js"></script>
 </head>
 <body>
 
-  <!-- Header -->
-  <div class="header">
-    <div class="header-brand">
-      <div class="header-logo">OM</div>
-      <div>
-        <div class="header-title">Om Software ERP</div>
-        <div class="header-sub">Universal Multi-Branch Management</div>
-      </div>
+  <div class="top-bar">
+    <div class="page-switch">
+      <button type="button" class="pg-btn active" id="btnPg1" onclick="showPage(1)">Page 1: Live</button>
+      <button type="button" class="pg-btn next-hl" id="btnPg2" onclick="showPage(2)">Next Page (Page 2)</button>
+      <button type="button" class="pg-btn" id="btnPg3" onclick="showPage(3)">Page 3: Modules</button>
     </div>
-    <div class="header-actions">
-      <span class="badge-role" id="activeRoleBadge">Admin</span>
-      <select id="branchSelector" class="btn-hdr" onchange="switchBranchFilter(this.value)">
+    <div class="hdr-right">
+      <select id="branchFilterSel" class="mini-btn" onchange="changeBranch(this.value)">
         <option value="ALL">All Branches</option>
-        <option value="001">Branch 001 (Unnao Main)</option>
-        <option value="002">Branch 002 (Kanpur Road)</option>
-        <option value="003">Branch 003 (Civil Lines)</option>
+        <option value="001">Branch 001</option>
+        <option value="002">Branch 002</option>
+        <option value="003">Branch 003</option>
       </select>
-      <button class="btn-hdr danger" onclick="performManualLogout()">Logout</button>
+      <button type="button" class="mini-btn out" onclick="logoutNow()">Logout</button>
     </div>
   </div>
 
-  <div class="container">
-    <!-- Real-time Notification Banner for Terminations & Alerts -->
-    <div id="notificationTicker"></div>
+  <div id="liveAlertStrip" class="alert-strip"></div>
 
-    <!-- Live Performance Dashboard Grid -->
-    <div class="stats-grid">
-      <div class="stat-card" onclick="openStaffEmployeesVault()">
-        <div class="stat-header">
-          <span>Total No. of Employees</span>
-          <span class="stat-tag" id="empBranchTag">Admin Only</span>
-        </div>
-        <div class="stat-value" id="dispTotalEmployees" style="color:var(--cyan)">0</div>
-        <div class="stat-desc">Click to view branch staff, KYC &amp; joining forms</div>
+  <!-- ================= PAGE 1: LIVE CARDS (CLEAN & PRESERVED) ================= -->
+  <section id="page1" class="page-view active">
+    <div class="live-card" onclick="openInfoModal('Total Collection', 'All branches combined collection')">
+      <div class="lc-top">
+        <div class="lc-left"><span>💰</span><span>TOTAL COLLECTION</span></div>
+        <span class="lc-pill">4 Branches</span>
       </div>
-
-      <div class="stat-card" onclick="openProfitLossStatementModal()">
-        <div class="stat-header">
-          <span>Total Loss &amp; Profit</span>
-          <span class="stat-tag">Net P&amp;L</span>
+      <div class="lc-row">
+        <div>
+          <div class="lc-val" id="p1TotalCollection" style="color:var(--gold)">₹2,23,200</div>
+          <div class="lc-sub">All branches combined</div>
         </div>
-        <div class="stat-value" id="dispNetProfit" style="color:var(--emerald)">₹0</div>
-        <div class="stat-desc">Bank-style statement &amp; charts comparison</div>
-      </div>
-
-      <div class="stat-card" onclick="openMembersVault()">
-        <div class="stat-header">
-          <span>Total Gym Members</span>
-          <span class="stat-tag">Live Count</span>
-        </div>
-        <div class="stat-value" id="dispTotalMembers" style="color:var(--gold)">0</div>
-        <div class="stat-desc">Active admissions &amp; renewals</div>
-      </div>
-
-      <div class="stat-card" onclick="openEnquiriesModal()">
-        <div class="stat-header">
-          <span>Running Enquiries</span>
-          <span class="stat-tag">Walk-in &amp; Leads</span>
-        </div>
-        <div class="stat-value" id="dispTotalEnquiries" style="color:var(--purple)">0</div>
-        <div class="stat-desc">Call, WhatsApp, SMS &amp; Age analytics</div>
+        <div class="spark" style="color:var(--gold)">📈</div>
       </div>
     </div>
 
-    <!-- Core Modules & Folders -->
-    <div class="sec-title">Core Modules &amp; Folders</div>
-    <div class="module-list">
-      
-      <!-- Admission Form -->
-      <div class="module-card" onclick="openAdmissionFormModal()">
-        <div class="module-info">
-          <div class="module-icon" style="color:var(--gold)">📝</div>
-          <div>
-            <div class="module-title">Admission Form</div>
-            <div class="module-sub">Member onboarding, multi-service selection (Sauna, Ice bath, Locker, Supplements, Cardio) &amp; UTR verification</div>
-          </div>
-        </div>
-        <div class="arrow-icon">→</div>
+    <div class="live-card" onclick="openInfoModal('Total Fees Collection', 'Membership & renewals')">
+      <div class="lc-top">
+        <div class="lc-left"><span>💳</span><span>TOTAL FEES COLLECTION</span></div>
+        <span class="lc-pill">4 Branches</span>
       </div>
-
-      <!-- Staff Joining & KYC -->
-      <div class="module-card" onclick="openStaffJoiningModal()">
-        <div class="module-info">
-          <div class="module-icon" style="color:var(--cyan)">👤</div>
-          <div>
-            <div class="module-title">Staff Joining &amp; Comprehensive KYC</div>
-            <div class="module-sub">Branch-wise joining form, Govt ID upload, Medical history, Bank/PF/UAN or Cash payment mode</div>
-          </div>
+      <div class="lc-row">
+        <div>
+          <div class="lc-val" id="p1FeesCollection" style="color:var(--emerald)">₹1,84,800</div>
+          <div class="lc-sub">Membership &amp; renewals</div>
         </div>
-        <div class="arrow-icon">→</div>
+        <div class="spark" style="color:var(--emerald)">📊</div>
       </div>
-
-      <!-- Professional Salary & Payroll Slip -->
-      <div class="module-card" onclick="openSalarySlipModal()">
-        <div class="module-info">
-          <div class="module-icon" style="color:var(--emerald)">💼</div>
-          <div>
-            <div class="module-title">Executive Staff Salary &amp; Payroll Desk</div>
-            <div class="module-sub">Professional corporate payslip, attendance late penalty, PF/ESIC breakdown &amp; printable PDF slip</div>
-          </div>
-        </div>
-        <div class="arrow-icon">→</div>
-      </div>
-
-      <!-- Enquiries & Age Demographics -->
-      <div class="module-card" onclick="openEnquiriesModal()">
-        <div class="module-info">
-          <div class="module-icon" style="color:var(--purple)">📞</div>
-          <div>
-            <div class="module-title">Walk-In &amp; Lead Enquiries Folder</div>
-            <div class="module-sub">Trail tracking, lead sources, direct WhatsApp/Call, and youth/age bracket analytics per branch</div>
-          </div>
-        </div>
-        <div class="arrow-icon">→</div>
-      </div>
-
-      <!-- Upload Gym Data (Universal Auto-Router) -->
-      <div class="module-card" onclick="openUploadRouterModal()">
-        <div class="module-info">
-          <div class="module-icon" style="color:var(--rose)">📥</div>
-          <div>
-            <div class="module-title">Upload Gym Data (Universal Auto-Router)</div>
-            <div class="module-sub">Upload single Excel/CSV; automatic distribution into Members, Staff, Collections &amp; Expenses</div>
-          </div>
-        </div>
-        <div class="arrow-icon">→</div>
-      </div>
-
     </div>
-  </div>
 
-  <!-- ================= MODAL: STAFF EMPLOYEES & KYC VAULT (ADMIN ONLY) ================= -->
-  <div class="ov" id="staffVaultOv">
+    <div class="live-card" onclick="showPage(3)">
+      <div class="lc-top">
+        <div class="lc-left"><span>🏋️</span><span>TOTAL GYM MEMBERS</span></div>
+        <span class="lc-pill">Live Count</span>
+      </div>
+      <div class="lc-row">
+        <div>
+          <div class="lc-val" id="p1TotalMembers" style="color:var(--cyan)">148</div>
+          <div class="lc-sub">Across all branches</div>
+        </div>
+        <div class="spark" style="color:var(--cyan)">📶</div>
+      </div>
+    </div>
+
+    <div class="live-card" onclick="openAdmissionModal()">
+      <div class="lc-top">
+        <div class="lc-left"><span>📝</span><span>NEW ADMISSIONS</span></div>
+        <span class="lc-pill">Live Board</span>
+      </div>
+      <div class="lc-row">
+        <div>
+          <div class="lc-val" id="p1NewAdmissions" style="color:var(--cyan)">42</div>
+          <div class="lc-sub">Tap: new admission &amp; statement</div>
+        </div>
+        <div class="spark" style="color:var(--cyan)">📈</div>
+      </div>
+    </div>
+
+    <div class="live-card" onclick="openInfoModal('Supplement Collection', 'Whey, creatine & shakers')">
+      <div class="lc-top">
+        <div class="lc-left"><span>💊</span><span>SUPPLEMENT COLLECTION</span></div>
+        <span class="lc-pill">POS Store</span>
+      </div>
+      <div class="lc-row">
+        <div>
+          <div class="lc-val" id="p1SupplementCollection" style="color:var(--purple)">₹38,400</div>
+          <div class="lc-sub">Whey, creatine &amp; shakers</div>
+        </div>
+        <div class="spark" style="color:var(--purple)">📈</div>
+      </div>
+    </div>
+
+    <div class="live-card" onclick="openInfoModal('Cash / Online Split', 'Branch-wise cash & online collection')">
+      <div class="lc-top">
+        <div class="lc-left"><span>💵</span><span>CASH / ONLINE</span></div>
+        <span class="lc-pill">Split Mode</span>
+      </div>
+      <div class="lc-row">
+        <div>
+          <div class="lc-val" id="p1CashOnline" style="color:var(--emerald);font-size:20px">₹1,43,000 Cash / ₹75,000 Online</div>
+          <div class="lc-sub">Click for branch-wise split</div>
+        </div>
+        <div class="spark">🟩🟦</div>
+      </div>
+    </div>
+
+    <div class="live-card" onclick="openPnlModal()">
+      <div class="lc-top">
+        <div class="lc-left"><span>⚖️</span><span>TOTAL LOSS &amp; PROFIT</span></div>
+        <span class="lc-pill">Net P&amp;L</span>
+      </div>
+      <div class="lc-row">
+        <div>
+          <div class="lc-val" id="p1NetPnl" style="color:var(--emerald)">+₹1,44,800</div>
+          <div class="lc-sub" id="p1ExpSub">Exp: ₹78,400 • Net Profit</div>
+        </div>
+        <div class="spark" style="color:var(--emerald)">📉📈</div>
+      </div>
+    </div>
+
+    <div class="live-card" onclick="openAdmissionModal()">
+      <div class="lc-top">
+        <div class="lc-left"><span>✨</span><span>EXTRA SERVICE COLLECTION</span></div>
+        <span class="lc-pill">Add-On</span>
+      </div>
+      <div class="lc-row">
+        <div>
+          <div class="lc-val" id="p1ExtraService" style="color:var(--gold)">₹0</div>
+          <div class="lc-sub">PT, steam, ice bath, locker, cardio, zumba</div>
+        </div>
+        <div class="spark" style="color:var(--gold)">📈</div>
+      </div>
+    </div>
+
+    <div class="live-card" onclick="openEmployeesModal()">
+      <div class="lc-top">
+        <div class="lc-left"><span>👥</span><span>TOTAL NO. OF EMPLOYEES</span></div>
+        <span class="lc-pill" id="p1EmpRoleTag">Admin Vault</span>
+      </div>
+      <div class="lc-row">
+        <div>
+          <div class="lc-val" id="p1TotalEmployees" style="color:var(--cyan)">0</div>
+          <div class="lc-sub">Branch count, KYC, joining, bank/PF/UAN &amp; medical</div>
+        </div>
+        <div class="spark" style="color:var(--cyan)">🗂️</div>
+      </div>
+    </div>
+
+    <div class="next-page-footer">
+      <button type="button" class="big-next-btn" onclick="showPage(2)">Next Page → (Staff KYC, Firing, Enquiries, P&amp;L &amp; Payslip)</button>
+    </div>
+  </section>
+
+  <!-- ================= PAGE 2: ADDED TOOLS (NEXT PAGE) ================= -->
+  <section id="page2" class="page-view">
+    <div class="panel">
+      <h2>Next Page — Staff, Firing, Enquiries, P&amp;L &amp; Payslip</h2>
+      <p class="desc">Jo naye points add kiye gaye hain wo yahan Page 2 par rakhe gaye hain taaki Page 1 clean rahe.</p>
+      <div class="grid-2">
+        <button type="button" class="tile-btn" onclick="openEmployeesModal()">👥 Total Employees &amp; KYC Vault<br><span style="font-size:11px;color:var(--muted)">Branch count, KYC, bank/PF/UAN &amp; download</span></button>
+        <button type="button" class="tile-btn" onclick="openStaffJoiningModal()">📋 Staff Joining Form<br><span style="font-size:11px;color:var(--muted)">Photo, ID, qualification, medical &amp; cash option</span></button>
+        <button type="button" class="tile-btn" onclick="openEnquiriesModal()">📞 Walk-In &amp; Lead Enquiries<br><span style="font-size:11px;color:var(--muted)">Call, WhatsApp, SMS &amp; age per branch</span></button>
+        <button type="button" class="tile-btn" onclick="openPnlModal()">📉📈 P&amp;L Statement &amp; Charts<br><span style="font-size:11px;color:var(--muted)">Date filter, charts &amp; Excel download</span></button>
+        <button type="button" class="tile-btn" onclick="openPayslipModal()">🧾 Office Salary Slip<br><span style="font-size:11px;color:var(--muted)">Earnings, PF/ESIC, late penalty &amp; print</span></button>
+        <button type="button" class="tile-btn" onclick="showPage(3)">📂 Go to Page 3 (Core Modules) →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PAGE 3: CORE MODULES & FOLDERS ================= -->
+  <section id="page3" class="page-view">
+    <div class="sec-label">Core Modules &amp; Folders (Page 3)</div>
+
+    <div class="mod-card" onclick="openAdmissionModal()">
+      <div>
+        <div class="mod-title">Admission Form</div>
+        <div class="mod-sub">Sauna, ice bath, locker, supplement, cardio, cycle, cross trainer, zumba + edit price + Cash/Online UTR</div>
+      </div>
+      <div class="mod-arr">→</div>
+    </div>
+
+    <div class="mod-card" onclick="openInfoModal('Pay Fees Desk', 'Fee collection, dues & receipts')">
+      <div>
+        <div class="mod-title">Pay Fees Desk</div>
+        <div class="mod-sub">Fee collection, dues &amp; receipts</div>
+      </div>
+      <div class="mod-arr">→</div>
+    </div>
+
+    <div class="mod-card" onclick="openInfoModal('Attendance Kiosk', 'Daily member & staff attendance')">
+      <div>
+        <div class="mod-title">Attendance Kiosk</div>
+        <div class="mod-sub">Daily member &amp; staff attendance</div>
+      </div>
+      <div class="mod-arr">→</div>
+    </div>
+
+    <div class="mod-card" onclick="openPayslipModal()">
+      <div>
+        <div class="mod-title">Staff Salary &amp; Payroll</div>
+        <div class="mod-sub">Office salary slip, attendance late penalty &amp; PF/ESIC</div>
+      </div>
+      <div class="mod-arr">→</div>
+    </div>
+
+    <div class="mod-card" onclick="openStaffJoiningModal()">
+      <div>
+        <div class="mod-title">Staff Joining</div>
+        <div class="mod-sub">Branch joining form, photo, gov ID, qualification, medical &amp; cash mode</div>
+      </div>
+      <div class="mod-arr">→</div>
+    </div>
+
+    <div class="mod-card" onclick="openAutoRouterModal()">
+      <div>
+        <div class="mod-title">Upload Gym Data</div>
+        <div class="mod-sub">Single Excel/CSV upload -> auto-route Members, Staff, Collection &amp; Expense</div>
+      </div>
+      <div class="mod-arr">→</div>
+    </div>
+
+    <div class="mod-card" onclick="openEmployeesModal()">
+      <div>
+        <div class="mod-title">Admin Portal &amp; Staff KYC Vault</div>
+        <div class="mod-sub">Admin-only branch staff KYC, joining form, bank/PF/UAN &amp; firing reason alert</div>
+      </div>
+      <div class="mod-arr">→</div>
+    </div>
+
+    <div class="panel">
+      <div class="sec-label" style="margin-top:0">Enterprise Control Desk Shortcuts</div>
+      <div class="grid-2">
+        <button type="button" class="tile-btn" onclick="openAdmissionModal()">Extra Service Collection</button>
+        <button type="button" class="tile-btn" onclick="openPnlModal()">Maintenance &amp; Bills</button>
+        <button type="button" class="tile-btn" onclick="openEmployeesModal()">Department Staff</button>
+        <button type="button" class="tile-btn" onclick="openInfoModal('Smart Attendance', 'Branch attendance log')">Smart Attendance</button>
+        <button type="button" class="tile-btn" onclick="openAutoRouterModal()">Unified Data Upload</button>
+        <button type="button" class="tile-btn" onclick="openPayslipModal()">Salary Slip</button>
+        <button type="button" class="tile-btn" onclick="openInfoModal('5-Point Security', 'Role & 10-min inactivity lock active')">5-Point Security</button>
+        <button type="button" class="tile-btn" onclick="openInfoModal('Audit Log', 'Recent system & staff events')">Audit Log</button>
+        <button type="button" class="tile-btn" onclick="openInfoModal('Licenses', 'Active license & tenant isolation')">Licenses</button>
+        <button type="button" class="tile-btn" onclick="openPnlModal()">Branch Collection &amp; Report</button>
+        <button type="button" class="tile-btn" onclick="openEmployeesModal()">Staff Codes</button>
+        <button type="button" class="tile-btn" onclick="showPage(1)">← Back to Page 1</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MODAL: EMPLOYEES & KYC VAULT ================= -->
+  <div class="ov" id="employeesOv">
     <div class="bx">
-      <div class="bx-hdr">
-        <div class="bx-title">Employees &amp; Staff KYC Vault (Admin Access)</div>
-        <button class="btn-close" onclick="closeOv('staffVaultOv')">✕</button>
+      <div class="bx-top">
+        <h3>Employees &amp; KYC Vault</h3>
+        <button type="button" class="x-btn" onclick="closeModal('employeesOv')">✕</button>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-        <span style="font-size:12px;color:var(--tx-muted)">Branch Filter: <b id="vaultBranchLabel">All Branches</b></span>
-        <button class="btn-sec" onclick="openStaffJoiningModal()">+ Add New Staff</button>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Staff Name</th>
-              <th>Branch</th>
-              <th>Designation</th>
-              <th>Phone</th>
-              <th>Salary Mode</th>
-              <th>KYC &amp; Docs</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="staffVaultTableBody"></tbody>
-        </table>
-      </div>
+      <div id="empBranchSummary" class="list-item"></div>
+      <div id="empVaultBody"></div>
     </div>
   </div>
 
-  <!-- ================= MODAL: STAFF JOINING & KYC FORM ================= -->
-  <div class="ov" id="staffJoiningOv">
+  <!-- ================= MODAL: STAFF JOINING FORM ================= -->
+  <div class="ov" id="joiningOv">
     <div class="bx">
-      <div class="bx-hdr">
-        <div class="bx-title">Staff Joining &amp; Comprehensive KYC Form</div>
-        <button class="btn-close" onclick="closeOv('staffJoiningOv')">✕</button>
+      <div class="bx-top">
+        <h3>Staff Joining Form</h3>
+        <button type="button" class="x-btn" onclick="closeModal('joiningOv')">✕</button>
       </div>
-      <form onsubmit="handleStaffJoiningSubmit(event)">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Select Branch *</label>
-            <select id="stfBranch" required>
-              <option value="001">Branch 001 (Unnao Main)</option>
-              <option value="002">Branch 002 (Kanpur Road)</option>
-              <option value="003">Branch 003 (Civil Lines)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Full Name *</label>
-            <input type="text" id="stfName" placeholder="e.g. Priya Sharma" required>
-          </div>
-          <div class="form-group">
-            <label>Designation / Post *</label>
-            <input type="text" id="stfPost" placeholder="e.g. Receptionist / Front Desk" required>
-          </div>
-          <div class="form-group">
-            <label>Contact Mobile *</label>
-            <input type="tel" id="stfPhone" placeholder="10-digit mobile" maxlength="10" required>
-          </div>
-          <div class="form-group">
-            <label>Qualification *</label>
-            <input type="text" id="stfQualification" placeholder="e.g. Graduate / B.P.Ed" required>
-          </div>
-          <div class="form-group">
-            <label>Medical History *</label>
-            <input type="text" id="stfMedical" placeholder="e.g. Fit / No known chronic ailment" required>
-          </div>
-          <div class="form-group">
-            <label>Salary Payment Mode *</label>
-            <select id="stfSalaryMode" onchange="toggleSalaryModeFields(this.value)" required>
-              <option value="Bank">Bank Transfer (Requires PF/UAN)</option>
-              <option value="Cash">Cash in Hand (No Bank/PF/UAN needed)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Monthly Salary (₹) *</label>
-            <input type="number" id="stfBaseSalary" placeholder="e.g. 15000" required>
-          </div>
+      <form onsubmit="saveStaffJoining(event)">
+        <div class="fg"><label>Branch *</label><select id="jBranch"><option value="001">Branch 001 (Unnao)</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
+        <div class="fg"><label>Staff Name *</label><input type="text" id="jName" required></div>
+        <div class="fg"><label>Post / Designation *</label><input type="text" id="jPost" placeholder="e.g. Reception / Trainer" required></div>
+        <div class="fg"><label>Qualification *</label><input type="text" id="jQual" required></div>
+        <div class="fg"><label>Medical History *</label><input type="text" id="jMed" required></div>
+        <div class="fg"><label>Live Photo (Capture / File)</label><input type="file" id="jPhoto" accept="image/*" capture="user"></div>
+        <div class="fg"><label>Govt ID Proof</label><input type="file" id="jIdProof" accept="image/*,.pdf"></div>
+        <div class="fg">
+          <label>Salary Payment Mode *</label>
+          <select id="jPayMode" onchange="toggleJoiningBank(this.value)">
+            <option value="Bank">Bank (Bank + PF + UAN)</option>
+            <option value="Cash">Cash (No Bank / PF / UAN needed)</option>
+          </select>
         </div>
-
-        <!-- Bank & PF Fields (Hidden if Cash) -->
-        <div id="bankDetailsSection" class="form-grid" style="border:1px dashed var(--border);border-radius:12px;padding:12px;margin-bottom:14px;">
-          <div class="form-group">
-            <label>Bank Name &amp; Account Number *</label>
-            <input type="text" id="stfBankAcc" placeholder="SBI / HDFC Acc No">
-          </div>
-          <div class="form-group">
-            <label>IFSC Code *</label>
-            <input type="text" id="stfBankIfsc" placeholder="SBIN000XXXX">
-          </div>
-          <div class="form-group">
-            <label>PF Account Number</label>
-            <input type="text" id="stfPfNo" placeholder="PF Member ID">
-          </div>
-          <div class="form-group">
-            <label>UAN Number</label>
-            <input type="text" id="stfUanNo" placeholder="12-digit UAN">
-          </div>
+        <div class="fg"><label>Monthly Salary (₹) *</label><input type="number" id="jSalary" value="15000" required></div>
+        <div id="jBankBox">
+          <div class="fg"><label>Bank Details (Bank &amp; Account No)</label><input type="text" id="jBank"></div>
+          <div class="fg"><label>PF Details</label><input type="text" id="jPf"></div>
+          <div class="fg"><label>UAN Details</label><input type="text" id="jUan"></div>
         </div>
-
-        <!-- Document & Photo Upload Simulation -->
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Live Photo / Selfie (Camera / File) *</label>
-            <input type="file" id="stfPhoto" accept="image/*" capture="user">
-          </div>
-          <div class="form-group">
-            <label>Govt ID Proof (Aadhaar / PAN) *</label>
-            <input type="file" id="stfGovId" accept="image/*,.pdf">
-          </div>
-        </div>
-
-        <button type="submit" class="btn-submit">Register Staff &amp; Sync to Branch</button>
+        <button type="submit" class="act-btn">Save Staff Joining</button>
       </form>
     </div>
   </div>
 
-  <!-- ================= MODAL: ADMISSION FORM WITH DYNAMIC EXTRA SERVICES ================= -->
-  <div class="ov" id="admissionFormOv">
+  <!-- ================= MODAL: ADMISSION FORM ================= -->
+  <div class="ov" id="admissionOv">
     <div class="bx">
-      <div class="bx-hdr">
-        <div class="bx-title">New Member Admission &amp; Services Form</div>
-        <button class="btn-close" onclick="closeOv('admissionFormOv')">✕</button>
+      <div class="bx-top">
+        <h3>Admission Form (Services + Cash/Online)</h3>
+        <button type="button" class="x-btn" onclick="closeModal('admissionOv')">✕</button>
       </div>
-      <form onsubmit="handleAdmissionSubmit(event)">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Select Branch *</label>
-            <select id="admBranch" required>
-              <option value="001">Branch 001 (Unnao Main)</option>
-              <option value="002">Branch 002 (Kanpur Road)</option>
-              <option value="003">Branch 003 (Civil Lines)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Member Name *</label>
-            <input type="text" id="admName" placeholder="Full name" required>
-          </div>
-          <div class="form-group">
-            <label>Mobile Number *</label>
-            <input type="tel" id="admPhone" placeholder="10-digit mobile" maxlength="10" required>
-          </div>
-          <div class="form-group">
-            <label>Age (For Demographic Tracking) *</label>
-            <input type="number" id="admAge" placeholder="e.g. 21" min="12" max="80" required>
-          </div>
-          <div class="form-group">
-            <label>Membership Plan *</label>
-            <select id="admPlan" onchange="calculateAdmissionTotal()">
-              <option value="1200" data-name="Monthly General">Monthly General — ₹1,200</option>
-              <option value="3200" data-name="Quarterly Fitness">Quarterly Fitness — ₹3,200</option>
-              <option value="6000" data-name="Half-Yearly Elite">Half-Yearly Elite — ₹6,000</option>
-              <option value="11000" data-name="Annual Pro">Annual Pro — ₹11,000</option>
-            </select>
+      <form onsubmit="saveAdmission(event)">
+        <div class="fg"><label>Branch *</label><select id="aBranch"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
+        <div class="fg"><label>Member Name *</label><input type="text" id="aName" required></div>
+        <div class="fg"><label>Age *</label><input type="number" id="aAge" value="22" required></div>
+        <div class="fg"><label>Base Admission Fee (₹) *</label><input type="number" id="aBaseFee" value="1200" oninput="calcAdmSum()"></div>
+
+        <div class="fg">
+          <label>Services &amp; Editable Price (₹):</label>
+          <div class="list-item">
+            <div><label><input type="checkbox" class="a-srv" data-label="Sauna Bath" onchange="calcAdmSum()"> Sauna Bath</label> <input type="number" class="a-prc" value="1000" style="width:90px;display:inline" oninput="calcAdmSum()"></div>
+            <div style="margin-top:6px"><label><input type="checkbox" class="a-srv" data-label="Ice Bath" onchange="calcAdmSum()"> Ice Bath</label> <input type="number" class="a-prc" value="1500" style="width:90px;display:inline" oninput="calcAdmSum()"></div>
+            <div style="margin-top:6px"><label><input type="checkbox" class="a-srv" data-label="Locker" onchange="calcAdmSum()"> Locker</label> <input type="number" class="a-prc" value="500" style="width:90px;display:inline" oninput="calcAdmSum()"></div>
+            <div style="margin-top:6px"><label><input type="checkbox" class="a-srv" data-label="Supplement" onchange="calcAdmSum()"> Supplement</label> <input type="number" class="a-prc" value="2500" style="width:90px;display:inline" oninput="calcAdmSum()"></div>
+            <div style="margin-top:6px"><label><input type="checkbox" class="a-srv" data-label="Cardio / Treadmill / Cycle / Cross Trainer" onchange="calcAdmSum()"> Cardio / Treadmill / Cycle / Cross Trainer</label> <input type="number" class="a-prc" value="800" style="width:90px;display:inline" oninput="calcAdmSum()"></div>
+            <div style="margin-top:6px"><label><input type="checkbox" class="a-srv" data-label="Zumba" onchange="calcAdmSum()"> Zumba</label> <input type="number" class="a-prc" value="1000" style="width:90px;display:inline" oninput="calcAdmSum()"></div>
           </div>
         </div>
 
-        <!-- Add-on Services Checklist with Editable Prices -->
-        <label style="margin-bottom:8px;display:block">Included Add-On Services (Check &amp; Edit Price):</label>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px,1fr));gap:8px;margin-bottom:14px;background:#0A0F1D;padding:12px;border-radius:12px;border:1px solid var(--border);">
-          <div>
-            <label><input type="checkbox" class="srv-chk" data-name="Sauna Bath" value="1000" onchange="calculateAdmissionTotal()"> Sauna Bath</label>
-            <input type="number" class="srv-price" value="1000" style="width:100%;margin-top:4px" onchange="updateServicePrice(this)">
-          </div>
-          <div>
-            <label><input type="checkbox" class="srv-chk" data-name="Ice Bath" value="1500" onchange="calculateAdmissionTotal()"> Ice Bath Recovery</label>
-            <input type="number" class="srv-price" value="1500" style="width:100%;margin-top:4px" onchange="updateServicePrice(this)">
-          </div>
-          <div>
-            <label><input type="checkbox" class="srv-chk" data-name="Personal Locker" value="500" onchange="calculateAdmissionTotal()"> Personal Locker</label>
-            <input type="number" class="srv-price" value="500" style="width:100%;margin-top:4px" onchange="updateServicePrice(this)">
-          </div>
-          <div>
-            <label><input type="checkbox" class="srv-chk" data-name="Cardio & Cross" value="800" onchange="calculateAdmissionTotal()"> Cardio / Cross Trainer</label>
-            <input type="number" class="srv-price" value="800" style="width:100%;margin-top:4px" onchange="updateServicePrice(this)">
-          </div>
-          <div>
-            <label><input type="checkbox" class="srv-chk" data-name="Zumba / Aerobics" value="1000" onchange="calculateAdmissionTotal()"> Zumba / Aerobics</label>
-            <input type="number" class="srv-price" value="1000" style="width:100%;margin-top:4px" onchange="updateServicePrice(this)">
-          </div>
+        <div class="fg">
+          <label>Payment Mode *</label>
+          <select id="aMode" onchange="toggleAdmOnline(this.value)">
+            <option value="Cash">Nagar / Cash</option>
+            <option value="Online">Online (UTR + Photo)</option>
+          </select>
         </div>
-
-        <!-- Payment Mode & Summary -->
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Payment Method *</label>
-            <select id="admPayMode" onchange="togglePaymentFields(this.value)" required>
-              <option value="Cash">Cash (Nagar Payment)</option>
-              <option value="Online">Online / UPI (UTR &amp; Screenshot)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Total Amount to Collect</label>
-            <input type="text" id="admTotalDisp" value="₹1,200" readonly style="color:var(--emerald);font-weight:bold;font-size:16px;">
-          </div>
+        <div id="aOnlineBox" style="display:none">
+          <div class="fg"><label>UTR Number *</label><input type="text" id="aUtr"></div>
+          <div class="fg"><label>Payment Slip Photo *</label><input type="file" id="aSlip" accept="image/*"></div>
         </div>
-
-        <!-- Online Payment Verification Fields -->
-        <div id="onlineProofFields" style="display:none;border:1px dashed var(--cyan);border-radius:12px;padding:12px;margin-bottom:14px;">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>UPI Transaction Reference / UTR Number *</label>
-              <input type="text" id="admUtr" placeholder="12-digit UTR">
-            </div>
-            <div class="form-group">
-              <label>Payment Screenshot Slip *</label>
-              <input type="file" id="admSlip" accept="image/*">
-            </div>
-          </div>
-        </div>
-
-        <button type="submit" class="btn-submit">Confirm Admission &amp; Live Broadcast</button>
+        <div class="fg"><label>Total Paid (₹)</label><input type="text" id="aTotalView" value="1200" readonly></div>
+        <button type="submit" class="act-btn">Submit Admission (Live Sync)</button>
       </form>
     </div>
   </div>
 
-  <!-- ================= MODAL: PROFIT & LOSS BANK STATEMENT & VISUAL CHARTS ================= -->
-  <div class="ov" id="profitLossOv">
-    <div class="bx" style="max-width:920px">
-      <div class="bx-hdr">
-        <div class="bx-title">Profit &amp; Loss Financial Statement &amp; Analytics</div>
-        <button class="btn-close" onclick="closeOv('profitLossOv')">✕</button>
-      </div>
-
-      <!-- Date Range Filter -->
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;background:#0A0F1D;padding:12px;border-radius:12px;">
-        <label>From Date:</label>
-        <input type="date" id="pnlStartDate">
-        <label>To Date:</label>
-        <input type="date" id="pnlEndDate">
-        <button class="btn-sec" onclick="filterProfitLossStatement()">Apply Filter</button>
-        <button class="btn-sec" onclick="downloadFinancialExcelReport()">Export Statement Excel</button>
-      </div>
-
-      <!-- Chart Display -->
-      <div style="background:#0A0F1D;border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:16px;">
-        <canvas id="pnlFinancialChart" style="max-height:280px"></canvas>
-      </div>
-
-      <!-- Statement Table -->
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Branch</th>
-              <th>Description / Category</th>
-              <th>Mode</th>
-              <th>Credit (Inflow)</th>
-              <th>Debit (Outflow)</th>
-              <th>Net Balance</th>
-            </tr>
-          </thead>
-          <tbody id="pnlStatementTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= MODAL: PROFESSIONAL SALARY PAYSLIP ================= -->
-  <div class="ov" id="salarySlipOv">
-    <div class="bx" style="max-width:780px">
-      <div class="bx-hdr">
-        <div class="bx-title">Executive Corporate Payslip Generator</div>
-        <button class="btn-close" onclick="closeOv('salarySlipOv')">✕</button>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Select Staff Member</label>
-          <select id="slipStaffSelect" onchange="populateSlipFields(this.value)"></select>
-        </div>
-        <div class="form-group">
-          <label>Days Present (Out of 30)</label>
-          <input type="number" id="slipDaysPresent" value="30" max="31" onchange="recalculatePayslip()">
-        </div>
-        <div class="form-group">
-          <label>Late Penalty Deductions (₹)</label>
-          <input type="number" id="slipLatePenalty" value="0" onchange="recalculatePayslip()">
-        </div>
-      </div>
-
-      <!-- Professional Office Salary Slip Preview -->
-      <div class="salary-slip" id="printablePayslipArea">
-        <div class="slip-header">
-          <div>
-            <h2 style="font-size:18px;font-weight:900;letter-spacing:1px;color:#0F172A;">OM SOFTWARE ENTERPRISE ERP</h2>
-            <div style="font-size:11px;color:#64748B;">Official Monthly Salary Voucher &amp; Performance Slip</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-weight:800;color:#0F172A;" id="slipMonthYear">NOVEMBER 2026</div>
-            <div style="font-size:11px;color:#64748B;">Confidential Document</div>
-          </div>
-        </div>
-
-        <div class="slip-grid">
-          <div>
-            <div><b>Employee Name:</b> <span id="slipEmpName">-</span></div>
-            <div><b>Designation:</b> <span id="slipEmpPost">-</span></div>
-            <div><b>Branch:</b> <span id="slipEmpBranch">-</span></div>
-          </div>
-          <div>
-            <div><b>Payment Mode:</b> <span id="slipEmpMode">-</span></div>
-            <div><b>UAN / PF No:</b> <span id="slipEmpUan">-</span></div>
-            <div><b>Bank Acc:</b> <span id="slipEmpBank">-</span></div>
-          </div>
-        </div>
-
-        <table class="slip-table">
-          <thead>
-            <tr>
-              <th>Earnings (A)</th>
-              <th>Amount (₹)</th>
-              <th>Deductions (B)</th>
-              <th>Amount (₹)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Basic Salary</td>
-              <td id="slipEarnBasic">₹0</td>
-              <td>Provident Fund (PF 12%)</td>
-              <td id="slipDedPf">₹0</td>
-            </tr>
-            <tr>
-              <td>House Rent Allowance (HRA)</td>
-              <td id="slipEarnHra">₹0</td>
-              <td>ESIC Contribution</td>
-              <td id="slipDedEsic">₹0</td>
-            </tr>
-            <tr>
-              <td>Special Allowance</td>
-              <td id="slipEarnSpecial">₹0</td>
-              <td>Attendance Late Penalty</td>
-              <td id="slipDedLate">₹0</td>
-            </tr>
-            <tr style="background:#F8FAFC;font-weight:bold;">
-              <td>Total Gross Earnings</td>
-              <td id="slipTotalGross">₹0</td>
-              <td>Total Deductions</td>
-              <td id="slipTotalDed">₹0</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;background:#0F172A;color:#FFFFFF;padding:12px;border-radius:8px;">
-          <b style="font-size:14px;">NET TAKE-HOME PAYABLE:</b>
-          <b style="font-size:18px;color:#38BDF8;" id="slipNetPayable">₹0</b>
-        </div>
-      </div>
-
-      <button type="button" class="btn-submit" onclick="window.print()">Print Official Salary Slip</button>
-    </div>
-  </div>
-
-  <!-- ================= MODAL: WALKING & LEAD ENQUIRIES FOLDER ================= -->
-  <div class="ov" id="enquiriesOv">
+  <!-- ================= MODAL: ENQUIRIES (WALK-IN & LEAD) ================= -->
+  <div class="ov" id="enqOv">
     <div class="bx">
-      <div class="bx-hdr">
-        <div class="bx-title">Running Enquiries &amp; Youth Demographics</div>
-        <button class="btn-close" onclick="closeOv('enquiriesOv')">✕</button>
+      <div class="bx-top">
+        <h3>Walk-In &amp; Lead Enquiries</h3>
+        <button type="button" class="x-btn" onclick="closeModal('enqOv')">✕</button>
       </div>
-
-      <form onsubmit="handleEnquirySubmit(event)" style="margin-bottom:16px;background:#0A0F1D;padding:12px;border-radius:12px;">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Branch *</label>
-            <select id="enqBranch">
-              <option value="001">Branch 001</option>
-              <option value="002">Branch 002</option>
-              <option value="003">Branch 003</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Customer Name *</label>
-            <input type="text" id="enqName" placeholder="Full name" required>
-          </div>
-          <div class="form-group">
-            <label>Phone / WhatsApp *</label>
-            <input type="tel" id="enqPhone" placeholder="10-digit phone" required>
-          </div>
-          <div class="form-group">
-            <label>Customer Age *</label>
-            <input type="number" id="enqAge" placeholder="e.g. 19" required>
-          </div>
-          <div class="form-group">
-            <label>Lead Source *</label>
-            <select id="enqSource">
-              <option value="Walk-in">Gym Walk-in Trail</option>
-              <option value="Instagram">Instagram Ad</option>
-              <option value="WhatsApp">WhatsApp Campaign</option>
-              <option value="Friend Referral">Friend Referral</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Tentative Joining Date</label>
-            <input type="date" id="enqDate">
-          </div>
-        </div>
-        <button type="submit" class="btn-sec">+ Register Running Enquiry</button>
+      <form onsubmit="saveEnquiry(event)">
+        <div class="fg"><label>Branch *</label><select id="eBranch"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
+        <div class="fg"><label>Folder Type *</label><select id="eFolder"><option value="Walking Enquiry">Walking Enquiry (Trail / Visit)</option><option value="Lead Enquiry">Lead Enquiry (Online / Sources)</option></select></div>
+        <div class="fg"><label>Lead Source</label><input type="text" id="eSource" placeholder="Walk-in / Instagram / WhatsApp / Referral"></div>
+        <div class="fg"><label>Name *</label><input type="text" id="eName" required></div>
+        <div class="fg"><label>Phone / WhatsApp *</label><input type="text" id="ePhone" required></div>
+        <div class="fg"><label>Email</label><input type="email" id="eEmail"></div>
+        <div class="fg"><label>Address</label><input type="text" id="eAddr"></div>
+        <div class="fg"><label>Age *</label><input type="number" id="eAge" value="20" required></div>
+        <div class="fg"><label>When Will Join?</label><input type="text" id="eWhen" placeholder="e.g. Next Monday / This week"></div>
+        <button type="submit" class="act-btn">Add to Running Enquiry</button>
       </form>
-
-      <!-- Age Demographic Summary Per Branch -->
-      <div style="background:#0A0F1D;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:14px;">
-        <b style="color:var(--cyan);font-size:12px">Youth &amp; Age Group Distribution Analysis:</b>
-        <div id="enqAgeStatsDisp" style="font-size:11.5px;color:var(--tx-muted);margin-top:6px;"></div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Branch</th>
-              <th>Age</th>
-              <th>Source</th>
-              <th>Follow-up Actions</th>
-            </tr>
-          </thead>
-          <tbody id="enquiryTableBody"></tbody>
-        </table>
-      </div>
+      <div id="eAgeSummary" class="list-item" style="margin-top:12px"></div>
+      <div id="eListBody"></div>
     </div>
   </div>
 
-  <!-- ================= INACTIVITY AUTO-LOGOUT SESSION MODAL ================= -->
-  <div class="ov" id="inactivityLogoutOv">
-    <div class="bx" style="max-width:440px;text-align:center;">
-      <div style="font-size:42px;margin-bottom:10px;">⏳</div>
-      <h3 style="color:var(--rose);margin-bottom:8px;">Session Timed Out (10 Min Inactivity)</h3>
-      <p style="font-size:12px;color:var(--tx-muted);margin-bottom:16px;">
-        Aapne pichhle 10 minute se koi button ya activity perform nahi ki. Data security ke liye portal automatic lock ho gaya hai.
-      </p>
-      <div style="display:flex;gap:10px;">
-        <button class="btn-submit" style="margin-top:0" onclick="restoreLastSession()">Restore Last Session</button>
-        <button class="btn-sec" style="flex:1" onclick="startFreshSession()">Start Fresh Session</button>
+  <!-- ================= MODAL: P&L STATEMENT & CHARTS ================= -->
+  <div class="ov" id="pnlOv">
+    <div class="bx">
+      <div class="bx-top">
+        <h3>Profit &amp; Loss Statement &amp; Charts</h3>
+        <button type="button" class="x-btn" onclick="closeModal('pnlOv')">✕</button>
       </div>
+      <div class="fg"><label>From Date</label><input type="date" id="pnlFrom"></div>
+      <div class="fg"><label>To Date</label><input type="date" id="pnlTo"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button type="button" class="sub-btn" onclick="renderPnlView()">Show Statement &amp; Charts</button>
+        <button type="button" class="sub-btn" onclick="downloadPnlExcel()">Download Excel Report</button>
+      </div>
+      <canvas id="pnlChartCanvas" style="max-height:220px;background:#070C18;border-radius:10px;padding:8px"></canvas>
+      <div id="pnlRowsBody" style="margin-top:10px"></div>
     </div>
   </div>
 
-  <!-- ================= JAVASCRIPT BUSINESS LOGIC & ENGINES ================= -->
+  <!-- ================= MODAL: OFFICE SALARY SLIP ================= -->
+  <div class="ov" id="slipOv">
+    <div class="bx">
+      <div class="bx-top">
+        <h3>Office Salary Slip</h3>
+        <button type="button" class="x-btn" onclick="closeModal('slipOv')">✕</button>
+      </div>
+      <div class="fg"><label>Select Employee</label><select id="slipEmpSel" onchange="renderSlip()"></select></div>
+      <div class="fg"><label>Late Penalty (₹)</label><input type="number" id="slipPenalty" value="0" oninput="renderSlip()"></div>
+      <div class="slip-box" id="slipPrintBox"></div>
+      <button type="button" class="act-btn" onclick="window.print()">Print / Save Slip</button>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: AUTO-ROUTER UPLOAD ================= -->
+  <div class="ov" id="routerOv">
+    <div class="bx">
+      <div class="bx-top">
+        <h3>Upload Gym Data (Auto-Router)</h3>
+        <button type="button" class="x-btn" onclick="closeModal('routerOv')">✕</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Excel/CSV upload karte hi data apne-ap Members, Staff, Collection, aur Expense mein set hoga, sirf active gym ke andar.</p>
+      <input type="file" accept=".csv,.xlsx,.xls" onchange="handleAutoRouterFile(event)">
+      <div id="routerStatus" class="list-item" style="margin-top:10px">Waiting for file...</div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: INFO ================= -->
+  <div class="ov" id="infoOv">
+    <div class="bx">
+      <div class="bx-top">
+        <h3 id="infoTitle">Details</h3>
+        <button type="button" class="x-btn" onclick="closeModal('infoOv')">✕</button>
+      </div>
+      <div id="infoBody" class="list-item"></div>
+    </div>
+  </div>
+
   <script>
-    // System Keys & Initial State
-    const STAFF_KEY = "om_emp_staff_registry_v2";
-    const ADM_KEY = "om_member_admission_registry_v2";
-    const PNL_KEY = "om_financial_statements_v2";
-    const ENQ_KEY = "om_lead_enquiries_registry_v2";
-    let activeBranchFilter = "ALL";
-    let lastActivityTimestamp = Date.now();
-    let pnlChartInstance = null;
+    const K_STAFF = "om_v4_staff";
+    const K_ADM = "om_v4_adm";
+    const K_PNL = "om_v4_pnl";
+    const K_ENQ = "om_v4_enq";
+    let curBranch = "ALL";
+    let pnlChart = null;
 
-    // Helper functions for JSON storage
-    function J(k, def) {
-      try {
-        const d = localStorage.getItem(k);
-        return d ? JSON.parse(d) : def;
-      } catch (e) { return def; }
-    }
+    function J(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { return d; } }
     function W(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+    function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function isAdmin() { const r = (localStorage.getItem("bfc_role") || "owner").toLowerCase(); return r === "owner" || r === "admin"; }
 
-    // --- 1. STRICT 10-MINUTE INACTIVITY TIMER WITH INTERACTION RESET ---
-    const INACTIVITY_LIMIT_MS = 10 * 60 * 1000; // 10 minutes
-
-    function resetInactivityTimer() {
-      lastActivityTimestamp = Date.now();
-      localStorage.setItem("om_last_active_time", String(lastActivityTimestamp));
-    }
-
-    // Attach listeners to genuine user interactions
-    ['mousedown', 'mousemove', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
-      window.addEventListener(evt, resetInactivityTimer, { passive: true });
-    });
-
-    setInterval(function checkInactivity() {
-      const now = Date.now();
-      const storedLast = Number(localStorage.getItem("om_last_active_time") || now);
-      if (now - storedLast >= INACTIVITY_LIMIT_MS) {
-        // Trigger auto-logout prompt
-        const ov = document.getElementById("inactivityLogoutOv");
-        if (ov && !ov.classList.contains("show")) {
-          ov.classList.add("show");
-        }
-      }
-    }, 15000);
-
-    function restoreLastSession() {
-      resetInactivityTimer();
-      document.getElementById("inactivityLogoutOv").classList.remove("show");
-    }
-
-    function startFreshSession() {
-      localStorage.removeItem("om_logged_user");
-      location.replace("login.html");
-    }
-
-    function performManualLogout() {
-      if (confirm("Are you sure you want to log out?")) {
-        startFreshSession();
-      }
-    }
-
-    // --- 2. BRANCH FILTER & LIVE STATS SYNC ---
-    function switchBranchFilter(br) {
-      activeBranchFilter = br;
-      document.getElementById("vaultBranchLabel").textContent = br === "ALL" ? "All Branches" : "Branch " + br;
-      document.getElementById("empBranchTag").textContent = br === "ALL" ? "All Branches" : "Branch " + br;
-      syncDashboardLiveNumbers();
-    }
-
-    function syncDashboardLiveNumbers() {
-      const staffList = J(STAFF_KEY, []);
-      const admList = J(ADM_KEY, []);
-      const pnlList = J(PNL_KEY, []);
-      const enqList = J(ENQ_KEY, []);
-
-      // Filter by active branch
-      const fStaff = activeBranchFilter === "ALL" ? staffList : staffList.filter(s => s.branch === activeBranchFilter);
-      const fAdm = activeBranchFilter === "ALL" ? admList : admList.filter(a => a.branch === activeBranchFilter);
-      const fPnl = activeBranchFilter === "ALL" ? pnlList : pnlList.filter(p => p.branch === activeBranchFilter);
-      const fEnq = activeBranchFilter === "ALL" ? enqList : enqList.filter(e => e.branch === activeBranchFilter);
-
-      // Fix staff count sync: exactly matches the array length
-      document.getElementById("dispTotalEmployees").textContent = fStaff.length;
-      document.getElementById("dispTotalMembers").textContent = fAdm.length;
-      document.getElementById("dispTotalEnquiries").textContent = fEnq.length;
-
-      // Calculate Net P&L
-      let totalCredit = 0, totalDebit = 0;
-      fPnl.forEach(item => {
-        totalCredit += Number(item.credit || 0);
-        totalDebit += Number(item.debit || 0);
+    function showPage(n) {
+      [1,2,3].forEach(i => {
+        document.getElementById("page" + i).classList.toggle("active", i === n);
+        document.getElementById("btnPg" + i).classList.toggle("active", i === n);
       });
-      const net = totalCredit - totalDebit;
-      const netEl = document.getElementById("dispNetProfit");
-      netEl.textContent = (net >= 0 ? "+₹" : "-₹") + Math.abs(net).toLocaleString("en-IN");
-      netEl.style.color = net >= 0 ? "var(--emerald)" : "var(--rose)";
     }
 
-    // --- 3. STAFF JOINING & KYC LOGIC (WITH CASH EXEMPTION) ---
-    function toggleSalaryModeFields(mode) {
-      const bankSec = document.getElementById("bankDetailsSection");
-      if (bankSec) {
-        bankSec.style.display = (mode === "Cash") ? "none" : "grid";
+    function changeBranch(b) { curBranch = b; refreshLiveDashboard(); }
+    function openModal(id) { document.getElementById(id).classList.add("show"); }
+    function closeModal(id) { document.getElementById(id).classList.remove("show"); }
+    function logoutNow() { localStorage.removeItem("om_logged_user"); location.replace("login.html"); }
+
+    function seedIfEmpty() {
+      if (!localStorage.getItem(K_STAFF)) {
+        W(K_STAFF, [
+          { id: "S1", branch: "001", name: "Neha Verma", post: "Reception Desk", qual: "B.Com", med: "Fit", payMode: "Bank", salary: 14000, bank: "SBI 1029384756", pf: "PF101", uan: "100111222333", photo: "Reception_Photo.jpg", idProof: "Aadhaar_Neha.pdf" },
+          { id: "S2", branch: "001", name: "Rohit Singh", post: "Floor Trainer", qual: "B.P.Ed", med: "Fit", payMode: "Cash", salary: 16000, bank: "Cash Paid", pf: "N/A", uan: "N/A", photo: "Trainer_Photo.jpg", idProof: "PAN_Rohit.jpg" }
+        ]);
+      }
+      if (!localStorage.getItem(K_PNL)) {
+        W(K_PNL, [
+          { date: "2026-11-01", branch: "001", title: "Fees Collection", mode: "Cash", credit: 143000, debit: 0 },
+          { date: "2026-11-02", branch: "001", title: "Online Fees & Supplement", mode: "Online", credit: 80200, debit: 0 },
+          { date: "2026-11-03", branch: "001", title: "Gym Expenses", mode: "Cash", credit: 0, debit: 78400 }
+        ]);
+      }
+      if (!localStorage.getItem(K_ADM)) {
+        W(K_ADM, Array.from({length: 148}, (_, i) => ({ name: "Member " + (i+1), branch: i%2===0?"001":"002", age: 18 + (i%20), fee: 1200, extra: 0, mode: "Cash", isNew: i < 42 })));
       }
     }
 
-    function handleStaffJoiningSubmit(e) {
-      e.preventDefault();
-      const staff = J(STAFF_KEY, []);
-      const isCash = document.getElementById("stfSalaryMode").value === "Cash";
+    function refreshLiveDashboard() {
+      const staff = J(K_STAFF, []);
+      const adm = J(K_ADM, []);
+      const pnl = J(K_PNL, []);
+      const enq = J(K_ENQ, []);
 
-      const newStaff = {
-        id: "STF_" + Date.now(),
-        branch: document.getElementById("stfBranch").value,
-        name: document.getElementById("stfName").value.trim(),
-        post: document.getElementById("stfPost").value.trim(),
-        phone: document.getElementById("stfPhone").value.trim(),
-        qualification: document.getElementById("stfQualification").value.trim(),
-        medical: document.getElementById("stfMedical").value.trim(),
-        salaryMode: document.getElementById("stfSalaryMode").value,
-        baseSalary: Number(document.getElementById("stfBaseSalary").value || 0),
-        bankAcc: isCash ? "N/A (Cash Paid)" : document.getElementById("stfBankAcc").value.trim(),
-        ifsc: isCash ? "N/A" : document.getElementById("stfBankIfsc").value.trim(),
-        pfNo: isCash ? "N/A" : (document.getElementById("stfPfNo").value.trim() || "N/A"),
-        uanNo: isCash ? "N/A" : (document.getElementById("stfUanNo").value.trim() || "N/A"),
-        joinedAt: new Date().toLocaleDateString("en-IN")
-      };
+      const fStaff = curBranch === "ALL" ? staff : staff.filter(x => x.branch === curBranch);
+      const fAdm = curBranch === "ALL" ? adm : adm.filter(x => x.branch === curBranch);
+      const fPnl = curBranch === "ALL" ? pnl : pnl.filter(x => x.branch === curBranch);
 
-      staff.unshift(newStaff);
-      W(STAFF_KEY, staff);
+      let cred = 0, deb = 0, cashAmt = 0, onlineAmt = 0, extraSum = 0;
+      fPnl.forEach(x => {
+        cred += Number(x.credit || 0);
+        deb += Number(x.debit || 0);
+        if (String(x.mode).toLowerCase().includes("online")) onlineAmt += Number(x.credit || 0);
+        else cashAmt += Number(x.credit || 0);
+      });
+      fAdm.forEach(a => { extraSum += Number(a.extra || 0); });
 
-      alert(`Staff ${newStaff.name} registered successfully for Branch ${newStaff.branch}!`);
-      closeOv('staffJoiningOv');
-      syncDashboardLiveNumbers();
-      renderStaffEmployeesTable();
+      document.getElementById("p1TotalEmployees").textContent = fStaff.length;
+      document.getElementById("p1EmpRoleTag").textContent = isAdmin() ? "Admin Only" : "Restricted";
+      document.getElementById("p1TotalMembers").textContent = fAdm.length;
+      document.getElementById("p1NewAdmissions").textContent = fAdm.filter(x => x.isNew).length || fAdm.length;
+      document.getElementById("p1TotalCollection").textContent = "₹" + cred.toLocaleString("en-IN");
+      document.getElementById("p1FeesCollection").textContent = "₹" + Math.max(0, cred - 38400).toLocaleString("en-IN");
+      document.getElementById("p1SupplementCollection").textContent = "₹38,400";
+      document.getElementById("p1CashOnline").textContent = `₹${cashAmt.toLocaleString("en-IN")} Cash / ₹${onlineAmt.toLocaleString("en-IN")} Online`;
+      const net = cred - deb;
+      document.getElementById("p1NetPnl").textContent = (net >= 0 ? "+₹" : "-₹") + Math.abs(net).toLocaleString("en-IN");
+      document.getElementById("p1ExpSub").textContent = `Exp: ₹${deb.toLocaleString("en-IN")} • ${net >= 0 ? "Net Profit" : "Net Loss"}`;
+      document.getElementById("p1ExtraService").textContent = "₹" + extraSum.toLocaleString("en-IN");
     }
 
-    // Staff Termination with Mandatory Reason & Alert Broadcaster
-    function terminateStaffMember(id) {
-      const staff = J(STAFF_KEY, []);
-      const target = staff.find(s => s.id === id);
-      if (!target) return;
-
-      const reason = prompt(`MANDATORY: Enter reason for removing ${target.name} from Branch ${target.branch}:`);
-      if (!reason || !reason.trim()) {
-        alert("Action aborted: Reason mention karna mandatory hai.");
+    function openEmployeesModal() {
+      if (!isAdmin()) {
+        alert("Ye section keval Admin ke liye hai.");
         return;
       }
+      const staff = J(K_STAFF, []);
+      const b001 = staff.filter(x => x.branch === "001").length;
+      const b002 = staff.filter(x => x.branch === "002").length;
+      const b003 = staff.filter(x => x.branch === "003").length;
+      document.getElementById("empBranchSummary").innerHTML =
+        `<b>Total Employees:</b> ${staff.length} &nbsp;|&nbsp; Branch 001: <b>${b001}</b> • Branch 002: <b>${b002}</b> • Branch 003: <b>${b003}</b>`;
 
-      // Decrement staff
-      const updated = staff.filter(s => s.id !== id);
-      W(STAFF_KEY, updated);
+      const list = curBranch === "ALL" ? staff : staff.filter(x => x.branch === curBranch);
+      document.getElementById("empVaultBody").innerHTML = list.map(s => `
+        <div class="list-item">
+          <div><b>${esc(s.name)}</b> — ${esc(s.post)} (Branch ${esc(s.branch)})</div>
+          <div style="color:var(--muted);margin-top:3px">Qual: ${esc(s.qual)} | Med: ${esc(s.med)} | Mode: ${esc(s.payMode)}</div>
+          <div style="color:var(--muted)">Bank: ${esc(s.bank)} | PF: ${esc(s.pf)} | UAN: ${esc(s.uan)}</div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+            <button type="button" class="sub-btn" onclick="downloadStaffDoc('${s.id}')">View / Download KYC &amp; Joining</button>
+            <button type="button" class="sub-btn" style="color:var(--rose);border-color:var(--rose)" onclick="fireStaffWithReason('${s.id}')">Remove Staff</button>
+          </div>
+        </div>
+      `).join("") || '<div class="list-item">Koi staff record nahi hai.</div>';
 
-      // Notification broadcast simulation (Telegram / Email / In-App)
-      const ticker = document.getElementById("notificationTicker");
-      ticker.style.display = "block";
-      ticker.innerHTML = `⚠️ <b>STAFF TERMINATION ALERT:</b> ${target.name} (${target.post}, Branch ${target.branch}) removed today. Reason: <i>"${escapeHtml(reason)}"</i>. Notification dispatched to Admin Email &amp; Telegram.`;
-
-      syncDashboardLiveNumbers();
-      renderStaffEmployeesTable();
+      openModal("employeesOv");
     }
 
-    function renderStaffEmployeesTable() {
-      const staff = J(STAFF_KEY, []);
-      const fStaff = activeBranchFilter === "ALL" ? staff : staff.filter(s => s.branch === activeBranchFilter);
-      const tbody = document.getElementById("staffVaultTableBody");
-
-      if (!fStaff.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--tx-muted)">No staff records found for this branch.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = fStaff.map(s => `
-        <tr>
-          <td><b>${escapeHtml(s.name)}</b></td>
-          <td>Branch ${escapeHtml(s.branch)}</td>
-          <td>${escapeHtml(s.post)}</td>
-          <td>${escapeHtml(s.phone)}</td>
-          <td><span style="color:${s.salaryMode === 'Cash' ? 'var(--gold)' : 'var(--cyan)'}">${s.salaryMode}</span></td>
-          <td>
-            <button class="btn-sec" style="padding:4px 8px;font-size:10.5px" onclick="downloadStaffKycCard('${s.id}')">View &amp; Download KYC</button>
-          </td>
-          <td>
-            <button class="btn-hdr danger" style="padding:4px 8px;font-size:10.5px" onclick="terminateStaffMember('${s.id}')">Fire / Remove</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function downloadStaffKycCard(id) {
-      const staff = J(STAFF_KEY, []);
-      const s = staff.find(x => x.id === id);
+    function downloadStaffDoc(id) {
+      const s = J(K_STAFF, []).find(x => x.id === id);
       if (!s) return;
-
-      const kycText = [
-        "OM SOFTWARE ERP — EMPLOYEE KYC & JOINING VERIFICATION",
-        "======================================================",
-        "Branch           : " + s.branch,
-        "Employee Name    : " + s.name,
-        "Designation      : " + s.post,
-        "Contact Number   : " + s.phone,
-        "Qualification    : " + s.qualification,
-        "Medical History  : " + s.medical,
-        "Salary Mode      : " + s.salaryMode,
-        "Base Salary      : Rs. " + s.baseSalary,
-        "Bank Details     : " + s.bankAcc + " (IFSC: " + s.ifsc + ")",
-        "PF & UAN Details : PF: " + s.pfNo + " | UAN: " + s.uanNo,
-        "Joining Date     : " + s.joinedAt,
-        "Admin Signature  : VERIFIED & ACTIVE"
-      ].join("\n");
-
-      const blob = new Blob([kycText], { type: "text/plain;charset=utf-8" });
+      const txt = [
+        "STAFF JOINING & KYC RECORD",
+        "Branch: " + s.branch,
+        "Name: " + s.name,
+        "Post: " + s.post,
+        "Qualification: " + s.qual,
+        "Medical History: " + s.med,
+        "Payment Mode: " + s.payMode,
+        "Bank: " + s.bank,
+        "PF: " + s.pf,
+        "UAN: " + s.uan,
+        "Photo: " + (s.photo || "Uploaded"),
+        "Gov ID: " + (s.idProof || "Uploaded")
+      ].join("
+");
       const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `KYC_Staff_${s.name.replace(/\s+/g, '_')}_Branch${s.branch}.txt`;
+      a.href = URL.createObjectURL(new Blob([txt], { type: "text/plain" }));
+      a.download = `KYC_${s.name.replace(/\s+/g, "_")}.txt`;
       a.click();
     }
 
-    // --- 4. ADMISSION FORM WITH DYNAMIC SERVICES & CASH/ONLINE SPLIT ---
-    function updateServicePrice(inp) {
-      const chk = inp.parentElement.querySelector('.srv-chk');
-      if (chk) chk.value = Number(inp.value || 0);
-      calculateAdmissionTotal();
-    }
-
-    function calculateAdmissionTotal() {
-      const planVal = Number(document.getElementById("admPlan").value || 0);
-      let servicesSum = 0;
-      document.querySelectorAll(".srv-chk:checked").forEach(chk => {
-        servicesSum += Number(chk.value || 0);
-      });
-      const grandTotal = planVal + servicesSum;
-      document.getElementById("admTotalDisp").value = "₹" + grandTotal.toLocaleString("en-IN");
-      return grandTotal;
-    }
-
-    function togglePaymentFields(mode) {
-      const proofSec = document.getElementById("onlineProofFields");
-      if (proofSec) proofSec.style.display = (mode === "Online") ? "block" : "none";
-    }
-
-    function handleAdmissionSubmit(e) {
-      e.preventDefault();
-      const adm = J(ADM_KEY, []);
-      const pnl = J(PNL_KEY, []);
-
-      const branch = document.getElementById("admBranch").value;
-      const name = document.getElementById("admName").value.trim();
-      const phone = document.getElementById("admPhone").value.trim();
-      const age = Number(document.getElementById("admAge").value || 20);
-      const planEl = document.getElementById("admPlan");
-      const planName = planEl.options[planEl.selectedIndex].getAttribute("data-name");
-      const payMode = document.getElementById("admPayMode").value;
-      const utr = payMode === "Online" ? document.getElementById("admUtr").value.trim() : "CASH_COUNTER";
-
-      // Collect selected services
-      const selectedServices = [];
-      document.querySelectorAll(".srv-chk:checked").forEach(chk => {
-        selectedServices.push(`${chk.getAttribute("data-name")} (₹${chk.value})`);
-      });
-
-      const totalFee = calculateAdmissionTotal();
-
-      const newMember = {
-        id: "MBR_" + Date.now(),
-        branch, name, phone, age,
-        plan: planName,
-        services: selectedServices.join(", ") || "General Workout Only",
-        totalFee,
-        payMode,
-        utr,
-        admittedAt: new Date().toLocaleDateString("en-IN")
-      };
-
-      adm.unshift(newMember);
-      W(ADM_KEY, adm);
-
-      // Auto-post to Financial Statement (Credit Inflow)
-      pnl.unshift({
-        id: "TX_" + Date.now(),
-        date: new Date().toISOString().slice(0, 10),
-        branch,
-        category: `Admission: ${name} (${planName})`,
-        mode: payMode,
-        credit: totalFee,
-        debit: 0
-      });
-      W(PNL_KEY, pnl);
-
-      alert(`Member ${name} registered! Synced directly to Branch ${branch} Manager & Admin Desk.`);
-      closeOv('admissionFormOv');
-      syncDashboardLiveNumbers();
-    }
-
-    // --- 5. PROFIT & LOSS BANK STATEMENT & VISUAL CHARTS ---
-    function openProfitLossStatementModal() {
-      renderProfitLossStatement();
-      renderProfitLossChart();
-      openOv('profitLossOv');
-    }
-
-    function renderProfitLossChart() {
-      const ctx = document.getElementById('pnlFinancialChart');
-      if (!ctx) return;
-
-      const pnl = J(PNL_KEY, []);
-      let credit = 0, debit = 0;
-      pnl.forEach(p => {
-        credit += Number(p.credit || 0);
-        debit += Number(p.debit || 0);
-      });
-
-      if (pnlChartInstance) pnlChartInstance.destroy();
-
-      pnlChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Total Inflow (Collections)', 'Total Outflow (Expenses)', 'Net Business Margin'],
-          datasets: [{
-            label: 'Amount in INR (₹)',
-            data: [credit, debit, Math.max(0, credit - debit)],
-            backgroundColor: ['#34D399', '#FB7185', '#F5A623'],
-            borderRadius: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            title: { display: true, text: 'Real-Time Financial Flow Breakdown (Bank-Style)', color: '#fff' }
-          },
-          scales: {
-            y: { ticks: { color: '#8E9BAE' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-            x: { ticks: { color: '#fff' } }
-          }
-        }
-      });
-    }
-
-    function renderProfitLossStatement() {
-      const pnl = J(PNL_KEY, []);
-      const tbody = document.getElementById("pnlStatementTableBody");
-      let runningBalance = 0;
-
-      if (!pnl.length) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--tx-muted)">No statement records available.</td></tr>`;
+    function fireStaffWithReason(id) {
+      const reason = prompt("Hatane ka reason likhna mandatory hai:");
+      if (!reason || !reason.trim()) {
+        alert("Reason likhe bina staff nahi hatega.");
         return;
       }
+      const staff = J(K_STAFF, []);
+      const target = staff.find(x => x.id === id);
+      const next = staff.filter(x => x.id !== id);
+      W(K_STAFF, next);
 
-      tbody.innerHTML = pnl.map(row => {
-        runningBalance += (Number(row.credit || 0) - Number(row.debit || 0));
-        return `
-          <tr>
-            <td>${row.date}</td>
-            <td>Branch ${row.branch}</td>
-            <td><b>${escapeHtml(row.category)}</b></td>
-            <td>${row.mode}</td>
-            <td style="color:var(--emerald)">${row.credit ? '+₹' + Number(row.credit).toLocaleString('en-IN') : '-'}</td>
-            <td style="color:var(--rose)">${row.debit ? '-₹' + Number(row.debit).toLocaleString('en-IN') : '-'}</td>
-            <td><b>₹${runningBalance.toLocaleString('en-IN')}</b></td>
-          </tr>
-        `;
-      }).join("");
+      const strip = document.getElementById("liveAlertStrip");
+      strip.style.display = "block";
+      strip.textContent = `Alert (Mail & Telegram): ${target ? target.name : "Staff"} (Branch ${target ? target.branch : ""}) removed. Reason: ${reason.trim()}. Active staff now: ${next.length}`;
+
+      refreshLiveDashboard();
+      openEmployeesModal();
     }
 
-    function filterProfitLossStatement() {
-      renderProfitLossStatement();
-      renderProfitLossChart();
+    function openStaffJoiningModal() { openModal("joiningOv"); }
+    function toggleJoiningBank(mode) {
+      document.getElementById("jBankBox").style.display = (mode === "Cash") ? "none" : "block";
     }
-
-    function downloadFinancialExcelReport() {
-      const pnl = J(PNL_KEY, []);
-      const ws = XLSX.utils.json_to_sheet(pnl);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Profit_and_Loss");
-      XLSX.writeFile(wb, "Om_Software_Bank_Statement.xlsx");
-    }
-
-    // --- 6. EXECUTIVE SALARY PAYSLIP GENERATION ---
-    function openSalarySlipModal() {
-      const staff = J(STAFF_KEY, []);
-      const sel = document.getElementById("slipStaffSelect");
-      sel.innerHTML = staff.map(s => `<option value="${s.id}">${s.name} (${s.post} - Branch ${s.branch})</option>`).join("");
-      if (staff.length) populateSlipFields(staff[0].id);
-      openOv('salarySlipOv');
-    }
-
-    function populateSlipFields(id) {
-      const staff = J(STAFF_KEY, []);
-      const s = staff.find(x => x.id === id);
-      if (!s) return;
-
-      document.getElementById("slipEmpName").textContent = s.name;
-      document.getElementById("slipEmpPost").textContent = s.post;
-      document.getElementById("slipEmpBranch").textContent = "Branch " + s.branch;
-      document.getElementById("slipEmpMode").textContent = s.salaryMode;
-      document.getElementById("slipEmpUan").textContent = s.uanNo || "N/A";
-      document.getElementById("slipEmpBank").textContent = s.bankAcc || "N/A";
-
-      recalculatePayslip();
-    }
-
-    function recalculatePayslip() {
-      const staff = J(STAFF_KEY, []);
-      const id = document.getElementById("slipStaffSelect").value;
-      const s = staff.find(x => x.id === id);
-      const base = s ? Number(s.baseSalary || 15000) : 15000;
-
-      const daysPresent = Math.min(31, Math.max(0, Number(document.getElementById("slipDaysPresent").value || 30)));
-      const latePenalty = Number(document.getElementById("slipLatePenalty").value || 0);
-
-      // Corporate breakdown: Basic (60%), HRA (25%), Special Allowance (15%)
-      const proratedBase = (base / 30) * daysPresent;
-      const basic = Math.round(proratedBase * 0.60);
-      const hra = Math.round(proratedBase * 0.25);
-      const special = Math.round(proratedBase * 0.15);
-      const gross = basic + hra + special;
-
-      // Deductions
-      const pf = (s && s.salaryMode === "Cash") ? 0 : Math.round(basic * 0.12);
-      const esic = (s && s.salaryMode === "Cash") ? 0 : Math.round(gross * 0.0075);
-      const totalDed = pf + esic + latePenalty;
-      const net = Math.max(0, gross - totalDed);
-
-      document.getElementById("slipEarnBasic").textContent = "₹" + basic.toLocaleString("en-IN");
-      document.getElementById("slipEarnHra").textContent = "₹" + hra.toLocaleString("en-IN");
-      document.getElementById("slipEarnSpecial").textContent = "₹" + special.toLocaleString("en-IN");
-      document.getElementById("slipTotalGross").textContent = "₹" + gross.toLocaleString("en-IN");
-
-      document.getElementById("slipDedPf").textContent = "₹" + pf.toLocaleString("en-IN");
-      document.getElementById("slipDedEsic").textContent = "₹" + esic.toLocaleString("en-IN");
-      document.getElementById("slipDedLate").textContent = "₹" + latePenalty.toLocaleString("en-IN");
-      document.getElementById("slipTotalDed").textContent = "₹" + totalDed.toLocaleString("en-IN");
-
-      document.getElementById("slipNetPayable").textContent = "₹" + net.toLocaleString("en-IN");
-    }
-
-    // --- 7. ENQUIRIES & AGE DEMOGRAPHICS ---
-    function openEnquiriesModal() {
-      renderEnquiries();
-      openOv('enquiriesOv');
-    }
-
-    function handleEnquirySubmit(e) {
+    function saveStaffJoining(e) {
       e.preventDefault();
-      const enq = J(ENQ_KEY, []);
-      const newEnq = {
-        id: "ENQ_" + Date.now(),
-        branch: document.getElementById("enqBranch").value,
-        name: document.getElementById("enqName").value.trim(),
-        phone: document.getElementById("enqPhone").value.trim(),
-        age: Number(document.getElementById("enqAge").value || 20),
-        source: document.getElementById("enqSource").value,
-        tentativeDate: document.getElementById("enqDate").value || "Immediate",
-        createdAt: new Date().toLocaleDateString("en-IN")
-      };
-      enq.unshift(newEnq);
-      W(ENQ_KEY, enq);
-      alert("Enquiry added successfully!");
-      renderEnquiries();
-      syncDashboardLiveNumbers();
+      const mode = document.getElementById("jPayMode").value;
+      const staff = J(K_STAFF, []);
+      const ph = document.getElementById("jPhoto").files[0];
+      const idp = document.getElementById("jIdProof").files[0];
+      staff.unshift({
+        id: "S_" + Date.now(),
+        branch: document.getElementById("jBranch").value,
+        name: document.getElementById("jName").value.trim(),
+        post: document.getElementById("jPost").value.trim(),
+        qual: document.getElementById("jQual").value.trim(),
+        med: document.getElementById("jMed").value.trim(),
+        payMode: mode,
+        salary: Number(document.getElementById("jSalary").value || 0),
+        bank: mode === "Cash" ? "Not Required (Cash)" : (document.getElementById("jBank").value.trim() || "Provided"),
+        pf: mode === "Cash" ? "Not Required (Cash)" : (document.getElementById("jPf").value.trim() || "Provided"),
+        uan: mode === "Cash" ? "Not Required (Cash)" : (document.getElementById("jUan").value.trim() || "Provided"),
+        photo: ph ? ph.name : "Captured",
+        idProof: idp ? idp.name : "Uploaded"
+      });
+      W(K_STAFF, staff);
+      closeModal("joiningOv");
+      refreshLiveDashboard();
+      alert("Staff joining saved.");
     }
 
+    function openAdmissionModal() { calcAdmSum(); openModal("admissionOv"); }
+    function toggleAdmOnline(m) { document.getElementById("aOnlineBox").style.display = m === "Online" ? "block" : "none"; }
+    function calcAdmSum() {
+      let total = Number(document.getElementById("aBaseFee").value || 0);
+      let extra = 0;
+      const rows = document.querySelectorAll("#admissionOv .list-item > div");
+      rows.forEach(div => {
+        const chk = div.querySelector(".a-srv");
+        const prc = Number(div.querySelector(".a-prc").value || 0);
+        if (chk && chk.checked) { extra += prc; total += prc; }
+      });
+      document.getElementById("aTotalView").value = total;
+      return { total, extra };
+    }
+    function saveAdmission(e) {
+      e.preventDefault();
+      const { total, extra } = calcAdmSum();
+      const branch = document.getElementById("aBranch").value;
+      const name = document.getElementById("aName").value.trim();
+      const age = Number(document.getElementById("aAge").value || 20);
+      const mode = document.getElementById("aMode").value;
+      if (mode === "Online" && !document.getElementById("aUtr").value.trim()) {
+        alert("Online payment mein UTR zaroori hai.");
+        return;
+      }
+      const adm = J(K_ADM, []);
+      adm.unshift({ name, branch, age, fee: total, extra, mode, isNew: true });
+      W(K_ADM, adm);
+
+      const pnl = J(K_PNL, []);
+      pnl.unshift({ date: new Date().toISOString().slice(0,10), branch, title: "Admission: " + name, mode, credit: total, debit: 0 });
+      W(K_PNL, pnl);
+
+      closeModal("admissionOv");
+      refreshLiveDashboard();
+      alert(`Admission saved for ${name} (Branch ${branch}) -> Admin & Manager live updated.`);
+    }
+
+    function openEnquiriesModal() { renderEnquiries(); openModal("enqOv"); }
+    function saveEnquiry(e) {
+      e.preventDefault();
+      const enq = J(K_ENQ, []);
+      enq.unshift({
+        branch: document.getElementById("eBranch").value,
+        folder: document.getElementById("eFolder").value,
+        source: document.getElementById("eSource").value.trim() || "Walk-in",
+        name: document.getElementById("eName").value.trim(),
+        phone: document.getElementById("ePhone").value.trim(),
+        email: document.getElementById("eEmail").value.trim(),
+        addr: document.getElementById("eAddr").value.trim(),
+        age: Number(document.getElementById("eAge").value || 20),
+        when: document.getElementById("eWhen").value.trim()
+      });
+      W(K_ENQ, enq);
+      renderEnquiries();
+    }
     function renderEnquiries() {
-      const enq = J(ENQ_KEY, []);
-      const fEnq = activeBranchFilter === "ALL" ? enq : enq.filter(e => e.branch === activeBranchFilter);
-      const tbody = document.getElementById("enquiryTableBody");
-
-      // Calculate Age Breakdown
-      let under20 = 0, age20to30 = 0, above30 = 0;
-      fEnq.forEach(e => {
-        if (e.age < 20) under20++;
-        else if (e.age <= 30) age20to30++;
-        else above30++;
-      });
-      document.getElementById("enqAgeStatsDisp").innerHTML = `
-        Teen / Youth (&lt; 20 yrs): <b>${under20}</b> &bull; Prime Fit (20-30 yrs): <b>${age20to30}</b> &bull; Masters (30+ yrs): <b>${above30}</b>
-      `;
-
-      if (!fEnq.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--tx-muted)">No running enquiries found.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = fEnq.map(e => `
-        <tr>
-          <td><b>${escapeHtml(e.name)}</b></td>
-          <td>Branch ${e.branch}</td>
-          <td>${e.age} yrs</td>
-          <td><span style="color:var(--cyan)">${e.source}</span></td>
-          <td>
-            <a href="tel:${e.phone}" class="btn-sec" style="text-decoration:none;padding:3px 7px;font-size:10px;">Call</a>
-            <a href="https://wa.me/91${e.phone}" target="_blank" class="btn-sec" style="text-decoration:none;padding:3px 7px;font-size:10px;color:var(--emerald);">WhatsApp</a>
-          </td>
-        </tr>
-      `).join("");
+      const enq = J(K_ENQ, []);
+      const f = curBranch === "ALL" ? enq : enq.filter(x => x.branch === curBranch);
+      const u18 = f.filter(x => x.age < 18).length;
+      const a18_25 = f.filter(x => x.age >= 18 && x.age <= 25).length;
+      const a25p = f.filter(x => x.age > 25).length;
+      document.getElementById("eAgeSummary").innerHTML = `<b>Age Breakdown:</b> &lt;18: <b>${u18}</b> • 18-25: <b>${a18_25}</b> • 25+: <b>${a25p}</b>`;
+      document.getElementById("eListBody").innerHTML = f.map(x => `
+        <div class="list-item">
+          <b>${esc(x.name)}</b> [${esc(x.folder)}] • Branch ${esc(x.branch)} • Age ${x.age} • Source: ${esc(x.source)}
+          <div style="color:var(--muted)">Ph: ${esc(x.phone)} • Join: ${esc(x.when || "-")}</div>
+          <div style="margin-top:6px;display:flex;gap:6px">
+            <a class="sub-btn" style="text-decoration:none" href="tel:${esc(x.phone)}">Call</a>
+            <a class="sub-btn" style="text-decoration:none" target="_blank" href="https://wa.me/91${esc(x.phone.replace(/\D/g,''))}">WhatsApp</a>
+            ${x.email ? `<a class="sub-btn" style="text-decoration:none" href="mailto:${esc(x.email)}">Email</a>` : ""}
+            <a class="sub-btn" style="text-decoration:none" href="sms:${esc(x.phone)}">SMS</a>
+          </div>
+        </div>
+      `).join("") || '<div class="list-item">Koi enquiry nahi hai.</div>';
     }
 
-    // Modal Helpers
-    function openOv(id) { document.getElementById(id).classList.add("show"); }
-    function closeOv(id) { document.getElementById(id).classList.remove("show"); }
-    function openStaffEmployeesVault() { renderStaffEmployeesTable(); openOv('staffVaultOv'); }
-    function openStaffJoiningModal() { openOv('staffJoiningOv'); }
-    function openAdmissionFormModal() { openOv('admissionFormOv'); }
-    function openUploadRouterModal() { location.href = "Gym_All_In_One_Auto_Router_Template.csv"; }
-    function escapeHtml(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function openPnlModal() { renderPnlView(); openModal("pnlOv"); }
+    function renderPnlView() {
+      const from = document.getElementById("pnlFrom").value;
+      const to = document.getElementById("pnlTo").value;
+      let rows = J(K_PNL, []);
+      if (curBranch !== "ALL") rows = rows.filter(r => r.branch === curBranch);
+      if (from) rows = rows.filter(r => r.date >= from);
+      if (to) rows = rows.filter(r => r.date <= to);
 
-    // Seed Initial Data if empty so dashboard is fully active on first load
-    (function seedInitialDatabase() {
-      if (!localStorage.getItem(STAFF_KEY)) {
-        W(STAFF_KEY, [
-          { id: "STF_1", branch: "001", name: "Priya Sharma", post: "Front Desk & Reception", phone: "9876543210", qualification: "Graduate", medical: "Fit", salaryMode: "Bank", baseSalary: 14000, bankAcc: "SBI 3928104812", ifsc: "SBIN0001234", pfNo: "PF83921", uanNo: "100928192811", joinedAt: "01/11/2026" },
-          { id: "STF_2", branch: "001", name: "Vikram Yadav", post: "Senior Floor Coach", phone: "9876543211", qualification: "B.P.Ed Certified", medical: "Fit", salaryMode: "Cash", baseSalary: 18000, bankAcc: "N/A (Cash Paid)", ifsc: "N/A", pfNo: "N/A", uanNo: "N/A", joinedAt: "10/11/2026" }
-        ]);
-      }
-      if (!localStorage.getItem(PNL_KEY)) {
-        W(PNL_KEY, [
-          { id: "TX_1", date: "2026-11-01", branch: "001", category: "Admission: Aarav Verma (Annual Pro)", mode: "Online", credit: 11000, debit: 0 },
-          { id: "TX_2", date: "2026-11-02", branch: "001", category: "Commercial Power Bill", mode: "Online", credit: 0, debit: 14850 },
-          { id: "TX_3", date: "2026-11-05", branch: "001", category: "Supplement POS Sale", mode: "Cash", credit: 4200, debit: 0 }
-        ]);
-      }
-      syncDashboardLiveNumbers();
-    })();
+      let cred = 0, deb = 0;
+      rows.forEach(r => { cred += Number(r.credit || 0); deb += Number(r.debit || 0); });
+
+      const ctx = document.getElementById("pnlChartCanvas");
+      if (pnlChart) pnlChart.destroy();
+      pnlChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Collection (In)", "Expense (Out)", "Net Profit"],
+          datasets: [{ label: "₹", data: [cred, deb, Math.max(0, cred - deb)], backgroundColor: ["#34D399", "#FB7185", "#F5A623"] }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+
+      document.getElementById("pnlRowsBody").innerHTML = rows.map(r => `
+        <div class="list-item"><b>${esc(r.date)}</b> • Branch ${esc(r.branch)} • ${esc(r.title)} (${esc(r.mode)}) — In: ₹${Number(r.credit||0)} / Out: ₹${Number(r.debit||0)}</div>
+      `).join("") || '<div class="list-item">No records in range.</div>';
+    }
+    function downloadPnlExcel() {
+      const ws = XLSX.utils.json_to_sheet(J(K_PNL, []));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "PnL_Statement");
+      XLSX.writeFile(wb, "Om_Software_PnL_Statement.xlsx");
+    }
+
+    function openPayslipModal() {
+      const staff = J(K_STAFF, []);
+      const sel = document.getElementById("slipEmpSel");
+      sel.innerHTML = staff.map(s => `<option value="${s.id}">${esc(s.name)} (${esc(s.post)})</option>`).join("");
+      renderSlip();
+      openModal("slipOv");
+    }
+    function renderSlip() {
+      const id = document.getElementById("slipEmpSel").value;
+      const s = J(K_STAFF, []).find(x => x.id === id) || { name: "Staff", post: "Executive", branch: "001", salary: 15000, payMode: "Bank", uan: "N/A" };
+      const penalty = Number(document.getElementById("slipPenalty").value || 0);
+      const basic = Math.round(s.salary * 0.6);
+      const hra = Math.round(s.salary * 0.25);
+      const spl = Math.max(0, s.salary - basic - hra);
+      const gross = basic + hra + spl;
+      const pf = s.payMode === "Cash" ? 0 : Math.round(basic * 0.12);
+      const esic = s.payMode === "Cash" ? 0 : Math.round(gross * 0.0075);
+      const net = Math.max(0, gross - pf - esic - penalty);
+
+      document.getElementById("slipPrintBox").innerHTML = `
+        <div style="display:flex;justify-content:space-between;border-bottom:2px solid #0F172A;padding-bottom:8px">
+          <div><b>OM SOFTWARE ENTERPRISE</b><div style="font-size:11px;color:#475569">Official Salary Slip</div></div>
+          <div style="text-align:right"><b>${esc(s.name)}</b><div style="font-size:11px">${esc(s.post)} • Branch ${esc(s.branch)}</div></div>
+        </div>
+        <table>
+          <tr><th>Earnings</th><th>₹</th><th>Deductions</th><th>₹</th></tr>
+          <tr><td>Basic</td><td>${basic}</td><td>PF</td><td>${pf}</td></tr>
+          <tr><td>HRA</td><td>${hra}</td><td>ESIC</td><td>${esic}</td></tr>
+          <tr><td>Special</td><td>${spl}</td><td>Late Penalty</td><td>${penalty}</td></tr>
+          <tr><td><b>Gross</b></td><td><b>${gross}</b></td><td><b>Net Pay</b></td><td><b>₹${net}</b></td></tr>
+        </table>
+      `;
+    }
+
+    function openAutoRouterModal() { openModal("routerOv"); }
+    function handleAutoRouterFile(ev) {
+      const file = ev.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
+        document.getElementById("routerStatus").textContent = `Routed ${rows.length} rows into active gym bucket.`;
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function openInfoModal(title, text) {
+      document.getElementById("infoTitle").textContent = title;
+      document.getElementById("infoBody").textContent = text;
+      openModal("infoOv");
+    }
+
+    seedIfEmpty();
+    refreshLiveDashboard();
   </script>
 </body>
 </html>

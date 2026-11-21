@@ -3,118 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Om Software ERP — Secure Login</title>
+  <title>Om Software ERP — Login</title>
   <style>
-    :root {
-      --bg: #060A14;
-      --card-bg: #0D1424;
-      --border: #1E2D4A;
-      --gold: #F5A623;
-      --emerald: #34D399;
-      --rose: #FB7185;
-      --tx-main: #FFFFFF;
-      --tx-muted: #8E9BAE;
-      --input-bg: #0A0F1D;
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body {
-      background: radial-gradient(1000px 600px at 50% -10%, #152238 0%, #060A14 70%);
-      color: var(--tx-main);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 410px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 28px 22px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
-      text-align: center;
-    }
-    .brand-icon {
-      width: 58px; height: 58px; margin: 0 auto 14px;
-      background: linear-gradient(135deg, #F5A623, #D97706);
-      border-radius: 16px; display: flex; align-items: center; justify-content: center;
-      font-size: 21px; font-weight: 900; color: #0B0F19;
-    }
-    .brand-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-    .brand-sub { font-size: 12px; color: var(--tx-muted); margin-bottom: 18px; }
-    .form-group { text-align: left; margin-bottom: 13px; }
-    .form-label { display: block; font-size: 11.5px; font-weight: 600; color: var(--tx-muted); margin-bottom: 5px; }
-    .form-control { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 11px 13px; color: #FFFFFF; font-size: 13.5px; outline: none; }
-    .btn-submit { width: 100%; background: linear-gradient(135deg, #F5A623, #E09612); color: #0B0F19; font-size: 14px; font-weight: 900; border: none; border-radius: 12px; padding: 12px; margin-top: 10px; cursor: pointer; }
-    .session-banner { display: none; background: rgba(34,211,238,0.12); border: 1px solid #22D3EE; color: #E0F2FE; border-radius: 12px; padding: 10px; font-size: 12px; margin-bottom: 14px; text-align: left; }
+    body { background: #050914; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .card { width: 100%; max-width: 410px; background: #0B1326; border: 1px solid #1C2D4E; border-radius: 20px; padding: 22px; }
+    h1 { font-size: 20px; color: #F5A623; text-align: center; margin-bottom: 4px; }
+    p.sub { font-size: 12px; color: #94A3B8; text-align: center; margin-bottom: 16px; }
+    .fg { margin-bottom: 12px; }
+    label { display: block; font-size: 12px; color: #94A3B8; margin-bottom: 4px; font-weight: 700; }
+    input, select { width: 100%; background: #070C18; border: 1px solid #1C2D4E; color: #fff; border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+    .btn { width: 100%; background: #F5A623; color: #060A14; border: 0; border-radius: 11px; padding: 12px; font-size: 14px; font-weight: 900; cursor: pointer; margin-top: 6px; }
+    .sess-box { display: none; background: rgba(34,211,238,0.1); border: 1px solid #22D3EE; border-radius: 10px; padding: 10px; margin-bottom: 12px; font-size: 12px; }
+    .sess-btns { display: flex; gap: 8px; margin-top: 8px; }
+    .sess-btns button { flex: 1; padding: 7px; border-radius: 8px; font-size: 11.5px; font-weight: 800; cursor: pointer; }
   </style>
 </head>
 <body>
-  <div class="login-card">
-    <div class="brand-icon">OM</div>
-    <h1 class="brand-title">Om Software ERP</h1>
-    <p class="brand-sub">Multi-Branch Secure Access Portal</p>
+  <div class="card">
+    <h1>Om Software ERP</h1>
+    <p class="sub">Sign In — Owner / Manager / Staff</p>
 
-    <!-- Last session detection prompt -->
-    <div id="sessionRecoveryBox" class="session-banner">
-      <b>Last Session Detected:</b>
-      <div id="sessionUserDesc" style="font-size:11px;color:#94A3B8;margin:4px 0 8px;">Logged in previously.</div>
-      <div style="display:flex;gap:8px;">
-        <button type="button" onclick="continueLastSession()" style="flex:1;background:#22D3EE;color:#000;border:0;border-radius:8px;padding:6px;font-size:11px;font-weight:bold;cursor:pointer;">Resume Session</button>
-        <button type="button" onclick="clearPreviousSession()" style="flex:1;background:#162238;color:#fff;border:1px solid #1E2D4A;border-radius:8px;padding:6px;font-size:11px;cursor:pointer;">New Session</button>
+    <div id="lastSessionPrompt" class="sess-box">
+      <div id="lastSessionText"></div>
+      <div class="sess-btns">
+        <button type="button" onclick="resumeLast()" style="background:#22D3EE;color:#050914;border:0">Last Session</button>
+        <button type="button" onclick="startNew()" style="background:#111C36;color:#fff;border:1px solid #1C2D4E">New Session</button>
       </div>
     </div>
 
-    <form id="loginForm" onsubmit="handleLoginSubmit(event)">
-      <div class="form-group">
-        <label class="form-label">Role</label>
-        <select id="loginRole" class="form-control">
-          <option value="owner">Admin / Owner (Full Access)</option>
-          <option value="manager">Branch Manager</option>
-          <option value="staff">Staff Desk</option>
+    <form onsubmit="doLogin(event)">
+      <div class="fg">
+        <label>Login Type</label>
+        <select id="loginType" onchange="toggleLoginMode()">
+          <option value="admin_manager">Admin / Manager (Email + Password + Security Q)</option>
+          <option value="staff">Staff (Branch Code + Employee ID + Password)</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">Username / Mobile</label>
-        <input type="text" id="loginUser" class="form-control" placeholder="Enter username or mobile" required autocomplete="username">
+
+      <div id="adminFields">
+        <div class="fg">
+          <label>Role</label>
+          <select id="admRole">
+            <option value="owner">Admin / Owner</option>
+            <option value="manager">Branch Manager</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Email ID *</label>
+          <input type="text" id="loginEmail" placeholder="owner@gym.com" required>
+        </div>
+        <div class="fg">
+          <label>Password *</label>
+          <input type="password" id="loginPass" placeholder="••••••••" required>
+        </div>
+        <div class="fg">
+          <label>Security Question *</label>
+          <select id="loginSecQ">
+            <option value="Favourite Person">Favourite Person</option>
+            <option value="Favourite Pet">Favourite Pet</option>
+            <option value="Favourite Song">Favourite Song</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Security Answer *</label>
+          <input type="text" id="loginSecA" placeholder="Enter answer" required>
+        </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <input type="password" id="loginPass" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+
+      <div id="staffFields" style="display:none">
+        <div class="fg">
+          <label>Branch Code *</label>
+          <input type="text" id="stfBranchCode" placeholder="e.g. 001">
+        </div>
+        <div class="fg">
+          <label>Employee ID *</label>
+          <input type="text" id="stfEmpId" placeholder="e.g. EMP-101">
+        </div>
+        <div class="fg">
+          <label>Password *</label>
+          <input type="password" id="stfPass" placeholder="••••••••">
+        </div>
       </div>
-      <button type="submit" class="btn-submit">Sign In to ERP Portal</button>
+
+      <button type="submit" class="btn">Login</button>
     </form>
   </div>
 
   <script>
     window.addEventListener("DOMContentLoaded", function() {
-      const lastUser = localStorage.getItem("om_logged_user");
-      const lastRole = localStorage.getItem("bfc_role");
-      if (lastUser) {
-        document.getElementById("sessionRecoveryBox").style.display = "block";
-        document.getElementById("sessionUserDesc").textContent = `User: ${lastUser} (${lastRole || 'Staff'})`;
+      const u = localStorage.getItem("om_logged_user");
+      const r = localStorage.getItem("bfc_role");
+      if (u) {
+        document.getElementById("lastSessionPrompt").style.display = "block";
+        document.getElementById("lastSessionText").textContent = `Last session: ${u} (${r || "user"})`;
       }
     });
 
-    function continueLastSession() {
+    function toggleLoginMode() {
+      const isStaff = document.getElementById("loginType").value === "staff";
+      document.getElementById("adminFields").style.display = isStaff ? "none" : "block";
+      document.getElementById("staffFields").style.display = isStaff ? "block" : "none";
+      document.getElementById("loginEmail").required = !isStaff;
+      document.getElementById("loginPass").required = !isStaff;
+      document.getElementById("loginSecA").required = !isStaff;
+      document.getElementById("stfBranchCode").required = isStaff;
+      document.getElementById("stfEmpId").required = isStaff;
+      document.getElementById("stfPass").required = isStaff;
+    }
+
+    function resumeLast() {
       localStorage.setItem("om_last_active_time", String(Date.now()));
       location.replace("index.html");
     }
 
-    function clearPreviousSession() {
+    function startNew() {
       localStorage.removeItem("om_logged_user");
-      localStorage.removeItem("bfc_role");
-      document.getElementById("sessionRecoveryBox").style.display = "none";
+      document.getElementById("lastSessionPrompt").style.display = "none";
     }
 
-    function handleLoginSubmit(e) {
+    function doLogin(e) {
       e.preventDefault();
-      const role = document.getElementById("loginRole").value;
-      const user = document.getElementById("loginUser").value.trim();
-      localStorage.setItem("om_logged_user", user);
-      localStorage.setItem("bfc_role", role);
+      const isStaff = document.getElementById("loginType").value === "staff";
+      if (isStaff) {
+        const bc = document.getElementById("stfBranchCode").value.trim();
+        const eid = document.getElementById("stfEmpId").value.trim();
+        const pw = document.getElementById("stfPass").value;
+        if (!bc || !eid || !pw) return;
+        localStorage.setItem("bfc_role", "staff");
+        localStorage.setItem("om_logged_user", `${eid}@BR-${bc}`);
+      } else {
+        const role = document.getElementById("admRole").value;
+        const em = document.getElementById("loginEmail").value.trim();
+        const pw = document.getElementById("loginPass").value;
+        const sq = document.getElementById("loginSecQ").value;
+        const sa = document.getElementById("loginSecA").value.trim();
+        if (!em || !pw || !sa) return;
+        localStorage.setItem("bfc_role", role);
+        localStorage.setItem("om_logged_user", `${em} (${sq})`);
+      }
       localStorage.setItem("om_last_active_time", String(Date.now()));
       location.replace("index.html");
     }
