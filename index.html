@@ -4240,5 +4240,54 @@ window.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
+
+<!-- VIEW EMPLOYEE & STAFF CODE DIRECT MODAL -->
+<div class="ov" id="omYourCodeModalOv">
+  <div class="bx" style="max-width:440px">
+    <h3>
+      <span id="omYourCodeTitle">Access Code</span>
+      <button type="button" onclick="closeOv('omYourCodeModalOv')" style="background:none;border:0;color:var(--ac-gold);font-size:18px;cursor:pointer">✕</button>
+    </h3>
+    <div id="omYourCodeBody" style="font-size:13px;line-height:1.6"></div>
+    <button type="button" class="btn g" onclick="closeOv('omYourCodeModalOv')">बंद करें</button>
+  </div>
+</div>
+
+
+<script>
+function openDashboardCodeModal(kind) {
+  let sess = {};
+  try { sess = JSON.parse(localStorage.getItem("om_staff_session") || "{}"); } catch(e) {}
+  const brCode = sess.branchCode || localStorage.getItem("bfc_branch_code") || "001";
+  const empCode = sess.employeeCode || ("EMP-" + brCode + "-01");
+  const stfCode = sess.code || ("STF-" + brCode + "-MGR");
+
+  const isEmp = (kind === 'employee');
+  const titleEl = document.getElementById("omYourCodeTitle");
+  const bodyEl = document.getElementById("omYourCodeBody");
+
+  if (titleEl) titleEl.textContent = isEmp ? "🆔 Your Employee Code" : "🎫 Your Staff Code";
+  if (bodyEl) {
+    const activeCode = isEmp ? empCode : stfCode;
+    bodyEl.innerHTML = `
+      <div class="row"><span><b>Branch Code:</b></span><b style="color:var(--ac-cyan)">Branch ${brCode}</b></div>
+      <div class="row"><span><b>${isEmp ? "Employee Code:" : "Staff Login Code:"}</b></span><b style="color:var(--ac-gold);font-size:16px;letter-spacing:1px">${activeCode}</b></div>
+      <button type="button" class="btn" style="margin-top:12px" onclick="copyCodeText('${activeCode}')">📋 Copy Code</button>
+    `;
+  }
+  const modal = document.getElementById("omYourCodeModalOv");
+  if (modal) modal.classList.add("show");
+}
+
+function copyCodeText(text) {
+  try {
+    navigator.clipboard.writeText(text);
+    alert("Code Copied: " + text);
+  } catch(e) {
+    prompt("Copy code:", text);
+  }
+}
+</script>
+
 </body>
 </html>
