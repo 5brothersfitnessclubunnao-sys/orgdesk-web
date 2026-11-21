@@ -1,534 +1,437 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Om Software - Staff &amp; Business Portal</title>
+  <title>OM SOFTWARE — Trust, Technology &amp; Innovation</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #070B14;
-      --bg-grad: radial-gradient(1200px 700px at 50% -10%, #152244 0%, #0A1020 60%, #05070D 100%);
-      --card: #0F172A;
-      --card-inner: #070D1A;
-      --border: #23355C;
-      --border-gold: #FFB800;
-      --gold: #FFB800;
-      --gold-glow: rgba(255, 184, 0, 0.22);
-      --cyan: #38BDF8;
-      --green: #10B981;
-      --red: #EF4444;
+      --bg: #050811;
+      --card: #0B1120;
+      --card-2: #111A2E;
+      --gold: #FACC15;
+      --gold-2: #EAB308;
+      --cyan: #22D3EE;
+      --emerald: #34D399;
+      --rose: #FB7185;
+      --bd: #1E2D4A;
       --tx: #F8FAFC;
-      --tx-sub: #CBD5E1;
-      --mut: #8494B2;
+      --mut: #94A3B8;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      width: 100%;
-      min-height: 100vh;
-      background: var(--bg-grad) fixed;
-      color: var(--tx);
-      overflow-x: hidden;
-    }
-
+    * { box-sizing: border-box; }
     body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(960px 540px at 50% -5%, #152342 0%, #070C18 62%, #04060C 100%);
+      color: var(--tx);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: clamp(16px, 3vw, 40px);
-      box-sizing: border-box;
+      align-items: center;
+      padding: 18px;
     }
-
-    /* Tablet / PC / Mobile Full Screen Wrapper */
-    .portal-shell {
+    .auth-box {
       width: 100%;
-      max-width: 1060px;
-      min-height: min(720px, 92vh);
-      background: rgba(15, 23, 42, 0.94);
-      border: 2px solid var(--border-gold);
-      border-radius: clamp(18px, 2.5vw, 28px);
-      padding: clamp(20px, 4vw, 48px);
-      box-shadow: 0 0 70px var(--gold-glow);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      backdrop-filter: blur(14px);
+      max-width: 430px;
+      background: var(--card);
+      border: 1.5px solid rgba(250, 204, 21, 0.75);
+      border-radius: 22px;
+      padding: 26px 22px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.65), 0 0 28px rgba(34, 211, 238, 0.08);
     }
-
-    /* Top Branding Bar */
-    .portal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      border-bottom: 1.5px dashed rgba(51, 78, 129, 0.65);
-      padding-bottom: clamp(14px, 2vw, 20px);
-      margin-bottom: clamp(18px, 2.5vw, 28px);
-    }
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .brand-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--gold);
-      color: #000;
-      border-radius: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0;
-      font-weight: 900;
-    }
-    .brand-meta h1 {
-      font-size: clamp(18px, 2.4vw, 26px);
-      font-weight: 900;
-      color: #FFFFFF;
-      letter-spacing: 0.5px;
-    }
-    .brand-meta p {
-      font-size: clamp(11.5px, 1.2vw, 13px);
-      color: var(--mut);
-      margin-top: 2px;
-    }
-
-    .mode-badge {
-      background: rgba(255, 184, 0, 0.14);
-      color: var(--gold);
-      border: 1.5px solid var(--gold);
-      padding: 6px 16px;
+    .top-pill {
+      display: inline-block;
+      background: rgba(34, 211, 238, 0.14);
+      color: var(--cyan);
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 4px 12px;
       border-radius: 999px;
-      font-size: 11.5px;
-      font-weight: 800;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.9px;
       text-transform: uppercase;
     }
+    .hdr { text-align: center; margin-bottom: 18px; }
+    .hdr h1 { margin: 10px 0 4px; font-size: 25px; font-weight: 900; color: #FFFFFF; letter-spacing: 0.6px; }
+    .tagline { margin: 0; font-size: 12.5px; color: var(--gold); font-weight: 700; letter-spacing: 0.4px; }
 
-    /* Hero Headline & Instructions */
-    .portal-desc {
-      font-size: clamp(13px, 1.35vw, 15px);
-      color: var(--tx-sub);
-      line-height: 1.6;
-      margin-bottom: clamp(18px, 2.5vw, 26px);
-    }
-    .portal-desc b {
-      color: #FFFFFF;
-    }
-    .portal-desc code {
-      background: #070D1A;
-      color: var(--gold);
-      padding: 2px 7px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      font-weight: 800;
-      font-size: 12.5px;
-    }
-
-    /* Alerts */
-    .msg-banner {
-      display: none;
-      padding: 14px 18px;
-      border-radius: 12px;
-      font-size: 13px;
-      line-height: 1.5;
-      margin-bottom: 20px;
-    }
-    .msg-err {
-      background: rgba(239, 68, 68, 0.16);
-      border: 1.5px solid var(--red);
-      color: #FCA5A5;
-    }
-    .msg-ok {
-      background: rgba(16, 185, 129, 0.16);
-      border: 1.5px solid var(--green);
-      color: #6EE7B7;
-    }
-
-    /* Grid for Inputs (2-Column on Tablet / PC, 1-Column on Phone) */
-    .input-grid {
+    .tabs {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: clamp(16px, 2.4vw, 28px);
-      margin-bottom: clamp(20px, 3vw, 32px);
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1.5px solid var(--bd);
+      margin-bottom: 16px;
     }
-
-    .field-card {
-      background: var(--card-inner);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: clamp(16px, 2vw, 22px);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .field-card:focus-within {
-      border-color: var(--gold);
-      box-shadow: 0 0 20px rgba(255, 184, 0, 0.15);
-    }
-
-    .field-card label {
-      display: block;
-      font-size: 12.5px;
+    .tab {
+      background: none;
+      border: 0;
+      color: var(--mut);
+      padding: 10px;
+      font-size: 13.5px;
       font-weight: 800;
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+    }
+    .tab.active {
       color: var(--gold);
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
-      margin-bottom: 8px;
+      border-bottom-color: var(--gold);
     }
-    .field-card input {
-      width: 100%;
-      padding: clamp(13px, 1.4vw, 16px);
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .mode-btn {
+      background: var(--card-2);
+      border: 1.5px solid var(--bd);
+      color: #E2E8F0;
+      padding: 9px 10px;
       border-radius: 11px;
-      border: 1.5px solid #334E81;
-      background: #0B1224;
-      color: #FFFFFF;
-      font-size: clamp(15px, 1.4vw, 18px);
+      font-size: 12px;
       font-weight: 800;
-      letter-spacing: 1px;
-      box-sizing: border-box;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .mode-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #090C12;
+    }
+
+    .field { margin-bottom: 12px; }
+    .field label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #CBD5E1;
+      margin-bottom: 5px;
+      letter-spacing: 0.2px;
+    }
+    .pw-wrap { position: relative; }
+    input, select {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 11px;
+      border: 1.5px solid var(--bd);
+      background: var(--card-2);
+      color: #FFFFFF;
+      font-size: 13.5px;
       outline: none;
     }
-    .field-card input:focus {
-      border-color: var(--gold);
+    input:focus, select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.16);
     }
-    .field-card .sub-tip {
-      font-size: 11px;
+    .eye {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: 0;
       color: var(--mut);
-      margin-top: 7px;
+      cursor: pointer;
+      font-size: 15px;
     }
 
-    /* Action Buttons */
-    .btn-row {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      padding-top: 18px;
-      border-top: 1px solid rgba(51, 78, 129, 0.5);
-    }
-    .btn-main {
-      flex: 2 1 260px;
-      padding: clamp(14px, 1.6vw, 18px);
-      border-radius: 13px;
-      border: none;
-      background: var(--gold);
-      color: #070B14;
+    .btn-gold {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 0;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color: #090C12;
+      font-size: 14.5px;
       font-weight: 900;
-      font-size: clamp(15px, 1.35vw, 17px);
       cursor: pointer;
-      letter-spacing: 0.5px;
-      transition: transform 0.15s ease, opacity 0.15s ease;
+      margin-top: 4px;
     }
-    .btn-main:hover {
-      transform: translateY(-1px);
-    }
-    .btn-sec {
-      flex: 1 1 160px;
-      padding: clamp(14px, 1.6vw, 18px);
-      border-radius: 13px;
-      border: 1.5px solid #334E81;
-      background: #162340;
-      color: #FFFFFF;
+    .btn-demo {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1.5px solid rgba(34, 211, 238, 0.45);
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(250, 204, 21, 0.08));
+      color: var(--gold);
+      font-size: 12.5px;
       font-weight: 800;
-      font-size: clamp(13px, 1.15vw, 15px);
       cursor: pointer;
-      text-align: center;
-      text-decoration: none;
+      margin-top: 10px;
     }
-    .btn-sec:hover {
+    .btn-demo:hover {
       border-color: var(--gold);
+      color: #FFFFFF;
     }
 
-    /* Switch Option (Admin vs Staff) */
-    .switch-bar {
-      margin-top: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+    .msg {
+      display: none;
+      padding: 10px 12px;
+      border-radius: 10px;
       font-size: 12px;
+      margin-bottom: 12px;
+      line-height: 1.45;
+    }
+    .err { background: rgba(251, 113, 133, 0.14); border: 1px solid var(--rose); color: #FECDD3; }
+    .ok { background: rgba(52, 211, 153, 0.14); border: 1px solid var(--emerald); color: #A7F3D0; }
+
+    .links {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 12px;
+      line-height: 1.8;
       color: var(--mut);
     }
-    .switch-link {
+    .links a {
       color: var(--gold);
-      cursor: pointer;
       text-decoration: underline;
+      cursor: pointer;
       font-weight: 700;
-    }
-
-    /* Admin Overlay / Modal */
-    .admin-form-block {
-      display: none;
-    }
-
-    @media (max-width: 600px) {
-      .input-grid { grid-template-columns: 1fr; }
-      .portal-shell { padding: 18px 16px; }
-      .field-card { padding: 14px; }
     }
   </style>
 </head>
 <body>
 
-<div class="portal-shell">
-  <!-- Top Header -->
-  <div>
-    <header class="portal-header">
-      <div class="brand-group">
-        <div class="brand-icon">🏋️</div>
-        <div class="brand-meta">
-          <h1 id="portalTitle">OM SOFTWARE • STAFF PORTAL</h1>
-          <p id="portalBranchSubtitle">Branch 001 (Akrampur / Unnao) &bull; Dual-Code Staff Access</p>
-        </div>
-      </div>
-      <div class="mode-badge" id="modeBadge">STAFF SIGN IN ONLY</div>
-    </header>
-
-    <!-- Staff Sign In Form (DEFAULT & STRICT FOR STAFF LINKS) -->
-    <div id="staffAuthContainer">
-      <p class="portal-desc">
-        Staff / Manager login ke liye apna <b>Staff Login Code</b> (<code>STF-</code>) aur <b>Manager Employee Code</b> (<code>EMP-</code>) darj karein. Verification ke baad dashboard par sirf <b>Admission Form</b>, <b>Pay Fees Desk</b>, aur <b>Staff Joining &amp; Attendance</b> ka access open hoga.
-      </p>
-
-      <div id="errMsg" class="msg-banner msg-err"></div>
-      <div id="okMsg" class="msg-banner msg-ok"></div>
-
-      <form id="staffLoginForm" onsubmit="handleStaffDualCodeLogin(event)">
-        <div class="input-grid">
-          
-          <!-- Field 1: Staff Code -->
-          <div class="field-card">
-            <label for="stfCodeInp">1. Staff Login Code *</label>
-            <input type="text" id="stfCodeInp" placeholder="STF-001-CODE" autocomplete="off" required>
-            <div class="sub-tip" id="stfPrefixTip">Prefix <code>STF-001-</code> pre-filled hai, aage ka code daalein.</div>
-          </div>
-
-          <!-- Field 2: Employee Code -->
-          <div class="field-card">
-            <label for="empCodeInp">2. Manager Employee Code *</label>
-            <input type="text" id="empCodeInp" placeholder="EMP-001-MGR" autocomplete="off" required>
-            <div class="sub-tip" id="empPrefixTip">Prefix <code>EMP-001-</code> pre-filled hai, apna employee code daalein.</div>
-          </div>
-
-        </div>
-
-        <div class="btn-row">
-          <button type="submit" class="btn-main" id="staffLoginBtn">
-            🔓 Verify Codes &amp; Open Staff App
-          </button>
-          <button type="button" class="btn-sec" onclick="switchToAdminMode()">
-            👑 Admin / Owner Login
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- Admin / Owner Login Form (Shown only if Admin clicks switch) -->
-    <div id="adminAuthContainer" class="admin-form-block">
-      <p class="portal-desc">
-        Master Admin / Gym Owner ke liye <b>Email / Mobile</b> + <b>Password</b> + <b>Security Answer</b> se full enterprise control desk login.
-      </p>
-
-      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
-        <div class="input-grid">
-          <div class="field-card">
-            <label>Admin Email ya 10-Ank Mobile *</label>
-            <input type="text" id="admIdInp" placeholder="owner@example.com ya 9876543210" autocomplete="username">
-          </div>
-          <div class="field-card">
-            <label>Password *</label>
-            <input type="password" id="admPwInp" placeholder="Password" autocomplete="current-password">
-          </div>
-        </div>
-
-        <div class="field-card" style="margin-bottom:28px">
-          <label>Security Question &amp; Answer *</label>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:6px">
-            <select id="admSecQ" style="padding:12px;border-radius:10px;background:#0B1224;border:1.5px solid #334E81;color:#fff;font-size:13px;font-weight:700">
-              <option value="Favourite Person">Favourite Person (खास / पसंदीदा व्यक्ति)</option>
-              <option value="Favourite Song">Favourite Song (पसंदीदा गाना)</option>
-              <option value="Favourite Pet">Favourite Pet (पसंदीदा पालतू जानवर)</option>
-              <option value="Childhood Nickname">Childhood Nickname (बचपन का निकनेम)</option>
-            </select>
-            <input type="text" id="admSecAns" placeholder="Apna Security Answer likhein" style="padding:12px;border-radius:10px;background:#0B1224;border:1.5px solid #334E81;color:#fff;font-size:14px;font-weight:800">
-          </div>
-        </div>
-
-        <div class="btn-row">
-          <button type="submit" class="btn-main" id="adminSubmitBtn">
-            🔐 Admin Enterprise Sign In
-          </button>
-          <button type="button" class="btn-sec" onclick="switchToStaffMode()">
-            🧑‍💼 Back to Staff Login
-          </button>
-        </div>
-      </form>
-    </div>
+<div class="auth-box">
+  <div class="hdr">
+    <span class="top-pill">ENTERPRISE FITNESS PLATFORM</span>
+    <h1>OM SOFTWARE</h1>
+    <p class="tagline">Trust, Technology &amp; Innovation</p>
   </div>
 
-  <!-- Bottom Helper Bar -->
-  <footer class="switch-bar">
-    <div>🔒 256-Bit TLS Isolated Org &bull; Om Software Enterprise SaaS</div>
-    <div id="footerSwitchSlot">
-      <span class="switch-link" onclick="switchToAdminMode()">Gym Owner Portal</span>
+  <div class="tabs">
+    <button type="button" class="tab active" id="tabSignIn" onclick="switchAuthTab('signin')">Sign In</button>
+    <button type="button" class="tab" id="tabSignUp" onclick="switchAuthTab('signup')">Create Account</button>
+  </div>
+
+  <div id="errBox" class="msg err"></div>
+  <div id="okBox" class="msg ok"></div>
+
+  <!-- SIGN IN -->
+  <div id="viewSignIn">
+    <div class="mode-switch">
+      <button type="button" class="mode-btn active" id="btnModeEmail" onclick="setLoginMode('email')">📧 Email / Mobile</button>
+      <button type="button" class="mode-btn" id="btnModeStaff" onclick="setLoginMode('staff')">🎫 Staff Code</button>
     </div>
-  </footer>
+
+    <form id="formSignIn" onsubmit="handleSignIn(event)">
+      <div id="emailLoginFields">
+        <div class="field">
+          <label>Email or 10-Digit Mobile *</label>
+          <input type="text" id="siIdentity" placeholder="name@example.com or 9876543210" autocomplete="username">
+        </div>
+        <div class="field">
+          <label>Password *</label>
+          <div class="pw-wrap">
+            <input type="password" id="siPassword" placeholder="Enter your password" autocomplete="current-password">
+            <button type="button" class="eye" onclick="togglePw('siPassword', this)">👁</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Security Question *</label>
+          <select id="siSecQuestion">
+            <option value="Favourite Person">Favourite Person</option>
+            <option value="Favourite Song">Favourite Song</option>
+            <option value="Favourite Pet">Favourite Pet</option>
+            <option value="Birth Place">Birth Place / City</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Security Answer *</label>
+          <input type="text" id="siSecAnswerDirect" placeholder="Enter security answer" autocomplete="off">
+        </div>
+      </div>
+
+      <div id="staffLoginFields" style="display:none">
+        <div class="field">
+          <label>Staff Access Code *</label>
+          <input type="text" id="siStaffCode" placeholder="STF-001-XXXXXX" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Employee Code (Optional)</label>
+          <input type="text" id="siEmpCode" placeholder="EMP-001-MGR" autocomplete="off">
+        </div>
+      </div>
+
+
+
+      <button type="submit" class="btn-gold" id="btnSubmitSignIn">Sign In</button>
+    </form>
+
+    <div class="links">
+      <div><a onclick="alert('Use your registered security question or contact your administrator for account recovery.')">Forgot Password or Security Question?</a></div>
+      <div>First-time setup? <a onclick="switchAuthTab('signup')">Create Account</a></div>
+    </div>
+
+    <button type="button" class="btn-demo" onclick="startCleanZeroDataDemo()">
+      🎬 Quick Demo (Zero Personal Data)
+    </button>
+  </div>
+
+  <!-- CREATE ACCOUNT (ADMIN / FIRST-TIME SETUP) -->
+  <div id="viewSignUp" style="display:none">
+    <form id="formSignUp" onsubmit="handleSignUp(event)">
+      <div class="field">
+        <label>Organization / Gym Name *</label>
+        <input type="text" id="suOrgName" placeholder="e.g. Om Fitness Club" required>
+      </div>
+      <div class="field">
+        <label>Email or 10-Digit Mobile *</label>
+        <input type="text" id="suIdentity" placeholder="admin@example.com or 9876543210" required>
+      </div>
+      <div class="field">
+        <label>Create Password (Min. 6 Characters) *</label>
+        <input type="password" id="suPassword" placeholder="Create strong password" minlength="6" required>
+      </div>
+      <div class="field">
+        <label>Security Question *</label>
+        <select id="suSecQ" required>
+          <option value="Favourite Person">Favourite Person</option>
+          <option value="Favourite Song">Favourite Song</option>
+          <option value="Favourite Pet">Favourite Pet</option>
+          <option value="Birth Place">Birth Place / City</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Security Answer *</label>
+        <input type="text" id="suSecA" placeholder="Required answer for login verification" required>
+      </div>
+      <button type="submit" class="btn-gold">Create Account &amp; Password</button>
+    </form>
+    <div class="links">
+      <div>Already registered? <a onclick="switchAuthTab('signin')">Sign In</a></div>
+    </div>
+  </div>
 </div>
 
 <script>
-(function() {
-  const LS = localStorage;
-  const $ = id => document.getElementById(id);
-  const q = new URLSearchParams(location.search);
-  let activeBranch = "001";
-  const m = (q.get("branch") || "").match(/(\d{1,4})/);
-  if (m && m[1]) activeBranch = m[1].padStart(3, "0");
+const LS = localStorage;
+const $ = id => document.getElementById(id);
+let currentMode = "email";
 
-  function normCode(v) {
-    return String(v || "").trim().toUpperCase();
-  }
+function showErr(t) { $("errBox").textContent = t; $("errBox").style.display = "block"; $("okBox").style.display = "none"; }
+function showOk(t) { $("okBox").textContent = t; $("okBox").style.display = "block"; $("errBox").style.display = "none"; }
+function clearMsgs() { $("errBox").style.display = "none"; $("okBox").style.display = "none"; }
 
-  function formatPrefixedCode(rawVal, defaultPrefix, branchCode) {
-    const bc = branchCode || "001";
-    let up = String(rawVal || "").toUpperCase().replace(/[^A-Z0-9-]/g, "");
-    const prefixMatch = up.match(/^(STF|EMP|MGR)-?/);
-    const prefix = prefixMatch ? prefixMatch[1] : defaultPrefix;
-    let rest = up.replace(/^(STF|EMP|MGR)-?/, "").replace(/-/g, "");
-    if (!rest) return `${prefix}-${bc}-`;
-    const digitsMatch = rest.match(/^(\d{1,3})(.*)$/);
-    if (digitsMatch) {
-      const bDigits = digitsMatch[1];
-      const codePart = digitsMatch[2] || "";
-      if (bDigits.length === 3 && codePart) return `${prefix}-${bDigits}-${codePart}`;
-      if (bDigits.length === 3 && up.endsWith("-")) return `${prefix}-${bDigits}-`;
-      return `${prefix}-${bDigits}${codePart ? "-" + codePart : ""}`;
-    }
-    return `${prefix}-${bc}-${rest}`;
-  }
+function switchAuthTab(tab) {
+  clearMsgs();
+  $("tabSignIn").classList.toggle("active", tab === "signin");
+  $("tabSignUp").classList.toggle("active", tab === "signup");
+  $("viewSignIn").style.display = tab === "signin" ? "block" : "none";
+  $("viewSignUp").style.display = tab === "signup" ? "block" : "none";
+}
 
-  function showMsg(text, isErr) {
-    const e = $("errMsg"), o = $("okMsg");
-    if (isErr) {
-      e.textContent = text; e.style.display = "block"; o.style.display = "none";
-    } else {
-      o.textContent = text; o.style.display = "block"; e.style.display = "none";
-    }
-  }
-  function hideMsg() { $("errMsg").style.display = "none"; $("okMsg").style.display = "none"; }
+function setLoginMode(mode) {
+  clearMsgs();
+  currentMode = mode;
+  $("btnModeEmail").classList.toggle("active", mode === "email");
+  $("btnModeStaff").classList.toggle("active", mode === "staff");
+  $("emailLoginFields").style.display = mode === "email" ? "block" : "none";
+  $("staffLoginFields").style.display = mode === "staff" ? "block" : "none";
+}
 
-  // Set initial inputs with branch prefix
-  const stfInp = $("stfCodeInp");
-  const empInp = $("empCodeInp");
-  stfInp.value = `STF-${activeBranch}-`;
-  empInp.value = `EMP-${activeBranch}-`;
+function togglePw(id, btn) {
+  const inp = $(id);
+  if (inp.type === "password") { inp.type = "text"; btn.textContent = "🙈"; }
+  else { inp.type = "password"; btn.textContent = "👁"; }
+}
 
-  stfInp.addEventListener("input", function() {
-    stfInp.value = formatPrefixedCode(stfInp.value, "STF", activeBranch);
-  });
-  empInp.addEventListener("input", function() {
-    empInp.value = formatPrefixedCode(empInp.value, "EMP", activeBranch);
-  });
+function startCleanZeroDataDemo() {
+  clearMsgs();
+  ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions", "bfc_staff_list", "om_fees_payments_v1", "om_erp_members_v1", "om_erp_expenses_v1", "om_erp_orders_v1", "om_erp_mem_v2", "om_erp_exp_v2", "om_erp_prod_v2"].forEach(k => LS.removeItem(k));
+  LS.removeItem("om_staff_session");
+  LS.setItem("bfc_role", "owner");
+  LS.setItem("om_demo_mode", "1");
+  LS.setItem("bfc_org_id", "demo_clean_workspace");
+  LS.setItem("om_org_profile", JSON.stringify({ orgId: "demo_clean_workspace", orgName: "OM SOFTWARE", role: "demo" }));
+  showOk("Quick Demo initialized with zero personal data.");
+  setTimeout(() => location.href = "index.html?demo=1", 250);
+}
 
-  $("portalBranchSubtitle").innerHTML = `Branch <b>${activeBranch}</b> &bull; Dual-Code Staff &amp; Manager Security`;
-
-  window.handleStaffDualCodeLogin = function(e) {
-    e.preventDefault();
-    hideMsg();
-    const stf = normCode(stfInp.value);
-    const emp = normCode(empInp.value);
-
-    if (!stf || stf.endsWith("-") || stf === `STF-${activeBranch}-`) {
-      showMsg("Staff Login Code poora bharein (jaise STF-" + activeBranch + "-NGXUS2).", true);
-      stfInp.focus();
-      return;
-    }
-    if (!emp || emp.endsWith("-") || emp === `EMP-${activeBranch}-`) {
-      showMsg("Manager Employee Code poora bharein (jaise EMP-" + activeBranch + "-MGR).", true);
-      empInp.focus();
-      return;
-    }
-
-    // Save verified staff session
-    const sessObj = {
-      code: stf,
-      employeeCode: emp,
-      branchCode: activeBranch,
-      role: "staff",
-      verifiedAt: new Date().toISOString()
-    };
-    LS.setItem("om_verified_mgr_session_" + activeBranch, JSON.stringify(sessObj));
+async function handleSignIn(e) {
+  e.preventDefault();
+  clearMsgs();
+  if (currentMode === "staff") {
+    const code = String($("siStaffCode").value || "").trim().toUpperCase();
+    if (!code) { showErr("Please enter your Staff Access Code."); return; }
+    const emp = String($("siEmpCode").value || "").trim().toUpperCase();
+    const brMatch = code.match(/(\d{3})/);
+    const br = (brMatch && brMatch[1]) || "001";
+    const sess = { code, employeeCode: emp, branchCode: br, role: "staff", verifiedAt: new Date().toISOString() };
     LS.setItem("bfc_role", "staff");
-    LS.setItem("bfc_org_id", "staff_org_" + activeBranch);
-    LS.setItem("om_staff_session", JSON.stringify(sessObj));
-    LS.setItem("om_last_active_url", "index.html?role=staff&branch=" + encodeURIComponent(activeBranch));
-
-    showMsg("Codes verified ✔ Opening Staff App...", false);
-    setTimeout(function() {
-      location.href = "index.html?role=staff&branch=" + encodeURIComponent(activeBranch);
-    }, 400);
-  };
-
-  window.switchToAdminMode = function() {
-    hideMsg();
-    $("staffAuthContainer").style.display = "none";
-    $("adminAuthContainer").style.display = "block";
-    $("portalTitle").textContent = "OM SOFTWARE • ADMIN PORTAL";
-    $("modeBadge").textContent = "MASTER ADMIN SIGN IN";
-    $("footerSwitchSlot").innerHTML = '<span class="switch-link" onclick="switchToStaffMode()">Staff Portal</span>';
-  };
-
-  window.switchToStaffMode = function() {
-    hideMsg();
-    $("adminAuthContainer").style.display = "none";
-    $("staffAuthContainer").style.display = "block";
-    $("portalTitle").textContent = "OM SOFTWARE • STAFF PORTAL";
-    $("modeBadge").textContent = "STAFF SIGN IN ONLY";
-    $("footerSwitchSlot").innerHTML = '<span class="switch-link" onclick="switchToAdminMode()">Gym Owner Portal</span>';
-  };
-
-  window.handleAdminLogin = async function(e) {
-    e.preventDefault();
-    hideMsg();
-    const rawId = $("admIdInp").value.trim();
-    const pw = $("admPwInp").value;
-    const qSel = $("admSecQ").value;
-    const aVal = $("admSecAns").value.trim().toLowerCase();
-
-    if (!rawId || !pw) { showMsg("Admin Email/Mobile aur Password dono bharein.", true); return; }
-    if (!aVal) { showMsg("Security Answer bharna zaroori hai.", true); return; }
-
-    try {
-      const CFG = { apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" };
-      if (!firebase.apps.length) firebase.initializeApp(CFG);
-      const cred = /^\d{10}$/.test(rawId) ? rawId + "@orgdesk.phone" : rawId;
-      const res = await firebase.auth().signInWithEmailAndPassword(cred, pw);
-      const orgId = res.user.uid;
-
-      LS.removeItem("om_staff_session");
-      LS.setItem("bfc_role", "owner");
-      LS.setItem("bfc_org_id", orgId);
-      LS.setItem("om_org_profile", JSON.stringify({ orgId: orgId, orgName: "Om Software Owner" }));
-      LS.setItem("om_last_active_url", "index.html");
-      showMsg("Admin sign in successful ✔ Redirecting...", false);
-      setTimeout(function() { location.href = "index.html"; }, 400);
-    } catch (err) {
-      showMsg((err && err.message) || "Admin login galat hai.", true);
-    }
-  };
-
-  // If query contains ?admin=1, start directly in admin mode; otherwise staff mode default
-  if (q.get("admin") === "1") {
-    switchToAdminMode();
+    LS.setItem("om_staff_session", JSON.stringify(sess));
+    LS.setItem("om_verified_mgr_session_" + br, JSON.stringify(sess));
+    showOk("Staff access verified.");
+    setTimeout(() => location.href = "index.html?role=staff&branch=" + encodeURIComponent(br), 250);
+    return;
   }
-})();
+
+  const rawId = String($("siIdentity").value || "").trim();
+  const pw = String($("siPassword").value || "");
+  if (!rawId || !pw) { showErr("Please enter both Email/Mobile and Password."); return; }
+
+  const secQVal = String(($("siSecQuestion") && $("siSecQuestion").value) || "").trim();
+  const directAns = String(($("siSecAnswerDirect") && $("siSecAnswerDirect").value) || "").trim().toLowerCase();
+  if (!secQVal || !directAns) {
+    showErr("Please select a Security Question and enter its answer.");
+    return;
+  }
+  let savedSec = null;
+  try { savedSec = JSON.parse(LS.getItem("om_last_sec_setup") || "null"); } catch(e) {}
+  if (savedSec && savedSec.a && directAns !== String(savedSec.a).trim().toLowerCase()) {
+    showErr("Incorrect security question answer.");
+    return;
+  }
+
+  try {
+    const CFG = { apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" };
+    if (!firebase.apps.length) firebase.initializeApp(CFG);
+    const emailCred = /^\d{10}$/.test(rawId) ? rawId + "@orgdesk.phone" : rawId;
+    const res = await firebase.auth().signInWithEmailAndPassword(emailCred, pw);
+    LS.removeItem("om_staff_session");
+    LS.setItem("bfc_role", "owner");
+    LS.setItem("bfc_org_id", res.user.uid);
+    LS.setItem("om_org_profile", JSON.stringify({ orgId: res.user.uid, orgName: "OM SOFTWARE", email: res.user.email || rawId }));
+    showOk("Signed in successfully.");
+    setTimeout(() => location.href = "index.html", 250);
+  } catch (err) {
+    showErr((err && err.message) || "Authentication failed.");
+  }
+}
+
+async function handleSignUp(e) {
+  e.preventDefault();
+  clearMsgs();
+  const orgName = String($("suOrgName").value || "").trim();
+  const rawId = String($("suIdentity").value || "").trim();
+  const pw = String($("suPassword").value || "");
+  const secQ = String(($("suSecQ") && $("suSecQ").value) || "Favourite Person");
+  const secA = String(($("suSecA") && $("suSecA").value) || "").trim().toLowerCase();
+  if (!orgName || !rawId || pw.length < 6 || !secA) { showErr("Please complete all required fields including password and security answer."); return; }
+
+  try {
+    const CFG = { apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ", authDomain:"bfc-gym-215ae.firebaseapp.com", projectId:"bfc-gym-215ae", storageBucket:"bfc-gym-215ae.firebasestorage.app", messagingSenderId:"886920088571", appId:"1:886920088571:web:c4bc478d246a2700b0d95e" };
+    if (!firebase.apps.length) firebase.initializeApp(CFG);
+    const emailCred = /^\d{10}$/.test(rawId) ? rawId + "@orgdesk.phone" : rawId;
+    const res = await firebase.auth().createUserWithEmailAndPassword(emailCred, pw);
+    LS.removeItem("om_staff_session");
+    LS.setItem("bfc_role", "owner");
+    LS.setItem("bfc_org_id", res.user.uid);
+    LS.setItem("om_org_profile", JSON.stringify({ orgId: res.user.uid, orgName: orgName, email: emailCred }));
+    LS.setItem("om_first_time_sec_" + res.user.uid, JSON.stringify({ q: secQ, a: secA, mustAnswerOnLogin: true }));
+    LS.setItem("om_last_sec_setup", JSON.stringify({ q: secQ, a: secA, mustAnswerOnLogin: true }));
+    showOk("Account and password configured.");
+    setTimeout(() => location.href = "index.html", 250);
+  } catch (err) {
+    showErr((err && err.message) || "Account creation failed.");
+  }
+}
 </script>
 
 </body>
