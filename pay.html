@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title id="pageTitle">Fees Portal</title>
+<title>Universal Gym ERP — Fees &amp; Billing Portal</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -187,10 +187,10 @@ th{color:#ffcc00;}
     <div class="welcome-slide-in" style="animation-delay:0.15s">
       <div style="background:#ffcc00;color:#000;font-size:11px;font-weight:900;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:12px;">OFFICIAL PORTAL</div>
     </div>
-    <h1 class="welcome-title welcome-slide-in" style="animation-delay:0.3s">Welcome To<br><span data-gym="name">5 Brother's Fitness Club</span></h1>
-    <p class="welcome-sub welcome-slide-in" style="animation-delay:0.45s">आपका <span data-gym="name">5 Brother's Fitness Club</span> में स्वागत है</p>
+    <h1 class="welcome-title welcome-slide-in" style="animation-delay:0.3s">Welcome To<br><span id='welcomeGymTitle'>Gym &amp; Fitness Club</span></h1>
+    <p class="welcome-sub welcome-slide-in" style="animation-delay:0.45s">आपका <span id='welcomeGymSub'>Gym &amp; Fitness Club</span> में स्वागत है</p>
     <p class="welcome-slide-in" style="animation-delay:0.55s;color:#aaa;font-size:13px;text-align:center;line-height:1.5;margin:0;">
-      <span data-gym="address">उमराव खेड़ा, अकरमपुर, उन्नाव</span><br>फीस जमा · रसीद · रजिस्टर
+      <span id='welcomeGymAddress'>शाखा पता व संपर्क</span><br>फीस जमा · रसीद · रजिस्टर
     </p>
     <button type="button" class="welcome-btn welcome-slide-in" style="animation-delay:0.7s" onclick="closeFeesWelcome()">✔ आगे बढ़ें</button>
   </div>
@@ -199,8 +199,8 @@ th{color:#ffcc00;}
 <div class="main-card">
   <div class="header">
     <div style="background:#ffcc00;color:#000;font-size:9px;font-weight:800;padding:2px 6px;border-radius:10px;display:inline-block;margin-bottom:4px;">OFFICIAL PORTAL</div>
-    <h1 data-gym="name">5 Brother's Fitness Club</h1>
-    <div class="tagline"><span data-gym="address">उमराव खेड़ा, अकरमपुर, उन्नाव</span> | Ph: <span data-gym="phone">9140417259</span></div>
+    <h1 id='hdrGymName'>Gym &amp; Fitness Club</h1>
+    <div class="tagline" id="hdrGymTagline">Branch Address | Official Contact</div>
   </div>
 
   <div class="nav-tabs">
@@ -248,6 +248,7 @@ th{color:#ffcc00;}
             <option value="poor">गरीब श्रेणी - ₹350</option>
             <option value="job" selected>नौकरी / बिज़नेस (Job / Business) - ₹500</option>
           </select>
+          <div id="studentNote" style="display:none; margin-top:6px; font-size:11px; font-weight:bold; color:#ff9900; line-height:1.4;">⚠️ विद्यार्थी योजना केवल असली विद्यार्थियों के लिए है। गलत सूचना देकर लेने पर बाकी राशि देनी पड़ेगी।</div>
         </div>
       </div>
 
@@ -306,10 +307,16 @@ th{color:#ffcc00;}
           <input type="date" id="mFeeJoinDate" readonly class="is-locked" title="यह केवल एडमिन द्वारा बदली जा सकती है" onclick="if(!this.readOnly && this.showPicker) this.showPicker()">
         </div>
         <div class="field-group">
-          <label>📅 अगली फीस तारीख (अभी की देय) [🔒 Admin बदल सकता है]</label>
+          <label>वर्तमान वैधता समाप्ति (पिछली अवधि)</label>
           <input type="date" id="mFeePrevPaidDate" readonly onchange="checkLateStatus()" onclick="if(!this.readOnly && this.showPicker) this.showPicker()" title="पिछली अवधि की अंतिम तारीख">
           <div id="nextDueLine" style="margin-top:6px;font-size:13px;font-weight:700;color:#16a34a"></div>
         </div>
+      </div>
+
+      <div class="field-group" id="nextFeeAdminWrap" style="display:none;">
+        <label style="color:#ffcc00;">📅 अगली फीस तारीख (Next Fee Date) [केवल एडमिन — बदल सकते हैं]</label>
+        <input type="date" id="mFeeNextDate" onchange="this.dataset.manual='1'; getLateDaysDetails();" onclick="if(this.showPicker) this.showPicker()" style="border-color:#ffcc00;">
+        <div style="font-size:11px;color:#aaa;margin-top:4px;">खाली/ऑटो = नियम से अपने-आप। यहाँ तारीख बदलेंगे तो Approve के बाद वही अगली फीस तारीख सेव होगी।</div>
       </div>
 
       <div class="field-group">
@@ -358,7 +365,6 @@ th{color:#ffcc00;}
         <button type="button" onclick="cleanDuplicateMembers()" style="background:#ff6600; color:#000; border:none; padding:5px 8px; border-radius:6px; font-weight:bold; font-size:11px; cursor:pointer;">🧹 डुप्लिकेट साफ</button>
         <button type="button" onclick="openDues()" style="background:#ff4444; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-weight:bold; font-size:11px; cursor:pointer;">⚠️ बकाया</button>
         <button type="button" onclick="openProofs()" style="background:#3b82f6; color:#fff; border:none; padding:5px 8px; border-radius:6px; font-weight:bold; font-size:11px; cursor:pointer;">📸 Proofs</button>
-        <button type="button" onclick="openGymProfile()" style="background:#ffcc00; color:#000; border:none; padding:5px 8px; border-radius:6px; font-weight:bold; font-size:11px; cursor:pointer;">🏋️ Gym Profile</button>
         <button type="button" class="btn-admin" onclick="downloadCSV()">📥 Excel</button>
       </div>
     </div>
@@ -480,7 +486,7 @@ th{color:#ffcc00;}
       <div style="background:#fff; border-radius:10px; padding:10px; margin-bottom:10px; text-align:center;">
         <div id="upiQrBox" style="display:inline-block; min-height:180px; min-width:180px;"></div>
         <div style="color:#000; font-size:11px; font-weight:bold; margin-top:4px;">📷 दूसरे फोन के UPI ऐप से स्कैन करें — रकम अपने-आप भरी होगी</div>
-        <div style="color:#555; font-size:10px;">UPI ID: <span data-gym="upiId">9140417259@okbizaxis</span></div>
+        <div style="color:#555; font-size:10px;">UPI ID: <span id='dispUpiId'>merchant@upi</span></div>
       </div>
       <button type="button" onclick="openUpiApp()" style="width:100%; background:#ffcc00; color:#000; border:none; padding:10px; border-radius:6px; font-weight:bold; font-size:13px; cursor:pointer; margin-bottom:12px;">🚀 UPI App खोलें (GPay / PhonePe / Paytm)</button>
 
@@ -491,7 +497,7 @@ th{color:#ffcc00;}
         <label style="font-size:11px; color:#ffcc00; display:block; margin-top:8px;">📸 या पेमेंट का स्क्रीनशॉट:</label>
         <input type="file" id="payProofFile" accept="image/*" onchange="onProofPicked(this)" style="margin-top:4px; width:100%; font-size:12px; color:#fff;">
         <img id="payProofPreview" alt="" style="display:none; max-width:100%; max-height:160px; margin-top:6px; border-radius:6px; border:1px solid #444;">
-        <button type="button" id="btnConfirmUtr" onclick="confirmOnlinePayment()" style="width:100%; background:#25D366; color:#000; border:none; padding:12px; border-radius:6px; font-weight:900; margin-top:10px; cursor:pointer;">✅ Sent to <span data-gym="name">5 Brother's Fitness Club</span> Owner<br>for confirmation — Your Payment Receive</button>
+        <button type="button" id="btnConfirmUtr" onclick="confirmOnlinePayment()" style="width:100%; background:#25D366; color:#000; border:none; padding:12px; border-radius:6px; font-weight:900; margin-top:10px; cursor:pointer;">✅ Sent to Gym Owner / Management<br>for confirmation — Your Payment Receive</button>
         <button type="button" onclick="closeUpiModal()" style="width:100%; background:#333; color:#fff; border:none; padding:8px; border-radius:6px; margin-top:6px; cursor:pointer;">रद्द करें (Cancel)</button>
       </div>
     </div>
@@ -499,7 +505,7 @@ th{color:#ffcc00;}
     <div id="upiStepWait" style="display:none; padding:10px 0;">
       <div style="font-size:42px; margin-bottom:8px;">⌛</div>
       <h3 style="color:#ffcc00; margin-bottom:6px;">Payment Details Sent!</h3>
-      <p style="font-size:13px; color:#00ff99; font-weight:bold; margin-bottom:8px;">Sent to <span data-gym="name">5 Brother's Fitness Club</span> Owner<br>for confirmation — Your Payment Receive</p>
+      <p style="font-size:13px; color:#00ff99; font-weight:bold; margin-bottom:8px;">Sent to Gym Owner / Management<br>for confirmation — Your Payment Receive</p>
       <p style="font-size:12px; color:#ccc; margin-bottom:14px;">Owner चेक करके Approve करेंगे।<br>Approve होते ही Receipt अपने-आप डाउनलोड होगी।</p>
       <div style="background:#222; border:2px solid #ffcc00; border-radius:12px; padding:16px; margin-bottom:12px;">
         <div style="font-size:11px; color:#aaa; margin-bottom:4px;">⏳ Live Verification Wait</div>
@@ -520,7 +526,7 @@ th{color:#ffcc00;}
     <h2 style="color:#25D366; font-size:20px; font-weight:900; margin-bottom:6px;">HURRAY! PAYMENT SUCCESSFUL!</h2>
     <h3 style="color:#ffcc00; font-size:15px; font-weight:800; margin-bottom:10px;">Thanks So Much For Payment</h3>
     <div style="background:#1e1e1e; border:1px dashed #ffcc00; border-radius:8px; padding:10px; margin-bottom:14px;">
-      <p data-gym="name" style="font-size:13px; color:#fff; font-weight:bold; margin-bottom:4px;">5 Brother's Fitness Club</p>
+      <p style="font-size:13px; color:#fff; font-weight:bold; margin-bottom:4px;" id="hurrayGymTitle">Gym &amp; Fitness Club</p>
       <p style="font-size:11px; color:#aaa;">आपकी सदस्यता सक्रिय कर दी गई है। हार्ड वर्क और रिजल्ट्स जारी रखें!</p>
     </div>
     <button type="button" onclick="proceedToReceiptFromHurray()" style="width:100%; background:#25D366; color:#000; border:none; padding:11px; border-radius:8px; font-weight:900; font-size:13px; cursor:pointer;">📄 रसीद देखें व डाउनलोड करें ➡️</button>
@@ -528,40 +534,6 @@ th{color:#ffcc00;}
 </div>
 
 <!-- OFFICIAL RECEIPT MODAL -->
-<!-- GYM PROFILE (naam / stamp / sign) -->
-<div id="gymModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:100000;overflow-y:auto;padding:12px;">
-  <div style="max-width:420px;margin:15px auto;background:#181818;border:2px solid #ffcc00;border-radius:12px;padding:16px;">
-    <h3 style="color:#ffcc00;margin-bottom:4px;">🏋️ Gym Profile</h3>
-    <div style="font-size:11px;color:#aaa;margin-bottom:12px;">यही नाम, पता, Sign व Stamp रसीद, पोर्टल व WhatsApp में आएगा।</div>
-    <label style="font-size:12px;color:#ffcc00;">जिम का नाम *</label>
-    <input id="gp_name"  style="width:100%;padding:9px;margin:3px 0 8px;border-radius:6px;background:#222;color:#fff;border:1px solid #444;">
-    <label style="font-size:12px;color:#ffcc00;">टैगलाइन (रसीद पर)</label>
-    <input id="gp_tagline"  style="width:100%;padding:9px;margin:3px 0 8px;border-radius:6px;background:#222;color:#fff;border:1px solid #444;">
-    <label style="font-size:12px;color:#ffcc00;">पता</label>
-    <input id="gp_address"  style="width:100%;padding:9px;margin:3px 0 8px;border-radius:6px;background:#222;color:#fff;border:1px solid #444;">
-    <label style="font-size:12px;color:#ffcc00;">जिम फोन नंबर</label>
-    <input id="gp_phone" inputmode="numeric" style="width:100%;padding:9px;margin:3px 0 8px;border-radius:6px;background:#222;color:#fff;border:1px solid #444;">
-    <label style="font-size:12px;color:#ffcc00;">Owner का नाम (Sign के नीचे)</label>
-    <input id="gp_ownerName"  style="width:100%;padding:9px;margin:3px 0 8px;border-radius:6px;background:#222;color:#fff;border:1px solid #444;">
-    <label style="font-size:12px;color:#ffcc00;">Owner WhatsApp (91 के साथ, जैसे 919990954574)</label>
-    <input id="gp_ownerWa" inputmode="numeric" style="width:100%;padding:9px;margin:3px 0 8px;border-radius:6px;background:#222;color:#fff;border:1px solid #444;">
-    <label style="font-size:12px;color:#ffcc00;">UPI ID</label>
-    <input id="gp_upiId"  style="width:100%;padding:9px;margin:3px 0 8px;border-radius:6px;background:#222;color:#fff;border:1px solid #444;">
-    <label style="font-size:12px;color:#ffcc00;">Bill ID शुरुआत (जैसे 5BFC)</label>
-    <input id="gp_billPrefix" maxlength="8" style="width:100%;padding:9px;margin:3px 0 8px;border-radius:6px;background:#222;color:#fff;border:1px solid #444;">
-    <div style="display:flex;gap:10px;margin:4px 0 12px;">
-      <div style="flex:1;text-align:center;"><div style="font-size:11px;color:#aaa;margin-bottom:4px;">Sign</div>
-        <img id="gp_signPrev" style="height:50px;max-width:100%;background:#fff;border-radius:6px;object-fit:contain;">
-        <input type="file" accept="image/*" onchange="gymPickImg(this,'signImg')" style="width:100%;font-size:10px;margin-top:4px;color:#aaa;"></div>
-      <div style="flex:1;text-align:center;"><div style="font-size:11px;color:#aaa;margin-bottom:4px;">Stamp</div>
-        <img id="gp_stampPrev" style="height:50px;width:50px;background:#fff;border-radius:50%;object-fit:cover;">
-        <input type="file" accept="image/*" onchange="gymPickImg(this,'stampImg')" style="width:100%;font-size:10px;margin-top:4px;color:#aaa;"></div>
-    </div>
-    <button type="button" onclick="saveGymProfile()" style="width:100%;background:#25D366;color:#000;border:none;padding:11px;border-radius:8px;font-weight:900;cursor:pointer;">💾 Save करें</button>
-    <button type="button" onclick="document.getElementById('gymModal').style.display='none'" style="width:100%;background:#333;color:#fff;border:none;padding:9px;border-radius:6px;margin-top:8px;cursor:pointer;">बंद करें</button>
-  </div>
-</div>
-
 <div id="receiptModal">
   <div class="receipt-wrapper">
     <div style="display:flex; justify-content:flex-start; margin-bottom:8px;" data-html2canvas-ignore="true">
@@ -570,13 +542,13 @@ th{color:#ffcc00;}
 
     <div id="printablePages">
       <div class="receipt-card">
-        <div class="receipt-watermark" data-gym="name">5 Brother's Fitness Club</div>
+        <div class="receipt-watermark" id="rWatermark">FITNESS CLUB</div>
 
         <div class="receipt-header">
           <div style="background:#ffcc00; color:#000; font-size:10px; font-weight:800; padding:2px 8px; border-radius:10px; display:inline-block;">PAGE 1 : OFFICIAL INVOICE</div>
-          <h2 data-gym="name" style="font-size:16px; margin-top:4px; font-weight:900;">5 Brother's Fitness Club</h2>
-          <div data-gym="tagline" style="font-size:10px; font-weight:bold; color:#555; margin-top:2px;">"100% असली और असरदार रिजल्ट"</div>
-          <p style="font-size:10px; color:#777; margin-top:2px;"><span data-gym="address">उमराव खेड़ा, अकरमपुर, उन्नाव</span> | Ph: <span data-gym="phone">9140417259</span></p>
+          <h2 style="font-size:16px; margin-top:4px; font-weight:900;" id="rGymHeadTitle">Gym &amp; Fitness Club</h2>
+          <div style="font-size:10px; font-weight:bold; color:#555; margin-top:2px;">"100% असली और असरदार रिजल्ट"</div>
+          <p style="font-size:10px; color:#777; margin-top:2px;" id="rGymHeadAddr">Branch Address | Ph: Contact</p>
         </div>
 
         <div class="r-row"><span>Bill ID:</span><b id="billId" style="color:#b37400;"></b></div>
@@ -598,20 +570,19 @@ th{color:#ffcc00;}
         <div class="r-row" id="rAdvRow" style="display:none; background:#e8fff0; border:1px dashed #0a7a2f; border-radius:6px; padding:4px 6px; color:#0a7a2f;"><span>💰 Advance jama:</span><b id="rAdvance" style="text-align:right;"></b></div>
         <div class="r-row"><span>वैधता / अगला भुगतान:</span><b id="rValidTill" style="color:#b37400;"></b></div>
         <div class="receipt-footer-stamp">
-          <!-- Dynamic Monthly Verification QR Code -->
           <div style="text-align:center;">
             <div id="receiptMonthlyQrBox" style="display:inline-block;background:#fff;padding:4px;border:1px solid #000;border-radius:6px;min-width:70px;min-height:70px;"></div>
             <div style="font-size:8px;font-weight:900;color:#000;margin-top:2px;">SCAN TO VIEW/DL</div>
           </div>
           <div class="receipt-sign-box">
-            <img src="https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg" alt="Signature" crossorigin="anonymous" class="receipt-sign-img" data-gym-img="signImg">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><circle cx='40' cy='40' r='36' stroke='%23000' stroke-width='3' fill='none'/><text x='40' y='36' font-size='9' font-weight='bold' text-anchor='middle' fill='%23000'>VERIFIED</text><text x='40' y='48' font-size='8' text-anchor='middle' fill='%23000'>FITNESS</text></svg>" alt="Signature" crossorigin="anonymous" class="receipt-sign-img">
             <div class="receipt-owner-txt">
-              <strong data-gym="ownerName">Saurabh Singh Chandel</strong>
-              <span data-gym="ownerTitle">Owner</span><br><span data-gym="name">5 Brother's Fitness Club</span>
+              <strong id='rOwnerStrong'>Authorized Manager</strong>
+              <span id='rOwnerRole'>Management</span><br><span id='rOwnerGymName'>Fitness Club</span>
             </div>
           </div>
           <div class="receipt-stamp-box">
-            <img src="https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg" alt="Authorized Stamp" crossorigin="anonymous" class="receipt-stamp-img" data-gym-img="stampImg">
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'><circle cx='40' cy='40' r='36' stroke='%23000' stroke-width='3' fill='none'/><text x='40' y='36' font-size='9' font-weight='bold' text-anchor='middle' fill='%23000'>VERIFIED</text><text x='40' y='48' font-size='8' text-anchor='middle' fill='%23000'>FITNESS</text></svg>" alt="Authorized Stamp" crossorigin="anonymous" class="receipt-stamp-img">
           </div>
         </div>
       </div>
@@ -665,10 +636,9 @@ th{color:#ffcc00;}
     </select>
     <label style="font-size:12px; color:#aaa;">अवधि</label>
     <select id="peDur" style="width:100%; padding:10px; margin:4px 0 12px; border-radius:6px; background:#222; color:#fff; border:1px solid #444;"></select>
-    <label style="font-size:12px; color:#ffcc00; font-weight:bold;">📅 अगली फीस की तारीख (Next Fees Date)</label>
-    <input type="date" id="peNextDue" onclick="if(this.showPicker) this.showPicker()" style="width:100%; padding:10px; margin:4px 0 4px; border-radius:6px; background:#222; color:#fff; border:1px solid #ffcc00;">
-    <div style="font-size:11px; color:#ffcc00; margin-bottom:10px;">यहीं से Admin अगली फीस तारीख सीधे बदल सकता है (जैसे 13/12/2026)। खाली छोड़ेंगे तो तारीख वैसी ही रहेगी।</div>
-    <div style="font-size:11px; color:#aaa; margin-bottom:12px;">Paid/Pending स्थिति और रसीद में कोई बदलाव नहीं होगा।</div>
+    <label style="font-size:12px; color:#ffcc00;">📅 अगली फीस तारीख (Next Fee Date)</label>
+    <input type="date" id="peNextFee" onclick="if(this.showPicker) this.showPicker()" style="width:100%; padding:10px; margin:4px 0 12px; border-radius:6px; background:#222; color:#fff; border:1px solid #ffcc00;">
+    <div style="font-size:11px; color:#aaa; margin-bottom:12px;">प्लान व अगली फीस तारीख बदलेगी। Paid/Pending स्थिति और रसीद में कोई बदलाव नहीं होगा।</div>
     <button type="button" onclick="savePlanEdit()" style="width:100%; background:#25D366; color:#000; border:none; padding:11px; border-radius:8px; font-weight:900; cursor:pointer;">💾 सेव करें</button>
     <button type="button" onclick="document.getElementById('planEditModal').style.display='none'" style="width:100%; background:#333; color:#fff; border:none; padding:9px; border-radius:8px; margin-top:8px; cursor:pointer;">रद्द करें</button>
   </div>
@@ -687,97 +657,6 @@ const firebaseConfig = {
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
-// ===== GYM PROFILE: naam / pata / sign / stamp registered gym ke hisab se =====
-const GYM_DEFAULT = {
-  name: "5 Brother's Fitness Club", tagline: "\"100% असली और असरदार रिजल्ट\"",
-  address: "उमराव खेड़ा, अकरमपुर, उन्नाव", phone: "9140417259",
-  ownerName: "Saurabh Singh Chandel", ownerTitle: "Owner", ownerWa: "919990954574",
-  upiId: "9140417259@okbizaxis", billPrefix: "5BFC",
-  signImg: "https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg",
-  stampImg: "https://i.ibb.co/mVtxCHkp/IMG-20261021-164158.jpg"
-};
-let GYM = Object.assign({}, GYM_DEFAULT);
-try {
-  var _org = JSON.parse(localStorage.getItem("om_org_profile") || "{}") || {};
-  var _orgName = _org.orgName || _org.gymName, _ov = {};
-  if (_orgName) {
-    _ov.name = _orgName;
-    if (_org.address) _ov.address = _org.address;
-    if (_org.phone) { _ov.phone = _org.phone; _ov.ownerWa = "91" + String(_org.phone).replace(/\D/g, "").slice(-10); }
-    if (_org.ownerName) _ov.ownerName = _org.ownerName;
-    if (_org.upiId) _ov.upiId = _org.upiId;
-    if (_orgName !== GYM_DEFAULT.name) {   // doosre gym par 5 Brother's ka stamp/tagline na aaye
-      _ov.tagline = ""; _ov.signImg = ""; _ov.stampImg = "";
-      _ov.billPrefix = (_orgName.split(/\s+/).map(function (w) { return w[0] || ""; }).join("").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 5)) || "BILL";
-    }
-  }
-  GYM = Object.assign({}, GYM_DEFAULT, _ov, JSON.parse(localStorage.getItem("bfc_gym_profile") || "{}"));
-} catch (e) {}
-function applyGymProfile() {
-  try {
-    document.querySelectorAll("[data-gym]").forEach(function (el) { el.textContent = GYM[el.getAttribute("data-gym")] || ""; });
-    document.querySelectorAll("img[data-gym-img]").forEach(function (im) { var u = GYM[im.getAttribute("data-gym-img")]; if (u) { im.style.display = ""; if (im.getAttribute("src") !== u) im.src = u; } else { im.style.display = "none"; } });
-    document.title = GYM.name + " - Fees Portal";
-  } catch (e) {}
-}
-applyGymProfile();
-(async function () {
-  try {
-    const d = await db.collection("settings").doc("gym_profile").get();
-    if (d.exists) {
-      GYM = Object.assign({}, GYM_DEFAULT, d.data());
-      try { localStorage.setItem("bfc_gym_profile", JSON.stringify(GYM)); } catch (e) {}
-      applyGymProfile();
-    }
-  } catch (e) { console.warn("Gym profile cloud load failed", e); }
-})();
-async function openGymProfile() {
-  if (!adminUnlocked) {
-    if (typeof bfcLogin !== "function") { alert("auth-gate.js load nahi hui — page refresh karo."); return; }
-    if (!(await bfcLogin())) return;
-  }
-  ["name","tagline","address","phone","ownerName","ownerWa","upiId","billPrefix"].forEach(function (k) { document.getElementById("gp_" + k).value = GYM[k] || ""; });
-  document.getElementById("gp_signPrev").src = GYM.signImg || "";
-  document.getElementById("gp_stampPrev").src = GYM.stampImg || "";
-  window.__gymTmp = { signImg: GYM.signImg, stampImg: GYM.stampImg };
-  document.getElementById("gymModal").style.display = "block";
-}
-function gymPickImg(input, key) {
-  const f = input.files && input.files[0]; if (!f) return;
-  const rd = new FileReader();
-  rd.onload = function () {
-    const im = new Image();
-    im.onload = function () {
-      const max = 360, r = Math.min(1, max / Math.max(im.width, im.height));
-      const c = document.createElement("canvas"); c.width = Math.round(im.width * r); c.height = Math.round(im.height * r);
-      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
-      let u = c.toDataURL("image/png"); if (u.length > 300000) u = c.toDataURL("image/jpeg", 0.85);
-      window.__gymTmp[key] = u;
-      document.getElementById(key === "signImg" ? "gp_signPrev" : "gp_stampPrev").src = u;
-    };
-    im.src = rd.result;
-  };
-  rd.readAsDataURL(f);
-}
-async function saveGymProfile() {
-  const g = function (k) { return document.getElementById("gp_" + k).value.trim(); };
-  if (!g("name")) { alert("जिम का नाम ज़रूरी है।"); return; }
-  const p = {
-    name: g("name"), tagline: g("tagline"), address: g("address"), phone: g("phone"),
-    ownerName: g("ownerName"), ownerTitle: "Owner", ownerWa: g("ownerWa").replace(/\D/g, "") || GYM_DEFAULT.ownerWa,
-    upiId: g("upiId") || GYM_DEFAULT.upiId,
-    billPrefix: (g("billPrefix") || "BILL").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 8) || "BILL",
-    signImg: (window.__gymTmp && window.__gymTmp.signImg) || "", stampImg: (window.__gymTmp && window.__gymTmp.stampImg) || ""
-  };
-  GYM = Object.assign({}, GYM_DEFAULT, p);
-  try { localStorage.setItem("bfc_gym_profile", JSON.stringify(GYM)); } catch (e) {}
-  applyGymProfile();
-  let cloudOk = true;
-  try { await db.collection("settings").doc("gym_profile").set(GYM); } catch (e) { cloudOk = false; console.error("Gym profile save failed", e); }
-  document.getElementById("gymModal").style.display = "none";
-  alert(cloudOk ? "✅ Gym Profile सेव हो गई। अब रसीद में यही नाम व Stamp आएगा।" : "⚠️ इस फोन में सेव हुई, पर cloud में नहीं (Firestore rules: settings/gym_profile)। दूसरे फोन पर नहीं दिखेगी।");
-}
 
 const BFC_IMG_KEYS = ["memberPhoto","memberSign","memberIdImg","memberIdBack","memberIdBackImg"];
 function bfcStripImgs(list) {
@@ -860,7 +739,6 @@ async function loadMembersFromCloud() {
       try { renderAdminTable(); } catch (e) {}
     }
     console.log("Cloud se members load hue:", cloud.length, "| local-only upload:", localOnly.length);
-    bfcImportAdmissions();
   } catch (err) {
     console.error("Cloud se members load nahi hue:", err);
   }
@@ -881,29 +759,6 @@ function bfcMirrorPublic(m) {
       db.collection("public_members").doc(String(m.id)).update(f).catch(function () {});
     }).catch(function () {});
   } catch (e) {}
-}
-
-// Admission form (member ke phone se) -> "admissions" collection -> admin ke khulte hi fees list me
-async function bfcImportAdmissions() {
-  try {
-    if (!(typeof bfcIsAdmin === "function" && await bfcIsAdmin())) return;
-    const snap = await db.collection("admissions").where("imported", "==", false).get();
-    if (snap.empty) return;
-    let list = getMasterList(), added = 0;
-    snap.forEach(function (d) {
-      const r = Object.assign({ id: d.id }, d.data());
-      const exists = list.some(function (x) {
-        return String(x.id) === String(r.id) || (x.phone && r.phone && String(x.phone).trim() === String(r.phone).trim() && String(x.name || "").trim().toLowerCase() === String(r.name || "").trim().toLowerCase());
-      });
-      if (!exists) { delete r.imported; list.push(r); added++; }
-    });
-    if (added) persistList(list);
-    const b = db.batch();
-    snap.forEach(function (d) { b.update(d.ref, { imported: true }); });
-    await b.commit();
-    try { renderAdminTable(); } catch (e) {}
-    console.log("Admissions import:", added);
-  } catch (e) { console.error("Admissions import failed", e); }
 }
 
 function persistList(list) {
@@ -1017,9 +872,6 @@ function calculateFinalAmount() {
 function esc(t) { return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 function planInfoOf(m) {
-  if (m && m.admPlan && parseFloat(m.planBase) > 0 && parseInt(m.planMonths, 10) > 0) {
-    return { type: PLANS[m.type] ? m.type : "job", base: parseFloat(m.planBase), months: parseInt(m.planMonths, 10) };
-  }
   let type = m.type;
   if (!PLANS[type]) type = (m.plan && m.plan.includes('विद्यार्थी')) ? 'student' : 'job';
   const opts = PLANS[type].opts;
@@ -1151,15 +1003,6 @@ function clearSelection() {
   checkLateStatus();
 }
 
-// Admission form se aaye custom plan (jaise 12 mahine / alag rakam) select me na ho to jod do
-function ensureDurOption(sel, base, months) {
-  if (!sel || String(sel.value) === String(base)) return;
-  const o = document.createElement("option");
-  o.value = String(base); o.setAttribute("data-months", String(months));
-  o.textContent = (months === 1 ? "1 महीना" : months + " महीने") + " - ₹" + Number(base).toLocaleString("en-IN");
-  sel.appendChild(o);
-  sel.value = String(base);
-}
 function selectMember(identifier) {
   const m = getMasterList().find(x => x.id != null && x.id.toString() === identifier.toString());
   if (!m) return;
@@ -1174,7 +1017,6 @@ function selectMember(identifier) {
   document.getElementById("feeCategory").value = p.type;
   updatePlanPrices();
   document.getElementById("feeDuration").value = String(p.base);
-  ensureDurOption(document.getElementById("feeDuration"), p.base, p.months);
 
   const jDate = m.joinDate || m.lastPaid || todayStr();
   document.getElementById("mFeeJoinDate").value = jDate;
@@ -1197,6 +1039,12 @@ function selectMember(identifier) {
   applyLock();
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+  const c = document.getElementById("feeCategory"), n = document.getElementById("studentNote");
+  if (!c || !n) return;
+  const f = function () { n.style.display = (c.value === "student") ? "block" : "none"; };
+  c.addEventListener("change", f); f();
+});
 function autoFillById(identifier) { selectMember(identifier); }
 
 function applyLock() {
@@ -1245,6 +1093,11 @@ function applyLock() {
     }
   }
 
+  const _nfw = document.getElementById("nextFeeAdminWrap");
+  if (_nfw) _nfw.style.display = (adminUnlocked && !isAdvOnly()) ? "block" : "none";
+  if (!adminUnlocked) { const _nf = document.getElementById("mFeeNextDate"); if (_nf) { _nf.dataset.manual = ""; } }
+  try { const _pl = pd.closest(".field-group").querySelector("label"); if (_pl) _pl.textContent = adminUnlocked ? "अभी की देय तारीख (पिछली अवधि समाप्त)" : "वर्तमान वैधता समाप्ति (पिछली अवधि)"; } catch (e) {}
+
   const bar = document.getElementById("lockBar");
   const txt = document.getElementById("lockText");
   const btn = document.getElementById("btnAdminUnlock");
@@ -1276,6 +1129,7 @@ async function toggleAdminUnlock() {
   adminUnlocked = true;
   fillIdentity();
   applyLock();
+  try { checkLateStatus(); } catch (e) {}
 }
 
 function initFormState() {
@@ -1322,79 +1176,38 @@ function nextCycleExpiry(prevExpiryStr, months) {
 /** जॉइनिंग तारीख से साइकिल: join 20 Oct, 1 माह → 19 Nov, 19 Dec ... (भुगतान की तारीख से कभी नहीं खिसकता) */
 function cycleFromJoin(joinStr, paidStr, months) {
   const m = Math.max(1, parseInt(months, 10) || 1);
-  const base = (joinStr && /^\d{4}-\d{2}-\d{2}$/.test(joinStr)) ? joinStr : paidStr;
-  const firstEnd = shiftMonthsISO(base, m);
-  if (paidStr < firstEnd) {
-    return {
-      nextExpiry: firstEnd,
-      dueDate: firstEnd,
-      startDate: base,
-      lateDays: 0
-    };
-  }
-  let k = 1, end = shiftMonthsISO(base, m);
-  while (end && end <= paidStr && k < 600) {
-    k++;
-    end = shiftMonthsISO(base, m * k);
-  }
-  const prevEnd = k > 1 ? shiftMonthsISO(base, m * (k - 1)) : base;
-  const late = Math.round((new Date(paidStr + "T00:00:00") - new Date(prevEnd + "T00:00:00")) / 86400000);
+  if (!joinStr) joinStr = paidStr;
+  let k = 1, end = calcExpiryDate(joinStr, m);
+  while (end && end <= paidStr && k < 600) { k++; end = calcExpiryDate(joinStr, m * k); }
+  const prevEnd = k > 1 ? calcExpiryDate(joinStr, m * (k - 1)) : "";
   return {
-    nextExpiry: end,
-    dueDate: prevEnd,
-    startDate: prevEnd,
-    lateDays: Math.max(0, late)
+    nextExpiry: end,                                   // अगली फीस की तारीख
+    dueDate: prevEnd || end,                           // जिस तारीख को फीस देनी थी
+    startDate: prevEnd ? prevEnd : joinStr,
+    lateDays: prevEnd ? Math.round((new Date(paidStr + "T00:00:00") - new Date(prevEnd + "T00:00:00")) / 86400000) : 0
   };
 }
 /** पिछली expiry पता हो तो: अगली expiry = उसके बाद वाली जॉइनिंग-साइकिल (14/11 चुकाया → 14/12). देर = भुगतान − पिछली expiry */
 function shiftMonthsISO(dateStr, deltaMonths) {
   if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return "";
   const parts = dateStr.split("-").map(Number);
-  const year = parts[0], monthIdx = parts[1] - 1, day = parts[2];
-  const targetMonthTotal = year * 12 + monthIdx + parseInt(deltaMonths, 10);
-  const ty = Math.floor(targetMonthTotal / 12);
-  const tm = ((targetMonthTotal % 12) + 12) % 12;
+  const total = parts[0] * 12 + (parts[1] - 1) + parseInt(deltaMonths, 10);
+  const ty = Math.floor(total / 12), tm = ((total % 12) + 12) % 12;
   const lastDay = new Date(ty, tm + 1, 0).getDate();
-  const clampedDay = Math.min(day, lastDay);
-  return String(ty).padStart(4, "0") + "-" + String(tm + 1).padStart(2, "0") + "-" + String(clampedDay).padStart(2, "0");
+  return String(ty).padStart(4, "0") + "-" + String(tm + 1).padStart(2, "0") + "-" + String(Math.min(parts[2], lastDay)).padStart(2, "0");
 }
-
 function cycleForPayment(joinStr, paidStr, months, prevExp) {
+  if (!prevExp) return cycleFromJoin(joinStr, paidStr, months);
   const m = Math.max(1, parseInt(months, 10) || 1);
-  const anchor = (joinStr && /^\d{4}-\d{2}-\d{2}$/.test(joinStr)) ? joinStr : paidStr;
-
-  // Case 1: An existing next due/expiry date (prevExp) is already present.
-  if (prevExp && /^\d{4}-\d{2}-\d{2}$/.test(prevExp)) {
-    // If paying BEFORE prevExp (e.g., already due 20 Dec, paying again on 22 Nov or 5 Dec),
-    // do NOT push nextExpiry forward; keep nextExpiry = prevExp.
-    if (paidStr < prevExp) {
-      const startCycle = shiftMonthsISO(prevExp, -m) || anchor;
-      return {
-        nextExpiry: prevExp,
-        dueDate: prevExp,
-        startDate: startCycle,
-        lateDays: 0
-      };
-    }
-    // Paying ON or AFTER prevExp: advance by m months from prevExp.
-    const nextExp = shiftMonthsISO(prevExp, m);
-    const late = Math.round((new Date(paidStr + "T00:00:00") - new Date(prevExp + "T00:00:00")) / 86400000);
-    return {
-      nextExpiry: nextExp,
-      dueDate: prevExp,
-      startDate: prevExp,
-      lateDays: Math.max(0, late)
-    };
+  // Renewal date se pehle (same mahine me) kitni bhi baar fees do -> next due date wahi rahegi, aage nahi khiskegi
+  if (/^\d{4}-\d{2}-\d{2}$/.test(prevExp) && paidStr && paidStr < prevExp) {
+    return { nextExpiry: prevExp, dueDate: prevExp, startDate: shiftMonthsISO(prevExp, -m) || prevExp, lateDays: 0 };
   }
-
-  // Case 2: First payment (no prevExp yet): next due date is anchor + m months.
-  const firstNext = shiftMonthsISO(anchor, m);
-  return {
-    nextExpiry: firstNext,
-    dueDate: firstNext,
-    startDate: anchor,
-    lateDays: 0
-  };
+  if (!joinStr) joinStr = prevExp;
+  let k = 1, end = calcExpiryDate(joinStr, m);
+  while (end && (end <= prevExp || end < paidStr) && k < 600) { k++; end = calcExpiryDate(joinStr, m * k); }
+  const late = Math.round((new Date(paidStr + "T00:00:00") - new Date(prevExp + "T00:00:00")) / 86400000);
+  return { nextExpiry: end, dueDate: prevExp, startDate: prevExp, lateDays: Math.max(0, late) };
 }
 function getSelectedPlanMonths() {
   const durSelect = document.getElementById("feeDuration");
@@ -1412,7 +1225,13 @@ function getLateDaysDetails() {
   const c = cycleForPayment(joinVal, paidDateVal, getSelectedPlanMonths(), prevExp);
   if (pv && !selectedMember && c.dueDate) pv.value = c.dueDate;
   const nx = document.getElementById("nextDueLine");
-  if (nx) nx.textContent = c.nextExpiry ? "इस भुगतान के बाद अगली देय तारीख: " + formatDateDMY(c.nextExpiry) : "";
+  const nf = document.getElementById("mFeeNextDate");
+  let _shownNext = c.nextExpiry;
+  if (nf) {
+    if (adminUnlocked && nf.dataset.manual === "1" && nf.value) _shownNext = nf.value;
+    else if (c.nextExpiry) nf.value = c.nextExpiry;
+  }
+  if (nx) nx.textContent = _shownNext ? "इस भुगतान के बाद अगली देय तारीख: " + formatDateDMY(_shownNext) + ((nf && adminUnlocked && nf.dataset.manual === "1") ? " (एडमिन द्वारा बदली)" : "") : "";
   if (c.lateDays <= 0) return ok;
   return { isLate: true, days: c.lateDays, text: `आपने ${c.lateDays} दिन देर से भुगतान किया ⚠️` };
 }
@@ -1474,12 +1293,17 @@ async function handleInitialSubmit(e) {
       lateInfo: { isLate: false, days: 0, text: "सिर्फ़ Advance जमा" },
       planBase: parseFloat(durSelect.value) || 0,
       catVal: document.getElementById("feeCategory").value,
-      memberId: selectedMember.id, adminEdited: adminUnlocked,
+      memberId: selectedMember.id, adminEdited: adminUnlocked, nextFeeOverride: "",
       advanceAdd: paidAmt, advanceUsed: 0, advanceBefore: Number(selectedMember.advance) || 0,
       advanceOnly: true
     };
     await startPaymentFlow(mode, paidAmt);
     return;
+  }
+
+  // Student scheme: sahi jankari ki confirmation (Admin ko chhod kar)
+  if (document.getElementById("feeCategory").value === "student" && !adminUnlocked) {
+    if (!confirm("🎓 क्या आप वास्तव में विद्यार्थी (Student) हैं?\n\nयदि आपके द्वारा गलत सूचना देकर Students Scheme में एडमिशन लिया जाता है, तो बाकी की राशि (Student और असली प्लान का अंतर) आपको देनी पड़ेगी।\n\nOK = हाँ, मैं विद्यार्थी हूँ\nCancel = नहीं")) return;
   }
 
   // Advance: pehle se jama advance + is baar zyada diya hua paisa
@@ -1511,6 +1335,7 @@ async function handleInitialSubmit(e) {
     catVal: document.getElementById("feeCategory").value,
     memberId: selectedMember ? selectedMember.id : null,
     adminEdited: adminUnlocked,
+    nextFeeOverride: (function () { const nf = document.getElementById("mFeeNextDate"); return (adminUnlocked && nf && nf.dataset.manual === "1" && /^\d{4}-\d{2}-\d{2}$/.test(nf.value)) ? nf.value : ""; })(),
     advanceAdd: advanceAdd, advanceUsed: useAdv, advanceBefore: advBefore
   };
 
@@ -1544,7 +1369,7 @@ async function startPaymentFlow(mode, paidAmt) {
 function upiLink() {
   const d = pendingPaymentData;
   const note = "Fee " + String(d.name || "").replace(/[^A-Za-z0-9 ]/g, "").trim().slice(0, 25);
-  return "upi://pay?pa=" + encodeURIComponent(GYM.upiId) + "&pn=" + encodeURIComponent(GYM.name.replace(/[^A-Za-z0-9 ]/g, "")) +
+  return "upi://pay?pa=" + encodeURIComponent("merchant@upi") + "&pn=" + encodeURIComponent("Fitness Club") +
          "&am=" + encodeURIComponent(String(d.paidAmt)) + "&cu=INR&tn=" + encodeURIComponent(note);
 }
 function renderUpiQr() {
@@ -1633,7 +1458,7 @@ async function confirmOnlinePayment() {
     joinDate: d.joinDateVal || "", prevPaidDate: d.prevPaidDateVal || "",
     lateInfo: d.lateInfo || null, image: hasProof ? window.__proofData : "",
     advanceAdd: Number(d.advanceAdd) || 0, advanceUsed: Number(d.advanceUsed) || 0,
-    advanceOnly: !!d.advanceOnly,
+    advanceOnly: !!d.advanceOnly, nextFeeOverride: d.nextFeeOverride || "",
     checked: false, status: "pending", createdAt: nowIso, modeText: d.modeText
   };
 
@@ -1662,12 +1487,12 @@ async function confirmOnlinePayment() {
     if (hasProof) bfcNotifyPhoto(window.__proofData, _cap); else bfcNotify(_cap);
   } catch (e) {}
 
-  // WhatsApp Owner 9990954574
-  const waMsg = `🏋️ *${GYM.name} – New Payment*\n\n*सदस्य:* ${d.name}\n*मोबाइल:* ${d.phone}\n*राशि:* ₹${d.paidAmt}\n*प्लान:* ${d.cat} | ${d.planText}\n` +
+  // WhatsApp Owner 9876543210
+  const waMsg = `🏋️ *Fitness Club – New Payment*\n\n*सदस्य:* ${d.name}\n*मोबाइल:* ${d.phone}\n*राशि:* ₹${d.paidAmt}\n*प्लान:* ${d.cat} | ${d.planText}\n` +
     (hasRef ? `*UTR:* ${ref}\n` : `*Proof:* Screenshot\n`) +
     `*तारीख:* ${d.paidDateVal || ""}\n*समय:* ${fmtIST(nowIso)}\n\n⚠️ Approve बाकी है।`;
   const apprLink = proofId ? (location.origin + location.pathname + "?approve=" + proofId) : "";
-  window.open("https://wa.me/" + GYM.ownerWa + "?text=" + encodeURIComponent(waMsg + (apprLink ? "\n\n👉 सीधा Approve करने के लिए यह लिंक खोलें:\n" + apprLink : "")), "_blank");
+  window.open("https://wa.me/919876543210?text=" + encodeURIComponent(waMsg + (apprLink ? "\n\n👉 सीधा Approve करने के लिए यह लिंक खोलें:\n" + apprLink : "")), "_blank");
 
   // Owner khud (admin login ke saath) fees le raha ho to wait nahi: seedha approve + receipt
   try {
@@ -1733,7 +1558,7 @@ function startApprovalWait(proofId, paymentData) {
       if (snap.exists && snap.data().status === "rejected") {
         clearInterval(waitTimerInterval); clearInterval(waitPollInterval);
         waitTimerInterval = null; waitPollInterval = null;
-        if (statusEl) statusEl.innerHTML = "<b style='color:#ff6666'>❌ Owner ने यह पेमेंट Reject किया।" + (snap.data().rejectReason ? "<br>कारण: " + esc(snap.data().rejectReason) : "") + "<br>कृपया Owner से संपर्क करें: " + GYM.phone + "</b>";
+        if (statusEl) statusEl.innerHTML = "<b style='color:#ff6666'>❌ Owner ने यह पेमेंट Reject किया।" + (snap.data().rejectReason ? "<br>कारण: " + esc(snap.data().rejectReason) : "") + "<br>कृपया Owner से संपर्क करें: 9876543210</b>";
         return;
       }
       if (snap.exists && snap.data().checked === true) {
@@ -1791,7 +1616,7 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
   const _cyc = data.advanceOnly
     ? { nextExpiry: data.prevPaidDateVal || "", startDate: data.prevPaidDateVal || _paidStr, dueDate: data.prevPaidDateVal || "", lateDays: 0 }
     : cycleForPayment(data.joinDateVal || _paidStr, _paidStr, data.months, data.memberId != null ? data.prevPaidDateVal : "");
-  const _nextExpiry = _cyc.nextExpiry;
+  const _nextExpiry = (!data.advanceOnly && data.nextFeeOverride) ? data.nextFeeOverride : _cyc.nextExpiry;
   const validTill = formatDateDMY(_nextExpiry);
   const activeFromStr = formatDateDMY(_cyc.startDate);
   const activeToStr = formatDateDMY(addDaysStr(_nextExpiry, -1));
@@ -1874,21 +1699,20 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
   }
   }
 
-  const billId = (opts && opts.billId) ? opts.billId : (GYM.billPrefix + "-" + Date.now().toString().slice(-4));
-  if (!reprint && window.__currentProofId) { try { db.collection("payment_proofs").doc(window.__currentProofId).update({ billId: billId }); } catch (e) {} }
+  const billId = (opts && opts.billId) ? opts.billId : ("5BFC-" + Date.now().toString().slice(-4));
+  // Har payment ka apna unique QR key (billId akela 10 sec me repeat ho sakta hai)
+  const receiptKey = (opts && opts.receiptKey) ? opts.receiptKey : (reprint ? billId : (billId + "-" + Date.now().toString(36)));
+  if (!reprint && window.__currentProofId) { try { db.collection("payment_proofs").doc(window.__currentProofId).update({ billId: billId, receiptKey: receiptKey }); } catch (e) {} }
   document.getElementById("billId").innerText = billId;
-
-  // Safe monthly receipt QR: encodes ?doc=receipt&code=<billId> without exposing phone numbers or portal controls
   try {
     const receiptRecord = {
       billId: billId,
-      gymName: GYM.name,
-      gymAddress: GYM.address,
-      gymPhone: GYM.phone,
+      receiptKey: receiptKey,
+      gymName: (typeof getActiveGymProfile === 'function' ? getActiveGymProfile().gymName : "Fitness Club"),
       memberName: data.name,
       fatherName: data.father || "-",
-      planDetails: `${data.cat} | ${data.planText}`,
-      paidAmount: data.paidAmt,
+      planDetails: data.cat + " | " + data.planText,
+      paidAmount: data.advanceOnly ? (Number(data.advanceAdd) || 0) : data.paidAmt,
       dueAmount: data.dueAmt || 0,
       paidDate: paidDateFormatted,
       validTill: validTill,
@@ -1897,29 +1721,19 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
     };
     try {
       const arch = JSON.parse(localStorage.getItem("om_receipt_archive") || "{}");
-      arch[billId] = receiptRecord;
+      arch[receiptKey] = receiptRecord;
       localStorage.setItem("om_receipt_archive", JSON.stringify(arch));
     } catch (e) {}
-    try {
-      if (db) db.collection("receipts").doc(billId).set(receiptRecord, { merge: true }).catch(function(){});
-    } catch (e) {}
-
-    const qrContainer = document.getElementById("receiptMonthlyQrBox");
-    if (qrContainer) {
-      qrContainer.innerHTML = "";
-      const safeDocUrl = window.location.origin + window.location.pathname + "?doc=receipt&code=" + encodeURIComponent(billId);
-      new QRCode(qrContainer, {
-        text: safeDocUrl,
-        width: 64,
-        height: 64,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
+    try { if (db) db.collection("receipts").doc(receiptKey).set(receiptRecord, { merge: true }).catch(function () {}); } catch (e) {}
+    const qrBox = document.getElementById("receiptMonthlyQrBox");
+    if (qrBox) {
+      qrBox.innerHTML = "";
+      new QRCode(qrBox, {
+        text: window.location.origin + window.location.pathname + "?doc=receipt&code=" + encodeURIComponent(receiptKey),
+        width: 64, height: 64, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M
       });
     }
-  } catch(e) {
-    console.warn("Receipt QR Error:", e);
-  }
+  } catch (e) { console.warn("Receipt QR Error:", e); }
   document.getElementById("rMode").innerText = modeText;
   document.getElementById("rJoinDate").innerText = joinDateFormatted;
   document.getElementById("billDate").innerText = paidDateFormatted;
@@ -1964,7 +1778,7 @@ function finalizeReceiptAndUnlock(modeText, shortMode, showHurray, opts) {
     prevPayMsg = `• *पिछला भुगतान:* ${prevDateFormatted}\n`;
   }
 
-  const msg = data.advanceOnly ? (`🏋️‍♂️ *${GYM.name.toUpperCase()}*\n*Advance जमा रसीद*\n━━━━━━━━━━━━━━━━━━━━\n*सदस्य:* ${data.name}\n*रसीद संख्या:* #${billId}\n• *तारीख:* ${paidDateFormatted}\n• *Advance जमा:* ₹${data.advanceAdd} (${modeText})\n• *अगली फीस तारीख:* ${validTill} (बदली नहीं)\n━━━━━━━━━━━━━━━━━━━━\n📍 ${GYM.address}\n📞 संपर्क: ${GYM.phone}`) : `🏋️‍♂️ *${GYM.name.toUpperCase()}*
+  const msg = data.advanceOnly ? (`🏋️‍♂️ *FITNESS CLUB*\n*Advance जमा रसीद*\n━━━━━━━━━━━━━━━━━━━━\n*सदस्य:* ${data.name}\n*रसीद संख्या:* #${billId}\n• *तारीख:* ${paidDateFormatted}\n• *Advance जमा:* ₹${data.advanceAdd} (${modeText})\n• *अगली फीस तारीख:* ${validTill} (बदली नहीं)\n━━━━━━━━━━━━━━━━━━━━\n📍 उमराव खेड़ा, अकरमपुर, उन्नाव\n📞 संपर्क: 9876543210`) : `🏋️‍♂️ *FITNESS CLUB*
 *Official Payment & Fee Slip*
 ━━━━━━━━━━━━━━━━━━━━
 *सदस्य:* ${data.name}
@@ -1983,8 +1797,8 @@ ${specialDiscountMsg}${advMsg}• *बकाया राशि:* ₹${data.dueA
 • *अगला भुगतान:* ${validTill}
 • *खाता स्थिति:* सक्रिय (Active)
 ━━━━━━━━━━━━━━━━━━━━
-📍 ${GYM.address}
-📞 संपर्क: ${GYM.phone}`;
+📍 उमराव खेड़ा, अकरमपुर, उन्नाव
+📞 संपर्क: 9876543210`;
 
   document.getElementById("waBtn").onclick = () => window.open("https://wa.me/91" + data.phone + "?text=" + encodeURIComponent(msg), "_blank");
 
@@ -2065,7 +1879,6 @@ async function ownerEnter() {
   enterAdminSection();
 }
 function enterAdminSection() {
-  bfcImportAdmissions();
   var _os = document.getElementById("ownerStrip"); if (_os) _os.style.display = "none";
   document.getElementById("sectionFees").style.display = "none";
   document.getElementById("sectionAdmin").style.display = "block";
@@ -2266,7 +2079,7 @@ function renderAdminTable() {
     }
 
     tr.innerHTML = `
-      <td style="font-weight:bold; color:#ffcc00;">${dueDay} तारीख</td>
+      <td style="font-weight:bold; color:#ffcc00;">${dueDay} तारीख${(function(){var nd=memberDueDate(m);return nd?'<br><small style="color:#00ff99;font-weight:normal;">अगली: '+formatDateDMY(nd)+'</small>':'';})()}</td>
       <td>
         <b>${__esc(m.name)}</b><br>
         <small style="color:#888;">${__esc(m.phone)}</small>${(Number(m.advance) > 0) ? `<br><span style="background:#0a2a14;color:#6f6;border:1px solid #1d6b3a;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:bold;">💰 Advance ₹${Number(m.advance)}</span>` : ""}${(Number(m.dueAmount) > 0) ? `<br><span style="background:#2a0a0a;color:#ff8a8a;border:1px solid #6b1d1d;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:bold;">⚠ Baaki ₹${Number(m.dueAmount)}</span>` : ""}
@@ -2397,12 +2210,12 @@ async function reprintProofReceipt(id) {
       paidDateVal: p.paidDate || "", joinDateVal: p.joinDate || "", prevPaidDateVal: p.prevPaidDate || "",
       lateInfo: p.lateInfo || { text: "-" }, planBase: Number(p.planBase) || 0, catVal: p.catVal || "job",
       memberId: p.memberId ? p.memberId : null, adminEdited: true,
-      advanceAdd: Number(p.advanceAdd) || 0, advanceUsed: Number(p.advanceUsed) || 0, advanceOnly: !!p.advanceOnly,
+      advanceAdd: Number(p.advanceAdd) || 0, advanceUsed: Number(p.advanceUsed) || 0, advanceOnly: !!p.advanceOnly, nextFeeOverride: p.nextFeeOverride || "",
       paidAtIso: p.createdAt || new Date().toISOString(), modeText: p.modeText || "Online UPI"
     };
     window.__reprintBack = true;
     document.getElementById("proofsModal").style.display = "none";
-    finalizeReceiptAndUnlock(p.modeText || "Online UPI", "Online", false, { reprint: true, billId: p.billId || (GYM.billPrefix + "-" + String(stamp).slice(-4)) });
+    finalizeReceiptAndUnlock(p.modeText || "Online UPI", "Online", false, { reprint: true, billId: p.billId || ("5BFC-" + String(stamp).slice(-4)), receiptKey: p.receiptKey || "" });
   } catch (e) { alert("❌ Receipt nahi bani: " + (e && e.message || e)); }
 }
 async function rejectProof(id, btn) {
@@ -2474,8 +2287,7 @@ function openPlanEdit(identifier) {
   document.getElementById("peCat").value = p.type;
   document.getElementById("peDur").innerHTML = planOptionsHTML(p.type, false);
   document.getElementById("peDur").value = String(p.base);
-  ensureDurOption(document.getElementById("peDur"), p.base, p.months);
-  document.getElementById("peNextDue").value = memberDueDate(m) || "";
+  document.getElementById("peNextFee").value = memberDueDate(m) || "";
   document.getElementById("planEditModal").style.display = "flex";
 }
 function savePlanEdit() {
@@ -2486,8 +2298,8 @@ function savePlanEdit() {
   list[idx].type = document.getElementById("peCat").value;
   list[idx].planBase = parseFloat(sel.value) || 0;
   list[idx].planMonths = parseInt(sel.options[sel.selectedIndex].getAttribute("data-months")) || 1;
-  const _nd = document.getElementById("peNextDue").value;
-  if (_nd) { list[idx].validTill = _nd; list[idx].dueV = 2; }
+  const _nfv = document.getElementById("peNextFee").value;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(_nfv) && _nfv !== memberDueDate(list[idx])) { list[idx].validTill = _nfv; list[idx].dueV = 2; }
   persistList(list);
   try { bfcMirrorPublic(list[idx]); } catch (e) {}
   document.getElementById("planEditModal").style.display = "none";
@@ -2524,7 +2336,7 @@ function toggleMemberPaidById(identifier) {
 function showMemberDetailById(identifier) {
   const m = getMasterList().find(x => (x.id && x.id.toString() === identifier.toString()) || (x.phone && x.phone.toString() === identifier.toString()));
   if (!m) return;
-  alert(`📋 सदस्य सम्पूर्ण रिकॉर्ड (ADMIN ONLY):\n\nनाम: ${m.name}\nपिता का नाम: ${m.father || m.parentName || 'N/A'}\nमोबाइल: ${m.phone}\nश्रेणी: ${m.type === 'student' ? 'विद्यार्थी' : 'जॉब/व्यापार'}\nस्थिति: ${m.status || m.manualStatus}\nमाध्यम: ${m.payMode || 'Cash'}\nअंतिम पेमेंट तिथि: ${m.lastPaid || 'N/A'}\nजॉइनिंग तिथि: ${m.joinDate || 'N/A'}\nअगली फीस तारीख: ${memberDueDate(m) ? formatDateDMY(memberDueDate(m)) : 'N/A'}`);
+  alert(`📋 सदस्य सम्पूर्ण रिकॉर्ड (ADMIN ONLY):\n\nनाम: ${m.name}\nपिता का नाम: ${m.father || m.parentName || 'N/A'}\nमोबाइल: ${m.phone}\nश्रेणी: ${m.type === 'student' ? 'विद्यार्थी' : 'जॉब/व्यापार'}\nस्थिति: ${m.status || m.manualStatus}\nमाध्यम: ${m.payMode || 'Cash'}\nअंतिम पेमेंट तिथि: ${m.lastPaid || 'N/A'}\nजॉइनिंग तिथि: ${m.joinDate || 'N/A'}`);
 }
 
 async function deleteMemberById(identifier) {
@@ -2540,10 +2352,7 @@ async function deleteMemberById(identifier) {
   m.payMode = "-";
   m.amount = 0;
   m.lastPaid = "";
-  delete m.validTill;
-  delete m.dueV;
   persistList(list);
-  try { bfcMirrorPublic(Object.assign({}, m, { validTill: "" })); } catch (e) {}
   alert("✅ \"" + m.name + "\" ki fees reset ho gayi (ab Pending hai).");
   renderAdminTable();
 }
@@ -2679,51 +2488,136 @@ window.addEventListener("DOMContentLoaded",function(){
   if(pm){for(var i=pm.options.length-1;i>=0;i--){if(pm.options[i].value==="cash")pm.remove(i)}pm.value="online"}
 });
 </script>
-
 <script>
+/* Receipt QR scan: ?doc=receipt&code=<receiptKey> -> sirf wahi receipt / fees details dikhegi */
 window.addEventListener("DOMContentLoaded", async function () {
   try {
     const params = new URLSearchParams(location.search);
-    const docType = params.get("doc");
     const docCode = params.get("code");
-    if (docType === "receipt" && docCode) {
-      document.getElementById("feesWelcomeModal").style.display = "none";
-      document.querySelector(".main-card").style.display = "none";
-      let rec = null;
-      try {
-        const arch = JSON.parse(localStorage.getItem("om_receipt_archive") || "{}");
-        if (arch && arch[docCode]) rec = arch[docCode];
-      } catch (e) {}
-      if (!rec && db) {
-        try {
-          const snap = await db.collection("receipts").doc(docCode).get();
-          if (snap.exists) rec = snap.data();
-        } catch (e) {}
-      }
-      if (rec) {
-        document.getElementById("billId").innerText = rec.billId || docCode;
-        document.getElementById("rMode").innerText = rec.modeText || "Verified";
-        document.getElementById("rJoinDate").innerText = rec.paidDate || "--";
-        document.getElementById("billDate").innerText = rec.paidDate || "--";
-        document.getElementById("rName").innerText = rec.memberName || "--";
-        document.getElementById("rFather").innerText = rec.fatherName || "-";
-        document.getElementById("rPhone").innerText = "Verified Member";
-        document.getElementById("rPlanDetails").innerText = rec.planDetails || "--";
-        document.getElementById("rGymFee").innerText = "₹" + (rec.paidAmount || 0);
-        document.getElementById("rDueFee").innerText = "₹" + (rec.dueAmount || 0);
-        document.getElementById("rValidTill").innerText = rec.validTill || "--";
-        const qrContainer = document.getElementById("receiptMonthlyQrBox");
-        if (qrContainer) {
-          qrContainer.innerHTML = "";
-          new QRCode(qrContainer, { text: location.href, width: 64, height: 64 });
-        }
-        document.getElementById("receiptModal").style.display = "flex";
-      } else {
-        alert("Receipt record (" + docCode + ") nahi mila.");
-      }
+    if (params.get("doc") !== "receipt" || !docCode) return;
+    const wm = document.getElementById("feesWelcomeModal"); if (wm) wm.style.display = "none";
+    const mc = document.querySelector(".main-card"); if (mc) mc.style.display = "none";
+    let rec = null;
+    try { const arch = JSON.parse(localStorage.getItem("om_receipt_archive") || "{}"); if (arch && arch[docCode]) rec = arch[docCode]; } catch (e) {}
+    if (!rec && db) {
+      try { const snap = await db.collection("receipts").doc(docCode).get(); if (snap.exists) rec = snap.data(); } catch (e) {}
     }
+    if (!rec) { alert("Receipt record (" + docCode + ") nahi mila."); return; }
+    const set = function (id, v) { const el = document.getElementById(id); if (el) el.innerText = v; };
+    set("billId", rec.billId || docCode);
+    set("rMode", rec.modeText || "Verified");
+    set("rJoinDate", rec.paidDate || "--");
+    set("billDate", rec.paidDate || "--");
+    set("rName", rec.memberName || "--");
+    set("rFather", rec.fatherName || "-");
+    set("rPhone", "Verified Member");
+    set("rPlanDetails", rec.planDetails || "--");
+    set("rGymFee", "₹" + (rec.paidAmount || 0));
+    set("rDueFee", "₹" + (rec.dueAmount || 0));
+    set("rValidTill", rec.validTill || "--");
+    const qb = document.getElementById("receiptMonthlyQrBox");
+    if (qb) { qb.innerHTML = ""; new QRCode(qb, { text: location.href, width: 64, height: 64 }); }
+    document.getElementById("receiptModal").style.display = "flex";
   } catch (e) {}
 });
 </script>
+
+<script>
+// --- UNIVERSAL MULTI-TENANT DYNAMIC PROFILE RESOLVER ---
+function getActiveGymProfile() {
+  try {
+    const custom = JSON.parse(localStorage.getItem("om_active_gym_profile") || "null");
+    if (custom && custom.gymName) return custom;
+  } catch (e) {}
+
+  try {
+    const vault = JSON.parse(localStorage.getItem("om_master_customer_vault_v2") || "[]");
+    const logged = localStorage.getItem("om_logged_user") || "";
+    if (vault.length && logged) {
+      const match = vault.find(c => logged.includes(c.gymName) || logged.includes(c.ownerName));
+      if (match) {
+        return {
+          gymName: match.gymName,
+          ownerName: match.ownerName,
+          phone: match.mobile,
+          address: match.address || (match.pincode ? "PIN: " + match.pincode : "Main Road"),
+          upiId: match.upiId || (match.mobile ? match.mobile + "@upi" : "gymowner@upi"),
+          ownerWa: match.mobile || "9876543210"
+        };
+      }
+    }
+    if (vault.length > 0) {
+      const first = vault[0];
+      return {
+        gymName: first.gymName,
+        ownerName: first.ownerName,
+        phone: first.mobile,
+        address: first.address || "Main Road",
+        upiId: first.mobile ? first.mobile + "@upi" : "gymowner@upi",
+        ownerWa: first.mobile || "9876543210"
+      };
+    }
+  } catch (e) {}
+
+  return {
+    gymName: "Universal Fitness Club",
+    ownerName: "Gym Owner / Manager",
+    phone: "9876543210",
+    address: "Fitness Center Campus",
+    upiId: "merchant@upi",
+    ownerWa: "9876543210"
+  };
+}
+
+(function applyUniversalTenantProfile() {
+  window.addEventListener("DOMContentLoaded", function() {
+    const prof = getActiveGymProfile();
+    document.title = `${prof.gymName} — Fees Portal`;
+
+    const elWelcomeTitle = document.getElementById("welcomeGymTitle");
+    if (elWelcomeTitle) elWelcomeTitle.textContent = prof.gymName;
+    const elWelcomeSub = document.getElementById("welcomeGymSub");
+    if (elWelcomeSub) elWelcomeSub.textContent = prof.gymName;
+    const elWelcomeAddr = document.getElementById("welcomeGymAddress");
+    if (elWelcomeAddr) elWelcomeAddr.textContent = `${prof.address} | Ph: ${prof.phone}`;
+
+    const elHdrName = document.getElementById("hdrGymName");
+    if (elHdrName) elHdrName.textContent = prof.gymName;
+    const elHdrTagline = document.getElementById("hdrGymTagline");
+    if (elHdrTagline) elHdrTagline.textContent = `${prof.address} | Ph: ${prof.phone}`;
+
+    const elHurrayTitle = document.getElementById("hurrayGymTitle");
+    if (elHurrayTitle) elHurrayTitle.textContent = prof.gymName;
+
+    const elWatermark = document.getElementById("rWatermark");
+    if (elWatermark) elWatermark.textContent = prof.gymName;
+    const elRHeadTitle = document.getElementById("rGymHeadTitle");
+    if (elRHeadTitle) elRHeadTitle.textContent = prof.gymName;
+    const elRHeadAddr = document.getElementById("rGymHeadAddr");
+    if (elRHeadAddr) elRHeadAddr.textContent = `${prof.address} | Ph: ${prof.phone}`;
+
+    const elROwnerStrong = document.getElementById("rOwnerStrong");
+    if (elROwnerStrong) elROwnerStrong.textContent = prof.ownerName;
+    const elROwnerRole = document.getElementById("rOwnerRole");
+    if (elROwnerRole) elROwnerRole.textContent = "Owner / Manager";
+    const elROwnerGym = document.getElementById("rOwnerGymName");
+    if (elROwnerGym) elROwnerGym.textContent = prof.gymName;
+
+    const elDispUpi = document.getElementById("dispUpiId");
+    if (elDispUpi) elDispUpi.textContent = prof.upiId;
+
+    // Override upiLink dynamically
+    window.upiLink = function() {
+      const d = pendingPaymentData || {};
+      const note = "Fee " + String(d.name || "").replace(/[^A-Za-z0-9 ]/g, "").trim().slice(0, 25);
+      return "upi://pay?pa=" + encodeURIComponent(prof.upiId) +
+             "&pn=" + encodeURIComponent(prof.gymName) +
+             "&am=" + encodeURIComponent(String(d.paidAmt || 0)) +
+             "&cu=INR&tn=" + encodeURIComponent(note);
+    };
+  });
+})();
+</script>
 </body>
 </html>
+
