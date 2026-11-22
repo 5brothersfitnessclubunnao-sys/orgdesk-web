@@ -827,11 +827,38 @@
       const fStf = curBr === "ALL" ? stf : stf.filter(x => x.branch === curBr);
       const fExt = curBr === "ALL" ? ext : ext.filter(x => x.br === curBr);
       const extSum = fExt.reduce((a,b) => a + Number(b.amt || 0), 0);
-      document.getElementById("vEmpCount").textContent = fStf.length + " Staff";
+
+      const brStats = {
+        "ALL": { totalCol: 223200, feesCol: 184800, members: 148, newAdm: 42, suppCol: 38400, cash: 143000, online: 75000, exp: 78400, pill: "5 Branches" },
+        "001": { totalCol: 112000, feesCol: 92000, members: 64, newAdm: 18, suppCol: 20000, cash: 72000, online: 40000, exp: 34000, pill: "Branch 001 (Unnao)" },
+        "002": { totalCol: 48200, feesCol: 40200, members: 36, newAdm: 10, suppCol: 8000, cash: 30000, online: 18200, exp: 18000, pill: "Branch 002 (Kanpur)" },
+        "003": { totalCol: 34000, feesCol: 28000, members: 24, newAdm: 7, suppCol: 6000, cash: 22000, online: 12000, exp: 14000, pill: "Branch 003 (Lucknow)" },
+        "004": { totalCol: 17000, feesCol: 14000, members: 14, newAdm: 4, suppCol: 3000, cash: 11000, online: 6000, exp: 7400, pill: "Branch 004 (Agra)" },
+        "005": { totalCol: 12000, feesCol: 10600, members: 10, newAdm: 3, suppCol: 1400, cash: 8000, online: 4000, exp: 5000, pill: "Branch 005 (Varanasi)" }
+      };
+
+      const b = brStats[curBr] || brStats["ALL"];
+      const netVal = b.totalCol + extSum - b.exp;
+      const empDisplay = curBr === "ALL" ? (stf.length + " Staff") : (fStf.length + " Staff");
+
+      document.getElementById("vEmpCount").textContent = empDisplay;
       document.getElementById("vExtraCol").textContent = "₹" + extSum.toLocaleString("en-IN");
-      document.getElementById("vMembers").textContent = String(148 + adm.length);
-      document.getElementById("vAdmissions").textContent = String(42 + adm.length);
-      document.getElementById("pillBranches").textContent = curBr === "ALL" ? "5 Branches" : "Branch " + curBr;
+      document.getElementById("vMembers").textContent = String(b.members + adm.length);
+      document.getElementById("vAdmissions").textContent = String(b.newAdm + adm.length);
+      document.getElementById("pillBranches").textContent = b.pill;
+
+      const elTot = document.getElementById("vTotalCol");
+      if (elTot) elTot.textContent = "₹" + (b.totalCol + extSum).toLocaleString("en-IN");
+      const elFees = document.getElementById("vFeesCol");
+      if (elFees) elFees.textContent = "₹" + b.feesCol.toLocaleString("en-IN");
+      const elCash = document.getElementById("vCashOnline");
+      if (elCash) elCash.textContent = "₹" + b.cash.toLocaleString("en-IN") + " Cash / ₹" + b.online.toLocaleString("en-IN") + " Online";
+      const elNet = document.getElementById("vNetPnl");
+      if (elNet) elNet.textContent = (netVal >= 0 ? "+₹" : "-₹") + Math.abs(netVal).toLocaleString("en-IN");
+      const elExpSub = document.getElementById("vExpSub");
+      if (elExpSub) elExpSub.textContent = "Exp: ₹" + b.exp.toLocaleString("en-IN") + " • " + (netVal >= 0 ? "Net Profit" : "Net Loss");
+      const elLiveMeta = document.getElementById("liveBoardMeta");
+      if (elLiveMeta) elLiveMeta.textContent = "Collection: ₹" + (b.totalCol + extSum).toLocaleString("en-IN") + " • Pro";
     }
 
     function renderBillCard() {
@@ -1632,6 +1659,29 @@ Telegram notification sent to Manager.`);
       const el = document.getElementById("attClock");
       if (el) el.textContent = new Date().toLocaleString("en-IN");
     }, 1000);
+
+    
+    // Anti-screenshot deterrent (PrintScreen block, contextmenu block, background/blur veil)
+    (function enableAntiScreenshotShield() {
+      const veil = document.createElement("div");
+      veil.id = "ssShieldVeil";
+      veil.style.cssText = "display:none;position:fixed;inset:0;background:#050813;z-index:2147483647;align-items:center;justify-content:center;color:#FB7185;font-weight:900;font-size:14px;text-align:center;padding:20px;";
+      veil.textContent = "SCREENSHOT / CAPTURE PROTECTED";
+      document.body.appendChild(veil);
+
+      window.addEventListener("keyup", function(e) {
+        if (e.key === "PrintScreen" || e.keyCode === 44) {
+          veil.style.display = "flex";
+          setTimeout(() => { veil.style.display = "none"; }, 1800);
+        }
+      });
+      document.addEventListener("contextmenu", e => e.preventDefault());
+      document.addEventListener("visibilitychange", () => {
+        veil.style.display = document.hidden ? "flex" : "none";
+      });
+      window.addEventListener("blur", () => { veil.style.display = "flex"; });
+      window.addEventListener("focus", () => { veil.style.display = "none"; });
+    })();
 
     seedData();
     syncDashboard();
