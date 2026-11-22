@@ -65,20 +65,20 @@
       font-weight: 700; cursor: pointer; text-decoration: underline; padding: 3px 0;
     }
     .btn-link.gold { color: var(--gold); }
-    .btn-link.rose { color: var(--rose); }
 
     .panel-box {
       display: none; background: #070D1C; border: 1px solid var(--border);
-      border-radius: 14px; padding: 14px; margin-top: 12px; font-size: 12px;
+      border-radius: 14px; padding: 14px; margin-top: 6px; font-size: 12px;
     }
     .panel-box.open { display: block; }
+
     .alert-err {
       display: none; background: rgba(251,113,133,0.15); border: 1px solid var(--rose);
-      color: #FECDD3; border-radius: 10px; padding: 9px 11px; font-size: 11.5px; margin-top: 10px; line-height: 1.4;
+      color: #FECDD3; border-radius: 10px; padding: 11px; font-size: 11.5px; margin-top: 10px; line-height: 1.45;
     }
     .alert-ok {
       display: none; background: rgba(52,211,153,0.14); border: 1px solid var(--emerald);
-      color: #D1FAE5; border-radius: 10px; padding: 9px 11px; font-size: 11.5px; margin-top: 10px; line-height: 1.4;
+      color: #D1FAE5; border-radius: 10px; padding: 11px; font-size: 11.5px; margin-top: 10px; line-height: 1.45;
     }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .rec { background: #0B132B; border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 11.5px; }
@@ -90,27 +90,28 @@
 <body>
 
   <div class="card" id="mainLoginCard">
-    <div class="hdr-center">
-      <div class="om-logo">ॐ</div>
-      <h1>Om Software ERP</h1>
-      <p class="sub">Central Enterprise Authentication Gateway</p>
-    </div>
+    <div id="loginHeaderBlock">
+      <div class="hdr-center">
+        <div class="om-logo">ॐ</div>
+        <h1>Om Software ERP</h1>
+        <p class="sub">Central Enterprise Authentication Gateway</p>
+      </div>
 
-    <!-- Role Switcher: Master Admin, Admin/Owner, Manager, Staff -->
-    <div class="role-bar">
-      <button type="button" class="role-btn dev active" id="rbDev" onclick="setRole('dev')">Master Admin</button>
-      <button type="button" class="role-btn" id="rbAdmin" onclick="setRole('admin')">Admin (Owner)</button>
-      <button type="button" class="role-btn" id="rbManager" onclick="setRole('manager')">Manager</button>
-      <button type="button" class="role-btn" id="rbStaff" onclick="setRole('staff')">Staff</button>
+      <!-- Role Switcher -->
+      <div class="role-bar">
+        <button type="button" class="role-btn dev active" id="rbDev" onclick="setRole('dev')">Master Admin</button>
+        <button type="button" class="role-btn" id="rbAdmin" onclick="setRole('admin')">Admin (Owner)</button>
+        <button type="button" class="role-btn" id="rbManager" onclick="setRole('manager')">Manager</button>
+        <button type="button" class="role-btn" id="rbStaff" onclick="setRole('staff')">Staff</button>
+      </div>
     </div>
 
     <form id="authForm" onsubmit="handleUniversalLogin(event)" autocomplete="off">
-      
-      <!-- 1. MASTER ADMIN (DEVELOPER): EMAIL & PASSWORD ONLY -->
+      <!-- 1. MASTER ADMIN -->
       <div id="secDev">
         <div class="rec" style="border-color:var(--rose);">
           <b style="color:var(--rose)">👑 Master Admin / Developer Desk</b>
-          <div style="font-size:10.5px;color:var(--muted);margin-top:2px;">Filhal ke liye keval apna Email aur Password daal kar use karein. Full master override &amp; all customer vaults active.</div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:2px;">Keval apna Email aur Password daal kar enter karein.</div>
         </div>
         <div class="fg">
           <label>Developer / Master Admin Email *</label>
@@ -164,7 +165,7 @@
         <div id="admLicFields" style="display:none;">
           <div class="fg"><label>Registered Mobile No *</label><input type="tel" id="admLicMob" maxlength="10" placeholder="10-digit mobile"></div>
           <div class="fg"><label>Registered Email ID *</label><input type="email" id="admLicEmail" placeholder="owner@fitnessclub.com"></div>
-          <div class="fg"><label>Active License Key *</label><input type="text" id="admLicKey" class="cap-field" placeholder="e.g. LIC-OM-OPE2HK"></div>
+          <div class="fg"><label>Active License Key *</label><input type="text" id="admLicKey" class="cap-field" placeholder="e.g. LIC-OM-OPE2HK" oninput="formatSmartCode(this)"></div>
         </div>
 
         <button type="submit" class="btn-gold">Sign In As Gym Owner</button>
@@ -180,10 +181,10 @@
       <div id="secManager" style="display:none;">
         <div class="fg">
           <label>Employee Code (Sent by Gym Owner) *</label>
-          <input type="text" id="mgrEmpCode" class="cap-field" placeholder="e.g. MGR-001-1" oninput="this.value=this.value.toUpperCase()">
+          <input type="text" id="mgrEmpCode" class="cap-field" placeholder="e.g. MGR-001-1" autocomplete="off" autocapitalize="characters" oninput="formatSmartCode(this)">
         </div>
         <div class="fg">
-          <label>Branch Code *</label>
+          <label>Branch Code (Numbers Only) *</label>
           <input type="text" id="mgrBranch" inputmode="numeric" placeholder="e.g. 001" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
         </div>
         <div class="fg">
@@ -208,9 +209,13 @@
 
       <!-- 4. STAFF LOGIN -->
       <div id="secStaff" style="display:none;">
+        <div class="rec" style="border-color:var(--cyan);">
+          <b style="color:var(--cyan)">👤 Staff Portal (Restricted Read-Only Access)</b>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:2px;">Staff keval apni attendance, salary, leave aur advance dekh/apply kar sakta hai; admin data nahi dikhega.</div>
+        </div>
         <div class="fg">
-          <label>Employee ID *</label>
-          <input type="text" id="stfEmpId" class="cap-field" placeholder="e.g. STF-001-1" oninput="this.value=this.value.toUpperCase()">
+          <label>Employee ID / Code *</label>
+          <input type="text" id="stfEmpId" class="cap-field" placeholder="e.g. STF-001-1" autocomplete="off" autocapitalize="characters" oninput="formatSmartCode(this)">
         </div>
         <div class="fg">
           <label>Registered Mobile No *</label>
@@ -236,20 +241,20 @@
     <div id="alertErr" class="alert-err"></div>
     <div id="alertOk" class="alert-ok"></div>
 
-    <!-- OWNER REGISTRATION MODAL / PANEL -->
+    <!-- OWNER REGISTRATION PANEL (SHOWS ALONE WHEN CLICKED) -->
     <div id="ownerSignupPanel" class="panel-box">
-      <b style="color:var(--gold);display:block;margin-bottom:8px;">📝 Register Fitness Center (Owner Onboarding)</b>
+      <b style="color:var(--gold);display:block;margin-bottom:8px;">📝 Register Fitness Center (First-Time Owner Sign Up)</b>
       <div class="fg"><label>Fitness Center / Gym Name *</label><input type="text" id="suGymName" placeholder="e.g. 5 Brother's Fitness Club"></div>
       <div class="grid2">
         <div class="fg"><label>Owner Full Name *</label><input type="text" id="suOwnerName" placeholder="Your Full Name"></div>
-        <div class="fg"><label>Contact Mobile No *</label><input type="tel" id="suMobile" maxlength="10" placeholder="10-digit mobile"></div>
+        <div class="fg"><label>Contact Mobile No *</label><input type="tel" id="suMobile" maxlength="10" placeholder="10-digit mobile" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
       <div class="grid2">
         <div class="fg"><label>Date of Birth (DOB) *</label><input type="date" id="suDob"></div>
         <div class="fg"><label>Registered Email ID *</label><input type="email" id="suEmail" placeholder="official@gym.com"></div>
       </div>
       <div class="fg"><label>Organization Full Address *</label><input type="text" id="suAddress" placeholder="Street, Locality, Area"></div>
-      <div class="fg"><label>PIN Code *</label><input type="text" id="suPincode" maxlength="6" placeholder="e.g. 209862"></div>
+      <div class="fg"><label>PIN Code *</label><input type="text" id="suPincode" maxlength="6" inputmode="numeric" placeholder="e.g. 209862" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       <div class="grid2">
         <div class="fg"><label>Create Login Password *</label><input type="password" id="suPass" placeholder="••••••••"></div>
         <div class="fg"><label>Create 4-Digit MPIN *</label><input type="password" id="suMpin" maxlength="4" inputmode="numeric" placeholder="4-digit MPIN" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
@@ -265,14 +270,14 @@
       <div class="fg"><label>Your Security Answer *</label><input type="text" id="suSecA" placeholder="Enter answer"></div>
 
       <button type="button" class="btn-gold" onclick="proceedToPlanSelection()">Proceed to Plan &amp; ₹1 Confirmation</button>
-      <button type="button" class="btn-sec" onclick="closeAllPanels()">Cancel</button>
+      <button type="button" class="btn-sec" onclick="backToLoginView()">← Back to Login</button>
     </div>
 
     <!-- PLAN SELECTION & ₹1 CONFIRMATION GATEWAY -->
     <div id="planGatewayPanel" class="panel-box">
       <b style="color:var(--emerald);display:block;margin-bottom:6px;">💳 Select Plan &amp; Confirm Verification</b>
       <p style="font-size:11px;color:var(--muted);margin-bottom:10px;">
-        Auto-renewal and instant license generation. ₹1 payment screenshot and UTR are mandatory for security verification.
+        Please take a screenshot of the payment and mention UTR no. Without UTR and payment screenshot we can't verify successfully.
       </p>
 
       <div class="fg">
@@ -292,16 +297,8 @@
       </div>
 
       <div class="fg">
-        <label>UPI Payment / QR Scanner</label>
-        <div style="background:#050813;border:1px dashed var(--cyan);border-radius:10px;padding:10px;text-align:center;">
-          <div style="font-size:11px;color:var(--cyan);font-weight:800;">UPI ID: omsoftware@upi</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;">Scan &amp; pay the confirmation fee from Google Pay, PhonePe, or Paytm</div>
-        </div>
-      </div>
-
-      <div class="fg">
         <label>Payment UTR / Transaction Reference No *</label>
-        <input type="text" id="pgUtrNo" placeholder="Enter 12-digit UTR Number" required>
+        <input type="text" id="pgUtrNo" placeholder="Enter UTR Number" required>
       </div>
       <div class="fg">
         <label>Payment Screenshot Receipt (Mandatory) *</label>
@@ -314,38 +311,38 @@
       </div>
 
       <button type="button" class="btn-gold" onclick="submitPlanPaymentAndGenerateLicense()">Submit Payment &amp; Generate License Key</button>
-      <button type="button" class="btn-sec" onclick="closeAllPanels()">Cancel</button>
+      <button type="button" class="btn-sec" onclick="backToLoginView()">← Back to Login</button>
     </div>
 
     <!-- FIRST TIME MANAGER SETUP PANEL -->
     <div id="mgrSetupPanel" class="panel-box">
       <b style="color:var(--cyan);display:block;margin-bottom:8px;">Manager First-Time Setup</b>
-      <div class="fg"><label>Employee Code *</label><input type="text" id="msCode" class="cap-field" placeholder="MGR-001-1"></div>
-      <div class="fg"><label>Branch Code *</label><input type="text" id="msBranch" placeholder="001"></div>
+      <div class="fg"><label>Employee Code *</label><input type="text" id="msCode" class="cap-field" placeholder="MGR-001-1" oninput="formatSmartCode(this)"></div>
+      <div class="fg"><label>Branch Code *</label><input type="text" id="msBranch" inputmode="numeric" placeholder="001" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       <div class="fg"><label>Email ID *</label><input type="email" id="msEmail" placeholder="manager@gym.com"></div>
       <div class="grid2">
         <div class="fg"><label>Create Password *</label><input type="password" id="msPass" placeholder="••••••••"></div>
-        <div class="fg"><label>Create 4-Digit MPIN *</label><input type="password" id="msMpin" maxlength="4" placeholder="4 digits"></div>
+        <div class="fg"><label>Create 4-Digit MPIN *</label><input type="password" id="msMpin" maxlength="4" inputmode="numeric" placeholder="4 digits" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
       <button type="button" class="btn-gold" onclick="saveManagerFirstTime()">Save Credentials &amp; Login</button>
-      <button type="button" class="btn-sec" onclick="closeAllPanels()">Cancel</button>
+      <button type="button" class="btn-sec" onclick="backToLoginView()">← Back to Login</button>
     </div>
 
     <!-- FIRST TIME STAFF SETUP PANEL -->
     <div id="stfSetupPanel" class="panel-box">
       <b style="color:var(--cyan);display:block;margin-bottom:8px;">Staff First-Time Setup</b>
-      <div class="fg"><label>Employee ID *</label><input type="text" id="ssId" class="cap-field" placeholder="STF-001-1"></div>
-      <div class="fg"><label>Registered Mobile No *</label><input type="tel" id="ssMobile" maxlength="10" placeholder="10-digit mobile"></div>
+      <div class="fg"><label>Employee ID *</label><input type="text" id="ssId" class="cap-field" placeholder="STF-001-1" oninput="formatSmartCode(this)"></div>
+      <div class="fg"><label>Registered Mobile No *</label><input type="tel" id="ssMobile" maxlength="10" inputmode="numeric" placeholder="10-digit mobile" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       <div class="grid2">
         <div class="fg"><label>Create Password *</label><input type="password" id="ssPass" placeholder="••••••••"></div>
-        <div class="fg"><label>Create 4-Digit MPIN *</label><input type="password" id="ssMpin" maxlength="4" placeholder="4 digits"></div>
+        <div class="fg"><label>Create 4-Digit MPIN *</label><input type="password" id="ssMpin" maxlength="4" inputmode="numeric" placeholder="4 digits" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       </div>
       <button type="button" class="btn-gold" onclick="saveStaffFirstTime()">Save Credentials &amp; Login</button>
-      <button type="button" class="btn-sec" onclick="closeAllPanels()">Cancel</button>
+      <button type="button" class="btn-sec" onclick="backToLoginView()">← Back to Login</button>
     </div>
   </div>
 
-  <!-- MASTER ADMIN (DEVELOPER) DASHBOARD MODAL -->
+  <!-- MASTER ADMIN DASHBOARD -->
   <div class="card" id="devDashboardCard" style="display:none;max-width:640px;">
     <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:14px;">
       <div>
@@ -355,29 +352,11 @@
       <button type="button" class="btn-sec" style="margin-top:0;padding:6px 10px;" onclick="logoutDev()">Logout</button>
     </div>
 
-    <!-- Live Developer Metrics -->
     <div class="grid2" style="margin-bottom:12px;">
-      <div class="rec">
-        <span style="font-size:11px;color:var(--muted)">Total Registered Gyms:</span>
-        <div style="font-size:22px;font-weight:900;color:var(--cyan);" id="mStatGyms">6 Gyms</div>
-      </div>
-      <div class="rec">
-        <span style="font-size:11px;color:var(--muted)">Total Renewals:</span>
-        <div style="font-size:22px;font-weight:900;color:var(--emerald);" id="mStatRenewals">4 Renewals</div>
-      </div>
-      <div class="rec">
-        <span style="font-size:11px;color:var(--muted)">Software Revenue Collected:</span>
-        <div style="font-size:20px;font-weight:900;color:var(--gold);" id="mStatRevenue">₹24,701</div>
-      </div>
-      <div class="rec">
-        <span style="font-size:11px;color:var(--muted)">Active Plans Split:</span>
-        <div style="font-size:11.5px;color:#fff;margin-top:3px;" id="mStatPlans">Trial: 2 &bull; Bronze: 2 &bull; Gold: 1 &bull; Plat: 1</div>
-      </div>
-    </div>
-
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <b style="font-size:12px;color:var(--gold);">Customer Vault (Passwords, MPINs, Keys &amp; UTR)</b>
-      <button type="button" class="btn-sec" style="margin-top:0;padding:4px 8px;font-size:11px;" onclick="renderCustomerVault()">Refresh Vault</button>
+      <div class="rec"><span style="font-size:11px;color:var(--muted)">Total Registered Gyms:</span><div style="font-size:22px;font-weight:900;color:var(--cyan);" id="mStatGyms">3 Gyms</div></div>
+      <div class="rec"><span style="font-size:11px;color:var(--muted)">Total Renewals:</span><div style="font-size:22px;font-weight:900;color:var(--emerald);" id="mStatRenewals">2 Renewals</div></div>
+      <div class="rec"><span style="font-size:11px;color:var(--muted)">Software Revenue Collected:</span><div style="font-size:20px;font-weight:900;color:var(--gold);" id="mStatRevenue">₹7,001</div></div>
+      <div class="rec"><span style="font-size:11px;color:var(--muted)">Active Plans Split:</span><div style="font-size:11.5px;color:#fff;margin-top:3px;" id="mStatPlans">Trial: 1 &bull; Bronze: 0 &bull; Gold: 1 &bull; Plat: 1</div></div>
     </div>
 
     <div id="customerVaultList" style="max-height:360px;overflow-y:auto;"></div>
@@ -390,84 +369,95 @@
   <script>
     const K_VAULT = "om_master_customer_vault_v2";
     const K_DEV_LOGS = "om_dev_notification_logs_v2";
+    const K_LOCK_24H = "om_24hr_device_lock_v1";
+    const ADMIN_SUPPORT_EMAIL = "admin@omsoftware.com";
     let curRole = "dev";
+    let tempOwnerSignup = null;
 
     function J(k, d) { try { return JSON.parse(localStorage.getItem(k) || "null") ?? d; } catch(e) { return d; } }
     function W(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
     function esc(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+    // Smart Code formatter: automatically capitalizes letters and keeps dashes/alphanumerics clean
+    function formatSmartCode(inp) {
+      let raw = inp.value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
+      // Ensure prefix like STF- or MGR- formats cleanly if user types STF or MGR
+      if (/^(STF|MGR|EMP)[0-9A-Z]+$/.test(raw) && !raw.includes("-")) {
+        raw = raw.slice(0, 3) + "-" + raw.slice(3);
+      }
+      inp.value = raw;
+    }
+
+    function checkDevice24HrLock() {
+      const lock = J(K_LOCK_24H, null);
+      if (!lock || !lock.lockUntil) return { locked: false };
+      if (Date.now() < lock.lockUntil) {
+        return { locked: true, role: lock.role || "User" };
+      }
+      localStorage.removeItem(K_LOCK_24H);
+      return { locked: false };
+    }
+
+    function registerFailedAttempt24HrLock(roleName) {
+      const lock = J(K_LOCK_24H, { fails: 0, lockUntil: 0, role: roleName });
+      lock.fails = (lock.fails || 0) + 1;
+      lock.role = roleName;
+      if (lock.fails >= 2) {
+        lock.lockUntil = Date.now() + (24 * 60 * 60 * 1000);
+        W(K_LOCK_24H, lock);
+        showLockedMessage(roleName);
+        return true;
+      }
+      W(K_LOCK_24H, lock);
+      showErr(`Galat credentials/code (${lock.fails}/2 attempt). 2 galat attempts ke baad device 24 hours ke liye lock ho jayega.`);
+      return false;
+    }
+
+    function showLockedMessage(roleName) {
+      const e = document.getElementById("alertErr");
+      const ok = document.getElementById("alertOk");
+      ok.style.display = "none";
+      e.style.display = "block";
+      e.innerHTML = `
+        <b>⛔ Device Locked for 24 Hours! Contact to Admin.</b><br>
+        <span style="font-size:11px;color:#FFE4E6;">Role: ${esc(roleName)} — 2 baar galat attempt ke baad device lock ho gaya hai.</span><br>
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.2);">
+          Please send us mail and share your problem, we will help you:<br>
+          <a href="mailto:${ADMIN_SUPPORT_EMAIL}?subject=${encodeURIComponent("24hr Device Lock Support - " + roleName)}&body=${encodeURIComponent("Hello Admin, my device is locked for 24 hours. Please help.")}" style="color:#FDE047;font-weight:900;text-decoration:underline;">${ADMIN_SUPPORT_EMAIL}</a>
+        </div>
+      `;
+    }
 
     function seedMasterVault() {
       const v = J(K_VAULT, null);
       if (!v || !v.length) {
         W(K_VAULT, [
           {
-            id: "CUST-001",
-            gymName: "5 Brother's Fitness Club & Nutrition",
-            ownerName: "Saurabh Singh Chandel",
-            mobile: "9876501100",
-            email: "saurabh.singh@omsoftware.com",
-            dob: "1992-06-01",
-            address: "Umrao Khera, Unnao, Uttar Pradesh - 209862",
-            pincode: "209862",
-            password: "Admin@123",
-            mpin: "1100",
-            secQ: "Favourite Song",
-            secA: "Kesariya",
-            plan: "PLATINUM_1Y",
-            planName: "Platinum Plan (1 Year)",
-            feePaid: 5000,
-            licenseKey: "LIC-OM-OPE2HK",
-            utrNo: "UTR983421102948",
-            screenshot: "receipt_001.png",
-            validUntil: "2027-11-22",
-            autoRenew: true,
-            status: "Active"
+            id: "CUST-001", gymName: "5 Brother's Fitness Club & Nutrition", ownerName: "Saurabh Singh Chandel",
+            mobile: "9876501100", email: "saurabh.singh@omsoftware.com", dob: "1992-06-01",
+            address: "Umrao Khera, Unnao, Uttar Pradesh - 209862", pincode: "209862",
+            password: "Admin@123", mpin: "1100", secQ: "Favourite Song", secA: "Kesariya",
+            plan: "PLATINUM_1Y", planName: "Platinum Plan (1 Year)", feePaid: 5000,
+            licenseKey: "LIC-OM-OPE2HK", utrNo: "UTR983421102948", screenshot: "receipt_001.png",
+            validUntil: "2027-11-22", autoRenew: true, status: "Active"
           },
           {
-            id: "CUST-002",
-            gymName: "Iron Temple Fitness Studio",
-            ownerName: "Rohan Bajpai",
-            mobile: "9876502200",
-            email: "rohan.bajpai@gmail.com",
-            dob: "1990-08-15",
-            address: "Swaroop Nagar, Kanpur - 208002",
-            pincode: "208002",
-            password: "Rohan@123",
-            mpin: "2200",
-            secQ: "Favourite Person",
-            secA: "Father",
-            plan: "SILVER_6M",
-            planName: "Silver / Gold Plan (6 Months)",
-            feePaid: 2000,
-            licenseKey: "LIC-GOLD-KANPUR82",
-            utrNo: "UTR192837465019",
-            screenshot: "receipt_002.png",
-            validUntil: "2027-05-22",
-            autoRenew: true,
-            status: "Active"
+            id: "CUST-002", gymName: "Iron Temple Fitness Studio", ownerName: "Rohan Bajpai",
+            mobile: "9876502200", email: "rohan.bajpai@gmail.com", dob: "1990-08-15",
+            address: "Swaroop Nagar, Kanpur - 208002", pincode: "208002",
+            password: "Rohan@123", mpin: "2200", secQ: "Favourite Person", secA: "Father",
+            plan: "SILVER_6M", planName: "Silver / Gold Plan (6 Months)", feePaid: 2000,
+            licenseKey: "LIC-GOLD-KANPUR82", utrNo: "UTR192837465019", screenshot: "receipt_002.png",
+            validUntil: "2027-05-22", autoRenew: true, status: "Active"
           },
           {
-            id: "CUST-003",
-            gymName: "FitZone Crossfit Center",
-            ownerName: "Amitabh Srivastava",
-            mobile: "9876503300",
-            email: "amitabh@fitzone.in",
-            dob: "1988-12-04",
-            address: "Hazratganj, Lucknow - 226001",
-            pincode: "226001",
-            password: "Amit@123",
-            mpin: "3300",
-            secQ: "Favourite Pet",
-            secA: "Tiger",
-            plan: "7_DAY_TRIAL",
-            planName: "7-Day Free Trial",
-            feePaid: 1,
-            licenseKey: "LIC-TRIAL-LKO991",
-            utrNo: "UTR778899001122",
-            screenshot: "receipt_003.png",
-            validUntil: "2026-11-29",
-            autoRenew: false,
-            status: "Active"
+            id: "CUST-003", gymName: "FitZone Crossfit Center", ownerName: "Amitabh Srivastava",
+            mobile: "9876503300", email: "amitabh@fitzone.in", dob: "1988-12-04",
+            address: "Hazratganj, Lucknow - 226001", pincode: "226001",
+            password: "Amit@123", mpin: "3300", secQ: "Favourite Pet", secA: "Tiger",
+            plan: "7_DAY_TRIAL", planName: "7-Day Free Trial", feePaid: 1,
+            licenseKey: "LIC-TRIAL-LKO991", utrNo: "UTR778899001122", screenshot: "receipt_003.png",
+            validUntil: "2026-11-29", autoRenew: false, status: "Active"
           }
         ]);
       }
@@ -481,11 +471,39 @@
       if (role === "manager") document.getElementById("rbManager").classList.add("active");
       if (role === "staff") document.getElementById("rbStaff").classList.add("active");
 
-      document.getElementById("secDev").style.display = (role === "dev") ? "block" : "none";
-      document.getElementById("secAdmin").style.display = (role === "admin") ? "block" : "none";
-      document.getElementById("secManager").style.display = (role === "manager") ? "block" : "none";
-      document.getElementById("secStaff").style.display = (role === "staff") ? "block" : "none";
-      closeAllPanels();
+      backToLoginView();
+    }
+
+    function backToLoginView() {
+      document.getElementById("loginHeaderBlock").style.display = "block";
+      document.getElementById("authForm").style.display = "block";
+      document.querySelectorAll(".panel-box").forEach(p => p.classList.remove("open"));
+
+      document.getElementById("secDev").style.display = (curRole === "dev") ? "block" : "none";
+      document.getElementById("secAdmin").style.display = (curRole === "admin") ? "block" : "none";
+      document.getElementById("secManager").style.display = (curRole === "manager") ? "block" : "none";
+      document.getElementById("secStaff").style.display = (curRole === "staff") ? "block" : "none";
+    }
+
+    function openOwnerSignup() {
+      document.getElementById("loginHeaderBlock").style.display = "none";
+      document.getElementById("authForm").style.display = "none";
+      document.querySelectorAll(".panel-box").forEach(p => p.classList.remove("open"));
+      document.getElementById("ownerSignupPanel").classList.add("open");
+    }
+
+    function openManagerFirstTime() {
+      document.getElementById("loginHeaderBlock").style.display = "none";
+      document.getElementById("authForm").style.display = "none";
+      document.querySelectorAll(".panel-box").forEach(p => p.classList.remove("open"));
+      document.getElementById("mgrSetupPanel").classList.add("open");
+    }
+
+    function openStaffFirstTime() {
+      document.getElementById("loginHeaderBlock").style.display = "none";
+      document.getElementById("authForm").style.display = "none";
+      document.querySelectorAll(".panel-box").forEach(p => p.classList.remove("open"));
+      document.getElementById("stfSetupPanel").classList.add("open");
     }
 
     function switchAdminLoginInputs() {
@@ -505,13 +523,6 @@
       e.style.display = "none"; ok.style.display = "block"; ok.textContent = msg;
     }
 
-    function closeAllPanels() {
-      document.querySelectorAll(".panel-box").forEach(p => p.classList.remove("open"));
-    }
-    function openOwnerSignup() { closeAllPanels(); document.getElementById("ownerSignupPanel").classList.add("open"); }
-    function openManagerFirstTime() { closeAllPanels(); document.getElementById("mgrSetupPanel").classList.add("open"); }
-    function openStaffFirstTime() { closeAllPanels(); document.getElementById("stfSetupPanel").classList.add("open"); }
-
     function updatePlanFeeDisplay() {
       const p = document.getElementById("pgPlanSel").value;
       const feeMap = {
@@ -526,7 +537,6 @@
       document.getElementById("pgAccessScope").textContent = info.scope;
     }
 
-    let tempOwnerSignup = null;
     function proceedToPlanSelection() {
       const gym = document.getElementById("suGymName").value.trim();
       const name = document.getElementById("suOwnerName").value.trim();
@@ -546,20 +556,15 @@
       }
 
       tempOwnerSignup = {
-        gymName: gym,
-        ownerName: name,
-        mobile: mob,
-        email: email,
+        gymName: gym, ownerName: name, mobile: mob, email: email,
         dob: document.getElementById("suDob").value,
         address: document.getElementById("suAddress").value.trim(),
         pincode: document.getElementById("suPincode").value.trim(),
-        password: pass,
-        mpin: mpin,
-        secQ: document.getElementById("suSecQ").value,
-        secA: secA
+        password: pass, mpin: mpin,
+        secQ: document.getElementById("suSecQ").value, secA: secA
       };
 
-      closeAllPanels();
+      document.querySelectorAll(".panel-box").forEach(p => p.classList.remove("open"));
       updatePlanFeeDisplay();
       document.getElementById("planGatewayPanel").classList.add("open");
     }
@@ -588,62 +593,80 @@
       const genLicKey = "LIC-OM-" + Date.now().toString(36).toUpperCase() + "-" + Math.floor(1000 + Math.random() * 9000);
 
       const custObj = Object.assign({}, tempOwnerSignup || {
-        gymName: "New Fitness Club",
-        ownerName: "Gym Owner",
-        mobile: "9876543210",
-        email: "owner@gym.com",
-        password: "Owner@123",
-        mpin: "1234",
-        secQ: "Favourite Song",
-        secA: "Kesariya"
+        gymName: "New Fitness Club", ownerName: "Gym Owner", mobile: "9876543210",
+        email: "owner@gym.com", password: "Owner@123", mpin: "1234",
+        secQ: "Favourite Song", secA: "Kesariya"
       }, {
         id: "CUST-" + Date.now().toString().slice(-4),
-        plan: planKey,
-        planName: planName,
-        feePaid: fee,
-        licenseKey: genLicKey,
-        utrNo: utr,
-        screenshot: scr[0].name,
+        plan: planKey, planName: planName, feePaid: fee,
+        licenseKey: genLicKey, utrNo: utr, screenshot: scr[0].name,
         validUntil: planKey === "7_DAY_TRIAL" ? "2026-11-29" : (planKey === "PLATINUM_1Y" ? "2027-11-22" : "2027-02-22"),
-        autoRenew: document.getElementById("pgAutoRenew").checked,
-        status: "Active"
+        autoRenew: document.getElementById("pgAutoRenew").checked, status: "Active"
       });
 
       const vault = J(K_VAULT, []);
       vault.unshift(custObj);
       W(K_VAULT, vault);
 
-      // Trigger Developer Alert Log
-      const logs = J(K_DEV_LOGS, []);
-      logs.unshift({
-        time: new Date().toLocaleString("en-IN"),
-        alert: `🎉 New Customer & Plan Payment: ${custObj.ownerName} (${custObj.gymName}) paid ₹${fee} via UTR: ${utr}. Generated License: ${genLicKey}`
-      });
-      W(K_DEV_LOGS, logs);
-
-      closeAllPanels();
-      showOk(`Payment Verified! Your License Key is: ${genLicKey}. Automatic license registered in Master Vault.`);
+      backToLoginView();
       setRole("admin");
+      showOk(`Payment Verified! License Key: ${genLicKey}. Ab aap login kar sakte hain.`);
       document.getElementById("admEmail").value = custObj.email;
       document.getElementById("admPass").value = custObj.password;
     }
 
+    function saveManagerFirstTime() {
+      const code = document.getElementById("msCode").value.trim().toUpperCase();
+      const br = document.getElementById("msBranch").value.trim();
+      const em = document.getElementById("msEmail").value.trim().toLowerCase();
+      const pass = document.getElementById("msPass").value;
+      const mpin = document.getElementById("msMpin").value.trim();
+      if (!code || !br || !em || !pass || mpin.length !== 4) {
+        showErr("Manager setup ke liye sabhi fields aur 4-digit MPIN zaroori hain.");
+        return;
+      }
+      localStorage.setItem("om_mgr_cred_" + code, JSON.stringify({ code, br, em, pass, mpin }));
+      backToLoginView();
+      showOk("Manager Password & MPIN saved. Ab aap login kar sakte hain.");
+    }
+
+    function saveStaffFirstTime() {
+      const id = document.getElementById("ssId").value.trim().toUpperCase();
+      const mob = document.getElementById("ssMobile").value.trim();
+      const pass = document.getElementById("ssPass").value;
+      const mpin = document.getElementById("ssMpin").value.trim();
+      if (!id || !mob || !pass || mpin.length !== 4) {
+        showErr("Staff setup ke liye sabhi fields aur 4-digit MPIN zaroori hain.");
+        return;
+      }
+      localStorage.setItem("om_stf_cred_" + id, JSON.stringify({ id, mob, pass, mpin }));
+      backToLoginView();
+      showOk("Staff Password & MPIN saved. Ab aap login kar sakte hain.");
+    }
+
     function handleUniversalLogin(e) {
       e.preventDefault();
+      const lockStatus = checkDevice24HrLock();
+      if (lockStatus.locked) {
+        showLockedMessage(lockStatus.role);
+        return;
+      }
+
       const vault = J(K_VAULT, []);
 
-      // 1. MASTER ADMIN (DEVELOPER)
+      // 1. MASTER ADMIN (Email & Password only)
       if (curRole === "dev") {
         const em = document.getElementById("devEmail").value.trim().toLowerCase();
         const pass = document.getElementById("devPass").value;
         if (em === "admin@omsoftware.com" && pass === "Admin@123") {
+          localStorage.removeItem(K_LOCK_24H);
           localStorage.setItem("bfc_role", "owner");
           localStorage.setItem("om_logged_user", "Master Admin (Developer)");
           document.getElementById("mainLoginCard").style.display = "none";
           document.getElementById("devDashboardCard").style.display = "block";
           renderCustomerVault();
         } else {
-          showErr("Invalid Master Admin Credentials.");
+          registerFailedAttempt24HrLock("Master Admin");
         }
         return;
       }
@@ -657,20 +680,15 @@
           const mpin = document.getElementById("admMpin").value.trim();
           const secA = (document.getElementById("admSecA").value || "").trim().toLowerCase();
 
-          const found = vault.find(c => c.email.toLowerCase() === em && (c.password === pass || (mpin && c.mpin === mpin)));
-          if (!found) {
-            showErr("Email ya Password/MPIN match nahi hua.");
-            return;
-          }
-          if (secA && found.secA.toLowerCase() !== secA) {
-            showErr("Security Answer match nahi hua.");
+          const found = vault.find(c => c.email.toLowerCase() === em && ((pass && c.password === pass) || (mpin && c.mpin === mpin)));
+          if (!found || (secA && found.secA.toLowerCase() !== secA)) {
+            registerFailedAttempt24HrLock("Gym Owner");
             return;
           }
 
+          localStorage.removeItem(K_LOCK_24H);
           localStorage.setItem("bfc_role", "owner");
           localStorage.setItem("om_logged_user", `${found.ownerName} (${found.gymName})`);
-          localStorage.setItem("om_active_plan", found.plan);
-          localStorage.setItem("om_active_license", found.licenseKey);
           location.replace("index.html");
         } else {
           const mob = document.getElementById("admLicMob").value.trim();
@@ -678,19 +696,18 @@
           const lic = document.getElementById("admLicKey").value.trim().toUpperCase();
           const found = vault.find(c => c.mobile === mob && c.email.toLowerCase() === em && c.licenseKey.toUpperCase() === lic);
           if (!found) {
-            showErr("Mobile, Email ya License Key match nahi hua.");
+            registerFailedAttempt24HrLock("Gym Owner");
             return;
           }
+          localStorage.removeItem(K_LOCK_24H);
           localStorage.setItem("bfc_role", "owner");
           localStorage.setItem("om_logged_user", `${found.ownerName} (${found.gymName})`);
-          localStorage.setItem("om_active_plan", found.plan);
-          localStorage.setItem("om_active_license", found.licenseKey);
           location.replace("index.html");
         }
         return;
       }
 
-      // 3. MANAGER
+      // 3. MANAGER (Restricted to Manager scope)
       if (curRole === "manager") {
         const code = document.getElementById("mgrEmpCode").value.trim().toUpperCase();
         const br = document.getElementById("mgrBranch").value.trim();
@@ -698,18 +715,41 @@
         const pass = document.getElementById("mgrPass").value;
         const mpin = document.getElementById("mgrMpin").value.trim();
 
+        const saved = J("om_mgr_cred_" + code, null);
+        const valid = (saved && ((pass && saved.pass === pass) || (mpin && saved.mpin === mpin))) ||
+                      (code === "MGR-001-1" && br === "001" && em === "manager@gym.com" && (pass === "Mgr@123" || mpin === "2020"));
+
+        if (!valid) {
+          registerFailedAttempt24HrLock("Manager");
+          return;
+        }
+
+        localStorage.removeItem(K_LOCK_24H);
         localStorage.setItem("bfc_role", "manager");
-        localStorage.setItem("om_logged_user", `Manager (${code || 'MGR-001'}) Branch ${br || '001'}`);
+        localStorage.setItem("om_logged_user", `Manager (${code}) Branch ${br}`);
         location.replace("index.html");
         return;
       }
 
-      // 4. STAFF
+      // 4. STAFF (Strict Staff Self-Service Only)
       if (curRole === "staff") {
         const eid = document.getElementById("stfEmpId").value.trim().toUpperCase();
         const mob = document.getElementById("stfMobile").value.trim();
+        const pass = document.getElementById("stfPass").value;
+        const mpin = document.getElementById("stfMpin").value.trim();
+
+        const saved = J("om_stf_cred_" + eid, null);
+        const valid = (saved && saved.mob === mob && ((pass && saved.pass === pass) || (mpin && saved.mpin === mpin))) ||
+                      (eid === "STF-001-1" && mob === "9876503344" && (pass === "Staff@123" || mpin === "3030"));
+
+        if (!valid) {
+          registerFailedAttempt24HrLock("Staff");
+          return;
+        }
+
+        localStorage.removeItem(K_LOCK_24H);
         localStorage.setItem("bfc_role", "staff");
-        localStorage.setItem("om_logged_user", `${eid || 'STF-001'} (${mob || 'Staff'})`);
+        localStorage.setItem("om_logged_user", `Staff (${eid})`);
         location.replace("index.html");
         return;
       }
@@ -782,6 +822,10 @@
     window.addEventListener("DOMContentLoaded", function() {
       seedMasterVault();
       setRole("dev");
+      const lock = checkDevice24HrLock();
+      if (lock.locked) {
+        showLockedMessage(lock.role);
+      }
     });
   </script>
 </body>
