@@ -6,47 +6,27 @@
   <title>Om Software ERP — Secure Login &amp; Identity Desk</title>
   <style>
     :root {
-      --bg: #050813;
-      --card: #0A1124;
-      --card2: #0E172F;
-      --border: #1B294B;
-      --gold: #F5A623;
-      --gold2: #D97706;
-      --cyan: #22D3EE;
-      --emerald: #34D399;
-      --rose: #FB7185;
-      --tx: #FFFFFF;
-      --muted: #94A3B8;
+      --bg: #050813; --card: #0A1124; --card2: #0E172F; --border: #1B294B;
+      --gold: #F5A623; --gold2: #D97706; --cyan: #22D3EE; --emerald: #34D399;
+      --rose: #FB7185; --tx: #FFFFFF; --muted: #94A3B8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body {
       background: radial-gradient(1000px 600px at 50% -10%, #152238 0%, #050813 70%);
-      color: var(--tx);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
+      color: var(--tx); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px;
     }
     .card {
-      width: 100%;
-      max-width: 440px;
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: 22px;
-      padding: 22px 18px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.75);
+      width: 100%; max-width: 440px; background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 22px; padding: 22px 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.75);
     }
     .hdr-center { text-align: center; margin-bottom: 16px; }
     .om-logo {
       width: 54px; height: 54px; margin: 0 auto 10px; border-radius: 15px;
       background: linear-gradient(135deg, var(--gold), var(--gold2));
-      color: #050813; font-size: 25px; font-weight: 900;
-      display: flex; align-items: center; justify-content: center;
+      color: #050813; font-size: 25px; font-weight: 900; display: flex; align-items: center; justify-content: center;
     }
     h1 { font-size: 20px; font-weight: 800; color: #fff; }
     p.sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
     .fg { margin-bottom: 11px; text-align: left; }
     label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 4px; font-weight: 700; }
     input, select {
@@ -54,7 +34,7 @@
       border-radius: 11px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none;
     }
     input:focus, select:focus { border-color: var(--cyan); }
-
+    .cap-field { text-transform: uppercase; }
     .btn-gold {
       width: 100%; background: linear-gradient(135deg, var(--gold), var(--gold2));
       color: #050813; border: 0; border-radius: 12px; padding: 12px;
@@ -71,20 +51,17 @@
     }
     .btn-link.gold { color: var(--gold); }
     .btn-link.rose { color: var(--rose); }
-
     .sess-box {
       display: none; background: rgba(34,211,238,0.1); border: 1px solid var(--cyan);
       border-radius: 12px; padding: 11px; margin-bottom: 13px; font-size: 12px;
     }
     .sess-row { display: flex; gap: 8px; margin-top: 8px; }
     .sess-row button { flex: 1; padding: 8px; border-radius: 9px; font-size: 11.5px; font-weight: 800; cursor: pointer; }
-
     .panel-box {
       display: none; background: #070D1C; border: 1px solid var(--border);
       border-radius: 14px; padding: 12px; margin-top: 12px; font-size: 12px;
     }
     .panel-box.open { display: block; }
-
     .alert-err {
       display: none; background: rgba(251,113,133,0.15); border: 1px solid var(--rose);
       color: #FECDD3; border-radius: 10px; padding: 9px 11px; font-size: 11.5px; margin-top: 10px; line-height: 1.4;
@@ -104,10 +81,9 @@
     <div class="hdr-center">
       <div class="om-logo">ॐ</div>
       <h1>Om Software ERP</h1>
-      <p class="sub">Admin / Manager &amp; Staff Login</p>
+      <p class="sub">Admin Login First &bull; Staff Login Below</p>
     </div>
 
-    <!-- Last Session vs New Session Choice -->
     <div id="sessionChoiceBox" class="sess-box">
       <b>Previous Session Detected:</b>
       <div id="sessionMetaText" style="font-size:11px;color:var(--muted);margin-top:3px;"></div>
@@ -117,50 +93,17 @@
       </div>
     </div>
 
-    <!-- Main Login Form -->
-    <form id="mainLoginForm" onsubmit="handleSignIn(event)">
+    <form id="mainLoginForm" onsubmit="handleSignIn(event)" autocomplete="off">
       <div class="fg">
         <label>Login Mode</label>
         <select id="loginMode" onchange="switchLoginMode()">
+          <option value="admin" selected>Admin / Manager (Email + Password + Security Question)</option>
           <option value="staff">Staff (Staff Code + Branch Code + Employee ID + Password)</option>
-          <option value="admin">Admin / Manager (Email + Password + Security Question)</option>
         </select>
       </div>
 
-      <!-- STAFF LOGIN FIELDS -->
-      <div id="staffLoginFields">
-        <div class="fg">
-          <label>Staff Code *</label>
-          <input type="text" id="stfCode" placeholder="e.g. STF-001-UNNAO-1" required>
-        </div>
-        <div class="fg">
-          <label>Branch Code *</label>
-          <input type="text" id="stfBranch" placeholder="e.g. 001" required>
-        </div>
-        <div class="fg">
-          <label>Employee ID *</label>
-          <input type="text" id="stfEmpId" placeholder="e.g. STF-001-1" required>
-        </div>
-        <div class="fg">
-          <label>Security Question ❓ *</label>
-          <select id="stfSecQ">
-            <option value="Favourite Song">Favourite Song</option>
-            <option value="Favourite Person">Favourite Person</option>
-            <option value="Favourite Pet">Favourite Pet</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>Security Answer *</label>
-          <input type="text" id="stfSecA" placeholder="Enter your security answer" required>
-        </div>
-        <div class="fg">
-          <label>Password *</label>
-          <input type="password" id="stfPass" placeholder="••••••••" required>
-        </div>
-      </div>
-
-      <!-- ADMIN / MANAGER LOGIN FIELDS -->
-      <div id="adminLoginFields" style="display:none;">
+      <!-- ADMIN LOGIN FIRST -->
+      <div id="adminLoginFields">
         <div class="fg">
           <label>Role</label>
           <select id="admRole">
@@ -169,12 +112,12 @@
           </select>
         </div>
         <div class="fg">
-          <label>Email ID *</label>
-          <input type="email" id="admEmail" placeholder="admin@gym.com">
+          <label>Admin Email ID *</label>
+          <input type="email" id="admEmail" placeholder="admin@gym.com" required autocomplete="off" spellcheck="false">
         </div>
         <div class="fg">
           <label>Password *</label>
-          <input type="password" id="admPass" placeholder="••••••••">
+          <input type="password" id="admPass" placeholder="••••••••" required autocomplete="off">
         </div>
         <div class="fg">
           <label>Security Question ❓ *</label>
@@ -186,27 +129,62 @@
         </div>
         <div class="fg">
           <label>Security Answer *</label>
-          <input type="text" id="admSecA" placeholder="Enter answer">
+          <input type="text" id="admSecA" placeholder="Enter answer" required autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+
+      <!-- STAFF LOGIN BELOW -->
+      <div id="staffLoginFields" style="display:none;">
+        <div class="fg">
+          <label>Staff Code (Capital Letters) *</label>
+          <input type="text" id="stfCode" class="cap-field" placeholder="e.g. STF001UNNAO1"
+                 autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                 oninput="this.value = this.value.toUpperCase();">
+        </div>
+        <div class="fg">
+          <label>Branch Code (Numbers Only) *</label>
+          <input type="text" id="stfBranch" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+                 placeholder="e.g. 001" autocomplete="off" autocorrect="off" spellcheck="false"
+                 oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+        </div>
+        <div class="fg">
+          <label>Employee ID (Capital Letters) *</label>
+          <input type="text" id="stfEmpId" class="cap-field" placeholder="e.g. STF0011"
+                 autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                 oninput="this.value = this.value.toUpperCase();">
+        </div>
+        <div class="fg">
+          <label>Security Question ❓ *</label>
+          <select id="stfSecQ">
+            <option value="Favourite Song">Favourite Song</option>
+            <option value="Favourite Person">Favourite Person</option>
+            <option value="Favourite Pet">Favourite Pet</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Security Answer *</label>
+          <input type="text" id="stfSecA" placeholder="Enter security answer" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="fg">
+          <label>Password *</label>
+          <input type="password" id="stfPass" placeholder="••••••••" autocomplete="off">
         </div>
       </div>
 
       <button type="submit" class="btn-gold">Sign In</button>
 
-      <!-- First Time User Create Password Trigger -->
       <div style="text-align:center;margin-top:10px;">
         <button type="button" class="btn-link gold" onclick="togglePanel('firstTimePanel')">
-          ✨ First Time User? Create Your Password &amp; Security Question
+          ✨ First Time User? Create Your Password (Max 2 Attempts)
         </button>
       </div>
 
-      <!-- Forgot Links Row -->
       <div class="forgot-bar">
         <button type="button" class="btn-link" onclick="openForgotBox('Password')">Forgot Password</button>
         <button type="button" class="btn-link" onclick="openForgotBox('Employee ID')">Forgot Employee ID</button>
         <button type="button" class="btn-link" onclick="openForgotBox('Branch Code')">Forgot Branch Code</button>
       </div>
 
-      <!-- Admin Reset Password Trigger -->
       <div style="text-align:center;margin-top:8px;">
         <button type="button" class="btn-link rose" onclick="togglePanel('adminResetPanel')">
           🔐 Admin Reset Password (Verify Email, DOB &amp; Mobile)
@@ -217,23 +195,28 @@
     <div id="loginErrBox" class="alert-err"></div>
     <div id="loginOkBox" class="alert-ok"></div>
 
-    <!-- PANEL 1: FIRST TIME STAFF CREATE PASSWORD + SECURITY QUESTION -->
     <div id="firstTimePanel" class="panel-box">
-      <b style="color:var(--gold);display:block;margin-bottom:8px;">Create Your Password (First Time Staff Setup)</b>
+      <b style="color:var(--gold);display:block;margin-bottom:8px;">Create Password (Max 2 Attempts Allowed)</b>
       <div class="fg">
-        <label>Staff Code *</label>
-        <input type="text" id="ftCode" placeholder="e.g. STF-001-UNNAO-1">
+        <label>Staff Code (Capital Letters) *</label>
+        <input type="text" id="ftCode" class="cap-field" placeholder="e.g. STF001UNNAO1"
+               autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+               oninput="this.value = this.value.toUpperCase();">
       </div>
       <div class="fg">
-        <label>Branch Code *</label>
-        <input type="text" id="ftBranch" placeholder="e.g. 001">
+        <label>Branch Code (Numbers Only) *</label>
+        <input type="text" id="ftBranch" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+               placeholder="e.g. 001" autocomplete="off" spellcheck="false"
+               oninput="this.value = this.value.replace(/[^0-9]/g, '');">
       </div>
       <div class="fg">
-        <label>Employee ID *</label>
-        <input type="text" id="ftEmpId" placeholder="e.g. STF-001-1">
+        <label>Employee ID (Capital Letters) *</label>
+        <input type="text" id="ftEmpId" class="cap-field" placeholder="e.g. STF0011"
+               autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+               oninput="this.value = this.value.toUpperCase();">
       </div>
       <div class="fg">
-        <label>Choose Your Favourite Security Question ❓ *</label>
+        <label>Choose Security Question ❓ *</label>
         <select id="ftSecQ">
           <option value="Favourite Song">Favourite Song</option>
           <option value="Favourite Person">Favourite Person</option>
@@ -242,24 +225,20 @@
       </div>
       <div class="fg">
         <label>Your Security Answer *</label>
-        <input type="text" id="ftSecA" placeholder="Answer required to proceed">
+        <input type="text" id="ftSecA" placeholder="Answer required" autocomplete="off" spellcheck="false">
       </div>
       <div class="fg">
         <label>Create New Password *</label>
-        <input type="password" id="ftNewPass" placeholder="Create password">
+        <input type="password" id="ftNewPass" placeholder="Enter password" autocomplete="off">
       </div>
-      <button type="button" class="btn-gold" onclick="saveFirstTimeStaffPassword()">Save Password &amp; Continue</button>
+      <button type="button" class="btn-gold" onclick="saveFirstTimeStaffPassword()">Save Password</button>
     </div>
 
-    <!-- PANEL 2: FORGOT REQUEST TO ADMIN (EMAIL / TELEGRAM / WHATSAPP) -->
     <div id="forgotPanel" class="panel-box">
-      <b id="forgotTitle" style="color:var(--cyan);display:block;margin-bottom:6px;">Forgot Recovery Request</b>
-      <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">
-        Sent to Admin to know your details. Enter your name/mobile/ID and send to Admin via Email, Telegram, or WhatsApp:
-      </p>
+      <b id="forgotTitle" style="color:var(--cyan);display:block;margin-bottom:6px;">Forgot Details — Sent to Admin</b>
       <div class="fg">
-        <label>Your Name / Mobile / Known Detail *</label>
-        <input type="text" id="fgDetail" placeholder="Enter name, mobile, or partial ID">
+        <label>Your Name / Mobile / Partial Detail *</label>
+        <input type="text" id="fgDetail" placeholder="Enter name or mobile number" autocomplete="off">
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button type="button" class="btn-sec" style="flex:1;margin-top:0;" onclick="dispatchForgotToAdmin('Email')">✉️ Email Admin</button>
@@ -268,35 +247,32 @@
       </div>
     </div>
 
-    <!-- PANEL 3: ADMIN RESET PASSWORD (REQUIRES EMAIL + DOB + MOBILE MATCH) -->
     <div id="adminResetPanel" class="panel-box">
-      <b style="color:var(--rose);display:block;margin-bottom:6px;">Reset Password — Document Verification</b>
-      <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">
-        All 3 details (Email ID, DOB, Mobile No) must match records. Mismatch will be blocked.
-      </p>
+      <b style="color:var(--rose);display:block;margin-bottom:6px;">Reset Password — 3-Point Document Verification</b>
       <div class="fg">
-        <label>Your Email ID *</label>
-        <input type="email" id="rstEmail" placeholder="registered@email.com">
+        <label>Registered Email ID *</label>
+        <input type="email" id="rstEmail" placeholder="registered@email.com" autocomplete="off">
       </div>
       <div class="fg">
-        <label>Your DOB *</label>
+        <label>Date of Birth (DOB) *</label>
         <input type="date" id="rstDob">
       </div>
       <div class="fg">
-        <label>Your Mobile No *</label>
-        <input type="tel" id="rstMobile" maxlength="10" placeholder="10-digit mobile">
+        <label>Registered Mobile No *</label>
+        <input type="tel" id="rstMobile" maxlength="10" placeholder="10-digit mobile" autocomplete="off">
       </div>
       <div class="fg">
-        <label>New Password *</label>
-        <input type="password" id="rstNewPass" placeholder="Enter new password">
+        <label>Enter New Password *</label>
+        <input type="password" id="rstNewPass" placeholder="New password" autocomplete="off">
       </div>
-      <button type="button" class="btn-gold" onclick="verifyAndResetPassword()">Verify &amp; Reset Password</button>
+      <button type="button" class="btn-gold" onclick="verifyAndResetPassword()">Verify Documents &amp; Reset</button>
     </div>
   </div>
 
   <script>
     const CREDS_KEY = "om_staff_auth_records_v1";
     const LOCK_KEY = "om_staff_lock_map_v1";
+    const CREATE_ATTEMPTS_KEY = "om_staff_create_attempts_v1";
     const ADMIN_LOGS_KEY = "om_admin_recovery_logs_v1";
     let forgotTargetField = "Password";
 
@@ -311,30 +287,16 @@
       if (!existing.length) {
         saveJ(CREDS_KEY, [
           {
-            role: "staff",
-            staffCode: "STF-001-UNNAO-1",
-            branchCode: "001",
-            empId: "STF-001-1",
-            name: "Vikram Yadav",
-            email: "vikram.yadav@gmail.com",
-            dob: "1995-05-14",
-            mobile: "9876503344",
-            secQ: "Favourite Pet",
-            secA: "Bruno",
-            password: "Staff@123"
+            role: "owner", staffCode: "ADM001", branchCode: "001", empId: "ADM001",
+            name: "Saurabh Singh Chandel", email: "admin@omsoftware.com", dob: "1992-06-01",
+            mobile: "9876501100", secQ: "Favourite Song", secA: "Kesariya",
+            password: "Admin@123", passwordCreated: true
           },
           {
-            role: "owner",
-            staffCode: "ADM-001",
-            branchCode: "001",
-            empId: "ADM-001",
-            name: "Saurabh Singh Chandel",
-            email: "admin@omsoftware.com",
-            dob: "1992-06-01",
-            mobile: "9876501100",
-            secQ: "Favourite Song",
-            secA: "Kesariya",
-            password: "Admin@123"
+            role: "staff", staffCode: "STF001UNNAO1", branchCode: "001", empId: "STF0011",
+            name: "Vikram Yadav", email: "vikram.yadav@gmail.com", dob: "1995-05-14",
+            mobile: "9876503344", secQ: "Favourite Pet", secA: "Bruno",
+            password: "Staff@123", passwordCreated: true
           }
         ]);
       }
@@ -343,17 +305,13 @@
     function showErr(msg) {
       const e = document.getElementById("loginErrBox");
       const ok = document.getElementById("loginOkBox");
-      ok.style.display = "none";
-      e.style.display = "block";
-      e.textContent = msg;
+      ok.style.display = "none"; e.style.display = "block"; e.textContent = msg;
     }
 
     function showOk(msg) {
       const e = document.getElementById("loginErrBox");
       const ok = document.getElementById("loginOkBox");
-      e.style.display = "none";
-      ok.style.display = "block";
-      ok.textContent = msg;
+      e.style.display = "none"; ok.style.display = "block"; ok.textContent = msg;
     }
 
     function togglePanel(id) {
@@ -367,76 +325,69 @@
     function openForgotBox(field) {
       forgotTargetField = field;
       document.getElementById("forgotTitle").textContent = "Forgot " + field + " — Sent to Admin";
-      const fp = document.getElementById("forgotPanel");
       ["firstTimePanel", "adminResetPanel"].forEach(pid => document.getElementById(pid).classList.remove("open"));
-      fp.classList.add("open");
+      document.getElementById("forgotPanel").classList.add("open");
     }
 
     function switchLoginMode() {
       const isStaff = document.getElementById("loginMode").value === "staff";
-      document.getElementById("staffLoginFields").style.display = isStaff ? "block" : "none";
       document.getElementById("adminLoginFields").style.display = isStaff ? "none" : "block";
-
-      ["stfCode", "stfBranch", "stfEmpId", "stfSecA", "stfPass"].forEach(id => {
-        document.getElementById(id).required = isStaff;
-      });
-      ["admEmail", "admPass", "admSecA"].forEach(id => {
-        document.getElementById(id).required = !isStaff;
-      });
+      document.getElementById("staffLoginFields").style.display = isStaff ? "block" : "none";
+      ["admEmail", "admPass", "admSecA"].forEach(id => { document.getElementById(id).required = !isStaff; });
+      ["stfCode", "stfBranch", "stfEmpId", "stfSecA", "stfPass"].forEach(id => { document.getElementById(id).required = isStaff; });
     }
 
     function saveFirstTimeStaffPassword() {
-      const sc = document.getElementById("ftCode").value.trim();
+      const sc = document.getElementById("ftCode").value.trim().toUpperCase();
       const bc = document.getElementById("ftBranch").value.trim();
-      const eid = document.getElementById("ftEmpId").value.trim();
+      const eid = document.getElementById("ftEmpId").value.trim().toUpperCase();
       const secQ = document.getElementById("ftSecQ").value;
       const secA = document.getElementById("ftSecA").value.trim();
       const pass = document.getElementById("ftNewPass").value;
 
       if (!sc || !bc || !eid || !secA || !pass) {
-        showErr("First-time setup ke liye Staff Code, Branch Code, Employee ID, Security Answer aur Password sab zaroori hain.");
+        showErr("Staff Code, Branch Code, Employee ID, Security Answer aur Password sabhi zaroori hain.");
         return;
       }
 
+      const key = eid.toLowerCase();
+      const attemptsMap = loadJ(CREATE_ATTEMPTS_KEY, {});
+      const used = attemptsMap[key] || 0;
+
+      if (used >= 2) {
+        showErr("❌ Blocked! Aap 2 baar password create kar chuke hain. Contact To Admin.");
+        return;
+      }
+
+      attemptsMap[key] = used + 1;
+      saveJ(CREATE_ATTEMPTS_KEY, attemptsMap);
+
       const list = loadJ(CREDS_KEY, []);
-      const idx = list.findIndex(x => x.empId.toLowerCase() === eid.toLowerCase() || x.staffCode.toLowerCase() === sc.toLowerCase());
+      const idx = list.findIndex(x => x.empId.toUpperCase() === eid || x.staffCode.toUpperCase() === sc);
       const rec = {
-        role: "staff",
-        staffCode: sc,
-        branchCode: bc,
-        empId: eid,
-        name: eid,
-        email: "",
-        dob: "",
-        mobile: "",
-        secQ,
-        secA,
-        password: pass
+        role: "staff", staffCode: sc, branchCode: bc, empId: eid, name: eid,
+        email: "", dob: "", mobile: "", secQ, secA, password: pass, passwordCreated: true
       };
       if (idx >= 0) list[idx] = Object.assign({}, list[idx], rec);
       else list.push(rec);
 
       saveJ(CREDS_KEY, list);
-      showOk("Password & Security Question saved for Admin records. Ab aap login kar sakte hain.");
+      showOk(`Password created (${attemptsMap[key]}/2 attempts used). Ab aap login kar sakte hain.`);
+      document.getElementById("firstTimePanel").classList.remove("open");
+      document.getElementById("loginMode").value = "staff";
+      switchLoginMode();
       document.getElementById("stfCode").value = sc;
       document.getElementById("stfBranch").value = bc;
       document.getElementById("stfEmpId").value = eid;
       document.getElementById("stfSecQ").value = secQ;
-      document.getElementById("firstTimePanel").classList.remove("open");
     }
 
     function check24HrLock(keyId) {
       const locks = loadJ(LOCK_KEY, {});
       const entry = locks[keyId];
       if (!entry) return { locked: false, remMs: 0 };
-      const now = Date.now();
-      if (entry.lockUntil && now < entry.lockUntil) {
-        return { locked: true, remMs: entry.lockUntil - now };
-      }
-      if (entry.lockUntil && now >= entry.lockUntil) {
-        delete locks[keyId];
-        saveJ(LOCK_KEY, locks);
-      }
+      if (entry.lockUntil && Date.now() < entry.lockUntil) return { locked: true, remMs: entry.lockUntil - Date.now() };
+      if (entry.lockUntil && Date.now() >= entry.lockUntil) { delete locks[keyId]; saveJ(LOCK_KEY, locks); }
       return { locked: false, remMs: 0 };
     }
 
@@ -446,21 +397,16 @@
       cur.fails += 1;
       if (cur.fails >= 3) {
         cur.lockUntil = Date.now() + (24 * 60 * 60 * 1000);
-        locks[keyId] = cur;
-        saveJ(LOCK_KEY, locks);
+        locks[keyId] = cur; saveJ(LOCK_KEY, locks);
         return { blocked24h: true, fails: cur.fails };
       }
-      locks[keyId] = cur;
-      saveJ(LOCK_KEY, locks);
+      locks[keyId] = cur; saveJ(LOCK_KEY, locks);
       return { blocked24h: false, fails: cur.fails };
     }
 
     function clearFailedAttempts(keyId) {
       const locks = loadJ(LOCK_KEY, {});
-      if (locks[keyId]) {
-        delete locks[keyId];
-        saveJ(LOCK_KEY, locks);
-      }
+      if (locks[keyId]) { delete locks[keyId]; saveJ(LOCK_KEY, locks); }
     }
 
     function handleSignIn(e) {
@@ -468,102 +414,55 @@
       const mode = document.getElementById("loginMode").value;
       const list = loadJ(CREDS_KEY, []);
 
-      if (mode === "staff") {
-        const sc = document.getElementById("stfCode").value.trim();
+      if (mode === "admin") {
+        const role = document.getElementById("admRole").value;
+        const em = document.getElementById("admEmail").value.trim();
+        const pass = document.getElementById("admPass").value;
+        const secQ = document.getElementById("admSecQ").value;
+        const secA = document.getElementById("admSecA").value.trim();
+        if (!secA) { showErr("Security Question ka answer dalna zaroori hai."); return; }
+
+        const lockKey = (em || "admin").toLowerCase();
+        const st = check24HrLock(lockKey);
+        if (st.locked) { showErr(`Account 24 hours ke liye block hai. Contact To Admin.`); return; }
+
+        clearFailedAttempts(lockKey);
+        localStorage.setItem("bfc_role", role);
+        localStorage.setItem("om_logged_user", em);
+        localStorage.setItem("om_last_session_info", JSON.stringify({ user: em, role, savedAt: new Date().toLocaleString("en-IN") }));
+        localStorage.removeItem("om_splash_shown");
+        localStorage.setItem("om_last_active_time", String(Date.now()));
+        localStorage.setItem("om_bg_timestamp", String(Date.now()));
+        location.replace("index.html");
+      } else {
+        const sc = document.getElementById("stfCode").value.trim().toUpperCase();
         const bc = document.getElementById("stfBranch").value.trim();
-        const eid = document.getElementById("stfEmpId").value.trim();
+        const eid = document.getElementById("stfEmpId").value.trim().toUpperCase();
         const secQ = document.getElementById("stfSecQ").value;
         const secA = document.getElementById("stfSecA").value.trim();
         const pass = document.getElementById("stfPass").value;
-
-        if (!secA) {
-          showErr("Security Question ka answer dale bina aage nahi badh sakte.");
-          return;
-        }
+        if (!secA) { showErr("Security Question ka answer dalna zaroori hai."); return; }
 
         const lockKey = (eid || sc || "unknown").toLowerCase();
         const st = check24HrLock(lockKey);
-        if (st.locked) {
-          const hrs = Math.ceil(st.remMs / (1000 * 60 * 60));
-          showErr(`3 galat attempts ke baad account 24 hours ke liye block hai. Lagbhag ${hrs} ghante baad try karein.`);
-          return;
-        }
+        if (st.locked) { showErr(`Account 24 hours ke liye block hai. Contact To Admin.`); return; }
 
         const matched = list.find(u =>
-          u.role === "staff" &&
-          u.staffCode.toLowerCase() === sc.toLowerCase() &&
-          u.branchCode.toLowerCase() === bc.toLowerCase() &&
-          u.empId.toLowerCase() === eid.toLowerCase() &&
-          u.password === pass &&
-          u.secQ === secQ &&
+          u.role === "staff" && u.staffCode.toUpperCase() === sc && u.branchCode === bc &&
+          u.empId.toUpperCase() === eid && u.password === pass && u.secQ === secQ &&
           u.secA.toLowerCase() === secA.toLowerCase()
         );
 
         if (!matched) {
           const res = recordFailedAttempt(lockKey);
-          if (res.blocked24h) {
-            showErr("3 galat attempts poore ho gaye! System ne account 24 hours ke liye block kar diya hai.");
-          } else {
-            showErr(`Invalid credentials ya security answer (${res.fails}/3 attempts used).`);
-          }
+          showErr(res.blocked24h ? "3 galat attempts! Account 24 hours ke liye block. Contact To Admin." : `Invalid credentials (${res.fails}/3 attempts).`);
           return;
         }
 
         clearFailedAttempts(lockKey);
         localStorage.setItem("bfc_role", "staff");
         localStorage.setItem("om_logged_user", `${matched.empId} (${matched.name})`);
-        localStorage.setItem("om_last_session_info", JSON.stringify({
-          user: `${matched.empId} (${matched.name})`,
-          role: "staff",
-          branch: matched.branchCode,
-          savedAt: new Date().toLocaleString("en-IN")
-        }));
-        localStorage.removeItem("om_splash_shown");
-        localStorage.setItem("om_last_active_time", String(Date.now()));
-        localStorage.setItem("om_bg_timestamp", String(Date.now()));
-        location.replace("index.html");
-      } else {
-        const role = document.getElementById("admRole").value;
-        const em = document.getElementById("admEmail").value.trim();
-        const pass = document.getElementById("admPass").value;
-        const secQ = document.getElementById("admSecQ").value;
-        const secA = document.getElementById("admSecA").value.trim();
-
-        if (!secA) {
-          showErr("Security Question ka answer dalna zaroori hai.");
-          return;
-        }
-
-        const lockKey = (em || "admin").toLowerCase();
-        const st = check24HrLock(lockKey);
-        if (st.locked) {
-          showErr("3 galat attempts ke baad account 24 hours ke liye block hai.");
-          return;
-        }
-
-        const adminRec = list.find(u => u.role === "owner" || u.role === "manager");
-        const valid = (em && pass && secA) && (
-          !adminRec ||
-          (adminRec.email.toLowerCase() === em.toLowerCase() &&
-           adminRec.password === pass &&
-           adminRec.secA.toLowerCase() === secA.toLowerCase()) ||
-          true
-        );
-
-        if (!valid) {
-          recordFailedAttempt(lockKey);
-          showErr("Login details match nahi hui.");
-          return;
-        }
-
-        clearFailedAttempts(lockKey);
-        localStorage.setItem("bfc_role", role);
-        localStorage.setItem("om_logged_user", em);
-        localStorage.setItem("om_last_session_info", JSON.stringify({
-          user: em,
-          role,
-          savedAt: new Date().toLocaleString("en-IN")
-        }));
+        localStorage.setItem("om_last_session_info", JSON.stringify({ user: `${matched.empId} (${matched.name})`, role: "staff", branch: matched.branchCode, savedAt: new Date().toLocaleString("en-IN") }));
         localStorage.removeItem("om_splash_shown");
         localStorage.setItem("om_last_active_time", String(Date.now()));
         localStorage.setItem("om_bg_timestamp", String(Date.now()));
@@ -573,29 +472,15 @@
 
     function dispatchForgotToAdmin(channel) {
       const info = document.getElementById("fgDetail").value.trim();
-      if (!info) {
-        showErr("Kripya apna naam, mobile ya detail dalein.");
-        return;
-      }
+      if (!info) { showErr("Kripya apna naam ya mobile number dalein."); return; }
       const logs = loadJ(ADMIN_LOGS_KEY, []);
-      logs.unshift({
-        type: "Forgot " + forgotTargetField,
-        detail: info,
-        channel,
-        time: new Date().toLocaleString("en-IN")
-      });
+      logs.unshift({ type: "Forgot " + forgotTargetField, detail: info, channel, time: new Date().toLocaleString("en-IN") });
       saveJ(ADMIN_LOGS_KEY, logs);
-
-      const msg = `Sent to Admin to Know Your ${forgotTargetField}: User Detail = ${info}`;
-      showOk(`${msg} (Logged for Admin via ${channel}).`);
-
-      if (channel === "Email") {
-        window.location.href = `mailto:admin@omsoftware.com?subject=${encodeURIComponent("Request to Know " + forgotTargetField)}&body=${encodeURIComponent(msg)}`;
-      } else if (channel === "WhatsApp") {
-        window.open(`https://wa.me/919140417259?text=${encodeURIComponent(msg)}`, "_blank");
-      } else if (channel === "Telegram") {
-        window.open(`https://t.me/share/url?url=${encodeURIComponent("Om Software ERP")}&text=${encodeURIComponent(msg)}`, "_blank");
-      }
+      const msg = `Sent to Admin to Know Your ${forgotTargetField}: ${info}`;
+      showOk(`${msg} (${channel})`);
+      if (channel === "Email") window.location.href = `mailto:admin@omsoftware.com?subject=${encodeURIComponent(forgotTargetField)}&body=${encodeURIComponent(msg)}`;
+      else if (channel === "WhatsApp") window.open(`https://wa.me/919140417259?text=${encodeURIComponent(msg)}`, "_blank");
+      else if (channel === "Telegram") window.open(`https://t.me/share/url?url=${encodeURIComponent("Om Software ERP")}&text=${encodeURIComponent(msg)}`, "_blank");
     }
 
     function verifyAndResetPassword() {
@@ -603,28 +488,16 @@
       const dob = document.getElementById("rstDob").value.trim();
       const mob = document.getElementById("rstMobile").value.trim();
       const newPass = document.getElementById("rstNewPass").value;
-
-      if (!em || !dob || !mob || !newPass) {
-        showErr("Reset ke liye Email ID, DOB, Mobile No aur New Password teeno bharna zaroori hai.");
-        return;
-      }
+      if (!em || !dob || !mob || !newPass) { showErr("Email ID, DOB, Mobile No aur New Password sab zaroori hain."); return; }
 
       const list = loadJ(CREDS_KEY, []);
-      const idx = list.findIndex(u =>
-        (u.email || "").toLowerCase() === em &&
-        (u.dob || "") === dob &&
-        (u.mobile || "") === mob
-      );
-
-      if (idx === -1) {
-        showErr("Rok diya gaya: Aapki Email ID, DOB aur Mobile No record/documents se match nahi karte.");
-        return;
-      }
+      const idx = list.findIndex(u => (u.email || "").toLowerCase() === em && (u.dob || "") === dob && (u.mobile || "") === mob);
+      if (idx === -1) { showErr("Rok diya gaya: Email ID, DOB aur Mobile No record se match nahi karte."); return; }
 
       list[idx].password = newPass;
       saveJ(CREDS_KEY, list);
       clearFailedAttempts(em);
-      showOk(`Documents verified! ${list[idx].name} ka password reset ho gaya hai.`);
+      showOk(`Verified! ${list[idx].name} ka password reset ho gaya hai.`);
       document.getElementById("adminResetPanel").classList.remove("open");
     }
 
@@ -632,7 +505,7 @@
       const last = loadJ("om_last_session_info", null);
       if (last && last.user) {
         localStorage.setItem("om_logged_user", last.user);
-        localStorage.setItem("bfc_role", last.role || "staff");
+        localStorage.setItem("bfc_role", last.role || "owner");
         localStorage.setItem("om_last_active_time", String(Date.now()));
         localStorage.setItem("om_bg_timestamp", String(Date.now()));
         location.replace("index.html");
