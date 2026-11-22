@@ -184,8 +184,12 @@
           <input type="text" id="mgrEmpCode" class="cap-field" placeholder="e.g. MGR-001-1" autocomplete="off" autocapitalize="characters" oninput="formatSmartCode(this)">
         </div>
         <div class="fg">
-          <label>Branch Code (Numbers Only) *</label>
+          <label>Branch / Company Register No *</label>
           <input type="text" id="mgrBranch" inputmode="numeric" placeholder="e.g. 001" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          <div style="font-size:10.5px;color:#FDE047;margin-top:4px;line-height:1.35;">
+            Only Mention Company Register No.<br>
+            <span style="color:#FCA5A5;">केवल कंपनी के रजिस्टर नंबर ही डालें, वरना लॉगिन 24 घंटे के लिए लॉक हो सकता है।</span>
+          </div>
         </div>
         <div class="fg">
           <label>Registered Email ID *</label>
@@ -201,7 +205,7 @@
             <input type="password" id="mgrMpin" maxlength="4" inputmode="numeric" placeholder="4-digit MPIN" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
           </div>
         </div>
-        <button type="submit" class="btn-gold">Manager Login</button>
+        <button type="submit" class="btn-gold">Login Manager</button>
         <div style="text-align:center;margin-top:8px;">
           <button type="button" class="btn-link" onclick="openManagerFirstTime()">➕ First Time Manager? Create Password &amp; MPIN</button>
         </div>
@@ -318,7 +322,7 @@
     <div id="mgrSetupPanel" class="panel-box">
       <b style="color:var(--cyan);display:block;margin-bottom:8px;">Manager First-Time Setup</b>
       <div class="fg"><label>Employee Code *</label><input type="text" id="msCode" class="cap-field" placeholder="MGR-001-1" oninput="formatSmartCode(this)"></div>
-      <div class="fg"><label>Branch Code *</label><input type="text" id="msBranch" inputmode="numeric" placeholder="001" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div class="fg"><label>Branch / Company Register No *</label><input type="text" id="msBranch" inputmode="numeric" placeholder="001" oninput="this.value=this.value.replace(/[^0-9]/g,'')"><div style="font-size:10.5px;color:#FDE047;margin-top:3px;">Only Mention Company Register No • केवल कंपनी के रजिस्टर नंबर ही डालें, वरना लॉगिन 24 घंटे के लिए लॉक हो सकता है।</div></div>
       <div class="fg"><label>Email ID *</label><input type="email" id="msEmail" placeholder="manager@gym.com"></div>
       <div class="grid2">
         <div class="fg"><label>Create Password *</label><input type="password" id="msPass" placeholder="••••••••"></div>
