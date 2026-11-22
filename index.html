@@ -1683,6 +1683,37 @@ Telegram notification sent to Manager.`);
       window.addEventListener("focus", () => { veil.style.display = "none"; });
     })();
 
+    
+    // Enforce strict Staff role view: staff cannot access full owner/admin financial or branch management
+    (function enforceStaffRoleIsolation() {
+      const role = (localStorage.getItem("bfc_role") || "owner").toLowerCase();
+      if (role === "staff") {
+        window.addEventListener("DOMContentLoaded", function() {
+          const p1 = document.getElementById("page1");
+          if (p1) {
+            p1.innerHTML = `
+              <div class="box-card" style="border-color:var(--cyan);">
+                <h2 style="font-size:16px;color:var(--cyan);">👤 Staff Self-Service Portal (Read-Only)</h2>
+                <p style="font-size:11.5px;color:var(--muted);margin-top:4px;">
+                  Aapko sirf apni attendance, monthly earned salary, leave application aur advance request ka access hai.
+                </p>
+                <div class="rec" style="margin-top:10px;">
+                  <b>Your Total Attendance:</b> 22/30 (22 Present &bull; 8 Off/Absent)<br>
+                  <b>This Month Earned Salary (₹10,000 / 30d):</b> 20 days = <b style="color:var(--emerald);">₹6,666.67</b><br>
+                  <b>Share App Link:</b> https://5brothersfitnessclubunnao-sys.github.io/orgdesk-web/login.html
+                </div>
+                <button type="button" class="big-btn" onclick="logoutUser()">Logout</button>
+              </div>
+            `;
+          }
+          ["tb2", "tb3", "tb4"].forEach(id => {
+            const b = document.getElementById(id);
+            if (b) b.style.display = "none";
+          });
+        });
+      }
+    })();
+
     seedData();
     syncDashboard();
     runSplash();
