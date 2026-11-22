@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Om Software ERP — Multi-Branch Operations &amp; Business Control Desk</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="auth-gate.js"></script>
+  <style>
+    :root {
+      --bg: #050813; --card: #0A1124; --card2: #0E172F; --border: #1B294B; --border-hl: #2A3F70;
+      --gold: #F5A623; --gold-dark: #D97706; --cyan: #22D3EE; --emerald: #34D399;
+      --rose: #FB7185; --purple: #A78BFA; --tx: #FFFFFF; --muted: #94A3B8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--tx); max-width: 580px; margin: 0 auto; padding-bottom: 90px; overflow-x: hidden; }
+
+    .hdr {
+      background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 14px;
+      position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .om-badge {
+      width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: #050813; font-size: 19px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+    }
+    .brand h1 { font-size: 15px; font-weight: 800; }
+    .brand p { font-size: 11px; color: var(--muted); }
+    .hdr-act { display: flex; gap: 6px; align-items: center; }
+    select.mini, button.mini {
+      background: #101B35; border: 1px solid var(--border); color: #fff; border-radius: 8px;
+      padding: 6px 9px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+    }
+    button.mini.danger { background: rgba(251,113,133,0.14); border-color: var(--rose); color: var(--rose); }
+
+    .tabs { display: flex; gap: 5px; padding: 10px 14px 4px; }
+    .tab-btn {
+      flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--muted);
+      border-radius: 10px; padding: 8px 6px; font-size: 11.5px; font-weight: 800; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--gold); color: #050813; border-color: var(--gold); }
+    .tab-btn.hl { border-color: var(--cyan); color: var(--cyan); }
+
+    .alert-bar {
+      display: none; margin: 8px 14px 0; background: rgba(34,211,238,0.12); border: 1px solid var(--cyan);
+      color: #E0F2FE; border-radius: 12px; padding: 10px 12px; font-size: 12px;
+    }
+
+    .page-sec { display: none; padding: 10px 14px; }
+    .page-sec.active { display: block; }
+
+    .live-strip {
+      display: flex; justify-content: space-between; align-items: center; background: #111A30;
+      border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin-bottom: 11px; font-size: 12px;
+    }
+    .tag-red { background: #E11D48; color: #fff; padding: 2px 7px; border-radius: 6px; font-size: 10.5px; font-weight: 800; }
+    .tag-cyan { background: rgba(34,211,238,0.15); color: var(--cyan); padding: 2px 7px; border-radius: 6px; font-size: 10.5px; font-weight: 800; }
+
+    .d-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 15px; margin-bottom: 10px; cursor: pointer; transition: 0.15s;
+    }
+    .d-card:hover { border-color: var(--gold); background: var(--card2); }
+    .dc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .dc-lbl { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .dc-pill { font-size: 10.5px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: rgba(34,211,238,0.12); color: var(--cyan); }
+    .dc-row { display: flex; justify-content: space-between; align-items: flex-end; }
+    .dc-num { font-size: 23px; font-weight: 900; }
+    .dc-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+    .big-btn {
+      width: 100%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #050813;
+      border: 0; border-radius: 14px; padding: 13px; font-size: 13.5px; font-weight: 900; cursor: pointer; margin-top: 10px;
+    }
+    .big-btn.sec { background: #132142; color: var(--cyan); border: 1px solid var(--border-hl); }
+
+    .box-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+    .sec-head { font-size: 11.5px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.9px; margin: 14px 0 9px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 10px; }
+    .tile {
+      background: var(--card); border: 1px solid var(--border); border-radius: 13px; padding: 13px 11px;
+      color: #fff; font-size: 12.5px; font-weight: 700; text-align: left; cursor: pointer;
+    }
+    .tile:hover { border-color: var(--cyan); background: var(--card2); }
+    .tile.red { border-color: rgba(251,113,133,0.45); color: var(--rose); text-align: center; grid-column: span 2; }
+
+    .m-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 13px 15px;
+      margin-bottom: 9px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+    .m-card:hover { border-color: var(--gold); background: var(--card2); }
+    .m-title { font-size: 14px; font-weight: 800; }
+    .m-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .modal-ov {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(7px);
+      z-index: 99999; align-items: center; justify-content: center; padding: 12px;
+    }
+    .modal-ov.open { display: flex; }
+    .modal-box {
+      background: var(--card); border: 1.5px solid var(--border-hl); border-radius: 18px;
+      width: 100%; max-width: 550px; max-height: 89vh; overflow-y: auto; padding: 18px;
+    }
+    .m-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 14px; }
+    .m-top h3 { font-size: 15.5px; color: var(--gold); }
+    .x-btn { background: none; border: 0; color: var(--rose); font-size: 19px; font-weight: 900; cursor: pointer; }
+    .fg { margin-bottom: 11px; }
+    .fg label { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 4px; font-weight: 700; }
+    .fc { width: 100%; background: #070D1C; border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px; color: #fff; font-size: 13px; }
+    .sub-btn { background: #111D38; color: var(--cyan); border: 1px solid var(--border); border-radius: 9px; padding: 7px 11px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+    .rec { background: #080F22; border: 1px solid var(--border); border-radius: 11px; padding: 11px; margin-bottom: 9px; font-size: 12px; }
+    .pill-ok { background: rgba(52,211,153,0.15); color: var(--emerald); border: 1px solid var(--emerald); padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 800; }
+    .pill-no { background: rgba(251,113,133,0.15); color: var(--rose); border: 1px solid var(--rose); padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 800; }
+    .pill-pd { background: rgba(245,166,35,0.15); color: var(--gold); border: 1px solid var(--gold); padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 800; }
+    .preview-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .preview-img { width: 62px; height: 62px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border-hl); }
+
+    /* Animated Om Splash */
+    #omSplash {
+      display: none; position: fixed; inset: 0; background: radial-gradient(circle at center, #1B2B50 0%, #050813 85%);
+      z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: 34px 18px; text-align: center;
+    }
+    .orbit-box { position: relative; width: 240px; height: 240px; margin: 18px auto; display: flex; align-items: center; justify-content: center; }
+    .om-glyph { font-size: 68px; font-weight: 900; color: var(--gold); text-shadow: 0 0 28px rgba(245,166,35,0.8); z-index: 2; }
+    .ring { position: absolute; border: 1.5px solid rgba(245,166,35,0.28); border-radius: 50%; }
+    .r1 { width: 140px; height: 140px; animation: rotCW 8s linear infinite; }
+    .r2 { width: 192px; height: 192px; border-color: rgba(34,211,238,0.28); animation: rotCCW 13s linear infinite; }
+    .r3 { width: 240px; height: 240px; border-color: rgba(167,139,250,0.25); animation: rotCW 19s linear infinite; }
+    .dot-p { position: absolute; width: 14px; height: 14px; border-radius: 50%; top: -7px; left: 56px; background: var(--gold); }
+    .r2 .dot-p { background: var(--cyan); top: 88px; left: -7px; }
+    .r3 .dot-p { background: var(--rose); top: auto; bottom: 8px; left: auto; right: 34px; }
+    @keyframes rotCW { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes rotCCW { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+  </style>
+</head>
+<body>
+
+  <div id="omSplash">
+    <div>
+      <div style="font-size:10.5px;font-weight:800;letter-spacing:2px;color:var(--gold);">OFFICIAL PORTAL &bull; ENTERPRISE EXPERIENCE</div>
+      <h1 style="font-size:22px;font-weight:900;margin-top:6px;">WELCOME TO OM SOFTWARE</h1>
+      <div style="font-size:11px;font-weight:700;color:var(--gold);margin-top:4px;">TRUST &bull; TECHNOLOGY &bull; POWER OF INNOVATION</div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:3px;">Universal Gym &amp; Business Management System</div>
+    </div>
+
+    <div class="orbit-box">
+      <div class="om-glyph">ॐ</div>
+      <div class="ring r1"><div class="dot-p"></div></div>
+      <div class="ring r2"><div class="dot-p"></div></div>
+      <div class="ring r3"><div class="dot-p"></div></div>
+    </div>
+
+    <div style="max-width:430px;">
+      <div style="font-size:12.5px;color:#FDE047;line-height:1.55;margin-bottom:16px;">
+        यदा यदा हि धर्मस्य ग्लानिर्भवति भारत।<br>अभ्युत्थानमधर्मस्य तदात्मानं सृजाम्यहम्।।
+      </div>
+      <div style="width:100%;height:5px;background:rgba(255,255,255,0.12);border-radius:99px;overflow:hidden;margin-bottom:8px;">
+        <div id="splashBar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width 0.3s;"></div>
+      </div>
+      <div id="splashTxt" style="font-size:11px;color:var(--muted);margin-bottom:10px;">ॐ ब्रह्माण्ड — Dashboard खुल रहा है... (3s)</div>
+      <button type="button" class="big-btn" style="background:#16A34A;color:#fff;margin-top:0;" onclick="hideSplash()">Dashboard पर चलें &rarr;</button>
+    </div>
+  </div>
+
+  <header class="hdr">
+    <div class="brand">
+      <div class="om-badge">ॐ</div>
+      <div>
+        <h1>Om Software ERP</h1>
+        <p>Enterprise Multi-Branch Workspace</p>
+      </div>
+    </div>
+    <div class="hdr-act">
+      <select id="branchSel" class="mini" onchange="setBranch(this.value)">
+        <option value="ALL">All Branches</option>
+        <option value="001">Branch 001 (Unnao)</option>
+        <option value="002">Branch 002 (Kanpur)</option>
+        <option value="003">Branch 003 (Lucknow)</option>
+        <option value="004">Branch 004 (Agra)</option>
+        <option value="005">Branch 005 (Varanasi)</option>
+      </select>
+      <button type="button" class="mini danger" onclick="logoutUser()">Logout</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button type="button" class="tab-btn active" id="tb1" onclick="switchPage(1)">Page 1: Live</button>
+    <button type="button" class="tab-btn hl" id="tb2" onclick="switchPage(2)">Page 2: Trial &amp; Grid</button>
+    <button type="button" class="tab-btn" id="tb3" onclick="switchPage(3)">Page 3: Ops</button>
+    <button type="button" class="tab-btn" id="tb4" onclick="switchPage(4)">Page 4: Modules</button>
+  </nav>
+
+  <div id="adminAlertBar" class="alert-bar"></div>
+
+  <!-- PAGE 1: LIVE CARDS -->
+  <section id="page1" class="page-sec active">
+    <div class="live-strip">
+      <span class="tag-red">&bull; LIVE BOARD</span>
+      <span id="liveBoardMeta">Collection: ₹2,23,200 &bull; Pro</span>
+      <span class="tag-cyan">AUTO FETCH</span>
+    </div>
+
+    <div class="d-card" onclick="openMod('modPnl')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--gold)">💰 Total Collection</span><span class="dc-pill" id="pillBranches">5 Branches</span></div>
+      <div class="dc-row"><div><div class="dc-num" id="vTotalCol" style="color:var(--gold)">₹2,23,200</div><div class="dc-sub">All branches combined</div></div><span>📈</span></div>
+    </div>
+
+    <div class="d-card" onclick="openMod('modPnl')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--emerald)">💳 Total Fees Collection</span><span class="dc-pill">5 Branches</span></div>
+      <div class="dc-row"><div><div class="dc-num" id="vFeesCol" style="color:var(--emerald)">₹1,84,800</div><div class="dc-sub">Membership &amp; renewals</div></div><span>📈</span></div>
+    </div>
+
+    <div class="d-card" onclick="switchPage(4)">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--cyan)">🏋️ Total Gym Members</span><span class="dc-pill">Live Count</span></div>
+      <div class="dc-row"><div><div class="dc-num" id="vMembers" style="color:var(--cyan)">148</div><div class="dc-sub">Across all branches</div></div><span>📶</span></div>
+    </div>
+
+    <div class="d-card" onclick="openMod('modAdmission')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--cyan)">📝 New Admissions</span><span class="dc-pill">Live Board</span></div>
+      <div class="dc-row"><div><div class="dc-num" id="vAdmissions" style="color:var(--cyan)">42</div><div class="dc-sub">Tap: admission &amp; services</div></div><span>📈</span></div>
+    </div>
+
+    <div class="d-card" onclick="openMod('modExtra')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--purple)">💊 Supplement Collection</span><span class="dc-pill">POS Store</span></div>
+      <div class="dc-row"><div><div class="dc-num" style="color:var(--purple)">₹38,400</div><div class="dc-sub">Whey, creatine &amp; shakers</div></div><span>📈</span></div>
+    </div>
+
+    <div class="d-card" onclick="openMod('modPnl')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--emerald)">💵 Cash / Online</span><span class="dc-pill">Split Mode</span></div>
+      <div class="dc-row"><div><div class="dc-num" id="vCashOnline" style="font-size:19px;color:var(--emerald)">₹1,43,000 Cash / ₹75,000 Online</div><div class="dc-sub">Click for branch-wise split</div></div><span>🟩🟦</span></div>
+    </div>
+
+    <div class="d-card" onclick="openMod('modPnl')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--emerald)">⚖️ Total Loss &amp; Profit</span><span class="dc-pill">Net P&amp;L</span></div>
+      <div class="dc-row"><div><div class="dc-num" id="vNetPnl" style="color:var(--emerald)">+₹1,44,800</div><div class="dc-sub" id="vExpSub">Exp: ₹78,400 &bull; Net Profit</div></div><span>📉📈</span></div>
+    </div>
+
+    <div class="d-card" onclick="openMod('modExtra')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--gold)">✨ Extra Service Collection</span><span class="dc-pill">Add-On</span></div>
+      <div class="dc-row"><div><div class="dc-num" id="vExtraCol" style="color:var(--gold)">₹0</div><div class="dc-sub">PT, steam, diet &amp; extra services</div></div><span>📈</span></div>
+    </div>
+
+    <div class="d-card" onclick="openMod('modDeptStaff')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--cyan)">👥 Total No. of Employees</span><span class="dc-pill">Admin Vault</span></div>
+      <div class="dc-row"><div><div class="dc-num" id="vEmpCount" style="color:var(--cyan)">5 Staff</div><div class="dc-sub">Branch count, KYC, joining &amp; bank/PF/UAN</div></div><span>🗂️</span></div>
+    </div>
+
+    <button type="button" class="big-btn" onclick="switchPage(2)">Next Page &rarr; (Page 2: Trial &amp; Enterprise Control Grid)</button>
+  </section>
+
+  <!-- PAGE 2: 7-DAY TRIAL AT TOP + ENTERPRISE CONTROL GRID -->
+  <section id="page2" class="page-sec">
+    <div class="box-card">
+      <div style="font-size:12px;font-weight:800;color:var(--emerald);">&bull; 7-Day Free Trial Active</div>
+      <div style="font-size:11px;color:var(--muted);margin:3px 0 10px;">Enterprise multi-branch workspace &bull; Cloud sync ready</div>
+      <button type="button" class="big-btn" style="margin-top:0;padding:10px;font-size:12px;" onclick="openMod('modLicense')">Upgrade Plan</button>
+    </div>
+
+    <div class="sec-head">ENTERPRISE CONTROL GRID</div>
+    <div class="grid2">
+      <button type="button" class="tile" onclick="openMod('modExtra')">Extra Service Collection</button>
+      <button type="button" class="tile" onclick="openMod('modMaint')">Maintenance &amp; Bills</button>
+      <button type="button" class="tile" onclick="openMod('modDeptStaff')">Department Staff</button>
+      <button type="button" class="tile" onclick="openMod('modAtt')">Smart Attendance</button>
+      <button type="button" class="tile" onclick="openMod('modRouter')">Unified Data Upload</button>
+      <button type="button" class="tile" onclick="openMod('modSlip')">Salary Slip</button>
+      <button type="button" class="tile" onclick="openMod('modPnl')">5-Point Security &amp; P&amp;L</button>
+      <button type="button" class="tile" onclick="openMod('modEnq')">Audit &amp; Enquiries</button>
+      <button type="button" class="tile" onclick="openMod('modLicense')">Licenses (LIC-OM-OPE2HK)</button>
+      <button type="button" class="tile" onclick="switchPage(1)">&larr; Back to Dashboard</button>
+      <button type="button" class="tile" onclick="openMod('modLicense')">🔑 License</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">🛡️ Code</button>
+      <button type="button" class="tile" onclick="openMod('modPnl')">📁 Branch Collection &amp; Report</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">📁 Staff Codes</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">🆔 View Your Employee Code</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">🪪 View Your Staff Code</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">🔍 Branch &amp; Staff Codes</button>
+      <button type="button" class="tile" onclick="openMod('modSelfie')">📸 Selfie Gallery</button>
+      <button type="button" class="tile red" onclick="logoutUser()">🚪 Logout</button>
+    </div>
+    <button type="button" class="big-btn sec" onclick="switchPage(3)">Next Page (Page 3: Operations &amp; Maintenance) &rarr;</button>
+  </section>
+
+  <!-- PAGE 3: OPERATIONS, MAINTENANCE, ENQUIRIES, P&L & SALARY -->
+  <section id="page3" class="page-sec">
+    <div class="box-card">
+      <h2 style="font-size:15.5px;color:var(--gold);">Operations &amp; Maintenance Command</h2>
+      <p style="font-size:11.5px;color:var(--muted);margin-top:3px;">Branch light bills, approval/rejection, staff KYC, attendance &amp; P&amp;L</p>
+    </div>
+    <div class="grid2">
+      <button type="button" class="tile" onclick="openMod('modMaint')">⚡ Maintenance &amp; Light Bills<br><span style="font-size:10.5px;color:var(--gold)">Meter, units, PDF &amp; photo</span></button>
+      <button type="button" class="tile" onclick="openMod('modMaint')">✅ Bill Approval / Rejection<br><span style="font-size:10.5px;color:var(--emerald)">Approve/Reject with reason</span></button>
+      <button type="button" class="tile" onclick="openMod('modDeptStaff')">🏢 Department-Wise Staff<br><span style="font-size:10.5px;color:var(--cyan)">Full KYC card &amp; actions</span></button>
+      <button type="button" class="tile" onclick="openMod('modAtt')">📋 Smart Attendance<br><span style="font-size:10.5px;color:var(--purple)">QR, batches &amp; expired fees</span></button>
+      <button type="button" class="tile" onclick="openMod('modEnq')">📞 Walk-In &amp; Lead Enquiries<br><span style="font-size:10.5px;color:var(--cyan)">Call, WhatsApp &amp; age</span></button>
+      <button type="button" class="tile" onclick="openMod('modPnl')">📉📈 P&amp;L Charts &amp; Excel<br><span style="font-size:10.5px;color:var(--gold)">Date filter &amp; chart sheet</span></button>
+      <button type="button" class="tile" onclick="openMod('modSlip')">🧾 Office &amp; HR Salary<br><span style="font-size:10.5px;color:var(--emerald)">Branch/Dept &amp; HR Excel</span></button>
+      <button type="button" class="tile" onclick="openMod('modStaffCheck')">🔎 40-Staff Selfie Check<br><span style="font-size:10.5px;color:var(--rose)">Present / Jao beta Absent</span></button>
+    </div>
+    <button type="button" class="big-btn sec" onclick="switchPage(4)">Next Page (Page 4: Core Modules &amp; Folders) &rarr;</button>
+  </section>
+
+  <!-- PAGE 4: CORE MODULES & FOLDERS -->
+  <section id="page4" class="page-sec">
+    <div class="sec-head" style="margin-top:0">Core Modules &amp; Folders (Page 4)</div>
+    <div class="m-card" onclick="openMod('modAdmission')"><div><div class="m-title">Admission Form</div><div class="m-sub">Services, editable price, Cash/Online UTR &amp; doc preview</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modExtra')"><div><div class="m-title">Pay Fees Desk</div><div class="m-sub">Fee collection, dues &amp; add-on receipts</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modAtt')"><div><div class="m-title">Attendance Kiosk</div><div class="m-sub">QR, Morning/Evening batch &amp; Fees Expired list</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modSlip')"><div><div class="m-title">Staff Salary &amp; Payroll</div><div class="m-sub">Branch/Department salary &amp; HR Excel sheet</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modJoining')"><div><div class="m-title">Staff Joining</div><div class="m-sub">KYC docs, qualification, medical &amp; Cash/Bank mode</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modRouter')"><div><div class="m-title">Upload Gym Data</div><div class="m-sub">Auto-router for CSV / Excel into isolated sections</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modDeptStaff')"><div><div class="m-title">Admin Portal</div><div class="m-sub">Staff directory, full KYC certificate &amp; firing reason</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <button type="button" class="big-btn sec" onclick="switchPage(1)">&larr; Back to Page 1 (Live Dashboard)</button>
+  </section>
+
+  <!-- MODALS -->
+  <div class="modal-ov" id="modExtra">
+    <div class="modal-box">
+      <div class="m-top"><h3>✨ Extra Service Collection</h3><button type="button" class="x-btn" onclick="closeMod('modExtra')">&times;</button></div>
+      <form onsubmit="addExtraService(event)">
+        <div class="fg"><label>Member / Client Name *</label><input class="fc" id="esName" required placeholder="Naam"></div>
+        <div class="fg"><label>Extra Service *</label><input class="fc" id="esSrv" required placeholder="PT / Steam / Diet"></div>
+        <div class="fg"><label>Amount (₹) *</label><input type="number" class="fc" id="esAmt" required value="1000"></div>
+        <div class="fg"><label>Branch *</label><select class="fc" id="esBr"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option><option value="004">Branch 004</option><option value="005">Branch 005</option></select></div>
+        <div class="fg"><label>Payment Mode *</label><select class="fc" id="esMode"><option value="Cash">Cash</option><option value="Online">Online</option></select></div>
+        <button type="submit" class="big-btn" style="margin-top:0">Add Extra Service Collection</button>
+      </form>
+      <div class="rec" style="margin-top:12px" id="esSummary">Total Extra Service Collection: ₹0 (0 Entries)</div>
+      <div id="esList"></div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modMaint">
+    <div class="modal-box">
+      <div class="m-top"><h3>🔧 Maintenance, Light Bills &amp; Approval</h3><button type="button" class="x-btn" onclick="closeMod('modMaint')">&times;</button></div>
+      <div class="rec">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <b style="color:var(--gold)">⚡ Branch Light Bill Tracker</b>
+          <button type="button" class="sub-btn" onclick="toggleBillForm()">+ Bill Daalein</button>
+        </div>
+        <select class="fc" id="billBrSel" onchange="renderBillCard()">
+          <option value="001">Branch 001 (₹14,850)</option>
+          <option value="002">Branch 002 (₹50,000)</option>
+          <option value="003">Branch 003 (₹50,000)</option>
+          <option value="004">Branch 004 (₹50,000)</option>
+          <option value="005">Branch 005 (₹12,000)</option>
+        </select>
+        <div id="billCardBox" style="margin-top:8px"></div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+          <button type="button" class="sub-btn" onclick="viewBillCopy('Image')">🖼️ View Image Copy</button>
+          <button type="button" class="sub-btn" onclick="viewBillCopy('PDF')">📄 View / Download PDF</button>
+        </div>
+      </div>
+
+      <div id="newBillForm" class="rec" style="display:none;border-color:var(--gold)">
+        <form onsubmit="submitLightBill(event)">
+          <div class="fg"><label>Current Bill (₹) *</label><input type="number" class="fc" id="nbCur" required value="15000"></div>
+          <div class="fg"><label>Previous Bill (₹) *</label><input type="number" class="fc" id="nbPrev" required value="13200"></div>
+          <div class="fg"><label>Prev Reading (kWh) *</label><input type="number" class="fc" id="nbPR" required value="18420"></div>
+          <div class="fg"><label>Curr Reading (kWh) *</label><input type="number" class="fc" id="nbCR" required value="20185"></div>
+          <div class="fg"><label>Load (kW) *</label><input class="fc" id="nbKw" required value="4 kW"></div>
+          <div class="fg"><label>Bill Photo / Upload *</label><input type="file" class="fc" accept="image/*,.pdf" capture="environment" onchange="showThumb(this,'nbPrevBox')"><div class="preview-row" id="nbPrevBox"></div></div>
+          <button type="submit" class="big-btn" style="margin-top:0">Submit Light Bill (Notify Admin)</button>
+        </form>
+      </div>
+
+      <form class="rec" onsubmit="submitConsumableBill(event)">
+        <b style="color:var(--cyan);display:block;margin-bottom:8px">Consumables / Vendor Bill (Jhadu, Pocha, Colin, Handwash, Sweeper)</b>
+        <div class="fg">
+          <label>Category / Auto-Search *</label>
+          <input list="catOpts" class="fc" id="cCat" required placeholder="Type or select e.g. Handwash, Colin, Sweeper">
+          <datalist id="catOpts">
+            <option value="Handwash">
+            <option value="Colin &amp; Glass Cleaner">
+            <option value="Jhadu &amp; Pocha">
+            <option value="Sweeper / Mali">
+            <option value="Equipment Maintenance">
+          </datalist>
+        </div>
+        <div class="fg"><label>Manual Amount (₹) *</label><input type="number" class="fc" id="cAmt" required value="650"></div>
+        <div class="fg"><label>Bill Photo (Upload or Live Camera) *</label><input type="file" class="fc" accept="image/*,.pdf" capture="environment" onchange="showThumb(this,'cPrevBox')"><div class="preview-row" id="cPrevBox"></div></div>
+        <button type="submit" class="big-btn" style="margin-top:0">Submit Bill for Admin Approval</button>
+      </form>
+
+      <div id="maintApprovalList"></div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modDeptStaff">
+    <div class="modal-box">
+      <div class="m-top"><h3>🏢 Department-Wise Staff &amp; KYC</h3><button type="button" class="x-btn" onclick="closeMod('modDeptStaff')">&times;</button></div>
+      <div class="fg"><label>Branch</label><select class="fc" id="dsBr" onchange="renderDeptStaff()"><option value="001">Branch 001 (Unnao)</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
+      <div class="fg"><label>Search Staff</label><input class="fc" id="dsSearch" oninput="renderDeptStaff()" placeholder="Name, role, department..."></div>
+      <div id="dsList"></div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modKycCard">
+    <div class="modal-box">
+      <div class="m-top"><h3>👑 Complete Staff KYC Certificate</h3><button type="button" class="x-btn" onclick="closeMod('modKycCard')">&times;</button></div>
+      <div id="kycCertBody" style="background:#fff;color:#0F172A;border-radius:12px;padding:15px;font-size:11.5px;"></div>
+      <button type="button" class="big-btn" onclick="window.print()">Print / Save KYC Certificate</button>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modAtt">
+    <div class="modal-box">
+      <div class="m-top"><h3>👑 5 BROTHER'S ATTENDANCE &amp; EXPIRED FEES</h3><button type="button" class="x-btn" onclick="closeMod('modAtt')">&times;</button></div>
+      <div class="rec" style="text-align:center">
+        <div style="font-size:14px;font-weight:900;color:#FDE047">स्मार्ट बायोमेट्रिक उपस्थिति प्रणाली</div>
+        <div style="font-size:11px;color:var(--muted)" id="attClock">22-11-2026 | Live</div>
+        <button type="button" class="big-btn" onclick="punchMemberAtt()">👉 MARK YOUR ATTENDANCE</button>
+        <div style="margin-top:10px">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=5BFC_QR_ATTENDANCE" alt="QR" style="background:#fff;padding:4px;border-radius:8px;width:82px;height:82px">
+          <div style="font-size:10.5px;color:var(--cyan);margin-top:4px">QR Scan Attendance Ready</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <button type="button" class="sub-btn" onclick="alert('Morning Batch: Total 60 | Present 22 | Absent 38')">🌅 Morning Batch</button>
+        <button type="button" class="sub-btn" onclick="alert('Evening Batch: Total 88 | Present 30 | Absent 58')">🌙 Evening Batch</button>
+      </div>
+
+      <div class="rec">
+        <b>📊 Aaj ka Live Count:</b> Total Members: <b>148</b> &bull; Present: <b style="color:var(--emerald)">52</b> &bull; Absent: <b style="color:var(--rose)">96</b>
+      </div>
+
+      <button type="button" class="big-btn" style="background:rgba(251,113,133,0.18);border:1px solid var(--rose);color:#FECDD3;margin-top:0;margin-bottom:8px" onclick="openMod('modExpired')">
+        ⚠️ Fees Expired Members (Last Visit Date &amp; Time)
+      </button>
+
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" onclick="openMod('modStaffCheck')">
+        🔎 40-Staff Selfie Check ("Jao beta Absent")
+      </button>
+
+      <div class="rec">
+        <b style="color:var(--cyan);display:block;margin-bottom:6px">Staff Outside / Late Attendance Punch</b>
+        <div class="fg"><label>Staff Name</label><input class="fc" id="stfAttName" placeholder="e.g. Rameshwar"></div>
+        <div class="fg"><label>Late Minutes</label><input type="number" class="fc" id="stfLateMin" value="0"></div>
+        <div class="fg">
+          <label>Location Mode</label>
+          <select class="fc" id="stfLocMode">
+            <option value="Inside Gym (150m)">Inside Gym (150m)</option>
+            <option value="Outside Gym (Remote)">Outside Gym (Remote)</option>
+          </select>
+        </div>
+        <div class="fg"><label>Live Photo</label><input type="file" class="fc" accept="image/*" capture="user" onchange="showThumb(this,'stfAttPrev')"><div class="preview-row" id="stfAttPrev"></div></div>
+        <button type="button" class="sub-btn" style="width:100%" onclick="punchStaffAtt()">Submit Staff Attendance &amp; Notify Manager</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modExpired">
+    <div class="modal-box">
+      <div class="m-top"><h3>⚠️ Fees Expired Members</h3><button type="button" class="x-btn" onclick="closeMod('modExpired')">&times;</button></div>
+      <div id="expiredListBox"></div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modStaffCheck">
+    <div class="modal-box">
+      <div class="m-top"><h3>🔎 40-Staff Selfie Verification</h3><button type="button" class="x-btn" onclick="closeMod('modStaffCheck')">&times;</button></div>
+      <div class="fg"><label>Staff Name</label><input class="fc" id="chkName" placeholder="Type staff name..." oninput="checkStaffSelfie()"></div>
+      <div class="fg"><label>Date</label><input type="date" class="fc" id="chkDate" value="2026-11-22" onchange="checkStaffSelfie()"></div>
+      <div id="chkResultBox" class="rec">Naam aur date chunein.</div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modSelfie">
+    <div class="modal-box">
+      <div class="m-top"><h3>📸 Selfie Gallery</h3><button type="button" class="x-btn" onclick="closeMod('modSelfie')">&times;</button></div>
+      <div class="fg"><label>Calendar Date</label><input type="date" class="fc" id="selfieDate" value="2026-11-04" onchange="renderSelfies()"></div>
+      <div id="selfieListBox"></div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modPnl">
+    <div class="modal-box">
+      <div class="m-top"><h3>📉📈 Profit &amp; Loss Statement &amp; Charts</h3><button type="button" class="x-btn" onclick="closeMod('modPnl')">&times;</button></div>
+      <div class="grid2">
+        <div class="fg"><label>From</label><input type="date" class="fc" id="pFrom"></div>
+        <div class="fg"><label>To</label><input type="date" class="fc" id="pTo"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <button type="button" class="sub-btn" onclick="renderPnl()">Apply &amp; Chart</button>
+        <button type="button" class="sub-btn" style="color:var(--emerald)" onclick="downloadB64(PNL_B64,'Om_Software_Enterprise_Financial_Report.xlsx')">📊 Download Chart Excel</button>
+      </div>
+      <canvas id="pnlChart" style="max-height:210px;background:#070D1C;border-radius:10px;padding:6px"></canvas>
+      <div id="pnlEntries" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+    <div class="modal-ov" id="modSlip">
+    <div class="modal-box" style="max-width:680px;">
+      <div class="m-top"><h3>🧾 Staff Salary Register &amp; Multi-Format Payroll</h3><button type="button" class="x-btn" onclick="closeMod('modSlip')">&times;</button></div>
+
+      <!-- Mode Selection Tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        <button type="button" class="tab-btn active" id="stTabBranch" style="flex:1;" onclick="setSalaryTab('branch')">🏢 Branch-Wise Salary</button>
+        <button type="button" class="tab-btn" id="stTabSearch" style="flex:1;" onclick="setSalaryTab('search')">🔍 Auto Search</button>
+        <button type="button" class="tab-btn" id="stTabCreate" style="flex:1;" onclick="setSalaryTab('create')">➕ Salary Create</button>
+      </div>
+
+      <!-- TAB 1: BRANCH-WISE SALARY SHEET WITH LIVE EDIT & AUTO FORMULA -->
+      <div id="salSecBranch">
+        <div class="rec" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:1;">
+            <select class="fc" id="salBr" style="width:140px;" onchange="renderSalaryBranch()">
+              <option value="001">Branch 001 (Unnao)</option>
+              <option value="002">Branch 002 (Kanpur)</option>
+              <option value="003">Branch 003 (Lucknow)</option>
+              <option value="004">Branch 004 (Agra)</option>
+              <option value="005">Branch 005 (Varanasi)</option>
+            </select>
+            <select class="fc" id="salDept" style="width:130px;" onchange="renderSalaryBranch()">
+              <option value="ALL">All Depts</option>
+              <option value="Management">Management</option>
+              <option value="Training">Training</option>
+              <option value="Front Desk">Front Desk</option>
+              <option value="Cleaning">Cleaning</option>
+            </select>
+            <button type="button" class="sub-btn" style="background:var(--gold);color:#050813;font-weight:900" onclick="renderSalaryBranch()">Submit</button>
+          </div>
+          <button type="button" class="sub-btn" style="color:var(--emerald)" onclick="downloadB64(HR_B64,'All_Branch_Staff_Salary_HR_Sheet.xlsx')">📥 Master HR Excel</button>
+        </div>
+        <div id="salTotalBox" class="rec" style="color:var(--gold);font-weight:800"></div>
+        <div id="salRowsBox"></div>
+      </div>
+
+      <!-- TAB 2: AUTO-SEARCH ACROSS 1-LAKH STAFF (ID, MOBILE, EMAIL, BRANCH + STATEMENT DATE PICKER) -->
+      <div id="salSecSearch" style="display:none;">
+        <div class="rec">
+          <div class="fg">
+            <label>Search Criterion:</label>
+            <select class="fc" id="searchFilterType" onchange="document.getElementById('salSearchQuery').placeholder='Search by ' + this.value + '...';">
+              <option value="All">All Fields (Auto-Detect)</option>
+              <option value="Employee ID">Search with Employee ID</option>
+              <option value="Mobile No">Search with Mobile No</option>
+              <option value="Email ID">Search with Email ID</option>
+              <option value="Branch Name">Search with Branch Name</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Enter Search Query:</label>
+            <input class="fc" id="salSearchQuery" placeholder="Search by name, ID, phone, email, branch..." oninput="filterStaffAutoSearch()">
+          </div>
+          <div class="grid2">
+            <div class="fg">
+              <label>From Date (Statement):</label>
+              <input type="date" class="fc" id="salDateFrom" value="2026-07-01">
+            </div>
+            <div class="fg">
+              <label>To Date (Statement):</label>
+              <input type="date" class="fc" id="salDateTo" value="2026-11-22">
+            </div>
+          </div>
+          <button type="button" class="big-btn" style="margin-top:2px" onclick="filterStaffAutoSearch()">Submit &amp; Fetch Statement</button>
+        </div>
+        <div id="salSearchResultsBox" style="margin-top:10px;max-height:280px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- TAB 3: SALARY CREATE (INSTANT FORMULATION SLIP FOR UNREGISTERED / NEW STAFF) -->
+      <div id="salSecCreate" style="display:none;">
+        <form class="rec" onsubmit="createInstantSalarySlip(event)">
+          <b style="color:var(--cyan);display:block;margin-bottom:8px">➕ Instant Salary Slip Creator (Auto-Formula)</b>
+          <div class="grid2">
+            <div class="fg"><label>Gym / Enterprise Name *</label><input class="fc" id="cstGymName" value="5 BROTHER'S FITNESS CLUB" required></div>
+            <div class="fg"><label>Branch / Location *</label><input class="fc" id="cstBranch" value="Umrao Khera, Unnao (Branch 001)" required></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Staff Full Name *</label><input class="fc" id="cstName" required placeholder="Employee Name"></div>
+            <div class="fg"><label>Employee ID *</label><input class="fc" id="cstId" required placeholder="e.g. 10058052 / STF-001"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Designation *</label><input class="fc" id="cstRole" value="Senior Floor Coach" required></div>
+            <div class="fg"><label>Department *</label><input class="fc" id="cstDept" value="Training" required></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Reporting Manager *</label><input class="fc" id="cstManager" value="Saurabh Singh Chandel (9876501100)" required></div>
+            <div class="fg"><label>Bank / Mode *</label><input class="fc" id="cstBank" value="KOTAK MAHINDRA BANK (1913450661)" required></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Staff Mobile (WhatsApp) *</label><input class="fc" id="cstMobile" value="9876503344" required></div>
+            <div class="fg"><label>Staff Email ID</label><input class="fc" id="cstEmail" value="staff@omsoftware.com"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <div class="fg"><label>Basic Salary (₹) *</label><input type="number" class="fc" id="cstBase" value="18000" oninput="recalcInstantSlip()"></div>
+            <div class="fg"><label>Special Allowance (₹)</label><input type="number" class="fc" id="cstAllow" value="3000" oninput="recalcInstantSlip()"></div>
+            <div class="fg"><label>Bonus / Incentive (₹)</label><input type="number" class="fc" id="cstBonus" value="1000" oninput="recalcInstantSlip()"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <div class="fg"><label>Late Penalty (₹)</label><input type="number" class="fc" id="cstPen" value="250" oninput="recalcInstantSlip()"></div>
+            <div class="fg"><label>Advance (₹)</label><input type="number" class="fc" id="cstAdv" value="1500" oninput="recalcInstantSlip()"></div>
+            <div class="fg"><label>PF / Deductions (₹)</label><input type="number" class="fc" id="cstPf" value="1250" oninput="recalcInstantSlip()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Paid Leaves (Days &amp; Reason)</label><input class="fc" id="cstPaidReason" value="2 Days (Casual / Festival Leave)"></div>
+            <div class="fg"><label>Unpaid Leaves (Days &amp; Reason)</label><input class="fc" id="cstUnpaidReason" value="1 Day (Medical Emergency - Loss of Pay)"></div>
+          </div>
+          <div class="fg">
+            <label>Calculated Net Transfer Amount:</label>
+            <input class="fc" id="cstNetCalc" value="₹19,000" readonly style="color:var(--emerald);font-weight:900;font-size:15px;">
+          </div>
+          <button type="submit" class="big-btn">Create &amp; Generate Salary Slip</button>
+        </form>
+      </div>
+
+      <!-- PROFESSIONAL SALARY VOUCHER & MULTI-ACTION TOOLBAR -->
+      <div id="salaryVoucherBox" style="display:none;margin-top:14px;background:#FFFFFF;color:#000000;border-radius:8px;padding:18px;border:1px solid #CBD5E1;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+        <div id="salarySlipPrintableContent"></div>
+
+        <!-- Action Buttons: Download + Send WhatsApp + Send Email -->
+        <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #CBD5E1;">
+          <b style="color:#0F172A;display:block;margin-bottom:8px;font-size:12px;">📤 Download Slip / Send Directly to Employee:</b>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+            <button type="button" class="sub-btn" style="flex:1;background:#0F172A;color:#FFFFFF;font-weight:800;padding:9px;" onclick="downloadSlipFormat('PDF')">📄 Download PDF</button>
+            <button type="button" class="sub-btn" style="flex:1;background:#0369A1;color:#FFFFFF;font-weight:800;padding:9px;" onclick="downloadSlipFormat('IMAGE')">🖼️ Download Image (PNG)</button>
+            <button type="button" class="sub-btn" style="flex:1;background:#047857;color:#FFFFFF;font-weight:800;padding:9px;" onclick="downloadSlipFormat('EXCEL')">📊 Download Excel (.xlsx)</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button type="button" class="sub-btn" style="flex:1;background:#16A34A;color:#FFFFFF;font-weight:800;padding:9px;" onclick="sendSalarySlipViaWhatsApp()">📲 Send to Employee WhatsApp</button>
+            <button type="button" class="sub-btn" style="flex:1;background:#2563EB;color:#FFFFFF;font-weight:800;padding:9px;" onclick="sendSalarySlipViaEmail()">✉️ Send to Employee Email</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modAdmission">
+    <div class="modal-box">
+      <div class="m-top"><h3>📝 Admission Form</h3><button type="button" class="x-btn" onclick="closeMod('modAdmission')">&times;</button></div>
+      <form onsubmit="saveAdmission(event)">
+        <div class="fg"><label>Branch *</label><select class="fc" id="admBr"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
+        <div class="fg"><label>Member Name *</label><input class="fc" id="admNm" required></div>
+        <div class="fg"><label>Base Fee (₹) *</label><input type="number" class="fc" id="admFee" value="1200" oninput="calcAdm()"></div>
+        <div class="rec">
+          <div><label><input type="checkbox" class="s-chk" data-s="Sauna" onchange="calcAdm()"> Sauna</label> <input type="number" class="fc s-p" value="1000" style="width:90px;display:inline" oninput="calcAdm()"></div>
+          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Ice Bath" onchange="calcAdm()"> Ice Bath</label> <input type="number" class="fc s-p" value="1500" style="width:90px;display:inline" oninput="calcAdm()"></div>
+          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Locker" onchange="calcAdm()"> Locker</label> <input type="number" class="fc s-p" value="500" style="width:90px;display:inline" oninput="calcAdm()"></div>
+          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Supplement" onchange="calcAdm()"> Supplement</label> <input type="number" class="fc s-p" value="2500" style="width:90px;display:inline" oninput="calcAdm()"></div>
+          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Cardio/Cycle/Cross" onchange="calcAdm()"> Cardio / Cycle / Cross Trainer</label> <input type="number" class="fc s-p" value="800" style="width:90px;display:inline" oninput="calcAdm()"></div>
+          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Zumba" onchange="calcAdm()"> Zumba</label> <input type="number" class="fc s-p" value="1000" style="width:90px;display:inline" oninput="calcAdm()"></div>
+        </div>
+        <div class="fg"><label>Payment Mode</label><select class="fc" id="admPay" onchange="document.getElementById('utrWrap').style.display=this.value==='Online'?'block':'none'"><option value="Cash">Cash</option><option value="Online">Online</option></select></div>
+        <div id="utrWrap" style="display:none"><div class="fg"><label>UTR Number *</label><input class="fc" id="admUtr"></div></div>
+        <div class="fg"><label>Photo &amp; Govt ID Upload</label><input type="file" class="fc" multiple accept="image/*,.pdf" onchange="showThumb(this,'admDocsPrev')"><div class="preview-row" id="admDocsPrev"></div></div>
+        <div class="fg"><label>Total (₹)</label><input class="fc" id="admTot" value="1200" readonly></div>
+        <button type="submit" class="big-btn">Save Admission</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modJoining">
+    <div class="modal-box">
+      <div class="m-top"><h3>👤 Staff Joining &amp; KYC</h3><button type="button" class="x-btn" onclick="closeMod('modJoining')">&times;</button></div>
+      <form onsubmit="saveJoining(event)">
+        <div class="fg"><label>Branch *</label><select class="fc" id="jnBr"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
+        <div class="fg"><label>Name *</label><input class="fc" id="jnNm" required></div>
+        <div class="fg"><label>Department *</label><select class="fc" id="jnDept"><option value="Training">Training</option><option value="Front Desk">Front Desk</option><option value="Cleaning">Cleaning</option><option value="Management">Management</option></select></div>
+        <div class="fg"><label>Role *</label><input class="fc" id="jnRole" required></div>
+        <div class="fg"><label>Payment Mode *</label><select class="fc" id="jnMode" onchange="document.getElementById('jnBankWrap').style.display=this.value==='Cash'?'none':'block'"><option value="Bank">Bank</option><option value="Cash">Cash (No Bank/PF/UAN)</option></select></div>
+        <div id="jnBankWrap">
+          <div class="fg"><label>Bank Details</label><input class="fc" id="jnBank"></div>
+          <div class="fg"><label>PF / UAN</label><input class="fc" id="jnPfUan"></div>
+        </div>
+        <div class="fg"><label>Photo, ID, Qualification &amp; Medical Docs</label><input type="file" class="fc" multiple accept="image/*,.pdf" capture="user" onchange="showThumb(this,'jnDocsPrev')"><div class="preview-row" id="jnDocsPrev"></div></div>
+        <button type="submit" class="big-btn">Save Staff Joining</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modEnq">
+    <div class="modal-box">
+      <div class="m-top"><h3>📞 Enquiries &amp; Age</h3><button type="button" class="x-btn" onclick="closeMod('modEnq')">&times;</button></div>
+      <form onsubmit="saveEnq(event)">
+        <div class="fg"><label>Folder</label><select class="fc" id="enqFld"><option value="Walking Enquiry">Walking Enquiry</option><option value="Lead Enquiry">Lead Enquiry</option></select></div>
+        <div class="fg"><label>Name *</label><input class="fc" id="enqNm" required></div>
+        <div class="fg"><label>Phone *</label><input class="fc" id="enqPh" required></div>
+        <div class="fg"><label>Age *</label><input type="number" class="fc" id="enqAge" value="20" required></div>
+        <div class="fg"><label>Lead Source</label><input class="fc" id="enqSrc" placeholder="Walk-in / Instagram / WhatsApp"></div>
+        <button type="submit" class="big-btn">Save Enquiry</button>
+      </form>
+      <div id="enqBox" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modRouter">
+    <div class="modal-box">
+      <div class="m-top"><h3>📥 Auto-Router Upload</h3><button type="button" class="x-btn" onclick="closeMod('modRouter')">&times;</button></div>
+      <input type="file" class="fc" accept=".csv,.xlsx,.xls" onchange="runRouter(event)">
+      <div class="rec" style="margin-top:10px" id="routerOut">Select CSV / Excel file.</div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modCodes">
+    <div class="modal-box">
+      <div class="m-top"><h3>🆔 Staff &amp; Branch Codes</h3><button type="button" class="x-btn" onclick="closeMod('modCodes')">&times;</button></div>
+      <input class="fc" id="codeQ" placeholder="Search name, father, wife, mobile, branch..." oninput="renderCodes()">
+      <div id="codeResults" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modLicense">
+    <div class="modal-box">
+      <div class="m-top"><h3>🔑 Protected License Key</h3><button type="button" class="x-btn" onclick="closeMod('modLicense')">&times;</button></div>
+      <div class="rec">Active Key (Locked): <b style="color:var(--gold)" id="licDisp">LIC-OM-OPE2HK-LOCKED</b></div>
+      <div class="fg"><label>Renewal Key</label><input class="fc" id="licInp" placeholder="Enter renewal key"></div>
+      <button type="button" class="big-btn" onclick="lockLic()">Activate &amp; Lock Key</button>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="inactivitySessionModal">
+    <div class="modal-box" style="text-align:center">
+      <h3 style="color:var(--rose);margin-bottom:8px">10 Min Inactivity Lock</h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">10 minute se koi button touch nahi hua.</p>
+      <button type="button" class="big-btn" onclick="localStorage.setItem('om_last_active_time',String(Date.now()));closeMod('inactivitySessionModal')">Resume Session</button>
+      <button type="button" class="big-btn sec" onclick="logoutUser()">New Session / Login</button>
+    </div>
+  </div>
+
+  <script>
+    const PNL_B64 = "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";
+    const HR_B64 = "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";
+    const K_STF = "om_final_staff_v1";
+    const K_BILLS = "om_final_bills_v1";
+    const K_VEND = "om_final_vend_v1";
+    const K_ADM = "om_final_adm_v1";
+    const K_EXT = "om_final_ext_v1";
+    const K_ENQ = "om_final_enq_v1";
+
+    let curBr = "ALL";
+    let chartObj = null;
+
+    function J(k, d) { try { return JSON.parse(localStorage.getItem(k) || "null") ?? d; } catch(e) { return d; } }
+    function W(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+    function esc(s) { return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function isAdmin() { const r = (localStorage.getItem("bfc_role") || "owner").toLowerCase(); return r === "owner" || r === "admin"; }
+
+    function switchPage(n) {
+      [1,2,3,4].forEach(i => {
+        document.getElementById("page" + i).classList.toggle("active", i === n);
+        document.getElementById("tb" + i).classList.toggle("active", i === n);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function setBranch(b) { curBr = b; syncDashboard(); }
+    function openMod(id) {
+      document.getElementById(id).classList.add("open");
+      if (id === "modMaint") { renderBillCard(); renderMaintList(); }
+      if (id === "modDeptStaff") renderDeptStaff();
+      if (id === "modExtra") renderExtra();
+      if (id === "modPnl") renderPnl();
+      if (id === "modSlip") renderSalaryBranch();
+      if (id === "modExpired") renderExpired();
+      if (id === "modSelfie") renderSelfies();
+      if (id === "modCodes") renderCodes();
+      if (id === "modEnq") renderEnq();
+    }
+    function closeMod(id) { document.getElementById(id).classList.remove("open"); }
+    function logoutUser() { localStorage.removeItem("om_logged_user"); location.replace("login.html"); }
+
+    function showThumb(inp, targetId) {
+      const box = document.getElementById(targetId);
+      if (!box || !inp.files || !inp.files.length) return;
+      box.innerHTML = "";
+      Array.from(inp.files).forEach(f => {
+        if (f.type.startsWith("image/")) {
+          const rd = new FileReader();
+          rd.onload = ev => { box.innerHTML += `<img src="${ev.target.result}" class="preview-img" title="${esc(f.name)}">`; };
+          rd.readAsDataURL(f);
+        } else {
+          box.innerHTML += `<span class="pill-ok">${esc(f.name)}</span>`;
+        }
+      });
+    }
+
+    function downloadB64(b64, filename) {
+      const bin = atob(b64);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([arr], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+      a.download = filename;
+      a.click();
+    }
+
+    function seedData() {
+      if (!localStorage.getItem(K_STF)) {
+        W(K_STF, [
+          { id: "STF-001-MGR", name: "Saurabh Singh Chandel", gymName: "5 BROTHER'S FITNESS CLUB & NUTRITION", branch: "001", branchName: "Umrao Khera, Unnao Main", dept: "Management", role: "Branch Manager", manager: "Self (Executive Owner)", mobile: "9876501100", email: "saurabh.singh@omsoftware.com", father: "Late Shri Chandel", wife: "Reet Singh", pan: "HBGPS6001D", aadhaar: "6437-4987-7588", bankName: "KOTAK MAHINDRA BANK", bank: "1913450661", pf: "GGN/1572727/0010132", uan: "100761344191", mode: "Bank", salary: 35000, allowance: 7000, bonus: 2000, totalDays: 30, presentDays: 30, paidLeave: 0, unpaidLeave: 0, lateMins: 0, penalty: 0, advance: 0, paidReason: "None (Full Attendance)", unpaidReason: "None", weekoff: "Sunday", festivalHolidays: "Diwali 1 day (Paid), no call-in" },
+          { id: "STF-001-TR1", name: "Vikram Yadav", gymName: "5 BROTHER'S FITNESS CLUB & NUTRITION", branch: "001", branchName: "Umrao Khera, Unnao Main", dept: "Training", role: "Senior Floor Coach", manager: "Saurabh Singh Chandel (9876501100)", mobile: "9876503344", email: "vikram.yadav@gmail.com", father: "Ram Kishore Yadav", wife: "Sunita Yadav", pan: "BXPYS9876K", aadhaar: "4920-1122-3344", bankName: "STATE BANK OF INDIA", bank: "30192847561", pf: "N/A (Cash/Daily)", uan: "N/A", mode: "Cash", salary: 18000, allowance: 3000, bonus: 1000, totalDays: 30, presentDays: 28, paidLeave: 1, unpaidLeave: 1, lateMins: 25, penalty: 250, advance: 2000, paidReason: "1 Day (Diwali Festival Paid Leave)", unpaidReason: "1 Day (Personal Emergency - Loss of Pay)", weekoff: "Sunday (alternate)", festivalHolidays: "Diwali 2 days (1 Paid + 1 called for duty - Paid)" },
+          { id: "STF-001-FD1", name: "Pooja Sharma", gymName: "5 BROTHER'S FITNESS CLUB & NUTRITION", branch: "001", branchName: "Umrao Khera, Unnao Main", dept: "Front Desk", role: "Reception Executive", manager: "Saurabh Singh Chandel (9876501100)", mobile: "9876504455", email: "pooja.sharma@gmail.com", father: "Rajesh Sharma", wife: "N/A", pan: "CKJPS4567M", aadhaar: "8901-2345-6789", bankName: "HDFC BANK", bank: "501002345678", pf: "PF83921", uan: "100928192811", mode: "Bank", salary: 14000, allowance: 2500, bonus: 500, totalDays: 30, presentDays: 29, paidLeave: 1, unpaidLeave: 0, lateMins: 10, penalty: 100, advance: 1000, paidReason: "1 Day (Casual Leave Approved)", unpaidReason: "None" },
+          { id: "STF-001-CL1", name: "Rameshwar Prasad", gymName: "5 BROTHER'S FITNESS CLUB & NUTRITION", branch: "001", branchName: "Umrao Khera, Unnao Main", dept: "Cleaning", role: "Morning Sweeper", manager: "Saurabh Singh Chandel (9876501100)", mobile: "9876504411", email: "rameshwar.p@gmail.com", father: "Shri Ram Prasad", wife: "Sunita Devi", pan: "N/A", aadhaar: "3344-5566-7788", bankName: "Cash in Hand", bank: "N/A (Cash)", pf: "N/A", uan: "N/A", mode: "Cash", salary: 10500, allowance: 1500, bonus: 300, totalDays: 30, presentDays: 27, paidLeave: 2, unpaidLeave: 1, lateMins: 30, penalty: 300, advance: 800, paidReason: "2 Days (Family Function Paid Leave)", unpaidReason: "1 Day (Health Issue - Unpaid Cut)" },
+          { id: "STF-002-TR1", name: "Kuldeep Verma", gymName: "OM FITNESS KANPUR", branch: "002", branchName: "Kanpur Road / Swaroop Nagar", dept: "Training", role: "Strength Coach", manager: "Rohan Bajpai (9876502200)", mobile: "9876502211", email: "kuldeep.verma@gmail.com", father: "Suresh Verma", wife: "Anjali", pan: "DZKPV7788L", aadhaar: "9988-7766-5544", bankName: "ICICI BANK", bank: "001122334455", pf: "PF77102", uan: "100771882991", mode: "Bank", salary: 16000, allowance: 2800, bonus: 500, totalDays: 30, presentDays: 27, paidLeave: 2, unpaidLeave: 1, lateMins: 15, penalty: 150, advance: 1500, paidReason: "2 Days (Festival Leave)", unpaidReason: "1 Day (Personal Leave)" }
+        ]);
+      }
+      if (!localStorage.getItem(K_BILLS)) {
+        W(K_BILLS, {
+          "001": { cur: 14850, prev: 13200, pRead: 18420, cRead: 20185, kw: "4 kW", dt: "2026-11-05" },
+          "002": { cur: 50000, prev: 48000, pRead: 24500, cRead: 28900, kw: "12 kW", dt: "2026-11-05" },
+          "003": { cur: 50000, prev: 47500, pRead: 31000, cRead: 35400, kw: "12 kW", dt: "2026-11-05" },
+          "004": { cur: 50000, prev: 49000, pRead: 19000, cRead: 23200, kw: "10 kW", dt: "2026-11-05" },
+          "005": { cur: 12000, prev: 11500, pRead: 14000, cRead: 15400, kw: "3 kW", dt: "2026-11-05" }
+        });
+      }
+      if (!localStorage.getItem(K_VEND)) {
+        W(K_VEND, [
+          { id: "V1", br: "001", cat: "Handwash", amt: 650, status: "Approved", reason: "Approved by Admin", dt: "2026-11-20" }
+        ]);
+      }
+    }
+
+    function syncDashboard() {
+      const stf = J(K_STF, []);
+      const ext = J(K_EXT, []);
+      const adm = J(K_ADM, []);
+      const fStf = curBr === "ALL" ? stf : stf.filter(x => x.branch === curBr);
+      const fExt = curBr === "ALL" ? ext : ext.filter(x => x.br === curBr);
+      const extSum = fExt.reduce((a,b) => a + Number(b.amt || 0), 0);
+      document.getElementById("vEmpCount").textContent = fStf.length + " Staff";
+      document.getElementById("vExtraCol").textContent = "₹" + extSum.toLocaleString("en-IN");
+      document.getElementById("vMembers").textContent = String(148 + adm.length);
+      document.getElementById("vAdmissions").textContent = String(42 + adm.length);
+      document.getElementById("pillBranches").textContent = curBr === "ALL" ? "5 Branches" : "Branch " + curBr;
+    }
+
+    function renderBillCard() {
+      const br = document.getElementById("billBrSel").value;
+      const b = J(K_BILLS, {})[br] || { cur: 0, prev: 0, pRead: 0, cRead: 0, kw: "-", dt: "-" };
+      const units = Math.max(0, Number(b.cRead) - Number(b.pRead));
+      document.getElementById("billCardBox").innerHTML = `
+        <div>Current Bill: <b style="color:var(--gold)">₹${Number(b.cur).toLocaleString("en-IN")}</b> &bull; Prev Bill: ₹${Number(b.prev).toLocaleString("en-IN")}</div>
+        <div>Load: <b>${esc(b.kw)}</b> &bull; Reading: ${b.pRead} &rarr; ${b.cRead} (Units: <b>${units}</b>) &bull; Date: ${esc(b.dt)}</div>
+      `;
+    }
+
+    function toggleBillForm() {
+      const f = document.getElementById("newBillForm");
+      f.style.display = f.style.display === "none" ? "block" : "none";
+    }
+
+    function submitLightBill(e) {
+      e.preventDefault();
+      const br = document.getElementById("billBrSel").value;
+      const bills = J(K_BILLS, {});
+      bills[br] = {
+        cur: Number(document.getElementById("nbCur").value || 0),
+        prev: Number(document.getElementById("nbPrev").value || 0),
+        pRead: Number(document.getElementById("nbPR").value || 0),
+        cRead: Number(document.getElementById("nbCR").value || 0),
+        kw: document.getElementById("nbKw").value.trim(),
+        dt: new Date().toISOString().slice(0, 10)
+      };
+      W(K_BILLS, bills);
+      const bar = document.getElementById("adminAlertBar");
+      bar.style.display = "block";
+      bar.textContent = `⚡ Light Bill Generate — Please check! Branch ${br} bill ₹${bills[br].cur.toLocaleString("en-IN")} updated.`;
+      toggleBillForm();
+      renderBillCard();
+      alert("Light Bill submitted & Admin live notification triggered!");
+    }
+
+    function viewBillCopy(type) {
+      const br = document.getElementById("billBrSel").value;
+      const b = J(K_BILLS, {})[br];
+      const txt = `BRANCH ${br} LIGHT BILL (${type} COPY)
+Current Bill: Rs. ${b.cur}
+Previous Bill: Rs. ${b.prev}
+Load: ${b.kw}
+Meter: ${b.pRead} -> ${b.cRead} kWh
+Date: ${b.dt}`;
+      if (type === "PDF") {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([txt], { type: "application/pdf" }));
+        a.download = `Light_Bill_Branch_${br}.pdf`;
+        a.click();
+      } else {
+        alert(txt);
+      }
+    }
+
+    function submitConsumableBill(e) {
+      e.preventDefault();
+      const br = document.getElementById("billBrSel").value;
+      const cat = document.getElementById("cCat").value.trim();
+      const amt = Number(document.getElementById("cAmt").value || 0);
+      const vList = J(K_VEND, []);
+      vList.unshift({ id: "V_" + Date.now(), br, cat, amt, status: "Pending", reason: "Awaiting Admin Approval", dt: new Date().toISOString().slice(0,10) });
+      W(K_VEND, vList);
+      const bar = document.getElementById("adminAlertBar");
+      bar.style.display = "block";
+      bar.textContent = `🔔 New Bill Submitted: Branch ${br} — ${cat} (₹${amt}) pending Admin approval.`;
+      renderMaintList();
+    }
+
+    function decideBill(id, ok) {
+      if (!isAdmin()) { alert("Keval Admin approve/reject kar sakta hai."); return; }
+      const vList = J(K_VEND, []);
+      const item = vList.find(x => x.id === id);
+      if (!item) return;
+      if (ok) {
+        item.status = "Approved";
+        item.reason = "Approved by Admin";
+      } else {
+        const r = prompt("Reject karne ka reason likhein:");
+        if (!r || !r.trim()) { alert("Reason mandatory hai."); return; }
+        item.status = "Rejected";
+        item.reason = r.trim();
+      }
+      W(K_VEND, vList);
+      renderMaintList();
+    }
+
+    function renderMaintList() {
+      const vList = J(K_VEND, []);
+      const appSum = vList.filter(x => x.status === "Approved").reduce((a,b) => a + Number(b.amt || 0), 0);
+      document.getElementById("maintApprovalList").innerHTML =
+        `<div class="rec"><b>Approved Maintenance Cost:</b> <span style="color:var(--emerald)">₹${appSum.toLocaleString("en-IN")}</span> (Rejected bills excluded)</div>` +
+        vList.map(x => {
+          const cls = x.status === "Approved" ? "pill-ok" : (x.status === "Rejected" ? "pill-no" : "pill-pd");
+          return `<div class="rec">
+            <div style="display:flex;justify-content:space-between"><b>${esc(x.cat)} (Branch ${esc(x.br)})</b><span class="${cls}">${esc(x.status)}</span></div>
+            <div style="margin:4px 0">Amount: <b>₹${Number(x.amt).toLocaleString("en-IN")}</b> &bull; Date: ${esc(x.dt)}</div>
+            <div style="font-size:11px;color:${x.status === 'Rejected' ? 'var(--rose)' : 'var(--muted)'}">Reason/Note: ${esc(x.reason)}</div>
+            ${isAdmin() && x.status === "Pending" ? `<div style="display:flex;gap:6px;margin-top:6px"><button type="button" class="sub-btn" style="color:var(--emerald)" onclick="decideBill('${x.id}',true)">Approve</button><button type="button" class="sub-btn" style="color:var(--rose)" onclick="decideBill('${x.id}',false)">Reject</button></div>` : ""}
+          </div>`;
+        }).join("");
+    }
+
+    function renderDeptStaff() {
+      const br = document.getElementById("dsBr").value;
+      const q = (document.getElementById("dsSearch").value || "").toLowerCase();
+      const list = J(K_STF, []).filter(s => s.branch === br && (!q || s.name.toLowerCase().includes(q) || s.dept.toLowerCase().includes(q) || s.role.toLowerCase().includes(q)));
+      document.getElementById("dsList").innerHTML = list.map(s => `
+        <div class="rec">
+          <b>${esc(s.name)}</b> (${esc(s.role)} &bull; ${esc(s.dept)})
+          <div style="font-size:11px;color:var(--muted)">ID: ${esc(s.id)} &bull; Mode: ${esc(s.mode)} &bull; Ph: ${esc(s.mobile)}</div>
+          <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
+            <a class="sub-btn" style="text-decoration:none" href="tel:${esc(s.mobile)}">Call</a>
+            <a class="sub-btn" style="text-decoration:none" href="sms:${esc(s.mobile)}">SMS</a>
+            <a class="sub-btn" style="text-decoration:none;color:var(--emerald)" target="_blank" href="https://wa.me/91${esc(s.mobile)}">WhatsApp</a>
+            <button type="button" class="sub-btn" onclick="openKycCert('${s.id}')">Full KYC Card</button>
+          </div>
+        </div>
+      `).join("") || '<div class="rec">Koi staff nahi mila.</div>';
+    }
+
+    function openKycCert(id) {
+      const s = J(K_STF, []).find(x => x.id === id);
+      if (!s) return;
+      document.getElementById("kycCertBody").innerHTML = `
+        <div style="border-bottom:2px solid #0F172A;padding-bottom:8px;margin-bottom:10px"><b>OFFICIAL STAFF KYC &amp; JOINING RECORD</b></div>
+        <div><b>Name:</b> ${esc(s.name)} &bull; <b>ID:</b> ${esc(s.id)}</div>
+        <div><b>Branch:</b> ${esc(s.branch)} &bull; <b>Department:</b> ${esc(s.dept)} &bull; <b>Role:</b> ${esc(s.role)}</div>
+        <div><b>Father:</b> ${esc(s.father)} &bull; <b>Wife:</b> ${esc(s.wife)} &bull; <b>Mobile:</b> ${esc(s.mobile)}</div>
+        <div><b>Qualification:</b> ${esc(s.qual)} &bull; <b>Medical:</b> ${esc(s.med)}</div>
+        <div><b>Payment Mode:</b> ${esc(s.mode)} &bull; <b>Bank:</b> ${esc(s.bank)} &bull; <b>PF/UAN:</b> ${esc(s.pfUan)}</div>
+        <div style="margin-top:8px;color:#059669;font-weight:800">✔ KYC Verified &amp; Stamped</div>
+      `;
+      openMod("modKycCard");
+    }
+
+    function punchMemberAtt() {
+      const nm = prompt("Member Name ya Mobile daalein:");
+      if (!nm || !nm.trim()) return;
+      alert(`Present marked for ${nm.trim()} at ${new Date().toLocaleTimeString()}`);
+    }
+
+    function punchStaffAtt() {
+      const nm = document.getElementById("stfAttName").value.trim();
+      const mins = Number(document.getElementById("stfLateMin").value || 0);
+      const loc = document.getElementById("stfLocMode").value;
+      if (!nm) { alert("Staff name daalein."); return; }
+      let reason = "Inside Gym";
+      let inf = "Yes";
+      if (loc.includes("Outside")) {
+        reason = prompt("Outside Gym attendance ka reason likhein (mandatory):");
+        if (!reason || !reason.trim()) { alert("Reason mandatory hai."); return; }
+        inf = confirm("Kya Manager ko inform kiya? OK = Yes, Cancel = No") ? "Yes" : "No";
+      }
+      const bar = document.getElementById("adminAlertBar");
+      bar.style.display = "block";
+      bar.textContent = `📲 Telegram Alert to Manager: ${nm} (${loc}) | Late: ${mins}m | Informed: ${inf} | Reason: ${reason}`;
+      alert(`Attendance logged for ${nm}.
+Location: ${loc}
+Late Penalty: ₹${mins * 10}
+Informed Manager: ${inf}
+Reason: ${reason}
+Telegram notification sent to Manager.`);
+    }
+
+    function renderExpired() {
+      const rows = [
+        { name: "Rahul Singh", ph: "9876543210", em: "rahul@gym.com", join: "2026-01-02", exp: "2026-02-02", last: "2026-02-01 06:45 AM" },
+        { name: "Pooja Sharma", ph: "9988776655", em: "pooja@gym.com", join: "2026-01-10", exp: "2026-07-10", last: "2026-07-09 05:30 PM" }
+      ];
+      document.getElementById("expiredListBox").innerHTML = rows.map(r => `
+        <div class="rec" style="border-left:3px solid var(--rose)">
+          <b>${esc(r.name)}</b> &bull; Ph: ${esc(r.ph)} &bull; Email: ${esc(r.em)}
+          <div>Joining: ${esc(r.join)} &bull; Expired: <b style="color:var(--rose)">${esc(r.exp)}</b></div>
+          <div style="color:#FDE047;margin-top:3px">Last Attendance: <b>${esc(r.last)}</b></div>
+        </div>
+      `).join("");
+    }
+
+    function checkStaffSelfie() {
+      const nm = (document.getElementById("chkName").value || "").trim().toLowerCase();
+      const dt = document.getElementById("chkDate").value;
+      const box = document.getElementById("chkResultBox");
+      if (!nm) { box.textContent = "Naam type karein."; return; }
+      const presentNames = ["saurabh", "vikram", "pooja", "rameshwar", "kuldeep", "yash", "vishal", "ayush"];
+      const ok = presentNames.some(x => nm.includes(x));
+      box.innerHTML = ok
+        ? `<div style="color:var(--emerald);font-weight:800">✔ Present on ${dt} — Selfie &amp; Time Verified.</div>`
+        : `<div style="color:var(--rose);font-weight:900">❌ Jao beta Absent! (${esc(dt)} ko koi selfie record nahi hai)</div>`;
+    }
+
+    function renderSelfies() {
+      const dt = document.getElementById("selfieDate").value;
+      document.getElementById("selfieListBox").innerHTML = `
+        <div class="rec"><b>Date: ${esc(dt)} — 52 Selfies Logged</b></div>
+        <div class="rec">1. Yash Singh Chandel &bull; 9990954574 &bull; 12:01 am</div>
+        <div class="rec">2. Vishal Sharma &bull; 7652064461 &bull; 05:06 am</div>
+        <div class="rec">3. Ayush Yadav &bull; 9554546369 &bull; 05:08 am</div>
+      `;
+    }
+
+    function renderPnl() {
+      const ctx = document.getElementById("pnlChart");
+      if (chartObj) chartObj.destroy();
+      chartObj = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Total Collection", "Total Expense", "Net Profit"],
+          datasets: [{ data: [223200, 78400, 144800], backgroundColor: ["#34D399", "#FB7185", "#F5A623"] }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+      document.getElementById("pnlEntries").innerHTML = `
+        <div class="rec"><b>2026-11-01</b> &bull; Membership Fees (Cash) &bull; <span style="color:var(--emerald)">+₹1,43,000</span></div>
+        <div class="rec"><b>2026-11-02</b> &bull; Online Fees &amp; Renewals &bull; <span style="color:var(--emerald)">+₹75,000</span></div>
+        <div class="rec"><b>2026-11-03</b> &bull; Supplement POS Sale &bull; <span style="color:var(--emerald)">+₹38,400</span></div>
+        <div class="rec"><b>2026-11-04</b> &bull; Expenses &bull; <span style="color:var(--rose)">-₹78,400</span></div>
+      `;
+    }
+
+
+    
+    // --- COMPLETE PROFESSIONAL SALARY VOUCHER & DISPATCH LOGIC ---
+    let currentVoucherStaff = null;
+    let currentVoucherPeriod = "November 2026";
+
+    function setSalaryTab(tab) {
+      document.getElementById('salSecBranch').style.display = (tab === 'branch') ? 'block' : 'none';
+      document.getElementById('salSecSearch').style.display = (tab === 'search') ? 'block' : 'none';
+      document.getElementById('salSecCreate').style.display = (tab === 'create') ? 'block' : 'none';
+
+      document.getElementById('stTabBranch').classList.toggle('active', tab === 'branch');
+      document.getElementById('stTabSearch').classList.toggle('active', tab === 'search');
+      document.getElementById('stTabCreate').classList.toggle('active', tab === 'create');
+
+      if (tab === 'branch') renderSalaryBranch();
+      if (tab === 'search') filterStaffAutoSearch();
+    }
+
+    function renderSalaryBranch() {
+      const br = document.getElementById("salBr").value;
+      const dept = document.getElementById("salDept").value;
+      const staffList = J(K_STF, []);
+      const rows = staffList.filter(s => s.branch === br && (dept === "ALL" || s.dept === dept));
+      let branchGross = 0;
+      let branchTotalNet = 0;
+
+      const container = document.getElementById("salRowsBox");
+      if (!rows.length) {
+        container.innerHTML = '<div class="rec" style="color:var(--muted)">Is branch aur department mein koi staff nahi mila.</div>';
+        document.getElementById("salTotalBox").textContent = `Total Net Salary Expense (Branch ${br}): ₹0`;
+        return;
+      }
+
+      container.innerHTML = rows.map(s => {
+        const base = Number(s.salary || 0);
+        const allow = Number(s.allowance || Math.round(base * 0.20));
+        const bonus = Number(s.bonus || 0);
+        const gross = base + allow + bonus;
+        branchGross += gross;
+
+        const penalty = Number(s.penalty ?? (Number(s.lateMins || 0) * 10));
+        const advance = Number(s.advance || 0);
+        const pf = (s.mode === "Cash") ? 0 : Number(s.pfNum ?? Math.round(base * 0.12));
+        const unpaidCut = Math.round((base / 30) * Number(s.unpaidLeave || 0));
+        const totalDeductions = penalty + advance + pf + unpaidCut;
+        const net = Math.max(0, gross - totalDeductions);
+        branchTotalNet += net;
+
+        return `
+          <div class="rec" style="border-left:3px solid var(--cyan); margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <b>${esc(s.name)}</b> <span class="pill-ok">${esc(s.id)}</span>
+                <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+                  Dept: <b>${esc(s.dept)}</b> &bull; Role: <b>${esc(s.role)}</b> &bull; Manager: <b>${esc(s.manager || "Saurabh Singh Chandel")}</b>
+                </div>
+              </div>
+              <button type="button" class="sub-btn" style="background:#0F1A33; color:var(--gold); border-color:var(--gold)" onclick='openStaffSalarySlipById("${s.id}")'>
+                📄 View Salary Slip
+              </button>
+            </div>
+
+            <!-- Editable Inputs with Real-time Formulation -->
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin:8px 0;">
+              <div>
+                <label style="font-size:10px; color:var(--muted)">Base Salary (₹):</label>
+                <input type="number" class="fc" style="padding:5px 8px; font-size:11.5px;" value="${base}" onchange="editStaffField('${s.id}', 'salary', this.value)">
+              </div>
+              <div>
+                <label style="font-size:10px; color:var(--muted)">Allowance (₹):</label>
+                <input type="number" class="fc" style="padding:5px 8px; font-size:11.5px;" value="${allow}" onchange="editStaffField('${s.id}', 'allowance', this.value)">
+              </div>
+              <div>
+                <label style="font-size:10px; color:var(--muted)">Incentive / Bonus (₹):</label>
+                <input type="number" class="fc" style="padding:5px 8px; font-size:11.5px;" value="${bonus}" onchange="editStaffField('${s.id}', 'bonus', this.value)">
+              </div>
+              <div>
+                <label style="font-size:10px; color:var(--muted)">Advance Taken (₹):</label>
+                <input type="number" class="fc" style="padding:5px 8px; font-size:11.5px;" value="${advance}" onchange="editStaffField('${s.id}', 'advance', this.value)">
+              </div>
+              <div>
+                <label style="font-size:10px; color:var(--muted)">Late Penalty (₹):</label>
+                <input type="number" class="fc" style="padding:5px 8px; font-size:11.5px;" value="${penalty}" onchange="editStaffField('${s.id}', 'penalty', this.value)">
+              </div>
+              <div>
+                <label style="font-size:10px; color:var(--muted)">Unpaid Leave Cut (₹):</label>
+                <input type="number" class="fc" style="padding:5px 8px; font-size:11.5px;" value="${unpaidCut}" readonly title="Auto-Calculated from Unpaid Days">
+              </div>
+              <div>
+                <label style="font-size:10px; color:var(--muted)">PF / ESIC (₹):</label>
+                <input type="number" class="fc" style="padding:5px 8px; font-size:11.5px;" value="${pf}" onchange="editStaffField('${s.id}', 'pfNum', this.value)">
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#091226; border-radius:8px; padding:6px 10px; font-size:11.5px;">
+              <div>Gross: <b>₹${gross.toLocaleString('en-IN')}</b> &bull; Deductions: <b style="color:var(--rose)">₹${totalDeductions.toLocaleString('en-IN')}</b></div>
+              <div style="font-weight:900; color:var(--emerald); font-size:13px;">Net Payable: ₹${net.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("salTotalBox").innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+          <span>Branch ${br} Total Gross: <b>₹${branchGross.toLocaleString("en-IN")}</b></span>
+          <span style="color:var(--emerald)">Net Payable Payout: <b>₹${branchTotalNet.toLocaleString("en-IN")}</b></span>
+        </div>
+      `;
+    }
+
+    function editStaffField(id, field, val) {
+      const staffList = J(K_STF, []);
+      const target = staffList.find(s => s.id === id);
+      if (target) {
+        target[field] = Number(val);
+        W(K_STF, staffList);
+        renderSalaryBranch();
+      }
+    }
+
+    // Auto Search
+    function filterStaffAutoSearch() {
+      const filterType = document.getElementById("searchFilterType").value;
+      const q = (document.getElementById("salSearchQuery").value || "").trim().toLowerCase();
+      const fromDate = document.getElementById("salDateFrom").value;
+      const toDate = document.getElementById("salDateTo").value;
+      const staffList = J(K_STF, []);
+      const container = document.getElementById("salSearchResultsBox");
+
+      if (!q) {
+        container.innerHTML = '<div class="rec" style="color:var(--muted)">Search by Employee ID, Mobile, Email, or Branch above.</div>';
+        return;
+      }
+
+      let matches = staffList.filter(s => {
+        if (filterType === "Employee ID") return (s.id || "").toLowerCase().includes(q);
+        if (filterType === "Mobile No") return (s.mobile || "").includes(q);
+        if (filterType === "Email ID") return (s.email || "").toLowerCase().includes(q);
+        if (filterType === "Branch Name") return (s.branch || "").toLowerCase().includes(q);
+        return (s.name || "").toLowerCase().includes(q) || (s.id || "").toLowerCase().includes(q) || (s.mobile || "").includes(q) || (s.email || "").toLowerCase().includes(q) || (s.branch || "").toLowerCase().includes(q);
+      });
+
+      if (!matches.length) {
+        container.innerHTML = '<div class="rec" style="color:var(--rose)">Koi record nahi mila.</div>';
+        return;
+      }
+
+      container.innerHTML = matches.map(s => `
+        <div class="rec" style="border:1px solid var(--gold); margin-bottom:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <b>${esc(s.name)}</b> <span class="pill-ok">${esc(s.id)}</span>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+                📞 ${esc(s.mobile)} &bull; ✉️ ${esc(s.email || 'N/A')} &bull; Branch: ${esc(s.branch)}
+              </div>
+            </div>
+            <button type="button" class="sub-btn" style="background:var(--gold); color:#050813; font-weight:900;" onclick='openStaffSalarySlipById("${s.id}", "${fromDate} to ${toDate}")'>
+              View Statement &rarr;
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    // Instant Slip Generator
+    function recalcInstantSlip() {
+      const base = Number(document.getElementById("cstBase").value || 0);
+      const allow = Number(document.getElementById("cstAllow").value || 0);
+      const bonus = Number(document.getElementById("cstBonus").value || 0);
+      const pen = Number(document.getElementById("cstPen").value || 0);
+      const adv = Number(document.getElementById("cstAdv").value || 0);
+      const pf = Number(document.getElementById("cstPf").value || 0);
+      const gross = base + allow + bonus;
+      const net = Math.max(0, gross - (pen + adv + pf));
+      document.getElementById("cstNetCalc").value = "₹" + net.toLocaleString("en-IN");
+    }
+
+    function createInstantSalarySlip(e) {
+      e.preventDefault();
+      const base = Number(document.getElementById("cstBase").value || 0);
+      const allow = Number(document.getElementById("cstAllow").value || 0);
+      const bonus = Number(document.getElementById("cstBonus").value || 0);
+      const pen = Number(document.getElementById("cstPen").value || 0);
+      const adv = Number(document.getElementById("cstAdv").value || 0);
+      const pf = Number(document.getElementById("cstPf").value || 0);
+
+      const tempStaff = {
+        gymName: document.getElementById("cstGymName").value.trim(),
+        branchName: document.getElementById("cstBranch").value.trim(),
+        name: document.getElementById("cstName").value.trim(),
+        id: document.getElementById("cstId").value.trim(),
+        role: document.getElementById("cstRole").value.trim(),
+        dept: document.getElementById("cstDept").value.trim(),
+        manager: document.getElementById("cstManager").value.trim(),
+        bankName: document.getElementById("cstBank").value.trim(),
+        mobile: document.getElementById("cstMobile").value.trim(),
+        email: document.getElementById("cstEmail").value.trim(),
+        salary: base,
+        allowance: allow,
+        bonus: bonus,
+        penalty: pen,
+        advance: adv,
+        pfNum: pf,
+        paidReason: document.getElementById("cstPaidReason").value.trim(),
+        unpaidReason: document.getElementById("cstUnpaidReason").value.trim(),
+        mode: "Bank Transfer",
+        totalDays: 30,
+        presentDays: 28,
+        unpaidLeave: 1,
+        pan: "HBGPS6001D",
+        uan: "100761344191",
+        weekoff: "Sunday (Rotational)",
+        festivalHolidays: "As per calendar — mark Paid/Unpaid if called on duty"
+      };
+
+      currentVoucherStaff = tempStaff;
+      currentVoucherPeriod = "November 2026";
+      renderSalarySlipVoucher(tempStaff, "November 2026");
+    }
+
+    function openStaffSalarySlipById(id, period) {
+      const staffList = J(K_STF, []);
+      const s = staffList.find(x => x.id === id);
+      if (!s) return;
+      currentVoucherStaff = s;
+      currentVoucherPeriod = period || "November 2026";
+      renderSalarySlipVoucher(s, currentVoucherPeriod);
+    }
+
+    // Professional Salary Slip Voucher Renderer
+    function renderSalarySlipVoucher(s, periodStr) {
+      const base = Number(s.salary || 0);
+      const allow = Number(s.allowance || Math.round(base * 0.20));
+      const bonus = Number(s.bonus || 0);
+      const gross = base + allow + bonus;
+      const penalty = Number(s.penalty ?? (Number(s.lateMins || 0) * 10));
+      const advance = Number(s.advance || 0);
+      const pf = (s.mode === "Cash") ? 0 : Number(s.pfNum ?? Math.round(base * 0.12));
+      const esic = (s.mode === "Cash") ? 0 : Number(s.esic || Math.round(base * 0.0075));
+      const unpaidCut = Math.round((base / 30) * Number(s.unpaidLeave || 0));
+      const totalDeductions = penalty + advance + pf + esic + unpaidCut;
+      const net = Math.max(0, gross - totalDeductions);
+
+      const gymName = s.gymName || "OM FITNESS ENTERPRISE";
+      const branchName = s.branchName || ("Branch " + (s.branch || "001"));
+      const managerName = s.manager || "Branch Manager";
+      const paidReason = s.paidReason || (s.paidLeave ? `${s.paidLeave} Day(s) Casual / Festival Leave` : "None");
+      const unpaidReason = s.unpaidReason || (s.unpaidLeave ? `${s.unpaidLeave} Day(s) Loss of Pay` : "None");
+      const weekoffNote = s.weekoff || "Sunday (Rotational as per roster)";
+      const festivalNote = s.festivalHolidays || "Diwali (2 days Paid), Holi (1 day Paid) — as applicable in period";
+      const presentDays = s.presentDays || 28;
+      const totalDays = s.totalDays || 30;
+      const lateMins = s.lateMins || 0;
+
+      // Simple number to words (Indian)
+      function numToWords(n) {
+        if (n === 0) return "Zero";
+        const a = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+        const b = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+        function tw(n){ if(n<20) return a[n]; return b[Math.floor(n/10)] + (n%10 ? " " + a[n%10] : ""); }
+        function th(n){ if(n===0) return ""; if(n<100) return tw(n); return a[Math.floor(n/100)] + " Hundred" + (n%100 ? " " + tw(n%100) : ""); }
+        let str = "";
+        const cr = Math.floor(n/10000000); n %= 10000000;
+        const l = Math.floor(n/100000); n %= 100000;
+        const ths = Math.floor(n/1000); n %= 1000;
+        if (cr) str += th(cr) + " Crore ";
+        if (l) str += th(l) + " Lakh ";
+        if (ths) str += th(ths) + " Thousand ";
+        if (n) str += th(n);
+        return str.trim() + " Rupees Only";
+      }
+      const netWords = numToWords(Math.round(net));
+
+      // QR placeholder (unique per slip)
+      const qrData = encodeURIComponent((s.id || "EMP") + "|" + periodStr + "|" + net);
+      const qrSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70"><rect width="70" height="70" fill="#fff"/><rect x="4" y="4" width="18" height="18" fill="#000"/><rect x="48" y="4" width="18" height="18" fill="#000"/><rect x="4" y="48" width="18" height="18" fill="#000"/><rect x="26" y="26" width="18" height="18" fill="#000"/><text x="35" y="66" text-anchor="middle" font-size="6" fill="#333">SCAN</text></svg>`;
+
+      const htmlContent = `
+        <div id="voucherPrintRoot" style="background:#FFFFFF; color:#000000; font-family: Arial, Helvetica, sans-serif; padding: 14px; border: 1.5px solid #334155; max-width: 620px; margin:0 auto;">
+          <!-- Header -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #0F172A; padding-bottom:8px; margin-bottom:10px;">
+            <div>
+              <div style="font-size:18px; font-weight:900; color:#0F172A; text-transform:uppercase; letter-spacing:0.4px;">${esc(gymName)}</div>
+              <div style="font-size:12px; font-weight:700; color:#1D4ED8; margin-top:2px;">${esc(branchName)}</div>
+              <div style="font-size:10px; color:#475569; margin-top:1px;">Reporting Manager: <b>${esc(managerName)}</b></div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:15px; font-weight:900; color:#0F172A; letter-spacing:1px;">PAY SLIP</div>
+              <div style="font-size:11px; color:#334155;">Period: <b>${esc(periodStr)}</b></div>
+              <div style="font-size:10px; color:#64748B;">Generated: ${new Date().toLocaleDateString('en-IN')}</div>
+            </div>
+          </div>
+
+          <!-- Employee Details -->
+          <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:10px;">
+            <tr>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; background:#F1F5F9; width:18%;"><b>Emp ID</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; width:32%;"><b>${esc(s.id)}</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; background:#F1F5F9; width:18%;"><b>Payment Mode</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8;">${esc(s.mode || "Bank")}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; background:#F1F5F9;"><b>Name</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8;"><b>${esc(s.name)}</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; background:#F1F5F9;"><b>Bank / A/c</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8;">${esc(s.bankName || s.bank || "—")}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; background:#F1F5F9;"><b>Department</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8;">${esc(s.dept || "—")}</td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; background:#F1F5F9;"><b>UAN / PF</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8;">${esc(s.uan || s.pf || "N/A")}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; background:#F1F5F9;"><b>Designation</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8;">${esc(s.role || "—")}</td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; background:#F1F5F9;"><b>PAN / Aadhaar</b></td>
+              <td style="padding:4px 6px; border:1px solid #94A3B8;">${esc(s.pan || "—")} / ${esc((s.aadhaar||"").slice(-4) ? "****"+(s.aadhaar||"").slice(-4) : "—")}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 6px; border:1px solid #94A3B8; background:#F1F5F9;"><b>Attendance</b></td>
+              <td colspan="3" style="padding:4px 6px; border:1px solid #94A3B8;">
+                Total Days: <b>${totalDays}</b> &nbsp;|&nbsp; Present: <b>${presentDays}</b> &nbsp;|&nbsp; Paid Leave: <b>${s.paidLeave||0}</b> &nbsp;|&nbsp; Unpaid: <b>${s.unpaidLeave||0}</b> &nbsp;|&nbsp; Late: <b>${lateMins} min</b>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Earnings vs Deductions -->
+          <table style="width:100%; border-collapse:collapse; font-size:11px; margin-bottom:8px;">
+            <thead>
+              <tr style="background:#0F172A; color:#fff;">
+                <th style="padding:6px 8px; text-align:left; width:30%;">Earnings</th>
+                <th style="padding:6px 8px; text-align:right; width:15%;">Amount (₹)</th>
+                <th style="padding:6px 8px; text-align:left; width:30%;">Deductions</th>
+                <th style="padding:6px 8px; text-align:right; width:25%;">Amount (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">Basic Salary</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">${base.toLocaleString('en-IN')}.00</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">Provident Fund (PF 12%)</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">${pf.toLocaleString('en-IN')}.00</td>
+              </tr>
+              <tr style="background:#F8FAFC;">
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">Special Allowance / HRA</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">${allow.toLocaleString('en-IN')}.00</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">ESIC (0.75%)</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">${esic.toLocaleString('en-IN')}.00</td>
+              </tr>
+              <tr>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">Incentive / Bonus</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">${bonus.toLocaleString('en-IN')}.00</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">Advance Recovery</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">${advance.toLocaleString('en-IN')}.00</td>
+              </tr>
+              <tr style="background:#F8FAFC;">
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">—</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">—</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">Late Attendance Penalty</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">${penalty.toLocaleString('en-IN')}.00</td>
+              </tr>
+              <tr>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">—</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">—</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1;">Unpaid Leave (LOP)</td>
+                <td style="padding:5px 8px; border:1px solid #CBD5E1; text-align:right;">${unpaidCut.toLocaleString('en-IN')}.00</td>
+              </tr>
+              <tr style="font-weight:bold; background:#E2E8F0;">
+                <td style="padding:6px 8px; border:1px solid #94A3B8;">Total Earnings (Gross)</td>
+                <td style="padding:6px 8px; border:1px solid #94A3B8; text-align:right;">${gross.toLocaleString('en-IN')}.00</td>
+                <td style="padding:6px 8px; border:1px solid #94A3B8;">Total Deductions</td>
+                <td style="padding:6px 8px; border:1px solid #94A3B8; text-align:right; color:#B91C1C;">${totalDeductions.toLocaleString('en-IN')}.00</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Net Pay -->
+          <div style="border:2px solid #0F172A; padding:8px 12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
+            <div>
+              <div style="font-size:13px; font-weight:900;">Net Payable: ₹ ${net.toLocaleString('en-IN')}.00</div>
+              <div style="font-size:10px; color:#475569; margin-top:2px;">In Words: <b>${netWords}</b></div>
+            </div>
+            <div style="text-align:center;">
+              ${qrSvg}
+              <div style="font-size:8px; color:#64748B;">Verify Slip</div>
+            </div>
+          </div>
+
+          <!-- Leave / Weekoff / Festival Section -->
+          <div style="border:1px solid #CBD5E1; padding:8px 10px; font-size:10.5px; line-height:1.5; margin-bottom:8px; background:#FAFAFA;">
+            <div style="font-weight:800; color:#0F172A; margin-bottom:4px; text-decoration:underline;">Attendance, Leave & Festival Record</div>
+            <div><b>Paid Leaves:</b> ${esc(paidReason)}</div>
+            <div><b>Unpaid Leaves (Deducted):</b> ${esc(unpaidReason)}</div>
+            <div><b>Rotational Weekoff:</b> ${esc(weekoffNote)}</div>
+            <div style="margin-top:4px;"><b>Festival Holidays (this period):</b> ${esc(festivalNote)}</div>
+            <div style="font-size:9.5px; color:#64748B; margin-top:3px;">Note: If staff was called on holiday, mark as Paid Duty or Unpaid as decided by Manager.</div>
+          </div>
+
+          <div style="font-size:9px; color:#64748B; text-align:center; border-top:1px dashed #CBD5E1; padding-top:6px;">
+            System-generated payslip • No physical signature required • For official use only
+          </div>
+        </div>
+      `;
+
+      document.getElementById("salarySlipPrintableContent").innerHTML = htmlContent;
+      const box = document.getElementById("salaryVoucherBox");
+      box.style.display = "block";
+      box.scrollIntoView({ behavior: 'smooth' });
+    }
+
+
+    // Multi-Format Downloader
+    function downloadSlipFormat(fmt) {
+      if (!currentVoucherStaff) return;
+      const baseName = `SalarySlip_${currentVoucherStaff.name.replace(/\s+/g, '_')}_${currentVoucherPeriod.replace(/\s+/g, '_')}`;
+
+      if (fmt === 'PDF') {
+        window.print();
+      } else if (fmt === 'EXCEL') {
+        downloadB64(HR_B64, `${baseName}.xlsx`);
+      } else if (fmt === 'IMAGE') {
+        const target = document.getElementById("voucherPrintRoot");
+        if (window.html2canvas && target) {
+          html2canvas(target, { scale: 2 }).then(canvas => {
+            const link = document.createElement("a");
+            link.download = `${baseName}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+          });
+        } else {
+          window.print();
+        }
+      }
+    }
+
+    // Send via WhatsApp
+    function sendSalarySlipViaWhatsApp() {
+      if (!currentVoucherStaff) return;
+      const s = currentVoucherStaff;
+      const base = Number(s.salary || 0);
+      const allow = Number(s.allowance || Math.round(base * 0.20));
+      const gross = base + allow + Number(s.bonus || 0);
+      const penalty = Number(s.penalty ?? (Number(s.lateMins || 0) * 10));
+      const advance = Number(s.advance || 0);
+      const pf = (s.mode === "Cash") ? 0 : Number(s.pfNum ?? Math.round(base * 0.12));
+      const unpaidCut = Math.round((base / 30) * Number(s.unpaidLeave || 0));
+      const totalDeductions = penalty + advance + pf + unpaidCut;
+      const net = Math.max(0, gross - totalDeductions);
+
+      const phone = (s.mobile || "").replace(/[^0-9]/g, "");
+      const textMsg = `*${s.gymName || "5 BROTHER'S FITNESS CLUB"} - SALARY SLIP*\n` +
+        `----------------------------------------\n` +
+        `👤 *Employee:* ${s.name} (${s.id})\n` +
+        `🏢 *Branch:* ${s.branchName || s.branch}\n` +
+        `👔 *Role:* ${s.role} | *Manager:* ${s.manager || "Saurabh Singh Chandel"}\n` +
+        `📅 *Period:* ${currentVoucherPeriod}\n` +
+        `----------------------------------------\n` +
+        `💵 *Basic Salary:* ₹${base.toLocaleString('en-IN')}\n` +
+        `➕ *Allowance/Bonus:* ₹${(allow + Number(s.bonus || 0)).toLocaleString('en-IN')}\n` +
+        `💰 *Gross Salary:* ₹${gross.toLocaleString('en-IN')}\n` +
+        `----------------------------------------\n` +
+        `➖ *Late Penalty:* ₹${penalty}\n` +
+        `➖ *Advance Cut:* ₹${advance}\n` +
+        `➖ *PF / Unpaid Cut:* ₹${pf + unpaidCut}\n` +
+        `❌ *Total Deductions:* ₹${totalDeductions.toLocaleString('en-IN')}\n` +
+        `----------------------------------------\n` +
+        `✅ *NET TAKE-HOME:* ₹${net.toLocaleString('en-IN')}\n` +
+        `----------------------------------------\n` +
+        `Paid Leaves: ${s.paidReason || "Casual Leave"}\n` +
+        `Unpaid Leaves: ${s.unpaidReason || "None"}\n\n` +
+        `_This is a verified system-generated slip._`;
+
+      const url = `https://wa.me/91${phone}?text=${encodeURIComponent(textMsg)}`;
+      window.open(url, "_blank");
+    }
+
+    // Send via Email
+    function sendSalarySlipViaEmail() {
+      if (!currentVoucherStaff) return;
+      const s = currentVoucherStaff;
+      const email = s.email || "employee@omsoftware.com";
+      const subject = `Official Pay Slip - ${currentVoucherPeriod} | ${s.name} (${s.id})`;
+      const body = `Dear ${s.name},\n\nPlease find your salary summary for ${currentVoucherPeriod} at ${s.gymName || "5 BROTHER'S FITNESS CLUB"} (${s.branchName || s.branch}).\n\nReporting Manager: ${s.manager || "Saurabh Singh Chandel"}\nMode: ${s.mode}\n\nDetailed breakdown is available in your employee portal.\n\nRegards,\nAccounts & HR Department`;
+      
+      window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    function calcAdm() {
+      let sum = Number(document.getElementById("admFee").value || 0);
+      const rows = document.querySelectorAll("#modAdmission .rec > div");
+      rows.forEach(d => {
+        const c = d.querySelector(".s-chk");
+        const p = Number(d.querySelector(".s-p").value || 0);
+        if (c && c.checked) sum += p;
+      });
+      document.getElementById("admTot").value = sum;
+      return sum;
+    }
+
+    function saveAdmission(e) {
+      e.preventDefault();
+      const tot = calcAdm();
+      if (document.getElementById("admPay").value === "Online" && !document.getElementById("admUtr").value.trim()) {
+        alert("UTR zaroori hai."); return;
+      }
+      const adm = J(K_ADM, []);
+      adm.unshift({ name: document.getElementById("admNm").value.trim(), br: document.getElementById("admBr").value, fee: tot });
+      W(K_ADM, adm);
+      closeMod("modAdmission");
+      syncDashboard();
+      alert("Admission saved!");
+    }
+
+    function saveJoining(e) {
+      e.preventDefault();
+      const mode = document.getElementById("jnMode").value;
+      const stf = J(K_STF, []);
+      stf.unshift({
+        id: "STF-" + Date.now().toString().slice(-4),
+        name: document.getElementById("jnNm").value.trim(),
+        branch: document.getElementById("jnBr").value,
+        dept: document.getElementById("jnDept").value,
+        role: document.getElementById("jnRole").value.trim(),
+        mobile: "9876500000", father: "KYC", wife: "KYC", qual: "Verified", med: "Fit",
+        mode, bank: mode === "Cash" ? "N/A (Cash)" : document.getElementById("jnBank").value.trim(),
+        pfUan: mode === "Cash" ? "N/A (Cash)" : document.getElementById("jnPfUan").value.trim(),
+        salary: 15000, advance: 0, paidLeave: 0, unpaidLeave: 0, lateMins: 0
+      });
+      W(K_STF, stf);
+      closeMod("modJoining");
+      syncDashboard();
+      alert("Staff joining saved!");
+    }
+
+    function addExtraService(e) {
+      e.preventDefault();
+      const ext = J(K_EXT, []);
+      ext.unshift({
+        name: document.getElementById("esName").value.trim(),
+        srv: document.getElementById("esSrv").value.trim(),
+        amt: Number(document.getElementById("esAmt").value || 0),
+        br: document.getElementById("esBr").value,
+        mode: document.getElementById("esMode").value
+      });
+      W(K_EXT, ext);
+      renderExtra();
+      syncDashboard();
+    }
+
+    function renderExtra() {
+      const ext = J(K_EXT, []);
+      const tot = ext.reduce((a,b) => a + Number(b.amt || 0), 0);
+      document.getElementById("esSummary").textContent = `Total Extra Service Collection: ₹${tot.toLocaleString("en-IN")} (${ext.length} Entries)`;
+      document.getElementById("esList").innerHTML = ext.map(x => `<div class="rec"><b>${esc(x.name)}</b> &bull; ${esc(x.srv)} (Br ${esc(x.br)}) &bull; ₹${x.amt} (${esc(x.mode)})</div>`).join("");
+    }
+
+    function saveEnq(e) {
+      e.preventDefault();
+      const list = J(K_ENQ, []);
+      list.unshift({ fld: document.getElementById("enqFld").value, nm: document.getElementById("enqNm").value.trim(), ph: document.getElementById("enqPh").value.trim(), age: document.getElementById("enqAge").value, src: document.getElementById("enqSrc").value.trim() });
+      W(K_ENQ, list);
+      renderEnq();
+    }
+
+    function renderEnq() {
+      const list = J(K_ENQ, []);
+      document.getElementById("enqBox").innerHTML = list.map(x => `
+        <div class="rec"><b>${esc(x.nm)}</b> [${esc(x.fld)}] &bull; Age: ${esc(x.age)} &bull; Source: ${esc(x.src || "-")}
+        <div style="margin-top:5px;display:flex;gap:6px"><a class="sub-btn" style="text-decoration:none" href="tel:${esc(x.ph)}">Call</a><a class="sub-btn" style="text-decoration:none" target="_blank" href="https://wa.me/91${esc(x.ph)}">WhatsApp</a></div></div>
+      `).join("") || '<div class="rec">No enquiries yet.</div>';
+    }
+
+    function runRouter(ev) {
+      const f = ev.target.files[0];
+      if (!f) return;
+      const rd = new FileReader();
+      rd.onload = e => {
+        const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
+        document.getElementById("routerOut").textContent = `Auto-Routed ${rows.length} rows into active gym sections.`;
+      };
+      rd.readAsArrayBuffer(f);
+    }
+
+    function renderCodes() {
+      const q = (document.getElementById("codeQ").value || "").toLowerCase();
+      const list = J(K_STF, []).filter(s => !q || s.name.toLowerCase().includes(q) || s.father.toLowerCase().includes(q) || s.wife.toLowerCase().includes(q) || s.mobile.includes(q) || s.branch.includes(q));
+      document.getElementById("codeResults").innerHTML = list.map(s => `
+        <div class="rec"><b>${esc(s.name)}</b> [Branch ${esc(s.branch)}] &bull; ID: <b style="color:var(--gold)">${esc(s.id)}</b>
+        <div style="font-size:11px;color:var(--muted)">Father: ${esc(s.father)} &bull; Wife: ${esc(s.wife)} &bull; Ph: ${esc(s.mobile)}</div></div>
+      `).join("");
+    }
+
+    function lockLic() {
+      const v = document.getElementById("licInp").value.trim();
+      if (!v) return;
+      localStorage.setItem("om_locked_lic", v);
+      document.getElementById("licDisp").textContent = v;
+      alert("License Key Locked!");
+    }
+
+    function runSplash() {
+      if (localStorage.getItem("om_splash_shown")) return;
+      const sp = document.getElementById("omSplash");
+      sp.style.display = "flex";
+      let p = 0;
+      const iv = setInterval(() => {
+        p += 34;
+        document.getElementById("splashBar").style.width = Math.min(100, p) + "%";
+        document.getElementById("splashTxt").textContent = `ॐ ब्रह्माण्ड — Dashboard खुल रहा है... (${Math.max(0, Math.ceil((100-p)/34))}s)`;
+        if (p >= 100) { clearInterval(iv); setTimeout(hideSplash, 400); }
+      }, 800);
+    }
+    function hideSplash() { document.getElementById("omSplash").style.display = "none"; localStorage.setItem("om_splash_shown", "1"); }
+
+    setInterval(() => {
+      const el = document.getElementById("attClock");
+      if (el) el.textContent = new Date().toLocaleString("en-IN");
+    }, 1000);
+
+    seedData();
+    syncDashboard();
+    runSplash();
+  </script>
+</body>
+</html>
