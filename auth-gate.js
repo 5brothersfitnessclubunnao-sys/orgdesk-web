@@ -1,70 +1,59 @@
-// Om Software ERP — 1-Min Background / Rapid Switch Auto-Logout & Anti-Capture Sentinel
+// Om Software ERP — 10-Min Inactivity Logout & Back Confirmation Sentinel
 (function initAuthGate() {
-  const ONE_MIN_MS = 60 * 1000; // 1 minute auto-logout when in background or idle/cycled
+  const TEN_MIN_MS = 10 * 60 * 1000;
   const role = (localStorage.getItem("bfc_role") || "owner").toLowerCase();
 
-  function markBgTime() {
-    localStorage.setItem("om_bg_timestamp", String(Date.now()));
+  function touchActivity() {
+    localStorage.setItem("om_last_active_time", String(Date.now()));
   }
 
-  function enforceOneMinAutoLogout() {
-    const loggedUser = localStorage.getItem("om_logged_user");
-    if (!loggedUser) return;
+  ["click", "touchstart", "keydown", "scroll", "mousemove"].forEach(ev => {
+    window.addEventListener(ev, touchActivity, { passive: true });
+  });
 
-    const bgTs = Number(localStorage.getItem("om_bg_timestamp") || Date.now());
+  function checkTenMinInactivity() {
+    const loggedUser = localStorage.getItem("om_logged_user");
     const lastAct = Number(localStorage.getItem("om_last_active_time") || Date.now());
     const now = Date.now();
 
-    // Track rapid login/logout cycling
-    const cycleCount = Number(localStorage.getItem("om_rapid_cycle_cnt") || "0");
-    if (cycleCount >= 3 || (now - bgTs >= ONE_MIN_MS) || (now - lastAct >= ONE_MIN_MS)) {
-      localStorage.setItem("om_last_session_info", JSON.stringify({
-        user: loggedUser,
-        role: role,
-        savedAt: new Date().toLocaleString("en-IN")
-      }));
-      localStorage.removeItem("om_logged_user");
-      localStorage.removeItem("om_rapid_cycle_cnt");
+    if (now - lastAct >= TEN_MIN_MS) {
+      if (loggedUser) {
+        localStorage.setItem("om_last_session_info", JSON.stringify({
+          user: loggedUser,
+          role: role,
+          savedAt: new Date().toLocaleString("en-IN")
+        }));
+        localStorage.removeItem("om_logged_user");
+      }
       if (!location.pathname.endsWith("login.html")) {
         location.replace("login.html");
       }
     }
   }
 
-  // Increment cycle counter if page loads repeatedly within seconds
-  const prevLoad = Number(localStorage.getItem("om_last_load_ts") || "0");
-  const nowTs = Date.now();
-  if (nowTs - prevLoad < 5000) {
-    const c = Number(localStorage.getItem("om_rapid_cycle_cnt") || "0") + 1;
-    localStorage.setItem("om_rapid_cycle_cnt", String(c));
-  } else {
-    localStorage.setItem("om_rapid_cycle_cnt", "0");
-  }
-  localStorage.setItem("om_last_load_ts", String(nowTs));
+  setInterval(checkTenMinInactivity, 15000);
 
-  document.addEventListener("visibilitychange", function() {
-    if (document.hidden) {
-      markBgTime();
-    } else {
-      enforceOneMinAutoLogout();
-      markBgTime();
-    }
-  });
-
-  window.addEventListener("blur", markBgTime);
-  window.addEventListener("focus", function() {
-    enforceOneMinAutoLogout();
-    markBgTime();
-  });
-
-  ["click", "touchstart", "keydown", "scroll"].forEach(ev => {
-    window.addEventListener(ev, () => {
-      localStorage.setItem("om_last_active_time", String(Date.now()));
-    }, { passive: true });
-  });
-
-  setInterval(enforceOneMinAutoLogout, 10000);
-  enforceOneMinAutoLogout();
+  // Back button confirmation prompt (Yes / No)
+  try {
+    history.pushState({ omGuard: true }, "", location.href);
+    window.addEventListener("popstate", function () {
+      const wantLogout = confirm("Kya aap Logout karna chahte hain? (OK = Yes, Cancel = No)");
+      if (wantLogout) {
+        const loggedUser = localStorage.getItem("om_logged_user");
+        if (loggedUser) {
+          localStorage.setItem("om_last_session_info", JSON.stringify({
+            user: loggedUser,
+            role: role,
+            savedAt: new Date().toLocaleString("en-IN")
+          }));
+        }
+        localStorage.removeItem("om_logged_user");
+        location.replace("login.html");
+      } else {
+        history.pushState({ omGuard: true }, "", location.href);
+      }
+    });
+  } catch (e) {}
 
   if (role === "owner" || role === "admin") return;
 

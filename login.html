@@ -97,8 +97,9 @@
       <div class="fg">
         <label>Login Mode</label>
         <select id="loginMode" onchange="switchLoginMode()">
-          <option value="admin" selected>Admin / Manager (Email + Password + Security Question)</option>
-          <option value="staff">Staff (Staff Code + Branch Code + Employee ID + Password)</option>
+          <option value="admin" selected>Admin Login (Email + Password + Security Question)</option>
+          <option value="management">Management Login (Manager Code + Branch Code + ID + Password)</option>
+          <option value="staff">Staff Login (Employee ID + Mobile No + Security Question)</option>
         </select>
       </div>
 
@@ -516,6 +517,39 @@
       localStorage.removeItem("om_logged_user");
       document.getElementById("sessionChoiceBox").style.display = "none";
     }
+
+    
+    // 10-minute inactivity check on login page & back button confirmation
+    (function setupLoginGuards() {
+      const TEN_MIN = 10 * 60 * 1000;
+      let loginIdleStart = Date.now();
+      ["click", "touchstart", "keydown", "mousemove", "scroll"].forEach(ev => {
+        window.addEventListener(ev, () => { loginIdleStart = Date.now(); }, { passive: true });
+      });
+      setInterval(() => {
+        if (Date.now() - loginIdleStart >= TEN_MIN) {
+          localStorage.removeItem("om_logged_user");
+          const frm = document.getElementById("mainLoginForm");
+          if (frm) frm.reset();
+          showErr("10 minute se koi activity na hone par session logout/reset kar diya gaya hai.");
+          loginIdleStart = Date.now();
+        }
+      }, 15000);
+
+      try {
+        history.pushState({ omLoginGuard: true }, "", location.href);
+        window.addEventListener("popstate", function () {
+          const ok = confirm("Kya aap Logout karna chahte hain? (OK = Yes, Cancel = No)");
+          if (ok) {
+            localStorage.removeItem("om_logged_user");
+            const frm = document.getElementById("mainLoginForm");
+            if (frm) frm.reset();
+          } else {
+            history.pushState({ omLoginGuard: true }, "", location.href);
+          }
+        });
+      } catch (e) {}
+    })();
 
     window.addEventListener("DOMContentLoaded", function() {
       seedAuthRecords();

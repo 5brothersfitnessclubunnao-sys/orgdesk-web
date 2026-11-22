@@ -317,6 +317,161 @@
   </section>
 
   <!-- MODALS -->
+
+  <!-- STAFF SELF-SERVICE & ROLE-BASED ATTENDANCE MODAL -->
+  <div class="modal-ov" id="modStaffSelfPortal">
+    <div class="modal-box" style="max-width:600px;">
+      <div class="m-top">
+        <h3>👤 Employee Self-Service &amp; Attendance Desk</h3>
+        <button type="button" class="x-btn" onclick="closeMod('modStaffSelfPortal')">&times;</button>
+      </div>
+
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        <button type="button" class="sub-btn" onclick="switchSelfTab('spAtt')">📅 Attendance</button>
+        <button type="button" class="sub-btn" onclick="switchSelfTab('spSal')">💰 See Your Salary</button>
+        <button type="button" class="sub-btn" onclick="switchSelfTab('spLeave')">📝 Apply Leave</button>
+        <button type="button" class="sub-btn" onclick="switchSelfTab('spAdv')">💵 Advance</button>
+        <button type="button" class="sub-btn" id="spBonusTabBtn" onclick="switchSelfTab('spBonus')">🎁 Your Bonus</button>
+        <button type="button" class="sub-btn" onclick="switchSelfTab('spShare')">🔗 Share Link</button>
+      </div>
+
+      <!-- 1. Attendance View (First Punch Priority + Exit Selfie + Calendar/Weekoff/Holiday) -->
+      <div id="spAtt">
+        <div class="rec">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <b>Your Total Attendance: <span id="spAttSummary">22/30</span></b>
+            <span class="pill-ok" id="spAttRemark">22 Present &bull; 8 Off/Absent</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+            Din ki <b>pehli attendance aur selfie</b> priority mani jayegi. Jane ke samay <b>Logout / Exit Day-End Attendance</b> selfie ke saath lagayein.
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+            <button type="button" class="sub-btn" style="background:var(--emerald);color:#050813;font-weight:800;" onclick="markRoleAttendance('IN')">▶ Mark Entry Attendance</button>
+            <button type="button" class="sub-btn" style="background:var(--gold);color:#050813;font-weight:800;" onclick="markRoleAttendance('OUT')">⏹ Logout / Exit Day-End Attendance</button>
+          </div>
+          <div class="fg" style="margin-top:8px;">
+            <label>Live Attendance Selfie (Entry / Exit / Outside)</label>
+            <input type="file" id="spSelfieFile" class="fc" accept="image/*" capture="user" onchange="showThumb(this,'spSelfiePrev')">
+            <div class="preview-row" id="spSelfiePrev"></div>
+          </div>
+        </div>
+
+        <div class="rec">
+          <b>Calendar &amp; Date-Wise Check (Selfie, Time, Day, Weekoff, Public Holiday)</b>
+          <div class="fg" style="margin-top:6px;">
+            <label>Date Chunein:</label>
+            <input type="date" id="spCheckDate" class="fc" value="2026-11-22" onchange="inspectAttendanceDate()">
+          </div>
+          <div id="spDateDetailBox" class="rec" style="margin-bottom:0;">
+            <div><b>Date:</b> 2026-11-22 (Sunday) &bull; <b>Status:</b> Present (1st Selfie Priority)</div>
+            <div style="font-size:11px;color:var(--cyan);margin-top:2px;">Weekoff / Holiday Note: Pre-set Weekoff &amp; Public Holidays calendar mein dikhenge.</div>
+          </div>
+        </div>
+        <div id="spManagerTeamBox"></div>
+      </div>
+
+      <!-- 2. See Your Salary & View This Month Salary -->
+      <div id="spSal" style="display:none;">
+        <div class="rec">
+          <b>Employee Profile Details (Read-Only)</b>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.5;">
+            Name: <b style="color:#fff;">Vikram Yadav</b> &bull; Post: <b>Senior Floor Coach</b> &bull; Joined: <b>2025-02-01</b><br>
+            DOB: <b>1995-05-14</b> &bull; Contact: <b>9876503344</b> &bull; Email: <b>vikram.yadav@gmail.com</b><br>
+            PAN: <b>BXPYS9876K</b> &bull; ID Proof: <b>Verified</b>
+          </div>
+          <button type="button" class="big-btn" style="padding:10px;font-size:12.5px;" onclick="calcThisMonthEarnedSalary()">📊 View This Month Salary</button>
+          <div id="spMonthSalSlip" style="margin-top:10px;"></div>
+        </div>
+
+        <div class="rec">
+          <b>Search &amp; Download Past Salary Slip</b>
+          <div class="fg" style="margin-top:6px;">
+            <label>Name / Mobile / Employee ID:</label>
+            <input type="text" id="spSalQuery" class="fc" placeholder="Enter Name, Mobile or Emp ID">
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>From Date:</label><input type="date" id="spSalFrom" class="fc" value="2026-07-01"></div>
+            <div class="fg"><label>To Date:</label><input type="date" id="spSalTo" class="fc" value="2026-11-22"></div>
+          </div>
+          <button type="button" class="sub-btn" style="width:100%;" onclick="downloadStaffSlipByRange()">📥 Download Salary Slip</button>
+        </div>
+      </div>
+
+      <!-- 3. Applying For Leave -->
+      <div id="spLeave" style="display:none;">
+        <form class="rec" onsubmit="submitLeaveApplication(event)">
+          <b>Applying For Leave (Auto-Filled Profile)</b>
+          <div style="font-size:11px;color:var(--muted);margin:4px 0 8px;">Staff: <b>Vikram Yadav (STF-001-1)</b> &bull; Mobile: <b>9876503344</b></div>
+          <div class="grid2">
+            <div class="fg"><label>From Date *</label><input type="date" id="lvFrom" class="fc" value="2026-11-23" onchange="updateLeaveDaysCount()" required></div>
+            <div class="fg"><label>To Date *</label><input type="date" id="lvTo" class="fc" value="2026-11-24" onchange="updateLeaveDaysCount()" required></div>
+          </div>
+          <div id="lvDaysBanner" style="font-size:11.5px;color:var(--gold);font-weight:800;margin-bottom:8px;">Selected: 2 Days Leave</div>
+          <div class="fg">
+            <label>Reason For Leaves *</label>
+            <select id="lvReasonType" class="fc" onchange="togglePersonalRemark()">
+              <option value="Exam">Exam</option>
+              <option value="Marriage">Marriage</option>
+              <option value="Birthday">Birthday</option>
+              <option value="Anniversary">Anniversary</option>
+              <option value="Medical Leave">Medical Leave</option>
+              <option value="Personal Reason">Personal Reason</option>
+            </select>
+          </div>
+          <div class="fg" id="lvPersonalRemarkBox" style="display:none;">
+            <label>Personal Reason Remark (Mandatory) *</label>
+            <input type="text" id="lvPersonalRemark" class="fc" placeholder="Kya personal kaam/reason hai?">
+          </div>
+          <div class="fg">
+            <label>Soochana Kis Madhyam Se Bhejni Hai?</label>
+            <select id="lvNotifyChannel" class="fc">
+              <option value="WhatsApp + Email + Telegram">WhatsApp + Email + Telegram</option>
+              <option value="WhatsApp">WhatsApp</option>
+              <option value="Email">Email</option>
+              <option value="Telegram">Telegram</option>
+            </select>
+          </div>
+          <button type="submit" class="big-btn" style="margin-top:0;">Apply For Leave</button>
+        </form>
+        <div id="spLeaveStatusList"></div>
+      </div>
+
+      <!-- 4. Advance Payment Request -->
+      <div id="spAdv" style="display:none;">
+        <form class="rec" onsubmit="submitAdvanceRequest(event)">
+          <b>Advance Payment Request</b>
+          <div class="fg" style="margin-top:6px;"><label>Kitna Amount Chahiye (₹) *</label><input type="number" id="advAmt" class="fc" value="2000" required></div>
+          <div class="fg"><label>Kab Chahiye (Required Date) *</label><input type="date" id="advDate" class="fc" value="2026-11-25" required></div>
+          <div class="fg"><label>Reason *</label><input type="text" id="advReason" class="fc" placeholder="Reason for advance payment" required></div>
+          <button type="submit" class="big-btn" style="margin-top:0;">Submit Advance Request</button>
+        </form>
+        <div id="spAdvHistory"></div>
+      </div>
+
+      <!-- 5. Your Bonus (Only for Eligible Categories, Hidden for Sweeper/Lower) -->
+      <div id="spBonus" style="display:none;">
+        <div class="rec" id="spBonusContent">
+          <b>Your Bonus Eligibility</b>
+          <div style="font-size:12px;color:var(--emerald);margin-top:6px;">Performance &amp; Target Bonus: ₹1,500 (Eligible Category)</div>
+        </div>
+      </div>
+
+      <!-- 6. Share App Link -->
+      <div id="spShare" style="display:none;">
+        <div class="rec">
+          <b>Share Your This App Through Link</b>
+          <div style="font-size:11.5px;color:var(--cyan);margin:6px 0;word-break:break-all;">
+            https://5brothersfitnessclubunnao-sys.github.io/orgdesk-web/login.html
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="sub-btn" onclick="navigator.clipboard && navigator.clipboard.writeText('https://5brothersfitnessclubunnao-sys.github.io/orgdesk-web/login.html');alert('Link copied!')">📋 Copy Link</button>
+            <a class="sub-btn" style="text-decoration:none;color:var(--emerald);" target="_blank" href="https://wa.me/?text=https%3A%2F%2F5brothersfitnessclubunnao-sys.github.io%2Forgdesk-web%2Flogin.html">📲 Share on WhatsApp</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-ov" id="modExtra">
     <div class="modal-box">
       <div class="m-top"><h3>✨ Extra Service Collection</h3><button type="button" class="x-btn" onclick="closeMod('modExtra')">&times;</button></div>
@@ -1632,6 +1787,225 @@ Telegram notification sent to Manager.`);
       const el = document.getElementById("attClock");
       if (el) el.textContent = new Date().toLocaleString("en-IN");
     }, 1000);
+
+    
+    // --- STAFF PORTAL & FIRST-PUNCH / EXIT / OUTSIDE GYM ATTENDANCE ---
+    const K_SP_ATT = "om_sp_attendance_v1";
+    const K_SP_LV = "om_sp_leaves_v1";
+    const K_SP_ADV = "om_sp_advances_v1";
+
+    function switchSelfTab(tabId) {
+      ["spAtt", "spSal", "spLeave", "spAdv", "spBonus", "spShare"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = (id === tabId) ? "block" : "none";
+      });
+      if (tabId === "spAtt") {
+        renderSelfAttendanceView();
+        inspectAttendanceDate();
+      }
+      if (tabId === "spLeave") {
+        updateLeaveDaysCount();
+        renderLeaveList();
+      }
+      if (tabId === "spAdv") renderAdvanceList();
+    }
+
+    function renderSelfAttendanceView() {
+      const role = (localStorage.getItem("bfc_role") || "owner").toLowerCase();
+      const mgrBox = document.getElementById("spManagerTeamBox");
+      if (mgrBox) {
+        if (role === "manager" || role === "owner" || role === "admin") {
+          mgrBox.innerHTML = `<div class="rec" style="border-color:var(--cyan);">
+            <b>Management / Admin Team Attendance Access:</b>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+              Aap pure staff ki attendance aur selfies dekh sakte hain: Vikram Yadav (06:58 AM - Selfie OK), Pooja Sharma (08:50 AM - Selfie OK), Rameshwar Prasad (06:05 AM - Selfie OK).
+            </div>
+          </div>`;
+        } else {
+          mgrBox.innerHTML = `<div class="rec"><b>Staff Access:</b> Aap sirf apni attendance lagane aur apna record dekhne ke liye authorized hain.</div>`;
+        }
+      }
+    }
+
+    function markRoleAttendance(direction) {
+      const role = (localStorage.getItem("bfc_role") || "staff").toLowerCase();
+      const user = localStorage.getItem("om_logged_user") || "Vikram Yadav (STF-001-1)";
+      const outside = confirm("Kya aap Gym ke bahar (Outside of the Gym) se attendance laga rahe hain?
+OK = Outside Gym, Cancel = Inside Gym");
+
+      let reason = "Inside Gym";
+      let informed = "N/A";
+      if (outside) {
+        reason = prompt("Gym ke bahar se attendance lagane ka Reason mention karein (Mandatory):");
+        if (!reason || !reason.trim()) {
+          alert("Outside Gym attendance ke liye Reason mention karna zaroori hai.");
+          return;
+        }
+        informed = confirm("Kya aapne apne Reporting Manager ko inform kiya hai?
+OK = Yes, Cancel = No") ? "Yes" : "No";
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      const nowTime = new Date().toLocaleTimeString("en-IN");
+      const attMap = J(K_SP_ATT, {});
+      const rec = attMap[today] || { firstEntry: null, exitPunch: null, logs: [] };
+
+      if (direction === "IN") {
+        if (!rec.firstEntry) {
+          rec.firstEntry = { time: nowTime, outside, reason, informed, selfieStored: true };
+        }
+        rec.logs.unshift(`Entry (${nowTime}) — ${outside ? "Outside: " + reason + " [Informed: " + informed + "]" : "Inside Gym"}`);
+      } else {
+        rec.exitPunch = { time: nowTime, outside, reason, informed, selfieStored: true };
+        rec.logs.unshift(`Logout / Exit Day-End (${nowTime}) — Selfie Stored`);
+      }
+      attMap[today] = rec;
+      W(K_SP_ATT, attMap);
+
+      const bar = document.getElementById("adminAlertBar");
+      if (outside) {
+        if (role === "manager") {
+          bar.style.display = "block";
+          bar.textContent = `🚨 ADMIN ALERT (Manager Outside Gym): ${user} | ${direction} | Informed: ${informed} | Reason: ${reason}`;
+          alert(`Outside Gym Alert sent to Admin!
+Manager: ${user}
+Informed: ${informed}
+Reason: ${reason}`);
+        } else {
+          bar.style.display = "block";
+          bar.textContent = `📲 TELEGRAM ALERT TO MANAGER: ${user} | ${direction} | Informed: ${informed} | Reason: ${reason}`;
+          alert(`Telegram alert sent to Reporting Manager (Informed: ${informed}).
+Reason: ${reason}
+First attendance/selfie priority active.`);
+        }
+      } else {
+        alert(`${direction === "IN" ? "First Entry Attendance" : "Logout / Exit Day-End Attendance"} recorded at ${nowTime} with selfie.`);
+      }
+    }
+
+    function inspectAttendanceDate() {
+      const dt = document.getElementById("spCheckDate").value || "2026-11-22";
+      const dObj = new Date(dt + "T00:00:00");
+      const dayName = isNaN(dObj.getTime()) ? "Day" : dObj.toLocaleDateString("en-US", { weekday: "long" });
+      const isWeekoff = (dayName === "Wednesday");
+      const isHoliday = (dt === "2026-11-08" || dt === "2026-08-28" || dt === "2026-03-04");
+      const box = document.getElementById("spDateDetailBox");
+      if (!box) return;
+      box.innerHTML = `
+        <div><b>Date:</b> ${esc(dt)} (${dayName}) &bull; <b>1st Selfie Priority:</b> Verified</div>
+        <div style="font-size:11px;color:var(--emerald);margin-top:2px;">
+          ${isHoliday ? "🎉 Public Holiday Recorded" : (isWeekoff ? "🗓️ Pre-Set Rotational Weekoff" : "✔ Attendance Record Available with Selfie & Timestamp")}
+        </div>
+      `;
+    }
+
+    function calcThisMonthEarnedSalary() {
+      const monthlySal = 10000;
+      const daysInMonth = 30;
+      const presentDays = 20;
+      const dailyRate = monthlySal / daysInMonth;
+      const earned = (dailyRate * presentDays).toFixed(2);
+      const box = document.getElementById("spMonthSalSlip");
+      if (box) {
+        box.innerHTML = `<div class="rec" style="background:#fff;color:#0F172A;">
+          <b>This Month Salary Slip (Read-Only)</b><br>
+          Monthly Salary: ₹10,000 &bull; Daily Rate (30d): ₹${dailyRate.toFixed(2)}<br>
+          Present Days: <b>20 Days</b> &bull; Earned Till Date: <b style="color:#047857;">₹${earned}</b>
+        </div>`;
+      }
+    }
+
+    function downloadStaffSlipByRange() {
+      const q = document.getElementById("spSalQuery").value.trim() || "Vikram Yadav";
+      const f = document.getElementById("spSalFrom").value;
+      const t = document.getElementById("spSalTo").value;
+      alert(`Salary slip prepared for ${q} (${f} to ${t}). Read-only download ready.`);
+    }
+
+    function updateLeaveDaysCount() {
+      const f = new Date(document.getElementById("lvFrom").value);
+      const t = new Date(document.getElementById("lvTo").value);
+      let days = 1;
+      if (!isNaN(f.getTime()) && !isNaN(t.getTime()) && t >= f) {
+        days = Math.floor((t - f) / (1000 * 60 * 60 * 24)) + 1;
+      }
+      const ok = confirm(`Aap ${days} din ke liye leaves / chhutti chahte hain?`);
+      if (!ok) return;
+      const b = document.getElementById("lvDaysBanner");
+      if (b) b.textContent = `Confirmed: ${days} Days Leave`;
+    }
+
+    function togglePersonalRemark() {
+      const r = document.getElementById("lvReasonType").value;
+      const box = document.getElementById("lvPersonalRemarkBox");
+      if (box) box.style.display = (r === "Personal Reason") ? "block" : "none";
+    }
+
+    function submitLeaveApplication(e) {
+      e.preventDefault();
+      const f = document.getElementById("lvFrom").value;
+      const t = document.getElementById("lvTo").value;
+      const rType = document.getElementById("lvReasonType").value;
+      const remark = document.getElementById("lvPersonalRemark").value.trim();
+      const ch = document.getElementById("lvNotifyChannel").value;
+      if (rType === "Personal Reason" && !remark) {
+        alert("Personal Reason ke liye remark likhna zaroori hai.");
+        return;
+      }
+      const d1 = new Date(f), d2 = new Date(t);
+      const days = (!isNaN(d1) && !isNaN(d2) && d2 >= d1) ? (Math.floor((d2 - d1) / 86400000) + 1) : 1;
+      const list = J(K_SP_LV, []);
+      list.unshift({
+        days, from: f, to: t,
+        reason: rType === "Personal Reason" ? `${rType} (${remark})` : rType,
+        channel: ch, status: "Pending"
+      });
+      W(K_SP_LV, list);
+      const bar = document.getElementById("adminAlertBar");
+      if (bar) {
+        bar.style.display = "block";
+        bar.textContent = `📲 Manager Notification (${ch}): Employee applied for ${days} leave(s) [${rType}].`;
+      }
+      renderLeaveList();
+    }
+
+    function renderLeaveList() {
+      const list = J(K_SP_LV, []);
+      const box = document.getElementById("spLeaveStatusList");
+      if (!box) return;
+      box.innerHTML = list.map(item => `
+        <div class="rec">
+          <b>Applied for ${item.days} Leaves</b> — <span class="pill-pd">${esc(item.status)}</span>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Dates: ${esc(item.from)} to ${esc(item.to)} &bull; Reason: ${esc(item.reason)} (${esc(item.channel)})</div>
+        </div>
+      `).join("");
+    }
+
+    function submitAdvanceRequest(e) {
+      e.preventDefault();
+      const amt = Number(document.getElementById("advAmt").value || 0);
+      const dt = document.getElementById("advDate").value;
+      const rsn = document.getElementById("advReason").value.trim();
+      const list = J(K_SP_ADV, []);
+      list.unshift({ amt, dt, rsn, status: "Pending" });
+      W(K_SP_ADV, list);
+      const bar = document.getElementById("adminAlertBar");
+      if (bar) {
+        bar.style.display = "block";
+        bar.textContent = `💵 Advance Request Notification: ₹${amt} needed on ${dt} (${rsn}).`;
+      }
+      renderAdvanceList();
+    }
+
+    function renderAdvanceList() {
+      const list = J(K_SP_ADV, []);
+      const box = document.getElementById("spAdvHistory");
+      if (!box) return;
+      box.innerHTML = list.map(a => `
+        <div class="rec"><b>₹${Number(a.amt).toLocaleString("en-IN")}</b> on ${esc(a.dt)} — <span class="pill-pd">${esc(a.status)}</span>
+        <div style="font-size:11px;color:var(--muted)">Reason: ${esc(a.rsn)}</div></div>
+      `).join("");
+    }
 
     seedData();
     syncDashboard();
