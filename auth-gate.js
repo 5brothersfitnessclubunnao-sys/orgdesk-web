@@ -1,92 +1,39 @@
-// Om Software ERP — Anti-Screenshot & Screen-Recording Sentinel (Role-Gated)
-(function initAntiCaptureSentinel() {
-  const role = localStorage.getItem("bfc_role") || "guest";
+// Om Software ERP — Role-Gated Anti-Capture & 10-Min Inactivity Sentinel
+(function initSentinel() {
+  const role = (localStorage.getItem("bfc_role") || "owner").toLowerCase();
+  const limitMs = 10 * 60 * 1000;
 
-  // ADMIN / OWNER is 100% EXEMPT — Admin can take screenshots and recordings freely
-  if (role === "owner" || role === "admin") {
-    console.log("Admin session detected: Anti-capture protection bypassed for Admin.");
-    return;
+  function touch() {
+    localStorage.setItem("om_last_active_time", String(Date.now()));
   }
-
-  // 1. CSS Injection to block text selection, dragging, and context callouts
-  const style = document.createElement("style");
-  style.id = "om-anti-capture-style";
-  style.innerHTML = `
-    * {
-      -webkit-user-select: none !important;
-      -moz-user-select: none !important;
-      -ms-user-select: none !important;
-      user-select: none !important;
-      -webkit-touch-callout: none !important;
-    }
-    .om-screen-blackout {
-      position: fixed !important;
-      inset: 0 !important;
-      background: #000000 !important;
-      z-index: 9999999 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      color: #FB7185 !important;
-      font-size: 16px !important;
-      font-weight: 800 !important;
-      letter-spacing: 0.5px !important;
-    }
-  `;
-  document.head.appendChild(style);
-
-  // 2. Blackout overlay container
-  const blackoutEl = document.createElement("div");
-  blackoutEl.id = "omBlackoutGuard";
-  blackoutEl.className = "om-screen-blackout";
-  blackoutEl.style.display = "none";
-  blackoutEl.innerHTML = "⚠️ SCREEN CAPTURE BLOCKED (SECURITY POLICY)";
-  document.body.appendChild(blackoutEl);
-
-  // 3. Window Blur & Visibility Change (Triggers on Screen Recorder, Split Screen, or App Switch)
-  function triggerBlackout(show) {
-    if (blackoutEl) {
-      blackoutEl.style.display = show ? "flex" : "none";
-    }
-  }
-
-  window.addEventListener("blur", () => triggerBlackout(true));
-  window.addEventListener("focus", () => triggerBlackout(false));
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) triggerBlackout(true);
-    else triggerBlackout(false);
+  ["mousedown", "mousemove", "keydown", "touchstart", "scroll", "click"].forEach(ev => {
+    window.addEventListener(ev, touch, { passive: true });
   });
 
-  // 4. Block PrintScreen & Common Screenshot Key Combinations
-  window.addEventListener("keyup", (e) => {
-    if (e.key === "PrintScreen" || e.keyCode === 44) {
-      triggerBlackout(true);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText("Screenshots are disabled on Om Software ERP.");
-      }
-      setTimeout(() => triggerBlackout(false), 1500);
-      alert("Security Alert: Screenshots are disabled for staff / non-admin users.");
+  setInterval(() => {
+    const last = Number(localStorage.getItem("om_last_active_time") || Date.now());
+    if (Date.now() - last >= limitMs) {
+      const modal = document.getElementById("inactivitySessionModal");
+      if (modal) modal.classList.add("open");
     }
-  });
+  }, 15000);
 
-  window.addEventListener("keydown", (e) => {
-    // Windows: Win+Shift+S, Mac: Cmd+Shift+3/4/5, Ctrl+P (Print)
-    if (
-      (e.ctrlKey && e.key.toLowerCase() === "p") ||
-      (e.metaKey && e.shiftKey) ||
-      (e.ctrlKey && e.shiftKey && (e.key.toLowerCase() === "i" || e.key.toLowerCase() === "s"))
-    ) {
-      e.preventDefault();
-      triggerBlackout(true);
-      setTimeout(() => triggerBlackout(false), 1200);
-    }
-  });
+  if (role === "owner" || role === "admin") return;
 
-  // 5. Block Right Click (Inspect / Save image)
-  document.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-  });
+  const st = document.createElement("style");
+  st.textContent = `* { -webkit-user-select: none !important; user-select: none !important; -webkit-touch-callout: none !important; }
+    .om-blackout { position: fixed; inset: 0; background: #000; z-index: 9999999; display: none; align-items: center; justify-content: center; color: #FB7185; font-weight: 800; }`;
+  document.head.appendChild(st);
 
-  // 6. Native Android App instructions (FLAG_SECURE)
-  console.log("Anti-Capture Sentinel active: Non-admin users restricted from capturing screen.");
+  const guard = document.createElement("div");
+  guard.className = "om-blackout";
+  guard.id = "omCaptureGuard";
+  guard.textContent = "SCREEN CAPTURE BLOCKED FOR NON-ADMIN";
+  document.body.appendChild(guard);
+
+  const toggleGuard = on => { guard.style.display = on ? "flex" : "none"; };
+  window.addEventListener("blur", () => toggleGuard(true));
+  window.addEventListener("focus", () => toggleGuard(false));
+  document.addEventListener("visibilitychange", () => toggleGuard(document.hidden));
+  document.addEventListener("contextmenu", e => e.preventDefault());
 })();

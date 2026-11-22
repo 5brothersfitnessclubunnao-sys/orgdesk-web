@@ -1,1 +1,5 @@
-Section,Name,Phone,Amount\nMember,Aarav,9876543210,1200
+Section,Branch,Name,Phone,Role_Or_Plan,Amount,Payment_Mode,Notes,Date
+Member,001,Aarav Verma,9876500101,Monthly Plan,1200,Cash,Morning batch,2026-11-22
+Staff,001,Vikram Yadav,9876500201,Trainer,18000,Cash,Floor coach,2026-11-22
+Collection,001,Monthly Fee,9876500101,Monthly,1200,Cash,Fee paid,2026-11-22
+Expense,001,Electricity Bill,0,Utility,14850,Online,Meter bill,2026-11-22
