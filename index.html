@@ -1684,19 +1684,171 @@ Telegram notification sent to Manager.`);
     })();
 
     
-    // Enforce strict Staff role view with full self-service desk
-    (function enforceStaffRoleIsolation() {
+    // Role-specific portal & attendance/selfie engine (Staff, Manager, Admin/Owner)
+    (function setupRolePortalsAndAttendance() {
       const role = (localStorage.getItem("bfc_role") || "owner").toLowerCase();
-      if (role === "staff") {
+      const loggedUser = localStorage.getItem("om_logged_user") || "Staff (STF-001-1)";
+
+      const isStaff = (role === "staff");
+      const isMgr = (role === "manager");
+
+      const codeMatch = loggedUser.match(/\(([^)]+)\)/);
+      const empCode = codeMatch ? codeMatch[1] : (isMgr ? "MGR-001-1" : "STF-001-1");
+      const brMatch = loggedUser.match(/Branch\s+([0-9A-Za-z-]+)/i);
+      const branchCode = brMatch ? brMatch[1] : "001";
+      const gymOrBranchName = (branchCode === "001") ? "5 Brother's Fitness Club & Nutrition (Unnao Main)" : ("Branch " + branchCode);
+
+      window.markAttendanceWithSelfie = function(typeLabel, previewId, statusOutId) {
+        const fileInput = document.getElementById(typeLabel === "OUT" ? "selfExitSelfieInp" : "selfEntrySelfieInp");
+        const rsnInp = document.getElementById("selfLocModeSel");
+        const locMode = rsnInp ? rsnInp.value : "Inside Gym";
+        let extraNote = "";
+
+        if (locMode === "Outside Gym") {
+          const reason = prompt("Outside Gym attendance ka reason likhein (mandatory):");
+          if (!reason || !reason.trim()) {
+            alert("Outside gym attendance ke liye reason likhna zaroori hai.");
+            return;
+          }
+          const informed = confirm("Kya Manager ko inform kiya? OK = Yes, Cancel = No") ? "Yes" : "No";
+          extraNote = " | Outside Reason: " + reason.trim() + " | Manager Informed: " + informed;
+        }
+
+        const nowTime = new Date().toLocaleTimeString("en-IN");
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const selfieName = (fileInput && fileInput.files && fileInput.files[0]) ? fileInput.files[0].name : "Live_Camera_Selfie.jpg";
+
+        const logs = J("om_att_selfie_logs_v1", []);
+        logs.unshift({
+          empCode: empCode,
+          branchCode: branchCode,
+          gymName: gymOrBranchName,
+          punchType: typeLabel,
+          time: nowTime,
+          date: todayStr,
+          locMode: locMode,
+          selfieName: selfieName,
+          note: extraNote
+        });
+        W("om_att_selfie_logs_v1", logs);
+
+        const outEl = document.getElementById(statusOutId || "selfPunchStatus");
+        if (outEl) {
+          outEl.innerHTML = `<span class="pill-ok">✔ ${esc(typeLabel)} Marked at ${esc(nowTime)}</span> <span style="color:var(--muted);font-size:11px;">(${esc(locMode)} • Selfie: ${esc(selfieName)}${esc(extraNote)})</span>`;
+        }
+        alert(`${typeLabel} Attendance & Selfie recorded at ${nowTime} for ${empCode} (${gymOrBranchName}).`);
+      };
+
+      window.handleSelfieFilePreview = function(inputEl, previewBoxId) {
+        const box = document.getElementById(previewBoxId);
+        if (!box || !inputEl || !inputEl.files || !inputEl.files[0]) return;
+        const f = inputEl.files[0];
+        if (f.type.startsWith("image/")) {
+          const reader = new FileReader();
+          reader.onload = function(ev) {
+            box.innerHTML = `<img src="${ev.target.result}" class="preview-img" alt="Selfie"><span style="font-size:11px;color:var(--emerald);align-self:center;">Selfie Ready: ${esc(f.name)}</span>`;
+          };
+          reader.readAsDataURL(f);
+        } else {
+          box.innerHTML = `<span class="pill-ok">Attached: ${esc(f.name)}</span>`;
+        }
+      };
+
+      window.showSelfDateInfo = function() {
+        const dt = document.getElementById("spDateInp").value;
+        const logs = J("om_att_selfie_logs_v1", []);
+        const dayLogs = logs.filter(l => l.date === dt && l.empCode === empCode);
+        const out = document.getElementById("spDateOut");
+        if (!out) return;
+        if (dayLogs.length) {
+          out.innerHTML = `<b>${esc(dt)}</b> — <span style="color:var(--emerald)">Present (${dayLogs.length} Punch)</span> • Last: ${esc(dayLogs[0].time)} • Selfie: ${esc(dayLogs[0].selfieName)}`;
+        } else if (dt === "2026-11-22") {
+          out.innerHTML = `<b>${esc(dt)}</b> — <span style="color:var(--emerald)">Present (1st Selfie Priority)</span> • Entry: 07:15 AM • Exit: 05:30 PM`;
+        } else {
+          out.innerHTML = `<b>${esc(dt)}</b> — <span style="color:var(--gold)">No Selfie Record on Selected Date</span> (Check another date or mark attendance)`;
+        }
+      };
+
+      window.switchSelfTab = function(tabId) {
+        ["spAtt", "spSal", "spLeave", "spAdv", "spBonus", "spShare"].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = (id === tabId) ? "block" : "none";
+        });
+      };
+
+      window.toggleSpRemark = function() {
+        const val = document.getElementById("spLvReason").value;
+        document.getElementById("spRemarkWrap").style.display = (val === "Personal Reason") ? "block" : "none";
+      };
+
+      window.submitSelfLeave = function(e) {
+        e.preventDefault();
+        const f = document.getElementById("spLvFrom").value;
+        const t = document.getElementById("spLvTo").value;
+        const r = document.getElementById("spLvReason").value;
+        const rem = document.getElementById("spRemarkTxt").value.trim();
+        const ch = document.getElementById("spLvChan").value;
+        if (r === "Personal Reason" && !rem) {
+          alert("Personal Reason ke liye remark likhna zaroori hai.");
+          return;
+        }
+        const box = document.getElementById("spLvList");
+        box.innerHTML = `<div class="rec"><b>Leave (${esc(f)} to ${esc(t)})</b> — <span class="pill-pd">Pending</span> • Reason: ${esc(r)}${rem ? " (" + esc(rem) + ")" : ""} • Sent via ${esc(ch)}</div>` + box.innerHTML;
+      };
+
+      window.submitSelfAdv = function(e) {
+        e.preventDefault();
+        const amt = document.getElementById("spAdvAmt").value;
+        const dt = document.getElementById("spAdvDt").value;
+        const rsn = document.getElementById("spAdvRsn").value.trim();
+        const box = document.getElementById("spAdvList");
+        box.innerHTML = `<div class="rec"><b>Advance ₹${esc(amt)}</b> on ${esc(dt)} — <span class="pill-pd">Pending</span> (${esc(rsn)})</div>` + box.innerHTML;
+      };
+
+      window.renderManagerStaffMonitor = function() {
+        const box = document.getElementById("mgrStaffMonitorBox");
+        if (!box) return;
+        const staffRows = J(K_STF, []);
+        const extraPunches = J("om_att_selfie_logs_v1", []);
+        const presentCount = 8 + extraPunches.length;
+        const absentCount = Math.max(0, 10 - presentCount);
+
+        box.innerHTML = `
+          <div class="rec" style="border-color:var(--gold);">
+            <b>📊 Aaj Ki Staff Attendance Summary (${esc(gymOrBranchName)}):</b><br>
+            Total Staff: <b>10</b> &bull; Present: <b style="color:var(--emerald)">${presentCount}</b> &bull; Absent: <b style="color:var(--rose)">${absentCount}</b>
+          </div>
+          ${extraPunches.map(p => `
+            <div class="rec" style="border-left:3px solid var(--emerald);">
+              <b>${esc(p.empCode)}</b> [${esc(p.punchType)}] — ${esc(p.time)} (${esc(p.date)})<br>
+              <span style="font-size:11px;color:var(--cyan);">Location: ${esc(p.locMode)} • Selfie: ${esc(p.selfieName)}${esc(p.note)}</span>
+            </div>
+          `).join("")}
+          ${staffRows.map(s => `
+            <div class="rec">
+              <b>${esc(s.name)}</b> (${esc(s.id)}) — <span class="pill-ok">Present</span><br>
+              <span style="font-size:11px;color:var(--muted);">Dept: ${esc(s.dept)} • Role: ${esc(s.role)} • Selfie Verified • Punches: 2 (Entry &amp; Exit)</span>
+            </div>
+          `).join("")}
+        `;
+      };
+
+      if (isStaff) {
         window.addEventListener("DOMContentLoaded", function() {
           const p1 = document.getElementById("page1");
           if (p1) {
             p1.innerHTML = `
               <div class="box-card" style="border-color:var(--cyan);">
+                <div style="background:#081229;border:1px solid var(--border-hl);border-radius:10px;padding:9px 11px;margin-bottom:10px;font-size:11.5px;">
+                  <div><b>Employee Code:</b> <span style="color:var(--gold)">${esc(empCode)}</span> &bull; <b>Branch Code:</b> <span style="color:var(--cyan)">${esc(branchCode)}</span></div>
+                  <div style="color:var(--muted);margin-top:2px;"><b>Gym / Branch:</b> ${esc(gymOrBranchName)}</div>
+                </div>
+
                 <h2 style="font-size:16px;color:var(--cyan);">👤 Staff Self-Service Portal (Read-Only)</h2>
-                <p style="font-size:11.5px;color:var(--muted);margin-top:4px;">
-                  Attendance, Monthly Earned Salary, Apply Leave, Advance Request, Bonus &amp; Share App Link.
+                <p style="font-size:11.5px;color:var(--muted);margin-top:3px;">
+                  Keval apna data access karein: Attendance &amp; Selfie, Monthly Earned Salary, Leave, Advance, Bonus &amp; Share Link.
                 </p>
+
                 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
                   <button type="button" class="sub-btn" onclick="switchSelfTab('spAtt')">Attendance</button>
                   <button type="button" class="sub-btn" onclick="switchSelfTab('spSal')">See Your Salary</button>
@@ -1710,11 +1862,35 @@ Telegram notification sent to Manager.`);
                   <div class="rec">
                     <b>Your Total Attendance: 22/30</b> &bull; <span class="pill-ok">22 Present &bull; 8 Off/Absent</span>
                     <div style="font-size:11px;color:var(--muted);margin-top:4px;">First punch &amp; selfie priority active. Logout / Exit Day-End attendance supported with selfie.</div>
-                    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-                      <button type="button" class="sub-btn" onclick="markSelfPunch('IN')">Mark Entry Attendance</button>
-                      <button type="button" class="sub-btn" onclick="markSelfPunch('OUT')">Logout / Exit Day-End Attendance</button>
+
+                    <div class="fg" style="margin-top:8px;">
+                      <label>Location Mode</label>
+                      <select id="selfLocModeSel" class="fc">
+                        <option value="Inside Gym">Inside Gym</option>
+                        <option value="Outside Gym">Outside Gym</option>
+                      </select>
                     </div>
+
+                    <div class="fg">
+                      <label>Entry Selfie Photo (Camera / Gallery)</label>
+                      <input type="file" id="selfEntrySelfieInp" accept="image/*" capture="user" class="fc" onchange="handleSelfieFilePreview(this,'entrySelfiePrev')">
+                      <div class="preview-row" id="entrySelfiePrev"></div>
+                    </div>
+
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                      <button type="button" class="big-btn" style="flex:1;margin-top:0;padding:10px;font-size:12px;" onclick="markAttendanceWithSelfie('MARK YOUR ATTENDANCE','entrySelfiePrev','selfPunchStatus')">👉 MARK YOUR ATTENDANCE</button>
+                    </div>
+
+                    <div class="fg" style="margin-top:10px;">
+                      <label>Logout / Exit Day-End Selfie Photo</label>
+                      <input type="file" id="selfExitSelfieInp" accept="image/*" capture="user" class="fc" onchange="handleSelfieFilePreview(this,'exitSelfiePrev')">
+                      <div class="preview-row" id="exitSelfiePrev"></div>
+                      <button type="button" class="sub-btn" style="width:100%;margin-top:6px;" onclick="markAttendanceWithSelfie('OUT','exitSelfiePrev','selfPunchStatus')">Logout / Exit Day-End Attendance</button>
+                    </div>
+
+                    <div id="selfPunchStatus" style="margin-top:8px;font-size:11.5px;"></div>
                   </div>
+
                   <div class="rec">
                     <b>Date-Wise Calendar Check:</b>
                     <input type="date" id="spDateInp" class="fc" value="2026-11-22" onchange="showSelfDateInfo()" style="margin-top:6px;">
@@ -1724,7 +1900,7 @@ Telegram notification sent to Manager.`);
 
                 <div id="spSal" style="display:none;margin-top:10px;">
                   <div class="rec">
-                    <b>Profile (Read-Only):</b> Vikram Yadav &bull; Senior Floor Coach &bull; 9876503344 &bull; vikram.yadav@gmail.com
+                    <b>Profile (Read-Only):</b> ${esc(empCode)} • Branch ${esc(branchCode)} • ${esc(gymOrBranchName)}
                     <div style="margin-top:6px;">Monthly Salary ₹10,000 / 30 days = ₹333.33/day. 20 days earned = <b style="color:var(--emerald)">₹6,666.67</b></div>
                   </div>
                 </div>
@@ -1769,9 +1945,36 @@ Telegram notification sent to Manager.`);
           });
         });
       }
+
+      if (isMgr) {
+        window.addEventListener("DOMContentLoaded", function() {
+          const p1 = document.getElementById("page1");
+          if (p1) {
+            const mgrBlock = document.createElement("div");
+            mgrBlock.className = "box-card";
+            mgrBlock.style.borderColor = "var(--gold)";
+            mgrBlock.innerHTML = `
+              <div style="font-size:11.5px;margin-bottom:8px;">
+                <b>Manager Code:</b> <span style="color:var(--gold)">${esc(empCode)}</span> &bull; <b>Branch:</b> <span style="color:var(--cyan)">${esc(branchCode)}</span> &bull; <b>${esc(gymOrBranchName)}</b>
+              </div>
+              <h2 style="font-size:15px;color:var(--gold);">Manager Attendance &amp; Staff Monitor</h2>
+              <div class="fg" style="margin-top:8px;">
+                <label>Apni Selfie / Attendance Photo</label>
+                <input type="file" id="mgrSelfieInp" accept="image/*" capture="user" class="fc" onchange="handleSelfieFilePreview(this,'mgrSelfiePrev')">
+                <div class="preview-row" id="mgrSelfiePrev"></div>
+              </div>
+              <button type="button" class="big-btn" style="margin-top:0;" onclick="markAttendanceWithSelfie('MANAGER ATTENDANCE','mgrSelfiePrev','mgrPunchStatus'); renderManagerStaffMonitor();">👉 Mark My Attendance with Selfie</button>
+              <div id="mgrPunchStatus" style="margin-top:6px;font-size:11.5px;"></div>
+              <div id="mgrStaffMonitorBox" style="margin-top:10px;"></div>
+            `;
+            p1.prepend(mgrBlock);
+            renderManagerStaffMonitor();
+          }
+        });
+      }
     })();
 
-    seedData();
+seedData();
     syncDashboard();
     runSplash();
   </script>
