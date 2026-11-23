@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signed() { return request.auth != null; }
+    function hasUser() { return exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function isMgrOf(g) { return signed() && hasUser() && me().role == 'manager' && me().gymId == g; }
+
+    match /gyms/{g} {
+      allow read: if signed() && (request.auth.uid == g || (hasUser() && me().gymId == g));
+      allow write: if signed() && request.auth.uid == g;
+    }
+    match /mobiles/{m} { allow read, create: if signed(); }
+
+    match /users/{u} {
+      allow read: if signed() && (request.auth.uid == u || resource.data.gymId == request.auth.uid || isMgrOf(resource.data.gymId));
+      allow create: if signed() && request.resource.data.gymId == request.auth.uid;
+      allow update, delete: if signed() && resource.data.gymId == request.auth.uid;
+    }
+
+    match /leaves/{l} {
+      allow create: if signed() && request.resource.data.uid == request.auth.uid;
+      allow read: if signed() && (resource.data.uid == request.auth.uid || resource.data.gymId == request.auth.uid || isMgrOf(resource.data.gymId));
+      allow update: if signed() && resource.data.gymId == request.auth.uid;
+    }
+
+    // Staff ki shikayat: sirf Gym Owner padh sakta hai (Manager nahi)
+    match /complaints/{c} {
+      allow create: if signed() && request.resource.data.uid == request.auth.uid;
+      allow read: if signed() && resource.data.gymId == request.auth.uid;
+    }
+
+    match /staffatt/{a} {
+      allow create, update: if signed() && request.resource.data.uid == request.auth.uid;
+      allow read: if signed() && (resource.data.uid == request.auth.uid || resource.data.gymId == request.auth.uid || isMgrOf(resource.data.gymId));
+    }
+
+    // Member wale pages (abhi pehle jaise khule; agla phase me gym-wise lock honge)
+    match /admissions/{id} { allow create: if true; allow read, write: if signed(); }
+    match /members/{id}            { allow read, write: if true; }
+    match /attendance/{id}         { allow read, write: if true; }
+    match /attendance_attempts/{id}{ allow read, write: if true; }
+    match /ex_members/{id}         { allow read, write: if true; }
+  }
+}

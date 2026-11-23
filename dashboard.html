@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="hi"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Gym Dashboard</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="auth-gate.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Roboto,sans-serif}
+body{background:#070707;color:#fff;max-width:520px;margin:0 auto;padding:12px 10px 40px}
+.hd{background:#121212;border:1.5px solid #ffcc00;border-radius:14px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hd b{color:#ffcc00;font-size:16px}.hd small{color:#aaa;font-size:11px;display:block}
+.nav{display:flex;gap:6px;margin:10px 0;overflow-x:auto}
+.nav button{flex:1;white-space:nowrap;background:#181818;border:1.5px solid #444;color:#bbb;padding:9px 10px;border-radius:8px;font-weight:800;font-size:12px}
+.nav button.on{background:#ffcc00;color:#000;border-color:#ffcc00}
+.c{background:#121212;border:1px solid #2a2a2a;border-radius:12px;padding:12px;margin-bottom:10px;font-size:13px;line-height:1.55}
+.c h3{color:#ffcc00;font-size:14px;margin-bottom:8px}
+input,select,textarea{width:100%;background:#000;border:1.5px solid #444;color:#fff;padding:10px;border-radius:8px;font-size:13px;margin:4px 0;outline:none}
+label{font-size:11px;color:#bbb;font-weight:700}
+.b{background:#ffcc00;color:#000;border:none;padding:10px 12px;border-radius:8px;font-weight:900;font-size:12px;cursor:pointer}
+.b.g{background:#1c1c1c;color:#ffcc00;border:1px solid #ffcc00}.b.r{background:#2a0f0f;color:#ff7777;border:1px solid #ff4444}.b.w{background:#25D366}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid a{background:#1c1c1c;border:1.5px solid #ffcc00;color:#ffcc00;text-decoration:none;text-align:center;padding:16px 6px;border-radius:10px;font-weight:800;font-size:13px}
+.tag{font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid #ffcc00;color:#ffcc00}
+#m{text-align:center;font-size:12px;font-weight:700;min-height:16px;margin:6px 0}
+.mut{color:#888;font-size:12px;text-align:center;padding:10px}
+</style></head><body>
+<div id="app"><div class="mut">Loading...</div></div><div id="m"></div>
+<script>
+const CFG={apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",authDomain:"bfc-gym-215ae.firebaseapp.com",projectId:"bfc-gym-215ae",storageBucket:"bfc-gym-215ae.firebasestorage.app",messagingSenderId:"886920088571",appId:"1:886920088571:web:c4bc478d246a2700b0d95e"};
+firebase.initializeApp(CFG);const auth=firebase.auth(),db=firebase.firestore();
+const $=id=>document.getElementById(id),v=id=>($(id)||{}).value||"";
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const empEmail=c=>String(c).trim().toLowerCase().replace(/[^a-z0-9]/g,"")+"@emp.bfcgym.app";
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const rnd=(n,s)=>Array.from({length:n},()=>s[Math.floor(Math.random()*s.length)]).join("");
+function msg(t,ok){const m=$("m");m.textContent=t||"";m.style.color=ok?"#00ff66":"#ff6666"}
+let U,P,G,T,TEAM=[];
+const NAV={owner:[["home","🏠 Home"],["team","👥 Team"],["leaves","📅 Leaves"],["comp","🚨 Complaints"]],
+ manager:[["home","🏠 Home"],["team","👥 Team"],["leaves","📅 Leaves"],["att","📸 Attendance"]],
+ staff:[["att","📸 Attendance"],["leave","📅 Leave"],["slip","💰 Salary Slip"],["help","🆘 Helpline"]]};
+
+auth.onAuthStateChanged(async u=>{
+ if(!u)return location.replace("login.html");U=u;
+ try{let s=await db.collection("gyms").doc(u.uid).get();
+  if(s.exists){G=s.data();P={...G,role:"owner",gymId:u.uid,name:G.ownerName}}
+  else{s=await db.collection("users").doc(u.uid).get();
+   if(!s.exists||s.data().active===false){await auth.signOut();return location.replace("login.html")}
+   P=s.data();const g=await db.collection("gyms").doc(P.gymId).get();G=g.exists?g.data():{gymName:P.gymName,email:P.adminEmail,mobile:P.helpPhone}}
+  T=NAV[P.role][0][0];draw()}catch(e){$("app").innerHTML='<div class="c">Load nahi hua ('+esc(e.code||e.message)+'). Firestore rules check karo.</div>'}});
+
+function logout(){auth.signOut().then(()=>location.replace("login.html"))}
+function go(t){T=t;msg("");draw()}
+function draw(){
+ const nav=NAV[P.role].map(x=>'<button class="'+(x[0]===T?"on":"")+'" onclick="go(\''+x[0]+'\')">'+x[1]+'</button>').join("");
+ $("app").innerHTML='<div class="hd"><div><b>👑 '+esc(G.gymName||"Gym")+'</b><small>'+esc(P.name||"")+' • <span class="tag">'+P.role.toUpperCase()+'</span></small></div><button class="b g" onclick="logout()">Logout</button></div><div class="nav">'+nav+'</div><div id="v"><div class="mut">Loading...</div></div>';
+ ({home,team,leaves,comp,att,leave,slip,help})[T]()}
+
+// ---------- HOME ----------
+function home(){$("v").innerHTML='<div class="c"><h3>Gym ke kaam</h3><div class="grid"><a href="admission.html">📝 Admission Form</a><a href="join.html">🤝 Joining Form</a><a href="pay.html">💰 Fees Portal</a><a href="attendance.html">📸 Member Attendance</a></div></div>'+
+ (P.role==="manager"?'<div class="c">Aap Manager hain: sab dekh sakte hain, delete nahi kar sakte.</div>':'')}
+
+// ---------- TEAM ----------
+async function loadTeam(){const s=await db.collection("users").where("gymId","==",P.gymId).get();TEAM=s.docs.map(d=>({id:d.id,...d.data()}));TEAM.sort((a,b)=>(a.role>b.role?1:-1))}
+async function team(){
+ try{await loadTeam()}catch(e){return $("v").innerHTML='<div class="c">Team load nahi hui ('+esc(e.code||e.message)+')</div>'}
+ const own=P.role==="owner",mgrs=TEAM.filter(x=>x.role==="manager"&&x.active!==false);
+ let h="";
+ if(own)h+='<div class="c"><h3>➕ Naya Manager / Staff banao</h3><label>Role</label><select id="n_role" onchange="genCode()"><option value="staff">Staff</option><option value="manager">Manager</option></select>'+
+ '<label>Naam</label><input id="n_name"><label>Mobile (WhatsApp)</label><input id="n_mob" type="tel" maxlength="10">'+
+ '<label>Employee Code</label><input id="n_code"><label>Password (aap denge)</label><input id="n_pw">'+
+ '<label>Monthly Salary ₹</label><input id="n_sal" type="number"><label>Incentive ₹ (khaali = nahi milega)</label><input id="n_inc" type="number">'+
+ '<label>Reporting Manager (Staff ke liye)</label><select id="n_rep"><option value="">— Gym Owner —</option>'+mgrs.map(m=>'<option value="'+m.id+'">'+esc(m.name)+'</option>').join("")+'</select>'+
+ '<div class="row"><button class="b" onclick="addEmp()">Account banao</button></div></div>';
+ h+='<div class="c"><h3>Team ('+TEAM.length+')</h3>'+(TEAM.length?TEAM.map(x=>'<div style="border-top:1px solid #2a2a2a;padding:8px 0"><b>'+esc(x.name)+'</b> <span class="tag">'+x.role+'</span>'+(x.active===false?' <span class="tag" style="color:#f66;border-color:#f66">BAND</span>':'')+
+  '<br>📞 '+esc(x.mobile)+' • Code: <b>'+esc(x.code)+'</b>'+(own?' • Password: <b>'+esc(x.initialPw)+'</b>':'')+'<br>💰 Salary ₹'+esc(x.salary||0)+(x.incentive?' • Incentive ₹'+esc(x.incentive):'')+
+  (own?'<div class="row"><button class="b w" onclick="invite(\''+x.id+'\')">📲 Link bhejo</button><button class="b '+(x.active===false?"g":"r")+'" onclick="toggleEmp(\''+x.id+'\','+(x.active===false)+')">'+(x.active===false?"Chalu karo":"Band karo")+'</button></div>':'')+'</div>').join(""):'<div class="mut">Abhi koi nahi</div>')+'</div>';
+ $("v").innerHTML=h;if(own)genCode()}
+function genCode(){const r=v("n_role")==="manager"?"MGR":"STF";if($("n_code")){$("n_code").value=r+rnd(4,"0123456789");$("n_pw").value=rnd(6,"abcdefghjkmnpqrstuvwxyz23456789")}}
+async function addEmp(){
+ const r=v("n_role"),name=v("n_name").trim(),mob=v("n_mob").replace(/\D/g,""),code=v("n_code").trim().toUpperCase(),pw=v("n_pw").trim(),rep=v("n_rep");
+ if(!name||mob.length!==10||!code||pw.length<6)return msg("Naam, 10 digit mobile, code aur 6+ akshar ka password bharo.");
+ msg("Account ban raha hai...",true);const sec=firebase.initializeApp(CFG,"s"+Date.now());
+ try{const c=await sec.auth().createUserWithEmailAndPassword(empEmail(code),pw);
+  let help=G.mobile||"";if(r==="staff"&&rep){const m=TEAM.find(x=>x.id===rep);if(m)help=m.mobile}
+  await db.collection("users").doc(c.user.uid).set({role:r,gymId:P.gymId,gymName:G.gymName||"",ownerName:G.ownerName||"",adminEmail:G.email||"",name,mobile:mob,code,initialPw:pw,
+   salary:+v("n_sal")||0,incentive:+v("n_inc")||0,reportsTo:rep||"",helpPhone:help,active:true,createdAt:Date.now()});
+  msg("✅ "+name+" ka account ban gaya. Ab 'Link bhejo' dabao.",true);team()
+ }catch(e){msg(e.code==="auth/email-already-in-use"?"Ye Employee Code pehle se hai, doosra code do.":"Account nahi bana ("+(e.code||e.message)+")")}
+ finally{try{await sec.auth().signOut()}catch(x){}try{sec.delete()}catch(x){}}}
+async function toggleEmp(id,on){if(!confirm(on?"Chalu karein?":"Is employee ka login band karein?"))return;await db.collection("users").doc(id).update({active:on});team()}
+function invite(id){const x=TEAM.find(t=>t.id===id);if(!x)return;
+ const base=location.href.replace(/[^\/]*$/,"")+"login.html?role="+x.role;
+ const t="Namaste "+x.name+", "+(G.gymName||"Gym")+" ka app kholo:\n"+base+"\nEmployee Code: "+x.code+"\nPassword: "+x.initialPw+"\nLogin ke baad apna MPin bana lena.";
+ window.open("https://wa.me/91"+String(x.mobile).slice(-10)+"?text="+encodeURIComponent(t),"_blank")}
+
+// ---------- LEAVES ----------
+async function leaves(){
+ let s;try{s=await db.collection("leaves").where("gymId","==",P.gymId).get()}catch(e){return $("v").innerHTML='<div class="c">Load nahi hua ('+esc(e.code||e.message)+')</div>'}
+ const L=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.at-a.at),own=P.role==="owner";
+ $("v").innerHTML='<div class="c"><h3>Leave Requests ('+L.length+')</h3>'+(L.length?L.map(l=>'<div style="border-top:1px solid #2a2a2a;padding:8px 0"><b>'+esc(l.name)+'</b> • '+esc(l.from)+' → '+esc(l.to)+'<br>'+esc(l.reason)+'<br><span class="tag">'+esc(l.status)+'</span>'+
+  (own&&l.status==="Pending"?'<div class="row"><button class="b" onclick="decide(\''+l.id+'\',\'Approved\')">Approve</button><button class="b r" onclick="decide(\''+l.id+'\',\'Rejected\')">Reject</button></div>':'')+'</div>').join(""):'<div class="mut">Koi request nahi</div>')+'</div>'}
+async function decide(id,st){await db.collection("leaves").doc(id).update({status:st});leaves()}
+async function comp(){
+ let s;try{s=await db.collection("complaints").where("gymId","==",P.gymId).get()}catch(e){return $("v").innerHTML='<div class="c">Load nahi hua ('+esc(e.code||e.message)+')</div>'}
+ const C=s.docs.map(d=>d.data()).sort((a,b)=>b.at-a.at);
+ $("v").innerHTML='<div class="c"><h3>🚨 Staff Complaints (sirf Owner dekh sakta hai)</h3>'+(C.length?C.map(c=>'<div style="border-top:1px solid #2a2a2a;padding:8px 0"><b>'+esc(c.name)+'</b> • '+new Date(c.at).toLocaleString("en-IN")+'<br>'+esc(c.text)+'</div>').join(""):'<div class="mut">Koi complaint nahi</div>')+'</div>'}
+
+// ---------- ATTENDANCE (manager/staff) ----------
+async function myAtt(){const s=await db.collection("staffatt").where("uid","==",U.uid).get();const ym=today().slice(0,7);return s.docs.map(d=>d.data()).filter(x=>x.date.startsWith(ym))}
+async function att(){
+ let A;try{A=await myAtt()}catch(e){return $("v").innerHTML='<div class="c">Load nahi hua ('+esc(e.code||e.message)+')</div>'}
+ const done=A.some(x=>x.date===today());
+ $("v").innerHTML='<div class="c"><h3>📸 Mark Your Attendance</h3>Aaj: <b>'+today()+'</b><br>Is mahine ab tak present: <b style="color:#00ff66;font-size:20px">'+A.length+'</b> din'+
+ '<div class="row">'+(done?'<span class="tag" style="color:#0f6;border-color:#0f6">✔ Aaj ki attendance lag chuki hai</span>':'<button class="b" onclick="markAtt()">PRESENT lagao</button>')+'</div></div>'}
+async function markAtt(){const d=today(),t=new Date().toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",hour12:true});
+ try{await db.collection("staffatt").doc(U.uid+"_"+d).set({gymId:P.gymId,uid:U.uid,name:P.name,role:P.role,date:d,time:t});
+  try{if(typeof bfcNotify==="function")bfcNotify("✅ "+(P.role==="manager"?"Manager":"Staff")+" PRESENT\n👤 "+P.name+"\n📅 "+d+" ⏰ "+t,P.role==="manager"?"manager_att":"staff_att")}catch(x){}
+  att()}catch(e){msg("Attendance nahi lagi ("+(e.code||e.message)+")")}}
+
+// ---------- STAFF: LEAVE / SLIP / HELPLINE ----------
+async function leave(){
+ let s;try{s=await db.collection("leaves").where("uid","==",U.uid).get()}catch(e){return $("v").innerHTML='<div class="c">Load nahi hua ('+esc(e.code||e.message)+')</div>'}
+ const L=s.docs.map(d=>d.data()).sort((a,b)=>b.at-a.at);
+ $("v").innerHTML='<div class="c"><h3>📅 Leave Apply karo</h3><label>Se</label><input id="lf" type="date" value="'+today()+'"><label>Tak</label><input id="lt" type="date" value="'+today()+'"><label>Kaaran</label><textarea id="lr" rows="2"></textarea><div class="row"><button class="b" onclick="applyLeave()">Apply</button></div></div>'+
+ '<div class="c"><h3>Meri Leaves</h3>'+(L.length?L.map(l=>esc(l.from)+' → '+esc(l.to)+' <span class="tag">'+esc(l.status)+'</span><br>').join(""):'<div class="mut">Koi leave nahi</div>')+'</div>'}
+async function applyLeave(){if(!v("lr").trim()||v("lt")<v("lf"))return msg("Kaaran likho aur dates sahi rakho.");
+ try{await db.collection("leaves").add({gymId:P.gymId,uid:U.uid,name:P.name,from:v("lf"),to:v("lt"),reason:v("lr").trim(),status:"Pending",at:Date.now()});msg("✅ Leave apply ho gayi.",true);leave()}catch(e){msg("Nahi hua ("+(e.code||e.message)+")")}}
+async function slip(){
+ let A;try{A=await myAtt()}catch(e){return $("v").innerHTML='<div class="c">Load nahi hua</div>'}
+ const d=new Date(),dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(),sal=+P.salary||0,inc=+P.incentive||0,pay=Math.round(sal/dim*A.length);
+ $("v").innerHTML='<div class="c"><h3>💰 Salary Slip — '+d.toLocaleString("en-IN",{month:"long",year:"numeric"})+'</h3>Naam: <b>'+esc(P.name)+'</b> ('+esc(P.code)+')<br>Monthly Salary: ₹'+sal+'<br>Is mahine present: '+A.length+' / '+dim+' din<br>Salary (present ke hisaab se): ₹'+pay+
+ (inc?'<br>Incentive: ₹'+inc+'<br><b>Total (estimate): ₹'+(pay+inc)+'</b>':'<br><b>Total (estimate): ₹'+pay+'</b>')+'<div class="mut">Ye anumaan hai. Final slip Gym Owner dega.</div></div>'}
+function help(){$("v").innerHTML='<div class="c"><h3>🆘 Emergency Helpline</h3>Job ya kisi ke pareshaan karne ki problem seedhe Gym Owner ko batao. Manager ye nahi dekh sakta.<textarea id="hc" rows="4" placeholder="Apni problem likho"></textarea><div class="row"><button class="b r" onclick="sendHelp()">Owner ko bhejo</button></div></div>'}
+async function sendHelp(){const t=v("hc").trim();if(!t)return msg("Problem likho.");
+ try{await db.collection("complaints").add({gymId:P.gymId,uid:U.uid,name:P.name,text:t,at:Date.now()})}catch(e){return msg("Nahi gaya ("+(e.code||e.message)+")")}
+ msg("✅ Owner tak pahunch gaya.",true);
+ if(G.email)window.open("mailto:"+G.email+"?subject="+encodeURIComponent("Staff Complaint - "+P.name)+"&body="+encodeURIComponent(t),"_blank")}
+</script></body></html>
