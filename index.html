@@ -333,48 +333,63 @@
   <section id="page4" class="page-sec">
     <div class="sec-head" style="margin-top:0">Page 4: Admission Form, Joining Form &amp; Core Modules</div>
 
-    <!-- TWO CLEAR BUTTONS -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-      <button type="button" id="p4TabAdmBtn" onclick="switchP4SubView('adm')" style="background:linear-gradient(135deg,#F5A623,#D97706);color:#050813;border:none;border-radius:14px;padding:16px 10px;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(245,166,35,0.4)">
-        📝 MEMBER ADMISSION<br>
-        <span style="font-size:10.5px;font-weight:700">Gym Member Form</span>
-      </button>
-      <button type="button" id="p4TabJnBtn" onclick="window.location.href='staff-join.html'" style="background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff;border:none;border-radius:14px;padding:16px 10px;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 4px 14px rgba(8,145,178,0.4)">
-        🧑‍💼 STAFF JOINING<br>
-        <span style="font-size:10.5px;font-weight:700">Full Employee Form →</span>
-      </button>
+    <div class="grid2" style="margin-bottom:10px">
+      <button type="button" class="sub-btn" id="p4TabAdmBtn" style="background:var(--gold);color:#050813;font-weight:900;padding:10px" onclick="switchP4SubView('adm')">📝 Admission Form (Member)</button>
+      <button type="button" class="sub-btn" id="p4TabJnBtn" style="padding:10px" onclick="switchP4SubView('jn')">🧑‍💼 Joining Form (Staff)</button>
     </div>
 
-    <!-- MEMBER ADMISSION (stays inside index) -->
-    <div id="p4SubAdm" style="background:linear-gradient(165deg,#1c1500 0%,#0A1124 70%);border:2.5px solid #F5A623;border-radius:16px;padding:16px;margin-bottom:14px">
-      <div style="text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid rgba(245,166,35,0.35)">
-        <div style="font-size:22px;margin-bottom:4px">📝</div>
-        <div style="color:#F5A623;font-size:16px;font-weight:900">GYM MEMBER ADMISSION FORM</div>
-        <div style="color:#94A3B8;font-size:11px;margin-top:3px">New Member Registration • Fees • Contact</div>
+    <!-- SUBVIEW A: ADMISSION FORM (MEMBER) -->
+    <div id="p4SubAdm" class="box-card" style="border-color:var(--gold)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="color:var(--gold);font-size:13.5px">📝 Gym Member Admission Form</b>
+        <button type="button" class="sub-btn" onclick="openMod('modAdmission')">Full Modal</button>
       </div>
       <div class="fg">
-        <label style="color:#F5A623;font-weight:800">🔍 Search Saved Members</label>
-        <input class="fc" id="p4MemSearch" oninput="renderP4Members()" placeholder="Name or phone...">
+        <label>Search Saved Members (Name / Mobile)</label>
+        <input class="fc" id="p4MemSearch" oninput="renderP4Members()" placeholder="Search member name or phone...">
         <div id="p4MemSearchOut" style="margin-top:6px"></div>
       </div>
       <form onsubmit="p4SaveMemberAdmission(event)">
-        <div class="fg"><label style="color:#F5A623">Member Full Name *</label><input class="fc" id="p4mName" required placeholder="Full Name"></div>
+        <div class="fg"><label>Member Name *</label><input class="fc" id="p4mName" required placeholder="Full Name"></div>
         <div class="grid2">
-          <div class="fg"><label style="color:#F5A623">Gender *</label><select class="fc" id="p4mGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
-          <div class="fg"><label style="color:#F5A623">Date of Birth</label><input type="date" class="fc" id="p4mDob"></div>
+          <div class="fg"><label>Gender *</label><select class="fc" id="p4mGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+          <div class="fg"><label>DOB</label><input type="date" class="fc" id="p4mDob"></div>
         </div>
         <div class="grid2">
-          <div class="fg"><label style="color:#F5A623">Mobile *</label><input type="tel" class="fc" id="p4mPhone" required maxlength="10" placeholder="10-digit mobile"></div>
-          <div class="fg"><label style="color:#F5A623">Plan & Fee *</label><input class="fc" id="p4mPlan" required value="1 Month - ₹500"></div>
+          <div class="fg"><label>Mobile *</label><input type="tel" class="fc" id="p4mPhone" required maxlength="10" placeholder="10-digit mobile"></div>
+          <div class="fg"><label>Plan &amp; Fee (₹) *</label><input class="fc" id="p4mPlan" required value="1 Month - ₹500"></div>
         </div>
-        <div class="fg"><label style="color:#F5A623">Address</label><input class="fc" id="p4mAddr" placeholder="Full address"></div>
-        <div class="fg"><label style="color:#F5A623">Father / Guardian Name</label><input class="fc" id="p4mFather" placeholder="Optional"></div>
-        <button type="submit" style="width:100%;background:linear-gradient(135deg,#F5A623,#D97706);color:#050813;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:900;margin-top:8px;cursor:pointer">💾 SAVE MEMBER ADMISSION</button>
+        <div class="fg"><label>Address</label><input class="fc" id="p4mAddr" placeholder="Member Address"></div>
+        <button type="submit" class="big-btn" style="margin-top:0">Save Member Admission</button>
       </form>
     </div>
 
-    <!-- Hidden empty div so old JS does not break -->
-    <div id="p4SubJn" style="display:none"></div>
+    <!-- SUBVIEW B: JOINING FORM (STAFF - MANAGER & ADMIN ACCESS) -->
+    <div id="p4SubJn" class="box-card" style="display:none;border-color:var(--cyan)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="color:var(--cyan);font-size:13.5px">🧑‍💼 Staff Joining Form (Manager &amp; Admin Access)</b>
+        <button type="button" class="sub-btn" onclick="openMod('modJoining')">Full Modal</button>
+      </div>
+      <form onsubmit="p4SaveStaffJoining(event)">
+        <div class="grid2">
+          <div class="fg"><label>Staff Name *</label><input class="fc" id="p4jName" required placeholder="Staff Full Name"></div>
+          <div class="fg"><label>Employee ID *</label><input class="fc" id="p4jId" required placeholder="e.g. STF-009"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Branch *</label><select class="fc" id="p4jBr"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
+          <div class="fg"><label>Department *</label><select class="fc" id="p4jDept"><option value="Training">Training</option><option value="Front Desk">Front Desk</option><option value="Cleaning">Cleaning</option><option value="Management">Management</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Role / Post *</label><input class="fc" id="p4jRole" required placeholder="e.g. Trainer / Helper"></div>
+          <div class="fg"><label>Payment Mode *</label><select class="fc" id="p4jMode"><option value="Bank">Bank</option><option value="Cash">Cash</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Salary (₹) *</label><input type="number" class="fc" id="p4jSal" required value="12000"></div>
+          <div class="fg"><label>Mobile *</label><input type="tel" class="fc" id="p4jPhone" required maxlength="10" placeholder="10-digit mobile"></div>
+        </div>
+        <button type="submit" class="big-btn sec" style="margin-top:0">Save Staff Joining Form</button>
+      </form>
+    </div>
 
     <div class="m-card" onclick="openMod('modExtra')"><div><div class="m-title">Pay Fees Desk</div><div class="m-sub">Fee collection, dues &amp; add-on receipts</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
     <div class="m-card" onclick="openMod('modAtt')"><div><div class="m-title">Attendance Kiosk</div><div class="m-sub">QR, Morning/Evening batch, Live Staff &amp; Fees Expired list</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
@@ -774,10 +789,29 @@
   </div>
 
   <div class="modal-ov" id="modLicense">
-    <div class="modal-box">
-      <div class="m-top"><h3>🔑 Protected License Key</h3><button type="button" class="x-btn" onclick="closeMod('modLicense')">&times;</button></div>
+    <div class="modal-box" style="max-width:580px">
+      <div class="m-top"><h3>🔑 Plans &amp; Protected License Key</h3><button type="button" class="x-btn" onclick="closeMod('modLicense')">&times;</button></div>
+
+      <div id="activePlanBanner" class="rec" style="border-color:var(--emerald);background:rgba(52,211,153,0.08);margin-bottom:10px"></div>
+
+      <div class="rec" style="border-color:var(--gold)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div>
+            <b style="color:var(--gold);font-size:14px">⭐ First / Base Plan — ₹99</b>
+            <div style="font-size:11px;color:var(--muted)">Essential Gym Starter Pack</div>
+          </div>
+          <button type="button" class="sub-btn" style="background:var(--gold);color:#050813;font-weight:900" onclick="activateBasePlan99()">Activate ₹99 Plan</button>
+        </div>
+        <div style="font-size:11.5px;line-height:1.55;margin-top:8px;color:#E2E8F0">
+          <div><b>1. Mark Your Attendance BY QR (First Priority):</b> Gym/Board QR scan → one-time Camera &amp; Location permission → search name/phone &amp; select → 3-sec auto selfie + save + joining-date-based present days count + instant Telegram alert with selfie.</div>
+          <div style="margin-top:4px"><b>2. Member Attendance &amp; Expired Alert:</b> Selfie with calendar, auto-search, Live Present &amp; Absent, Total Gym Members, easy remove, Fees Expire flashing board &amp; Expired Members list + calendar-wise member attendance.</div>
+          <div style="margin-top:4px"><b>3. Fees Payment &amp; Instant Receipt:</b> Auto-search by name/phone/father → shows Joining Date, Membership Expiry, Next Fees Date, Plan &amp; Months → instant Edit Plan option → Cash/Online mode → Pay → instant receipt download + auto WhatsApp message to member.</div>
+          <div style="margin-top:4px"><b>4. Instant Admission Form + Unique QR:</b> Fill &amp; save member admission + instant receipt + unique QR (scan anytime to view form) + permanent save until removed + search by name/phone.</div>
+        </div>
+      </div>
+
       <div class="rec">Active Key (Locked): <b style="color:var(--gold)" id="licDisp">LIC-OM-OPE2HK-LOCKED</b></div>
-      <div class="fg"><label>Renewal Key</label><input class="fc" id="licInp" placeholder="Enter renewal key"></div>
+      <div class="fg"><label>Renewal / License Key</label><input class="fc" id="licInp" placeholder="Enter license / renewal key"></div>
       <button type="button" class="big-btn" onclick="lockLic()">Activate &amp; Lock Key</button>
     </div>
   </div>
@@ -2542,5 +2576,48 @@ seedData();
 })();
 </script>
 
+<script>
+(function enhanceFirstPlan99AndLicense() {
+  function refreshActivePlanBanner() {
+    var box = document.getElementById("activePlanBanner");
+    if (!box) return;
+    var activePlan = null;
+    try { activePlan = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null"); } catch (e) {}
+    if (activePlan && activePlan.amount) {
+      box.innerHTML = `<span class="pill-ok">ACTIVE PLAN</span> <b style="color:var(--emerald)">You have already a ₹${esc(activePlan.amount)} plan (${esc(activePlan.name || "First Plan")})</b>`;
+    } else {
+      box.innerHTML = `<span class="pill-pd">TRIAL / NO PAID PLAN YET</span> <span style="color:var(--muted)">Select ₹99 First Plan or enter a License Key below.</span>`;
+    }
+  }
+
+  window.activateBasePlan99 = function() {
+    var planObj = { name: "First Plan (Base)", amount: 99, activatedAt: new Date().toISOString() };
+    try { localStorage.setItem("om_active_subscription_plan", JSON.stringify(planObj)); } catch (e) {}
+    refreshActivePlanBanner();
+    alert("You have already a ₹99 plan — First Plan activated!");
+  };
+
+  var origLockLic = window.lockLic;
+  window.lockLic = function() {
+    var inp = document.getElementById("licInp");
+    var val = inp ? inp.value.trim() : "";
+    if (val) {
+      var planObj = { name: "Licensed Plan (" + val + ")", amount: 99, key: val, activatedAt: new Date().toISOString() };
+      try { localStorage.setItem("om_active_subscription_plan", JSON.stringify(planObj)); } catch (e) {}
+    }
+    if (typeof origLockLic === "function") origLockLic();
+    refreshActivePlanBanner();
+  };
+
+  window.addEventListener("DOMContentLoaded", refreshActivePlanBanner);
+  document.addEventListener("click", function(ev) {
+    if (ev.target && ev.target.closest && ev.target.closest('[onclick*="modLicense"]')) {
+      setTimeout(refreshActivePlanBanner, 50);
+    }
+  });
+})();
+</script>
+
+<script src="plan-bridge.js"></script>
 </body>
 </html>

@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>First / Base Plan (₹99) — Gym SaaS Plans</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
     :root {
       --bg: #050814;
@@ -31,6 +34,26 @@
       padding: 18px 14px 70px;
     }
     .container { max-width: 780px; margin: 0 auto; }
+
+    /* Optional Opt-In Update Popup */
+    .update-toast {
+      display: none;
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(17, 28, 58, 0.96));
+      border: 1.5px solid var(--cyan);
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .update-toast.show { display: block; }
+    .update-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .btn-opt-in {
+      background: var(--cyan); color: #050814; border: 0; border-radius: 9px;
+      padding: 8px 13px; font-size: 12px; font-weight: 900; cursor: pointer;
+    }
+    .btn-keep-old {
+      background: transparent; color: var(--muted); border: 1px solid var(--border);
+      border-radius: 9px; padding: 8px 13px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
 
     /* Top Bar */
     .topbar {
@@ -65,6 +88,7 @@
       font-size: 10.5px; font-weight: 900; letter-spacing: 0.6px; padding: 4px 10px; border-radius: 999px;
     }
     .status-text { font-size: 14px; font-weight: 800; color: #ffffff; }
+    .sync-tag { font-size: 11px; color: var(--cyan); font-weight: 700; }
 
     /* Hero Plan Header */
     .hero-card {
@@ -148,6 +172,21 @@
 </head>
 <body>
   <div class="container">
+    <!-- Optional Opt-In Update Popup (only shown when developer publishes a release notice) -->
+    <div class="update-toast" id="optInUpdateBanner">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <b style="color:var(--cyan);font-size:13.5px" id="updTitle">New App Update Available</b>
+        <span class="status-badge" id="updVersionTag">v1.1 • OPTIONAL</span>
+      </div>
+      <p style="font-size:12px;color:#e2e8f0;margin-top:5px;line-height:1.45" id="updDesc">
+        नए फ़ीचर और सुधार उपलब्ध हैं। आपका मौजूदा प्लान सुरक्षित है—आप चाहें तो नया वर्ज़न अपना सकते हैं या पुराने वर्ज़न पर ही रह सकते हैं।
+      </p>
+      <div class="update-actions">
+        <button type="button" class="btn-opt-in" id="btnAdoptUpdate" onclick="adoptAppUpdate()">Update / Use New Feature</button>
+        <button type="button" class="btn-keep-old" id="btnKeepVersion" onclick="keepCurrentVersion()">Stay on Current Version</button>
+      </div>
+    </div>
+
     <div class="topbar">
       <a href="index.html" class="back-link" id="backLink">← Dashboard</a>
       <div class="lang-switch">
@@ -161,7 +200,7 @@
         <span class="status-badge" id="statusPill">PLAN STATUS</span>
         <div class="status-text" id="statusHeadline" style="margin-top:6px;">You have already a ₹99 plan</div>
       </div>
-      <div id="statusMeta" style="font-size:11.5px;color:var(--muted);"></div>
+      <div class="sync-tag" id="statusMeta">Cloud Sync Ready</div>
     </div>
 
     <div class="hero-card">
@@ -195,6 +234,33 @@
   </div>
 
   <script>
+    const CFG = {
+      apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
+      authDomain: "bfc-gym-215ae.firebaseapp.com",
+      projectId: "bfc-gym-215ae",
+      storageBucket: "bfc-gym-215ae.firebasestorage.app",
+      messagingSenderId: "886920088571",
+      appId: "1:886920088571:web:c4bc478d246a2700b0d95e"
+    };
+    let db = null, auth = null;
+    try {
+      if (window.firebase) {
+        if (!firebase.apps.length) firebase.initializeApp(CFG);
+        auth = firebase.auth();
+        db = firebase.firestore();
+      }
+    } catch (e) {}
+
+    // Developer release notice configuration (set enabled: true when you finalize & announce an update)
+    const APP_RELEASE_NOTICE = {
+      enabled: false,
+      version: "v1.1",
+      titleHi: "नया ऐप अपडेट उपलब्ध है",
+      titleEn: "New App Update Available",
+      descHi: "नए फीचर्स तैयार हैं। आपका मौजूदा प्लान सुरक्षित है—आप नया वर्ज़न अपना सकते हैं या पुराने वर्ज़न पर बने रह सकते हैं।",
+      descEn: "New features are ready. Your existing plan stays intact—you may opt in or remain on your current version."
+    };
+
     const PLAN_CONTENT = {
       hi: {
         back: "← डैशबोर्ड पर जाएं",
@@ -205,6 +271,8 @@
         cta: "₹99 First Plan एक्टिवेट करें",
         kfTitle: "⭐ मुख्य विशेषताएँ (Highlighted Key Features)",
         extraTitle: "💡 जिम ओनर के लिए अतिरिक्त उपयोगी बिंदु",
+        adoptBtn: "नया अपडेट / फ़ीचर अपनाएं",
+        keepBtn: "पुराने वर्ज़न पर ही रहें",
         cards: [
           {
             priority: true,
@@ -265,6 +333,8 @@
         cta: "Activate ₹99 First Plan",
         kfTitle: "⭐ Highlighted Key Features",
         extraTitle: "💡 Extra Helpful Points for Gym Owners",
+        adoptBtn: "Update / Use New Feature",
+        keepBtn: "Stay on Current Version",
         cards: [
           {
             priority: true,
@@ -319,6 +389,7 @@
     };
 
     let currentLang = "hi";
+    let activePlanRecord = null;
 
     function esc(v) {
       return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
@@ -326,23 +397,94 @@
       });
     }
 
+    function getGymKey() {
+      try {
+        var gid = localStorage.getItem("bfc_gid") || "";
+        if (!gid && auth && auth.currentUser) gid = auth.currentUser.uid;
+        return gid || "default_gym";
+      } catch (e) {
+        return "default_gym";
+      }
+    }
+
+    async function loadPlanFromCloud() {
+      try {
+        var localP = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
+        if (localP && localP.amount) activePlanRecord = localP;
+      } catch (e) {}
+
+      if (db) {
+        try {
+          var gid = getGymKey();
+          var snap = await db.collection("subscriptions").doc(gid).get();
+          if (snap.exists && snap.data() && snap.data().amount) {
+            activePlanRecord = snap.data();
+            try { localStorage.setItem("om_active_subscription_plan", JSON.stringify(activePlanRecord)); } catch (e) {}
+          }
+        } catch (e) {}
+      }
+      renderPlanStatus();
+      renderOptInUpdateBanner();
+    }
+
+    async function savePlanToCloud(planObj) {
+      try { localStorage.setItem("om_active_subscription_plan", JSON.stringify(planObj)); } catch (e) {}
+      if (db) {
+        try {
+          var gid = getGymKey();
+          await db.collection("subscriptions").doc(gid).set(Object.assign({}, planObj, { gymId: gid, updatedAt: Date.now() }), { merge: true });
+        } catch (e) {}
+      }
+    }
+
     function renderPlanStatus() {
-      var saved = null;
-      try { saved = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null"); } catch (e) {}
       var pill = document.getElementById("statusPill");
       var head = document.getElementById("statusHeadline");
       var meta = document.getElementById("statusMeta");
-      if (saved && saved.amount) {
-        pill.textContent = currentLang === "hi" ? "सक्रिय प्लान" : "ACTIVE PLAN";
-        head.textContent = "You have already a ₹" + saved.amount + " plan";
-        meta.textContent = (saved.name || "First Plan") + (saved.activatedAt ? " • " + new Date(saved.activatedAt).toLocaleDateString("en-IN") : "");
+      if (activePlanRecord && activePlanRecord.amount) {
+        pill.textContent = currentLang === "hi" ? "सक्रिय प्लान (CLOUD SAVED)" : "ACTIVE PLAN (CLOUD SAVED)";
+        head.textContent = "You have already a ₹" + activePlanRecord.amount + " plan";
+        meta.textContent = (activePlanRecord.name || "First Plan") + (activePlanRecord.versionChoice ? " • " + activePlanRecord.versionChoice : "");
       } else {
         pill.textContent = currentLang === "hi" ? "ट्रायल / बेस प्लान" : "TRIAL / BASE";
         head.textContent = currentLang === "hi"
           ? "अभी कोई पेड प्लान एक्टिव नहीं है — ₹99 First Plan चुनें"
           : "No paid plan active yet — Choose ₹99 First Plan";
-        meta.textContent = "";
+        meta.textContent = "Cloud Sync Ready";
       }
+    }
+
+    function renderOptInUpdateBanner() {
+      var banner = document.getElementById("optInUpdateBanner");
+      if (!banner) return;
+      var dismissed = false;
+      try { dismissed = localStorage.getItem("om_dismissed_update_" + APP_RELEASE_NOTICE.version) === "1"; } catch (e) {}
+      if (APP_RELEASE_NOTICE.enabled && !dismissed) {
+        banner.classList.add("show");
+        document.getElementById("updTitle").textContent = currentLang === "hi" ? APP_RELEASE_NOTICE.titleHi : APP_RELEASE_NOTICE.titleEn;
+        document.getElementById("updDesc").textContent = currentLang === "hi" ? APP_RELEASE_NOTICE.descHi : APP_RELEASE_NOTICE.descEn;
+        document.getElementById("updVersionTag").textContent = APP_RELEASE_NOTICE.version + " • OPTIONAL";
+        document.getElementById("btnAdoptUpdate").textContent = PLAN_CONTENT[currentLang].adoptBtn;
+        document.getElementById("btnKeepVersion").textContent = PLAN_CONTENT[currentLang].keepBtn;
+      } else {
+        banner.classList.remove("show");
+      }
+    }
+
+    async function adoptAppUpdate() {
+      if (activePlanRecord && activePlanRecord.amount) {
+        activePlanRecord = Object.assign({}, activePlanRecord, { versionChoice: APP_RELEASE_NOTICE.version + " (Opted-In)" });
+        await savePlanToCloud(activePlanRecord);
+      }
+      renderPlanStatus();
+      alert(currentLang === "hi"
+        ? "नया अपडेट अपनाया गया—आपका मौजूदा प्लान सुरक्षित है।"
+        : "Update applied—your active plan remains untouched.");
+    }
+
+    function keepCurrentVersion() {
+      try { localStorage.setItem("om_dismissed_update_" + APP_RELEASE_NOTICE.version, "1"); } catch (e) {}
+      renderOptInUpdateBanner();
     }
 
     function setLang(lang) {
@@ -382,19 +524,31 @@
       }).join("");
 
       renderPlanStatus();
+      renderOptInUpdateBanner();
     }
 
-    function activatePlan99() {
-      var obj = { name: "First Plan (Base)", amount: 99, activatedAt: new Date().toISOString() };
-      try { localStorage.setItem("om_active_subscription_plan", JSON.stringify(obj)); } catch (e) {}
+    async function activatePlan99() {
+      // Preserve existing active plan if already active; otherwise activate ₹99 First Plan in Cloud
+      if (activePlanRecord && activePlanRecord.amount) {
+        renderPlanStatus();
+        alert("You have already a ₹" + activePlanRecord.amount + " plan");
+        return;
+      }
+      var obj = {
+        name: "First Plan (Base)",
+        amount: 99,
+        status: "active",
+        activatedAt: new Date().toISOString()
+      };
+      activePlanRecord = obj;
+      await savePlanToCloud(obj);
       renderPlanStatus();
-      alert(currentLang === "hi"
-        ? "You have already a ₹99 plan — First Plan एक्टिवेट हो गया!"
-        : "You have already a ₹99 plan — First Plan activated!");
+      alert("You have already a ₹99 plan — First Plan saved to cloud!");
     }
 
     window.addEventListener("DOMContentLoaded", function () {
       setLang("hi");
+      loadPlanFromCloud();
     });
   </script>
 </body>
