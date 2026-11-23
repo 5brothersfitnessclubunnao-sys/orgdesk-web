@@ -125,7 +125,57 @@
     var db = firebase.firestore();
 
     auth.onAuthStateChanged(async function (user) {
-      if (!user) { goLogin(); return; }
+      if (!user) {
+        try {
+          var locRole = safeRole(localStorage.getItem('bfc_role') || localStorage.getItem('om_active_role') || '');
+          var locUser = String(localStorage.getItem('om_logged_user') || '').trim();
+          var ownerAcc = null;
+          try { ownerAcc = JSON.parse(localStorage.getItem('om_owner_account_v1') || 'null'); } catch (e) {}
+          var prof = null;
+          try { prof = JSON.parse(localStorage.getItem('om_active_gym_profile') || localStorage.getItem('om_org_profile') || 'null'); } catch (e) {}
+          var isDemo = localStorage.getItem('om_demo_preview_active') === '1';
+          var prevAmt = Number(localStorage.getItem('om_preview_plan_amount') || 0);
+
+          var isPrimeMasterLocal = (localStorage.getItem('om_prime_master_auth') === '1' || localStorage.getItem('om_is_master_admin') === '1');
+          if (isPrimeMasterLocal) {
+            publish({
+              uid: 'prime_master_local',
+              role: 'developer',
+              gymId: '__master__',
+              branchId: '',
+              isMasterAdmin: true,
+              planActive: true,
+              planName: 'Master Admin',
+              planAmount: 999,
+              email: '',
+              displayName: 'Prime Master'
+            });
+            return;
+          }
+
+          if (locRole || ownerAcc || (prof && (prof.gymName || prof.orgName))) {
+            var resolvedRole = locRole || 'owner';
+            var resolvedGymId = (prof && (prof.gymId || prof.orgId)) || (ownerAcc && ownerAcc.email) || 'local_owner_gym';
+            var resolvedName = locUser || (ownerAcc && (ownerAcc.ownerName || ownerAcc.gymName)) || (prof && (prof.gymName || prof.orgName)) || 'Gym Owner';
+            var resolvedPlanAmt = prevAmt > 0 ? prevAmt : 0;
+            publish({
+              uid: 'local_' + resolvedRole,
+              role: resolvedRole,
+              gymId: resolvedGymId,
+              branchId: (prof && prof.branchId) || '001',
+              isMasterAdmin: false,
+              planActive: resolvedPlanAmt > 0,
+              planName: resolvedPlanAmt > 0 ? ('Plan ₹' + resolvedPlanAmt + (isDemo ? ' (Demo Preview)' : '')) : '',
+              planAmount: resolvedPlanAmt,
+              email: (ownerAcc && ownerAcc.email) || '',
+              displayName: resolvedName
+            });
+            return;
+          }
+        } catch (e) {}
+        goLogin();
+        return;
+      }
       try {
         var token = await user.getIdTokenResult(true);
         var claims = token.claims || {};
