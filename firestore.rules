@@ -15,12 +15,18 @@ service cloud.firestore {
         ? request.auth.token.gymId
         : (hasUser() && userData().gymId != null ? userData().gymId : request.auth.uid);
     }
+    // Branch comes from the token claim OR the users/{uid} doc (same as tenant-access.js)
+    function myBranch() {
+      return signed() && request.auth.token.branchId != null
+        ? request.auth.token.branchId
+        : (hasUser() && userData().branchId != null ? userData().branchId : '');
+    }
     function sameGym(g) { return master() || (signed() && g is string && myGym() == g); }
     function ownerOf(g) { return master() || (signed() && myGym() == g && (request.auth.uid == g || role() == 'owner')); }
     function managerOf(g) { return signed() && myGym() == g && role() == 'manager'; }
     function staffOf(g) { return signed() && myGym() == g && role() == 'staff'; }
     function branchMatches(data) {
-      return role() != 'manager' || (request.auth.token.branchId != null && data.branchId == request.auth.token.branchId);
+      return role() != 'manager' || (myBranch() != '' && data.branchId == myBranch());
     }
     function hasPlan(g, minimum) {
       return master() || (
@@ -33,6 +39,22 @@ service cloud.firestore {
     }
     function managerOrOwner(g, data) {
       return ownerOf(g) || (managerOf(g) && branchMatches(data));
+    }
+
+    // ---- Login lookup: mobile / Employee ID / Manager ID  ->  email ----
+    // get is public (needed BEFORE login), list is blocked, a key can be created only once
+    // and only pointing to the creator's own email, so nobody can hijack someone else's ID.
+    match /login_index/{key} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signed()
+        && request.resource.data.keys().hasOnly(['email','uid','gymId','role'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email is string
+        && request.resource.data.email == request.auth.token.email;
+      allow update: if false;
+      allow delete: if master() || (signed() && resource.data.uid == request.auth.uid)
+        || (resource.data.get('gymId', '') != '' && ownerOf(resource.data.gymId));
     }
 
     match /owner_accounts/{uid} {
