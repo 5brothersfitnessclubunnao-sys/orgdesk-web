@@ -140,13 +140,37 @@
         var profile = null;
         var ownerSnap = await db.collection('owner_accounts').doc(user.uid).get();
 
+        if (!role) {
+          var userSnap = await db.collection('users').doc(user.uid).get();
+          if (userSnap.exists) {
+            var uData = userSnap.data() || {};
+            role = safeRole(uData.role);
+            if (!gymId) gymId = String(uData.gymId || uData.orgId || '');
+            if (!branchId) branchId = String(uData.branchId || uData.branch || '');
+          }
+        }
+
         if (ownerSnap.exists && (!role || role === 'owner')) {
           profile = ownerSnap.data() || {};
           role = 'owner';
           gymId = user.uid;
+        } else if (!ownerSnap.exists && !role) {
+          // Initialize owner_accounts for a newly registered owner user when no team/user doc exists
+          role = 'owner';
+          gymId = user.uid;
+          profile = {
+            uid: user.uid,
+            role: 'owner',
+            gymId: user.uid,
+            email: user.email || '',
+            displayName: claims.name || user.email || 'Gym Owner'
+          };
+          await db.collection('owner_accounts').doc(user.uid).set(Object.assign({}, profile, {
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          }), { merge: true }).catch(function () {});
         } else if (role === 'manager' || role === 'staff') {
-          if (!gymId) throw new Error('Manager/Staff token is missing gymId claim');
-          if (!branchId) throw new Error('Manager/Staff token is missing branchId claim');
+          if (!gymId) throw new Error('Manager/Staff account is missing gymId');
+          if (!branchId) throw new Error('Manager/Staff account is missing branchId');
         } else {
           throw new Error('Role is not verified by Firebase');
         }
