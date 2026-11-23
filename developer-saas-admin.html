@@ -328,10 +328,35 @@
       alert("Customer & License Key saved: " + licKey);
     }
 
+    
+window.addEventListener("storage", function (ev) {
+  if (ev && (ev.key === "om_plan_customers_v1" || ev.key === "om_saas_dev_customers_v1" || ev.key === "om_active_subscription_plan")) {
+    syncDevMetrics();
+  }
+});
+
     window.addEventListener("DOMContentLoaded", function () {
       syncDevMetrics();
       setInterval(syncDevMetrics, 2500);
     });
   </script>
+
+<script>
+(function requirePrimeMasterSession() {
+  try {
+    if (localStorage.getItem("om_prime_master_auth") !== "1") {
+      location.replace("prime-master-login.html");
+    }
+  } catch (e) {}
+})();
+function lockPrimeMaster() {
+  try {
+    localStorage.removeItem("om_prime_master_auth");
+    localStorage.removeItem("om_is_master_admin");
+  } catch (e) {}
+  location.replace("prime-master-login.html");
+}
+</script>
+
 </body>
 </html>
