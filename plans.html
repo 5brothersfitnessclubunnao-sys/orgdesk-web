@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>First / Base Plan (₹99) — Gym SaaS Plans</title>
+  <style>
+    :root {
+      --bg: #050814;
+      --surface: #0b1226;
+      --surface-2: #111c3a;
+      --border: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(245, 166, 35, 0.45);
+      --border-cyan: rgba(34, 211, 238, 0.4);
+      --gold: #f5a623;
+      --gold-bright: #ffd166;
+      --cyan: #22d3ee;
+      --emerald: #34d399;
+      --rose: #fb7185;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+    body {
+      background:
+        radial-gradient(900px 420px at 50% -10%, rgba(245, 166, 35, 0.14), transparent 65%),
+        radial-gradient(700px 380px at 85% 15%, rgba(34, 211, 238, 0.1), transparent 65%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px 14px 70px;
+    }
+    .container { max-width: 780px; margin: 0 auto; }
+
+    /* Top Bar */
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: rgba(11, 18, 38, 0.85); backdrop-filter: blur(14px);
+      border: 1px solid var(--border); border-radius: 16px; padding: 12px 16px; margin-bottom: 18px;
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+      color: var(--text); font-size: 12.5px; font-weight: 700;
+      background: var(--surface-2); border: 1px solid var(--border); padding: 8px 13px; border-radius: 10px;
+    }
+    .back-link:hover { border-color: var(--gold); color: var(--gold); }
+    .lang-switch {
+      display: inline-flex; background: #060a17; border: 1px solid var(--border-gold);
+      border-radius: 11px; padding: 3px; gap: 3px;
+    }
+    .lang-btn {
+      border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 800;
+      padding: 6px 13px; border-radius: 8px; cursor: pointer; transition: 0.2s;
+    }
+    .lang-btn.active { background: linear-gradient(135deg, var(--gold), #d97706); color: #050814; }
+
+    /* Active Plan Status Banner */
+    .status-banner {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.14), rgba(11, 18, 38, 0.92));
+      border: 1.5px solid rgba(52, 211, 153, 0.45); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px;
+    }
+    .status-badge {
+      background: rgba(52, 211, 153, 0.2); color: var(--emerald); border: 1px solid var(--emerald);
+      font-size: 10.5px; font-weight: 900; letter-spacing: 0.6px; padding: 4px 10px; border-radius: 999px;
+    }
+    .status-text { font-size: 14px; font-weight: 800; color: #ffffff; }
+
+    /* Hero Plan Header */
+    .hero-card {
+      background: linear-gradient(160deg, rgba(17, 28, 58, 0.95), rgba(11, 18, 38, 0.95));
+      border: 1.5px solid var(--border-gold); border-radius: 22px; padding: 24px 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55); margin-bottom: 22px;
+    }
+    .hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+    .tag-pill {
+      display: inline-block; background: rgba(245, 166, 35, 0.15); color: var(--gold-bright);
+      border: 1px solid var(--border-gold); font-size: 10.5px; font-weight: 800;
+      padding: 4px 11px; border-radius: 999px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.6px;
+    }
+    .hero-title { font-size: 24px; font-weight: 900; color: #fff; line-height: 1.25; }
+    .hero-sub { font-size: 13px; color: var(--muted); margin-top: 5px; max-width: 470px; line-height: 1.5; }
+    .price-box {
+      text-align: right; background: rgba(5, 8, 20, 0.7); border: 1px solid var(--border-gold);
+      border-radius: 16px; padding: 12px 18px; min-width: 150px;
+    }
+    .price-val { font-size: 30px; font-weight: 900; color: var(--gold-bright); line-height: 1.1; }
+    .price-cycle { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .cta-btn {
+      margin-top: 18px; width: 100%; border: 0; border-radius: 14px; padding: 14px 18px;
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #050814;
+      font-size: 14px; font-weight: 900; cursor: pointer; box-shadow: 0 10px 25px rgba(245, 166, 35, 0.28);
+    }
+    .cta-btn:hover { filter: brightness(1.05); }
+
+    /* Section Title */
+    .sec-title-wrap { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 14px; }
+    .sec-title { font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .sec-line { height: 2px; flex: 1; background: linear-gradient(90deg, var(--gold), transparent); margin-left: 12px; opacity: 0.5; }
+
+    /* Highlighted Key Feature Cards */
+    .kf-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 640px) { .kf-grid { grid-template-columns: 1fr 1fr; } }
+
+    .kf-card {
+      background: rgba(11, 18, 38, 0.92); border: 1.5px solid var(--border);
+      border-radius: 18px; padding: 18px; position: relative; transition: 0.2s;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .kf-card.priority {
+      border-color: var(--border-gold);
+      box-shadow: 0 12px 30px rgba(245, 166, 35, 0.12);
+      grid-column: 1 / -1;
+      background: linear-gradient(160deg, rgba(22, 34, 68, 0.96), rgba(11, 18, 38, 0.96));
+    }
+    .kf-card:hover { border-color: var(--cyan); transform: translateY(-2px); }
+    .kf-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+    .kf-badge {
+      font-size: 10px; font-weight: 900; padding: 3px 9px; border-radius: 999px;
+      background: rgba(34, 211, 238, 0.14); color: var(--cyan); border: 1px solid var(--border-cyan);
+      white-space: nowrap;
+    }
+    .kf-card.priority .kf-badge {
+      background: rgba(245, 166, 35, 0.2); color: var(--gold-bright); border-color: var(--border-gold);
+    }
+    .kf-name { font-size: 16px; font-weight: 900; color: #ffffff; }
+    .kf-list { list-style: none; margin-top: 6px; display: flex; flex-direction: column; gap: 7px; }
+    .kf-list li {
+      font-size: 12.5px; color: #cbd5e1; line-height: 1.48; padding-left: 18px; position: relative;
+    }
+    .kf-list li::before {
+      content: "✓"; position: absolute; left: 0; top: 0; color: var(--emerald); font-weight: 900;
+    }
+
+    /* Owner Extra Highlights */
+    .extra-strip {
+      margin-top: 20px; background: rgba(11, 18, 38, 0.92); border: 1.5px solid var(--border-cyan);
+      border-radius: 18px; padding: 18px;
+    }
+    .extra-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
+    @media (min-width: 640px) { .extra-grid { grid-template-columns: 1fr 1fr; } }
+    .extra-item {
+      background: #070d1d; border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+    }
+    .extra-item b { display: block; color: var(--cyan); font-size: 12.5px; margin-bottom: 4px; }
+    .extra-item span { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <a href="index.html" class="back-link" id="backLink">← Dashboard</a>
+      <div class="lang-switch">
+        <button type="button" class="lang-btn active" id="btnHi" onclick="setLang('hi')">हिन्दी</button>
+        <button type="button" class="lang-btn" id="btnEn" onclick="setLang('en')">English</button>
+      </div>
+    </div>
+
+    <div class="status-banner" id="planStatusBanner">
+      <div>
+        <span class="status-badge" id="statusPill">PLAN STATUS</span>
+        <div class="status-text" id="statusHeadline" style="margin-top:6px;">You have already a ₹99 plan</div>
+      </div>
+      <div id="statusMeta" style="font-size:11.5px;color:var(--muted);"></div>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-top">
+        <div>
+          <span class="tag-pill" id="heroPill">FIRST / BASE PLAN</span>
+          <h1 class="hero-title" id="heroTitle">First / Base Plan — ₹99</h1>
+          <p class="hero-sub" id="heroSub">
+            नए या बढ़ते जिम ओनर के लिए सबसे स्मार्ट शुरुआती पैक—QR सेल्फ़ी अटेंडेंस, लाइव मेंबर/एक्सपायर बोर्ड, तुरंत फ़ीस रसीद और यूनिक QR एडमिशन फ़ॉर्म एक ही जगह।
+          </p>
+        </div>
+        <div class="price-box">
+          <div class="price-val">₹99</div>
+          <div class="price-cycle" id="priceCycle">First / Base Plan</div>
+        </div>
+      </div>
+      <button type="button" class="cta-btn" id="activateBtn" onclick="activatePlan99()">Activate ₹99 First Plan</button>
+    </div>
+
+    <div class="sec-title-wrap">
+      <div class="sec-title" id="kfSectionTitle">⭐ Highlighted Key Features</div>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="kf-grid" id="keyFeaturesGrid"></div>
+
+    <div class="extra-strip">
+      <div class="kf-name" id="extraTitle" style="color:var(--cyan)">🚀 Extra Value Added for Gym Owners</div>
+      <div class="extra-grid" id="extraGrid"></div>
+    </div>
+  </div>
+
+  <script>
+    const PLAN_CONTENT = {
+      hi: {
+        back: "← डैशबोर्ड पर जाएं",
+        pill: "फर्स्ट / बेस प्लान",
+        title: "First / Base Plan — ₹99",
+        sub: "जिम ओनर के रोज़मर्रा के काम को आसान बनाने वाला सबसे ज़रूरी बेस प्लान—QR अटेंडेंस पहली प्राथमिकता पर, साथ में लाइव मेंबर बोर्ड, फ़ीस रसीद और यूनिक QR एडमिशन फ़ॉर्म।",
+        cycle: "बेस स्टार्टर प्लान",
+        cta: "₹99 First Plan एक्टिवेट करें",
+        kfTitle: "⭐ मुख्य विशेषताएँ (Highlighted Key Features)",
+        extraTitle: "💡 जिम ओनर के लिए अतिरिक्त उपयोगी बिंदु",
+        cards: [
+          {
+            priority: true,
+            badge: "PRIORITY #1 • QR SELF ATTENDANCE",
+            name: "1. Mark Your Attendance BY QR (सबसे पहले)",
+            points: [
+              "जिम या बोर्ड पर लगा QR स्कैन करते ही सीधे अटेंडेंस स्क्रीन खुले।",
+              "पहली बार Camera और Location की अनुमति, उसके बाद दोबारा बार-बार परमिशन न मांगे।",
+              "फ़ोन में नाम या मोबाइल नंबर डालकर चुनते ही 3 सेकंड में ऑटोमैटिक सेल्फ़ी क्लिक होकर सेव हो।",
+              "दिनों की गिनती जॉइनिंग तारीख से हो (जैसे 2 Oct जॉइन और 30 Oct तक 28 दिन)।",
+              "अटेंडेंस लगते ही Telegram पर सेल्फ़ी के साथ तुरंत मैसेज पहुंचे।"
+            ]
+          },
+          {
+            priority: false,
+            badge: "LIVE BOARD & CALENDAR",
+            name: "2. Member Attendance & Expired Alert",
+            points: [
+              "कैलेंडर और ऑटो-सर्च के साथ मेंबर्स की सेल्फ़ी अटेंडेंस।",
+              "Live Present, Live Absent और Total Gym Members की साफ़ गिनती व आसान Remove विकल्प।",
+              "बोर्ड पर Fees Expire फ़्लैशिंग अलर्ट, Expired Members की सूची और कैलेंडर-वार अटेंडेंस।"
+            ]
+          },
+          {
+            priority: false,
+            badge: "INSTANT RECEIPT & WHATSAPP",
+            name: "3. Fees Payment & Instant Receipt",
+            points: [
+              "नाम, मोबाइल या पिता के नाम के शुरुआती अक्षरों से ऑटो-सर्च।",
+              "चुनते ही Joining Date, Membership Expiry Date, Next Fees Date, प्लान और महीने दिखें।",
+              "प्लान बदलने के लिए तुरंत Edit विकल्प; Online या Cash चुनकर Pay करते ही रसीद डाउनलोड व WhatsApp पर भेजने की सुविधा।"
+            ]
+          },
+          {
+            priority: false,
+            badge: "UNIQUE QR FORM",
+            name: "4. Instant Admission Form + Unique QR",
+            points: [
+              "एडमिशन फ़ॉर्म भरते ही सेव, तुरंत रसीद और कस्टमर को भेजने का विकल्प।",
+              "हर फ़ॉर्म का Unique QR जिसे स्कैन करके मेंबर अपना फ़ॉर्म देख सके।",
+              "हटाने तक डेटा स्थायी रूप से सुरक्षित और नाम/नंबर से तुरंत सर्च।"
+            ]
+          }
+        ],
+        extras: [
+          { b: "Due / Pending Fees Filter", s: "बकाया फ़ीस और जल्द एक्सपायर होने वाले सदस्यों पर तुरंत नज़र।" },
+          { b: "Today's Cash + Online Summary", s: "आज की नकद और ऑनलाइन फ़ीस का साफ़ हिसाब एक जगह।" },
+          { b: "Member Status At A Glance", s: "सर्च या QR पर प्लान, वैधता और स्थिति स्पष्ट दिखे।" },
+          { b: "Clean Upgrade Path", s: "बड़े फीचर्स के लिए आगे के प्लान में अपग्रेड करने का साफ़ रास्ता।" }
+        ]
+      },
+      en: {
+        back: "← Back to Dashboard",
+        pill: "FIRST / BASE PLAN",
+        title: "First / Base Plan — ₹99",
+        sub: "Essential starter pack for gym owners—QR selfie attendance first, paired with live member/expiry tracking, instant fee receipts, and unique QR admission forms.",
+        cycle: "Base Starter Plan",
+        cta: "Activate ₹99 First Plan",
+        kfTitle: "⭐ Highlighted Key Features",
+        extraTitle: "💡 Extra Helpful Points for Gym Owners",
+        cards: [
+          {
+            priority: true,
+            badge: "PRIORITY #1 • QR SELF ATTENDANCE",
+            name: "1. Mark Your Attendance BY QR (First Priority)",
+            points: [
+              "Scanning the gym/board QR opens attendance directly.",
+              "One-time Camera & Location permission—no repeated permission prompts later.",
+              "Enter name or mobile & select: auto selfie captures and saves in 3 seconds.",
+              "Attendance days count from joining date (e.g., joined 2 Oct → 28 days by 30 Oct).",
+              "Instant Telegram notification with selfie as soon as attendance is marked."
+            ]
+          },
+          {
+            priority: false,
+            badge: "LIVE BOARD & CALENDAR",
+            name: "2. Member Attendance & Expired Alert",
+            points: [
+              "Member selfie attendance with calendar and auto-search.",
+              "Live Present, Live Absent, Total Gym Members count, and easy remove.",
+              "Fees Expire flashing alert on board, Expired Members list, and calendar-wise member attendance."
+            ]
+          },
+          {
+            priority: false,
+            badge: "INSTANT RECEIPT & WHATSAPP",
+            name: "3. Fees Payment & Instant Receipt",
+            points: [
+              "Auto-search by starting letters of name, mobile, or father name.",
+              "Shows Joining Date, Membership Expiry Date, Next Fees Date, plan, and months.",
+              "Instant Edit option to change plan; choose Online/Cash → Pay → instant receipt download + WhatsApp share."
+            ]
+          },
+          {
+            priority: false,
+            badge: "UNIQUE QR FORM",
+            name: "4. Instant Admission Form + Unique QR",
+            points: [
+              "Fill & save admission form with instant receipt and customer share.",
+              "Unique QR per form so members can scan anytime to view their admission form.",
+              "Permanently saved until removed, with instant search by name or number."
+            ]
+          }
+        ],
+        extras: [
+          { b: "Due / Pending Fees Filter", s: "Spot pending dues and upcoming expiries quickly." },
+          { b: "Today's Cash + Online Summary", s: "Track today's Cash and Online collections clearly." },
+          { b: "Member Status At A Glance", s: "Clear plan, validity, and status on search or QR." },
+          { b: "Clean Upgrade Path", s: "Smooth upgrade to higher plans whenever your gym scales." }
+        ]
+      }
+    };
+
+    let currentLang = "hi";
+
+    function esc(v) {
+      return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+
+    function renderPlanStatus() {
+      var saved = null;
+      try { saved = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null"); } catch (e) {}
+      var pill = document.getElementById("statusPill");
+      var head = document.getElementById("statusHeadline");
+      var meta = document.getElementById("statusMeta");
+      if (saved && saved.amount) {
+        pill.textContent = currentLang === "hi" ? "सक्रिय प्लान" : "ACTIVE PLAN";
+        head.textContent = "You have already a ₹" + saved.amount + " plan";
+        meta.textContent = (saved.name || "First Plan") + (saved.activatedAt ? " • " + new Date(saved.activatedAt).toLocaleDateString("en-IN") : "");
+      } else {
+        pill.textContent = currentLang === "hi" ? "ट्रायल / बेस प्लान" : "TRIAL / BASE";
+        head.textContent = currentLang === "hi"
+          ? "अभी कोई पेड प्लान एक्टिव नहीं है — ₹99 First Plan चुनें"
+          : "No paid plan active yet — Choose ₹99 First Plan";
+        meta.textContent = "";
+      }
+    }
+
+    function setLang(lang) {
+      currentLang = (lang === "en") ? "en" : "hi";
+      document.documentElement.lang = currentLang;
+      document.getElementById("btnHi").classList.toggle("active", currentLang === "hi");
+      document.getElementById("btnEn").classList.toggle("active", currentLang === "en");
+
+      var c = PLAN_CONTENT[currentLang];
+      document.getElementById("backLink").textContent = c.back;
+      document.getElementById("heroPill").textContent = c.pill;
+      document.getElementById("heroTitle").textContent = c.title;
+      document.getElementById("heroSub").textContent = c.sub;
+      document.getElementById("priceCycle").textContent = c.cycle;
+      document.getElementById("activateBtn").textContent = c.cta;
+      document.getElementById("kfSectionTitle").textContent = c.kfTitle;
+      document.getElementById("extraTitle").textContent = c.extraTitle;
+
+      document.getElementById("keyFeaturesGrid").innerHTML = c.cards.map(function (card) {
+        return `
+          <div class="kf-card ${card.priority ? "priority" : ""}">
+            <div>
+              <div class="kf-head">
+                <div class="kf-name">${esc(card.name)}</div>
+                <span class="kf-badge">${esc(card.badge)}</span>
+              </div>
+              <ul class="kf-list">
+                ${card.points.map(function (pt) { return "<li>" + esc(pt) + "</li>"; }).join("")}
+              </ul>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("extraGrid").innerHTML = c.extras.map(function (ex) {
+        return `<div class="extra-item"><b>${esc(ex.b)}</b><span>${esc(ex.s)}</span></div>`;
+      }).join("");
+
+      renderPlanStatus();
+    }
+
+    function activatePlan99() {
+      var obj = { name: "First Plan (Base)", amount: 99, activatedAt: new Date().toISOString() };
+      try { localStorage.setItem("om_active_subscription_plan", JSON.stringify(obj)); } catch (e) {}
+      renderPlanStatus();
+      alert(currentLang === "hi"
+        ? "You have already a ₹99 plan — First Plan एक्टिवेट हो गया!"
+        : "You have already a ₹99 plan — First Plan activated!");
+    }
+
+    window.addEventListener("DOMContentLoaded", function () {
+      setLang("hi");
+    });
+  </script>
+</body>
+</html>
