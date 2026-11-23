@@ -1,247 +1,122 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Gym ERP — Admission &amp; Staff Registration</title>
-<style>
-  :root {
-    --gold: #ffcc00;
-    --bg: #07090f;
-    --card: #111622;
-    --card2: #171f30;
-    --border: #263046;
-    --green: #00ff66;
-    --cyan: #38bdf8;
-    --red: #ff5555;
-    --muted: #94a3b8;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; }
-  body { background: var(--bg); color: #fff; padding: 12px; max-width: 540px; margin: 0 auto; min-height: 100vh; }
-  .top-nav { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  .nav-link { text-decoration: none; background: var(--card2); border: 1px solid var(--border); color: var(--gold); padding: 7px 12px; border-radius: 8px; font-size: 11.5px; font-weight: 800; }
-  .gym-head { background: linear-gradient(135deg, #1d1909 0%, #0d111a 100%); border: 1.5px solid var(--gold); border-radius: 14px; padding: 14px; text-align: center; margin-bottom: 12px; }
-  .gym-head h1 { font-size: 18px; color: var(--gold); font-weight: 900; text-transform: uppercase; }
-  .gym-head p { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .type-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .type-btn { padding: 10px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--card2); color: var(--muted); font-size: 12px; font-weight: 800; cursor: pointer; }
-  .type-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
-  .form-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
-  .fg { margin-bottom: 10px; }
-  label { display: block; font-size: 11px; color: #cbd5e1; font-weight: 700; margin-bottom: 4px; }
-  input, select { width: 100%; background: #090d16; border: 1.5px solid var(--border); border-radius: 9px; padding: 10px; color: #fff; font-size: 13px; outline: none; }
-  input:focus, select:focus { border-color: var(--gold); }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .btn-save { width: 100%; background: linear-gradient(135deg, var(--green), #00c853); color: #000; border: 0; border-radius: 10px; padding: 12px; font-size: 13px; font-weight: 900; cursor: pointer; margin-top: 4px; }
-  .list-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 14px; }
-  .list-title { font-size: 13px; font-weight: 900; color: var(--gold); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-  .entry-item { background: #0b0f19; border: 1px solid #222b3f; border-radius: 10px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .entry-item b { font-size: 13px; color: #fff; }
-  .entry-item small { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
-  .btn-del { background: rgba(255, 85, 85, 0.15); border: 1px solid var(--red); color: #ff8080; padding: 5px 9px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admission Form</title>
+  <script src="gym-scope.js"></script>
+  <script src="admform.js"></script>
+  <style>
+    :root{--bg:#0b0b0d;--card:#151519;--border:#2c2c36;--ac:#ffcc00;--tx:#f4f4f8;--mut:#9a9aa8;--ok:#2ecc71}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:var(--bg);color:var(--tx);font-family:'Segoe UI',Arial,sans-serif;padding:16px}
+    .wrap{max-width:520px;margin:0 auto;background:var(--card);border:2px solid var(--ac);border-radius:16px;padding:18px}
+    h2{margin:0;color:var(--ac);font-size:19px;font-weight:900}
+    .sub{color:var(--mut);font-size:11.5px;margin:4px 0 14px}
+    .field{margin-bottom:11px}
+    label{display:block;font-size:11px;color:#ccc;margin-bottom:4px;font-weight:700}
+    input,select,textarea{width:100%;background:#0b0b0e;border:1.5px solid var(--border);color:#fff;padding:10px 12px;border-radius:8px;font-size:12.5px;outline:none}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .btn{width:100%;background:var(--ac);color:#000;border:0;border-radius:9px;padding:12px;font-weight:900;font-size:13px;cursor:pointer;margin-top:8px}
+    .btn-top{background:#222;color:var(--ac);border:1px solid var(--ac);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800;text-decoration:none}
+    .rec-card{background:#0e0e13;border:1px solid var(--border);border-radius:10px;padding:10px;margin-top:8px;font-size:12px}
+  </style>
 </head>
 <body>
-  <div class="top-nav">
-    <a class="nav-link" href="login.html">🔑 Login / Gym</a>
-    <a class="nav-link" href="attendance.html">📸 Attendance Kiosk</a>
-    <a class="nav-link" href="pay.html">💳 Fees Portal</a>
+<div class="wrap">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+    <h2>Admission Form</h2>
+    <a href="index.html" class="btn-top">Dashboard</a>
+  </div>
+  <p class="sub">Single unified Admission Form (saved &amp; searchable by name or mobile).</p>
+
+  <div class="field">
+    <label>Search Saved Admissions (Name or Mobile)</label>
+    <input type="text" id="admSearch" oninput="renderAdmissions()" placeholder="Search member name or phone...">
+    <div id="admResults"></div>
   </div>
 
-  <div class="gym-head">
-    <h1 id="admGymTitle">GYM ADMISSION FORM</h1>
-    <p id="admGymSub">Active Gym Member &amp; Staff Admission</p>
-  </div>
-
-  <div class="type-switch">
-    <button type="button" class="type-btn active" id="btnTypeMember" onclick="setEntryType('member')">🏋️ Gym Member Admission</button>
-    <button type="button" class="type-btn" id="btnTypeStaff" onclick="setEntryType('staff')">👥 Staff Admission</button>
-  </div>
-
-  <form class="form-card" onsubmit="saveAdmissionRecord(event)">
-    <div class="row2">
-      <div class="fg">
-        <label id="lblFullName">सदस्य का पूरा नाम *</label>
-        <input type="text" id="admName" required placeholder="Naam likhein">
+  <form id="admForm" onsubmit="submitAdmission(event)">
+    <div class="row">
+      <div class="field">
+        <label>Member Name *</label>
+        <input type="text" id="aName" required placeholder="Full Name">
       </div>
-      <div class="fg">
-        <label id="lblPhone">मोबाइल नंबर *</label>
-        <input type="tel" id="admPhone" maxlength="10" required placeholder="10-digit mobile">
+      <div class="field">
+        <label>Mobile Number *</label>
+        <input type="tel" id="aPhone" required maxlength="10" placeholder="10-digit mobile">
       </div>
     </div>
-
-    <div class="row2">
-      <div class="fg">
-        <label id="lblBatchSlot">बैच / स्लॉट *</label>
-        <select id="admBatch">
-          <option value="morning">🌅 Morning Batch</option>
-          <option value="evening">🌙 Evening Batch</option>
-        </select>
+    <div class="row">
+      <div class="field">
+        <label>Joining Date *</label>
+        <input type="date" id="aDate" required>
       </div>
-      <div class="fg">
-        <label id="lblJoinDate">जॉइनिंग तारीख *</label>
-        <input type="date" id="admJoinDate" required>
+      <div class="field">
+        <label>Plan &amp; Fee (₹) *</label>
+        <input type="text" id="aPlan" required placeholder="e.g. 1 Month - ₹500">
       </div>
     </div>
-
-    <div class="row2" id="memberExtraFields">
-      <div class="fg">
-        <label>प्लान *</label>
-        <select id="admPlan">
-          <option value="General (1 Month)">General (1 Month)</option>
-          <option value="Quarterly (3 Months)">Quarterly (3 Months)</option>
-          <option value="Half-Yearly (6 Months)">Half-Yearly (6 Months)</option>
-          <option value="Annual (12 Months)">Annual (12 Months)</option>
-        </select>
+    <div class="row">
+      <div class="field">
+        <label>Amount Paid (₹) *</label>
+        <input type="number" id="aPaid" required value="500">
       </div>
-      <div class="fg">
-        <label>फीस स्थिति *</label>
-        <select id="admFeeStatus">
-          <option value="Paid">Paid</option>
-          <option value="Pending">Pending</option>
-        </select>
+      <div class="field">
+        <label>Due Amount (₹)</label>
+        <input type="number" id="aDue" value="0">
       </div>
     </div>
-
-    <div class="row2" id="staffExtraFields" style="display:none;">
-      <div class="fg">
-        <label>पद / भूमिका (Role)</label>
-        <input type="text" id="admStaffRole" placeholder="Trainer / Reception / Cleaner">
-      </div>
-      <div class="fg">
-        <label>Staff ID</label>
-        <input type="text" id="admStaffCode" placeholder="STF-101">
-      </div>
+    <div class="field">
+      <label>Address</label>
+      <textarea id="aAddr" rows="2" placeholder="Member address"></textarea>
     </div>
-
-    <button type="submit" class="btn-save" id="btnSaveAdm">✔ Admission Save Karein</button>
+    <button type="submit" class="btn">Save Admission Form</button>
   </form>
-
-  <div class="list-card">
-    <div class="list-title">
-      <span id="rosterHeading">Registered Members</span>
-      <span id="rosterCount" style="color:var(--green);">0</span>
-    </div>
-    <div id="rosterListBox"></div>
-  </div>
-
+</div>
 <script>
-  let currentEntryType = "member";
-
-  function getGymProfile() {
+  const $ = id => document.getElementById(id);
+  const esc = v => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const readAdm = () => { try { return JSON.parse(localStorage.getItem("5bfc_admissions") || "[]") || []; } catch (e) { return []; } };
+  const writeAdm = arr => {
     try {
-      const p = JSON.parse(localStorage.getItem("om_active_gym_profile") || "null");
-      if (p && p.gymName) return p;
+      localStorage.setItem("5bfc_admissions", JSON.stringify(arr));
+      localStorage.setItem("5BFC_MEMBERS", JSON.stringify(arr));
     } catch (e) {}
-    return { gymName: "Fitness Club", address: "Active Gym" };
-  }
-
-  function getGymKey(suffix) {
-    const p = getGymProfile();
-    const slug = String(p.gymName || "default").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_");
-    return "gym_" + slug + "_" + suffix;
-  }
-
-  function esc(s) {
-    return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  }
-
-  function setEntryType(type) {
-    currentEntryType = type;
-    const isStaff = type === "staff";
-    document.getElementById("btnTypeMember").classList.toggle("active", !isStaff);
-    document.getElementById("btnTypeStaff").classList.toggle("active", isStaff);
-    document.getElementById("memberExtraFields").style.display = isStaff ? "none" : "grid";
-    document.getElementById("staffExtraFields").style.display = isStaff ? "grid" : "none";
-    document.getElementById("lblFullName").textContent = isStaff ? "स्टाफ का पूरा नाम *" : "सदस्य का पूरा नाम *";
-    document.getElementById("btnSaveAdm").textContent = isStaff ? "✔ Staff Admission Save Karein" : "✔ Member Admission Save Karein";
-    renderRoster();
-  }
-
-  function saveAdmissionRecord(e) {
+  };
+  function submitAdmission(e) {
     e.preventDefault();
-    const name = document.getElementById("admName").value.trim();
-    const phone = document.getElementById("admPhone").value.replace(/\D/g, "").slice(-10);
-    const batch = document.getElementById("admBatch").value;
-    const joinDate = document.getElementById("admJoinDate").value;
-
-    if (!name || phone.length < 10 || !joinDate) {
-      alert("Kripya naam, 10-digit mobile aur joining date bharein.");
-      return;
-    }
-
-    const key = getGymKey(currentEntryType === "staff" ? "staff" : "members");
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem(key) || "[]"); } catch (err) {}
-
     const item = {
-      id: (currentEntryType === "staff" ? "STF_" : "MEM_") + phone + "_" + Date.now().toString().slice(-4),
-      name,
-      phone,
-      batch,
-      slot: batch === "evening" ? "06:00 PM - 07:00 PM" : "06:00 AM - 07:00 AM",
-      joinDate,
-      plan: document.getElementById("admPlan").value,
-      manualStatus: document.getElementById("admFeeStatus").value,
-      roleTitle: document.getElementById("admStaffRole").value.trim() || "Staff",
-      staffCode: document.getElementById("admStaffCode").value.trim() || "",
-      activeInGym: true
+      id: "adm_" + Date.now(),
+      formType: "Admission Form",
+      name: $("aName").value.trim(),
+      phone: $("aPhone").value.replace(/\D/g, "").slice(-10),
+      joinDate: $("aDate").value || new Date().toISOString().slice(0, 10),
+      planName: $("aPlan").value.trim(),
+      amount: Number($("aPaid").value || 0),
+      dueAmount: Number($("aDue").value || 0),
+      address: $("aAddr").value.trim(),
+      status: Number($("aDue").value || 0) > 0 ? "Pending" : "Paid",
+      nonDeletable: true
     };
-
-    list.unshift(item);
-    localStorage.setItem(key, JSON.stringify(list));
-    document.getElementById("admName").value = "";
-    document.getElementById("admPhone").value = "";
-    document.getElementById("admStaffRole").value = "";
-    document.getElementById("admStaffCode").value = "";
-    renderRoster();
-    alert("✅ " + name + " ka admission save ho gaya!");
+    const arr = readAdm();
+    arr.unshift(item);
+    writeAdm(arr);
+    $("admForm").reset();
+    $("aDate").value = new Date().toISOString().slice(0, 10);
+    renderAdmissions();
+    alert("Admission saved!");
   }
-
-  function deleteRosterItem(id) {
-    if (!confirm("Kya aap is entry ko hatana chahte hain?")) return;
-    const key = getGymKey(currentEntryType === "staff" ? "staff" : "members");
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem(key) || "[]"); } catch (err) {}
-    list = list.filter(x => String(x.id) !== String(id));
-    localStorage.setItem(key, JSON.stringify(list));
-    renderRoster();
+  function renderAdmissions() {
+    const q = ($("admSearch").value || "").trim().toLowerCase();
+    const rows = readAdm().filter(r => !q || String(r.name || "").toLowerCase().includes(q) || String(r.phone || "").includes(q));
+    $("admResults").innerHTML = rows.slice(0, 6).map(r =>
+      `<div class="rec-card"><div><b style="color:var(--ac)">${esc(r.name)}</b> • <small>${esc(r.phone || "-")}</small></div><div style="font-size:11px;color:#ccc;margin-top:2px">Plan: ${esc(r.planName || "-")} • Paid: ₹${Number(r.amount || 0)} • Due: ₹${Number(r.dueAmount || 0)}</div></div>`
+    ).join("");
   }
-
-  function renderRoster() {
-    const key = getGymKey(currentEntryType === "staff" ? "staff" : "members");
-    let list = [];
-    try { list = JSON.parse(localStorage.getItem(key) || "[]"); } catch (err) {}
-
-    document.getElementById("rosterHeading").textContent = currentEntryType === "staff" ? "Registered Staff" : "Registered Gym Members";
-    document.getElementById("rosterCount").textContent = String(list.length);
-    const box = document.getElementById("rosterListBox");
-
-    if (!list.length) {
-      box.innerHTML = '<div style="color:#777;font-size:12px;text-align:center;padding:14px;">Is gym ke liye abhi koi entry nahi hai.</div>';
-      return;
-    }
-
-    box.innerHTML = list.map(m => `
-      <div class="entry-item">
-        <div>
-          <b>${esc(m.name)}</b>
-          <small>📞 ${esc(m.phone)} • ${m.batch === "evening" ? "🌙 Evening" : "🌅 Morning"} • Join: ${esc(m.joinDate)}</small>
-          <small>${currentEntryType === "staff" ? ("Role: " + esc(m.roleTitle)) : ("Plan: " + esc(m.plan) + " • " + esc(m.manualStatus))}</small>
-        </div>
-        <button type="button" class="btn-del" onclick="deleteRosterItem('${esc(m.id)}')">Delete</button>
-      </div>
-    `).join("");
-  }
-
-  window.addEventListener("DOMContentLoaded", function() {
-    const p = getGymProfile();
-    document.getElementById("admGymTitle").textContent = "👑 " + String(p.gymName || "FITNESS CLUB").toUpperCase();
-    document.getElementById("admGymSub").textContent = "Admission & Registration — " + (p.gymName || "Active Gym");
-    const today = new Date();
-    const iso = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
-    document.getElementById("admJoinDate").value = iso;
-    renderRoster();
+  window.addEventListener("DOMContentLoaded", () => {
+    $("aDate").value = new Date().toISOString().slice(0, 10);
+    renderAdmissions();
   });
 </script>
 </body>

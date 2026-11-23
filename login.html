@@ -145,20 +145,47 @@
     </div>
   </form>
 
-  <!-- MANAGER / STAFF LOGIN FORM (NO SIGN-UP OPTION) -->
-  <form id="teamLoginForm" style="display:none" onsubmit="handleTeamLogin(event)">
+  <!-- MANAGER / STAFF LOGIN FORM (NO SIGN-UP OPTION, FIRST-TIME PASSWORD CREATE + MPIN + 3 SECURITY QUESTIONS) -->
+  <form id="teamLoginForm" style="display:none" onsubmit="handleTeamLogin(event)" autocomplete="on">
     <div class="field">
-      <label id="teamCodeLabel">Employee Code *</label>
-      <input type="text" id="tmEmpCode" required placeholder="Enter Employee Code given by Gym Owner">
+      <label id="teamCodeLabel">Login with Employee ID *</label>
+      <input type="text" id="tmEmpCode" name="username" autocomplete="username" required oninput="onTeamCodeChanged()" placeholder="Enter Employee Code / ID">
     </div>
+
+    <div class="auth-method-row">
+      <button type="button" class="abtn on" id="tmAuthPwdBtn" onclick="setTeamAuthMethod('password')">Login with Password</button>
+      <button type="button" class="abtn" id="tmAuthMpinBtn" onclick="setTeamAuthMethod('mpin')">Login with MPIN</button>
+    </div>
+
+    <label class="check-inline" style="margin-bottom:8px">
+      <input type="checkbox" id="tmFirstTimeCreatePwd" onchange="toggleTeamFirstTimePwd()">
+      <span>First Time? Create Password khud banayein (Admin password na ho ya time na ho to)</span>
+    </label>
+
+    <div class="field" id="tmPasswordField">
+      <label id="tmPasswordLabel">Password *</label>
+      <input type="password" id="tmPassword" name="password" autocomplete="current-password" placeholder="Enter Password">
+    </div>
+
+    <div class="field" id="tmMpinField" style="display:none">
+      <label>MPIN (4-6 Digits Fast Login) *</label>
+      <input type="password" id="tmMpin" inputmode="numeric" maxlength="6" placeholder="Enter or create 4-6 digit MPIN">
+    </div>
+
     <div class="field">
-      <label>Password *</label>
-      <input type="password" id="tmPassword" required placeholder="Enter Password">
+      <label>Security Question (3 Options) *</label>
+      <select id="tmSecQuestion" required>
+        <option value="What is your favorite workout exercise?">What is your favorite workout exercise?</option>
+        <option value="What is your childhood nickname?">What is your childhood nickname?</option>
+        <option value="What is your first gym location or city?">What is your first gym location or city?</option>
+      </select>
     </div>
+
     <div class="field">
-      <label>Create / Set MPIN for Fast Login (Optional / Save)</label>
-      <input type="password" id="tmMpin" inputmode="numeric" maxlength="6" placeholder="Set or enter 4-6 digit MPIN">
+      <label>Security Question Answer *</label>
+      <input type="text" id="tmSecAnswer" required placeholder="Enter your security answer">
     </div>
+
     <button type="submit" class="btn-main" id="tmSubmitBtn">Login</button>
     <div class="links-row">
       <a onclick="openTeamForgotModal('code')">Forgot Employee ID</a>
@@ -456,57 +483,173 @@
     }
   }
 
+  let teamLoginMethod = "password";
+  const TEAM_CREDS_KEY = "om_saved_team_creds_v1";
+
+  function readTeamCreds() {
+    try { return JSON.parse(localStorage.getItem(TEAM_CREDS_KEY) || "{}") || {}; } catch (e) { return {}; }
+  }
+  function writeTeamCreds(obj) {
+    try { localStorage.setItem(TEAM_CREDS_KEY, JSON.stringify(obj)); } catch (e) {}
+  }
+
+  function setTeamAuthMethod(m) {
+    teamLoginMethod = (m === "mpin") ? "mpin" : "password";
+    if ($("tmAuthPwdBtn")) $("tmAuthPwdBtn").classList.toggle("on", teamLoginMethod === "password");
+    if ($("tmAuthMpinBtn")) $("tmAuthMpinBtn").classList.toggle("on", teamLoginMethod === "mpin");
+    if (teamLoginMethod === "mpin") {
+      if ($("tmPasswordField")) $("tmPasswordField").style.display = "none";
+      if ($("tmMpinField")) $("tmMpinField").style.display = "block";
+      if ($("tmPassword")) $("tmPassword").value = "";
+    } else {
+      if ($("tmPasswordField")) $("tmPasswordField").style.display = "block";
+      if ($("tmMpinField")) $("tmMpinField").style.display = "none";
+      if ($("tmMpin")) $("tmMpin").value = "";
+    }
+  }
+
+  function toggleTeamFirstTimePwd() {
+    const chk = $("tmFirstTimeCreatePwd") && $("tmFirstTimeCreatePwd").checked;
+    if ($("tmPasswordLabel")) {
+      $("tmPasswordLabel").textContent = chk ? "Create New Password (First Time) *" : "Password *";
+    }
+    if ($("tmPassword")) {
+      $("tmPassword").placeholder = chk ? "Create your own password (6+ chars)" : "Enter Password";
+    }
+  }
+
+  function onTeamCodeChanged() {
+    const code = (($("tmEmpCode") && $("tmEmpCode").value) || "").trim().toLowerCase();
+    if (!code) return;
+    const saved = readTeamCreds()[code];
+    if (saved) {
+      if (saved.password && $("tmPassword") && !$("tmPassword").value) $("tmPassword").value = saved.password;
+      if (saved.mpin && $("tmMpin") && !$("tmMpin").value) $("tmMpin").value = saved.mpin;
+      if (saved.secQuestion && $("tmSecQuestion")) $("tmSecQuestion").value = saved.secQuestion;
+      if (saved.secAnswer && $("tmSecAnswer") && !$("tmSecAnswer").value) $("tmSecAnswer").value = saved.secAnswer;
+    }
+  }
+
   function handleTeamLogin(e) {
     e.preventDefault();
     clearAlerts();
 
     const code = $("tmEmpCode").value.trim();
-    const pwd = $("tmPassword").value;
-    const mpin = $("tmMpin").value.trim();
+    const pwd = $("tmPassword") ? $("tmPassword").value : "";
+    const mpin = $("tmMpin") ? $("tmMpin").value.trim() : "";
+    const secQ = $("tmSecQuestion") ? $("tmSecQuestion").value : "";
+    const secA = ($("tmSecAnswer") ? $("tmSecAnswer").value : "").trim().toLowerCase();
+    const firstTimeCreate = !!($("tmFirstTimeCreatePwd") && $("tmFirstTimeCreatePwd").checked);
+
+    if (!code) { showErr("Please enter Employee ID / Code."); return; }
+    if (!secA) { showErr("Please answer the Security Question."); return; }
 
     let teamList = [];
     try { teamList = JSON.parse(localStorage.getItem("bfc_staff_list") || "[]") || []; } catch (x) {}
 
-    const matched = teamList.find(item => {
+    let matched = teamList.find(item => {
       const itemRole = String(item.accessRole || item.role || "staff").toLowerCase();
       const roleMatch = (currentRole === "manager") ? itemRole.includes("manager") : !itemRole.includes("manager");
       return roleMatch && String(item.empCode || item.id || "").trim().toLowerCase() === code.toLowerCase();
     });
 
-    if (!matched) {
-      showErr("Invalid Employee Code for " + currentRole.toUpperCase() + ". Gym Owner se code lein ya Forgot par click karein.");
+    const savedCredsMap = readTeamCreds();
+    const localSaved = savedCredsMap[code.toLowerCase()];
+
+    // If first-time create password is checked or user is setting up on this device when admin hasn't set password yet
+    if (!matched && firstTimeCreate) {
+      if (!pwd || pwd.length < 4) {
+        showErr("First time password kam se kam 4 characters ka banayein.");
+        return;
+      }
+      if (mpin && !/^\d{4,6}$/.test(mpin)) {
+        showErr("MPIN 4 se 6 digits ka hona chahiye.");
+        return;
+      }
+      matched = {
+        id: code,
+        empCode: code,
+        name: code,
+        accessRole: currentRole,
+        role: currentRole,
+        department: currentRole === "manager" ? "Management" : "Staff",
+        loginPassword: pwd,
+        mpin: mpin || "",
+        secQuestion: secQ,
+        secAnswer: secA,
+        joinDate: new Date().toISOString().slice(0, 10)
+      };
+      teamList.push(matched);
+      localStorage.setItem("bfc_staff_list", JSON.stringify(teamList));
+    }
+
+    if (!matched && !localSaved) {
+      showErr("Employee ID nahi mila. Pehli baar password khud banana hai to 'First Time? Create Password' tick karein ya Forgot par click karein.");
       return;
     }
 
-    const expectedPwd = String(matched.loginPassword || "1234");
-    const expectedMpin = String(matched.mpin || "");
+    const activeRecord = matched || localSaved;
+    const expectedPwd = String(activeRecord.loginPassword || activeRecord.password || "");
+    const expectedMpin = String(activeRecord.mpin || "");
 
-    if (mpin && !/^\d{4,6}$/.test(mpin)) {
-      showErr("MPIN 4 se 6 digits ka hona chahiye.");
-      return;
+    if (firstTimeCreate && pwd) {
+      activeRecord.loginPassword = pwd;
+      if (matched) matched.loginPassword = pwd;
+    } else if (teamLoginMethod === "mpin") {
+      if (!mpin || !/^\d{4,6}$/.test(mpin)) {
+        showErr("Please enter valid 4-6 digit MPIN.");
+        return;
+      }
+      if (expectedMpin && expectedMpin !== mpin) {
+        showErr("MPIN galat hai.");
+        return;
+      }
+      if (!expectedMpin) {
+        activeRecord.mpin = mpin;
+        if (matched) matched.mpin = mpin;
+      }
+    } else {
+      if (expectedPwd && pwd !== expectedPwd) {
+        showErr("Password galat hai. Agar password nahi mila hai to 'First Time? Create Password' tick karke naya password banayein.");
+        return;
+      }
+      if (!expectedPwd && pwd) {
+        activeRecord.loginPassword = pwd;
+        if (matched) matched.loginPassword = pwd;
+      }
     }
 
-    if (expectedMpin && mpin && mpin === expectedMpin) {
-      // Valid MPIN
-    } else if (pwd !== expectedPwd) {
-      showErr("Password galat hai.");
+    if (activeRecord.secAnswer && String(activeRecord.secAnswer).toLowerCase() !== secA) {
+      showErr("Security Question ka jawab galat hai.");
       return;
     }
+    activeRecord.secQuestion = secQ;
+    activeRecord.secAnswer = secA;
 
-    if (mpin) {
-      matched.mpin = mpin;
-      const updated = teamList.map(x => String(x.id) === String(matched.id) ? matched : x);
+    if (matched) {
+      const updated = teamList.map(x => String(x.id) === String(matched.id) ? Object.assign({}, x, matched) : x);
       localStorage.setItem("bfc_staff_list", JSON.stringify(updated));
     }
+
+    // Save on device for automatic autofill next time
+    savedCredsMap[code.toLowerCase()] = {
+      code,
+      role: currentRole,
+      password: activeRecord.loginPassword || pwd || "",
+      mpin: activeRecord.mpin || mpin || "",
+      secQuestion: secQ,
+      secAnswer: secA
+    };
+    writeTeamCreds(savedCredsMap);
 
     const lp = JSON.parse(localStorage.getItem("om_last_org_profile") || localStorage.getItem("om_org_profile") || "{}") || {};
     const roleSession = {
       role: currentRole,
-      empId: matched.id,
-      empCode: matched.empCode || matched.id,
-      empName: matched.name,
-      department: matched.department || matched.role || currentRole,
-      orgId: matched.orgId || lp.orgId || "",
+      empId: activeRecord.id || code,
+      empCode: activeRecord.empCode || code,
+      empName: activeRecord.name || code,
+      department: activeRecord.department || activeRecord.role || currentRole,
+      orgId: activeRecord.orgId || lp.orgId || "",
       orgName: lp.orgName || lp.gymName || "Gym",
       loggedInAt: new Date().toISOString()
     };
