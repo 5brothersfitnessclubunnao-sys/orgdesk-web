@@ -284,8 +284,16 @@
       }
     }
 
+    function clearPrimeFlags() {
+      try {
+        localStorage.removeItem("om_prime_master_auth");
+        localStorage.removeItem("om_is_master_admin");
+      } catch (e) {}
+    }
+
     function submitOwnerSignup(ev) {
       ev.preventDefault();
+      clearPrimeFlags();
       var cnt = Number(document.getElementById("suGymCount").value || 1);
       var gymName = (document.getElementById("suGymName").value || "").trim();
       var ownerName = (document.getElementById("suOwnerName").value || "").trim();
@@ -308,6 +316,7 @@
 
       try {
         localStorage.setItem("om_owner_account_v1", JSON.stringify(ownerRec));
+        localStorage.setItem("om_preferred_login_role", "owner");
         localStorage.setItem("om_active_gym_profile", JSON.stringify({ gymName: gymName, ownerName: ownerName, role: "owner", gymCount: cnt }));
         localStorage.setItem("bfc_role", "owner");
         localStorage.setItem("om_active_role", "owner");
@@ -318,29 +327,54 @@
         }
       } catch (e) {}
 
-      location.replace("index.html");
+      location.href = "index.html";
     }
 
     function submitOwnerSignin(ev) {
       ev.preventDefault();
+      clearPrimeFlags();
       var idVal = (document.getElementById("ownLoginId").value || "").trim();
+      var errEl = document.getElementById("ownErr");
+      if (!idVal) {
+        if (errEl) errEl.textContent = "Email ID ya Mobile darj karein.";
+        return;
+      }
+      if (errEl) errEl.textContent = "";
+
       var saved = null;
       try { saved = JSON.parse(localStorage.getItem("om_owner_account_v1") || "null"); } catch (e) {}
       var gymName = (saved && saved.gymName) ? saved.gymName : idVal;
+      var ownerLabel = (saved && saved.ownerName) ? saved.ownerName : idVal;
       var cnt = (saved && saved.gymCount) ? Number(saved.gymCount) : 1;
 
       try {
+        localStorage.setItem("om_preferred_login_role", "owner");
         localStorage.setItem("bfc_role", "owner");
         localStorage.setItem("om_active_role", "owner");
-        localStorage.setItem("om_logged_user", idVal);
-        localStorage.setItem("om_active_gym_profile", JSON.stringify({ gymName: gymName, ownerName: idVal, role: "owner", gymCount: cnt }));
+        localStorage.setItem("om_logged_user", ownerLabel + " (" + gymName + ")");
+        localStorage.setItem("om_active_gym_profile", JSON.stringify({ gymName: gymName, ownerName: ownerLabel, role: "owner", gymCount: cnt }));
         if (!localStorage.getItem("om_active_subscription_plan")) {
           localStorage.setItem("om_demo_preview_active", "1");
           if (cnt >= 2 && cnt <= 4) localStorage.setItem("om_preview_plan_amount", "999");
         }
       } catch (e) {}
-      location.replace("index.html");
+      location.href = "index.html";
     }
+
+    window.addEventListener("DOMContentLoaded", function () {
+      try {
+        var pref = localStorage.getItem("om_preferred_login_role");
+        var saved = JSON.parse(localStorage.getItem("om_owner_account_v1") || "null");
+        if (pref === "owner" || saved) {
+          setRole("owner");
+          setOwnerMode("signin");
+          if (saved && (saved.email || saved.phone)) {
+            var idInp = document.getElementById("ownLoginId");
+            if (idInp && !idInp.value) idInp.value = saved.email || saved.phone;
+          }
+        }
+      } catch (e) {}
+    });
 
     function recoverOwnerCred(kind) {
       var saved = null;
