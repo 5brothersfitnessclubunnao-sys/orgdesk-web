@@ -792,28 +792,71 @@
   </div>
 
   <div class="modal-ov" id="modLicense">
-    <div class="modal-box" style="max-width:580px">
-      <div class="m-top"><h3>🔑 Plans &amp; Protected License Key</h3><button type="button" class="x-btn" onclick="closeMod('modLicense')">&times;</button></div>
+    <div class="modal-box" style="max-width:600px">
+      <div class="m-top"><h3>🔑 All 5 Plans &amp; License Key</h3><button type="button" class="x-btn" onclick="closeMod('modLicense')">&times;</button></div>
 
       <div id="activePlanBanner" class="rec" style="border-color:var(--emerald);background:rgba(52,211,153,0.08);margin-bottom:10px"></div>
 
+      <!-- Plan 1: ₹99 -->
       <div class="rec" style="border-color:var(--gold)">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
           <div>
-            <b style="color:var(--gold);font-size:14px">⭐ First / Base Plan — ₹99</b>
-            <div style="font-size:11px;color:var(--muted)">Essential Gym Starter Pack</div>
+            <b style="color:var(--gold);font-size:14px">1. First / Base Plan — ₹99</b>
+            <div style="font-size:11px;color:var(--muted)">QR Self Attendance, Live Board &amp; Expiry, Instant Fees Receipt + WhatsApp, Admission Form + QR</div>
           </div>
-          <button type="button" class="sub-btn" style="background:var(--gold);color:#050813;font-weight:900" onclick="activateBasePlan99()">Activate ₹99 Plan</button>
-        </div>
-        <div style="font-size:11.5px;line-height:1.55;margin-top:8px;color:#E2E8F0">
-          <div><b>1. Mark Your Attendance BY QR (First Priority):</b> Gym/Board QR scan → one-time Camera &amp; Location permission → search name/phone &amp; select → 3-sec auto selfie + save + joining-date-based present days count + instant Telegram alert with selfie.</div>
-          <div style="margin-top:4px"><b>2. Member Attendance &amp; Expired Alert:</b> Selfie with calendar, auto-search, Live Present &amp; Absent, Total Gym Members, easy remove, Fees Expire flashing board &amp; Expired Members list + calendar-wise member attendance.</div>
-          <div style="margin-top:4px"><b>3. Fees Payment &amp; Instant Receipt:</b> Auto-search by name/phone/father → shows Joining Date, Membership Expiry, Next Fees Date, Plan &amp; Months → instant Edit Plan option → Cash/Online mode → Pay → instant receipt download + auto WhatsApp message to member.</div>
-          <div style="margin-top:4px"><b>4. Instant Admission Form + Unique QR:</b> Fill &amp; save member admission + instant receipt + unique QR (scan anytime to view form) + permanent save until removed + search by name/phone.</div>
+          <button type="button" class="sub-btn" style="background:var(--gold);color:#050813;font-weight:900" onclick="requestPlanSelection(99, 'First Plan (₹99)')">Select ₹99</button>
         </div>
       </div>
 
-      <div class="rec">Active Key (Locked): <b style="color:var(--gold)" id="licDisp">LIC-OM-OPE2HK-LOCKED</b></div>
+      <!-- Plan 2: ₹199 -->
+      <div class="rec" style="border-color:var(--cyan)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div>
+            <b style="color:var(--cyan);font-size:14px">2. Growth Value Plan — ₹199</b>
+            <div style="font-size:11px;color:var(--muted)">All ₹99 + Cash/Online Split, Supplement Billing, Due Reminders, Walk-In/Lead Enquiry, CSV Export</div>
+          </div>
+          <button type="button" class="sub-btn" style="background:var(--cyan);color:#050813;font-weight:900" onclick="requestPlanSelection(199, 'Growth Value Plan (₹199)')">Select ₹199</button>
+        </div>
+      </div>
+
+      <!-- Plan 3: ₹399 -->
+      <div class="rec" style="border-color:var(--emerald)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div>
+            <b style="color:var(--emerald);font-size:14px">3. Pro Business Plan — ₹399</b>
+            <div style="font-size:11px;color:var(--muted)">All ₹199 + Full Staff Payroll &amp; Salary Slips, Light/Vendor Bills Approval, Net P&amp;L Engine, Staff KYC Vault</div>
+          </div>
+          <button type="button" class="sub-btn" style="background:var(--emerald);color:#050813;font-weight:900" onclick="requestPlanSelection(399, 'Pro Business Plan (₹399)')">Select ₹399</button>
+        </div>
+      </div>
+
+      <!-- Plan 4: ₹499 -->
+      <div class="rec" style="border-color:var(--purple)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div>
+            <b style="color:var(--purple);font-size:14px">4. Advanced Audit Plan — ₹499</b>
+            <div style="font-size:11px;color:var(--muted)">All ₹399 + GPS Geo-Fence &amp; Anti-Proxy, Manager Isolated Portal, Female Privacy Masking, Audit Trail</div>
+          </div>
+          <button type="button" class="sub-btn" style="background:var(--purple);color:#050813;font-weight:900" onclick="requestPlanSelection(499, 'Advanced Audit Plan (₹499)')">Select ₹499</button>
+        </div>
+      </div>
+
+      <!-- Plan 5: ₹999 -->
+      <div class="rec" style="border-color:var(--rose)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div>
+            <b style="color:var(--rose);font-size:14px">5. Complete Enterprise ERP — ₹999</b>
+            <div style="font-size:11px;color:var(--muted)">All Features Unlocked + Multi-Branch Central Command, Auto Data Router, Permanent Cloud Sync, Custom Branding</div>
+          </div>
+          <button type="button" class="sub-btn" style="background:var(--rose);color:#050813;font-weight:900" onclick="requestPlanSelection(999, 'Complete Enterprise ERP (₹999)')">Select ₹999</button>
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <button type="button" class="big-btn sec" onclick="location.href='plans.html'">Open Full Plans Page (plans.html) &rarr;</button>
+      </div>
+
+      <div class="rec" style="margin-top:10px">Active Key (Locked): <b style="color:var(--gold)" id="licDisp">LIC-OM-OPE2HK-LOCKED</b></div>
       <div class="fg"><label>Renewal / License Key</label><input class="fc" id="licInp" placeholder="Enter license / renewal key"></div>
       <button type="button" class="big-btn" onclick="lockLic()">Activate &amp; Lock Key</button>
     </div>
@@ -1160,22 +1203,40 @@ Telegram notification sent to Manager.`);
     }
 
     function renderPnl() {
+      const ext = J(K_EXT, []);
+      const vend = J(K_VEND, []);
+      const adm = J(K_ADM, []);
+      const totalCol = ext.reduce((a, b) => a + Number(b.amt || b.amount || 0), 0) + adm.reduce((a, b) => a + Number(b.fee || b.amount || 0), 0);
+      const totalExp = vend.filter(x => x.status === "Approved").reduce((a, b) => a + Number(b.amt || 0), 0);
+      const netVal = totalCol - totalExp;
+
       const ctx = document.getElementById("pnlChart");
       if (chartObj) chartObj.destroy();
       chartObj = new Chart(ctx, {
         type: "bar",
         data: {
           labels: ["Total Collection", "Total Expense", "Net Profit"],
-          datasets: [{ data: [223200, 78400, 144800], backgroundColor: ["#34D399", "#FB7185", "#F5A623"] }]
+          datasets: [{ data: [totalCol, totalExp, netVal], backgroundColor: ["#34D399", "#FB7185", "#F5A623"] }]
         },
         options: { responsive: true, plugins: { legend: { display: false } } }
       });
-      document.getElementById("pnlEntries").innerHTML = `
-        <div class="rec"><b>2026-11-01</b> &bull; Membership Fees (Cash) &bull; <span style="color:var(--emerald)">+₹1,43,000</span></div>
-        <div class="rec"><b>2026-11-02</b> &bull; Online Fees &amp; Renewals &bull; <span style="color:var(--emerald)">+₹75,000</span></div>
-        <div class="rec">Abhi koi supplement sale record upload nahi hua hai.</div>
-        <div class="rec"><b>2026-11-04</b> &bull; Expenses &bull; <span style="color:var(--rose)">-₹78,400</span></div>
-      `;
+
+      const entriesBox = document.getElementById("pnlEntries");
+      if (!ext.length && !vend.length && !adm.length) {
+        entriesBox.innerHTML = `<div class="rec">Abhi koi P&amp;L, collection ya expense record upload nahi hua hai.</div>`;
+        return;
+      }
+      let rowsHtml = "";
+      adm.forEach(x => {
+        rowsHtml += `<div class="rec"><b>${esc(x.name || "Admission")}</b> &bull; Branch ${esc(x.br || "001")} &bull; <span style="color:var(--emerald)">+₹${Number(x.fee || 0).toLocaleString("en-IN")}</span></div>`;
+      });
+      ext.forEach(x => {
+        rowsHtml += `<div class="rec"><b>${esc(x.name || "Extra Service")}</b> (${esc(x.srv || "Service")}) &bull; <span style="color:var(--emerald)">+₹${Number(x.amt || 0).toLocaleString("en-IN")}</span></div>`;
+      });
+      vend.filter(x => x.status === "Approved").forEach(x => {
+        rowsHtml += `<div class="rec"><b>${esc(x.cat || "Expense")}</b> (${esc(x.dt || "")}) &bull; <span style="color:var(--rose)">-₹${Number(x.amt || 0).toLocaleString("en-IN")}</span></div>`;
+      });
+      entriesBox.innerHTML = rowsHtml || `<div class="rec">Abhi koi P&amp;L, collection ya expense record upload nahi hua hai.</div>`;
     }
 
 
@@ -2594,7 +2655,17 @@ seedData();
     if(/modcodes|gps|geofence|audit|security|branchsel/.test(v)) return 499;
     return 99;
   }
-  function hasPaidPlan(required){ return isMaster() || (!!sess().planActive && Number(sess().planAmount||0) >= Number(required||99)); }
+  function activePlanTierAmount() {
+    var amt = Number(sess().planAmount || 0);
+    try {
+      var localPlan = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
+      if (localPlan && String(localPlan.status || "active").toLowerCase() === "active") {
+        amt = Math.max(amt, Number(localPlan.amount || 0));
+      }
+    } catch (e) {}
+    return amt;
+  }
+  function hasPaidPlan(required){ return isMaster() || (activePlanTierAmount() >= Number(required||99)); }
   function showPlanWall(required){
     const minPlan = Number(required || 99);
     alert("Please purchase / upgrade to the ₹"+minPlan+" plan before using this feature. Aap feature ka preview dekh sakte hain; final action plan activate hone ke baad chalega.");
@@ -2640,6 +2711,17 @@ seedData();
   window.addEventListener("om:session-ready", applyVerifiedRole);
   window.addEventListener("om:stats-ready", function(){ if(typeof syncDashboard==="function") syncDashboard(); });
 })();
+</script>
+
+
+<script>
+window.requestPlanSelection = function(amt, label) {
+  try {
+    localStorage.setItem("om_selected_plan_preview", JSON.stringify({ amount: amt, name: label }));
+  } catch (e) {}
+  alert(label + " chuna gaya hai. Plans page (plans.html) par jaakar details aur activation request dekhein.");
+  location.href = "plans.html";
+};
 </script>
 
 </body>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Developer SaaS Control — Live Customer &amp; Plan Console</title>
+  <style>
+    :root {
+      --bg: #050814; --card: #0a1124; --card2: #0e172f; --border: #1b294b; --border-hl: #2a3f70;
+      --gold: #f5a623; --gold-bright: #ffd166; --cyan: #22d3ee; --emerald: #34d399;
+      --purple: #a78bfa; --rose: #fb7185; --text: #f8fafc; --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); max-width: 680px; margin: 0 auto; padding-bottom: 80px; }
+
+    /* TV News Style Live Ticker */
+    .tv-ticker-wrap {
+      display: flex; align-items: center; background: #090f22; border-bottom: 1.5px solid var(--rose);
+      overflow: hidden; white-space: nowrap; position: sticky; top: 0; z-index: 1000;
+    }
+    .tv-badge {
+      background: #e11d48; color: #fff; font-size: 11px; font-weight: 900;
+      padding: 8px 12px; letter-spacing: 0.6px; flex-shrink: 0;
+    }
+    .tv-track {
+      display: inline-flex; gap: 28px; padding: 8px 14px; font-size: 12px; font-weight: 800; color: var(--gold-bright);
+      animation: newsScroll 18s linear infinite;
+    }
+    @keyframes newsScroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .wrap { padding: 14px; }
+    .hdr-bar {
+      display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; margin-bottom: 14px;
+    }
+    .btn {
+      background: var(--card2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 10px; padding: 7px 12px; font-size: 12px; font-weight: 800; text-decoration: none; cursor: pointer;
+    }
+    .btn-gold { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #050814; border: 0; }
+
+    .grid2 { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 560px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+
+    .s-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px;
+      cursor: pointer; transition: 0.15s;
+    }
+    .s-card:hover { border-color: var(--gold); background: var(--card2); }
+    .s-lbl { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    .s-num { font-size: 22px; font-weight: 900; margin-top: 6px; }
+    .s-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .drawer-box {
+      display: none; background: var(--card); border: 1.5px solid var(--cyan);
+      border-radius: 18px; padding: 16px; margin-top: 14px;
+    }
+    .drawer-box.open { display: block; }
+    .item { background: #070d1d; border: 1px solid var(--border); border-radius: 12px; padding: 11px; margin-top: 8px; font-size: 12px; line-height: 1.5; }
+    .inp {
+      width: 100%; background: #070d1d; border: 1px solid var(--border); color: #fff;
+      border-radius: 10px; padding: 8px 10px; font-size: 12px; margin-top: 4px;
+    }
+    label { font-size: 11px; color: var(--muted); font-weight: 700; display: block; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <!-- TV NEWS STYLE LIVE COUNTER STREAM -->
+  <div class="tv-ticker-wrap">
+    <div class="tv-badge">● LIVE STREAM</div>
+    <div class="tv-track" id="tvNewsTrack">
+      <span>000 • OM SOFTWARE SAAS LIVE</span>
+      <span>001 • PLAN &amp; LICENSE CONSOLE</span>
+      <span>002 • REAL-TIME CUSTOMER STREAM</span>
+      <span>000 • OM SOFTWARE SAAS LIVE</span>
+      <span>001 • PLAN &amp; LICENSE CONSOLE</span>
+      <span>002 • REAL-TIME CUSTOMER STREAM</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hdr-bar">
+      <div>
+        <div style="font-size:10.5px;color:var(--cyan);font-weight:800">APP DEVELOPER / SAAS ADMIN ONLY</div>
+        <h1 style="font-size:17px;font-weight:900">SaaS Plans, Customers &amp; License Control</h1>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="admin-payments.html" class="btn">Payment Verify</a>
+        <a href="plans.html" class="btn btn-gold">Plans Page</a>
+        <a href="index.html" class="btn">← App</a>
+      </div>
+    </div>
+
+    <!-- DEVELOPER / SAAS ADMIN METRIC CARDS -->
+    <div class="grid2">
+      <div class="s-card" style="border-color:var(--gold)" onclick="openDevSection('collection')">
+        <div class="s-lbl" style="color:var(--gold)">💰 Total Collection (Plans Only)</div>
+        <div class="s-num" id="dPlanCollection" style="color:var(--gold)">₹0</div>
+        <div class="s-sub">Sirf plan payment se aane wali rashi</div>
+      </div>
+
+      <div class="s-card" style="border-color:var(--emerald)" onclick="openDevSection('live')">
+        <div class="s-lbl" style="color:var(--emerald)">🟢 Live Customers</div>
+        <div class="s-num" id="dLiveCustCount" style="color:var(--emerald)">0</div>
+        <div class="s-sub">Active plan wale customers • Click to view</div>
+      </div>
+
+      <div class="s-card" style="border-color:var(--cyan)" onclick="openDevSection('new')">
+        <div class="s-lbl" style="color:var(--cyan)">🆕 New Customers</div>
+        <div class="s-num" id="dNewCustCount" style="color:var(--cyan)">0</div>
+        <div class="s-sub">Naye customer • License key &amp; gym details</div>
+      </div>
+
+      <div class="s-card" style="border-color:var(--purple)" onclick="openDevSection('old')">
+        <div class="s-lbl" style="color:var(--purple)">📁 Old Customers</div>
+        <div class="s-num" id="dOldCustCount" style="color:var(--purple)">0</div>
+        <div class="s-sub">Purane customer records • Click to inspect</div>
+      </div>
+
+      <div class="s-card" style="border-color:var(--gold-bright)" onclick="openDevSection('renewal')">
+        <div class="s-lbl" style="color:var(--gold-bright)">🔄 Renewal Wale Customers</div>
+        <div class="s-num" id="dRenewalCustCount" style="color:var(--gold-bright)">0</div>
+        <div class="s-sub">Renewal / due / renewed customers</div>
+      </div>
+
+      <div class="s-card" onclick="openDevSection('insights')">
+        <div class="s-lbl" style="color:var(--cyan)">📊 Most Selling Plan &amp; Top City</div>
+        <div class="s-num" id="dTopPlanShort" style="font-size:15px;color:#fff">—</div>
+        <div class="s-sub" id="dTopCitySub">Best City: —</div>
+      </div>
+    </div>
+
+    <!-- INSIDE DETAIL / TROUBLESHOOT INSPECTOR (OPENS ON CLICK) -->
+    <div class="drawer-box" id="devDetailDrawer">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
+        <h2 id="devDrawerTitle" style="font-size:16px;font-weight:900;color:var(--cyan)">Details</h2>
+        <button type="button" class="btn" onclick="document.getElementById('devDetailDrawer').classList.remove('open')">✕ Close</button>
+      </div>
+      <div id="devDrawerBody"></div>
+    </div>
+
+    <!-- ADD / LOOKUP CUSTOMER DETAILS FOR SUPPORT & TROUBLESHOOTING -->
+    <div class="s-card" style="margin-top:14px;cursor:default">
+      <div class="s-lbl" style="color:var(--gold)">🛠️ Add / Update Customer Record (For Support &amp; Testing)</div>
+      <form onsubmit="addDevCustomerRecord(event)">
+        <div class="grid2">
+          <div><label>Customer Type</label>
+            <select class="inp" id="dcType">
+              <option value="new">New Customer</option>
+              <option value="old">Old Customer</option>
+              <option value="renewal">Renewal Customer</option>
+            </select>
+          </div>
+          <div><label>City *</label><input class="inp" id="dcCity" required placeholder="e.g. Unnao / Kanpur / Lucknow"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Gym Name *</label><input class="inp" id="dcGym" required placeholder="Customer Gym Name"></div>
+          <div><label>Owner / Customer Name *</label><input class="inp" id="dcOwner" required placeholder="Owner Name"></div>
+        </div>
+        <div class="grid2">
+          <div><label>Mobile *</label><input class="inp" id="dcPhone" required maxlength="10" placeholder="10-digit mobile"></div>
+          <div><label>Plan &amp; Amount (₹) *</label>
+            <select class="inp" id="dcPlanAmt">
+              <option value="99">First Plan — ₹99</option>
+              <option value="199">Growth Value — ₹199</option>
+              <option value="399">Pro Business — ₹399</option>
+              <option value="499">Advanced Audit — ₹499</option>
+              <option value="999">Enterprise ERP — ₹999</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div><label>Login ID / Email</label><input class="inp" id="dcEmail" placeholder="gym@example.com"></div>
+          <div><label>Password / PIN</label><input class="inp" id="dcPass" placeholder="Password / PIN"></div>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%;margin-top:12px;padding:10px">Save Customer &amp; Generate License Key</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const K_DEV_CUST = "om_saas_dev_customers_v1";
+    const K_PAY_CUST = "om_plan_customers_v1";
+    let tickerSeq = 0;
+
+    function esc(v) {
+      return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+
+    function readJson(k, d) {
+      try { return JSON.parse(localStorage.getItem(k) || "null") ?? d; } catch (e) { return d; }
+    }
+
+    function getAllCustomers() {
+      var devList = readJson(K_DEV_CUST, []);
+      var payList = readJson(K_PAY_CUST, []).map(function (p, i) {
+        return {
+          id: "PAY-" + (i + 1),
+          type: "new",
+          active: true,
+          gymName: p.name || "Gym",
+          ownerName: p.name || "Owner",
+          phone: p.phone || "-",
+          city: p.city || "Not Specified",
+          planAmount: Number(p.planAmount || 99),
+          planName: p.planName || ("Plan ₹" + (p.planAmount || 99)),
+          licenseKey: p.licenseKey || "-",
+          email: p.email || "-",
+          password: p.testPass || "-",
+          utr: p.utr || "-",
+          hasScreenshot: !!p.hasScreenshot,
+          time: p.time || ""
+        };
+      });
+      return devList.concat(payList);
+    }
+
+    function syncDevMetrics() {
+      var all = getAllCustomers();
+      var liveList = all.filter(function (c) { return c.active !== false; });
+      var newList = all.filter(function (c) { return c.type === "new"; });
+      var oldList = all.filter(function (c) { return c.type === "old"; });
+      var renList = all.filter(function (c) { return c.type === "renewal"; });
+
+      // Total collection strictly from plan payments
+      var planCol = all.reduce(function (sum, c) { return sum + Number(c.planAmount || 0); }, 0);
+
+      document.getElementById("dPlanCollection").textContent = "₹" + planCol.toLocaleString("en-IN");
+      document.getElementById("dLiveCustCount").textContent = String(liveList.length);
+      document.getElementById("dNewCustCount").textContent = String(newList.length);
+      document.getElementById("dOldCustCount").textContent = String(oldList.length);
+      document.getElementById("dRenewalCustCount").textContent = String(renList.length);
+
+      if (!all.length) {
+        document.getElementById("dTopPlanShort").textContent = "—";
+        document.getElementById("dTopCitySub").textContent = "Best City: —";
+      } else {
+        var planCounts = {};
+        var cityCounts = {};
+        all.forEach(function (c) {
+          var pk = "₹" + Number(c.planAmount || 99);
+          planCounts[pk] = (planCounts[pk] || 0) + 1;
+          var ck = (c.city || "").trim();
+          if (ck) cityCounts[ck] = (cityCounts[ck] || 0) + 1;
+        });
+        var topPlan = Object.keys(planCounts).sort(function (a, b) { return planCounts[b] - planCounts[a]; })[0] || "—";
+        var topCity = Object.keys(cityCounts).sort(function (a, b) { return cityCounts[b] - cityCounts[a]; })[0] || "—";
+        document.getElementById("dTopPlanShort").textContent = topPlan;
+        document.getElementById("dTopCitySub").textContent = "Best City: " + topCity;
+      }
+
+      var pad = String(tickerSeq).padStart(3, "0");
+      var line = `${pad} • PLAN COLLECTION: ₹${planCol.toLocaleString("en-IN")} • LIVE: ${liveList.length} • NEW: ${newList.length} • RENEWAL: ${renList.length}`;
+      document.getElementById("tvNewsTrack").innerHTML =
+        `<span>${esc(line)}</span><span>${esc(line)}</span><span>${esc(line)}</span><span>${esc(line)}</span>`;
+      tickerSeq = (tickerSeq + 1) % 1000;
+    }
+
+    function openDevSection(sec) {
+      var all = getAllCustomers();
+      var drawer = document.getElementById("devDetailDrawer");
+      var titleEl = document.getElementById("devDrawerTitle");
+      var bodyEl = document.getElementById("devDrawerBody");
+      drawer.classList.add("open");
+
+      var filtered = all;
+      if (sec === "live") { titleEl.textContent = "🟢 Live Customers"; filtered = all.filter(function (c) { return c.active !== false; }); }
+      else if (sec === "new") { titleEl.textContent = "🆕 New Customers (License Key & Gym Details)"; filtered = all.filter(function (c) { return c.type === "new"; }); }
+      else if (sec === "old") { titleEl.textContent = "📁 Old Customers"; filtered = all.filter(function (c) { return c.type === "old"; }); }
+      else if (sec === "renewal") { titleEl.textContent = "🔄 Renewal Wale Customers"; filtered = all.filter(function (c) { return c.type === "renewal"; }); }
+      else if (sec === "collection") { titleEl.textContent = "💰 Total Plan Collection"; }
+      else { titleEl.textContent = "📊 Most Selling Plan & City Response"; }
+
+      if (!filtered.length) {
+        bodyEl.innerHTML = `<div class="item">Abhi is section ke liye koi customer record darj nahi hai.</div>`;
+        return;
+      }
+
+      bodyEl.innerHTML = filtered.map(function (c, i) {
+        return `
+          <div class="item">
+            <b>${i + 1}. Gym: ${esc(c.gymName)}</b> (${esc(c.ownerName)}) • City: <b>${esc(c.city)}</b><br>
+            🔑 License Key: <b style="color:var(--gold-bright)">${esc(c.licenseKey)}</b> • Plan: <b>₹${esc(c.planAmount)}</b><br>
+            📞 Mobile: <b>${esc(c.phone)}</b> • Login: <b>${esc(c.email)}</b> / Pass: <b>${esc(c.password)}</b><br>
+            🧾 UTR: <b>${esc(c.utr || "-")}</b> • Screenshot: <b>${c.hasScreenshot ? "Yes" : "No"}</b>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function addDevCustomerRecord(ev) {
+      ev.preventDefault();
+      var type = document.getElementById("dcType").value;
+      var city = document.getElementById("dcCity").value.trim();
+      var gym = document.getElementById("dcGym").value.trim();
+      var owner = document.getElementById("dcOwner").value.trim();
+      var phone = document.getElementById("dcPhone").value.replace(/\D/g, "");
+      var amt = Number(document.getElementById("dcPlanAmt").value || 99);
+      var email = document.getElementById("dcEmail").value.trim() || "-";
+      var pass = document.getElementById("dcPass").value.trim() || "-";
+      var licKey = "LIC-OM-" + amt + "-" + String(Date.now()).slice(-5);
+
+      var list = readJson(K_DEV_CUST, []);
+      list.unshift({
+        id: "DEV-" + Date.now().toString().slice(-5),
+        type: type,
+        active: true,
+        city: city,
+        gymName: gym,
+        ownerName: owner,
+        phone: phone,
+        planAmount: amt,
+        licenseKey: licKey,
+        email: email,
+        password: pass,
+        utr: "ADMIN-ADDED",
+        hasScreenshot: false,
+        time: new Date().toLocaleString("en-IN")
+      });
+      try { localStorage.setItem(K_DEV_CUST, JSON.stringify(list)); } catch (e) {}
+
+      syncDevMetrics();
+      alert("Customer & License Key saved: " + licKey);
+    }
+
+    window.addEventListener("DOMContentLoaded", function () {
+      syncDevMetrics();
+      setInterval(syncDevMetrics, 2500);
+    });
+  </script>
+</body>
+</html>
