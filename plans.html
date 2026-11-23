@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>First / Base Plan (₹99) — Gym SaaS Plans</title>
+  <title>Gym SaaS Plans &amp; Pricing — Om Software ERP</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -12,13 +12,17 @@
       --bg: #050814;
       --surface: #0b1226;
       --surface-2: #111c3a;
-      --border: rgba(255, 255, 255, 0.1);
-      --border-gold: rgba(245, 166, 35, 0.45);
-      --border-cyan: rgba(34, 211, 238, 0.4);
+      --border: rgba(255, 255, 255, 0.12);
+      --border-gold: rgba(245, 166, 35, 0.5);
+      --border-cyan: rgba(34, 211, 238, 0.45);
+      --border-emerald: rgba(52, 211, 153, 0.45);
+      --border-purple: rgba(167, 139, 250, 0.45);
+      --border-rose: rgba(251, 113, 133, 0.45);
       --gold: #f5a623;
       --gold-bright: #ffd166;
       --cyan: #22d3ee;
       --emerald: #34d399;
+      --purple: #a78bfa;
       --rose: #fb7185;
       --text: #f8fafc;
       --muted: #94a3b8;
@@ -31,40 +35,20 @@
         var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 18px 14px 70px;
+      padding: 18px 14px 80px;
     }
-    .container { max-width: 780px; margin: 0 auto; }
+    .container { max-width: 900px; margin: 0 auto; }
 
-    /* Optional Opt-In Update Popup */
-    .update-toast {
-      display: none;
-      background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(17, 28, 58, 0.96));
-      border: 1.5px solid var(--cyan);
-      border-radius: 16px;
-      padding: 14px 16px;
-      margin-bottom: 16px;
-    }
-    .update-toast.show { display: block; }
-    .update-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    .btn-opt-in {
-      background: var(--cyan); color: #050814; border: 0; border-radius: 9px;
-      padding: 8px 13px; font-size: 12px; font-weight: 900; cursor: pointer;
-    }
-    .btn-keep-old {
-      background: transparent; color: var(--muted); border: 1px solid var(--border);
-      border-radius: 9px; padding: 8px 13px; font-size: 12px; font-weight: 700; cursor: pointer;
-    }
-
-    /* Top Bar */
     .topbar {
       display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
-      background: rgba(11, 18, 38, 0.85); backdrop-filter: blur(14px);
-      border: 1px solid var(--border); border-radius: 16px; padding: 12px 16px; margin-bottom: 18px;
+      background: rgba(11, 18, 38, 0.88); backdrop-filter: blur(14px);
+      border: 1px solid var(--border); border-radius: 16px; padding: 12px 16px; margin-bottom: 16px;
     }
     .back-link {
       display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
       color: var(--text); font-size: 12.5px; font-weight: 700;
       background: var(--surface-2); border: 1px solid var(--border); padding: 8px 13px; border-radius: 10px;
+      cursor: pointer;
     }
     .back-link:hover { border-color: var(--gold); color: var(--gold); }
     .lang-switch {
@@ -73,120 +57,109 @@
     }
     .lang-btn {
       border: 0; background: transparent; color: var(--muted); font-size: 12px; font-weight: 800;
-      padding: 6px 13px; border-radius: 8px; cursor: pointer; transition: 0.2s;
+      padding: 6px 13px; border-radius: 8px; cursor: pointer;
     }
     .lang-btn.active { background: linear-gradient(135deg, var(--gold), #d97706); color: #050814; }
 
-    /* Active Plan Status Banner */
     .status-banner {
       display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
-      background: linear-gradient(135deg, rgba(52, 211, 153, 0.14), rgba(11, 18, 38, 0.92));
-      border: 1.5px solid rgba(52, 211, 153, 0.45); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px;
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.14), rgba(11, 18, 38, 0.94));
+      border: 1.5px solid rgba(52, 211, 153, 0.45); border-radius: 16px; padding: 14px 18px; margin-bottom: 20px;
     }
     .status-badge {
       background: rgba(52, 211, 153, 0.2); color: var(--emerald); border: 1px solid var(--emerald);
       font-size: 10.5px; font-weight: 900; letter-spacing: 0.6px; padding: 4px 10px; border-radius: 999px;
     }
     .status-text { font-size: 14px; font-weight: 800; color: #ffffff; }
-    .sync-tag { font-size: 11px; color: var(--cyan); font-weight: 700; }
 
-    /* Hero Plan Header */
-    .hero-card {
-      background: linear-gradient(160deg, rgba(17, 28, 58, 0.95), rgba(11, 18, 38, 0.95));
-      border: 1.5px solid var(--border-gold); border-radius: 22px; padding: 24px 20px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55); margin-bottom: 22px;
+    .header-intro { text-align: center; margin-bottom: 22px; }
+    .header-intro h1 { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 6px; }
+    .header-intro p { font-size: 13px; color: var(--muted); max-width: 620px; margin: 0 auto; line-height: 1.5; }
+
+    /* Outer Plan Cards Grid (5 Tiers) */
+    .plans-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 24px; }
+    @media (min-width: 640px) { .plans-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 860px) { .plans-grid { grid-template-columns: 1fr 1fr 1fr; } }
+
+    .plan-card {
+      background: linear-gradient(160deg, rgba(17, 28, 58, 0.96), rgba(11, 18, 38, 0.96));
+      border: 1.5px solid var(--border); border-radius: 20px; padding: 20px;
+      cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between;
+      position: relative;
     }
-    .hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
-    .tag-pill {
-      display: inline-block; background: rgba(245, 166, 35, 0.15); color: var(--gold-bright);
-      border: 1px solid var(--border-gold); font-size: 10.5px; font-weight: 800;
-      padding: 4px 11px; border-radius: 999px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.6px;
+    .plan-card:hover { transform: translateY(-3px); filter: brightness(1.05); }
+
+    .plan-card.tier-99 { border-color: var(--border-gold); }
+    .plan-card.tier-199 { border-color: var(--border-cyan); }
+    .plan-card.tier-399 { border-color: var(--border-emerald); }
+    .plan-card.tier-499 { border-color: var(--border-purple); }
+    .plan-card.tier-999 { border-color: var(--border-rose); background: linear-gradient(160deg, rgba(30, 20, 50, 0.96), rgba(11, 18, 38, 0.98)); }
+
+    .plan-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .pill {
+      display: inline-block; font-size: 10px; font-weight: 800;
+      padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; text-transform: uppercase;
     }
-    .hero-title { font-size: 24px; font-weight: 900; color: #fff; line-height: 1.25; }
-    .hero-sub { font-size: 13px; color: var(--muted); margin-top: 5px; max-width: 470px; line-height: 1.5; }
+    .tier-99 .pill { background: rgba(245, 166, 35, 0.16); color: var(--gold-bright); border: 1px solid var(--border-gold); }
+    .tier-199 .pill { background: rgba(34, 211, 238, 0.16); color: var(--cyan); border: 1px solid var(--border-cyan); }
+    .tier-399 .pill { background: rgba(52, 211, 153, 0.16); color: var(--emerald); border: 1px solid var(--border-emerald); }
+    .tier-499 .pill { background: rgba(167, 139, 250, 0.16); color: var(--purple); border: 1px solid var(--border-purple); }
+    .tier-999 .pill { background: rgba(251, 113, 133, 0.2); color: var(--rose); border: 1px solid var(--border-rose); }
+
+    .plan-name { font-size: 18px; font-weight: 900; color: #fff; line-height: 1.25; }
+    .plan-desc { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.48; }
+
     .price-box {
-      text-align: right; background: rgba(5, 8, 20, 0.7); border: 1px solid var(--border-gold);
-      border-radius: 16px; padding: 12px 18px; min-width: 150px;
+      text-align: right; background: rgba(5, 8, 20, 0.75); border-radius: 12px;
+      padding: 8px 12px; min-width: 86px; border: 1px solid var(--border);
     }
-    .price-val { font-size: 30px; font-weight: 900; color: var(--gold-bright); line-height: 1.1; }
-    .price-cycle { font-size: 11px; color: var(--muted); margin-top: 3px; }
-    .cta-btn {
-      margin-top: 18px; width: 100%; border: 0; border-radius: 14px; padding: 14px 18px;
+    .tier-99 .price-box { border-color: var(--border-gold); }
+    .tier-199 .price-box { border-color: var(--border-cyan); }
+    .tier-399 .price-box { border-color: var(--border-emerald); }
+    .tier-499 .price-box { border-color: var(--border-purple); }
+    .tier-999 .price-box { border-color: var(--border-rose); }
+
+    .price-num { font-size: 24px; font-weight: 900; line-height: 1; }
+    .tier-99 .price-num { color: var(--gold-bright); }
+    .tier-199 .price-num { color: var(--cyan); }
+    .tier-399 .price-num { color: var(--emerald); }
+    .tier-499 .price-num { color: var(--purple); }
+    .tier-999 .price-num { color: var(--rose); }
+
+    .open-hint { margin-top: 14px; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 4px; }
+    .tier-99 .open-hint { color: var(--gold-bright); }
+    .tier-199 .open-hint { color: var(--cyan); }
+    .tier-399 .open-hint { color: var(--emerald); }
+    .tier-499 .open-hint { color: var(--purple); }
+    .tier-999 .open-hint { color: var(--rose); }
+
+    /* Inside Plan View */
+    .inside-view {
+      display: none;
+      background: rgba(11, 18, 38, 0.98); border: 1.5px solid var(--border-gold);
+      border-radius: 22px; padding: 22px; margin-bottom: 24px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.6);
+    }
+    .inside-view.open { display: block; }
+    .inside-hdr { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+    .btn-sec {
+      background: #070d1d; color: var(--text); border: 1px solid var(--border);
+      border-radius: 10px; padding: 9px 15px; font-size: 12px; font-weight: 800; cursor: pointer;
+    }
+    .btn-act {
       background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #050814;
-      font-size: 14px; font-weight: 900; cursor: pointer; box-shadow: 0 10px 25px rgba(245, 166, 35, 0.28);
+      border: 0; border-radius: 10px; padding: 10px 18px; font-size: 13px; font-weight: 900; cursor: pointer;
     }
-    .cta-btn:hover { filter: brightness(1.05); }
-
-    /* Section Title */
-    .sec-title-wrap { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 14px; }
-    .sec-title { font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .sec-line { height: 2px; flex: 1; background: linear-gradient(90deg, var(--gold), transparent); margin-left: 12px; opacity: 0.5; }
-
-    /* Highlighted Key Feature Cards */
-    .kf-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
-    @media (min-width: 640px) { .kf-grid { grid-template-columns: 1fr 1fr; } }
-
-    .kf-card {
-      background: rgba(11, 18, 38, 0.92); border: 1.5px solid var(--border);
-      border-radius: 18px; padding: 18px; position: relative; transition: 0.2s;
-      display: flex; flex-direction: column; justify-content: space-between;
+    .feat-card {
+      background: #070d1d; border: 1px solid var(--border); border-radius: 15px; padding: 15px; margin-bottom: 12px;
     }
-    .kf-card.priority {
-      border-color: var(--border-gold);
-      box-shadow: 0 12px 30px rgba(245, 166, 35, 0.12);
-      grid-column: 1 / -1;
-      background: linear-gradient(160deg, rgba(22, 34, 68, 0.96), rgba(11, 18, 38, 0.96));
-    }
-    .kf-card:hover { border-color: var(--cyan); transform: translateY(-2px); }
-    .kf-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
-    .kf-badge {
-      font-size: 10px; font-weight: 900; padding: 3px 9px; border-radius: 999px;
-      background: rgba(34, 211, 238, 0.14); color: var(--cyan); border: 1px solid var(--border-cyan);
-      white-space: nowrap;
-    }
-    .kf-card.priority .kf-badge {
-      background: rgba(245, 166, 35, 0.2); color: var(--gold-bright); border-color: var(--border-gold);
-    }
-    .kf-name { font-size: 16px; font-weight: 900; color: #ffffff; }
-    .kf-list { list-style: none; margin-top: 6px; display: flex; flex-direction: column; gap: 7px; }
-    .kf-list li {
-      font-size: 12.5px; color: #cbd5e1; line-height: 1.48; padding-left: 18px; position: relative;
-    }
-    .kf-list li::before {
-      content: "✓"; position: absolute; left: 0; top: 0; color: var(--emerald); font-weight: 900;
-    }
-
-    /* Owner Extra Highlights */
-    .extra-strip {
-      margin-top: 20px; background: rgba(11, 18, 38, 0.92); border: 1.5px solid var(--border-cyan);
-      border-radius: 18px; padding: 18px;
-    }
-    .extra-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
-    @media (min-width: 640px) { .extra-grid { grid-template-columns: 1fr 1fr; } }
-    .extra-item {
-      background: #070d1d; border: 1px solid var(--border); border-radius: 12px; padding: 12px;
-    }
-    .extra-item b { display: block; color: var(--cyan); font-size: 12.5px; margin-bottom: 4px; }
-    .extra-item span { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+    .feat-card.first-prio { border-color: var(--border-gold); background: rgba(245, 166, 35, 0.06); }
+    .feat-title { font-size: 15px; font-weight: 900; color: #fff; margin-bottom: 6px; }
+    .feat-body { font-size: 12.5px; color: #cbd5e1; line-height: 1.55; }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Optional Opt-In Update Popup (only shown when developer publishes a release notice) -->
-    <div class="update-toast" id="optInUpdateBanner">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-        <b style="color:var(--cyan);font-size:13.5px" id="updTitle">New App Update Available</b>
-        <span class="status-badge" id="updVersionTag">v1.1 • OPTIONAL</span>
-      </div>
-      <p style="font-size:12px;color:#e2e8f0;margin-top:5px;line-height:1.45" id="updDesc">
-        नए फ़ीचर और सुधार उपलब्ध हैं। आपका मौजूदा प्लान सुरक्षित है—आप चाहें तो नया वर्ज़न अपना सकते हैं या पुराने वर्ज़न पर ही रह सकते हैं।
-      </p>
-      <div class="update-actions">
-        <button type="button" class="btn-opt-in" id="btnAdoptUpdate" onclick="adoptAppUpdate()">Update / Use New Feature</button>
-        <button type="button" class="btn-keep-old" id="btnKeepVersion" onclick="keepCurrentVersion()">Stay on Current Version</button>
-      </div>
-    </div>
-
     <div class="topbar">
       <a href="index.html" class="back-link" id="backLink">← Dashboard</a>
       <div class="lang-switch">
@@ -195,42 +168,129 @@
       </div>
     </div>
 
-    <div class="status-banner" id="planStatusBanner">
+    <div class="status-banner">
       <div>
         <span class="status-badge" id="statusPill">PLAN STATUS</span>
-        <div class="status-text" id="statusHeadline" style="margin-top:6px;">You have already a ₹99 plan</div>
+        <div class="status-text" id="statusHeadline" style="margin-top:6px;">No active plan saved yet</div>
       </div>
-      <div class="sync-tag" id="statusMeta">Cloud Sync Ready</div>
+      <div id="statusMeta" style="font-size:11.5px;color:var(--cyan);font-weight:700;">Account verification required</div>
     </div>
 
-    <div class="hero-card">
-      <div class="hero-top">
+    <div class="header-intro">
+      <h1 id="introTitle">Gym Management Plans &amp; Scalability</h1>
+      <p id="introSub">5 सरल और पारदर्शी प्लान — शुरुआत से लेकर मल्टी-ब्रांच एंटरप्राइज़ तक, अपनी ज़रूरत के अनुसार सही प्लान चुनें।</p>
+    </div>
+
+    <!-- 5 PLAN TIERS (Cards on the outside) -->
+    <div class="plans-grid" id="outerPlansGrid">
+      
+      <!-- Tier 1: ₹99 -->
+      <div class="plan-card tier-99" onclick="openInsidePlan(99)">
         <div>
-          <span class="tag-pill" id="heroPill">FIRST / BASE PLAN</span>
-          <h1 class="hero-title" id="heroTitle">First / Base Plan — ₹99</h1>
-          <p class="hero-sub" id="heroSub">
-            नए या बढ़ते जिम ओनर के लिए सबसे स्मार्ट शुरुआती पैक—QR सेल्फ़ी अटेंडेंस, लाइव मेंबर/एक्सपायर बोर्ड, तुरंत फ़ीस रसीद और यूनिक QR एडमिशन फ़ॉर्म एक ही जगह।
-          </p>
+          <div class="plan-top">
+            <div>
+              <span class="pill" id="p99Badge">1. BASE STARTER</span>
+              <div class="plan-name" id="p99Title">First Plan — ₹99</div>
+            </div>
+            <div class="price-box">
+              <div class="price-num">₹99</div>
+              <div style="font-size:10px;color:var(--muted)" id="p99SubPrice">Starter</div>
+            </div>
+          </div>
+          <p class="plan-desc" id="p99Desc">QR सेल्फ़ी अटेंडेंस, लाइव मेंबर/एक्सपायरी बोर्ड, तुरंत फ़ीस रसीद और यूनिक QR एडमिशन फ़ॉर्म।</p>
         </div>
-        <div class="price-box">
-          <div class="price-val">₹99</div>
-          <div class="price-cycle" id="priceCycle">First / Base Plan</div>
+        <div class="open-hint" id="p99OpenHint">विस्तार से देखें →</div>
+      </div>
+
+      <!-- Tier 2: ₹199 -->
+      <div class="plan-card tier-199" onclick="openInsidePlan(199)">
+        <div>
+          <div class="plan-top">
+            <div>
+              <span class="pill" id="p199Badge">2. GROWTH VALUE</span>
+              <div class="plan-name" id="p199Title">Growth Value — ₹199</div>
+            </div>
+            <div class="price-box">
+              <div class="price-num">₹199</div>
+              <div style="font-size:10px;color:var(--muted)" id="p199SubPrice">Operations</div>
+            </div>
+          </div>
+          <p class="plan-desc" id="p199Desc">Cash/Online split, बकाया फ़ीस रिमाइंडर, Walk-in व Lead इन्क्वायरी ट्रैकर, बेसिक स्टाफ और CSV एक्सपोर्ट।</p>
+        </div>
+        <div class="open-hint" id="p199OpenHint">विस्तार से देखें →</div>
+      </div>
+
+      <!-- Tier 3: ₹399 -->
+      <div class="plan-card tier-399" onclick="openInsidePlan(399)">
+        <div>
+          <div class="plan-top">
+            <div>
+              <span class="pill" id="p399Badge">3. PRO BUSINESS</span>
+              <div class="plan-name" id="p399Title">Pro Business — ₹399</div>
+            </div>
+            <div class="price-box">
+              <div class="price-num">₹399</div>
+              <div style="font-size:10px;color:var(--muted)" id="p399SubPrice">Payroll &amp; P&amp;L</div>
+            </div>
+          </div>
+          <p class="plan-desc" id="p399Desc">स्टाफ पेरोल व सैलरी स्लिप (Advance/Late penalty), लाइट/कंज्यूमेबल बिल मंज़ूरी और लाइव Net P&amp;L इंजन।</p>
+        </div>
+        <div class="open-hint" id="p399OpenHint">विस्तार से देखें →</div>
+      </div>
+
+      <!-- Tier 4: ₹499 -->
+      <div class="plan-card tier-499" onclick="openInsidePlan(499)">
+        <div>
+          <div class="plan-top">
+            <div>
+              <span class="pill" id="p499Badge">4. ADVANCED AUDIT</span>
+              <div class="plan-name" id="p499Title">Advanced Audit — ₹499</div>
+            </div>
+            <div class="price-box">
+              <div class="price-num">₹499</div>
+              <div style="font-size:10px;color:var(--muted)" id="p499SubPrice">Security</div>
+            </div>
+          </div>
+          <p class="plan-desc" id="p499Desc">GPS पेरीमीटर व एंटी-प्रॉक्सी चेक, मैनेजर आइसोलेटेड पोर्टल (प्राइवेसी मास्किंग), ऑटो रीन्यूअल अलर्ट व ऑडिट ट्रेल।</p>
+        </div>
+        <div class="open-hint" id="p499OpenHint">विस्तार से देखें →</div>
+      </div>
+
+      <!-- Tier 5: ₹999 -->
+      <div class="plan-card tier-999" style="grid-column: 1 / -1;" onclick="openInsidePlan(999)">
+        <div>
+          <div class="plan-top">
+            <div>
+              <span class="pill" id="p999Badge">5. COMPLETE ENTERPRISE ERP</span>
+              <div class="plan-name" id="p999Title">Enterprise ERP — ₹999</div>
+            </div>
+            <div class="price-box">
+              <div class="price-num">₹999</div>
+              <div style="font-size:10px;color:var(--muted)" id="p999SubPrice">All Unlocked</div>
+            </div>
+          </div>
+          <p class="plan-desc" id="p999Desc">सभी प्लान्स के सभी फीचर्स अनलॉक: मल्टी-ब्रांच सेंट्रल कमांड (Branch 001, 002...), ऑटो डेटा राउटर (CSV/Excel import), परमानेंट क्लाउड सिंक, कस्टम जिम ब्रांडिंग व प्रायोरिटी वीआईपी सपोर्ट।</p>
+        </div>
+        <div class="open-hint" id="p999OpenHint">विस्तार से देखें →</div>
+      </div>
+
+    </div>
+
+    <!-- INSIDE PLAN VIEW (Opened when a card is clicked) -->
+    <div class="inside-view" id="insidePlanView">
+      <div class="inside-hdr">
+        <div>
+          <span class="pill" id="insidePlanPill">INSIDE PLAN DETAILS</span>
+          <h2 id="insidePlanTitle" style="font-size:22px;font-weight:900;color:#fff">Plan Details</h2>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn-sec" id="btnBackToPlans" onclick="closeInsidePlan()">← All Plans</button>
+          <button type="button" class="btn-act" id="btnActivateInside" onclick="activateCurrentInsidePlan()">Request This Plan</button>
         </div>
       </div>
-      <button type="button" class="cta-btn" id="activateBtn" onclick="activatePlan99()">Activate ₹99 First Plan</button>
+      <div id="insideFeaturesContainer"></div>
     </div>
 
-    <div class="sec-title-wrap">
-      <div class="sec-title" id="kfSectionTitle">⭐ Highlighted Key Features</div>
-      <div class="sec-line"></div>
-    </div>
-
-    <div class="kf-grid" id="keyFeaturesGrid"></div>
-
-    <div class="extra-strip">
-      <div class="kf-name" id="extraTitle" style="color:var(--cyan)">🚀 Extra Value Added for Gym Owners</div>
-      <div class="extra-grid" id="extraGrid"></div>
-    </div>
   </div>
 
   <script>
@@ -251,145 +311,110 @@
       }
     } catch (e) {}
 
-    // Developer release notice configuration (set enabled: true when you finalize & announce an update)
-    const APP_RELEASE_NOTICE = {
-      enabled: false,
-      version: "v1.1",
-      titleHi: "नया ऐप अपडेट उपलब्ध है",
-      titleEn: "New App Update Available",
-      descHi: "नए फीचर्स तैयार हैं। आपका मौजूदा प्लान सुरक्षित है—आप नया वर्ज़न अपना सकते हैं या पुराने वर्ज़न पर बने रह सकते हैं।",
-      descEn: "New features are ready. Your existing plan stays intact—you may opt in or remain on your current version."
-    };
-
-    const PLAN_CONTENT = {
-      hi: {
-        back: "← डैशबोर्ड पर जाएं",
-        pill: "फर्स्ट / बेस प्लान",
-        title: "First / Base Plan — ₹99",
-        sub: "जिम ओनर के रोज़मर्रा के काम को आसान बनाने वाला सबसे ज़रूरी बेस प्लान—QR अटेंडेंस पहली प्राथमिकता पर, साथ में लाइव मेंबर बोर्ड, फ़ीस रसीद और यूनिक QR एडमिशन फ़ॉर्म।",
-        cycle: "बेस स्टार्टर प्लान",
-        cta: "₹99 First Plan एक्टिवेट करें",
-        kfTitle: "⭐ मुख्य विशेषताएँ (Highlighted Key Features)",
-        extraTitle: "💡 जिम ओनर के लिए अतिरिक्त उपयोगी बिंदु",
-        adoptBtn: "नया अपडेट / फ़ीचर अपनाएं",
-        keepBtn: "पुराने वर्ज़न पर ही रहें",
-        cards: [
-          {
-            priority: true,
-            badge: "PRIORITY #1 • QR SELF ATTENDANCE",
-            name: "1. Mark Your Attendance BY QR (सबसे पहले)",
-            points: [
-              "जिम या बोर्ड पर लगा QR स्कैन करते ही सीधे अटेंडेंस स्क्रीन खुले।",
-              "पहली बार Camera और Location की अनुमति, उसके बाद दोबारा बार-बार परमिशन न मांगे।",
-              "फ़ोन में नाम या मोबाइल नंबर डालकर चुनते ही 3 सेकंड में ऑटोमैटिक सेल्फ़ी क्लिक होकर सेव हो।",
-              "दिनों की गिनती जॉइनिंग तारीख से हो (जैसे 2 Oct जॉइन और 30 Oct तक 28 दिन)।",
-              "अटेंडेंस लगते ही Telegram पर सेल्फ़ी के साथ तुरंत मैसेज पहुंचे।"
-            ]
-          },
-          {
-            priority: false,
-            badge: "LIVE BOARD & CALENDAR",
-            name: "2. Member Attendance & Expired Alert",
-            points: [
-              "कैलेंडर और ऑटो-सर्च के साथ मेंबर्स की सेल्फ़ी अटेंडेंस।",
-              "Live Present, Live Absent और Total Gym Members की साफ़ गिनती व आसान Remove विकल्प।",
-              "बोर्ड पर Fees Expire फ़्लैशिंग अलर्ट, Expired Members की सूची और कैलेंडर-वार अटेंडेंस।"
-            ]
-          },
-          {
-            priority: false,
-            badge: "INSTANT RECEIPT & WHATSAPP",
-            name: "3. Fees Payment & Instant Receipt",
-            points: [
-              "नाम, मोबाइल या पिता के नाम के शुरुआती अक्षरों से ऑटो-सर्च।",
-              "चुनते ही Joining Date, Membership Expiry Date, Next Fees Date, प्लान और महीने दिखें।",
-              "प्लान बदलने के लिए तुरंत Edit विकल्प; Online या Cash चुनकर Pay करते ही रसीद डाउनलोड व WhatsApp पर भेजने की सुविधा।"
-            ]
-          },
-          {
-            priority: false,
-            badge: "UNIQUE QR FORM",
-            name: "4. Instant Admission Form + Unique QR",
-            points: [
-              "एडमिशन फ़ॉर्म भरते ही सेव, तुरंत रसीद और कस्टमर को भेजने का विकल्प।",
-              "हर फ़ॉर्म का Unique QR जिसे स्कैन करके मेंबर अपना फ़ॉर्म देख सके।",
-              "हटाने तक डेटा स्थायी रूप से सुरक्षित और नाम/नंबर से तुरंत सर्च।"
-            ]
-          }
+    const PLAN_DETAILS = {
+      99: {
+        titleHi: "First / Base Plan — ₹99 (Starter Pack)",
+        titleEn: "First / Base Plan — ₹99 (Starter Pack)",
+        name: "First Plan (₹99)",
+        amount: 99,
+        featuresHi: [
+          { prio: true, t: "1. Mark Your Attendance BY QR (सबसे पहले)", b: "QR स्कैन करते ही अटेंडेंस स्क्रीन; पहली बार Camera व Location अनुमति; नाम/नंबर चुनते ही 3 सेकंड में ऑटो-सेल्फ़ी क्लिक व सेव; जॉइनिंग तारीख से दिन गिनती (2 Oct → 30 Oct = 28 दिन) और Telegram पर सेल्फ़ी अलर्ट।" },
+          { prio: false, t: "2. Member Attendance & Expired Alert", b: "कैलेंडर और ऑटो-सर्च के साथ मेंबर्स की सेल्फ़ी अटेंडेंस, Live Present/Absent, Total Gym Members, आसान Remove, Fees Expire फ़्लैशिंग बोर्ड और Expired Members सूची।" },
+          { prio: false, t: "3. Fees Payment & Instant Receipt", b: "नाम/मोबाइल/पिता के नाम से ऑटो-सर्च; Joining Date, Expiry, Next Fees Date, प्लान व महीने; Edit प्लान विकल्प; Online/Cash मोड; Pay करते ही रसीद डाउनलोड व WhatsApp पर भेजने की सुविधा।" },
+          { prio: false, t: "4. Instant Admission Form + Unique QR", b: "फ़ॉर्म सेव + तुरंत रसीद + Unique QR (स्कैन करके कभी भी फ़ॉर्म देखें) + हटाने तक स्थायी सुरक्षित डेटा + नाम/नंबर से सर्च।" }
         ],
-        extras: [
-          { b: "Due / Pending Fees Filter", s: "बकाया फ़ीस और जल्द एक्सपायर होने वाले सदस्यों पर तुरंत नज़र।" },
-          { b: "Today's Cash + Online Summary", s: "आज की नकद और ऑनलाइन फ़ीस का साफ़ हिसाब एक जगह।" },
-          { b: "Member Status At A Glance", s: "सर्च या QR पर प्लान, वैधता और स्थिति स्पष्ट दिखे।" },
-          { b: "Clean Upgrade Path", s: "बड़े फीचर्स के लिए आगे के प्लान में अपग्रेड करने का साफ़ रास्ता।" }
+        featuresEn: [
+          { prio: true, t: "1. Mark Your Attendance BY QR (First Priority)", b: "QR scan opens attendance directly; one-time Camera & Location permission; 3-sec auto selfie on name/mobile select; days counted from joining date (2 Oct → 30 Oct = 28 days) + instant Telegram selfie alert." },
+          { prio: false, t: "2. Member Attendance & Expired Alert", b: "Member selfie attendance with calendar & auto-search, Live Present/Absent, Total Members, easy remove, Fees Expire flashing board & Expired Members list." },
+          { prio: false, t: "3. Fees Payment & Instant Receipt", b: "Auto-search by name/phone/father name; shows Joining Date, Expiry, Next Fees Date, plan & months; instant Edit plan; Online/Cash → Pay → receipt download + WhatsApp share." },
+          { prio: false, t: "4. Instant Admission Form + Unique QR", b: "Save admission form + instant receipt + Unique QR (scan anytime to view form) + permanent save until removed + search by name/phone." }
         ]
       },
-      en: {
-        back: "← Back to Dashboard",
-        pill: "FIRST / BASE PLAN",
-        title: "First / Base Plan — ₹99",
-        sub: "Essential starter pack for gym owners—QR selfie attendance first, paired with live member/expiry tracking, instant fee receipts, and unique QR admission forms.",
-        cycle: "Base Starter Plan",
-        cta: "Activate ₹99 First Plan",
-        kfTitle: "⭐ Highlighted Key Features",
-        extraTitle: "💡 Extra Helpful Points for Gym Owners",
-        adoptBtn: "Update / Use New Feature",
-        keepBtn: "Stay on Current Version",
-        cards: [
-          {
-            priority: true,
-            badge: "PRIORITY #1 • QR SELF ATTENDANCE",
-            name: "1. Mark Your Attendance BY QR (First Priority)",
-            points: [
-              "Scanning the gym/board QR opens attendance directly.",
-              "One-time Camera & Location permission—no repeated permission prompts later.",
-              "Enter name or mobile & select: auto selfie captures and saves in 3 seconds.",
-              "Attendance days count from joining date (e.g., joined 2 Oct → 28 days by 30 Oct).",
-              "Instant Telegram notification with selfie as soon as attendance is marked."
-            ]
-          },
-          {
-            priority: false,
-            badge: "LIVE BOARD & CALENDAR",
-            name: "2. Member Attendance & Expired Alert",
-            points: [
-              "Member selfie attendance with calendar and auto-search.",
-              "Live Present, Live Absent, Total Gym Members count, and easy remove.",
-              "Fees Expire flashing alert on board, Expired Members list, and calendar-wise member attendance."
-            ]
-          },
-          {
-            priority: false,
-            badge: "INSTANT RECEIPT & WHATSAPP",
-            name: "3. Fees Payment & Instant Receipt",
-            points: [
-              "Auto-search by starting letters of name, mobile, or father name.",
-              "Shows Joining Date, Membership Expiry Date, Next Fees Date, plan, and months.",
-              "Instant Edit option to change plan; choose Online/Cash → Pay → instant receipt download + WhatsApp share."
-            ]
-          },
-          {
-            priority: false,
-            badge: "UNIQUE QR FORM",
-            name: "4. Instant Admission Form + Unique QR",
-            points: [
-              "Fill & save admission form with instant receipt and customer share.",
-              "Unique QR per form so members can scan anytime to view their admission form.",
-              "Permanently saved until removed, with instant search by name or number."
-            ]
-          }
+      199: {
+        titleHi: "Growth Value Plan — ₹199 (Daily Operations)",
+        titleEn: "Growth Value Plan — ₹199 (Daily Operations)",
+        name: "Growth Value Plan (₹199)",
+        amount: 199,
+        featuresHi: [
+          { prio: true, t: "1. ₹99 First Plan की सभी सुविधाएँ शामिल", b: "QR सेल्फ़ी अटेंडेंस, लाइव मेंबर/एक्सपायरी बोर्ड, तुरंत फ़ीस रसीद और यूनिक QR एडमिशन फ़ॉर्म पूरा शामिल।" },
+          { prio: false, t: "2. Live Cash + Online + Supplement / Extra Item Board", b: "आज व महीने का Cash और Online अलग-अलग टोटल, साथ में Supplement, Shaker, Hand Grip या Extra Service की अलग collection ट्रैकिंग।" },
+          { prio: false, t: "3. Due / Pending Fees Reminder & Follow-Up", b: "बकाया फ़ीस और जल्द एक्सपायर होने वाले सदस्यों की सूची व सीधा WhatsApp / कॉल रिमाइंडर।" },
+          { prio: false, t: "4. Walk-In & Lead Enquiry Tracker", b: "जिम में आने वाली नई इन्क्वायरीज़ (Walk-In, Call, Instagram) का नाम, फ़ोन, आयु और सोर्स रिकॉर्ड।" },
+          { prio: false, t: "5. Staff Attendance & Excel / CSV Export", b: "स्टाफ की उपस्थिति/लीव का बेसिक व्यू और मेंबर्स व कलेक्शन का Excel/CSV डेटा डाउनलोड।" }
         ],
-        extras: [
-          { b: "Due / Pending Fees Filter", s: "Spot pending dues and upcoming expiries quickly." },
-          { b: "Today's Cash + Online Summary", s: "Track today's Cash and Online collections clearly." },
-          { b: "Member Status At A Glance", s: "Clear plan, validity, and status on search or QR." },
-          { b: "Clean Upgrade Path", s: "Smooth upgrade to higher plans whenever your gym scales." }
+        featuresEn: [
+          { prio: true, t: "1. Includes All ₹99 Features", b: "Full QR selfie attendance, member attendance & expiry board, instant fee receipts, and unique QR admission forms." },
+          { prio: false, t: "2. Live Cash + Online + Supplement Billing", b: "Separate Cash vs Online totals for today/month plus separate supplement, shaker, and extra service collection." },
+          { prio: false, t: "3. Due Fees Reminder & Follow-Up", b: "Due/pending & near-expiry lists with direct WhatsApp / Call reminder triggers." },
+          { prio: false, t: "4. Walk-In & Lead Enquiry Tracker", b: "Track gym walk-ins, phone inquiries, and social leads with name, phone, age, and source." },
+          { prio: false, t: "5. Staff Basic View & Excel Export", b: "Basic staff attendance/leave view plus full member and collection Excel/CSV export." }
+        ]
+      },
+      399: {
+        titleHi: "Pro Business Plan — ₹399 (Payroll, Expenses & P&L)",
+        titleEn: "Pro Business Plan — ₹399 (Payroll, Expenses & P&L)",
+        name: "Pro Business Plan (₹399)",
+        amount: 399,
+        featuresHi: [
+          { prio: true, t: "1. ₹199 की सभी सुविधाएँ शामिल", b: "QR अटेंडेंस, रसीद, एडमिशन, Cash/Online स्प्लिट, Due रिमाइंडर, लीड्स और CSV एक्सपोर्ट पूरा शामिल।" },
+          { prio: false, t: "2. Full Staff Payroll & Salary Slips", b: "स्टाफ की बेस सैलरी, अलाउंस, बोनस, लेट पेनल्टी, एडवांस कटौती और PF/ESI हिसाब के साथ प्रोफेशनल सैलरी स्लिप वाउचर (Image, PDF, Excel & WhatsApp)।" },
+          { prio: false, t: "3. Maintenance & Light / Vendor Bills Tracker", b: "बिजली बिल (मीटर रीडिंग, यूनिट्स, लोड, बिल फ़ोटो/PDF) और वेंडर बिल (सफ़ाई, मेंटेनेंस, सामान) की एंट्री व एडमिन अप्रूवल/रिजेक्शन।" },
+          { prio: false, t: "4. Net Profit & Loss (P&L) Engine", b: "कुल कलेक्शन (फ़ीस + सप्लीमेंट) माइनस कुल स्वीकृत ख़र्च (सैलरी + बिल) = Net Profit/Loss का लाइव स्टेटमेंट व चार्ट शीट डाउनलोड।" },
+          { prio: false, t: "5. Department-Wise Staff Directory & KYC Vault", b: "स्टाफ का डिपार्टमेंट-वार रिकॉर्ड, मोबाइल, बैंक/PF विवरण और अधिकृत KYC सर्टिफिकेट जनरेशन।" }
+        ],
+        featuresEn: [
+          { prio: true, t: "1. Includes All ₹199 Features", b: "Full attendance, receipts, admissions, collection split, due reminders, leads, and CSV export." },
+          { prio: false, t: "2. Full Staff Payroll & Salary Slips", b: "Base salary, allowances, bonus, late penalty, advance deduction, and PF/ESI calculations with printable vouchers (Image, PDF, Excel & WhatsApp)." },
+          { prio: false, t: "3. Maintenance & Light Bills Tracker", b: "Light bills (meter readings, units, photo/PDF) and consumable/vendor bills with Admin Approve/Reject workflow." },
+          { prio: false, t: "4. Net Profit & Loss (P&L) Engine", b: "Total collection minus total approved expenses = Net Profit/Loss statement with interactive charts and Excel report." },
+          { prio: false, t: "5. Department Staff Directory & KYC Vault", b: "Department-wise staff management, bank details, emergency contacts, and KYC certificate generator." }
+        ]
+      },
+      499: {
+        titleHi: "Advanced Audit & Security Plan — ₹499 (Security & Role Control)",
+        titleEn: "Advanced Audit & Security Plan — ₹499 (Security & Role Control)",
+        name: "Advanced Audit Plan (₹499)",
+        amount: 499,
+        featuresHi: [
+          { prio: true, t: "1. ₹399 की सभी सुविधाएँ शामिल", b: "पेरोल, P&L, मेंटेनेंस बिल, स्टाफ KYC और संपूर्ण ऑपरेशंस शामिल।" },
+          { prio: false, t: "2. Smart GPS Geo-Fence & Anti-Proxy Verification", b: "जिम के निश्चित दायरे (GPS Radius) में ही अटेंडेंस की अनुमति; बाहर से फ़र्ज़ी अटेंडेंस की रोकथाम।" },
+          { prio: false, t: "3. Manager / Receptionist Isolated Portal", b: "मैनेजर और स्टाफ के लिए अलग सुरक्षित पोर्टल — महिला सदस्यों के मोबाइल/पते की प्राइवेसी मास्किंग (***) ताकि डेटा सुरक्षित रहे।" },
+          { prio: false, t: "4. Automated Expiry & WhatsApp Triggers", b: "मेंबरशिप ख़त्म होने से 3 दिन पहले ऑटोमैटिक अलर्ट्स और डायरेक्ट पेमेंट UPI लिंक्स।" },
+          { prio: false, t: "5. Audit Trail & Dispute Desk", b: "हटाए गए सदस्यों का कारण-सहित रिकॉर्ड (Reason mandatory), फ़ीस रीसेट व ऑडिट लॉग्स।" }
+        ],
+        featuresEn: [
+          { prio: true, t: "1. Includes All ₹399 Features", b: "Full payroll, P&L, maintenance approval, staff KYC, and operational controls." },
+          { prio: false, t: "2. Smart GPS Geo-Fence & Anti-Proxy Verification", b: "Restrict attendance strictly within gym perimeter to prevent proxy and fraudulent check-ins." },
+          { prio: false, t: "3. Manager / Receptionist Isolated Portal", b: "Role-restricted manager view with automatic privacy masking (***) for female member contact and address details." },
+          { prio: false, t: "4. Automated Expiry & WhatsApp Triggers", b: "Pre-expiry notifications 3 days prior with instant payment UPI links." },
+          { prio: false, t: "5. Audit Trail & Dispute Desk", b: "Audit logs for removed members with mandatory reason logging and fee dispute handling." }
+        ]
+      },
+      999: {
+        titleHi: "Complete Enterprise ERP — ₹999 (Multi-Branch & Full Freedom)",
+        titleEn: "Complete Enterprise ERP — ₹999 (Multi-Branch & Full Freedom)",
+        name: "Complete Enterprise ERP (₹999)",
+        amount: 999,
+        featuresHi: [
+          { prio: true, t: "1. सभी प्लान्स के समस्त फीचर्स पूर्णतः अनलॉक", b: "कोई सीमा नहीं — अटेंडेंस, एडमिशन, पेरोल, P&L, सिक्योरिटी व ऑडिट के सारे टूल्स सक्रिय।" },
+          { prio: false, t: "2. Multi-Branch Central Operations Desk", b: "एक ही एडमिन लॉगिन से सभी शाखाओं (Branch 001, Branch 002...) का लाइव कलेक्शन, तुलना और सेंट्रलाइज़्ड कंट्रोल।" },
+          { prio: false, t: "3. Unified Data Upload & Auto-Router", b: "पुराने जिम का कोई भी CSV/Excel अपलोड करें — सिस्टम अपने-आप डेटा को एडमिशन, मेंबर्स और स्टाफ में आइसोलेट कर देता है।" },
+          { prio: false, t: "4. Permanent Cloud Backup & Zero-Loss Sync", b: "Firestore क्लाउड बैकअप — फ़ोन बदलने या ऐप री-इंस्टॉल करने पर डेटा 1 सेकंड में वापस।" },
+          { prio: false, t: "5. Custom Gym White-Label Branding & VIP Support", b: "आपके अपने जिम का नाम, लोगो और हेडर टाइटल; भविष्य के अपडेट्स आपके एक्टिव प्लान को बिना बाधित किए मिलेंगे।" }
+        ],
+        featuresEn: [
+          { prio: true, t: "1. All Features from All Plans Unlocked", b: "Unlimited access — attendance, admissions, payroll, P&L, security, and audit tools completely unlocked." },
+          { prio: false, t: "2. Multi-Branch Central Operations Desk", b: "Manage multiple branches (Branch 001, 002, etc.) from a single master dashboard with branch-wise split." },
+          { prio: false, t: "3. Unified Data Upload & Auto-Router", b: "Import any legacy gym CSV/Excel file; system automatically categorizes and routes data into isolated sections." },
+          { prio: false, t: "4. Permanent Cloud Backup & Zero-Loss Sync", b: "Real-time Firestore cloud backup ensuring instant data recovery across any device." },
+          { prio: false, t: "5. Custom Gym White-Label Branding & VIP Support", b: "Custom gym branding, header labels, and non-disruptive cloud developer updates with VIP priority." }
         ]
       }
     };
 
-    let currentLang = "hi";
-    let activePlanRecord = null;
+    let lang = "hi";
+    let insidePlanAmt = null;
+    let activeCloudPlan = null;
 
     function esc(v) {
       return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
@@ -397,159 +422,152 @@
       });
     }
 
-    function getGymKey() {
-      try {
-        var gid = localStorage.getItem("bfc_gid") || "";
-        if (!gid && auth && auth.currentUser) gid = auth.currentUser.uid;
-        return gid || "default_gym";
-      } catch (e) {
-        return "default_gym";
-      }
-    }
+    function setLang(l) {
+      lang = l === "en" ? "en" : "hi";
+      document.getElementById("btnHi").classList.toggle("active", lang === "hi");
+      document.getElementById("btnEn").classList.toggle("active", lang === "en");
+      document.getElementById("backLink").textContent = lang === "hi" ? "← डैशबोर्ड" : "← Dashboard";
+      
+      const hints = ["p99OpenHint", "p199OpenHint", "p399OpenHint", "p499OpenHint", "p999OpenHint"];
+      hints.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = lang === "hi" ? "विस्तार से देखें →" : "View Details →";
+      });
 
-    async function loadPlanFromCloud() {
-      try {
-        var localP = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
-        if (localP && localP.amount) activePlanRecord = localP;
-      } catch (e) {}
+      document.getElementById("btnBackToPlans").textContent = lang === "hi" ? "← सभी प्लान" : "← All Plans";
+      document.getElementById("btnActivateInside").textContent = lang === "hi" ? "इस प्लान के लिए अनुरोध करें" : "Request This Plan";
+      
+      document.getElementById("introTitle").textContent = lang === "hi" ? "Gym Management Plans & Scalability" : "Gym Management Plans & Scalability";
+      document.getElementById("introSub").textContent = lang === "hi" 
+        ? "5 सरल और पारदर्शी प्लान — शुरुआत से लेकर मल्टी-ब्रांच एंटरप्राइज़ तक, अपनी ज़रूरत के अनुसार सही प्लान चुनें।"
+        : "5 clear, transparent plans — from single-desk starter to multi-branch enterprise scale, pick what fits your gym best.";
 
-      if (db) {
-        try {
-          var gid = getGymKey();
-          var snap = await db.collection("subscriptions").doc(gid).get();
-          if (snap.exists && snap.data() && snap.data().amount) {
-            activePlanRecord = snap.data();
-            try { localStorage.setItem("om_active_subscription_plan", JSON.stringify(activePlanRecord)); } catch (e) {}
-          }
-        } catch (e) {}
-      }
       renderPlanStatus();
-      renderOptInUpdateBanner();
+      if (insidePlanAmt) renderInsidePlan();
     }
 
-    async function savePlanToCloud(planObj) {
-      try { localStorage.setItem("om_active_subscription_plan", JSON.stringify(planObj)); } catch (e) {}
-      if (db) {
-        try {
-          var gid = getGymKey();
-          await db.collection("subscriptions").doc(gid).set(Object.assign({}, planObj, { gymId: gid, updatedAt: Date.now() }), { merge: true });
-        } catch (e) {}
+    function openInsidePlan(amt) {
+      insidePlanAmt = amt;
+      document.getElementById("outerPlansGrid").style.display = "none";
+      document.getElementById("insidePlanView").classList.add("open");
+      renderInsidePlan();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function closeInsidePlan() {
+      insidePlanAmt = null;
+      document.getElementById("insidePlanView").classList.remove("open");
+      document.getElementById("outerPlansGrid").style.display = "grid";
+    }
+
+    function renderInsidePlan() {
+      const p = PLAN_DETAILS[insidePlanAmt] || PLAN_DETAILS[99];
+      document.getElementById("insidePlanTitle").textContent = lang === "hi" ? p.titleHi : p.titleEn;
+      const list = lang === "hi" ? p.featuresHi : p.featuresEn;
+      document.getElementById("insideFeaturesContainer").innerHTML = list.map(f => {
+        return `<div class="feat-card ${f.prio ? "first-prio" : ""}"><div class="feat-title">${esc(f.t)}</div><div class="feat-body">${esc(f.b)}</div></div>`;
+      }).join("");
+    }
+
+    async function activateCurrentInsidePlan() {
+      const p = PLAN_DETAILS[insidePlanAmt] || PLAN_DETAILS[99];
+      if (!auth || !auth.currentUser || !db) {
+        alert("Pehle Gym Owner account se login karein. Plan request ke liye verified account aur Firebase connection zaroori hai.");
+        location.href = "login.html";
+        return;
+      }
+      const uid = auth.currentUser.uid;
+      let claims = {};
+      try { claims = (await auth.currentUser.getIdTokenResult(true)).claims || {}; } catch (e) {}
+      const gymId = String(claims.gymId || claims.orgId || uid);
+      if (claims.masterAdmin === true) {
+        alert("Master Admin account par plans purchase ki zaroorat nahi hai.");
+        return;
+      }
+      if (claims.role && claims.role !== "owner") {
+        alert("Plan purchase request sirf Gym Owner bhej sakta hai. Manager/Staff apne Gym Owner se contact karein.");
+        return;
+      }
+      const ownerCheck = await db.collection("owner_accounts").doc(uid).get();
+      if (!ownerCheck.exists) {
+        alert("Sirf verified Gym Owner plan purchase request bhej sakta hai.");
+        return;
+      }
+      const request = {
+        uid: uid,
+        gymId: gymId,
+        planName: p.name,
+        amount: p.amount,
+        status: "pending",
+        requestedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        source: "plans-page"
+      };
+      try {
+        await db.collection("plan_requests").doc(uid).set(request, { merge: true });
+        document.getElementById("statusPill").textContent = "REQUEST PENDING";
+        document.getElementById("statusHeadline").textContent = p.name + " — approval pending";
+        document.getElementById("statusMeta").textContent = "Payment verification ke baad Master Admin plan activate karega.";
+        alert("Plan request submit ho gayi. Payment verify hone ke baad Master Admin aapka plan activate karega. Abhi features locked rahenge.");
+      } catch (e) {
+        console.error(e);
+        alert("Plan request save nahi hui. Firebase login aur Firestore rules check karein.");
       }
     }
 
     function renderPlanStatus() {
-      var pill = document.getElementById("statusPill");
-      var head = document.getElementById("statusHeadline");
-      var meta = document.getElementById("statusMeta");
-      if (activePlanRecord && activePlanRecord.amount) {
-        pill.textContent = currentLang === "hi" ? "सक्रिय प्लान (CLOUD SAVED)" : "ACTIVE PLAN (CLOUD SAVED)";
-        head.textContent = "You have already a ₹" + activePlanRecord.amount + " plan";
-        meta.textContent = (activePlanRecord.name || "First Plan") + (activePlanRecord.versionChoice ? " • " + activePlanRecord.versionChoice : "");
+      const pill = document.getElementById("statusPill");
+      const head = document.getElementById("statusHeadline");
+      if (activeCloudPlan && activeCloudPlan.status === "active" && activeCloudPlan.amount) {
+        pill.textContent = lang === "hi" ? "सक्रिय प्लान" : "ACTIVE PLAN";
+        head.textContent = (activeCloudPlan.name || "Plan") + " — ₹" + activeCloudPlan.amount;
+        document.getElementById("statusMeta").textContent = "Verified cloud subscription";
+      } else if (activeCloudPlan && activeCloudPlan.status === "pending") {
+        pill.textContent = "REQUEST PENDING";
+        head.textContent = (activeCloudPlan.name || "Selected plan") + " — approval pending";
+        document.getElementById("statusMeta").textContent = "Features remain locked until approval";
       } else {
-        pill.textContent = currentLang === "hi" ? "ट्रायल / बेस प्लान" : "TRIAL / BASE";
-        head.textContent = currentLang === "hi"
-          ? "अभी कोई पेड प्लान एक्टिव नहीं है — ₹99 First Plan चुनें"
-          : "No paid plan active yet — Choose ₹99 First Plan";
-        meta.textContent = "Cloud Sync Ready";
+        pill.textContent = lang === "hi" ? "प्लान स्थिति" : "PLAN STATUS";
+        head.textContent = lang === "hi" ? "अभी कोई सक्रिय प्लान नहीं है — प्लान चुनकर अनुरोध भेजें" : "No active plan — choose a plan to request activation";
+        document.getElementById("statusMeta").textContent = "Preview only • Purchase required to use features";
       }
-    }
-
-    function renderOptInUpdateBanner() {
-      var banner = document.getElementById("optInUpdateBanner");
-      if (!banner) return;
-      var dismissed = false;
-      try { dismissed = localStorage.getItem("om_dismissed_update_" + APP_RELEASE_NOTICE.version) === "1"; } catch (e) {}
-      if (APP_RELEASE_NOTICE.enabled && !dismissed) {
-        banner.classList.add("show");
-        document.getElementById("updTitle").textContent = currentLang === "hi" ? APP_RELEASE_NOTICE.titleHi : APP_RELEASE_NOTICE.titleEn;
-        document.getElementById("updDesc").textContent = currentLang === "hi" ? APP_RELEASE_NOTICE.descHi : APP_RELEASE_NOTICE.descEn;
-        document.getElementById("updVersionTag").textContent = APP_RELEASE_NOTICE.version + " • OPTIONAL";
-        document.getElementById("btnAdoptUpdate").textContent = PLAN_CONTENT[currentLang].adoptBtn;
-        document.getElementById("btnKeepVersion").textContent = PLAN_CONTENT[currentLang].keepBtn;
-      } else {
-        banner.classList.remove("show");
-      }
-    }
-
-    async function adoptAppUpdate() {
-      if (activePlanRecord && activePlanRecord.amount) {
-        activePlanRecord = Object.assign({}, activePlanRecord, { versionChoice: APP_RELEASE_NOTICE.version + " (Opted-In)" });
-        await savePlanToCloud(activePlanRecord);
-      }
-      renderPlanStatus();
-      alert(currentLang === "hi"
-        ? "नया अपडेट अपनाया गया—आपका मौजूदा प्लान सुरक्षित है।"
-        : "Update applied—your active plan remains untouched.");
-    }
-
-    function keepCurrentVersion() {
-      try { localStorage.setItem("om_dismissed_update_" + APP_RELEASE_NOTICE.version, "1"); } catch (e) {}
-      renderOptInUpdateBanner();
-    }
-
-    function setLang(lang) {
-      currentLang = (lang === "en") ? "en" : "hi";
-      document.documentElement.lang = currentLang;
-      document.getElementById("btnHi").classList.toggle("active", currentLang === "hi");
-      document.getElementById("btnEn").classList.toggle("active", currentLang === "en");
-
-      var c = PLAN_CONTENT[currentLang];
-      document.getElementById("backLink").textContent = c.back;
-      document.getElementById("heroPill").textContent = c.pill;
-      document.getElementById("heroTitle").textContent = c.title;
-      document.getElementById("heroSub").textContent = c.sub;
-      document.getElementById("priceCycle").textContent = c.cycle;
-      document.getElementById("activateBtn").textContent = c.cta;
-      document.getElementById("kfSectionTitle").textContent = c.kfTitle;
-      document.getElementById("extraTitle").textContent = c.extraTitle;
-
-      document.getElementById("keyFeaturesGrid").innerHTML = c.cards.map(function (card) {
-        return `
-          <div class="kf-card ${card.priority ? "priority" : ""}">
-            <div>
-              <div class="kf-head">
-                <div class="kf-name">${esc(card.name)}</div>
-                <span class="kf-badge">${esc(card.badge)}</span>
-              </div>
-              <ul class="kf-list">
-                ${card.points.map(function (pt) { return "<li>" + esc(pt) + "</li>"; }).join("")}
-              </ul>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      document.getElementById("extraGrid").innerHTML = c.extras.map(function (ex) {
-        return `<div class="extra-item"><b>${esc(ex.b)}</b><span>${esc(ex.s)}</span></div>`;
-      }).join("");
-
-      renderPlanStatus();
-      renderOptInUpdateBanner();
-    }
-
-    async function activatePlan99() {
-      // Preserve existing active plan if already active; otherwise activate ₹99 First Plan in Cloud
-      if (activePlanRecord && activePlanRecord.amount) {
-        renderPlanStatus();
-        alert("You have already a ₹" + activePlanRecord.amount + " plan");
-        return;
-      }
-      var obj = {
-        name: "First Plan (Base)",
-        amount: 99,
-        status: "active",
-        activatedAt: new Date().toISOString()
-      };
-      activePlanRecord = obj;
-      await savePlanToCloud(obj);
-      renderPlanStatus();
-      alert("You have already a ₹99 plan — First Plan saved to cloud!");
     }
 
     window.addEventListener("DOMContentLoaded", function () {
-      setLang("hi");
-      loadPlanFromCloud();
+      if (!auth || !db) {
+        document.getElementById("statusMeta").textContent = "Firebase unavailable — login required";
+        setLang("hi"); return;
+      }
+      auth.onAuthStateChanged(async function(user) {
+        if (!user) {
+          activeCloudPlan = null;
+          document.getElementById("statusMeta").textContent = "Login required to view your gym plan";
+          setLang("hi"); return;
+        }
+        try {
+          const token = await user.getIdTokenResult(true);
+          if (token.claims && token.claims.masterAdmin === true) {
+            activeCloudPlan = { name: "Master Admin", amount: 999, status: "active" };
+            document.getElementById("statusMeta").textContent = "Developer / Master Admin • All features";
+            setLang("hi"); return;
+          }
+          const gymId = String((token.claims && (token.claims.gymId || token.claims.orgId)) || user.uid);
+          const snap = await db.collection("subscriptions").doc(gymId).get();
+          activeCloudPlan = snap.exists ? snap.data() : null;
+          setLang("hi");
+          const req = await db.collection("plan_requests").doc(user.uid).get();
+          if ((!activeCloudPlan || activeCloudPlan.status !== "active") && req.exists) {
+            activeCloudPlan = req.data();
+            renderPlanStatus();
+          }
+        } catch (e) {
+          console.error(e);
+          activeCloudPlan = null;
+          document.getElementById("statusMeta").textContent = "Cloud plan status could not be verified";
+          renderPlanStatus();
+        }
+      });
     });
+
   </script>
 </body>
 </html>

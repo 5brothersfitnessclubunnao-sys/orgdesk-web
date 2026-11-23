@@ -7,6 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-functions-compat.js"></script>
   <style>
     :root{--bg:#0b0b0d;--card:#151519;--border:#2c2c36;--ac:#ffcc00;--tx:#f4f4f8;--mut:#9a9aa8;--ok:#2ecc71;--err:#ff5c5c}
     *{box-sizing:border-box}
@@ -102,8 +103,8 @@
         <option value="What is your first gym location or city?">What is your first gym location or city?</option>
       </select>
     </div>
-    <div class="field">
-      <label>Security Question Answer *</label>
+    <div class="field" style="display:none">
+      <label>Security Question Answer</label>
       <input type="text" id="suSecAnswer" required placeholder="Enter your answer">
     </div>
     <button type="submit" class="btn-main" id="suSubmitBtn">Sign Up &amp; Create Owner Account</button>
@@ -147,6 +148,7 @@
 
   <!-- MANAGER / STAFF LOGIN FORM (NO SIGN-UP OPTION, FIRST-TIME PASSWORD CREATE + MPIN + 3 SECURITY QUESTIONS) -->
   <form id="teamLoginForm" style="display:none" onsubmit="handleTeamLogin(event)" autocomplete="on">
+    <input type="hidden" id="tmGymId" value="">
     <div class="field">
       <label id="teamCodeLabel">Login with Employee ID *</label>
       <input type="text" id="tmEmpCode" name="username" autocomplete="username" required oninput="onTeamCodeChanged()" placeholder="Enter Employee Code / ID">
@@ -158,8 +160,8 @@
     </div>
 
     <label class="check-inline" style="margin-bottom:8px">
-      <input type="checkbox" id="tmFirstTimeCreatePwd" onchange="toggleTeamFirstTimePwd()">
-      <span>First Time? Create Password khud banayein (Admin password na ho ya time na ho to)</span>
+      <input type="checkbox" id="tmFirstTimeCreatePwd" disabled>
+      <span>First-time activation: Owner/Manager se secure invite link lein (backend setup required)</span>
     </label>
 
     <div class="field" id="tmPasswordField">
@@ -172,9 +174,9 @@
       <input type="password" id="tmMpin" inputmode="numeric" maxlength="6" placeholder="Enter or create 4-6 digit MPIN">
     </div>
 
-    <div class="field">
-      <label>Security Question (3 Options) *</label>
-      <select id="tmSecQuestion" required>
+    <div class="field" style="display:none">
+      <label>Security Question (3 Options)</label>
+      <select id="tmSecQuestion">
         <option value="What is your favorite workout exercise?">What is your favorite workout exercise?</option>
         <option value="What is your childhood nickname?">What is your childhood nickname?</option>
         <option value="What is your first gym location or city?">What is your first gym location or city?</option>
@@ -183,7 +185,7 @@
 
     <div class="field">
       <label>Security Question Answer *</label>
-      <input type="text" id="tmSecAnswer" required placeholder="Enter your security answer">
+      <input type="text" id="tmSecAnswer" placeholder="Enter your security answer">
     </div>
 
     <button type="submit" class="btn-main" id="tmSubmitBtn">Login</button>
@@ -198,12 +200,12 @@
 <div class="modal-ov" id="ownerRecoveryModal">
   <div class="modal-bx">
     <h3 id="recTitle" style="color:var(--ac);margin:0 0 8px;font-size:16px">Account Recovery</h3>
-    <p class="sub" style="margin-bottom:10px">Email verification link ya Mobile OTP bhejkar Password / MPIN reset karein ya Email ID khojein.</p>
+    <p class="sub" style="margin-bottom:10px">Registered email par Firebase password-reset link bhejein. Mobile OTP / MPIN recovery ke liye secure backend setup zaroori hai.</p>
     <div class="field">
       <label>Registered Email or Mobile No. *</label>
       <input type="text" id="recContactInput" placeholder="owner@gym.com or 9876543210">
     </div>
-    <button type="button" class="btn-sec" onclick="sendRecoveryOtp()">Send Email / Mobile OTP</button>
+    <button type="button" class="btn-sec" onclick="sendRecoveryOtp()">Send Password Reset Email</button>
     <div id="recOtpSection" style="display:none;margin-top:10px">
       <div id="recOtpDemoHint" style="font-size:11px;color:var(--ok);margin-bottom:6px"></div>
       <div class="field">
@@ -252,6 +254,7 @@
   if (!firebase.apps.length) firebase.initializeApp(FB_CFG);
   const auth = firebase.auth();
   const db = firebase.firestore();
+  const functions = firebase.app().functions("asia-south1");
 
   const OWNERS_KEY = "om_registered_owners_v1";
   let currentRole = "owner";
@@ -357,23 +360,25 @@
     btn.textContent = "Creating account...";
 
     try {
-      let uid = "owner_" + Date.now();
+      // Firebase Auth is the source of truth. Never create a local/synthetic owner.
+      let cred;
       try {
-        const cred = await auth.createUserWithEmailAndPassword(email, password);
-        if (cred && cred.user) {
-          uid = cred.user.uid;
-          await cred.user.updateProfile({ displayName: ownerName });
-        }
+        cred = await auth.createUserWithEmailAndPassword(email, password);
+        if (!cred || !cred.user) throw new Error("Firebase account create nahi hua.");
+        await cred.user.updateProfile({ displayName: ownerName });
       } catch (fbErr) {
         if (fbErr && fbErr.code === "auth/email-already-in-use") {
           showErr("You are already sign up Account please Login");
           setOwnerMode("signin");
           $("liOwnerEmail").value = email;
-          btn.disabled = false;
-          btn.textContent = "Sign Up & Create Owner Account";
-          return;
+        } else {
+          showErr((fbErr && fbErr.message) || "Firebase account create nahi ho saka. Dobara try karein.");
         }
+        btn.disabled = false;
+        btn.textContent = "Sign Up & Create Owner Account";
+        return;
       }
+      const uid = cred.user.uid;
 
       const orgId = uid;
       const profile = {
@@ -386,26 +391,34 @@
         phone,
         dob,
         email,
-        mpin,
+        // MPIN and security-answer verification must be stored/verified server-side.
         secQuestion,
-        secAnswer,
         createdAt: new Date().toISOString()
       };
 
-      owners.push(profile);
+      // Keep only non-secret profile metadata on this device.
+      const safeProfile = Object.assign({}, profile);
+      owners.push(safeProfile);
       writeOwners(owners);
-      localStorage.setItem("om_org_profile", JSON.stringify(profile));
-      localStorage.setItem("om_last_org_profile", JSON.stringify(profile));
-      localStorage.setItem("om_org_profile_saved_" + uid, JSON.stringify(profile));
+      localStorage.setItem("om_org_profile", JSON.stringify(safeProfile));
+      localStorage.setItem("om_last_org_profile", JSON.stringify(safeProfile));
+      localStorage.setItem("om_org_profile_saved_" + uid, JSON.stringify(safeProfile));
       localStorage.setItem("om_active_role", "owner");
       localStorage.setItem("om_session_active", "1");
       localStorage.setItem("om_last_activity_time", String(Date.now()));
 
       try {
-        await db.collection("owner_accounts").doc(uid).set(Object.assign({}, profile, { passwordHidden: true }), { merge: true });
-      } catch (e2) {}
+        await db.collection("owner_accounts").doc(uid).set(safeProfile, { merge: true });
+      } catch (e2) {
+        try { await cred.user.delete(); } catch (rollbackError) {}
+        try { await auth.signOut(); } catch (signoutError) {}
+        showErr("Account bana, lekin Gym profile cloud me save nahi hui. Security ke liye account rollback kiya. Firestore Rules check karein.");
+        btn.disabled = false;
+        btn.textContent = "Sign Up & Create Owner Account";
+        return;
+      }
 
-      showOk("Gym Owner Account created! Redirecting to dashboard...");
+      showOk("Owner account create ho gaya. Abhi Email + Password login active hai; MPIN/security-answer verification secure backend deploy hone ke baad activate hogi. Redirecting...");
       setTimeout(() => { window.location.replace("index.html"); }, 900);
     } catch (err) {
       showErr((err && err.message) || "Sign up failed");
@@ -438,10 +451,8 @@
 
     try {
       if (loginMethod === "mpin") {
-        if (!rec || String(rec.mpin || "") !== mpin) {
-          showErr("Invalid Email ya MPIN.");
-          return;
-        }
+        showErr("Secure MPIN login abhi server-side verification ke bina enable nahi hai. Password se login karein.");
+        return;
       } else {
         if (!pwd) { showErr("Please enter password."); return; }
         let authed = false;
@@ -449,8 +460,7 @@
           const cred = await auth.signInWithEmailAndPassword(email, pwd);
           if (cred && cred.user) authed = true;
         } catch (authErr) {
-          if (rec && rec.fallbackPwd && rec.fallbackPwd === pwd) authed = true;
-          else throw authErr;
+          throw authErr;
         }
         if (!authed) { showErr("Invalid Email or Password."); return; }
       }
@@ -463,7 +473,9 @@
         gymName: (rec && (rec.gymName || rec.orgName)) || "Gym",
         secAnswer: secAns || (rec && rec.secAnswer) || ""
       });
-      if (pwd && !finalProf.fallbackPwd) finalProf.fallbackPwd = pwd;
+      delete finalProf.fallbackPwd;
+      delete finalProf.mpin;
+      delete finalProf.secAnswer;
 
       const updatedOwners = owners.filter(o => String(o.email || "").toLowerCase() !== email);
       updatedOwners.push(finalProf);
@@ -519,148 +531,42 @@
   }
 
   function onTeamCodeChanged() {
-    const code = (($("tmEmpCode") && $("tmEmpCode").value) || "").trim().toLowerCase();
-    if (!code) return;
-    const saved = readTeamCreds()[code];
-    if (saved) {
-      if (saved.password && $("tmPassword") && !$("tmPassword").value) $("tmPassword").value = saved.password;
-      if (saved.mpin && $("tmMpin") && !$("tmMpin").value) $("tmMpin").value = saved.mpin;
-      if (saved.secQuestion && $("tmSecQuestion")) $("tmSecQuestion").value = saved.secQuestion;
-      if (saved.secAnswer && $("tmSecAnswer") && !$("tmSecAnswer").value) $("tmSecAnswer").value = saved.secAnswer;
-    }
+    // Never auto-fill employee passwords, MPINs, or security answers from localStorage.
   }
 
-  function handleTeamLogin(e) {
+  async function handleTeamLogin(e) {
     e.preventDefault();
     clearAlerts();
-
-    const code = $("tmEmpCode").value.trim();
-    const pwd = $("tmPassword") ? $("tmPassword").value : "";
-    const mpin = $("tmMpin") ? $("tmMpin").value.trim() : "";
-    const secQ = $("tmSecQuestion") ? $("tmSecQuestion").value : "";
-    const secA = ($("tmSecAnswer") ? $("tmSecAnswer").value : "").trim().toLowerCase();
-    const firstTimeCreate = !!($("tmFirstTimeCreatePwd") && $("tmFirstTimeCreatePwd").checked);
-
-    if (!code) { showErr("Please enter Employee ID / Code."); return; }
-    if (!secA) { showErr("Please answer the Security Question."); return; }
-
-    let teamList = [];
-    try { teamList = JSON.parse(localStorage.getItem("bfc_staff_list") || "[]") || []; } catch (x) {}
-
-    let matched = teamList.find(item => {
-      const itemRole = String(item.accessRole || item.role || "staff").toLowerCase();
-      const roleMatch = (currentRole === "manager") ? itemRole.includes("manager") : !itemRole.includes("manager");
-      return roleMatch && String(item.empCode || item.id || "").trim().toLowerCase() === code.toLowerCase();
-    });
-
-    const savedCredsMap = readTeamCreds();
-    const localSaved = savedCredsMap[code.toLowerCase()];
-
-    // If first-time create password is checked or user is setting up on this device when admin hasn't set password yet
-    if (!matched && firstTimeCreate) {
-      if (!pwd || pwd.length < 4) {
-        showErr("First time password kam se kam 4 characters ka banayein.");
-        return;
-      }
-      if (mpin && !/^\d{4,6}$/.test(mpin)) {
-        showErr("MPIN 4 se 6 digits ka hona chahiye.");
-        return;
-      }
-      matched = {
-        id: code,
-        empCode: code,
-        name: code,
-        accessRole: currentRole,
-        role: currentRole,
-        department: currentRole === "manager" ? "Management" : "Staff",
-        loginPassword: pwd,
-        mpin: mpin || "",
-        secQuestion: secQ,
-        secAnswer: secA,
-        joinDate: new Date().toISOString().slice(0, 10)
-      };
-      teamList.push(matched);
-      localStorage.setItem("bfc_staff_list", JSON.stringify(teamList));
+    const code = ($("tmEmpCode").value || "").trim();
+    const gymId = ($("tmGymId").value || "").trim();
+    const method = teamLoginMethod === "mpin" ? "mpin" : "password";
+    const secret = method === "mpin" ? (($("tmMpin") && $("tmMpin").value) || "").trim() : (($("tmPassword") && $("tmPassword").value) || "");
+    if (!gymId) { showErr("Ye secure invite link incomplete hai. Gym Owner se naya Manager/Staff invite link lein."); return; }
+    if (!code || !secret) { showErr("Employee Code aur Password/MPIN dono zaroori hain."); return; }
+    try {
+      const callable = functions.httpsCallable("loginTeamWithCode");
+      const result = await callable({ gymId, employeeCode: code, role: currentRole, method, secret });
+      const data = result.data || {};
+      if (!data.token) throw new Error("Secure login token nahi mila.");
+      await auth.signInWithCustomToken(data.token);
+      localStorage.setItem("bfc_role", data.role);
+      localStorage.setItem("om_active_role", data.role);
+      localStorage.setItem("bfc_gid", data.gymId);
+      localStorage.setItem("om_logged_user", data.name || data.employeeCode || code);
+      localStorage.setItem("om_team_session", JSON.stringify({
+        role: data.role, empId: data.employeeCode, empCode: data.employeeCode,
+        empName: data.name, orgId: data.gymId, branchId: data.branchId,
+        department: data.role === "manager" ? "Management" : "Staff",
+        loggedInAt: new Date().toISOString()
+      }));
+      localStorage.setItem("om_session_active", "1");
+      localStorage.setItem("om_last_activity_time", String(Date.now()));
+      showOk(data.role.toUpperCase() + " secure login successful!");
+      setTimeout(() => window.location.replace("index.html"), 400);
+    } catch (err) {
+      console.error(err);
+      showErr(err && err.message ? err.message.replace("Firebase: ", "") : "Login verify nahi ho paya. Code aur password check karein.");
     }
-
-    if (!matched && !localSaved) {
-      showErr("Employee ID nahi mila. Pehli baar password khud banana hai to 'First Time? Create Password' tick karein ya Forgot par click karein.");
-      return;
-    }
-
-    const activeRecord = matched || localSaved;
-    const expectedPwd = String(activeRecord.loginPassword || activeRecord.password || "");
-    const expectedMpin = String(activeRecord.mpin || "");
-
-    if (firstTimeCreate && pwd) {
-      activeRecord.loginPassword = pwd;
-      if (matched) matched.loginPassword = pwd;
-    } else if (teamLoginMethod === "mpin") {
-      if (!mpin || !/^\d{4,6}$/.test(mpin)) {
-        showErr("Please enter valid 4-6 digit MPIN.");
-        return;
-      }
-      if (expectedMpin && expectedMpin !== mpin) {
-        showErr("MPIN galat hai.");
-        return;
-      }
-      if (!expectedMpin) {
-        activeRecord.mpin = mpin;
-        if (matched) matched.mpin = mpin;
-      }
-    } else {
-      if (expectedPwd && pwd !== expectedPwd) {
-        showErr("Password galat hai. Agar password nahi mila hai to 'First Time? Create Password' tick karke naya password banayein.");
-        return;
-      }
-      if (!expectedPwd && pwd) {
-        activeRecord.loginPassword = pwd;
-        if (matched) matched.loginPassword = pwd;
-      }
-    }
-
-    if (activeRecord.secAnswer && String(activeRecord.secAnswer).toLowerCase() !== secA) {
-      showErr("Security Question ka jawab galat hai.");
-      return;
-    }
-    activeRecord.secQuestion = secQ;
-    activeRecord.secAnswer = secA;
-
-    if (matched) {
-      const updated = teamList.map(x => String(x.id) === String(matched.id) ? Object.assign({}, x, matched) : x);
-      localStorage.setItem("bfc_staff_list", JSON.stringify(updated));
-    }
-
-    // Save on device for automatic autofill next time
-    savedCredsMap[code.toLowerCase()] = {
-      code,
-      role: currentRole,
-      password: activeRecord.loginPassword || pwd || "",
-      mpin: activeRecord.mpin || mpin || "",
-      secQuestion: secQ,
-      secAnswer: secA
-    };
-    writeTeamCreds(savedCredsMap);
-
-    const lp = JSON.parse(localStorage.getItem("om_last_org_profile") || localStorage.getItem("om_org_profile") || "{}") || {};
-    const roleSession = {
-      role: currentRole,
-      empId: activeRecord.id || code,
-      empCode: activeRecord.empCode || code,
-      empName: activeRecord.name || code,
-      department: activeRecord.department || activeRecord.role || currentRole,
-      orgId: activeRecord.orgId || lp.orgId || "",
-      orgName: lp.orgName || lp.gymName || "Gym",
-      loggedInAt: new Date().toISOString()
-    };
-
-    localStorage.setItem("om_active_role", currentRole);
-    localStorage.setItem("om_team_session", JSON.stringify(roleSession));
-    localStorage.setItem("om_session_active", "1");
-    localStorage.setItem("om_last_activity_time", String(Date.now()));
-
-    showOk(currentRole.toUpperCase() + " login successful!");
-    setTimeout(() => { window.location.replace("index.html"); }, 700);
   }
 
   function openRecoveryModal(type) {
@@ -676,41 +582,21 @@
 
   async function sendRecoveryOtp() {
     const contact = $("recContactInput").value.trim();
-    if (!contact) { alert("Please enter Email or Mobile number."); return; }
-    activeOtp = String(Math.floor(100000 + Math.random() * 900000));
-    if (contact.includes("@")) {
-      try { await auth.sendPasswordResetEmail(contact); } catch (e) {}
+    if (!contact || !contact.includes("@")) {
+      $("recOutputBox").textContent = "Password recovery ke liye registered email address enter karein. Mobile OTP backend abhi configured nahi hai.";
+      return;
     }
-    $("recOtpSection").style.display = "block";
-    $("recOtpDemoHint").innerHTML = "OTP sent to <b>" + contact + "</b> • Verification OTP: <b style='color:#ffcc00'>" + activeOtp + "</b>";
+    try {
+      await auth.sendPasswordResetEmail(contact);
+      $("recOtpSection").style.display = "none";
+      $("recOutputBox").textContent = "Firebase password-reset email bhej diya gaya hai. Apne inbox/spam folder me link open karke password reset karein. Is page par OTP enter karne ki zaroorat nahi hai.";
+    } catch (err) {
+      $("recOutputBox").textContent = (err && err.message) || "Reset email bheja nahi ja saka.";
+    }
   }
 
   async function applyRecoveryReset() {
-    const contact = $("recContactInput").value.trim().toLowerCase();
-    const otp = $("recOtpCodeInput").value.trim();
-    if (!activeOtp || otp !== activeOtp) {
-      $("recOutputBox").innerHTML = "<span style='color:#ff9494'>OTP match nahi hua.</span>";
-      return;
-    }
-    const owners = readOwners();
-    const idx = owners.findIndex(o => String(o.email || "").toLowerCase() === contact || String(o.phone || "") === contact.replace(/\D/g, ""));
-    if (recoveryType === "email") {
-      if (idx >= 0) {
-        $("recOutputBox").innerHTML = "<span style='color:#8dffb8'>Registered Email ID: <b>" + owners[idx].email + "</b></span>";
-        $("liOwnerEmail").value = owners[idx].email;
-      } else {
-        $("recOutputBox").innerHTML = "<span style='color:#ff9494'>Is number/email se koi owner account nahi mila.</span>";
-      }
-      return;
-    }
-    const newVal = $("recNewSecretInput").value.trim();
-    if (!newVal) { $("recOutputBox").innerHTML = "<span style='color:#ff9494'>New value zaroori hai.</span>"; return; }
-    if (idx >= 0) {
-      if (recoveryType === "mpin") owners[idx].mpin = newVal;
-      else owners[idx].fallbackPwd = newVal;
-      writeOwners(owners);
-    }
-    $("recOutputBox").innerHTML = "<span style='color:#8dffb8'>" + (recoveryType === "mpin" ? "MPIN" : "Password") + " successfully reset! Ab aap login kar sakte hain.</span>";
+    $("recOutputBox").textContent = "Is page ka local OTP reset band hai. Password reset ke liye registered email par Firebase ka reset link use karein. MPIN reset ke liye secure backend deployment zaroori hai.";
   }
 
   function openTeamForgotModal(type) {
@@ -731,25 +617,31 @@
     const owners = readOwners();
     const lp = JSON.parse(localStorage.getItem("om_last_org_profile") || localStorage.getItem("om_org_profile") || "{}") || {};
     const ownerRec = owners[0] || lp;
-    const adminWa = String((ownerRec && ownerRec.phone) || "919990954574").replace(/\D/g, "");
-    const waNum = adminWa.length === 10 ? ("91" + adminWa) : (adminWa || "919990954574");
+    const adminWa = String((ownerRec && ownerRec.phone) || "").replace(/\D/g, "");
+    if (!adminWa) {
+      showErr("Gym Owner ka registered contact nahi mila. Owner se contact details update karwayein.");
+      return;
+    }
+    const waNum = adminWa.length === 10 ? ("91" + adminWa) : adminWa;
 
     const msg = `Please Help me in this
 Role: ${currentRole.toUpperCase()}
 Request: ${teamForgotType === "code" ? "Forgot Employee ID/Code" : "Forgot Password"}
 Name: ${nm}
 Contact: ${ct}`;
-    $("tfResultBox").innerHTML = "<span style='color:#8dffb8'>Request Gym Owner ko bheji ja rahi hai (WhatsApp &amp; Email alert). Gym Owner ke paas aapka code aur password record rehta hai.</span>";
+    $("tfResultBox").textContent = "WhatsApp request open ho rahi hai. Email alert tabhi bheja ja sakta hai jab verified email-notification backend configure ho.";
     window.open("https://wa.me/" + waNum + "?text=" + encodeURIComponent(msg), "_blank");
   }
 
   (function initRoleFromQuery(){
-    const qRole = (new URLSearchParams(window.location.search).get("role") || "").toLowerCase();
-    if (qRole === "manager" || qRole === "staff" || qRole === "owner") {
-      if (qRole !== "owner") {
-        $("roleSelectorBar").style.display = "none";
-      }
+    const params = new URLSearchParams(window.location.search);
+    const qRole = (params.get("role") || "").toLowerCase();
+    const gymId = params.get("gymId") || "";
+    if ($("tmGymId")) $("tmGymId").value = gymId;
+    if ((qRole === "manager" || qRole === "staff") && gymId) {
+      $("roleSelectorBar").style.display = "none";
       selectRole(qRole);
+      ["owner","manager","staff"].forEach(r => { const b=$("roleBtn_"+r); if(b) b.style.display = r===qRole ? "block" : "none"; });
     } else {
       selectRole("owner");
     }
