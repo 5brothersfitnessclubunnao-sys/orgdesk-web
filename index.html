@@ -2724,5 +2724,81 @@ window.requestPlanSelection = function(amt, label) {
 };
 </script>
 
+
+<script>
+(function ownerOldDataAndDemoPreviewController() {
+  function isDemoPreviewMode() {
+    try {
+      var activePlan = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
+      if (activePlan && activePlan.status === "active" && Number(activePlan.amount || 0) > 0) return false;
+      return localStorage.getItem("om_demo_preview_active") === "1";
+    } catch (e) { return false; }
+  }
+
+  function effectivePlanTier() {
+    var tier = 0;
+    try {
+      var activePlan = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
+      if (activePlan && Number(activePlan.amount || 0) > 0) tier = Math.max(tier, Number(activePlan.amount));
+    } catch (e) {}
+    try {
+      var prevAmt = Number(localStorage.getItem("om_preview_plan_amount") || 0);
+      if (prevAmt > 0) tier = Math.max(tier, prevAmt);
+    } catch (e) {}
+    return tier;
+  }
+
+  window.addEventListener("DOMContentLoaded", function () {
+    var role = String(localStorage.getItem("bfc_role") || localStorage.getItem("om_active_role") || "").toLowerCase();
+    var p1 = document.getElementById("page1");
+    if (role === "owner" && p1 && !document.getElementById("ownerTopActionBanner")) {
+      var banner = document.createElement("div");
+      banner.id = "ownerTopActionBanner";
+      banner.className = "box-card";
+      banner.style.cssText = "border-color:var(--gold);margin-bottom:12px";
+
+      var demoMsg = isDemoPreviewMode()
+        ? `<div class="rec" style="border-color:var(--rose);color:#fecdd3;margin-bottom:8px">
+             <b>Abhi aap ye plan dekh sakte hain demo ke roop me; logout karte hi saari detail reset ho jayegi. Please purchase our ₹999 plan.</b>
+           </div>`
+        : "";
+
+      var brCount = 1;
+      try { brCount = Number(localStorage.getItem("om_multi_gym_count") || 1); } catch (e) {}
+      var stfList = [];
+      try { stfList = JSON.parse(localStorage.getItem("om_final_staff_v1") || "[]") || []; } catch (e) {}
+
+      banner.innerHTML = demoMsg + `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <div>
+            <b style="color:var(--cyan);font-size:13px">📤 Please upload your Old data to Live information</b>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Selected Gyms: <b>${brCount}</b> • Branch Employees Registered: <b>${stfList.length}</b></div>
+          </div>
+          <label class="sub-btn" style="cursor:pointer">
+            Upload Excel / CSV
+            <input type="file" accept=".csv,.xlsx,.xls" style="display:none" onchange="if(typeof runRouter==='function')runRouter(event)">
+          </label>
+        </div>
+      `;
+      p1.insertBefore(banner, p1.firstChild);
+    }
+  });
+
+  // Reset demo details on logout
+  var origLogout = window.logoutUser;
+  window.logoutUser = function () {
+    try {
+      if (localStorage.getItem("om_demo_preview_active") === "1") {
+        ["om_demo_preview_active", "om_preview_plan_amount", "om_multi_gym_count", "om_assigned_999_tier_preview", "om_owner_account_v1", "om_active_gym_profile"].forEach(function (k) {
+          localStorage.removeItem(k);
+        });
+      }
+    } catch (e) {}
+    if (typeof origLogout === "function") origLogout();
+    else location.replace("login.html");
+  };
+})();
+</script>
+
 </body>
 </html>
