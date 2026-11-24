@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OrgDesk - Plan Upgrade & Payment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-500/30">
+          OD
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white leading-tight">OrgDesk Fitness</h1>
+          <p class="text-xs text-slate-400">Subscription & Billing Portal</p>
+        </div>
+      </div>
+      <div id="userBadge" class="hidden items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700 text-xs">
+        <i class="fa-solid fa-user-check text-emerald-400"></i>
+        <span id="userEmailDisplay" class="text-slate-300 font-medium">Logged In</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-8">
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <span class="text-blue-400 text-xs font-bold tracking-widest uppercase bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">Upgrade Your Gym</span>
+      <h2 class="text-3xl font-extrabold text-white mt-3">Select Plan & Make Payment</h2>
+      <p class="text-slate-400 mt-2 text-sm">Choose your subscription plan, complete the payment via UPI, and submit your UTR for instant processing.</p>
+    </div>
+
+    <!-- Alert Message Container -->
+    <div id="alertBox" class="hidden max-w-2xl mx-auto mb-6 p-4 rounded-xl border text-sm flex items-center gap-3"></div>
+
+    <!-- Plan Selection Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-10">
+      <div class="plan-card bg-slate-800/60 border border-slate-700 hover:border-blue-500 rounded-2xl p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between" onclick="selectPlan(99, 'Basic Plan')">
+        <div>
+          <span class="text-xs font-semibold text-slate-400">Starter</span>
+          <h3 class="text-lg font-bold text-white mt-1">Basic</h3>
+          <div class="text-2xl font-black text-blue-400 mt-2">₹99 <span class="text-xs font-normal text-slate-400">/mo</span></div>
+          <ul class="text-xs text-slate-300 space-y-1.5 mt-3">
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Attendance & Members</li>
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Mobile Directory</li>
+          </ul>
+        </div>
+        <button class="w-full mt-4 py-2 rounded-xl bg-slate-700 hover:bg-blue-600 font-medium text-xs text-white transition-colors">Select Plan</button>
+      </div>
+
+      <div class="plan-card bg-slate-800/60 border border-slate-700 hover:border-blue-500 rounded-2xl p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between" onclick="selectPlan(199, 'Standard Plan')">
+        <div>
+          <span class="text-xs font-semibold text-blue-400">Popular</span>
+          <h3 class="text-lg font-bold text-white mt-1">Standard</h3>
+          <div class="text-2xl font-black text-blue-400 mt-2">₹199 <span class="text-xs font-normal text-slate-400">/mo</span></div>
+          <ul class="text-xs text-slate-300 space-y-1.5 mt-3">
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Staff Management</li>
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Leave & Advances</li>
+          </ul>
+        </div>
+        <button class="w-full mt-4 py-2 rounded-xl bg-slate-700 hover:bg-blue-600 font-medium text-xs text-white transition-colors">Select Plan</button>
+      </div>
+
+      <div class="plan-card bg-slate-800/60 border-2 border-blue-500 bg-blue-950/20 rounded-2xl p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between relative shadow-lg shadow-blue-500/10" onclick="selectPlan(399, 'Pro Plan')">
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">Recommended</span>
+        <div>
+          <span class="text-xs font-semibold text-blue-300">Growth</span>
+          <h3 class="text-lg font-bold text-white mt-1">Pro</h3>
+          <div class="text-2xl font-black text-blue-400 mt-2">₹399 <span class="text-xs font-normal text-slate-400">/mo</span></div>
+          <ul class="text-xs text-slate-300 space-y-1.5 mt-3">
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Salary Slips & Docs</li>
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Multi-branch Support</li>
+          </ul>
+        </div>
+        <button class="w-full mt-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 font-medium text-xs text-white transition-colors">Select Plan</button>
+      </div>
+
+      <div class="plan-card bg-slate-800/60 border border-slate-700 hover:border-blue-500 rounded-2xl p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between" onclick="selectPlan(499, 'Enterprise Plan')">
+        <div>
+          <span class="text-xs font-semibold text-purple-400">Advanced</span>
+          <h3 class="text-lg font-bold text-white mt-1">Enterprise</h3>
+          <div class="text-2xl font-black text-blue-400 mt-2">₹499 <span class="text-xs font-normal text-slate-400">/mo</span></div>
+          <ul class="text-xs text-slate-300 space-y-1.5 mt-3">
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Manager Permissions</li>
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Full Analytics</li>
+          </ul>
+        </div>
+        <button class="w-full mt-4 py-2 rounded-xl bg-slate-700 hover:bg-blue-600 font-medium text-xs text-white transition-colors">Select Plan</button>
+      </div>
+
+      <div class="plan-card bg-slate-800/60 border border-slate-700 hover:border-blue-500 rounded-2xl p-4 cursor-pointer transition-all duration-200 flex flex-col justify-between" onclick="selectPlan(999, 'Master Plan')">
+        <div>
+          <span class="text-xs font-semibold text-amber-400">All Access</span>
+          <h3 class="text-lg font-bold text-white mt-1">Master</h3>
+          <div class="text-2xl font-black text-blue-400 mt-2">₹999 <span class="text-xs font-normal text-slate-400">/mo</span></div>
+          <ul class="text-xs text-slate-300 space-y-1.5 mt-3">
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Unlimited Gyms</li>
+            <li><i class="fa-solid fa-check text-emerald-400 mr-1"></i> Priority Support</li>
+          </ul>
+        </div>
+        <button class="w-full mt-4 py-2 rounded-xl bg-slate-700 hover:bg-blue-600 font-medium text-xs text-white transition-colors">Select Plan</button>
+      </div>
+    </div>
+
+    <!-- Payment Form Section -->
+    <div class="max-w-3xl mx-auto bg-slate-800/80 border border-slate-700 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <!-- QR Code & Details -->
+        <div class="flex flex-col items-center text-center bg-slate-900/60 p-6 rounded-2xl border border-slate-700/50">
+          <h4 class="text-sm font-semibold text-slate-300 mb-1">Scan & Pay via UPI</h4>
+          <p class="text-xs text-slate-400 mb-4">Pay using PhonePe, Paytm, Google Pay, or BHIM</p>
+
+          <div class="bg-white p-3 rounded-2xl shadow-inner mb-4">
+            <img id="qrCodeImg" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=5brothersfitness@upi&pn=OrgDesk&am=399" alt="UPI QR Code" class="w-44 h-44 rounded-lg">
+          </div>
+
+          <div class="w-full bg-slate-800 rounded-xl p-3 border border-slate-700 flex items-center justify-between">
+            <div class="text-left">
+              <p class="text-[10px] text-slate-400 font-medium uppercase">Selected Plan</p>
+              <p id="selectedPlanText" class="text-sm font-bold text-white">Pro Plan (₹399)</p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] text-slate-400 font-medium uppercase">UPI ID</p>
+              <p class="text-xs font-semibold text-blue-400">5brothersfitness@upi</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Inputs -->
+        <form id="paymentForm" onsubmit="handlePaymentSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">12-Digit UTR / Transaction ID <span class="text-rose-500">*</span></label>
+            <input type="text" id="utrInput" required placeholder="e.g. 432198765432" pattern="[A-Za-z0-9]{8,30}" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors uppercase">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Payment Screenshot (Optional)</label>
+            <input type="file" id="proofFileInput" accept="image/*" onchange="handleFileSelect(event)" class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 cursor-pointer">
+          </div>
+
+          <div id="imagePreviewContainer" class="hidden mt-2">
+            <img id="imagePreview" src="" alt="Proof Preview" class="h-20 w-auto rounded-lg border border-slate-700 object-cover">
+          </div>
+
+          <button type="submit" id="submitBtn" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 active:scale-[0.99] font-semibold text-sm text-white rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i> Submit Payment Proof
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-slate-800 bg-slate-950 py-4 text-center text-xs text-slate-500">
+    &copy; 2026 OrgDesk Fitness Management. All rights reserved.
+  </footer>
+
+  <script>
+    // Exact Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU",
+      authDomain: "orgdesk-fc207.firebaseapp.com",
+      projectId: "orgdesk-fc207",
+      storageBucket: "orgdesk-fc207.firebasestorage.app",
+      messagingSenderId: "677150519977",
+      appId: "1:677150519977:web:74de5f488494280d352fb8"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    let selectedAmount = 399;
+    let selectedPlanName = "Pro Plan";
+    let base64Proof = "";
+
+    function currentGymId() {
+      try {
+        if (window.omSecureSession && window.omSecureSession.gymId) {
+          return String(window.omSecureSession.gymId);
+        }
+        const u = auth.currentUser;
+        if (u && u.uid) return String(u.uid);
+        return String(localStorage.getItem("bfc_gid") || "demo_gym");
+      } catch (e) {
+        return "demo_gym";
+      }
+    }
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        document.getElementById('userBadge').classList.remove('hidden');
+        document.getElementById('userBadge').classList.add('flex');
+        document.getElementById('userEmailDisplay').textContent = user.email || user.uid;
+      }
+    });
+
+    function selectPlan(amount, planName) {
+      selectedAmount = amount;
+      selectedPlanName = planName;
+      document.getElementById('selectedPlanText').textContent = `${planName} (₹${amount})`;
+      
+      const upiUrl = `upi://pay?pa=5brothersfitness@upi&pn=OrgDesk&am=${amount}`;
+      document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
+
+      showAlert(`Selected ${planName} for ₹${amount}`, 'info');
+    }
+
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 750000) {
+        showAlert("File size should be less than 750KB", "error");
+        event.target.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        base64Proof = e.target.result;
+        document.getElementById('imagePreview').src = base64Proof;
+        document.getElementById('imagePreviewContainer').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function handlePaymentSubmit(e) {
+      e.preventDefault();
+      const utr = document.getElementById('utrInput').value.trim().toUpperCase();
+      const gymId = currentGymId();
+
+      if (!utr || utr.length < 8) {
+        showAlert("Please enter a valid UTR / Transaction ID", "error");
+        return;
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
+
+      try {
+        const proofPayload = {
+          gymId: gymId,
+          utr: utr,
+          amount: selectedAmount,
+          planName: selectedPlanName,
+          screenshotData: base64Proof || "",
+          status: "pending",
+          submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection("payment_proofs").add(proofPayload);
+
+        const receiptRecord = {
+          gymId: gymId,
+          utr: utr,
+          amount: selectedAmount,
+          planName: selectedPlanName,
+          status: "pending_verification",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection("receipts").add(receiptRecord);
+
+        showAlert("Payment proof submitted successfully! Verification usually takes 5-10 minutes.", "success");
+        document.getElementById('paymentForm').reset();
+        document.getElementById('imagePreviewContainer').classList.add('hidden');
+        base64Proof = "";
+      } catch (err) {
+        console.error("Firestore submission error:", err);
+        showAlert(`Error: ${err.message || "Failed to submit payment proof"}`, "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Submit Payment Proof`;
+      }
+    }
+
+    function showAlert(msg, type = "info") {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-rose-500/10', 'border-rose-500/30', 'text-rose-400', 'bg-blue-500/10', 'border-blue-500/30', 'text-blue-400');
+      
+      if (type === "success") {
+        alertBox.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${msg}`;
+      } else if (type === "error") {
+        alertBox.classList.add('bg-rose-500/10', 'border-rose-500/30', 'text-rose-400');
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${msg}`;
+      } else {
+        alertBox.classList.add('bg-blue-500/10', 'border-blue-500/30', 'text-blue-400');
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${msg}`;
+      }
+    }
+  </script>
+</body>
+</html>
