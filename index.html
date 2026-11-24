@@ -251,7 +251,7 @@
       <div class="dc-row"><div><div class="dc-num" id="vAdmissions" style="color:var(--cyan)">0</div><div class="dc-sub">Tap: admission &amp; services</div></div><span>📈</span></div>
     </div>
 
-    <div class="d-card" onclick="openMod('modExtra')">
+    <div class="d-card" onclick="openMod('modPnl')">
       <div class="dc-top"><span class="dc-lbl" style="color:var(--purple)">💊 Supplement Collection</span><span class="dc-pill">POS Store</span></div>
       <div class="dc-row"><div><div class="dc-num" style="color:var(--purple)">₹0</div><div class="dc-sub">Whey, creatine &amp; shakers</div></div><span>📈</span></div>
     </div>
@@ -266,9 +266,13 @@
       <div class="dc-row"><div><div class="dc-num" id="vNetPnl" style="color:var(--emerald)">₹0</div><div class="dc-sub" id="vExpSub">Exp: ₹0 &bull; Net Profit</div></div><span>📉📈</span></div>
     </div>
 
-    <div class="d-card" onclick="openMod('modExtra')">
-      <div class="dc-top"><span class="dc-lbl" style="color:var(--gold)">✨ Extra Service Collection</span><span class="dc-pill">Add-On</span></div>
-      <div class="dc-row"><div><div class="dc-num" id="vExtraCol" style="color:var(--gold)">₹0</div><div class="dc-sub">PT, steam, diet &amp; extra services</div></div><span>📈</span></div>
+    <div class="d-card" onclick="openPay('pay')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--gold)">&#128179; Pay Fees</span><span class="dc-pill">Collect</span></div>
+      <div class="dc-row"><div><div class="dc-num" style="color:var(--gold);font-size:18px">Fees lo &rarr;</div><div class="dc-sub">Member fees, receipt &amp; dues</div></div><span>&#128179;</span></div>
+    </div>
+    <div class="d-card om-owner-only" onclick="openPay('records')">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--emerald)">&#128210; Fees Records</span><span class="dc-pill">Owner</span></div>
+      <div class="dc-row"><div><div class="dc-num" style="color:var(--emerald);font-size:18px">Records &rarr;</div><div class="dc-sub">Kisne kitni fees di, pending &amp; renewal</div></div><span>&#128210;</span></div>
     </div>
 
     <div class="d-card" onclick="openMod('modDeptStaff')">
@@ -289,7 +293,8 @@
 
     <div class="sec-head">ENTERPRISE CONTROL GRID</div>
     <div class="grid2">
-      <button type="button" class="tile" onclick="openMod('modExtra')">Extra Service Collection</button>
+      <button type="button" class="tile" onclick="openPay('pay')">&#128179; Pay Fees</button>
+      <button type="button" class="tile om-owner-only" onclick="openPay('records')">&#128210; Fees Records</button>
       <button type="button" class="tile" onclick="openMod('modMaint')">Maintenance &amp; Bills</button>
       <button type="button" class="tile" onclick="openMod('modDeptStaff')">Department Staff</button>
       <button type="button" class="tile" onclick="openMod('modAtt')">Smart Attendance</button>
@@ -394,7 +399,8 @@
       </form>
     </div>
 
-    <div class="m-card" onclick="openMod('modExtra')"><div><div class="m-title">Pay Fees Desk</div><div class="m-sub">Fee collection, dues &amp; add-on receipts</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openPay('pay')"><div><div class="m-title">Pay Fees</div><div class="m-sub">Fees lena, receipt &amp; dues</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card om-owner-only" onclick="openPay('records')"><div><div class="m-title">Fees Records</div><div class="m-sub">Manager ne jo fees li uske records</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
     <div class="m-card" onclick="openMod('modAtt')"><div><div class="m-title">Attendance Kiosk</div><div class="m-sub">QR, Morning/Evening batch, Live Staff &amp; Fees Expired list</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
     <div class="m-card" onclick="openMod('modSlip')"><div><div class="m-title">Staff Salary &amp; Payroll</div><div class="m-sub">Branch/Department salary, penalty &amp; HR Excel sheet</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
     <div class="m-card" onclick="openMod('modRouter')"><div><div class="m-title">Upload Gym Data</div><div class="m-sub">Auto-router for CSV / Excel into isolated sections</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
@@ -404,18 +410,9 @@
 
   <!-- MODALS -->
   <div class="modal-ov" id="modExtra">
-    <div class="modal-box">
-      <div class="m-top"><h3>✨ Extra Service Collection</h3><button type="button" class="x-btn" onclick="closeMod('modExtra')">&times;</button></div>
-      <form onsubmit="addExtraService(event)">
-        <div class="fg"><label>Member / Client Name *</label><input class="fc" id="esName" required placeholder="Naam"></div>
-        <div class="fg"><label>Extra Service *</label><input class="fc" id="esSrv" required placeholder="PT / Steam / Diet"></div>
-        <div class="fg"><label>Amount (₹) *</label><input type="number" class="fc" id="esAmt" required value="1000"></div>
-        <div class="fg"><label>Branch *</label><select class="fc" id="esBr"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option><option value="004">Branch 004</option><option value="005">Branch 005</option></select></div>
-        <div class="fg"><label>Payment Mode *</label><select class="fc" id="esMode"><option value="Cash">Cash</option><option value="Online">Online</option></select></div>
-        <button type="submit" class="big-btn" style="margin-top:0">Add Extra Service Collection</button>
-      </form>
-      <div class="rec" style="margin-top:12px" id="esSummary">Total Extra Service Collection: ₹0 (0 Entries)</div>
-      <div id="esList"></div>
+    <div class="modal-box" style="max-width:100%;width:100%;height:94vh;padding:0;overflow:hidden">
+      <div class="m-top" style="padding:10px 12px;margin:0"><h3 id="payTitle">&#128179; Pay Fees</h3><button type="button" class="x-btn" onclick="closeMod('modExtra')">&times;</button></div>
+      <iframe id="payFrame" title="Pay Fees" style="width:100%;height:calc(94vh - 52px);border:0;background:#000"></iframe>
     </div>
   </div>
 
@@ -493,49 +490,25 @@
   </div>
 
   <div class="modal-ov" id="modAtt">
+    <div class="modal-box" style="max-width:100%;width:100%;height:94vh;padding:0;overflow:hidden">
+      <div class="m-top" style="padding:10px 12px;margin:0"><h3>&#128081; Attendance</h3><button type="button" class="x-btn" onclick="closeMod('modAtt')">&times;</button></div>
+      <div id="attStaffTools" class="grid2" style="display:none;padding:0 10px 8px;gap:6px">
+        <button type="button" class="sub-btn" onclick="openMod('modStaffPunch')">&#128338; Staff Late / Outside</button>
+        <button type="button" class="sub-btn" onclick="openMod('modStaffCheck')">&#128270; Staff Selfie Check</button>
+      </div>
+      <iframe id="attFrame" title="Attendance" style="width:100%;height:calc(94vh - 52px);border:0;background:#000"></iframe>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modStaffPunch">
     <div class="modal-box">
-      <div class="m-top"><h3>👑 5 BROTHER'S ATTENDANCE &amp; EXPIRED FEES</h3><button type="button" class="x-btn" onclick="closeMod('modAtt')">&times;</button></div>
-      <div class="rec" style="text-align:center">
-        <div style="font-size:14px;font-weight:900;color:#FDE047">स्मार्ट बायोमेट्रिक उपस्थिति प्रणाली</div>
-        <div style="font-size:11px;color:var(--muted)" id="attClock">22-11-2026 | Live</div>
-        <button type="button" class="big-btn" onclick="punchMemberAtt()">👉 MARK YOUR ATTENDANCE</button>
-        <div style="margin-top:10px">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=5BFC_QR_ATTENDANCE" alt="QR" style="background:#fff;padding:4px;border-radius:8px;width:82px;height:82px">
-          <div style="font-size:10.5px;color:var(--cyan);margin-top:4px">QR Scan Attendance Ready</div>
-        </div>
-      </div>
-
-      <div class="grid2">
-        <button type="button" class="sub-btn" onclick="alert('Morning Batch: Total 60 | Present 22 | Absent 38')">🌅 Morning Batch</button>
-        <button type="button" class="sub-btn" onclick="alert('Evening Batch: Total 88 | Present 30 | Absent 58')">🌙 Evening Batch</button>
-      </div>
-
-      <div class="rec">
-        <b>📊 Aaj ka Live Count:</b> Total Members: <b>0</b> &bull; Present: <b style="color:var(--emerald)">0</b> &bull; Absent: <b style="color:var(--rose)">0</b>
-      </div>
-
-      <button type="button" class="big-btn" style="background:rgba(251,113,133,0.18);border:1px solid var(--rose);color:#FECDD3;margin-top:0;margin-bottom:8px" onclick="openMod('modExpired')">
-        ⚠️ Fees Expired Members (Last Visit Date &amp; Time)
-      </button>
-
-      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" onclick="openMod('modStaffCheck')">
-        🔎 40-Staff Selfie Check ("Jao beta Absent")
-      </button>
-
-      <div class="rec">
-        <b style="color:var(--cyan);display:block;margin-bottom:6px">Staff Outside / Late Attendance Punch</b>
-        <div class="fg"><label>Staff Name</label><input class="fc" id="stfAttName" placeholder="e.g. Rameshwar"></div>
-        <div class="fg"><label>Late Minutes</label><input type="number" class="fc" id="stfLateMin" value="0"></div>
-        <div class="fg">
-          <label>Location Mode</label>
-          <select class="fc" id="stfLocMode">
-            <option value="Inside Gym (150m)">Inside Gym (150m)</option>
-            <option value="Outside Gym (Remote)">Outside Gym (Remote)</option>
-          </select>
-        </div>
-        <div class="fg"><label>Live Photo</label><input type="file" class="fc" accept="image/*" capture="user" onchange="showThumb(this,'stfAttPrev')"><div class="preview-row" id="stfAttPrev"></div></div>
-        <button type="button" class="sub-btn" style="width:100%" onclick="punchStaffAtt()">Submit Staff Attendance &amp; Notify Manager</button>
-      </div>
+      <div class="m-top"><h3>&#128338; Staff Outside / Late Attendance</h3><button type="button" class="x-btn" onclick="closeMod('modStaffPunch')">&times;</button></div>
+      <div class="fg"><label>Staff Name</label><input class="fc" id="stfAttName" placeholder="Staff ka naam"></div>
+      <div class="fg"><label>Late Minutes</label><input type="number" class="fc" id="stfLateMin" value="0"></div>
+      <div class="fg"><label>Location Mode</label>
+        <select class="fc" id="stfLocMode"><option value="Inside Gym (150m)">Inside Gym (150m)</option><option value="Outside Gym (Remote)">Outside Gym (Remote)</option></select></div>
+      <div class="fg"><label>Live Photo</label><input type="file" class="fc" accept="image/*" capture="user" onchange="showThumb(this,'stfAttPrev')"><div class="preview-row" id="stfAttPrev"></div></div>
+      <button type="button" class="sub-btn" style="width:100%" onclick="omStaffPunchSubmit()">Submit Staff Attendance &amp; Notify Manager</button>
     </div>
   </div>
 
@@ -550,7 +523,7 @@
     <div class="modal-box">
       <div class="m-top"><h3>🔎 40-Staff Selfie Verification</h3><button type="button" class="x-btn" onclick="closeMod('modStaffCheck')">&times;</button></div>
       <div class="fg"><label>Staff Name</label><input class="fc" id="chkName" placeholder="Type staff name..." oninput="checkStaffSelfie()"></div>
-      <div class="fg"><label>Date</label><input type="date" class="fc" id="chkDate" value="2026-11-22" onchange="checkStaffSelfie()"></div>
+      <div class="fg"><label>Date</label><input type="date" class="fc" id="chkDate" onchange="checkStaffSelfie()"></div>
       <div id="chkResultBox" class="rec">Naam aur date chunein.</div>
     </div>
   </div>
@@ -558,7 +531,7 @@
   <div class="modal-ov" id="modSelfie">
     <div class="modal-box">
       <div class="m-top"><h3>📸 Selfie Gallery</h3><button type="button" class="x-btn" onclick="closeMod('modSelfie')">&times;</button></div>
-      <div class="fg"><label>Calendar Date</label><input type="date" class="fc" id="selfieDate" value="2026-11-04" onchange="renderSelfies()"></div>
+      <div class="fg"><label>Calendar Date</label><input type="date" class="fc" id="selfieDate" onchange="renderSelfies()"></div>
       <div id="selfieListBox"></div>
     </div>
   </div>
@@ -923,7 +896,8 @@
       document.getElementById(id).classList.add("open");
       if (id === "modMaint") { renderBillCard(); renderMaintList(); }
       if (id === "modDeptStaff") renderDeptStaff();
-      if (id === "modExtra") renderExtra();
+      if (id === "modExtra") loadPayFrame();
+      if (id === "modAtt") loadAttFrame();
       if (id === "modPnl") renderPnl();
       if (id === "modSlip") renderSalaryBranch();
       if (id === "modExpired") renderExpired();
@@ -988,7 +962,6 @@
       const net = total - expenses;
       const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
       setText("vEmpCount", staffCount + " Staff");
-      setText("vExtraCol", "₹" + extSum.toLocaleString("en-IN"));
       setText("vMembers", String(memberCount));
       setText("vAdmissions", String(memberCount));
       setText("pillBranches", curBr === "ALL" ? "0 Branches" : "Branch " + curBr);
@@ -1167,10 +1140,8 @@ Telegram notification sent to Manager.`);
     }
 
     function renderExpired() {
-      const rows = [
-        { name: "Rahul Singh", ph: "9876543210", em: "rahul@gym.com", join: "2026-01-02", exp: "2026-02-02", last: "2026-02-01 06:45 AM" },
-        { name: "Pooja Sharma", ph: "9988776655", em: "pooja@gym.com", join: "2026-01-10", exp: "2026-07-10", last: "2026-07-09 05:30 PM" }
-      ];
+      const rows = [];
+      if (!rows.length) { document.getElementById("expiredListBox").innerHTML = '<div class="rec">Abhi koi expired member record nahi hai.</div>'; return; }
       document.getElementById("expiredListBox").innerHTML = rows.map(r => `
         <div class="rec" style="border-left:3px solid var(--rose)">
           <b>${esc(r.name)}</b> &bull; Ph: ${esc(r.ph)} &bull; Email: ${esc(r.em)}
@@ -1185,8 +1156,8 @@ Telegram notification sent to Manager.`);
       const dt = document.getElementById("chkDate").value;
       const box = document.getElementById("chkResultBox");
       if (!nm) { box.textContent = "Naam type karein."; return; }
-      const presentNames = ["saurabh", "vikram", "pooja", "rameshwar", "kuldeep", "yash", "vishal", "ayush"];
-      const ok = presentNames.some(x => nm.includes(x));
+      const logs = J("om_att_selfie_logs_v1", []);
+      const ok = logs.some(l => String(l.date || "") === dt && JSON.stringify(l).toLowerCase().includes(nm));
       box.innerHTML = ok
         ? `<div style="color:var(--emerald);font-weight:800">✔ Present on ${dt} — Selfie &amp; Time Verified.</div>`
         : `<div style="color:var(--rose);font-weight:900">❌ Jao beta Absent! (${esc(dt)} ko koi selfie record nahi hai)</div>`;
@@ -1194,12 +1165,9 @@ Telegram notification sent to Manager.`);
 
     function renderSelfies() {
       const dt = document.getElementById("selfieDate").value;
-      document.getElementById("selfieListBox").innerHTML = `
-        <div class="rec"><b>Date: ${esc(dt)} — 52 Selfies Logged</b></div>
-        <div class="rec">1. Yash Singh Chandel &bull; 9990954574 &bull; 12:01 am</div>
-        <div class="rec">2. Vishal Sharma &bull; 7652064461 &bull; 05:06 am</div>
-        <div class="rec">3. Ayush Yadav &bull; 9554546369 &bull; 05:08 am</div>
-      `;
+      const logs = J("om_att_selfie_logs_v1", []).filter(l => String(l.date || "") === dt);
+      document.getElementById("selfieListBox").innerHTML = `<div class="rec"><b>Date: ${esc(dt)} &mdash; ${logs.length} Selfies Logged</b></div>` +
+        logs.map((l, i) => `<div class="rec">${i + 1}. ${esc(l.empCode || "Staff")} &bull; ${esc(l.punchType || "")} &bull; ${esc(l.time || "")}</div>`).join("");
     }
 
     function renderPnl() {
@@ -2656,16 +2624,10 @@ seedData();
     return 99;
   }
   function activePlanTierAmount() {
-    var amt = Number(sess().planAmount || 0);
-    try {
-      var localPlan = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
-      if (localPlan && String(localPlan.status || "active").toLowerCase() === "active") {
-        amt = Math.max(amt, Number(localPlan.amount || 0));
-      }
-    } catch (e) {}
-    return amt;
+    // Entitlement comes only from tenant-access.js after Firebase Auth + cloud subscription verification.
+    return sess().planActive ? Number(sess().planAmount || 0) : 0;
   }
-  function hasPaidPlan(required){ return isMaster() || (activePlanTierAmount() >= Number(required||99)); }
+  function hasPaidPlan(required){ return isMaster() || (!!sess().planActive && activePlanTierAmount() >= Number(required||99)); }
   function showPlanWall(required){
     const minPlan = Number(required || 99);
     alert("Please purchase / upgrade to the ₹"+minPlan+" plan before using this feature. Aap feature ka preview dekh sakte hain; final action plan activate hone ke baad chalega.");
@@ -2683,6 +2645,18 @@ seedData();
     if (!el || el.disabled) return;
     const attr = (el.getAttribute("onclick") || "").toLowerCase();
     const label = (el.innerText || el.value || "").toLowerCase();
+    const sec = window.omSecureSession || {};
+    if (sec.role === "staff") { ev.preventDefault(); ev.stopImmediatePropagation(); location.replace("staff-portal.html"); return; }
+    if (sec.role === "manager") {
+      const modalId = (el.closest(".modal-ov") || {}).id || "";
+      const moduleMatch = (attr + " " + modalId).match(/mod[a-z0-9]+/i);
+      const moduleId = moduleMatch ? moduleMatch[0] : "";
+      if (moduleId && typeof sec.canOpenModule === "function" && !sec.canOpenModule(moduleId)) {
+        ev.preventDefault(); ev.stopImmediatePropagation();
+        alert("Owner ne is module ki permission nahi di hai, ya aapke Gym ka plan is feature ko allow nahi karta.");
+        return;
+      }
+    }
     if (/logout|closemod|switchpage|openmod|plans|back|view|preview|details|language|setlang|toggle|render|search|filter|cancel/.test(attr + " " + label)) return;
     if (/submit|save|receive|payment|pay\(|markattendance|remove|delete|approve|reject|upload|import|generate|add[a-z]*|create|update|decide|collect|renew|joining|admission|activate|locklic|applyleave|requestleave/.test(attr)) {
       const context=attr + " " + label + " " + ((el.closest(".modal-ov")||{}).id||"");
@@ -2829,7 +2803,7 @@ window.requestPlanSelection = function(amt, label) {
 
     // 3 & 4. Add-On Extra Service & Unique QR / Smart Attendance inside Page 4
     var p4 = document.getElementById("page4");
-    if (p4 && !document.getElementById("p4AddOnAndQrBox")) {
+    if (false) {
       var box = document.createElement("div");
       box.id = "p4AddOnAndQrBox";
       box.className = "box-card";
@@ -2937,5 +2911,175 @@ window.requestPlanSelection = function(amt, label) {
 })();
 </script>
 
+
+<script>
+(function upgradeModExtraAndAttendanceV7() {
+  window.esFilterMembers = function () {
+    var q = ((document.getElementById("esMemberSearch") || {}).value || "").trim().toLowerCase();
+    var out = document.getElementById("esMemberSugOut");
+    if (!out) return;
+    if (!q) { out.innerHTML = ""; return; }
+    var adm = (typeof J === "function" && typeof K_ADM !== "undefined") ? J(K_ADM, []) : [];
+    var hits = adm.filter(function (m) {
+      return String(m.name || "").toLowerCase().includes(q) || String(m.phone || "").includes(q);
+    });
+    out.innerHTML = hits.slice(0, 5).map(function (m) {
+      return `<div class="rec" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="esPickMember('${esc(m.name)}')">
+        <span><b>${esc(m.name)}</b> • ${esc(m.phone || "-")}</span>
+        <span class="pill-ok">Select</span>
+      </div>`;
+    }).join("") || '<div class="rec">No admitted member found.</div>';
+  };
+
+  window.esPickMember = function (nm) {
+    var nInp = document.getElementById("esName");
+    var sInp = document.getElementById("esMemberSearch");
+    var out = document.getElementById("esMemberSugOut");
+    if (nInp) nInp.value = nm;
+    if (sInp) sInp.value = nm;
+    if (out) out.innerHTML = "";
+  };
+
+  window.esRecalcTotal = function () {
+    var pAmt = Number((document.getElementById("esPlanAmt") || {}).value || 0);
+    var eAmt = Number((document.getElementById("esAmt") || {}).value || 0);
+    var totInp = document.getElementById("esTotalPayable");
+    if (totInp) totInp.value = String(pAmt + eAmt);
+  };
+
+  window.addEventListener("DOMContentLoaded", function () {
+    esRecalcTotal();
+    // Keep staff late/outside punch & 40-staff check hidden from quick attendance modal unless Admin opens it
+    var modAtt = document.getElementById("modAtt");
+    if (modAtt) {
+      var recs = modAtt.querySelectorAll(".rec");
+      recs.forEach(function (r) {
+        if (/Staff Outside \/ Late Attendance Punch/i.test(r.textContent || "")) {
+          r.style.display = "none";
+        }
+      });
+      var btns = modAtt.querySelectorAll("button");
+      btns.forEach(function (b) {
+        if (/40-Staff Selfie Check/i.test(b.textContent || "")) {
+          b.style.display = "none";
+        }
+      });
+    }
+  });
+})();
+</script>
+
+
+<script>
+(function gymOperationModeController() {
+  var MODE_KEY = "om_gym_operation_mode";
+
+  window.getGymOperationMode = function () {
+    try {
+      var v = localStorage.getItem(MODE_KEY);
+      return (v === "owner_solo" || v === "has_staff") ? v : "has_staff";
+    } catch (e) { return "has_staff"; }
+  };
+
+  window.setGymOperationMode = function (mode) {
+    var clean = (mode === "owner_solo") ? "owner_solo" : "has_staff";
+    try { localStorage.setItem(MODE_KEY, clean); } catch (e) {}
+    applyGymOperationModeUI();
+  };
+
+  window.renderOwnerMemberDaysList = function () {
+    var box = document.getElementById("ownerMemberDaysList");
+    if (!box) return;
+    var adm = (typeof J === "function" && typeof K_ADM !== "undefined") ? J(K_ADM, []) : [];
+    var attLogs = (typeof J === "function") ? J("om_att_selfie_logs_v1", []) : [];
+    if (!adm.length) {
+      box.innerHTML = '<div class="rec">Abhi koi member record nahi hai. Member add/upload hone par naam aur kitne din aaye yahan dikhega.</div>';
+      return;
+    }
+    box.innerHTML = adm.map(function (m) {
+      var nm = String(m.name || "Member");
+      var days = attLogs.filter(function (l) {
+        return String(l.empCode || l.name || "").toLowerCase().includes(nm.toLowerCase());
+      }).length;
+      return '<div class="rec" style="display:flex;justify-content:space-between;align-items:center">' +
+        '<div><b>' + esc(nm) + '</b> • <span style="color:var(--muted)">' + esc(m.phone || "-") + '</span></div>' +
+        '<span class="pill-ok">' + days + ' din aaya</span></div>';
+    }).join("");
+  };
+
+  window.applyGymOperationModeUI = function () {
+    var mode = getGymOperationMode();
+    var sel = document.getElementById("gymOpModeSel");
+    if (sel) sel.value = mode;
+
+    var isSolo = (mode === "owner_solo");
+    var ownerAttBox = document.getElementById("ownerAttendanceOverviewBox");
+    var selfieBtns = document.querySelectorAll("#btnPresTrigger, #liveCamCaptureBtn, [onclick*='punchMemberAtt'], [onclick*='punchStaffAtt'], [onclick*='markAttendanceWithSelfie']");
+
+    if (ownerAttBox) {
+      ownerAttBox.style.display = isSolo ? "none" : "block";
+      if (!isSolo) renderOwnerMemberDaysList();
+    }
+
+    selfieBtns.forEach(function (el) {
+      var modAtt = el.closest && el.closest("#modAtt");
+      if (isSolo) {
+        el.style.display = "";
+      } else {
+        // When staff exists, hide selfie punch buttons from owner view
+        if (!modAtt || /punchStaffAtt|punchMemberAtt/i.test(el.getAttribute("onclick") || "")) {
+          el.style.display = "none";
+        }
+      }
+    });
+  };
+
+  window.addEventListener("DOMContentLoaded", function () {
+    var p1 = document.getElementById("page1");
+    if (p1 && !document.getElementById("gymOpModePanel")) {
+      var panel = document.createElement("div");
+      panel.id = "gymOpModePanel";
+      panel.className = "box-card";
+      panel.style.cssText = "border-color:var(--gold);margin-bottom:12px";
+      panel.innerHTML =
+        '<div style="font-size:12.5px;font-weight:900;color:var(--gold);margin-bottom:6px">⚙️ Aap gym khud chalate hain ya attendance / fees ke liye staff hai?</div>' +
+        '<div class="grid2" style="margin-bottom:8px">' +
+          '<button type="button" class="sub-btn" onclick="setGymOperationMode(\'has_staff\')">✅ Staff Hai (No Selfie for Owner)</button>' +
+          '<button type="button" class="sub-btn" onclick="setGymOperationMode(\'owner_solo\')">🙋 Koi Staff Nahi (Selfie On)</button>' +
+        '</div>' +
+        '<div id="ownerAttendanceOverviewBox" class="rec" style="margin-bottom:0">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+            '<b style="color:var(--cyan)">📋 Members &amp; Kitne Din Aaye (Selfie Off)</b>' +
+            '<button type="button" class="sub-btn" onclick="openPay(\'pay\')">💳 Pay Fees</button>' +
+          '</div>' +
+          '<div id="ownerMemberDaysList"></div>' +
+        '</div>';
+      p1.insertBefore(panel, p1.firstChild);
+    }
+    applyGymOperationModeUI();
+  });
+})();
+</script>
+
+<script>
+(function(){
+  function role(){ return String((window.omSecureSession&&window.omSecureSession.role)||localStorage.getItem("bfc_role")||"guest").toLowerCase(); }
+  window.openPay=function(view){
+    if(view==="records" && role()!=="owner"){ alert("Fees Records sirf Owner ke liye hain."); return; }
+    window.__payView=view; document.getElementById("payTitle").innerHTML = view==="records" ? "&#128210; Fees Records" : "&#128179; Pay Fees";
+    openMod("modExtra");
+  };
+  window.loadPayFrame=function(){ document.getElementById("payFrame").src="pay.html"+(window.__payView==="records"?"?view=records":"")+"#"+Date.now(); };
+  window.loadAttFrame=function(){
+    document.getElementById("attFrame").src="attendance.html#"+Date.now();
+    var r=role(); document.getElementById("attStaffTools").style.display=(r==="owner"||r==="manager")?"grid":"none";
+  };
+  window.omStaffPunchSubmit=function(){ punchStaffAtt(); };
+  window.openQuickFeeDesk=function(){ openPay("pay"); };
+  window.addEventListener("load",function(){
+    if(role()!=="owner"){ var s=document.createElement("style"); s.textContent=".om-owner-only{display:none!important}"; document.head.appendChild(s); }
+  });
+})();
+</script>
 </body>
 </html>

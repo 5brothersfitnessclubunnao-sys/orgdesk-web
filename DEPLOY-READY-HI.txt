@@ -1,0 +1,13 @@
+OM ERP FINAL — orgdesk-fc207
+
+Package includes the secure tenant migration for attendance.html, pay.html, staff-records.html and auth-gate.js.
+Firebase project is orgdesk-fc207.
+₹1 payment test mode is OFF in plans.html and firestore.rules.
+No tg-notify.js dependency is included because that file was not supplied.
+
+IMPORTANT: this ZIP is deployment-ready; it has NOT been deployed to Firebase from this chat because no Firebase CLI/authenticated deployment connection is available here.
+Deploy from a trusted machine after signing into Firebase:
+  firebase use orgdesk-fc207
+  firebase deploy --only firestore:rules,hosting
+
+Do not upload any service-account JSON to the website.

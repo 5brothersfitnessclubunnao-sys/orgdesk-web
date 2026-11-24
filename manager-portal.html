@@ -1,0 +1,41 @@
+<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OM ERP — Manager Portal</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<style>*{box-sizing:border-box}body{margin:0;background:#070b15;color:#f8fafc;font:14px Arial;padding:14px}.wrap{max-width:850px;margin:auto}.card{background:#101a2d;border:1px solid #2b3e5c;border-radius:14px;padding:14px;margin:10px 0}h2{color:#f5c542;margin:0 0 10px}.muted{color:#9aa9bf;font-size:12px;line-height:1.5}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}button{padding:9px 12px;border:0;border-radius:8px;background:#f5c542;color:#111;font-weight:900}button.danger{background:#fb7185}.item{padding:10px;border:1px solid #2c405e;border-radius:9px;margin:7px 0}.good{color:#6ee7b7}.warn{color:#facc15}a{color:#67d8ff}</style></head><body><div class="wrap">
+<div class="card"><div class="row" style="justify-content:space-between"><h2>MANAGER PORTAL</h2><button onclick="logout()">Logout</button></div><div id="identity" class="muted">Verifying manager access…</div><div id="permissions" class="muted"></div><p><a href="index.html">Open assigned ERP modules →</a></p></div>
+<div class="card" id="approvalCard"><h2>Staff Leave Applications</h2><div id="leaves">Loading…</div></div>
+<div class="card" id="advanceCard"><h2>Staff Advance Applications</h2><div id="advances">Loading…</div></div>
+</div>
+<script>
+const CFG={apiKey:'AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU',authDomain:'orgdesk-fc207.firebaseapp.com',projectId:'orgdesk-fc207',storageBucket:'orgdesk-fc207.firebasestorage.app',messagingSenderId:'677150519977',appId:'1:677150519977:web:74de5f488494280d352fb8'};
+if(!firebase.apps.length)firebase.initializeApp(CFG);const auth=firebase.auth(),db=firebase.firestore();let M=null;
+const $=id=>document.getElementById(id),esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function logout(){auth.signOut().finally(()=>location.replace('login.html'))}
+async function decide(btn){const col=btn.dataset.col,id=btn.dataset.id,status=btn.dataset.status;try{await db.collection(col).doc(id).update({status,reviewedAt:firebase.firestore.FieldValue.serverTimestamp(),reviewedBy:M.uid});await loadApprovals()}catch(e){alert('Approval failed: '+(e.message||e))}}
+async function loadApprovals(){
+ const [l,a]=await Promise.all([
+  db.collection('leaves').where('gymId','==',M.gymId).where('branchId','==',M.branchId).get(),
+  db.collection('staff_advances').where('gymId','==',M.gymId).where('branchId','==',M.branchId).get()
+ ]);
+ const pendingL=l.docs.filter(d=>(d.data()||{}).status==='pending');
+ const pendingA=a.docs.filter(d=>(d.data()||{}).status==='pending');
+ $('leaves').innerHTML=pendingL.length?pendingL.map(d=>{const x=d.data()||{};return `<div class="item"><b>${esc(x.name||x.employeeCode||'Staff')}</b> • ${esc(x.fromDate||'')} to ${esc(x.toDate||'')}<div class="muted">${esc(x.reason||'')}</div><div class="row"><button data-col="leaves" data-id="${esc(d.id)}" data-status="approved" onclick="decide(this)">Approve</button><button class="danger" data-col="leaves" data-id="${esc(d.id)}" data-status="declined" onclick="decide(this)">Decline</button></div></div>`}).join(''):'<div class="muted">No pending leave applications.</div>';
+ $('advances').innerHTML=pendingA.length?pendingA.map(d=>{const x=d.data()||{};return `<div class="item"><b>${esc(x.name||x.employeeCode||'Staff')}</b> • ₹${Number(x.amount||0)}<div class="muted">${esc(x.reason||'')}</div><div class="row"><button data-col="staff_advances" data-id="${esc(d.id)}" data-status="approved" onclick="decide(this)">Approve</button><button class="danger" data-col="staff_advances" data-id="${esc(d.id)}" data-status="declined" onclick="decide(this)">Decline</button></div></div>`}).join(''):'<div class="muted">No pending advance applications.</div>';
+}
+auth.onAuthStateChanged(async u=>{
+ if(!u){location.replace('login.html');return}
+ try{
+  const profileSnap=await db.collection('users').doc(u.uid).get(),c=profileSnap.exists?profileSnap.data():{};
+  if(c.role!=='manager'||c.active!==true||!c.gymId||!c.branchId){location.replace('login.html');return}
+  const sub=await db.collection('subscriptions').doc(c.gymId).get(),p=sub.exists?sub.data():{};
+  const exp=p.expiresAt||p.expiryAt||p.validUntil||null,expMs=!exp?Infinity:(typeof exp==='number'?exp:(exp.toDate?exp.toDate().getTime():Date.parse(exp)));
+  if(p.status!=='active'||!(expMs>Date.now())||Number(p.amount||0)<499){alert('Manager Portal ke liye ₹499+ active Gym Plan chahiye.');logout();return}
+  const perms=Array.isArray(c.permissions)?c.permissions:[];
+  M={uid:u.uid,gymId:c.gymId,branchId:c.branchId,permissions:perms};
+  $('identity').textContent=(c.name||u.displayName||'Manager')+' • Branch '+c.branchId+' • Gym Plan ₹'+p.amount;
+  $('permissions').textContent='Owner-assigned permissions: '+(perms.join(', ')||'None assigned');
+  if(!perms.includes('staffApprovals')){$('approvalCard').style.display='none';$('advanceCard').style.display='none'}
+  else await loadApprovals();
+ }catch(e){alert('Manager access verify nahi hua: '+(e.message||e));logout()}
+});
+</script></body></html>

@@ -1,17 +1,17 @@
 /*
  * OM Software ERP - authenticated tenant / role / subscription gate.
- * Requires Firebase Auth + Firestore compat SDK and the bfc-gym-215ae project.
+ * Requires Firebase Auth + Firestore compat SDK and the orgdesk-fc207 project.
  * Trust boundary: roles come from owner_accounts or Firebase custom claims, never from localStorage.
  */
 (function () {
   'use strict';
   var CFG = {
-    apiKey: 'AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ',
-    authDomain: 'bfc-gym-215ae.firebaseapp.com',
-    projectId: 'bfc-gym-215ae',
-    storageBucket: 'bfc-gym-215ae.firebasestorage.app',
-    messagingSenderId: '886920088571',
-    appId: '1:886920088571:web:c4bc478d246a2700b0d95e'
+    apiKey: 'AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU',
+    authDomain: 'orgdesk-fc207.firebaseapp.com',
+    projectId: 'orgdesk-fc207',
+    storageBucket: 'orgdesk-fc207.firebasestorage.app',
+    messagingSenderId: '677150519977',
+    appId: '1:677150519977:web:74de5f488494280d352fb8'
   };
 
   function goLogin(message) {
@@ -32,39 +32,26 @@
     var expiry = data.expiresAt || data.expiryAt || data.validUntil || null;
     if (!expiry) return true;
     var ms = typeof expiry === 'number' ? expiry : (expiry.toDate ? expiry.toDate().getTime() : Date.parse(expiry));
-    return !isFinite(ms) || ms >= Date.now();
+    return isFinite(ms) && ms >= Date.now();
   }
 
-  function managerModuleAllow(id) {
-    return [
-      'modAtt','modAdmission','modJoining','modFees','modExpired',
-      'modDeptStaff','modSlip','modRouter','modEnq','modCodes'
-    ].indexOf(id) >= 0;
+  function managerModuleAllow(id, permissions) {
+    return Array.isArray(permissions) && permissions.indexOf(String(id)) >= 0;
   }
 
 
-  function addMpinSetupButton(session) {
-    if (!['manager', 'staff'].includes(session.role) || document.getElementById('omSetMpinBtn')) return;
-    var host = document.getElementById('ribMeta') || document.getElementById('roleIdentityBanner');
-    if (!host) return;
-    var b = document.createElement('button');
-    b.id = 'omSetMpinBtn'; b.type = 'button'; b.textContent = 'Set / Change MPIN';
-    b.style.cssText = 'margin:8px 0 0;padding:7px 10px;border-radius:8px;border:1px solid #22D3EE;background:#10213c;color:#22D3EE;font-weight:800;font-size:11px;';
-    b.addEventListener('click', async function () {
-      var pin = prompt('New MPIN (4–6 digits) enter karein:');
-      if (!pin) return;
-      if (!/^\d{4,6}$/.test(pin)) { alert('MPIN 4–6 digits ka hona chahiye.'); return; }
-      try {
-        var fn = firebase.app().functions('asia-south1').httpsCallable('setMyTeamMpin');
-        await fn({ mpin: pin });
-        alert('MPIN securely save ho gaya. Ab next login mein MPIN use kar sakte hain.');
-      } catch (e) { console.error(e); alert('MPIN save nahi hua: ' + (e.message || 'Please retry')); }
-    });
-    host.appendChild(b);
-  }
+  function addMpinSetupButton() { /* MPIN requires Cloud Functions; disabled in Spark-only mode. */ }
 
   function publish(session) {
     window.omSecureSession = session;
+    if (session.role === 'staff' && !/staff-portal\.html/i.test(location.pathname)) {
+      location.replace('staff-portal.html');
+      return;
+    }
+    if (session.role === 'manager' && !/manager-portal\.html|index\.html/i.test(location.pathname)) {
+      location.replace('manager-portal.html');
+      return;
+    }
     try {
       localStorage.setItem('bfc_role', session.role);
       localStorage.setItem('om_active_role', session.role);
@@ -75,8 +62,10 @@
       else localStorage.removeItem('om_active_subscription_plan');
     } catch (e) {}
     session.canOpenModule = function (id) {
-      if (session.isMasterAdmin || session.role === 'owner') return true;
-      if (session.role === 'manager') return managerModuleAllow(id);
+      if (session.isMasterAdmin) return true;
+      if (!session.planActive) return false;
+      if (session.role === 'owner') return true;
+      if (session.role === 'manager') return Number(session.planAmount || 0) >= 499 && managerModuleAllow(id, session.permissions);
       return false;
     };
     addMpinSetupButton(session);
@@ -125,57 +114,7 @@
     var db = firebase.firestore();
 
     auth.onAuthStateChanged(async function (user) {
-      if (!user) {
-        try {
-          var locRole = safeRole(localStorage.getItem('bfc_role') || localStorage.getItem('om_active_role') || '');
-          var locUser = String(localStorage.getItem('om_logged_user') || '').trim();
-          var ownerAcc = null;
-          try { ownerAcc = JSON.parse(localStorage.getItem('om_owner_account_v1') || 'null'); } catch (e) {}
-          var prof = null;
-          try { prof = JSON.parse(localStorage.getItem('om_active_gym_profile') || localStorage.getItem('om_org_profile') || 'null'); } catch (e) {}
-          var isDemo = localStorage.getItem('om_demo_preview_active') === '1';
-          var prevAmt = Number(localStorage.getItem('om_preview_plan_amount') || 0);
-
-          var isPrimeMasterLocal = (localStorage.getItem('om_prime_master_auth') === '1' || localStorage.getItem('om_is_master_admin') === '1');
-          if (isPrimeMasterLocal) {
-            publish({
-              uid: 'prime_master_local',
-              role: 'developer',
-              gymId: '__master__',
-              branchId: '',
-              isMasterAdmin: true,
-              planActive: true,
-              planName: 'Master Admin',
-              planAmount: 999,
-              email: '',
-              displayName: 'Prime Master'
-            });
-            return;
-          }
-
-          if (locRole || ownerAcc || (prof && (prof.gymName || prof.orgName))) {
-            var resolvedRole = locRole || 'owner';
-            var resolvedGymId = (prof && (prof.gymId || prof.orgId)) || (ownerAcc && ownerAcc.email) || 'local_owner_gym';
-            var resolvedName = locUser || (ownerAcc && (ownerAcc.ownerName || ownerAcc.gymName)) || (prof && (prof.gymName || prof.orgName)) || 'Gym Owner';
-            var resolvedPlanAmt = prevAmt > 0 ? prevAmt : 0;
-            publish({
-              uid: 'local_' + resolvedRole,
-              role: resolvedRole,
-              gymId: resolvedGymId,
-              branchId: (prof && prof.branchId) || '001',
-              isMasterAdmin: false,
-              planActive: resolvedPlanAmt > 0,
-              planName: resolvedPlanAmt > 0 ? ('Plan ₹' + resolvedPlanAmt + (isDemo ? ' (Demo Preview)' : '')) : '',
-              planAmount: resolvedPlanAmt,
-              email: (ownerAcc && ownerAcc.email) || '',
-              displayName: resolvedName
-            });
-            return;
-          }
-        } catch (e) {}
-        goLogin();
-        return;
-      }
+      if (!user) { goLogin(); return; }
       try {
         var token = await user.getIdTokenResult(true);
         var claims = token.claims || {};
@@ -190,44 +129,28 @@
         var profile = null;
         var ownerSnap = await db.collection('owner_accounts').doc(user.uid).get();
 
-        if (!role) {
-          var userSnap = await db.collection('users').doc(user.uid).get();
-          if (userSnap.exists) {
-            var uData = userSnap.data() || {};
-            role = safeRole(uData.role);
-            if (!gymId) gymId = String(uData.gymId || uData.orgId || '');
-            if (!branchId) branchId = String(uData.branchId || uData.branch || '');
-          }
-        }
-
-        if (ownerSnap.exists && (!role || role === 'owner')) {
+        if (ownerSnap.exists) {
           profile = ownerSnap.data() || {};
           role = 'owner';
           gymId = user.uid;
-        } else if (!ownerSnap.exists && !role) {
-          // Initialize owner_accounts for a newly registered owner user when no team/user doc exists
-          role = 'owner';
-          gymId = user.uid;
-          profile = {
-            uid: user.uid,
-            role: 'owner',
-            gymId: user.uid,
-            email: user.email || '',
-            displayName: claims.name || user.email || 'Gym Owner'
-          };
-          await db.collection('owner_accounts').doc(user.uid).set(Object.assign({}, profile, {
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          }), { merge: true }).catch(function () {});
-        } else if (role === 'manager' || role === 'staff') {
-          if (!gymId) throw new Error('Manager/Staff account is missing gymId');
-          if (!branchId) throw new Error('Manager/Staff account is missing branchId');
         } else {
-          throw new Error('Role is not verified by Firebase');
+          var userSnap = await db.collection('users').doc(user.uid).get();
+          if (!userSnap.exists) throw new Error('Employee profile is not registered by Gym Owner.');
+          profile = userSnap.data() || {};
+          role = safeRole(profile.role);
+          gymId = String(profile.gymId || '');
+          branchId = String(profile.branchId || '');
+          if (!profile.active || !['manager','staff'].includes(role) || !gymId || !branchId) {
+            throw new Error('Employee role / Gym / Branch profile is invalid or inactive.');
+          }
         }
 
         var planSnap = await db.collection('subscriptions').doc(gymId).get();
         var plan = planSnap.exists ? (planSnap.data() || {}) : null;
         var planActive = activeSubscription(plan);
+        var planAmount = planActive ? Number(plan.amount || 0) : 0;
+        if (role === 'manager' && (!planActive || planAmount < 499)) throw new Error('Manager portal requires an active ₹499+ Gym plan.');
+        if (role === 'staff' && (!planActive || planAmount < 199)) throw new Error('Staff portal requires an active ₹199+ Gym plan.');
         publish({
           uid: user.uid,
           role: role,
@@ -236,9 +159,11 @@
           isMasterAdmin: false,
           planActive: planActive,
           planName: planActive ? (plan.name || plan.planName || 'Active Plan') : '',
-          planAmount: planActive ? Number(plan.amount || 0) : 0,
+          planAmount: planAmount,
+          permissions: Array.isArray(profile && profile.permissions) ? profile.permissions : [],
+          employeeCode: profile && profile.employeeCode || '',
           email: user.email || '',
-          displayName: (profile && (profile.ownerName || profile.gymName)) || claims.name || user.email || role
+          displayName: (profile && (profile.ownerName || profile.gymName || profile.name)) || claims.name || user.email || role
         });
       } catch (e) {
         console.error('ERP access verification failed:', e);

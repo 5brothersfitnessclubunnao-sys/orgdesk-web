@@ -1,0 +1,61 @@
+<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OM ERP — Staff Portal</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<style>*{box-sizing:border-box}body{margin:0;background:#070b15;color:#f8fafc;font:14px Arial;padding:14px}.wrap{max-width:760px;margin:auto}.card{background:#101a2d;border:1px solid #2b3e5c;border-radius:14px;padding:14px;margin:10px 0}h2{color:#f5c542;margin:0 0 10px}.muted{color:#9aa9bf;font-size:12px;line-height:1.5}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}input,textarea{width:100%;padding:11px;border:1px solid #42536e;border-radius:8px;background:#081020;color:white;margin:5px 0 10px}button{padding:10px 14px;border:0;border-radius:8px;background:#f5c542;color:#111;font-weight:900}a{color:#67d8ff}.item{padding:10px;border:1px solid #2c405e;border-radius:9px;margin:7px 0}.good{color:#6ee7b7}.warn{color:#facc15}.hidden{display:none}</style></head><body><div class="wrap">
+<div class="card"><div class="row" style="justify-content:space-between"><h2>STAFF SELF-SERVICE PORTAL</h2><button onclick="logout()">Logout</button></div><div id="identity" class="muted">Verifying Employee ID…</div><div id="plan" class="muted"></div></div>
+<div class="card"><h2>My Attendance</h2><div id="attendance" class="muted">Loading…</div></div>
+<div class="card"><h2>Apply Leave</h2><label>From Date</label><input type="date" id="leaveFrom"><label>To Date</label><input type="date" id="leaveTo"><label>Reason</label><textarea id="leaveReason" rows="2"></textarea><button onclick="applyLeave()">Submit Leave Request</button><div id="leaveMsg" class="muted"></div><div id="myLeaves"></div></div>
+<div class="card"><h2>Apply Salary Advance</h2><label>Amount (₹)</label><input type="number" id="advanceAmount" min="1" max="1000000"><label>Reason</label><textarea id="advanceReason" rows="2"></textarea><button onclick="applyAdvance()">Submit Advance Request</button><div id="advanceMsg" class="muted"></div><div id="myAdvances"></div></div>
+<div class="card" id="salaryCard"><h2>My Salary Slips</h2><div id="salary" class="muted">Checking plan access…</div></div>
+</div>
+<script>
+const CFG={apiKey:'AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU',authDomain:'orgdesk-fc207.firebaseapp.com',projectId:'orgdesk-fc207',storageBucket:'orgdesk-fc207.firebasestorage.app',messagingSenderId:'677150519977',appId:'1:677150519977:web:74de5f488494280d352fb8'};
+if(!firebase.apps.length)firebase.initializeApp(CFG);const auth=firebase.auth(),db=firebase.firestore();let S=null;
+const $=id=>document.getElementById(id),esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function logout(){auth.signOut().finally(()=>location.replace('login.html'))}
+function showRows(id,docs,fn){$(id).innerHTML=docs.length?docs.map(fn).join(''):'<div class="muted">Abhi koi record nahi hai.</div>'}
+async function init(u){
+ const profileSnap=await db.collection('users').doc(u.uid).get();
+ if(!profileSnap.exists){location.replace('login.html');return}
+ const c=profileSnap.data()||{};
+ if(c.role!=='staff'||c.active!==true||!c.gymId||!c.branchId){location.replace('login.html');return}
+ const gymId=c.gymId,branchId=c.branchId,uid=u.uid;
+ const ps=await db.collection('subscriptions').doc(gymId).get(),p=ps.exists?ps.data():{};
+ let expiry=p.expiresAt||p.expiryAt||p.validUntil||null;
+ let expiryMs=!expiry?Infinity:(typeof expiry==='number'?expiry:(expiry.toDate?expiry.toDate().getTime():Date.parse(expiry)));
+ const active=p.status==='active'&&expiryMs>Date.now();
+ if(!active||Number(p.amount||0)<199){alert('Gym ka plan inactive hai. Owner se contact karein.');logout();return}
+ S={uid,gymId,branchId,code:c.employeeCode||'',name:c.name||u.displayName||'Staff',plan:Number(p.amount||0)};
+ $('identity').textContent=S.name+' • Employee ID: '+S.code+' • Branch: '+branchId;
+ $('plan').textContent='Gym Plan: ₹'+S.plan+' • Staff self-service';
+ const [staff,att,leaves,adv]=await Promise.all([
+  db.collection('staff').doc(uid).get(),
+  db.collection('staffatt').where('gymId','==',gymId).where('uid','==',uid).get(),
+  db.collection('leaves').where('gymId','==',gymId).where('uid','==',uid).get(),
+  db.collection('staff_advances').where('gymId','==',gymId).where('uid','==',uid).get()
+ ]);
+ if(staff.exists)S.name=(staff.data()||{}).name||S.name;
+ $('identity').textContent=S.name+' • Employee ID: '+S.code+' • Branch: '+branchId;
+ const attRows=att.docs.map(d=>d.data()||{}).sort((a,b)=>String(b.date||b.createdAt||'').localeCompare(String(a.date||a.createdAt||''))).slice(0,30);
+ showRows('attendance',attRows,x=>'<div class="item">📅 '+esc(x.date||x.day||'-')+' • '+esc(x.status||x.mark||'Present')+' <span class="muted">'+esc(x.time||'')+'</span></div>');
+ showRows('myLeaves',leaves.docs.map(d=>d.data()||{}),x=>'<div class="item">Leave: '+esc(x.fromDate||x.date||'-')+' to '+esc(x.toDate||'-')+' • <b>'+esc(x.status||'pending')+'</b><div class="muted">'+esc(x.reason||'')+'</div></div>');
+ showRows('myAdvances',adv.docs.map(d=>d.data()||{}),x=>'<div class="item">₹'+Number(x.amount||0)+' • <b>'+esc(x.status||'pending')+'</b><div class="muted">'+esc(x.reason||'')+'</div></div>');
+ if(S.plan>=399){
+  const sal=await db.collection('staff_salary').where('gymId','==',gymId).where('uid','==',uid).get();
+  const rows=sal.docs.map(d=>({id:d.id,...(d.data()||{})})).sort((a,b)=>String(b.month||'').localeCompare(String(a.month||'')));
+  $('salary').innerHTML=rows.length?rows.map(x=>'<div class="item"><b>'+esc(x.month||x.period||'Salary')+'</b> • Net ₹'+Number(x.netPay||x.amount||0)+' '+(x.slipUrl?'<a href="'+esc(x.slipUrl)+'" target="_blank" rel="noopener">Download Salary Slip</a>':'<span class="muted">Slip not attached</span>')+'</div>').join(''):'<div class="muted">Salary slip abhi upload nahi hui.</div>';
+  const latest=rows[0];if(latest&&latest.creditedAt){const key='om_salary_seen_'+latest.id;if(!localStorage.getItem(key)){alert('Salary credited notification: ₹'+Number(latest.netPay||latest.amount||0));localStorage.setItem(key,'1')}}
+ }else{$('salary').innerHTML='<span class="warn">Salary slips ke liye Gym Owner ko ₹399 ya usse upar ka plan chahiye.</span>'}
+}
+async function applyLeave(){
+ if(!S)return;const a=$('leaveFrom').value,b=$('leaveTo').value,r=$('leaveReason').value.trim();
+ if(!a||!b||b<a||!r){$('leaveMsg').textContent='Date aur reason sahi bharein.';return}
+ try{await db.collection('leaves').add({gymId:S.gymId,branchId:S.branchId,uid:S.uid,employeeCode:S.code,name:S.name,fromDate:a,toDate:b,reason:r,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});$('leaveMsg').textContent='Leave request manager/owner ko bhej di gayi.';$('leaveReason').value='';await init(auth.currentUser)}catch(e){$('leaveMsg').textContent='Request nahi gayi: '+(e.message||e)}
+}
+async function applyAdvance(){
+ if(!S)return;const amount=Number($('advanceAmount').value),reason=$('advanceReason').value.trim();
+ if(!(amount>0)||!reason){$('advanceMsg').textContent='Amount aur reason bharein.';return}
+ try{await db.collection('staff_advances').add({gymId:S.gymId,branchId:S.branchId,uid:S.uid,employeeCode:S.code,name:S.name,amount,reason,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});$('advanceMsg').textContent='Advance request manager/owner ko bhej di gayi.';$('advanceReason').value='';$('advanceAmount').value='';await init(auth.currentUser)}catch(e){$('advanceMsg').textContent='Request nahi gayi: '+(e.message||e)}
+}
+auth.onAuthStateChanged(u=>{if(!u){location.replace('login.html');return}init(u).catch(e=>{console.error(e);alert('Staff data load nahi hua: '+(e.message||e))})});
+</script></body></html>

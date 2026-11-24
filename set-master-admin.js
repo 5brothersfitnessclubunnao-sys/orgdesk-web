@@ -5,7 +5,7 @@ if (!uid) {
   console.error('Usage: node set-master-admin.js FIREBASE_AUTH_UID');
   process.exit(1);
 }
-admin.initializeApp({ credential: admin.credential.applicationDefault(), projectId: 'bfc-gym-215ae' });
+admin.initializeApp({ credential: admin.credential.applicationDefault(), projectId: 'orgdesk-fc207' });
 admin.auth().getUser(uid)
   .then(user => admin.auth().setCustomUserClaims(uid, { ...(user.customClaims || {}), masterAdmin: true }))
   .then(() => { console.log('Master Admin claim assigned to UID:', uid); process.exit(0); })

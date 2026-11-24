@@ -7,7 +7,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="gym-scope.js"></script>
 <script src="tenant-access.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Roboto,sans-serif}
@@ -37,8 +36,8 @@ label{font-size:11px;color:#bbb;font-weight:700}
 </div>
 <div id="editBox" class="hide"></div>
 <script>
-const CFG={apiKey:"AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",authDomain:"bfc-gym-215ae.firebaseapp.com",projectId:"bfc-gym-215ae",storageBucket:"bfc-gym-215ae.firebasestorage.app",messagingSenderId:"886920088571",appId:"1:886920088571:web:c4bc478d246a2700b0d95e"};
-firebase.initializeApp(CFG);const auth=firebase.auth(),db=bfcScope(firebase.firestore());
+const CFG={apiKey:"AIzaSyAwuFgPJUavmRRzkH0z83FUP0Ey5eZETCU",authDomain:"orgdesk-fc207.firebaseapp.com",projectId:"orgdesk-fc207",storageBucket:"orgdesk-fc207.firebasestorage.app",messagingSenderId:"677150519977",appId:"1:677150519977:web:74de5f488494280d352fb8"};
+if(!firebase.apps.length) firebase.initializeApp(CFG);const auth=firebase.auth(),db=firebase.firestore();
 const $=id=>document.getElementById(id),esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function msg(t,ok){$("m").textContent=t||"";$("m").style.color=ok?"#00ff66":"#ff6666"}
 let ST=[],CUR=null,DOCS={},NEWDOC={};

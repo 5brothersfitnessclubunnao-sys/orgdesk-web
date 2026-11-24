@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="tenant-access.js"></script>
+<script src="auth-gate.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title id="pageTitle">Fees Portal</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="auth-gate.js" data-mode="ondemand"></script>
 <script>
 /* safai helpers: naam/id kabhi code ban kar na chale */
 window.__esc=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
@@ -21,7 +22,6 @@ window.bfcLoadMembersSnap = window.bfcLoadMembersSnap || async function (db) {
   return await db.collection("members").get();
 };
 </script>
-<script src="tg-notify.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent;}
 
@@ -678,12 +678,12 @@ th{color:#ffcc00;}
 
 // --- FIREBASE CLOUD SYNC (taaki attendance kiosk par sabhi members dikhein) ---
 const firebaseConfig = {
-  apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
-  authDomain: "bfc-gym-215ae.firebaseapp.com",
-  projectId: "bfc-gym-215ae",
-  storageBucket: "bfc-gym-215ae.firebasestorage.app",
-  messagingSenderId: "886920088571",
-  appId: "1:886920088571:web:c4bc478d246a2700b0d95e"
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
 };
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -2736,7 +2736,7 @@ window.addEventListener("DOMContentLoaded", async function () {
   window.addEventListener("DOMContentLoaded", function () {
     var formEl = document.getElementById("formGymFee");
     var durGroup = document.getElementById("feeDuration") ? document.getElementById("feeDuration").closest(".field-group") : null;
-    if (formEl && durGroup && !document.getElementById("anyExtraServiceBox")) {
+    if (false) {
       durGroup.parentNode.insertAdjacentHTML("afterend", extraServiceHtml);
       var sDt = document.getElementById("esStartDate");
       if (sDt && !sDt.value) sDt.value = todayStr();
@@ -2751,7 +2751,7 @@ window.addEventListener("DOMContentLoaded", async function () {
     }
 
     var validRow = document.getElementById("rValidTill") ? document.getElementById("rValidTill").closest(".r-row") : null;
-    if (validRow && !document.getElementById("rExtraSrvRow")) {
+    if (false) {
       validRow.insertAdjacentHTML("afterend", receiptExtraHtml);
     }
 
@@ -3047,8 +3047,7 @@ window.addEventListener("DOMContentLoaded", async function () {
     list.forEach(function (m) {
       lines.push('"' + String(m.name || "").replace(/"/g, '""') + '","' + String(m.phone || "") + '","' + String(m.status || "Pending") + '","' + String(m.lastPaid || "") + '","' + String(memberDueDate(m) || "") + '"');
     });
-    var blob = new Blob([lines.join("
-")], { type: "text/csv;charset=utf-8;" });
+    var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
     bfcSaveBlob(blob, "Master_Payment_Collection_" + todayStr() + ".csv");
   };
 })();
@@ -3130,7 +3129,7 @@ window.addEventListener("DOMContentLoaded", async function () {
     }
 
     var durGroup = document.getElementById("feeDuration") ? document.getElementById("feeDuration").closest(".field-group") : null;
-    if (durGroup && !document.getElementById("ifYouWantExtraSrvBox")) {
+    if (false) {
       var esHtml = `
         <div id="ifYouWantExtraSrvBox" class="box-panel" style="border:1.5px solid #ffcc00">
           <label class="checkbox-container" style="margin-top:0">
@@ -3240,5 +3239,15 @@ window.addEventListener("DOMContentLoaded", async function () {
 })();
 </script>
 
+<script>
+(function(){
+  var role=String(localStorage.getItem("bfc_role")||"").toLowerCase();
+  var q=new URLSearchParams(location.search);
+  if(role==="manager"){ var s=document.createElement("style"); s.textContent="#mpcOpenBtnMarker{display:none!important}"; document.head.appendChild(s); }
+  window.addEventListener("load",function(){
+    if(q.get("view")==="records" && role!=="manager" && window.openMasterPaymentCollection){ setTimeout(openMasterPaymentCollection,400); }
+  });
+})();
+</script>
 </body>
 </html>
