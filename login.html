@@ -390,6 +390,39 @@
     }
   }
 
+
+  async function findRegisteredEmailRole(email) {
+    const cleanEmail = String(email || "").trim().toLowerCase();
+    if (!cleanEmail) return null;
+    try {
+      const localOwners = readOwners();
+      const foundLocal = localOwners.find(o => String(o.email || "").toLowerCase() === cleanEmail);
+      if (foundLocal) return String(foundLocal.role || "owner").toLowerCase();
+    } catch (e) {}
+    try {
+      const ownSnap = await db.collection("owner_accounts").where("email", "==", cleanEmail).limit(1).get();
+      if (!ownSnap.empty) {
+        const d = ownSnap.docs[0].data() || {};
+        return String(d.role || "owner").toLowerCase();
+      }
+    } catch (e) {}
+    try {
+      const usrSnap = await db.collection("users").where("email", "==", cleanEmail).limit(1).get();
+      if (!usrSnap.empty) {
+        const d = usrSnap.docs[0].data() || {};
+        const r = String(d.role || "").toLowerCase();
+        if (r === "manager" || r === "staff" || r === "owner") return r;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function formatAlreadyRegisteredMsg(role) {
+    if (role === "staff") return "Already Email id register hai As a staff";
+    if (role === "manager") return "Already Email id register hai As a manager";
+    return "Already Email id register hai As a owner";
+  }
+
   async function handleOwnerSignUp(e) {
     e.preventDefault();
     clearAlerts();
@@ -416,9 +449,15 @@
     const owners = readOwners();
     const dup = owners.find(o => String(o.email || "").toLowerCase() === email || String(o.phone || "") === phone);
     if (dup) {
-      showErr("You are already sign up Account please Login");
-      setOwnerMode("signin");
-      $("liOwnerEmail").value = dup.email || email;
+      const rDup = String(dup.role || "owner").toLowerCase();
+      showErr(formatAlreadyRegisteredMsg(rDup));
+      if (rDup === "owner") { setOwnerMode("signin"); $("liOwnerEmail").value = dup.email || email; }
+      return;
+    }
+    const existingRole = await findRegisteredEmailRole(email);
+    if (existingRole) {
+      showErr(formatAlreadyRegisteredMsg(existingRole));
+      if (existingRole === "owner") { setOwnerMode("signin"); $("liOwnerEmail").value = email; }
       return;
     }
 
@@ -434,9 +473,9 @@
         await cred.user.updateProfile({ displayName: ownerName });
       } catch (fbErr) {
         if (fbErr && fbErr.code === "auth/email-already-in-use") {
-          showErr("You are already sign up Account please Login");
-          setOwnerMode("signin");
-          $("liOwnerEmail").value = email;
+          const rFound = await findRegisteredEmailRole(email);
+          showErr(formatAlreadyRegisteredMsg(rFound || "owner"));
+          if (!rFound || rFound === "owner") { setOwnerMode("signin"); $("liOwnerEmail").value = email; }
         } else {
           showErr((fbErr && fbErr.message) || "Firebase account create nahi ho saka. Dobara try karein.");
         }
@@ -549,7 +588,23 @@
       showOk("Gym Owner Login successful! Opening dashboard...");
       setTimeout(() => { window.location.replace("index.html"); }, 700);
     } catch (err) {
-      showErr((err && err.message) || "Login failed");
+      const code = (err && err.code) || "";
+      if (code === "auth/wrong-password") {
+        showErr("Galat Password daal rahe hain");
+      } else if (code === "auth/user-not-found") {
+        showErr("Galat Email id daal rahe hain");
+      } else if (code === "auth/invalid-email") {
+        showErr("Galat Email id daal rahe hain");
+      } else if (code === "auth/invalid-credential" || code === "auth/invalid-login-credentials") {
+        const regRole = await findRegisteredEmailRole(email);
+        if (!regRole) {
+          showErr("Galat Email id daal rahe hain");
+        } else {
+          showErr("Galat Password daal rahe hain");
+        }
+      } else {
+        showErr((err && err.message) || "Login failed");
+      }
     }
   }
 
