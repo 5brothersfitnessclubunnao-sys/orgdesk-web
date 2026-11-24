@@ -9,7 +9,7 @@
 <div class="card" id="salaryCard"><h2>My Salary Slips</h2><div id="salary" class="muted">Checking plan access…</div></div>
 </div>
 <script>
-const CFG={apiKey:'AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU',authDomain:'orgdesk-fc207.firebaseapp.com',projectId:'orgdesk-fc207',storageBucket:'orgdesk-fc207.firebasestorage.app',messagingSenderId:'677150519977',appId:'1:677150519977:web:74de5f488494280d352fb8'};
+const CFG={apiKey:'AIzaSyAwuFgPJIUavmRRzkHOz83FUP0EyfZETCU',authDomain:'orgdesk-fc207.firebaseapp.com',projectId:'orgdesk-fc207',storageBucket:'orgdesk-fc207.firebasestorage.app',messagingSenderId:'677150519977',appId:'1:677150519977:web:74de5f488494280d352fb8'};
 if(!firebase.apps.length)firebase.initializeApp(CFG);const auth=firebase.auth(),db=firebase.firestore();let S=null;
 const $=id=>document.getElementById(id),esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function logout(){auth.signOut().finally(()=>location.replace('login.html'))}

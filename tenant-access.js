@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   var CFG = {
-    apiKey: 'AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU',
+    apiKey: 'AIzaSyAwuFgPJIUavmRRzkHOz83FUP0EyfZETCU',
     authDomain: 'orgdesk-fc207.firebaseapp.com',
     projectId: 'orgdesk-fc207',
     storageBucket: 'orgdesk-fc207.firebasestorage.app',
