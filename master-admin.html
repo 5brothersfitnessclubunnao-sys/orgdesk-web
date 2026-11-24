@@ -7,7 +7,7 @@
 <div class="card"><h2>All Registered Gyms</h2><div id="gyms">Loading…</div></div>
 <div class="card"><h2>Recent Approved / Declined Requests</h2><div id="history">Loading…</div></div></div>
 <script>
-const CFG={apiKey:'AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU',authDomain:'orgdesk-fc207.firebaseapp.com',projectId:'orgdesk-fc207',storageBucket:'orgdesk-fc207.firebasestorage.app',messagingSenderId:'677150519977',appId:'1:677150519977:web:74de5f488494280d352fb8'};
+const CFG={apiKey:'AIzaSyAwuFgPJIUavmRRzkHOz83FUP0EyfZETCU',authDomain:'orgdesk-fc207.firebaseapp.com',projectId:'orgdesk-fc207',storageBucket:'orgdesk-fc207.firebasestorage.app',messagingSenderId:'677150519977',appId:'1:677150519977:web:74de5f488494280d352fb8'};
 if(!firebase.apps.length)firebase.initializeApp(CFG);const auth=firebase.auth(),db=firebase.firestore();
 const $=id=>document.getElementById(id),esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PLAN_NAMES={99:'First Plan (₹99)',199:'Growth Value Plan (₹199)',399:'Pro Business Plan (₹399)',499:'Advanced Audit Plan (₹499)',999:'Complete Enterprise ERP (₹999)'};
@@ -86,5 +86,32 @@ async function loadAll(){
  }
  $('history').innerHTML=history.length?history.map(p=>'<div class="item"><b>'+esc(p.gymName||p.gymId)+'</b> • '+esc(p.status)+'<div class="muted">UTR: '+esc(p.utr)+' • Plan ₹'+Number(p.planAmount||0)+' • Paid ₹'+Number(p.amountPaid||0)+' • '+esc(timeOf(p.reviewedAt))+'</div>'+(p.licenseKey?'<div class="good">License: '+esc(p.licenseKey)+'</div>':'')+(p.reviewReason?'<div class="bad">Reason: '+esc(p.reviewReason)+'</div>':'')+'</div>').join(''):'<div class="item">No reviewed payment history yet.</div>';
 }
-auth.onAuthStateChanged(async u=>{if(!u){location.replace('login.html');return}try{const t=await u.getIdTokenResult(true);if(!t.claims.masterAdmin){alert('Master Admin access denied.');location.replace('index.html');return}$('status').textContent='Verified Master Admin • Manual UPI approvals';await loadAll();watchPendingPayments()}catch(e){$('status').textContent='Verification failed: '+(e.message||e)}});
+auth.onAuthStateChanged(async u=>{
+  if(!u){ location.replace('login.html'); return; }
+  try{
+    const t = await u.getIdTokenResult(true);
+    let isMaster = !!(t && t.claims && t.claims.masterAdmin === true);
+    if(!isMaster && u && u.uid){
+      try{
+        const mDoc = await db.collection('masters').doc(u.uid).get();
+        if(mDoc.exists) isMaster = true;
+      }catch(e){}
+    }
+    // Developer override — 5-tap MPIN flag (back redirect band)
+    if(!isMaster){
+      try{ if(localStorage.getItem('om_dev_master_access') === '1') isMaster = true; }catch(e){}
+    }
+    if(!isMaster){
+      alert('Master Admin access denied.');
+      location.replace('index.html');
+      return;
+    }
+    const devMode = (function(){ try{ return localStorage.getItem('om_dev_master_access')==='1'; }catch(e){ return false; } })();
+    $('status').textContent = 'Verified Master Admin • Manual UPI approvals' + (devMode ? ' (Developer Mode)' : '');
+    await loadAll();
+    watchPendingPayments();
+  }catch(e){
+    $('status').textContent = 'Verification failed: ' + (e.message || e);
+  }
+});
 </script></body></html>
