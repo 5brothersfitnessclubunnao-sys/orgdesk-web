@@ -1,19 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ---------- Helpers (fixed: safe for users without custom claims) ----------
     function signed() { return request.auth != null; }
-    function master() { return signed() && request.auth.token.masterAdmin == true; }
+    function hasClaim(k) { return signed() && (k in request.auth.token); }
+    function master() {
+      return (hasClaim('masterAdmin') && request.auth.token.masterAdmin == true)
+        || (signed() && exists(/databases/$(database)/documents/masters/$(request.auth.uid)));
+    }
     function hasUser() { return signed() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function userData() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
     function role() {
-      return signed() && request.auth.token.role != null
+      return hasClaim('role')
         ? request.auth.token.role
         : (hasUser() ? userData().role : '');
     }
     function myGym() {
-      return signed() && request.auth.token.gymId != null
+      return hasClaim('gymId')
         ? request.auth.token.gymId
-        : (hasUser() && userData().gymId != null ? userData().gymId : request.auth.uid);
+        : ((hasUser() && ('gymId' in userData())) ? userData().gymId : request.auth.uid);
+    }
+    function myBranch() {
+      return hasClaim('branchId')
+        ? request.auth.token.branchId
+        : ((hasUser() && ('branchId' in userData())) ? userData().branchId : '');
     }
     function sameGym(g) { return master() || (signed() && g is string && myGym() == g); }
     function ownerOf(g) { return master() || (signed() && myGym() == g && (request.auth.uid == g || role() == 'owner')); }
@@ -25,11 +36,6 @@ service cloud.firestore {
         && userData().permissions.hasAny([permission]);
     }
     function staffOf(g) { return signed() && myGym() == g && role() == 'staff'; }
-    function myBranch() {
-      return signed() && request.auth.token.branchId != null
-        ? request.auth.token.branchId
-        : (hasUser() && userData().branchId != null ? userData().branchId : '');
-    }
     function branchMatches(data) {
       return role() != 'manager' || (myBranch() != '' && data.branchId == myBranch());
     }
@@ -46,6 +52,7 @@ service cloud.firestore {
       return ownerOf(g) || (managerCan(g, permission) && branchMatches(data));
     }
 
+    // ---------- Owner / gym / plan ----------
     match /owner_accounts/{uid} {
       allow create: if signed() && request.auth.uid == uid;
       allow read: if master() || (signed() && request.auth.uid == uid);
@@ -80,6 +87,7 @@ service cloud.firestore {
       allow delete: if master();
     }
 
+    // ---------- Users (manager / staff profiles) ----------
     match /users/{uid} {
       allow create: if signed() && (master() || (ownerOf(request.resource.data.gymId)
         && request.resource.data.role in ['manager','staff']
@@ -92,6 +100,12 @@ service cloud.firestore {
       allow delete: if master() || ownerOf(resource.data.gymId);
     }
 
+    match /settings/{docId} {
+      allow read: if signed();
+      allow write: if master() || (signed() && ownerOf(myGym()));
+    }
+
+    // ---------- Members / admissions / attendance ----------
     match /members/{id} {
       allow read: if hasPlan(resource.data.gymId, 99) && managerOrOwner(resource.data.gymId, resource.data, 'modAtt');
       allow create: if hasPlan(request.resource.data.gymId, 99)
@@ -116,7 +130,7 @@ service cloud.firestore {
       allow create: if hasPlan(request.resource.data.gymId, 99)
         && (ownerOf(request.resource.data.gymId) || (managerCan(request.resource.data.gymId, 'modAdmission') && branchMatches(request.resource.data)));
       allow update: if hasPlan(resource.data.gymId, 99)
-        && (ownerOf(resource.data.gymId) || (managerCan(resource.data.gymId, 'modAdmission') && branchMatches(resource.data)));
+        && (ownerOf(resource.data.gymId) || (managerCan(request.resource.data.gymId, 'modAdmission') && branchMatches(request.resource.data)));
       allow delete: if hasPlan(resource.data.gymId, 99) && ownerOf(resource.data.gymId);
     }
 
@@ -148,6 +162,25 @@ service cloud.firestore {
       allow update, delete: if hasPlan(resource.data.gymId, 99) && ownerOf(resource.data.gymId);
     }
 
+    // ---------- Fees / receipts ----------
+    match /payment_proofs/{id} {
+      allow create: if signed()
+        && request.resource.data.gymId is string
+        && sameGym(request.resource.data.gymId);
+      allow read, update, delete: if signed()
+        && resource.data.gymId is string
+        && managerOrOwner(resource.data.gymId, resource.data, 'modFees');
+    }
+
+    match /receipts/{id} {
+      allow create: if signed()
+        && request.resource.data.gymId is string
+        && sameGym(request.resource.data.gymId);
+      allow read, update, delete: if signed()
+        && resource.data.gymId is string
+        && managerOrOwner(resource.data.gymId, resource.data, 'modFees');
+    }
+
     match /ex_members/{id} {
       allow read: if hasPlan(resource.data.gymId, 99) && managerOrOwner(resource.data.gymId, resource.data, 'modExpired');
       allow create, update: if hasPlan(request.resource.data.gymId, 99)
@@ -155,6 +188,7 @@ service cloud.firestore {
       allow delete: if hasPlan(resource.data.gymId, 99) && ownerOf(resource.data.gymId);
     }
 
+    // ---------- Staff ----------
     match /staff/{id} {
       allow read: if hasPlan(resource.data.gymId, 199) && (
         ownerOf(resource.data.gymId)
@@ -178,7 +212,7 @@ service cloud.firestore {
       allow create: if hasPlan(request.resource.data.gymId, 399)
         && (ownerOf(request.resource.data.gymId) || (managerCan(request.resource.data.gymId, 'modDeptStaff') && branchMatches(request.resource.data)));
       allow update: if hasPlan(resource.data.gymId, 399)
-        && (ownerOf(resource.data.gymId) || (managerCan(resource.data.gymId, 'modDeptStaff') && branchMatches(resource.data)))
+        && (ownerOf(resource.data.gymId) || (managerCan(request.resource.data.gymId, 'modDeptStaff') && branchMatches(request.resource.data)))
         && request.resource.data.gymId == resource.data.gymId
         && (role() != 'manager' || request.resource.data.branchId == resource.data.branchId);
       allow delete: if hasPlan(resource.data.gymId, 399) && ownerOf(resource.data.gymId);
@@ -212,7 +246,6 @@ service cloud.firestore {
       allow delete: if hasPlan(resource.data.gymId, 199) && ownerOf(resource.data.gymId);
     }
 
-
     match /staff_advances/{id} {
       allow create: if hasPlan(request.resource.data.gymId, 199)
         && staffOf(request.resource.data.gymId)
@@ -238,8 +271,8 @@ service cloud.firestore {
       );
       allow create: if hasPlan(request.resource.data.gymId, 399)
         && (ownerOf(request.resource.data.gymId) || (managerCan(request.resource.data.gymId, 'modSlip') && branchMatches(request.resource.data)));
-      allow update: if hasPlan(resource.data.gymId, 399)
-        && (ownerOf(resource.data.gymId) || (managerCan(resource.data.gymId, 'modSlip') && branchMatches(resource.data)))
+      allow update: if hasPlan(request.resource.data.gymId, 399)
+        && (ownerOf(request.resource.data.gymId) || (managerCan(request.resource.data.gymId, 'modSlip') && branchMatches(request.resource.data)))
         && request.resource.data.gymId == resource.data.gymId
         && request.resource.data.uid == resource.data.uid;
       allow delete: if ownerOf(resource.data.gymId);
@@ -258,12 +291,9 @@ service cloud.firestore {
       allow update, delete: if hasPlan(resource.data.gymId, 99) && ownerOf(resource.data.gymId);
     }
 
-
-    // TEST ONLY. Set false before accepting real customer payments.
+    // ---------- Plan payments ----------
     function testPlanPaymentsAllowed() { return false; }
 
-    // Owner submits UTR + compressed screenshot directly to Firestore (Spark-compatible).
-    // Screenshot is capped so the whole document stays below Firestore's 1 MiB limit.
     match /payment_requests/{requestId} {
       allow read: if master() || (signed() && resource.data.uid == request.auth.uid && resource.data.gymId == myGym());
       allow create: if signed()
@@ -283,7 +313,6 @@ service cloud.firestore {
       allow update, delete: if master();
     }
 
-    // UTR can be used once. Marker and payment request must be written in the same batch.
     match /used_upi_transactions/{utrHash} {
       allow read: if master();
       allow create: if signed()
@@ -295,13 +324,18 @@ service cloud.firestore {
       allow update, delete: if master();
     }
 
-    // Issued license keys are visible to their owning Gym Owner and Master Admin.
     match /licenses/{licenseKey} {
       allow read: if master() || (signed() && resource.data.uid == request.auth.uid && ownerOf(resource.data.gymId));
       allow create, update, delete: if master();
     }
 
-    // No blanket public access. All other collections are denied except to Master Admin.
+    // Developer accounts: add documents only from Firebase Console (doc id = developer UID)
+    match /masters/{uid} {
+      allow read: if signed() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Everything else: master admin only
     match /{document=**} { allow read, write: if master(); }
   }
 }

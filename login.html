@@ -268,6 +268,19 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
+  // One-time fresh start: wipe old test data stored on this device
+  (function freshStartOnce() {
+    try {
+      if (localStorage.getItem("om_fresh_reset_v1")) return;
+      ["om_registered_owners_v1","om_org_profile","om_last_org_profile","om_active_role","om_session_active",
+       "om_last_activity_time","bfc_role","bfc_gid","om_logged_user","om_team_session","om_secure_session_v1",
+       "om_active_subscription_plan","om_saved_team_creds_v1"].forEach(k => localStorage.removeItem(k));
+      Object.keys(localStorage).forEach(k => { if (k.indexOf("om_org_profile_saved_") === 0) localStorage.removeItem(k); });
+      localStorage.setItem("om_fresh_reset_v1", "1");
+      auth.signOut().catch(() => {});
+    } catch (e) {}
+  })();
+
   const OWNERS_KEY = "om_registered_owners_v1";
   let currentRole = "owner";
   let ownerMode = "signin";
@@ -300,8 +313,12 @@
   }
   function verifyDevMpin() {
     const pin = (document.getElementById("devMpinInput").value || "").trim();
-    if (pin === "1992" || pin === "1234" || pin === "9125") {
+    if (pin === "1234") {
       closeDevModal();
+      if (!auth.currentUser) {
+        alert("Pehle developer email aur password se Gym Owner Sign In karein, phir ye MPIN dalein.");
+        return;
+      }
       location.href = "master-admin.html";
     } else {
       alert("Invalid Developer MPIN");
