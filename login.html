@@ -7,14 +7,13 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  
   <style>
     :root{--bg:#0b0b0d;--card:#151519;--border:#2c2c36;--ac:#ffcc00;--tx:#f4f4f8;--mut:#9a9aa8;--ok:#2ecc71;--err:#ff5c5c}
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;background:var(--bg);color:var(--tx);font-family:'Segoe UI',Arial,sans-serif;display:flex;justify-content:center;align-items:center;padding:16px}
     .box{width:100%;max-width:450px;background:var(--card);border:2px solid var(--ac);border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.65)}
     .hdr{text-align:center;border-bottom:1.5px dashed var(--border);padding-bottom:12px;margin-bottom:14px}
-    .badge{display:inline-block;background:var(--ac);color:#000;font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:10px;margin-bottom:6px;cursor:pointer}
+    .badge{display:inline-block;background:var(--ac);color:#000;font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:10px;margin-bottom:6px;cursor:pointer;user-select:none}
     h2{margin:0;color:var(--ac);font-size:20px;font-weight:900}
     .sub{margin:4px 0 0;color:var(--mut);font-size:11.5px}
     .role-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
@@ -59,7 +58,7 @@
     <button type="button" class="rbtn" id="roleBtn_staff" onclick="selectRole('staff')">Staff</button>
   </div>
 
-  <!-- OWNER SIGN UP / SIGN IN SWITCH (HIDDEN FOR MANAGER & STAFF) -->
+  <!-- OWNER SIGN UP / SIGN IN SWITCH -->
   <div class="mode-switch-bar" id="ownerModeBar">
     <button type="button" class="mbtn active" id="modeSignInBtn" onclick="setOwnerMode('signin')">Sign In</button>
     <button type="button" class="mbtn" id="modeSignUpBtn" onclick="setOwnerMode('signup')">Owner Sign Up</button>
@@ -69,7 +68,7 @@
   <form id="ownerSignUpForm" style="display:none" onsubmit="handleOwnerSignUp(event)">
     <div class="field">
       <label>Please Enter Your Gym Name *</label>
-      <input type="text" id="suGymName" required placeholder="e.g. 5 Brother's Fitness Club">
+      <input type="text" id="suGymName" required placeholder="e.g. Fitness Club">
     </div>
     <div class="field">
       <label>Owner Name *</label>
@@ -97,15 +96,15 @@
     </div>
     <div class="field">
       <label>Please Choose Your Security Question *</label>
-      <select id="suSecQuestion" required>
+      <select id="suSecQuestion" required onchange="syncSecurityPrompt()">
         <option value="What is your favorite workout exercise?">What is your favorite workout exercise?</option>
         <option value="What is your childhood nickname?">What is your childhood nickname?</option>
         <option value="What is your first gym location or city?">What is your first gym location or city?</option>
       </select>
     </div>
-    <div class="field" style="display:none">
-      <label>Security Question Answer</label>
-      <input type="text" id="suSecAnswer" required placeholder="Enter your answer">
+    <div class="field">
+      <label id="suSecAnsLabel">Security Question Answer *</label>
+      <input type="text" id="suSecAnswer" required placeholder="Enter your security answer">
     </div>
     <button type="submit" class="btn-main" id="suSubmitBtn">Sign Up &amp; Create Owner Account</button>
   </form>
@@ -114,7 +113,7 @@
   <form id="ownerSignInForm" onsubmit="handleOwnerSignIn(event)">
     <div class="field">
       <label>Email ID *</label>
-      <input type="email" id="liOwnerEmail" required placeholder="owner@gym.com">
+      <input type="email" id="liOwnerEmail" required oninput="syncLoginSecurityQuestion()" placeholder="owner@gym.com">
     </div>
 
     <div class="auth-method-row">
@@ -130,6 +129,15 @@
     <div class="field" id="liMpinField" style="display:none">
       <label>MPIN (Fast Login) *</label>
       <input type="password" id="liOwnerMpin" inputmode="numeric" maxlength="6" placeholder="Enter 4-6 digit MPIN">
+    </div>
+
+    <div class="field">
+      <label>Choose Security Question *</label>
+      <select id="liSecQuestionSelect" required onchange="syncSecurityPrompt()">
+        <option value="What is your favorite workout exercise?">What is your favorite workout exercise?</option>
+        <option value="What is your childhood nickname?">What is your childhood nickname?</option>
+        <option value="What is your first gym location or city?">What is your first gym location or city?</option>
+      </select>
     </div>
 
     <div class="field">
@@ -151,7 +159,7 @@
     <input type="hidden" id="tmGymId" value="">
     <div class="field">
       <label id="teamCodeLabel">Login with Employee ID *</label>
-      <input type="text" id="tmEmpCode" name="username" autocomplete="username" required oninput="onTeamCodeChanged()" placeholder="Enter Employee Code / ID">
+      <input type="text" id="tmEmpCode" name="username" autocomplete="username" required placeholder="Enter Employee Code / ID">
     </div>
 
     <div class="auth-method-row">
@@ -159,24 +167,14 @@
       <button type="button" class="abtn" id="tmAuthMpinBtn" style="display:none" disabled>MPIN unavailable in no-Blaze mode</button>
     </div>
 
-    <label class="check-inline" style="margin-bottom:8px">
-      <input type="checkbox" id="tmFirstTimeCreatePwd" disabled>
-      <span>Employee account Owner ne Firebase Auth mein create kiya hona chahiye.</span>
-    </label>
-
     <div class="field" id="tmPasswordField">
       <label id="tmPasswordLabel">Password *</label>
-      <input type="password" id="tmPassword" name="password" autocomplete="current-password" placeholder="Enter Password">
+      <input type="password" id="tmPassword" name="password" autocomplete="current-password" required placeholder="Enter Password">
     </div>
 
-    <div class="field" id="tmMpinField" style="display:none">
-      <label>MPIN (4-6 Digits Fast Login) *</label>
-      <input type="password" id="tmMpin" inputmode="numeric" maxlength="6" placeholder="Enter or create 4-6 digit MPIN">
-    </div>
-
-    <div class="field" style="display:none">
-      <label>Security Question (3 Options)</label>
-      <select id="tmSecQuestion">
+    <div class="field">
+      <label>Choose Security Question *</label>
+      <select id="tmSecQuestion" required onchange="syncSecurityPrompt()">
         <option value="What is your favorite workout exercise?">What is your favorite workout exercise?</option>
         <option value="What is your childhood nickname?">What is your childhood nickname?</option>
         <option value="What is your first gym location or city?">What is your first gym location or city?</option>
@@ -184,8 +182,8 @@
     </div>
 
     <div class="field">
-      <label>Security Question Answer *</label>
-      <input type="text" id="tmSecAnswer" placeholder="Enter your security answer">
+      <label id="tmSecAnsLabel">Security Question Answer *</label>
+      <input type="text" id="tmSecAnswer" required placeholder="Enter your security answer">
     </div>
 
     <button type="submit" class="btn-main" id="tmSubmitBtn">Login</button>
@@ -199,7 +197,7 @@
 <!-- HIDDEN DEVELOPER 5-TAP MPIN MODAL -->
 <div class="modal-ov" id="devLoginModal">
   <div class="modal-bx" style="border-color:#22d3ee;text-align:center;">
-    <h3 style="color:#22d3ee;margin:0 0 6px;font-size:17px">⚡ Developer Console Access</h3>
+    <h3 style="color:#22d3ee;margin:0 0 6px;font-size:17px">Developer Console Access</h3>
     <p class="sub" style="margin-bottom:12px">Enter Developer MPIN to unlock Master Admin Console</p>
     <div class="field">
       <input type="password" id="devMpinInput" inputmode="numeric" maxlength="6" placeholder="Enter MPIN" style="text-align:center;font-size:18px;letter-spacing:4px;">
@@ -209,34 +207,22 @@
   </div>
 </div>
 
-<!-- OWNER RECOVERY / OTP MODAL -->
+<!-- OWNER RECOVERY MODAL -->
 <div class="modal-ov" id="ownerRecoveryModal">
   <div class="modal-bx">
     <h3 id="recTitle" style="color:var(--ac);margin:0 0 8px;font-size:16px">Account Recovery</h3>
     <p class="sub" style="margin-bottom:10px">Registered email par Firebase password-reset link bhejein.</p>
     <div class="field">
-      <label>Registered Email or Mobile No. *</label>
-      <input type="text" id="recContactInput" placeholder="owner@gym.com or 9876543210">
+      <label>Registered Email *</label>
+      <input type="text" id="recContactInput" placeholder="owner@gym.com">
     </div>
     <button type="button" class="btn-sec" onclick="sendRecoveryOtp()">Send Password Reset Email</button>
-    <div id="recOtpSection" style="display:none;margin-top:10px">
-      <div id="recOtpDemoHint" style="font-size:11px;color:var(--ok);margin-bottom:6px"></div>
-      <div class="field">
-        <label>Enter OTP *</label>
-        <input type="text" id="recOtpCodeInput" maxlength="6" placeholder="6-digit OTP">
-      </div>
-      <div class="field" id="recNewSecretField">
-        <label id="recNewSecretLabel">New Password / MPIN *</label>
-        <input type="password" id="recNewSecretInput" placeholder="Enter new value">
-      </div>
-      <button type="button" class="btn-main" style="background:var(--ok);color:#000" onclick="applyRecoveryReset()">Verify OTP &amp; Complete</button>
-    </div>
     <div id="recOutputBox" style="margin-top:10px;font-size:12px"></div>
     <button type="button" class="btn-sec" onclick="closeRecoveryModal()">Close</button>
   </div>
 </div>
 
-<!-- MANAGER / STAFF FORGOT -> SEND TO ADMIN MODAL -->
+<!-- MANAGER / STAFF FORGOT MODAL -->
 <div class="modal-ov" id="teamForgotModal">
   <div class="modal-bx">
     <h3 id="tfTitle" style="color:var(--ac);margin:0 0 8px;font-size:16px">Forgot Credentials Request</h3>
@@ -249,7 +235,7 @@
       <label>Your Mobile or Email *</label>
       <input type="text" id="tfContact" placeholder="Mobile number or email">
     </div>
-    <button type="button" class="btn-main" style="background:var(--ok);color:#000" onclick="sendTeamForgotToAdmin()">Sent to Admin (WhatsApp + Email)</button>
+    <button type="button" class="btn-main" style="background:var(--ok);color:#000" onclick="sendTeamForgotToAdmin()">Sent to Admin (WhatsApp)</button>
     <div id="tfResultBox" style="margin-top:10px;font-size:11.5px"></div>
     <button type="button" class="btn-sec" onclick="closeTeamForgotModal()">Close</button>
   </div>
@@ -257,7 +243,7 @@
 
 <script>
   const FB_CFG = {
-    apiKey: "AIzaSyAwuFgPJIUavmRRzkHOz83FUP0EyfZETCU",
+    apiKey: "AIzaSyAwuFgPJUavmRRzkHOz83FUP0EyfZETCU",
     authDomain: "orgdesk-fc207.firebaseapp.com",
     projectId: "orgdesk-fc207",
     storageBucket: "orgdesk-fc207.firebasestorage.app",
@@ -272,10 +258,16 @@
   let currentRole = "owner";
   let ownerMode = "signin";
   let loginMethod = "password";
-  let recoveryType = "password";
   let teamForgotType = "code";
+  let isSubmittingAuth = false;
 
-  // 5-Tap Hidden Developer Trigger
+  const $ = id => document.getElementById(id);
+  const readOwners = () => { try { return JSON.parse(localStorage.getItem(OWNERS_KEY) || "[]") || []; } catch (e) { return []; } };
+  const writeOwners = arr => { try { localStorage.setItem(OWNERS_KEY, JSON.stringify(arr)); } catch (e) {} };
+  const showErr = m => { $("errBox").textContent = m; $("errBox").style.display = "block"; $("okBox").style.display = "none"; };
+  const showOk = m => { $("okBox").textContent = m; $("okBox").style.display = "block"; $("errBox").style.display = "none"; };
+  const clearAlerts = () => { $("errBox").style.display = "none"; $("okBox").style.display = "none"; };
+
   let devTapCount = 0;
   let devTapTimer = null;
   function handleDevTrigger() {
@@ -288,18 +280,18 @@
     }
   }
   function openDevModal() {
-    const el = document.getElementById("devLoginModal");
+    const el = $("devLoginModal");
     if (el) {
-      document.getElementById("devMpinInput").value = "";
+      $("devMpinInput").value = "";
       el.classList.add("show");
     }
   }
   function closeDevModal() {
-    const el = document.getElementById("devLoginModal");
+    const el = $("devLoginModal");
     if (el) el.classList.remove("show");
   }
   function verifyDevMpin() {
-    const pin = (document.getElementById("devMpinInput").value || "").trim();
+    const pin = ($("devMpinInput").value || "").trim();
     if (pin === "1992" || pin === "1234" || pin === "9125") {
       closeDevModal();
       location.href = "master-admin.html";
@@ -308,12 +300,29 @@
     }
   }
 
-  const $ = id => document.getElementById(id);
-  const readOwners = () => { try { return JSON.parse(localStorage.getItem(OWNERS_KEY) || "[]") || []; } catch (e) { return []; } };
-  const writeOwners = arr => { try { localStorage.setItem(OWNERS_KEY, JSON.stringify(arr)); } catch (e) {} };
-  const showErr = m => { $("errBox").textContent = m; $("errBox").style.display = "block"; $("okBox").style.display = "none"; };
-  const showOk = m => { $("okBox").textContent = m; $("okBox").style.display = "block"; $("errBox").style.display = "none"; };
-  const clearAlerts = () => { $("errBox").style.display = "none"; $("okBox").style.display = "none"; };
+  function syncSecurityPrompt() {
+    const suQ = $("suSecQuestion") ? $("suSecQuestion").value : "";
+    if ($("suSecAnsLabel") && suQ) {
+      $("suSecAnsLabel").textContent = "Answer (" + suQ + ") *";
+    }
+    const liQ = $("liSecQuestionSelect") ? $("liSecQuestionSelect").value : "";
+    if ($("liSecQLabel") && liQ) {
+      $("liSecQLabel").textContent = "Answer (" + liQ + ") *";
+    }
+    const tmQ = $("tmSecQuestion") ? $("tmSecQuestion").value : "";
+    if ($("tmSecAnsLabel") && tmQ) {
+      $("tmSecAnsLabel").textContent = "Answer (" + tmQ + ") *";
+    }
+  }
+
+  function syncLoginSecurityQuestion() {
+    const email = ($("liOwnerEmail").value || "").trim().toLowerCase();
+    const rec = readOwners().find(o => String(o.email || "").toLowerCase() === email);
+    if (rec && rec.secQuestion && $("liSecQuestionSelect")) {
+      $("liSecQuestionSelect").value = rec.secQuestion;
+    }
+    syncSecurityPrompt();
+  }
 
   function selectRole(role) {
     currentRole = (role === "manager" || role === "staff") ? role : "owner";
@@ -331,20 +340,22 @@
       setOwnerMode(ownerMode);
     } else if (currentRole === "manager") {
       $("portalTitle").textContent = "Manager Login";
-      $("portalSub").textContent = "Management Login Only — Employee Code + Password + MPIN";
+      $("portalSub").textContent = "Management Login Only — Employee Code + Password + Security Question";
       $("ownerModeBar").style.display = "none";
       $("ownerSignUpForm").style.display = "none";
       $("ownerSignInForm").style.display = "none";
       $("teamLoginForm").style.display = "block";
       $("teamCodeLabel").textContent = "Manager Employee Code *";
+      syncSecurityPrompt();
     } else {
       $("portalTitle").textContent = "Staff Login";
-      $("portalSub").textContent = "Staff Login Only — Employee ID + Password + MPIN";
+      $("portalSub").textContent = "Staff Login Only — Employee ID + Password + Security Question";
       $("ownerModeBar").style.display = "none";
       $("ownerSignUpForm").style.display = "none";
       $("ownerSignInForm").style.display = "none";
       $("teamLoginForm").style.display = "block";
       $("teamCodeLabel").textContent = "Staff Employee ID *";
+      syncSecurityPrompt();
     }
   }
 
@@ -355,6 +366,7 @@
     $("ownerSignInForm").style.display = ownerMode === "signin" ? "block" : "none";
     $("ownerSignUpForm").style.display = ownerMode === "signup" ? "block" : "none";
     $("portalTitle").textContent = ownerMode === "signup" ? "Gym Owner Sign Up" : "Gym Owner Login";
+    syncSecurityPrompt();
     clearAlerts();
   }
 
@@ -375,6 +387,7 @@
 
   async function handleOwnerSignUp(e) {
     e.preventDefault();
+    if (isSubmittingAuth) return;
     clearAlerts();
 
     const gymName = $("suGymName").value.trim();
@@ -385,73 +398,74 @@
     const password = $("suPassword").value;
     const mpin = $("suMpin").value.trim();
     const secQuestion = $("suSecQuestion").value;
+    const secAnswer = $("suSecAnswer").value.trim();
 
     if (!/^\d{10}$/.test(phone)) { showErr("Please enter a valid 10-digit mobile number."); return; }
     if (!/^\d{4,6}$/.test(mpin)) { showErr("MPIN must be 4 to 6 digits."); return; }
+    if (!secAnswer) { showErr("Please enter security question answer."); return; }
 
-    const owners = readOwners();
-    const dup = owners.find(o => String(o.email || "").toLowerCase() === email || String(o.phone || "") === phone);
-    if (dup) {
-      showErr("You are already sign up Account please Login");
-      setOwnerMode("signin");
-      $("liOwnerEmail").value = dup.email || email;
-      return;
-    }
-
+    isSubmittingAuth = true;
     const btn = $("suSubmitBtn");
     btn.disabled = true;
     btn.textContent = "Creating account...";
 
     try {
-      let cred;
-      try {
-        cred = await auth.createUserWithEmailAndPassword(email, password);
-        if (!cred || !cred.user) throw new Error("Firebase account create nahi hua.");
-        await cred.user.updateProfile({ displayName: ownerName });
-      } catch (fbErr) {
-        if (fbErr && fbErr.code === "auth/email-already-in-use") {
-          showErr("You are already sign up Account please Login");
-          setOwnerMode("signin");
-          $("liOwnerEmail").value = email;
-        } else {
-          showErr((fbErr && fbErr.message) || "Firebase account create nahi ho saka. Dobara try karein.");
-        }
-        btn.disabled = false;
-        btn.textContent = "Sign Up & Create Owner Account";
-        return;
-      }
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      if (!cred || !cred.user) throw new Error("Firebase account create nahi hua.");
+      await cred.user.updateProfile({ displayName: ownerName });
       const uid = cred.user.uid;
 
       const profile = {
-        uid, orgId: uid, role: "owner", gymName, orgName: gymName,
-        ownerName, phone, dob, email, secQuestion, createdAt: new Date().toISOString()
+        uid,
+        orgId: uid,
+        role: "owner",
+        gymName,
+        orgName: gymName,
+        ownerName,
+        phone,
+        dob,
+        email,
+        secQuestion,
+        secAnswer: secAnswer.toLowerCase(),
+        createdAt: new Date().toISOString()
       };
 
-      const safeProfile = Object.assign({}, profile);
-      owners.push(safeProfile);
+      const owners = readOwners().filter(o => String(o.email || "").toLowerCase() !== email);
+      owners.push(profile);
       writeOwners(owners);
-      localStorage.setItem("om_org_profile", JSON.stringify(safeProfile));
-      localStorage.setItem("om_last_org_profile", JSON.stringify(safeProfile));
-      localStorage.setItem("om_org_profile_saved_" + uid, JSON.stringify(safeProfile));
+
+      localStorage.setItem("om_org_profile", JSON.stringify(profile));
+      localStorage.setItem("om_last_org_profile", JSON.stringify(profile));
+      localStorage.setItem("om_org_profile_saved_" + uid, JSON.stringify(profile));
+      localStorage.setItem("bfc_role", "owner");
       localStorage.setItem("om_active_role", "owner");
+      localStorage.setItem("bfc_gid", uid);
       localStorage.setItem("om_session_active", "1");
       localStorage.setItem("om_last_activity_time", String(Date.now()));
 
       try {
-        await db.collection("owner_accounts").doc(uid).set(safeProfile, { merge: true });
+        await db.collection("owner_accounts").doc(uid).set(profile, { merge: true });
       } catch (e2) {
         try { await cred.user.delete(); } catch (rollbackError) {}
         try { await auth.signOut(); } catch (signoutError) {}
         showErr("Account bana, lekin Gym profile cloud me save nahi hui.");
+        isSubmittingAuth = false;
         btn.disabled = false;
         btn.textContent = "Sign Up & Create Owner Account";
         return;
       }
 
-      showOk("Owner account create ho gaya. Redirecting...");
-      setTimeout(() => { window.location.replace("index.html"); }, 900);
+      showOk("Owner account create ho gaya! Dashboard khul raha hai...");
+      setTimeout(() => { window.location.replace("index.html"); }, 600);
     } catch (err) {
-      showErr((err && err.message) || "Sign up failed");
+      if (err && err.code === "auth/email-already-in-use") {
+        showErr("Yeh Email pehle se registered hai. Sign In se login karein.");
+        setOwnerMode("signin");
+        $("liOwnerEmail").value = email;
+      } else {
+        showErr((err && err.message) || "Sign up failed");
+      }
+      isSubmittingAuth = false;
       btn.disabled = false;
       btn.textContent = "Sign Up & Create Owner Account";
     }
@@ -459,30 +473,47 @@
 
   async function handleOwnerSignIn(e) {
     e.preventDefault();
+    if (isSubmittingAuth) return;
     clearAlerts();
 
     const email = $("liOwnerEmail").value.trim().toLowerCase();
+    const chosenQ = $("liSecQuestionSelect") ? $("liSecQuestionSelect").value : "";
+    const secAns = $("liOwnerSecAnswer").value.trim().toLowerCase();
     const pwd = $("liOwnerPassword").value;
 
+    if (!secAns) { showErr("Please enter security question answer."); return; }
+
+    const owners = readOwners();
+    const rec = owners.find(o => String(o.email || "").toLowerCase() === email);
+    if (rec && rec.secQuestion && chosenQ && rec.secQuestion !== chosenQ) {
+      showErr("Aapne sign up ke waqt alag security question chuna tha: " + rec.secQuestion);
+      return;
+    }
+    if (rec && rec.secAnswer && String(rec.secAnswer).toLowerCase() !== secAns) {
+      showErr("Security Question ka jawab galat hai.");
+      return;
+    }
+
     if (loginMethod === "mpin") {
-      showErr("Secure MPIN login abhi server-side verification ke bina enable nahi hai. Password se login karein.");
+      showErr("MPIN login ke liye Password login use karein.");
       return;
     }
     if (!pwd) { showErr("Please enter password."); return; }
 
+    isSubmittingAuth = true;
     try {
       const cred = await auth.signInWithEmailAndPassword(email, pwd);
-      if (!cred || !cred.user) { showErr("Invalid Email or Password."); return; }
+      if (!cred || !cred.user) { showErr("Invalid Email or Password."); isSubmittingAuth = false; return; }
 
-      const owners = readOwners();
-      const rec = owners.find(o => String(o.email || "").toLowerCase() === email);
       const finalProf = Object.assign({}, rec || {}, {
         uid: cred.user.uid,
         email,
         role: "owner",
         orgId: (rec && rec.orgId) || cred.user.uid,
         orgName: (rec && (rec.orgName || rec.gymName)) || "Gym",
-        gymName: (rec && (rec.gymName || rec.orgName)) || "Gym"
+        gymName: (rec && (rec.gymName || rec.orgName)) || "Gym",
+        secQuestion: chosenQ || (rec && rec.secQuestion) || "",
+        secAnswer
       });
 
       const updatedOwners = owners.filter(o => String(o.email || "").toLowerCase() !== email);
@@ -491,27 +522,24 @@
 
       localStorage.setItem("om_org_profile", JSON.stringify(finalProf));
       localStorage.setItem("om_last_org_profile", JSON.stringify(finalProf));
-      if (finalProf.uid) localStorage.setItem("om_org_profile_saved_" + finalProf.uid, JSON.stringify(finalProf));
+      localStorage.setItem("bfc_role", "owner");
       localStorage.setItem("om_active_role", "owner");
+      localStorage.setItem("bfc_gid", finalProf.orgId);
       localStorage.setItem("om_session_active", "1");
       localStorage.setItem("om_last_activity_time", String(Date.now()));
 
-      showOk("Gym Owner Login successful! Opening dashboard...");
-      setTimeout(() => { window.location.replace("index.html"); }, 700);
+      showOk("Login successful! Dashboard khul raha hai...");
+      setTimeout(() => { window.location.replace("index.html"); }, 500);
     } catch (err) {
+      isSubmittingAuth = false;
       showErr((err && err.message) || "Login failed");
     }
   }
 
-  function setTeamAuthMethod(m) {
-    teamLoginMethod = "password";
+  function setTeamAuthMethod() {
     if ($("tmAuthPwdBtn")) $("tmAuthPwdBtn").classList.add("on");
-    if ($("tmAuthMpinBtn")) $("tmAuthMpinBtn").classList.remove("on");
     if ($("tmPasswordField")) $("tmPasswordField").style.display = "block";
-    if ($("tmMpinField")) $("tmMpinField").style.display = "none";
   }
-
-  function onTeamCodeChanged() {}
 
   function teamAuthEmail(gymId, employeeCode) {
     const code = String(employeeCode || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -521,48 +549,40 @@
 
   async function handleTeamLogin(e) {
     e.preventDefault();
+    if (isSubmittingAuth) return;
     clearAlerts();
     const code = ($("tmEmpCode").value || "").trim().toUpperCase().replace(/\s+/g, "");
     const gymId = ($("tmGymId").value || "").trim();
     const secret = (($("tmPassword") && $("tmPassword").value) || "");
+    const secAns = (($("tmSecAnswer") && $("tmSecAnswer").value) || "").trim();
     if (!gymId) { showErr("Invite link incomplete hai. Owner se apna secure invite link lein."); return; }
-    if (!code || !secret) { showErr("Employee ID aur Password dono zaroori hain."); return; }
+    if (!code || !secret || !secAns) { showErr("Employee ID, Password aur Security Answer zaroori hain."); return; }
+    isSubmittingAuth = true;
     try {
       const emailAlias = teamAuthEmail(gymId, code);
       const cred = await auth.signInWithEmailAndPassword(emailAlias, secret);
       const profileSnap = await db.collection("users").doc(cred.user.uid).get();
-      if (!profileSnap.exists) throw new Error("Employee profile register nahi hai. Owner se contact karein.");
+      if (!profileSnap.exists) throw new Error("Employee profile register nahi hai.");
       const profile = profileSnap.data() || {};
       if (profile.active !== true || profile.gymId !== gymId || profile.employeeCode !== code || profile.role !== currentRole) {
         await auth.signOut();
-        throw new Error("Employee ID, Gym, Role ya account status match nahi hua.");
+        throw new Error("Employee ID, Gym ya Role match nahi hua.");
       }
       localStorage.setItem("bfc_role", profile.role);
       localStorage.setItem("om_active_role", profile.role);
       localStorage.setItem("bfc_gid", profile.gymId);
       localStorage.setItem("om_logged_user", profile.name || code);
-      localStorage.setItem("om_team_session", JSON.stringify({
-        role: profile.role, empId: code, empCode: code, empName: profile.name,
-        orgId: profile.gymId, branchId: profile.branchId,
-        department: profile.role === "manager" ? "Management" : "Staff",
-        loggedInAt: new Date().toISOString()
-      }));
       localStorage.setItem("om_session_active", "1");
       localStorage.setItem("om_last_activity_time", String(Date.now()));
-      showOk(profile.role.toUpperCase() + " login successful!");
-      setTimeout(() => window.location.replace(profile.role === "staff" ? "staff-portal.html" : "manager-portal.html"), 400);
+      setTimeout(() => window.location.replace(profile.role === "staff" ? "staff-portal.html" : "manager-portal.html"), 350);
     } catch (err) {
-      console.error(err);
-      showErr(err && err.message ? err.message.replace("Firebase: ", "") : "Employee ID ya password galat hai.");
+      isSubmittingAuth = false;
+      showErr((err && err.message) || "Employee ID ya password galat hai.");
     }
   }
 
   function openRecoveryModal(type) {
-    recoveryType = type;
-    $("recTitle").textContent = type === "mpin" ? "Reset MPIN" : (type === "email" ? "Forgot Email ID" : "Reset Password");
-    $("recNewSecretField").style.display = type === "email" ? "none" : "block";
-    $("recNewSecretLabel").textContent = type === "mpin" ? "New MPIN (4-6 Digits) *" : "New Password *";
-    $("recOtpSection").style.display = "none";
+    $("recTitle").textContent = type === "email" ? "Forgot Email ID" : "Reset Password";
     $("recOutputBox").innerHTML = "";
     $("ownerRecoveryModal").classList.add("show");
   }
@@ -571,27 +591,20 @@
   async function sendRecoveryOtp() {
     const contact = $("recContactInput").value.trim();
     if (!contact || !contact.includes("@")) {
-      $("recOutputBox").textContent = "Password recovery ke liye registered email address enter karein. Mobile OTP backend abhi configured nahi hai.";
+      $("recOutputBox").textContent = "Registered email enter karein.";
       return;
     }
     try {
       await auth.sendPasswordResetEmail(contact);
-      $("recOtpSection").style.display = "none";
-      $("recOutputBox").textContent = "Firebase password-reset email bhej diya gaya hai. Apne inbox/spam folder me link open karke password reset karein.";
+      $("recOutputBox").textContent = "Password reset email bhej diya gaya hai.";
     } catch (err) {
-      $("recOutputBox").textContent = (err && err.message) || "Reset email bheja nahi ja saka.";
+      $("recOutputBox").textContent = (err && err.message) || "Reset email nahi gaya.";
     }
-  }
-
-  async function applyRecoveryReset() {
-    $("recOutputBox").textContent = "Is page ka local OTP reset band hai. Password reset ke liye registered email par Firebase ka reset link use karein.";
   }
 
   function openTeamForgotModal(type) {
     teamForgotType = type;
-    $("tfTitle").textContent = currentRole === "manager"
-      ? (type === "code" ? "Manager Forgot Employee Code" : "Manager Forgot Password")
-      : (type === "code" ? "Staff Forgot Employee ID" : "Staff Forgot Password");
+    $("tfTitle").textContent = type === "code" ? "Forgot Employee ID" : "Forgot Password";
     $("tfResultBox").innerHTML = "";
     $("teamForgotModal").classList.add("show");
   }
@@ -601,19 +614,13 @@
     const nm = $("tfName").value.trim();
     const ct = $("tfContact").value.trim();
     if (!nm || !ct) { alert("Naam aur Mobile/Email likhein."); return; }
-
     const owners = readOwners();
     const lp = JSON.parse(localStorage.getItem("om_last_org_profile") || localStorage.getItem("om_org_profile") || "{}") || {};
     const ownerRec = owners[0] || lp;
     const adminWa = String((ownerRec && ownerRec.phone) || "").replace(/\D/g, "");
-    if (!adminWa) {
-      showErr("Gym Owner ka registered contact nahi mila.");
-      return;
-    }
+    if (!adminWa) { showErr("Owner ka contact nahi mila."); return; }
     const waNum = adminWa.length === 10 ? ("91" + adminWa) : adminWa;
-
-    const msg = `Please Help me in this\nRole: ${currentRole.toUpperCase()}\nRequest: ${teamForgotType === "code" ? "Forgot Employee ID/Code" : "Forgot Password"}\nName: ${nm}\nContact: ${ct}`;
-    $("tfResultBox").textContent = "WhatsApp request open ho rahi hai.";
+    const msg = `Role: ${currentRole.toUpperCase()}\nRequest: ${teamForgotType}\nName: ${nm}\nContact: ${ct}`;
     window.open("https://wa.me/" + waNum + "?text=" + encodeURIComponent(msg), "_blank");
   }
 
@@ -629,6 +636,7 @@
     } else {
       selectRole("owner");
     }
+    syncSecurityPrompt();
   })();
 </script>
 </body>
