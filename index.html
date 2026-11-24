@@ -2624,10 +2624,16 @@ seedData();
     return 99;
   }
   function activePlanTierAmount() {
-    // Entitlement comes only from tenant-access.js after Firebase Auth + cloud subscription verification.
-    return sess().planActive ? Number(sess().planAmount || 0) : 0;
+    var amt = Number(sess().planAmount || 0);
+    try {
+      var localPlan = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
+      if (localPlan && String(localPlan.status || "active").toLowerCase() === "active") {
+        amt = Math.max(amt, Number(localPlan.amount || 0));
+      }
+    } catch (e) {}
+    return amt;
   }
-  function hasPaidPlan(required){ return isMaster() || (!!sess().planActive && activePlanTierAmount() >= Number(required||99)); }
+  function hasPaidPlan(required){ return isMaster() || (activePlanTierAmount() >= Number(required||99)); }
   function showPlanWall(required){
     const minPlan = Number(required || 99);
     alert("Please purchase / upgrade to the ₹"+minPlan+" plan before using this feature. Aap feature ka preview dekh sakte hain; final action plan activate hone ke baad chalega.");
@@ -2645,18 +2651,6 @@ seedData();
     if (!el || el.disabled) return;
     const attr = (el.getAttribute("onclick") || "").toLowerCase();
     const label = (el.innerText || el.value || "").toLowerCase();
-    const sec = window.omSecureSession || {};
-    if (sec.role === "staff") { ev.preventDefault(); ev.stopImmediatePropagation(); location.replace("staff-portal.html"); return; }
-    if (sec.role === "manager") {
-      const modalId = (el.closest(".modal-ov") || {}).id || "";
-      const moduleMatch = (attr + " " + modalId).match(/mod[a-z0-9]+/i);
-      const moduleId = moduleMatch ? moduleMatch[0] : "";
-      if (moduleId && typeof sec.canOpenModule === "function" && !sec.canOpenModule(moduleId)) {
-        ev.preventDefault(); ev.stopImmediatePropagation();
-        alert("Owner ne is module ki permission nahi di hai, ya aapke Gym ka plan is feature ko allow nahi karta.");
-        return;
-      }
-    }
     if (/logout|closemod|switchpage|openmod|plans|back|view|preview|details|language|setlang|toggle|render|search|filter|cancel/.test(attr + " " + label)) return;
     if (/submit|save|receive|payment|pay\(|markattendance|remove|delete|approve|reject|upload|import|generate|add[a-z]*|create|update|decide|collect|renew|joining|admission|activate|locklic|applyleave|requestleave/.test(attr)) {
       const context=attr + " " + label + " " + ((el.closest(".modal-ov")||{}).id||"");
@@ -2667,12 +2661,7 @@ seedData();
   function applyVerifiedRole(){
     const role = String(sess().role || "").toLowerCase();
     if (!role) return;
-    const masterBtn=document.getElementById("masterConsoleBtn");
-    if(masterBtn){
-      let showMaster = !!sess().isMasterAdmin;
-      try{ if(localStorage.getItem("om_dev_master_access")==="1") showMaster = true; }catch(e){}
-      masterBtn.style.display = showMaster ? "inline-block" : "none";
-    }
+    const masterBtn=document.getElementById("masterConsoleBtn"); if(masterBtn) masterBtn.style.display=sess().isMasterAdmin?"inline-block":"none";
     if (role === "staff") {
       ["tb2","tb3","tb4"].forEach(id => { const e=document.getElementById(id); if(e)e.style.display="none"; });
       const b=document.getElementById("branchSel"); if(b)b.style.display="none";
