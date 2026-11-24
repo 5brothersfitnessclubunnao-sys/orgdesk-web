@@ -366,68 +366,67 @@
       var p = PLANS_META[selectedPlanAmt] || PLANS_META[99];
       var custName = (document.getElementById("cpName").value || "").trim();
       var custPhone = (document.getElementById("cpPhone").value || "").replace(/\D/g, "");
-      var custEmail = (document.getElementById("cpEmail").value || "").trim() || "testuser@gmail.com";
-      var custPass = (document.getElementById("cpPass").value || "").trim() || "1234";
+      var custEmail = (document.getElementById("cpEmail").value || "").trim() || "";
+      var custPass = (document.getElementById("cpPass").value || "").trim() || "";
       var utr = (document.getElementById("cpUtr").value || "").trim();
       var isOneRupee = document.getElementById("payOneRupeeTestChk").checked;
-      var licKey = "LIC-OM-" + p.amount + "-" + String(Date.now()).slice(-5);
+      var licKey = "LIC-OM-PLAN" + p.amount + "-" + String(Date.now()).slice(-5);
 
-      var activePlanObj = {
-        name: p.name,
-        amount: p.amount,
-        paidAmount: isOneRupee ? 1 : p.amount,
-        testOneRupeeMode: isOneRupee,
-        status: "active",
-        licenseKey: licKey,
-        utr: utr || (isOneRupee ? "TEST-1RS-VERIFIED" : ""),
-        hasScreenshot: !!uploadedScrData,
-        activatedAt: new Date().toISOString()
-      };
-
-      try {
-        localStorage.setItem("om_active_subscription_plan", JSON.stringify(activePlanObj));
-        localStorage.setItem("om_locked_lic", licKey);
-      } catch (e) {}
-
-      if (db) {
-        try {
-          var gid = localStorage.getItem("bfc_gid") || "default_gym";
-          await db.collection("subscriptions").doc(gid).set(Object.assign({}, activePlanObj, { gymId: gid, updatedAt: Date.now() }), { merge: true });
-        } catch (e) {}
-      }
-
-      // Save customer entry for Admin "Total Customers" view
-      var custList = [];
-      try { custList = JSON.parse(localStorage.getItem("om_plan_customers_v1") || "[]") || []; } catch (e) {}
-      custList.unshift({
+      var requestId = "REQ-" + Date.now();
+      var pendingRecord = {
+        id: requestId,
         name: custName,
+        gymName: custName,
         phone: custPhone,
         email: custEmail,
         testPass: custPass,
         planName: p.name,
         planAmount: p.amount,
         paidNow: isOneRupee ? 1 : p.amount,
-        utr: utr || "Not provided",
+        testOneRupeeMode: isOneRupee,
+        utr: utr || (isOneRupee ? "TEST-1RS" : "Not provided"),
         hasScreenshot: !!uploadedScrData,
         screenshotData: uploadedScrData || "",
         licenseKey: licKey,
-        status: "ACTIVE",
+        verifyStatus: "PENDING_APPROVAL",
+        status: "PENDING_APPROVAL",
         time: new Date().toLocaleString("en-IN")
-      });
-      try { localStorage.setItem("om_plan_customers_v1", JSON.stringify(custList)); } catch (e) {}
+      };
 
-      renderPlanBanner();
-      renderAdminCustomers();
+      var custList = [];
+      try { custList = JSON.parse(localStorage.getItem("om_plan_customers_v1") || "[]") || []; } catch (e) {}
+      custList.unshift(pendingRecord);
+      try {
+        localStorage.setItem("om_plan_customers_v1", JSON.stringify(custList));
+        localStorage.setItem("om_pending_payment_approvals_v1", JSON.stringify(custList));
+      } catch (e) {}
+
+      if (db) {
+        try {
+          await db.collection("payment_approvals").doc(requestId).set(Object.assign({}, pendingRecord, { updatedAt: Date.now() }), { merge: true });
+          await db.collection("customer_accounts").doc(requestId).set({
+            gymName: custName,
+            ownerName: custName,
+            phone: custPhone,
+            email: custEmail,
+            planName: p.name,
+            planAmount: p.amount,
+            licenseKey: licKey,
+            status: "PENDING_APPROVAL",
+            updatedAt: Date.now()
+          }, { merge: true });
+        } catch (e) {}
+      }
 
       document.getElementById("activationResultBox").innerHTML = `
-        <div class="cust-card" style="border-color:var(--emerald)">
-          <b style="color:var(--emerald);font-size:14px">✅ Plan Activated: ${esc(p.name)}</b><br>
-          <div>Customer: <b>${esc(custName)}</b> • Phone: <b>${esc(custPhone)}</b></div>
-          <div>License Key: <b style="color:var(--gold-bright)">${esc(licKey)}</b></div>
-          <div>Test Login / Password Used: <b>${esc(custEmail)}</b> / <b>${esc(custPass)}</b></div>
-          <div>UTR: <b>${esc(utr || (isOneRupee ? "₹1 Test Mode" : "-"))}</b> • Screenshot: <b>${uploadedScrData ? "Uploaded" : "Not Uploaded"}</b></div>
-          <div style="margin-top:10px">
-            <a href="index.html" class="btn-act" style="text-decoration:none;display:inline-block">🚀 Dashboard पर जाकर सर्विस चेक करें →</a>
+        <div class="cust-card" style="border-color:var(--gold)">
+          <b style="color:var(--gold-bright);font-size:14px">⏳ Payment Approval Ke Liye Bhej Di Gayi Hai</b><br>
+          <div>Customer / Gym: <b>${esc(custName)}</b> • Phone: <b>${esc(custPhone)}</b></div>
+          <div>Gmail / Login ID: <b>${esc(custEmail || "-")}</b></div>
+          <div>Selected Plan: <b>${esc(p.name)}</b> (Payable: ₹${isOneRupee ? 1 : p.amount})</div>
+          <div>Generated Plan License Key: <b style="color:var(--cyan)">${esc(licKey)}</b></div>
+          <div style="margin-top:8px;font-size:11.5px;color:#cbd5e1">
+            Developer ke approve karte hi aapko <b>"Your plan has been activated"</b> ka notification mil jayega aur aapka plan active ho jayega.
           </div>
         </div>
       `;
@@ -519,5 +518,19 @@
 })();
 </script>
 
+
+<script>
+(function checkDeveloperApprovalOnPlans(){
+  try {
+    var notif = JSON.parse(localStorage.getItem("om_plan_activated_notif_v1") || "null");
+    if (notif && notif.active) {
+      var box = document.getElementById("activationResultBox");
+      if (box) {
+        box.innerHTML = '<div class="cust-card" style="border-color:var(--emerald)"><b style="color:var(--emerald);font-size:15px">Your plan has been activated</b><div>Plan: <b>' + esc(notif.planName || "") + '</b> • License Key: <b>' + esc(notif.licenseKey || "") + '</b></div><div style="margin-top:8px"><a href="index.html" class="btn-act" style="text-decoration:none;display:inline-block">Dashboard Par Jayein →</a></div></div>';
+      }
+    }
+  } catch(e){}
+})();
+</script>
 </body>
 </html>
