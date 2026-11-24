@@ -476,6 +476,31 @@
 
       const owners = readOwners();
       const rec = owners.find(o => String(o.email || "").toLowerCase() === email);
+
+      // Make sure the cloud owner profile exists (dashboard gate needs it)
+      try {
+        const ownSnap = await db.collection("owner_accounts").doc(cred.user.uid).get();
+        if (!ownSnap.exists) {
+          const us = await db.collection("users").doc(cred.user.uid).get();
+          if (us.exists) {
+            await auth.signOut();
+            showErr("Ye account Manager/Staff ka hai. Upar Manager ya Staff tab se login karein.");
+            return;
+          }
+          const gname = (rec && (rec.gymName || rec.orgName)) || "My Gym";
+          await db.collection("owner_accounts").doc(cred.user.uid).set({
+            uid: cred.user.uid, orgId: cred.user.uid, role: "owner",
+            gymName: gname, orgName: gname,
+            ownerName: (rec && rec.ownerName) || cred.user.displayName || "",
+            phone: (rec && rec.phone) || "", email,
+            createdAt: new Date().toISOString()
+          }, { merge: true });
+        }
+      } catch (fsErr) {
+        console.error(fsErr);
+        showErr("Firestore access nahi mila (" + ((fsErr && (fsErr.code || fsErr.message)) || "error") + "). Firestore Rules publish hue ya nahi check karein.");
+        return;
+      }
       const finalProf = Object.assign({}, rec || {}, {
         uid: cred.user.uid,
         email,

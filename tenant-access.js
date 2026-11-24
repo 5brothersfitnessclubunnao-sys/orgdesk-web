@@ -167,7 +167,7 @@
         });
       } catch (e) {
         console.error('ERP access verification failed:', e);
-        goLogin('Account / Role / Gym access verify nahi ho paya. Secure login dobara karein.');
+        goLogin('Account / Role / Gym access verify nahi ho paya. Secure login dobara karein.\n\nKaaran: ' + ((e && (e.code || e.message)) || e));
       }
     });
   }
