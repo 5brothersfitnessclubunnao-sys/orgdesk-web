@@ -401,7 +401,10 @@
         localStorage.setItem("om_preferred_login_role", "owner");
         localStorage.setItem("om_active_gym_profile", JSON.stringify({ gymName: gymName, ownerName: ownerName, role: "owner", gymCount: cnt }));
         localStorage.setItem("bfc_role", "owner");
-        localStorage.setItem("om_active_role", "owner");
+              localStorage.setItem("om_active_role", "owner");
+      localStorage.removeItem("om_dev_master_access");
+      localStorage.removeItem("om_prime_master_auth");
+      localStorage.removeItem("om_is_master_admin");
         localStorage.setItem("om_logged_user", ownerName + " (" + gymName + ")");
         localStorage.removeItem("om_logged_out_flag"); localStorage.setItem("om_session_active", "1"); localStorage.setItem("om_last_activity_time", String(Date.now())); localStorage.setItem("om_demo_preview_active", "1");
         if (cnt >= 2 && cnt <= 4) localStorage.setItem("om_preview_plan_amount", "999");
@@ -441,7 +444,10 @@
       try {
         localStorage.setItem("om_preferred_login_role", "owner");
         localStorage.setItem("bfc_role", "owner");
-        localStorage.setItem("om_active_role", "owner");
+              localStorage.setItem("om_active_role", "owner");
+      localStorage.removeItem("om_dev_master_access");
+      localStorage.removeItem("om_prime_master_auth");
+      localStorage.removeItem("om_is_master_admin");
         localStorage.setItem("om_logged_user", ownerLabel + " (" + gymName + ")");
         localStorage.setItem("om_active_gym_profile", JSON.stringify({ gymName: gymName, ownerName: ownerLabel, role: "owner", gymCount: cnt }));
         if (!localStorage.getItem("om_active_subscription_plan")) {
