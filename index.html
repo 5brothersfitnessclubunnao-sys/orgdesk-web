@@ -2800,5 +2800,142 @@ window.requestPlanSelection = function(amt, label) {
 })();
 </script>
 
+
+<script>
+(function fullFeatureSuiteV5() {
+  window.addEventListener("DOMContentLoaded", function () {
+    // 6. Active plan banner at top when owner has an active plan
+    try {
+      var planObj = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
+      if (planObj && planObj.status === "active" && Number(planObj.amount || 0) > 0 && !document.getElementById("activePlanTopBanner")) {
+        var topB = document.createElement("div");
+        topB.id = "activePlanTopBanner";
+        topB.className = "box-card";
+        topB.style.cssText = "border-color:var(--emerald);background:rgba(52,211,153,0.08);margin:8px 14px 0";
+        topB.innerHTML = `<div style="font-size:16px;font-weight:900;color:var(--emerald)">Your This Plan: ${esc(planObj.name || ("Plan ₹" + planObj.amount))}</div>`;
+        var navEl = document.querySelector("nav.tabs");
+        if (navEl && navEl.parentNode) navEl.parentNode.insertBefore(topB, navEl.nextSibling);
+      }
+    } catch (e) {}
+
+    // 2. Clean professional demo preview copy
+    var demoBanner = document.getElementById("ownerTopActionBanner");
+    if (demoBanner) {
+      demoBanner.innerHTML = demoBanner.innerHTML.replace(
+        /Abhi aap ye plan dekh sakte hain demo ke roop me; logout karte hi saari detail reset ho jayegi\. Please purchase our ₹999 plan\./g,
+        "Demo Preview Mode: Aap is plan ke features ka preview dekh sakte hain; logout karne par demo session reset ho jayega. Poori suvidha ke liye kripya ₹999 plan purchase karein."
+      );
+    }
+
+    // 3 & 4. Add-On Extra Service & Unique QR / Smart Attendance inside Page 4
+    var p4 = document.getElementById("page4");
+    if (p4 && !document.getElementById("p4AddOnAndQrBox")) {
+      var box = document.createElement("div");
+      box.id = "p4AddOnAndQrBox";
+      box.className = "box-card";
+      box.style.borderColor = "var(--cyan)";
+      box.innerHTML = `
+        <b style="color:var(--cyan);font-size:13.5px;display:block;margin-bottom:8px">✨ Add-On Service &amp; Member Unique QR / Smart Attendance</b>
+        <div class="fg">
+          <label>Admitted Member Name / Mobile (Mandatory — Must Exist in Admission) *</label>
+          <input class="fc" id="aoMemberQuery" placeholder="Search admitted member name or mobile">
+        </div>
+        <div class="grid2">
+          <div class="fg">
+            <label>Add-On Service *</label>
+            <select class="fc" id="aoServiceSel">
+              <option value="Personal Training">Personal Training</option>
+              <option value="Sauna & Steam">Sauna &amp; Steam</option>
+              <option value="Diet & Transformation">Diet &amp; Transformation</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Amount (₹) *</label>
+            <input type="number" class="fc" id="aoAmtInp" value="2500">
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="fg">
+            <label>Trainer Name (or Friend / Family if none) *</label>
+            <input class="fc" id="aoTrainerInp" placeholder="Trainer Name or Friend / Family">
+          </div>
+          <div class="fg">
+            <label>Expiry Date *</label>
+            <input type="date" class="fc" id="aoExpDateInp" value="2026-12-24">
+          </div>
+        </div>
+        <button type="button" class="big-btn" style="margin-top:0" onclick="activateMemberAddOnService()">Activate Add-On Service &amp; Generate Receipt</button>
+        <div id="aoReceiptBox" style="margin-top:10px"></div>
+
+        <hr style="border-color:var(--border);margin:14px 0">
+        <b style="color:var(--gold);font-size:13px;display:block;margin-bottom:6px">🎫 Member Unique QR (DOB Check) &amp; Smart Attendance</b>
+        <div class="grid2">
+          <div class="fg"><label>Member DOB (for QR Fees View)</label><input type="date" class="fc" id="qrMemberDobInp"></div>
+          <div class="fg"><label>Attendance Mode</label>
+            <select class="fc" id="smartAttModeSel">
+              <option value="QR Scan">Attendance with QR Scan</option>
+              <option value="Mobile & Name">Attendance with Mobile No &amp; Name</option>
+              <option value="Unique QR Card">Attendance with Unique QR Card</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="big-btn sec" style="margin-top:0" onclick="generateMemberUniqueQrAndAtt()">Generate Unique QR &amp; Mark Smart Attendance</button>
+        <div id="memberQrOut" style="margin-top:8px"></div>
+      `;
+      p4.insertBefore(box, p4.firstChild.nextSibling);
+    }
+  });
+
+  window.activateMemberAddOnService = function () {
+    var q = (document.getElementById("aoMemberQuery").value || "").trim().toLowerCase();
+    var admList = [];
+    try { admList = JSON.parse(localStorage.getItem("om_final_adm_v1") || "[]") || []; } catch (e) {}
+    var matched = admList.find(function (m) {
+      return (m.name && String(m.name).toLowerCase().includes(q)) || (m.phone && String(m.phone).includes(q));
+    });
+    if (!q || !matched) {
+      alert("Extra service keval pehle se admitted gym member ke liye active hogi. Kripya valid admitted member ka naam/mobile daalein.");
+      return;
+    }
+
+    var srv = document.getElementById("aoServiceSel").value;
+    var amt = Number(document.getElementById("aoAmtInp").value || 0);
+    var trainer = (document.getElementById("aoTrainerInp").value || "").trim() || "Friend / Family";
+    var expDt = document.getElementById("aoExpDateInp").value;
+    var startDt = new Date().toISOString().slice(0, 10);
+
+    var prof = {};
+    try { prof = JSON.parse(localStorage.getItem("om_active_gym_profile") || "{}") || {}; } catch (e) {}
+    var gymTitle = prof.gymName || "Gym";
+    var mgrSign = prof.ownerName || "Manager";
+
+    alert("Your service has been activated");
+
+    document.getElementById("aoReceiptBox").innerHTML = `
+      <div class="rec" style="background:#fff;color:#0f172a;border-radius:10px;padding:12px">
+        <div style="font-weight:900;font-size:14px">${esc(gymTitle)} — ADD-ON SERVICE RECEIPT</div>
+        <div>Member: <b>${esc(matched.name)}</b> • Status: <b>Already Plan Active</b></div>
+        <div>Add-On Service: <b>${esc(srv)}</b> • Amount: <b>₹${amt.toLocaleString("en-IN")}</b></div>
+        <div>Trainer / Assigned: <b>${esc(trainer)}</b></div>
+        <div>Start Date: <b>${esc(startDt)}</b> • Expiry Date: <b>${esc(expDt)}</b></div>
+        <div style="margin-top:6px;font-weight:800">Stamp / Authorized Signature: <i>${esc(mgrSign)}</i></div>
+      </div>
+    `;
+  };
+
+  window.generateMemberUniqueQrAndAtt = function () {
+    var mode = document.getElementById("smartAttModeSel").value;
+    var dob = document.getElementById("qrMemberDobInp").value || "Not Provided";
+    var qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=" + encodeURIComponent("OM_MEMBER_QR_" + Date.now());
+    document.getElementById("memberQrOut").innerHTML = `
+      <div class="rec">
+        <div><b>Mode:</b> ${esc(mode)} • <b>DOB:</b> ${esc(dob)}</div>
+        <img src="${qrCodeUrl}" alt="Unique Member QR" style="background:#fff;padding:4px;border-radius:8px;width:96px;height:96px;margin-top:6px">
+      </div>
+    `;
+  };
+})();
+</script>
+
 </body>
 </html>

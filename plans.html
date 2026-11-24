@@ -495,5 +495,38 @@
       updateUpiLinks();
     });
   </script>
+
+<script>
+(function enhancePlanReceiptAndTelegram() {
+  var origSub = window.submitPlanPaymentAndActivate;
+  window.submitPlanPaymentAndActivate = async function (ev) {
+    if (typeof origSub === "function") await origSub(ev);
+    var resBox = document.getElementById("activationResultBox");
+    var p = (typeof PLANS_META !== "undefined" && PLANS_META[selectedPlanAmt]) ? PLANS_META[selectedPlanAmt] : { name: "Plan", amount: selectedPlanAmt || 99, features: [] };
+    try {
+      var tgArr = JSON.parse(localStorage.getItem("om_owner_telegram_alerts_v1") || "[]") || [];
+      tgArr.unshift({ msg: "New Plan Payment Received: " + p.name + " (₹" + p.amount + ")", at: new Date().toLocaleString("en-IN") });
+      localStorage.setItem("om_owner_telegram_alerts_v1", JSON.stringify(tgArr.slice(0, 30)));
+    } catch (e) {}
+    if (resBox && !document.getElementById("planReceiptDownloadBtn")) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "planReceiptDownloadBtn";
+      btn.className = "btn-sec";
+      btn.style.marginTop = "8px";
+      btn.textContent = "Please Download Receipt";
+      btn.onclick = function () {
+        var txt = "PLAN RECEIPT\nPlan: " + p.name + "\nIncluded Features:\n- " + (p.features || []).join("\n- ");
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([txt], { type: "text/plain" }));
+        a.download = "Plan_Receipt_" + p.amount + ".txt";
+        a.click();
+      };
+      resBox.appendChild(btn);
+    }
+  };
+})();
+</script>
+
 </body>
 </html>
