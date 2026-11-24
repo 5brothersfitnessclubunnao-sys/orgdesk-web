@@ -215,6 +215,11 @@
   </div>
 
   <script>
+    function esc(v) {
+      return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
     const PRIME_PIN = "8336";
     let tapCounter = 0;
     let tapTimer = null;
@@ -332,7 +337,7 @@
         localStorage.removeItem("om_account_locked_prime_master");
         localStorage.setItem("om_prime_master_auth", "1");
         localStorage.setItem("om_is_master_admin", "1");
-        localStorage.setItem("om_logged_user", "Prime Master");
+        localStorage.removeItem("om_logged_out_flag"); localStorage.setItem("om_session_active", "1"); localStorage.setItem("om_last_activity_time", String(Date.now())); localStorage.setItem("om_logged_user", "Prime Master");
       } catch (e) {}
       location.replace("developer-saas-admin.html");
     }
@@ -398,7 +403,7 @@
         localStorage.setItem("bfc_role", "owner");
         localStorage.setItem("om_active_role", "owner");
         localStorage.setItem("om_logged_user", ownerName + " (" + gymName + ")");
-        localStorage.setItem("om_demo_preview_active", "1");
+        localStorage.removeItem("om_logged_out_flag"); localStorage.setItem("om_session_active", "1"); localStorage.setItem("om_last_activity_time", String(Date.now())); localStorage.setItem("om_demo_preview_active", "1");
         if (cnt >= 2 && cnt <= 4) localStorage.setItem("om_preview_plan_amount", "999");
       } catch (e) {}
       location.href = "index.html";
@@ -440,7 +445,7 @@
         localStorage.setItem("om_logged_user", ownerLabel + " (" + gymName + ")");
         localStorage.setItem("om_active_gym_profile", JSON.stringify({ gymName: gymName, ownerName: ownerLabel, role: "owner", gymCount: cnt }));
         if (!localStorage.getItem("om_active_subscription_plan")) {
-          localStorage.setItem("om_demo_preview_active", "1");
+          localStorage.removeItem("om_logged_out_flag"); localStorage.setItem("om_session_active", "1"); localStorage.setItem("om_last_activity_time", String(Date.now())); localStorage.setItem("om_demo_preview_active", "1");
           if (cnt >= 2 && cnt <= 4) localStorage.setItem("om_preview_plan_amount", "999");
         }
       } catch (e) {}
