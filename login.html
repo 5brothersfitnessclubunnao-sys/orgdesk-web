@@ -112,6 +112,7 @@
           <div id="ownMpinFieldWrap" style="display:none">
             <label for="ownLoginMpin">4-Digit MPIN *</label>
             <input type="password" id="ownLoginMpin" class="inp mpin-box" inputmode="numeric" maxlength="4" placeholder="••••">
+            <button type="submit" id="ownMpinSubmitBtn" class="btn-main" style="margin-top:10px;background:linear-gradient(135deg,#22d3ee,#0284c7);color:#050814">Login with MPIN →</button>
           </div>
 
           <div id="ownSecUnlockWrap" style="display:none">
@@ -120,7 +121,7 @@
           </div>
 
           <div id="ownErr" class="msg-err"></div>
-          <button type="submit" class="btn-main">Login to Gym Dashboard</button>
+          <button type="submit" id="ownMainSubmitBtn" class="btn-main">Login to Gym Dashboard</button>
         </form>
 
         <div class="helper-links">
@@ -356,6 +357,8 @@
       document.getElementById("ownAuthMpinBtn").classList.toggle("active", isMpin);
       document.getElementById("ownPassFieldWrap").style.display = isMpin ? "none" : "block";
       document.getElementById("ownMpinFieldWrap").style.display = isMpin ? "block" : "none";
+      var mainBtn = document.getElementById("ownMainSubmitBtn");
+      if (mainBtn) mainBtn.style.display = isMpin ? "none" : "block";
     }
 
     function handleGymCountChange() {
@@ -471,10 +474,23 @@
     function submitManagerLogin(ev) {
       ev.preventDefault();
       var mgrId = (document.getElementById("mgrCodeInp").value || "").trim();
+      var matched = null;
+      try {
+        var teamList = JSON.parse(localStorage.getItem("om_team_profiles_v1") || "[]") || [];
+        matched = teamList.find(function(x){
+          return String(x.employeeCode || "").toLowerCase() === mgrId.toLowerCase();
+        });
+      } catch (e) {}
+      var dispName = matched ? (matched.name + " (" + matched.employeeCode + ")") : ("Manager (" + mgrId + ")");
       try {
         localStorage.setItem("bfc_role", "manager");
         localStorage.setItem("om_active_role", "manager");
-        localStorage.setItem("om_logged_user", "Manager (" + mgrId + ")");
+        localStorage.setItem("om_logged_user", dispName);
+        if (matched) {
+          localStorage.setItem("om_team_session", JSON.stringify(matched));
+        }
+        localStorage.removeItem("om_logged_out_flag");
+        localStorage.setItem("om_session_active", "1");
       } catch (e) {}
       location.href = "index.html";
     }
@@ -499,7 +515,16 @@
         if (sub && sub.status === "active" && Number(sub.amount || 0) > 0) ownerPlanActive = true;
       } catch (e) {}
 
-      if (!ownerPlanActive && !/^STF-/i.test(empId)) {
+      var isSavedTeamId = false;
+      var matchedTeam = null;
+      try {
+        var teamList = JSON.parse(localStorage.getItem("om_team_profiles_v1") || "[]") || [];
+        matchedTeam = teamList.find(function(x){
+          return String(x.employeeCode || "").toLowerCase() === empId.toLowerCase();
+        });
+        if (matchedTeam) isSavedTeamId = true;
+      } catch (e) {}
+      if (!ownerPlanActive && !isSavedTeamId && !/^STF-/i.test(empId)) {
         if (errEl) errEl.textContent = "Your Fitness Club is not Registered with us";
         return;
       }
