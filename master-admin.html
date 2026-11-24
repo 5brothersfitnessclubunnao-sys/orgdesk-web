@@ -86,12 +86,5 @@ async function loadAll(){
  }
  $('history').innerHTML=history.length?history.map(p=>'<div class="item"><b>'+esc(p.gymName||p.gymId)+'</b> • '+esc(p.status)+'<div class="muted">UTR: '+esc(p.utr)+' • Plan ₹'+Number(p.planAmount||0)+' • Paid ₹'+Number(p.amountPaid||0)+' • '+esc(timeOf(p.reviewedAt))+'</div>'+(p.licenseKey?'<div class="good">License: '+esc(p.licenseKey)+'</div>':'')+(p.reviewReason?'<div class="bad">Reason: '+esc(p.reviewReason)+'</div>':'')+'</div>').join(''):'<div class="item">No reviewed payment history yet.</div>';
 }
-auth.onAuthStateChanged(async u=>{if(!u){location.replace('login.html');return}try{const t=await u.getIdTokenResult(true);let isMaster = !!(t && t.claims && t.claims.masterAdmin === true);
-if(!isMaster && u && u.uid){
-  try{
-    const mDoc = await db.collection('masters').doc(u.uid).get();
-    if(mDoc.exists) isMaster = true;
-  }catch(e){}
-}
-if(!isMaster){alert('Master Admin access denied.');location.replace('index.html');return}$('status').textContent='Verified Master Admin • Manual UPI approvals';await loadAll();watchPendingPayments()}catch(e){$('status').textContent='Verification failed: '+(e.message||e)}});
+auth.onAuthStateChanged(async u=>{if(!u){location.replace('login.html');return}try{const t=await u.getIdTokenResult(true);if(!t.claims.masterAdmin){alert('Master Admin access denied.');location.replace('index.html');return}$('status').textContent='Verified Master Admin • Manual UPI approvals';await loadAll();watchPendingPayments()}catch(e){$('status').textContent='Verification failed: '+(e.message||e)}});
 </script></body></html>

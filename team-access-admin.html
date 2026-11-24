@@ -29,7 +29,7 @@
 <div class="card"><h2>Employee Password / Reset</h2><p class="muted">Password reset Firebase Console → Authentication → Users se karein. Is ERP page se password read ya recover nahi hota.</p></div>
 </div>
 <script>
-const CFG={apiKey:'AIzaSyAwuFgPJIUavmRRzkHOz83FUP0EyfZETCU',authDomain:'orgdesk-fc207.firebaseapp.com',projectId:'orgdesk-fc207',storageBucket:'orgdesk-fc207.firebasestorage.app',messagingSenderId:'677150519977',appId:'1:677150519977:web:74de5f488494280d352fb8'};
+const CFG={apiKey:'AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU',authDomain:'orgdesk-fc207.firebaseapp.com',projectId:'orgdesk-fc207',storageBucket:'orgdesk-fc207.firebasestorage.app',messagingSenderId:'677150519977',appId:'1:677150519977:web:74de5f488494280d352fb8'};
 if(!firebase.apps.length)firebase.initializeApp(CFG);const auth=firebase.auth(),db=firebase.firestore();
 const $=id=>document.getElementById(id);let owner=null;
 function emailAlias(gymId,code){const c=String(code||'').trim().toLowerCase().replace(/[^a-z0-9]/g,''),g=String(gymId||'').toLowerCase().replace(/[^a-z0-9]/g,'');return c+'.'+g+'@omstaff.app'}

@@ -28,8 +28,8 @@ This patch does not use Cloud Functions or Firebase Storage. It is intended for 
 - Screenshots are stored in Firestore; this consumes Firestore document storage and has practical document-size limits.
 
 TEST PAYMENT MODE — CURRENTLY ENABLED
-- plans.html: PLAN_PAYMENT_TEST_MODE = false
-- firestore.rules: testPlanPaymentsAllowed() returns false
+- plans.html: PLAN_PAYMENT_TEST_MODE = true
+- firestore.rules: testPlanPaymentsAllowed() returns true
 While testing, the UPI link requests ₹1. Master Admin must still verify the ₹1 transaction in GPay Business and click Approve. Approval activates the FULL selected plan. Never approve based only on the screenshot or customer claim.
 
 BEFORE PUBLIC LAUNCH

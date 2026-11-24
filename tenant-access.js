@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   var CFG = {
-    apiKey: 'AIzaSyAwuFgPJIUavmRRzkHOz83FUP0EyfZETCU',
+    apiKey: 'AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU',
     authDomain: 'orgdesk-fc207.firebaseapp.com',
     projectId: 'orgdesk-fc207',
     storageBucket: 'orgdesk-fc207.firebasestorage.app',
@@ -68,16 +68,6 @@
       if (session.role === 'manager') return Number(session.planAmount || 0) >= 499 && managerModuleAllow(id, session.permissions);
       return false;
     };
-    try {
-      var badge = document.getElementById('omRoleBadge');
-      if (!badge) {
-        badge = document.createElement('div');
-        badge.id = 'omRoleBadge';
-        badge.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:99999;background:#ffcc00;color:#000;font:800 11px Arial,sans-serif;padding:4px 10px;border-radius:12px;opacity:.92;pointer-events:none';
-        document.body.appendChild(badge);
-      }
-      badge.textContent = (session.isMasterAdmin ? 'DEVELOPER' : String(session.role).toUpperCase()) + ' \u2022 ' + (session.employeeCode || session.displayName || session.email || '');
-    } catch (e) {}
     addMpinSetupButton(session);
     var masterBtn = document.getElementById('masterConsoleBtn');
     if (masterBtn) masterBtn.style.display = session.isMasterAdmin ? 'inline-block' : 'none';
@@ -128,11 +118,7 @@
       try {
         var token = await user.getIdTokenResult(true);
         var claims = token.claims || {};
-        var isMaster = claims.masterAdmin === true;
-        if (!isMaster) {
-          try { var mSnap = await db.collection('masters').doc(user.uid).get(); isMaster = mSnap.exists; } catch (me) {}
-        }
-        if (isMaster) {
+        if (claims.masterAdmin === true) {
           publish({ uid: user.uid, role: 'developer', gymId: '__master__', isMasterAdmin: true, planActive: true, planName: 'Master Admin', planAmount: 999, email: user.email || '', displayName: 'Master Admin' });
           return;
         }
@@ -181,7 +167,7 @@
         });
       } catch (e) {
         console.error('ERP access verification failed:', e);
-        goLogin('Account / Role / Gym access verify nahi ho paya. Secure login dobara karein.\n\nKaaran: ' + ((e && (e.code || e.message)) || e));
+        goLogin('Account / Role / Gym access verify nahi ho paya. Secure login dobara karein.');
       }
     });
   }
