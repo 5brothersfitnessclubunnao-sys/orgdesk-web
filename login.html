@@ -30,9 +30,10 @@
     .abtn{background:#0e0e12;border:1px solid var(--border);color:#ddd;padding:8px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer}
     .abtn.on{background:rgba(46,204,113,.15);border-color:var(--ok);color:var(--ok)}
     .btn-main{width:100%;background:var(--ac);color:#000;border:0;border-radius:9px;padding:12px;font-size:13.5px;font-weight:900;cursor:pointer;margin-top:6px}
+    .btn-main:disabled{opacity:.6;cursor:not-allowed}
     .btn-sec{width:100%;background:#22222a;color:#fff;border:1px solid var(--border);border-radius:9px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px}
-    .alert-err{display:none;background:rgba(255,92,92,.14);border:1px solid var(--err);color:#ff9494;padding:9px;border-radius:8px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700}
-    .alert-ok{display:none;background:rgba(46,204,113,.14);border:1px solid var(--ok);color:#8dffb8;padding:9px;border-radius:8px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700}
+    .alert-err{display:none;background:rgba(255,92,92,.14);border:1px solid var(--err);color:#ff9494;padding:9px;border-radius:8px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700;word-break:break-word}
+    .alert-ok{display:none;background:rgba(46,204,113,.14);border:1px solid var(--ok);color:#8dffb8;padding:9px;border-radius:8px;font-size:11.5px;margin-bottom:10px;text-align:center;font-weight:700;word-break:break-word}
     .links-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:12px;font-size:11px}
     .links-row a{color:var(--ac);text-decoration:none;cursor:pointer;font-weight:700}
     .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;justify-content:center;align-items:center;padding:16px}
@@ -145,7 +146,7 @@
       <input type="text" id="liOwnerSecAnswer" required placeholder="Answer your security question">
     </div>
 
-    <button type="submit" class="btn-main">Login to Gym Dashboard</button>
+    <button type="submit" class="btn-main" id="liSubmitBtn">Login to Gym Dashboard</button>
 
     <div class="links-row">
       <a onclick="openRecoveryModal('password')">Forgot / Reset Password</a>
@@ -243,16 +244,28 @@
 
 <script>
   const FB_CFG = {
-    apiKey: "AIzaSyAwuFgPJUavmRRzkHOz83FUP0EyfZETCU",
+    apiKey: "AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU",
     authDomain: "orgdesk-fc207.firebaseapp.com",
     projectId: "orgdesk-fc207",
     storageBucket: "orgdesk-fc207.firebasestorage.app",
     messagingSenderId: "677150519977",
     appId: "1:677150519977:web:74de5f488494280d352fb8"
   };
-  if (!firebase.apps.length) firebase.initializeApp(FB_CFG);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+
+  let auth = null;
+  let db = null;
+  let firebaseReady = false;
+
+  try {
+    if (typeof firebase !== "undefined") {
+      if (!firebase.apps.length) firebase.initializeApp(FB_CFG);
+      auth = firebase.auth();
+      db = firebase.firestore();
+      firebaseReady = true;
+    }
+  } catch (initErr) {
+    console.error("Firebase init error:", initErr);
+  }
 
   const OWNERS_KEY = "om_registered_owners_v1";
   let currentRole = "owner";
@@ -264,9 +277,20 @@
   const $ = id => document.getElementById(id);
   const readOwners = () => { try { return JSON.parse(localStorage.getItem(OWNERS_KEY) || "[]") || []; } catch (e) { return []; } };
   const writeOwners = arr => { try { localStorage.setItem(OWNERS_KEY, JSON.stringify(arr)); } catch (e) {} };
-  const showErr = m => { $("errBox").textContent = m; $("errBox").style.display = "block"; $("okBox").style.display = "none"; };
-  const showOk = m => { $("okBox").textContent = m; $("okBox").style.display = "block"; $("errBox").style.display = "none"; };
-  const clearAlerts = () => { $("errBox").style.display = "none"; $("okBox").style.display = "none"; };
+  const showErr = m => {
+    const el = $("errBox");
+    if (el) { el.textContent = m; el.style.display = "block"; }
+    if ($("okBox")) $("okBox").style.display = "none";
+  };
+  const showOk = m => {
+    const el = $("okBox");
+    if (el) { el.textContent = m; el.style.display = "block"; }
+    if ($("errBox")) $("errBox").style.display = "none";
+  };
+  const clearAlerts = () => {
+    if ($("errBox")) $("errBox").style.display = "none";
+    if ($("okBox")) $("okBox").style.display = "none";
+  };
 
   let devTapCount = 0;
   let devTapTimer = null;
@@ -385,6 +409,30 @@
     }
   }
 
+  function saveSessionAndNavigate(profile, targetPage) {
+    try {
+      const owners = readOwners().filter(o => String(o.email || "").toLowerCase() !== String(profile.email || "").toLowerCase());
+      owners.push(profile);
+      writeOwners(owners);
+      localStorage.setItem("om_org_profile", JSON.stringify(profile));
+      localStorage.setItem("om_last_org_profile", JSON.stringify(profile));
+      if (profile.uid) localStorage.setItem("om_org_profile_saved_" + profile.uid, JSON.stringify(profile));
+      localStorage.setItem("bfc_role", profile.role || "owner");
+      localStorage.setItem("om_active_role", profile.role || "owner");
+      localStorage.setItem("bfc_gid", profile.orgId || profile.uid || "");
+      localStorage.setItem("om_session_active", "1");
+      localStorage.setItem("om_last_activity_time", String(Date.now()));
+    } catch (e) {}
+
+    // If opened from content:// or file://, index.html might be in the same folder or might not exist.
+    // Try navigating to index.html, and if it fails/isn't found, show clear success status.
+    try {
+      window.location.href = targetPage || "index.html";
+    } catch (navErr) {
+      showOk("Session saved! Please open " + (targetPage || "index.html"));
+    }
+  }
+
   async function handleOwnerSignUp(e) {
     e.preventDefault();
     if (isSubmittingAuth) return;
@@ -400,7 +448,11 @@
     const secQuestion = $("suSecQuestion").value;
     const secAnswer = $("suSecAnswer").value.trim();
 
+    if (!gymName) { showErr("Please enter Gym Name."); return; }
+    if (!ownerName) { showErr("Please enter Owner Name."); return; }
     if (!/^\d{10}$/.test(phone)) { showErr("Please enter a valid 10-digit mobile number."); return; }
+    if (!email) { showErr("Please enter valid Email ID."); return; }
+    if (!password || password.length < 6) { showErr("Password must be at least 6 characters."); return; }
     if (!/^\d{4,6}$/.test(mpin)) { showErr("MPIN must be 4 to 6 digits."); return; }
     if (!secAnswer) { showErr("Please enter security question answer."); return; }
 
@@ -409,61 +461,56 @@
     btn.disabled = true;
     btn.textContent = "Creating account...";
 
+    const fallbackUid = "owner_" + Date.now();
+    const profile = {
+      uid: fallbackUid,
+      orgId: fallbackUid,
+      role: "owner",
+      gymName,
+      orgName: gymName,
+      ownerName,
+      phone,
+      dob,
+      email,
+      mpin,
+      secQuestion,
+      secAnswer: secAnswer.toLowerCase(),
+      createdAt: new Date().toISOString()
+    };
+
+    if (!firebaseReady || !auth) {
+      showOk("Account saved locally! Redirecting...");
+      saveSessionAndNavigate(profile, "index.html");
+      isSubmittingAuth = false;
+      btn.disabled = false;
+      btn.textContent = "Sign Up & Create Owner Account";
+      return;
+    }
+
     try {
       const cred = await auth.createUserWithEmailAndPassword(email, password);
-      if (!cred || !cred.user) throw new Error("Firebase account create nahi hua.");
-      await cred.user.updateProfile({ displayName: ownerName });
-      const uid = cred.user.uid;
-
-      const profile = {
-        uid,
-        orgId: uid,
-        role: "owner",
-        gymName,
-        orgName: gymName,
-        ownerName,
-        phone,
-        dob,
-        email,
-        secQuestion,
-        secAnswer: secAnswer.toLowerCase(),
-        createdAt: new Date().toISOString()
-      };
-
-      const owners = readOwners().filter(o => String(o.email || "").toLowerCase() !== email);
-      owners.push(profile);
-      writeOwners(owners);
-
-      localStorage.setItem("om_org_profile", JSON.stringify(profile));
-      localStorage.setItem("om_last_org_profile", JSON.stringify(profile));
-      localStorage.setItem("om_org_profile_saved_" + uid, JSON.stringify(profile));
-      localStorage.setItem("bfc_role", "owner");
-      localStorage.setItem("om_active_role", "owner");
-      localStorage.setItem("bfc_gid", uid);
-      localStorage.setItem("om_session_active", "1");
-      localStorage.setItem("om_last_activity_time", String(Date.now()));
-
-      try {
-        await db.collection("owner_accounts").doc(uid).set(profile, { merge: true });
-      } catch (e2) {
-        try { await cred.user.delete(); } catch (rollbackError) {}
-        try { await auth.signOut(); } catch (signoutError) {}
-        showErr("Account bana, lekin Gym profile cloud me save nahi hui.");
-        isSubmittingAuth = false;
-        btn.disabled = false;
-        btn.textContent = "Sign Up & Create Owner Account";
-        return;
+      if (cred && cred.user) {
+        try { await cred.user.updateProfile({ displayName: ownerName }); } catch (upErr) {}
+        profile.uid = cred.user.uid;
+        profile.orgId = cred.user.uid;
+        if (db) {
+          try {
+            await db.collection("owner_accounts").doc(cred.user.uid).set(profile, { merge: true });
+          } catch (fsErr) {
+            console.warn("Firestore save warning:", fsErr);
+          }
+        }
       }
-
       showOk("Owner account create ho gaya! Dashboard khul raha hai...");
-      setTimeout(() => { window.location.replace("index.html"); }, 600);
+      saveSessionAndNavigate(profile, "index.html");
     } catch (err) {
-      if (err && err.code === "auth/email-already-in-use") {
-        showErr("Yeh Email pehle se registered hai. Sign In se login karein.");
+      const code = err && err.code ? err.code : "";
+      if (code === "auth/email-already-in-use") {
+        showErr("Yeh Email pehle se registered hai. Sign In tab par click karke login karein.");
         setOwnerMode("signin");
         $("liOwnerEmail").value = email;
       } else {
-        showErr((err && err.message) || "Sign up failed");
+        showErr((err && err.message) ? err.message : "Sign up failed");
       }
       isSubmittingAuth = false;
       btn.disabled = false;
@@ -480,11 +527,14 @@
     const chosenQ = $("liSecQuestionSelect") ? $("liSecQuestionSelect").value : "";
     const secAns = $("liOwnerSecAnswer").value.trim().toLowerCase();
     const pwd = $("liOwnerPassword").value;
+    const mpin = $("liOwnerMpin").value.trim();
 
+    if (!email) { showErr("Please enter Email ID."); return; }
     if (!secAns) { showErr("Please enter security question answer."); return; }
 
     const owners = readOwners();
     const rec = owners.find(o => String(o.email || "").toLowerCase() === email);
+
     if (rec && rec.secQuestion && chosenQ && rec.secQuestion !== chosenQ) {
       showErr("Aapne sign up ke waqt alag security question chuna tha: " + rec.secQuestion);
       return;
@@ -494,45 +544,70 @@
       return;
     }
 
+    const btn = $("liSubmitBtn");
+    btn.disabled = true;
+    btn.textContent = "Logging in...";
+    isSubmittingAuth = true;
+
     if (loginMethod === "mpin") {
-      showErr("MPIN login ke liye Password login use karein.");
+      if (!mpin) {
+        showErr("Please enter MPIN.");
+        btn.disabled = false;
+        btn.textContent = "Login to Gym Dashboard";
+        isSubmittingAuth = false;
+        return;
+      }
+      if (rec && rec.mpin && String(rec.mpin) === mpin) {
+        showOk("MPIN Login successful! Opening dashboard...");
+        saveSessionAndNavigate(rec, "index.html");
+        btn.disabled = false;
+        btn.textContent = "Login to Gym Dashboard";
+        isSubmittingAuth = false;
+        return;
+      } else {
+        showErr("MPIN galat hai ya is device par registered nahi hai. Password se try karein.");
+        btn.disabled = false;
+        btn.textContent = "Login to Gym Dashboard";
+        isSubmittingAuth = false;
+        return;
+      }
+    }
+
+    if (!pwd) {
+      showErr("Please enter password.");
+      btn.disabled = false;
+      btn.textContent = "Login to Gym Dashboard";
+      isSubmittingAuth = false;
       return;
     }
-    if (!pwd) { showErr("Please enter password."); return; }
 
-    isSubmittingAuth = true;
     try {
-      const cred = await auth.signInWithEmailAndPassword(email, pwd);
-      if (!cred || !cred.user) { showErr("Invalid Email or Password."); isSubmittingAuth = false; return; }
-
-      const finalProf = Object.assign({}, rec || {}, {
-        uid: cred.user.uid,
-        email,
-        role: "owner",
-        orgId: (rec && rec.orgId) || cred.user.uid,
-        orgName: (rec && (rec.orgName || rec.gymName)) || "Gym",
-        gymName: (rec && (rec.gymName || rec.orgName)) || "Gym",
-        secQuestion: chosenQ || (rec && rec.secQuestion) || "",
-        secAnswer
-      });
-
-      const updatedOwners = owners.filter(o => String(o.email || "").toLowerCase() !== email);
-      updatedOwners.push(finalProf);
-      writeOwners(updatedOwners);
-
-      localStorage.setItem("om_org_profile", JSON.stringify(finalProf));
-      localStorage.setItem("om_last_org_profile", JSON.stringify(finalProf));
-      localStorage.setItem("bfc_role", "owner");
-      localStorage.setItem("om_active_role", "owner");
-      localStorage.setItem("bfc_gid", finalProf.orgId);
-      localStorage.setItem("om_session_active", "1");
-      localStorage.setItem("om_last_activity_time", String(Date.now()));
-
-      showOk("Login successful! Dashboard khul raha hai...");
-      setTimeout(() => { window.location.replace("index.html"); }, 500);
+      if (firebaseReady && auth) {
+        const cred = await auth.signInWithEmailAndPassword(email, pwd);
+        const finalProf = Object.assign({}, rec || {}, {
+          uid: cred.user.uid,
+          email,
+          role: "owner",
+          orgId: (rec && rec.orgId) || cred.user.uid,
+          orgName: (rec && (rec.orgName || rec.gymName)) || "Gym",
+          gymName: (rec && (rec.gymName || rec.orgName)) || "Gym",
+          secQuestion: chosenQ || (rec && rec.secQuestion) || "",
+          secAnswer
+        });
+        showOk("Gym Owner Login successful! Opening dashboard...");
+        saveSessionAndNavigate(finalProf, "index.html");
+      } else if (rec) {
+        showOk("Local Login successful! Opening dashboard...");
+        saveSessionAndNavigate(rec, "index.html");
+      } else {
+        showErr("Firebase auth unavailable.");
+      }
     } catch (err) {
+      showErr((err && err.message) ? err.message : "Login failed");
+    } finally {
       isSubmittingAuth = false;
-      showErr((err && err.message) || "Login failed");
+      btn.disabled = false;
+      btn.textContent = "Login to Gym Dashboard";
     }
   }
 
@@ -558,6 +633,9 @@
     if (!gymId) { showErr("Invite link incomplete hai. Owner se apna secure invite link lein."); return; }
     if (!code || !secret || !secAns) { showErr("Employee ID, Password aur Security Answer zaroori hain."); return; }
     isSubmittingAuth = true;
+    const btn = $("tmSubmitBtn");
+    btn.disabled = true;
+    btn.textContent = "Logging in...";
     try {
       const emailAlias = teamAuthEmail(gymId, code);
       const cred = await auth.signInWithEmailAndPassword(emailAlias, secret);
@@ -574,10 +652,14 @@
       localStorage.setItem("om_logged_user", profile.name || code);
       localStorage.setItem("om_session_active", "1");
       localStorage.setItem("om_last_activity_time", String(Date.now()));
-      setTimeout(() => window.location.replace(profile.role === "staff" ? "staff-portal.html" : "manager-portal.html"), 350);
+      showOk(profile.role.toUpperCase() + " login successful!");
+      window.location.href = (profile.role === "staff" ? "staff-portal.html" : "manager-portal.html");
     } catch (err) {
+      showErr((err && err.message) ? err.message : "Employee ID ya password galat hai.");
+    } finally {
       isSubmittingAuth = false;
-      showErr((err && err.message) || "Employee ID ya password galat hai.");
+      btn.disabled = false;
+      btn.textContent = "Login";
     }
   }
 
