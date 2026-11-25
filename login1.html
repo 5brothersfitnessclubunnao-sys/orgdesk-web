@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Om Software ERP — Sign In &amp; Setup</title>
+  <style>
+    :root {
+      --bg: #060A14;
+      --card-bg: #0D1424;
+      --border: #1E2D4A;
+      --gold: #F5A623;
+      --emerald: #34D399;
+      --rose: #FB7185;
+      --tx-main: #FFFFFF;
+      --tx-muted: #8E9BAE;
+      --input-bg: #0A0F1D;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body {
+      background: radial-gradient(1000px 600px at 50% -10%, #152238 0%, #060A14 70%);
+      color: var(--tx-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 410px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 28px 22px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+      text-align: center;
+    }
+    .brand-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 14px;
+      background: linear-gradient(135deg, #F5A623, #D97706);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      font-weight: 900;
+      color: #0B0F19;
+    }
+    .brand-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .brand-sub { font-size: 12px; color: var(--tx-muted); margin-bottom: 18px; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .tab-btn { background: none; border: 0; color: var(--tx-muted); padding: 9px 6px; font-size: 12.5px; font-weight: 800; cursor: pointer; border-bottom: 2.5px solid transparent; }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .form-group { text-align: left; margin-bottom: 13px; }
+    .form-label { display: block; font-size: 11.5px; font-weight: 600; color: var(--tx-muted); margin-bottom: 5px; }
+    .form-control { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 11px 13px; color: #FFFFFF; font-size: 13.5px; outline: none; }
+    .form-control:focus { border-color: var(--gold); }
+    .btn-submit { width: 100%; background: linear-gradient(135deg, #F5A623, #E09612); color: #0B0F19; font-size: 14px; font-weight: 900; border: none; border-radius: 12px; padding: 12px; margin-top: 6px; cursor: pointer; }
+    .msg-box { display: none; font-size: 11.5px; padding: 9px 12px; border-radius: 10px; margin-bottom: 12px; text-align: left; }
+    .msg-box.err { display: block; background: rgba(251, 113, 133, 0.14); border: 1px solid var(--rose); color: #FECDD3; }
+    .msg-box.ok { display: block; background: rgba(52, 211, 153, 0.14); border: 1px solid var(--emerald); color: #A7F3D0; }
+    .helper-link { margin-top: 12px; font-size: 11.5px; color: var(--tx-muted); }
+    .helper-link a { color: var(--gold); cursor: pointer; text-decoration: underline; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="brand-icon">OM</div>
+    <h1 class="brand-title">Om Software ERP</h1>
+    <p class="brand-sub">Sign in to access your branch management portal</p>
+
+    <div class="tabs">
+      <button type="button" class="tab-btn active" id="tabSignIn" onclick="setAuthView('signin')">Sign In</button>
+      <button type="button" class="tab-btn" id="tabFirstSetup" onclick="setAuthView('signup')">First-Time Setup</button>
+    </div>
+
+    <div id="authMsgBox" class="msg-box"></div>
+
+    <form id="signInForm" onsubmit="handleSignInSubmit(event)">
+      <div class="form-group">
+        <label class="form-label" for="loginRole">Portal Role</label>
+        <select id="loginRole" class="form-control">
+          <option value="owner">Admin / Owner (All Branches)</option>
+          <option value="manager">Branch Manager</option>
+          <option value="staff">Staff Member</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="loginIdentity">Email, Username or Staff ID</label>
+        <input type="text" id="loginIdentity" class="form-control" placeholder="Enter email, username or staff ID" autocomplete="username" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="loginSecQ">Security Question</label>
+        <select id="loginSecQ" class="form-control">
+          <option value="Favourite Person">Favourite Person</option>
+          <option value="Favourite Pet">Favourite Pet</option>
+          <option value="Favourite Song">Favourite Song</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="loginSecA">Security Answer</label>
+        <input type="text" id="loginSecA" class="form-control" placeholder="Enter your security answer" autocomplete="off">
+      </div>
+
+      <button type="submit" class="btn-submit">Access Portal</button>
+      <div class="helper-link">
+        <a onclick="handleForgotSecurityRecovery()">Forgot Password or Security Question?</a>
+      </div>
+    </form>
+
+    <form id="firstSetupForm" style="display:none" onsubmit="handleFirstTimeCustomerSetup(event)">
+      <div class="form-group">
+        <label class="form-label" for="ftGymName">Gym / Business Name *</label>
+        <input type="text" id="ftGymName" class="form-control" placeholder="e.g. Royal Fitness Studio" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ftCity">City / Branch Location *</label>
+        <input type="text" id="ftCity" class="form-control" placeholder="e.g. Unnao / Kanpur" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ftEmail">Email or Mobile *</label>
+        <input type="text" id="ftEmail" class="form-control" placeholder="customer@example.com or mobile" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ftUsername">Create Username *</label>
+        <input type="text" id="ftUsername" class="form-control" placeholder="Choose a username" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ftPassword">Create Password (Min 6 chars) *</label>
+        <input type="password" id="ftPassword" class="form-control" placeholder="Create password" minlength="6" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ftSecQ">Security Question *</label>
+        <select id="ftSecQ" class="form-control" required>
+          <option value="Favourite Person">Favourite Person</option>
+          <option value="Favourite Pet">Favourite Pet</option>
+          <option value="Favourite Song">Favourite Song</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="ftSecA">Security Answer *</label>
+        <input type="text" id="ftSecA" class="form-control" placeholder="Answer for recovery" required>
+      </div>
+
+      <button type="submit" class="btn-submit">Create Account &amp; Go To Plans</button>
+    </form>
+  </div>
+
+  <script>
+    function setAuthView(mode) {
+      const isSignIn = (mode === "signin");
+      document.getElementById("tabSignIn").classList.toggle("active", isSignIn);
+      document.getElementById("tabFirstSetup").classList.toggle("active", !isSignIn);
+      document.getElementById("signInForm").style.display = isSignIn ? "block" : "none";
+      document.getElementById("firstSetupForm").style.display = isSignIn ? "none" : "block";
+      const mb = document.getElementById("authMsgBox");
+      mb.className = "msg-box";
+      mb.textContent = "";
+    }
+
+    function showAuthMsg(type, txt) {
+      const mb = document.getElementById("authMsgBox");
+      mb.className = "msg-box " + type;
+      mb.textContent = txt;
+    }
+
+    function getSavedCustomersRegistry() {
+      try {
+        const raw = localStorage.getItem("om_creator_customers_registry_v1");
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveCustomerToCreatorRegistry(custObj) {
+      const list = getSavedCustomersRegistry();
+      list.unshift(custObj);
+      localStorage.setItem("om_creator_customers_registry_v1", JSON.stringify(list));
+    }
+
+    function handleForgotSecurityRecovery() {
+      const idVal = String(document.getElementById("loginIdentity").value || "").trim().toLowerCase();
+      const list = getSavedCustomersRegistry();
+      const found = list.find(c =>
+        String(c.username || "").toLowerCase() === idVal ||
+        String(c.email || "").toLowerCase() === idVal
+      );
+      if (found) {
+        const ans = prompt("Security Question: " + found.secQuestion + "\nEnter your answer:");
+        if (ans && ans.trim().toLowerCase() === String(found.secAnswer || "").trim().toLowerCase()) {
+          alert("Verified!\nUsername: " + found.username + "\nEmail: " + found.email + "\nLicense Key: " + found.licenseKey);
+        } else {
+          showAuthMsg("err", "Security answer did not match.");
+        }
+      } else {
+        showAuthMsg("err", "Enter your registered Username or Email first, then click recovery.");
+      }
+    }
+
+    function handleFirstTimeCustomerSetup(e) {
+      e.preventDefault();
+      const gymName = document.getElementById("ftGymName").value.trim();
+      const city = document.getElementById("ftCity").value.trim();
+      const email = document.getElementById("ftEmail").value.trim();
+      const username = document.getElementById("ftUsername").value.trim();
+      const password = document.getElementById("ftPassword").value;
+      const secQuestion = document.getElementById("ftSecQ").value;
+      const secAnswer = document.getElementById("ftSecA").value.trim();
+
+      if (!gymName || !city || !email || !username || password.length < 6 || !secAnswer) {
+        showAuthMsg("err", "Please complete all required fields including security question and answer.");
+        return;
+      }
+
+      const licKey = "LIC-OM-" + Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+      const customerRecord = {
+        id: "CUST-" + Date.now(),
+        gymName, city, email, username, password, secQuestion, secAnswer,
+        licenseKey: licKey,
+        planName: "Unpurchased Preview",
+        planAmount: 0,
+        purchased: false,
+        purchasedAt: "",
+        createdAt: new Date().toISOString()
+      };
+
+      saveCustomerToCreatorRegistry(customerRecord);
+      localStorage.setItem("om_active_customer_account", JSON.stringify(customerRecord));
+      localStorage.setItem("om_customer_unpurchased_preview", "1");
+      localStorage.setItem("bfc_role", "customer_preview");
+
+      showAuthMsg("ok", "Account created! Redirecting to Purchase Plan portal...");
+      setTimeout(function() {
+        location.replace("index.html?view=purchase_plan");
+      }, 500);
+    }
+
+    function handleSignInSubmit(e) {
+      e.preventDefault();
+      const role = document.getElementById("loginRole").value;
+      const identity = document.getElementById("loginIdentity").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      const secQ = document.getElementById("loginSecQ").value;
+      const secA = document.getElementById("loginSecA").value.trim();
+
+      if (!identity || !password) {
+        showAuthMsg("err", "Please enter Username/Email and Password.");
+        return;
+      }
+
+      const customers = getSavedCustomersRegistry();
+      const matchedCust = customers.find(c =>
+        String(c.username || "").toLowerCase() === identity.toLowerCase() ||
+        String(c.email || "").toLowerCase() === identity.toLowerCase()
+      );
+
+      if (matchedCust) {
+        if (matchedCust.password !== password) {
+          showAuthMsg("err", "Incorrect password.");
+          return;
+        }
+        if (secA && String(matchedCust.secAnswer || "").toLowerCase() !== secA.toLowerCase()) {
+          showAuthMsg("err", "Incorrect security answer for " + matchedCust.secQuestion + ".");
+          return;
+        }
+        localStorage.setItem("om_active_customer_account", JSON.stringify(matchedCust));
+        localStorage.setItem("om_customer_unpurchased_preview", matchedCust.purchased ? "0" : "1");
+        localStorage.setItem("bfc_role", matchedCust.purchased ? "owner" : "customer_preview");
+        location.replace("index.html" + (matchedCust.purchased ? "" : "?view=purchase_plan"));
+        return;
+      }
+
+      localStorage.removeItem("om_customer_unpurchased_preview");
+      localStorage.setItem("bfc_role", role);
+      localStorage.setItem("om_logged_user", identity);
+      localStorage.setItem("om_last_active_time", String(Date.now()));
+
+      if (role === "staff" || role === "manager") {
+        const brMatch = identity.match(/(\d{3})/);
+        const brCode = (brMatch && brMatch[1]) || "001";
+        localStorage.setItem("om_staff_session", JSON.stringify({
+          code: identity.toUpperCase(),
+          role: role,
+          branchCode: brCode
+        }));
+        location.replace("index.html?role=" + role + "&branch=" + brCode);
+      } else {
+        localStorage.removeItem("om_staff_session");
+        location.replace("index.html");
+      }
+    }
+  </script>
+</body>
+</html>
