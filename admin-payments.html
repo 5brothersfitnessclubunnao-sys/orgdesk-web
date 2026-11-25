@@ -3,111 +3,175 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Developer Admin Console &bull; Customer Approvals</title>
+  <title>Owner / Admin Payment Verification &amp; Total Customers</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
     :root {
-      --bg: #050814; --card: #0b1226; --border: rgba(255,255,255,0.12);
+      --bg: #050814; --card: #0b1226; --card2: #111c3a; --border: rgba(255,255,255,0.12);
       --gold: #f5a623; --gold-bright: #ffd166; --cyan: #22d3ee; --emerald: #34d399;
       --rose: #fb7185; --text: #f8fafc; --muted: #94a3b8;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 18px 14px 80px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 18px 14px 80px; }
     .wrap { max-width: 900px; margin: 0 auto; }
-    .top { display: flex; justify-content: space-between; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 12px 16px; margin-bottom: 16px; }
+    .top {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 12px 16px; margin-bottom: 16px;
+    }
+    a.btn, button.btn {
+      background: var(--card2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 13px; font-size: 12px; font-weight: 800; text-decoration: none; cursor: pointer;
+    }
+    button.btn-ok { background: linear-gradient(135deg, var(--emerald), #059669); color: #050814; border: 0; }
+    button.btn-no { background: rgba(251,113,133,0.18); color: var(--rose); border: 1px solid var(--rose); }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+    .sbox { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px; text-align: center; }
+    .sbox b { display: block; font-size: 20px; color: var(--gold-bright); }
+    .sbox span { font-size: 11px; color: var(--muted); }
     .item { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; margin-bottom: 12px; font-size: 12.5px; }
-    button.btn-ok { background: linear-gradient(135deg, var(--emerald), #059669); color: #050814; border: 0; border-radius: 8px; padding: 8px 14px; font-weight: 800; cursor: pointer; }
-    button.btn-no { background: rgba(251,113,133,0.18); color: var(--rose); border: 1px solid var(--rose); border-radius: 8px; padding: 8px 14px; font-weight: 800; cursor: pointer; }
-    button.btn-res { background: #070d1d; color: var(--cyan); border: 1px solid var(--cyan); border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
+    .badge-ok { background: rgba(52,211,153,0.18); color: var(--emerald); border: 1px solid var(--emerald); padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 900; }
+    .badge-pd { background: rgba(245,166,35,0.18); color: var(--gold-bright); border: 1px solid var(--gold); padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 900; }
+    .badge-no { background: rgba(251,113,133,0.18); color: var(--rose); border: 1px solid var(--rose); padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 900; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="top">
       <div>
-        <div style="font-size:11px;color:var(--cyan);font-weight:800">DEVELOPER MASTER CONSOLE</div>
-        <h1 style="font-size:18px;font-weight:900">Pending Customer Payments &amp; Accounts</h1>
+        <div style="font-size:11px;color:var(--cyan);font-weight:800">OWNER / ADMIN PAYMENT CONSOLE</div>
+        <h1 style="font-size:19px;font-weight:900">Customer Payment Alert &amp; Verification</h1>
       </div>
-      <div><a href="index.html" style="color:var(--gold);text-decoration:none;font-weight:800">← Dashboard</a></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="developer-saas-admin.html" class="btn" style="border-color:var(--gold);color:var(--gold-bright)">📺 Live Dev Console</a>
+        <a href="plans.html" class="btn">Customer Plans Page</a>
+        <a href="index.html" class="btn">← Dashboard</a>
+      </div>
     </div>
 
-    <div id="paymentQueue"></div>
+    <div id="ownerLiveAlert" class="item" style="border-color:var(--emerald);background:rgba(52,211,153,0.08)">
+      <b>🔔 Owner Notification Status:</b> <span id="ownerAlertText">Checking customer payments...</span>
+    </div>
+
+    <div class="stats">
+      <div class="sbox"><b id="stTotalCust">0</b><span>Total Customers</span></div>
+      <div class="sbox"><b id="stVerifiedCust">0</b><span>Verified / Approved</span></div>
+      <div class="sbox"><b id="stPendingCust">0</b><span>Pending Verification</span></div>
+    </div>
+
+    <div id="customerPaymentList"></div>
   </div>
 
   <script>
-    function getList() {
-      try { return JSON.parse(localStorage.getItem("om_plan_customers_v1") || "[]"); } catch(e) { return []; }
+    const CFG = {
+      apiKey: 'AIzaSyAwuFgPJIUavmRRzkHOz83FUP0EyfZETCU',
+    authDomain: 'orgdesk-fc207.firebaseapp.com',
+    projectId: 'orgdesk-fc207',
+    storageBucket: 'orgdesk-fc207.firebasestorage.app',
+    messagingSenderId: '677150519977',
+    appId: '1:677150519977:web:74de5f488494280d352fb8'
+    };
+    let db = null;
+    try {
+      if (window.firebase) {
+        if (!firebase.apps.length) firebase.initializeApp(CFG);
+        db = firebase.firestore();
+      }
+    } catch (e) {}
+
+    function esc(v) {
+      return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
     }
 
-    function processReq(idx, isApprove) {
-      const list = getList();
-      const item = list[idx];
-      if (!item) return;
+    function getCustList() {
+      try { return JSON.parse(localStorage.getItem("om_plan_customers_v1") || "[]") || []; } catch (e) { return []; }
+    }
 
-      if (isApprove) {
-        const planObj = {
+    function saveCustList(list) {
+      try { localStorage.setItem("om_plan_customers_v1", JSON.stringify(list)); } catch (e) {}
+    }
+
+    async function verifyCustomerPayment(idx, approved) {
+      var list = getCustList();
+      var item = list[idx];
+      if (!item) return;
+      item.verifyStatus = approved ? "VERIFIED" : "REJECTED";
+      item.status = approved ? "ACTIVE" : "REJECTED";
+      saveCustList(list);
+
+      if (approved) {
+        var planObj = {
           name: item.planName,
-          amount: item.planAmount,
+          amount: Number(item.planAmount || 99),
+          paidAmount: Number(item.paidNow || 1),
           status: "active",
+          verifiedByOwner: true,
           licenseKey: item.licenseKey,
           utr: item.utr,
           activatedAt: new Date().toISOString()
         };
-        localStorage.setItem("om_active_subscription_plan", JSON.stringify(planObj));
-        localStorage.setItem("om_plan_activated_notif_v1", JSON.stringify({ active: true, planName: item.planName, licenseKey: item.licenseKey }));
-        alert("This Member has been purchased " + item.planName + " — Plan Successfully Activated!");
+        try {
+          localStorage.setItem("om_active_subscription_plan", JSON.stringify(planObj));
+          localStorage.setItem("om_locked_lic", item.licenseKey || "");
+        } catch (e) {}
+        if (db) {
+          try {
+            var gid = localStorage.getItem("bfc_gid") || "default_gym";
+            await db.collection("subscriptions").doc(gid).set(Object.assign({}, planObj, { gymId: gid, updatedAt: Date.now() }), { merge: true });
+          } catch (e) {}
+        }
+      }
+      renderOwnerPayments();
+    }
+
+    function renderOwnerPayments() {
+      var list = getCustList();
+      var verified = list.filter(function (x) { return x.verifyStatus === "VERIFIED"; }).length;
+      var pending = list.filter(function (x) { return x.verifyStatus !== "VERIFIED" && x.verifyStatus !== "REJECTED"; }).length;
+
+      document.getElementById("stTotalCust").textContent = String(list.length);
+      document.getElementById("stVerifiedCust").textContent = String(verified);
+      document.getElementById("stPendingCust").textContent = String(pending);
+
+      var alertEl = document.getElementById("ownerAlertText");
+      if (list.length > 0) {
+        var latest = list[0];
+        alertEl.innerHTML = `<b style="color:var(--gold-bright)">Naya Payment Entry:</b> ${esc(latest.name)} (${esc(latest.phone)}) ne <b>${esc(latest.planName)}</b> ke liye ₹${esc(latest.paidNow)} (UTR: <b>${esc(latest.utr)}</b>) submit kiya hai.`;
       } else {
-        alert("Payment Request Declined!");
+        alertEl.textContent = "Abhi kisi customer ne payment submit nahi kiya hai. Jab customer plans.html se payment karega, yahan turant alert dikhega.";
       }
 
-      list.splice(idx, 1);
-      localStorage.setItem("om_plan_customers_v1", JSON.stringify(list));
-      renderQueue();
-    }
-
-    function resetCustPass(email) {
-      const newPass = prompt("Enter Master Password for Customer (" + email + "):", "gym12345");
-      if (!newPass) return;
-      try {
-        let own = JSON.parse(localStorage.getItem("om_owner_account_v1") || "null");
-        if (own) {
-          own.password = newPass;
-          localStorage.setItem("om_owner_account_v1", JSON.stringify(own));
-          alert("Password updated to: " + newPass + " (Notified to Customer & Developer)");
-        }
-      } catch(e) {}
-    }
-
-    function renderQueue() {
-      const list = getList();
-      const box = document.getElementById("paymentQueue");
+      var box = document.getElementById("customerPaymentList");
       if (!list.length) {
-        box.innerHTML = '<div class="item" style="color:var(--muted);text-align:center">Koi pending payment request nahi hai.</div>';
+        box.innerHTML = `<div class="item">Koi customer payment record nahi hai.</div>`;
         return;
       }
 
-      box.innerHTML = list.map((c, i) => `
-        <div class="item" style="border-color:var(--gold)">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <b>${c.gymName}</b>
-            <span style="color:var(--emerald);font-weight:900">This Member has been purchased ${c.planName} (₹${c.paidNow})</span>
+      box.innerHTML = list.map(function (c, i) {
+        var st = c.verifyStatus || "PENDING";
+        var bCls = st === "VERIFIED" ? "badge-ok" : (st === "REJECTED" ? "badge-no" : "badge-pd");
+        return `
+          <div class="item">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+              <b>${i + 1}. ${esc(c.name)}</b> <span class="${bCls}">${esc(st)}</span>
+            </div>
+            <div style="margin-top:6px">📞 Mobile: <b>${esc(c.phone)}</b> • Plan: <b style="color:var(--gold-bright)">${esc(c.planName)}</b> (Paid Now: ₹${esc(c.paidNow)})</div>
+            <div>🔑 License Key: <b>${esc(c.licenseKey)}</b> • Test Login: <b>${esc(c.email)}</b> / Pass: <b>${esc(c.testPass)}</b></div>
+            <div>🧾 UTR: <b>${esc(c.utr)}</b> • 📸 Screenshot: <b style="color:${c.hasScreenshot ? "var(--emerald)" : "var(--rose)"}">${c.hasScreenshot ? "Shared (Yes)" : "Not Shared (No)"}</b></div>
+            ${c.screenshotData ? `<img src="${c.screenshotData}" alt="Screenshot" style="width:74px;height:74px;border-radius:8px;object-fit:cover;margin-top:8px;border:1px solid var(--emerald)">` : ""}
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">${esc(c.time)}</div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button type="button" class="btn btn-ok" onclick="verifyCustomerPayment(${i}, true)">✅ Verify &amp; Approve Payment</button>
+              <button type="button" class="btn btn-no" onclick="verifyCustomerPayment(${i}, false)">✕ Reject</button>
+            </div>
           </div>
-          <div style="margin:6px 0;font-size:12px">
-            📞 Mobile: <b>${c.phone}</b> &bull; ✉️ Registered Email: <b style="color:var(--cyan)">${c.email}</b>
-          </div>
-          <div style="font-size:12px">
-            🧾 UTR: <b>${c.utr}</b> &bull; 🔑 Generated Key: <b>${c.licenseKey}</b>
-          </div>
-          ${c.screenshotData ? `<div style="margin-top:6px"><img src="${c.screenshotData}" style="width:72px;height:72px;border-radius:8px;object-fit:cover;border:1px solid var(--emerald)"></div>` : ''}
-          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-            <button class="btn-ok" onclick="processReq(${i}, true)">✅ Approve &amp; Activate Plan</button>
-            <button class="btn-no" onclick="processReq(${i}, false)">✕ Decline</button>
-            <button class="btn-res" onclick="resetCustPass('${c.email}')">🔑 Change Customer Password</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join("");
     }
 
-    window.addEventListener("DOMContentLoaded", renderQueue);
+    window.addEventListener("DOMContentLoaded", renderOwnerPayments);
   </script>
 </body>
 </html>

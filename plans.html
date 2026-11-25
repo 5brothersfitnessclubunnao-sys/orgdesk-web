@@ -221,7 +221,10 @@
           <span class="pill">UPI PAYMENT &amp; ACTIVATION</span>
           <h2 id="selectedPlanHeading" style="font-size:19px;font-weight:900;color:#fff">Selected: First Plan — ₹99</h2>
         </div>
-        
+        <label style="display:inline-flex;align-items:center;gap:6px;background:#070d1d;border:1px solid var(--cyan);padding:7px 11px;border-radius:10px;color:var(--cyan);cursor:pointer">
+          <input type="checkbox" id="payOneRupeeTestChk" checked onchange="updateUpiLinks()">
+          <span>₹1 Test Mode (₹1 pay करने पर भी पूरा प्लान ₹99/₹199/₹399/₹499/₹999 एक्टिवेट होगा)</span>
+        </label>
       </div>
 
       <div id="insidePlanFeaturesList" style="margin-bottom:12px"></div>
@@ -235,7 +238,7 @@
           Payee: <b>5 Brother's Fitness Club</b><br>
           Official UPI ID: <b style="color:var(--gold-bright);font-size:15px">9140417259@okbizaxis</b><br>
           Mobile: <b>+91 91404 17259</b><br>
-          Payable Amount Now: <b id="payableNowDisp" style="color:var(--emerald);font-size:16px">₹99</b>
+          Payable Amount Now: <b id="payableNowDisp" style="color:var(--emerald);font-size:16px">₹1 (Test Mode → Activates ₹99 Plan)</b>
         </div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;align-items:center">
           <a id="upiAppLink" class="btn-upi" href="upi://pay?pa=9140417259@okbizaxis&pn=5%20Brother%27s%20Fitness%20Club&am=1&cu=INR">📲 Pay via UPI App (GPay / PhonePe / Paytm)</a>
@@ -244,18 +247,18 @@
       </div>
 
       <form onsubmit="submitPlanPaymentAndActivate(event)" class="feat-card">
-        <div class="feat-title">📝 Customer Payment &amp; License Activation Form</div><div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">This is For the payment confirmation after confirmation automatically Licence key will generate</div>
+        <div class="feat-title">📝 Customer Payment &amp; License Activation Form</div>
         <div class="grid2">
           <div><label>Customer / Gym Name *</label><input class="inp" id="cpName" required placeholder="Customer / Gym Name"></div>
           <div><label>10-Digit Mobile *</label><input class="inp" id="cpPhone" required maxlength="10" placeholder="10-digit mobile"></div>
         </div>
         <div class="grid2">
-          <div><label>Email ID</label><input class="inp" id="cpEmail" placeholder="customer@example.com"></div>
-          
+          <div><label>Login Email / ID (for Testing)</label><input class="inp" id="cpEmail" placeholder="customer@example.com"></div>
+          <div><label>Test Password / PIN</label><input class="inp" id="cpPass" placeholder="Test password / PIN"></div>
         </div>
         <div class="grid2">
-          <div><label>UTR / Transaction Ref No.</label><input class="inp" id="cpUtr" required placeholder="12-digit UTR Number"></div>
-          <div><label>Payment Screenshot (Image)</label><input type="file" accept="image/*" class="inp" id="cpScrFile" required onchange="handleScrPick(this)"></div>
+          <div><label>UTR / Transaction Ref No.</label><input class="inp" id="cpUtr" placeholder="Enter UTR number (optional in ₹1 test)"></div>
+          <div><label>Payment Screenshot (Image)</label><input type="file" accept="image/*" class="inp" id="cpScrFile" onchange="handleScrPick(this)"></div>
         </div>
         <div id="cpScrPreview" style="margin-top:6px"></div>
         <button type="submit" class="btn-act" style="width:100%;margin-top:12px">✅ Confirm Payment &amp; Activate Plan + Generate License Key</button>
@@ -329,14 +332,17 @@
 
     function updateUpiLinks() {
       var p = PLANS_META[selectedPlanAmt] || PLANS_META[99];
-      var payAmt = p.amount;
+      var isOneRupee = document.getElementById("payOneRupeeTestChk").checked;
+      var payAmt = isOneRupee ? 1 : p.amount;
       var linkEl = document.getElementById("upiAppLink");
       var dispEl = document.getElementById("payableNowDisp");
       if (linkEl) {
         linkEl.href = "upi://pay?pa=" + encodeURIComponent(UPI_ID) + "&pn=" + encodeURIComponent(PAYEE_NAME) + "&am=" + payAmt + "&cu=INR";
       }
       if (dispEl) {
-        dispEl.textContent = "₹" + p.amount;
+        dispEl.textContent = isOneRupee
+          ? ("₹1 (Test Payment → Activates Full " + p.name + ")")
+          : ("₹" + p.amount + " (" + p.name + ")");
       }
     }
 
@@ -360,67 +366,68 @@
       var p = PLANS_META[selectedPlanAmt] || PLANS_META[99];
       var custName = (document.getElementById("cpName").value || "").trim();
       var custPhone = (document.getElementById("cpPhone").value || "").replace(/\D/g, "");
-      var custEmail = (document.getElementById("cpEmail").value || "").trim() || "";
-      var custPass = (document.getElementById("cpPass").value || "").trim() || "";
+      var custEmail = (document.getElementById("cpEmail").value || "").trim() || "testuser@gmail.com";
+      var custPass = (document.getElementById("cpPass").value || "").trim() || "1234";
       var utr = (document.getElementById("cpUtr").value || "").trim();
       var isOneRupee = document.getElementById("payOneRupeeTestChk").checked;
-      var licKey = "LIC-OM-PLAN" + p.amount + "-" + String(Date.now()).slice(-5);
+      var licKey = "LIC-OM-" + p.amount + "-" + String(Date.now()).slice(-5);
 
-      var requestId = "REQ-" + Date.now();
-      var pendingRecord = {
-        id: requestId,
+      var activePlanObj = {
+        name: p.name,
+        amount: p.amount,
+        paidAmount: isOneRupee ? 1 : p.amount,
+        testOneRupeeMode: isOneRupee,
+        status: "active",
+        licenseKey: licKey,
+        utr: utr || (isOneRupee ? "TEST-1RS-VERIFIED" : ""),
+        hasScreenshot: !!uploadedScrData,
+        activatedAt: new Date().toISOString()
+      };
+
+      try {
+        localStorage.setItem("om_active_subscription_plan", JSON.stringify(activePlanObj));
+        localStorage.setItem("om_locked_lic", licKey);
+      } catch (e) {}
+
+      if (db) {
+        try {
+          var gid = localStorage.getItem("bfc_gid") || "default_gym";
+          await db.collection("subscriptions").doc(gid).set(Object.assign({}, activePlanObj, { gymId: gid, updatedAt: Date.now() }), { merge: true });
+        } catch (e) {}
+      }
+
+      // Save customer entry for Admin "Total Customers" view
+      var custList = [];
+      try { custList = JSON.parse(localStorage.getItem("om_plan_customers_v1") || "[]") || []; } catch (e) {}
+      custList.unshift({
         name: custName,
-        gymName: custName,
         phone: custPhone,
         email: custEmail,
         testPass: custPass,
         planName: p.name,
         planAmount: p.amount,
         paidNow: isOneRupee ? 1 : p.amount,
-        testOneRupeeMode: isOneRupee,
-        utr: utr || (isOneRupee ? "TEST-1RS" : "Not provided"),
+        utr: utr || "Not provided",
         hasScreenshot: !!uploadedScrData,
         screenshotData: uploadedScrData || "",
         licenseKey: licKey,
-        verifyStatus: "PENDING_APPROVAL",
-        status: "PENDING_APPROVAL",
+        status: "ACTIVE",
         time: new Date().toLocaleString("en-IN")
-      };
+      });
+      try { localStorage.setItem("om_plan_customers_v1", JSON.stringify(custList)); } catch (e) {}
 
-      var custList = [];
-      try { custList = JSON.parse(localStorage.getItem("om_plan_customers_v1") || "[]") || []; } catch (e) {}
-      custList.unshift(pendingRecord);
-      try {
-        localStorage.setItem("om_plan_customers_v1", JSON.stringify(custList));
-        localStorage.setItem("om_pending_payment_approvals_v1", JSON.stringify(custList));
-      } catch (e) {}
-
-      if (db) {
-        try {
-          await db.collection("payment_approvals").doc(requestId).set(Object.assign({}, pendingRecord, { updatedAt: Date.now() }), { merge: true });
-          await db.collection("customer_accounts").doc(requestId).set({
-            gymName: custName,
-            ownerName: custName,
-            phone: custPhone,
-            email: custEmail,
-            planName: p.name,
-            planAmount: p.amount,
-            licenseKey: licKey,
-            status: "PENDING_APPROVAL",
-            updatedAt: Date.now()
-          }, { merge: true });
-        } catch (e) {}
-      }
+      renderPlanBanner();
+      renderAdminCustomers();
 
       document.getElementById("activationResultBox").innerHTML = `
-        <div class="cust-card" style="border-color:var(--gold)">
-          <b style="color:var(--gold-bright);font-size:14px">⏳ Payment Approval Ke Liye Bhej Di Gayi Hai</b><br>
-          <div>Customer / Gym: <b>${esc(custName)}</b> • Phone: <b>${esc(custPhone)}</b></div>
-          <div>Gmail / Login ID: <b>${esc(custEmail || "-")}</b></div>
-          <div>Selected Plan: <b>${esc(p.name)}</b> (Payable: ₹${isOneRupee ? 1 : p.amount})</div>
-          <div>Generated Plan License Key: <b style="color:var(--cyan)">${esc(licKey)}</b></div>
-          <div style="margin-top:8px;font-size:11.5px;color:#cbd5e1">
-            Developer ke approve karte hi aapko <b>"Your plan has been activated"</b> ka notification mil jayega aur aapka plan active ho jayega.
+        <div class="cust-card" style="border-color:var(--emerald)">
+          <b style="color:var(--emerald);font-size:14px">✅ Plan Activated: ${esc(p.name)}</b><br>
+          <div>Customer: <b>${esc(custName)}</b> • Phone: <b>${esc(custPhone)}</b></div>
+          <div>License Key: <b style="color:var(--gold-bright)">${esc(licKey)}</b></div>
+          <div>Test Login / Password Used: <b>${esc(custEmail)}</b> / <b>${esc(custPass)}</b></div>
+          <div>UTR: <b>${esc(utr || (isOneRupee ? "₹1 Test Mode" : "-"))}</b> • Screenshot: <b>${uploadedScrData ? "Uploaded" : "Not Uploaded"}</b></div>
+          <div style="margin-top:10px">
+            <a href="index.html" class="btn-act" style="text-decoration:none;display:inline-block">🚀 Dashboard पर जाकर सर्विस चेक करें →</a>
           </div>
         </div>
       `;
@@ -512,19 +519,5 @@
 })();
 </script>
 
-
-<script>
-(function checkDeveloperApprovalOnPlans(){
-  try {
-    var notif = JSON.parse(localStorage.getItem("om_plan_activated_notif_v1") || "null");
-    if (notif && notif.active) {
-      var box = document.getElementById("activationResultBox");
-      if (box) {
-        box.innerHTML = '<div class="cust-card" style="border-color:var(--emerald)"><b style="color:var(--emerald);font-size:15px">Your plan has been activated</b><div>Plan: <b>' + esc(notif.planName || "") + '</b> • License Key: <b>' + esc(notif.licenseKey || "") + '</b></div><div style="margin-top:8px"><a href="index.html" class="btn-act" style="text-decoration:none;display:inline-block">Dashboard Par Jayein →</a></div></div>';
-      }
-    }
-  } catch(e){}
-})();
-</script>
 </body>
 </html>
