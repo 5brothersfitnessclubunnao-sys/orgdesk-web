@@ -10,663 +10,182 @@
       --gold: #f5a623; --gold-bright: #ffd166; --cyan: #22d3ee; --emerald: #34d399;
       --rose: #fb7185; --text: #f8fafc; --muted: #94a3b8;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
-    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 18px 14px 70px; display: flex; justify-content: center; align-items: flex-start; }
-    .portal-card {
-      width: 100%; max-width: 460px; background: var(--card); border: 1.5px solid var(--border);
-      border-radius: 22px; padding: 20px; margin-top: 8px;
-    }
-    .tag { display: inline-block; background: rgba(245,166,35,0.16); color: var(--gold-bright); border: 1px solid var(--border); font-size: 10px; font-weight: 900; padding: 4px 11px; border-radius: 999px; cursor: pointer; user-select: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 18px 14px 70px; display: flex; justify-content: center; }
+    .portal-card { width: 100%; max-width: 480px; background: var(--card); border: 1.5px solid var(--border); border-radius: 22px; padding: 20px; margin-top: 8px; }
+    .tag { display: inline-block; background: rgba(245,166,35,0.16); color: var(--gold-bright); border: 1px solid var(--border); font-size: 10px; font-weight: 900; padding: 4px 11px; border-radius: 999px; }
     h1 { font-size: 22px; font-weight: 900; color: var(--gold-bright); margin-top: 8px; text-align: center; }
-    .sub { font-size: 12px; color: var(--muted); text-align: center; margin-top: 4px; line-height: 1.45; }
-
-    .role-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 14px; }
-    .r-btn {
-      background: #070d1d; border: 1px solid rgba(255,255,255,0.14); color: var(--text);
-      border-radius: 10px; padding: 9px 5px; font-size: 11px; font-weight: 800; cursor: pointer; text-align: center;
-    }
-    .r-btn.active { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #050814; border-color: var(--gold); }
-    .r-btn.hidden-dev { display: none; }
-    .r-btn.hidden-dev.revealed { display: block; border-color: var(--cyan); color: var(--cyan); }
-
+    .sub { font-size: 12px; color: var(--muted); text-align: center; margin-top: 4px; }
     .mode-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-    .m-btn {
-      background: #070d1d; border: 1px solid rgba(255,255,255,0.14); color: var(--text);
-      border-radius: 10px; padding: 8px; font-size: 12px; font-weight: 800; cursor: pointer;
-    }
+    .m-btn { background: #070d1d; border: 1px solid rgba(255,255,255,0.14); color: var(--text); border-radius: 10px; padding: 8px; font-size: 12px; font-weight: 800; cursor: pointer; }
     .m-btn.active { border-color: var(--gold); color: var(--gold-bright); background: rgba(245,166,35,0.12); }
-
     label { display: block; font-size: 11.5px; color: var(--muted); font-weight: 700; margin-top: 11px; margin-bottom: 4px; }
-    .inp, select.inp {
-      width: 100%; background: #070d1d; border: 1px solid rgba(255,255,255,0.16); color: #fff;
-      border-radius: 11px; padding: 10px 12px; font-size: 13px;
-    }
-    .mpin-box { text-align: center; font-size: 22px; letter-spacing: 10px; font-weight: 900; color: var(--gold-bright); }
-    .btn-main {
-      width: 100%; margin-top: 14px; background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-      color: #050814; border: 0; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 900; cursor: pointer;
-    }
-    .btn-ok { background: var(--emerald); color: #050814; border: 0; border-radius: 8px; padding: 7px 11px; font-size: 11.5px; font-weight: 800; cursor: pointer; }
-    .btn-no { background: rgba(251,113,133,0.18); color: var(--rose); border: 1px solid var(--rose); border-radius: 8px; padding: 7px 11px; font-size: 11.5px; font-weight: 800; cursor: pointer; }
-    .msg-err { color: var(--rose); font-size: 12px; font-weight: 700; margin-top: 8px; min-height: 16px; line-height: 1.45; }
-    .alert-box {
-      background: rgba(251,113,133,0.12); border: 1px solid var(--rose); color: #ffe4e6;
-      border-radius: 12px; padding: 10px 12px; font-size: 11.5px; line-height: 1.5; margin-top: 10px;
-    }
-    .info-box {
-      background: rgba(34, 211, 238, 0.1); border: 1px solid var(--cyan); color: #e0f2fe;
-      border-radius: 12px; padding: 10px 12px; font-size: 12px; line-height: 1.5; margin-top: 12px;
-    }
-    .helper-links { display: flex; justify-content: space-between; margin-top: 12px; font-size: 11.5px; }
-    .helper-links button { background: none; border: 0; color: var(--gold-bright); font-weight: 700; cursor: pointer; text-decoration: underline; }
+    .inp { width: 100%; background: #070d1d; border: 1px solid rgba(255,255,255,0.16); color: #fff; border-radius: 11px; padding: 10px 12px; font-size: 13px; }
+    .btn-main { width: 100%; margin-top: 14px; background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #050814; border: 0; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 900; cursor: pointer; }
+    .msg-err { color: var(--rose); font-size: 12px; font-weight: 700; margin-top: 8px; min-height: 16px; }
   </style>
 </head>
 <body>
   <div class="portal-card">
-    <!-- 5-Tap Hidden App Developer / Prime Master Reveal -->
-    <div style="text-align:center"><span class="tag" id="portalSecretTag" onclick="handleFiveTapReveal()">GYM SAAS PORTAL</span></div>
+    <div style="text-align:center"><span class="tag">GYM SAAS PORTAL</span></div>
     <h1 id="portalTitle">Gym Owner Login</h1>
-    <div class="sub" id="portalSub">Secure Role-Based Access</div>
+    <div class="sub">Secure Role-Based Access</div>
 
-    <div class="role-row">
-      <button type="button" class="r-btn hidden-dev" id="roleBtnPrime" onclick="setRole('prime')">Prime Master</button>
-      <button type="button" class="r-btn active" id="roleBtnOwner" onclick="setRole('owner')">Gym Owner</button>
-      <button type="button" class="r-btn" id="roleBtnManager" onclick="setRole('manager')">Manager</button>
-      <button type="button" class="r-btn" id="roleBtnStaff" onclick="setRole('staff')">Staff</button>
+    <div class="mode-row">
+      <button type="button" class="m-btn active" id="ownModeSignin" onclick="setOwnerMode('signin')">Sign In</button>
+      <button type="button" class="m-btn" id="ownModeSignup" onclick="setOwnerMode('signup')">New Sign Up</button>
     </div>
 
-    <div id="secAlertBanner" class="alert-box" style="display:none"></div>
+    <!-- SIGN IN BOX -->
+    <div id="ownSigninBox">
+      <form onsubmit="submitOwnerSignin(event)">
+        <label for="ownLoginId">Email ID / Mobile *</label>
+        <input type="text" id="ownLoginId" class="inp" required placeholder="owner@gym.com ya 10-digit mobile">
 
-    <!-- PRIME MASTER (PIN 8336 ONLY) -->
-    <div id="secPrime" style="display:none">
-      <form onsubmit="submitPrimeLogin(event)">
-        <label for="pmPinInp">Prime Master MPIN *</label>
-        <input type="password" id="pmPinInp" class="inp mpin-box" inputmode="numeric" maxlength="4" placeholder="••••">
-        <div id="pmErr" class="msg-err"></div>
-        <button type="submit" class="btn-main">Prime Master Login →</button>
+        <label for="ownLoginPass">Password *</label>
+        <input type="password" id="ownLoginPass" class="inp" placeholder="Enter password">
+
+        <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between">
+          <label style="margin:0;display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--gold-bright);font-weight:800;font-size:12px">
+            <input type="checkbox" id="saveLoginChk" checked style="width:16px;height:16px;accent-color:var(--gold)">
+            <span>Save Login</span>
+          </label>
+          <span style="font-size:11px;color:var(--muted)">Auto-fill on this device</span>
+        </div>
+
+        <div id="ownErr" class="msg-err"></div>
+        <button type="submit" class="btn-main">Login to Gym Dashboard</button>
       </form>
     </div>
 
-    <!-- GYM OWNER -->
-    <div id="secOwner">
-      <div class="mode-row">
-        <button type="button" class="m-btn active" id="ownModeSignin" onclick="setOwnerMode('signin')">Sign In</button>
-        <button type="button" class="m-btn" id="ownModeSignup" onclick="setOwnerMode('signup')">New Sign Up</button>
-      </div>
+    <!-- SIGN UP BOX -->
+    <div id="ownSignupBox" style="display:none">
+      <form onsubmit="submitOwnerSignup(event)">
+        <label>Gym Name *</label>
+        <input type="text" id="suGymName" class="inp" required placeholder="Gym Name">
 
-      <div id="ownSigninBox">
-        <div class="mode-row">
-          <button type="button" class="m-btn active" id="ownAuthPassBtn" onclick="setOwnerAuthMethod('password')">Login with Password</button>
-          <button type="button" class="m-btn" id="ownAuthMpinBtn" onclick="setOwnerAuthMethod('mpin')">Login with MPIN</button>
-        </div>
+        <label>Owner Name *</label>
+        <input type="text" id="suOwnerName" class="inp" required placeholder="Owner Name">
 
-        <form onsubmit="submitOwnerSignin(event)">
-          <label for="ownLoginId">Email ID / Mobile *</label>
-          <input type="text" id="ownLoginId" class="inp" required placeholder="owner@gym.com or 10-digit mobile">
+        <label>10-Digit Mobile *</label>
+        <input type="tel" id="suPhone" class="inp" required maxlength="10" placeholder="10-digit mobile">
 
-          <div id="ownPassFieldWrap">
-            <label for="ownLoginPass">Password *</label>
-            <input type="password" id="ownLoginPass" class="inp" placeholder="Enter password">
-          </div>
+        <label>Email ID *</label>
+        <input type="email" id="suEmail" class="inp" required placeholder="owner@gmail.com">
 
-          <div id="ownMpinFieldWrap" style="display:none">
-            <label for="ownLoginMpin">4-Digit MPIN *</label>
-            <input type="password" id="ownLoginMpin" class="inp mpin-box" inputmode="numeric" maxlength="4" placeholder="••••">
-            <button type="submit" id="ownMpinSubmitBtn" class="btn-main" style="margin-top:10px;background:linear-gradient(135deg,#22d3ee,#0284c7);color:#050814">Login with MPIN →</button>
-          </div>
+        <label>Create Password *</label>
+        <input type="password" id="suCreatePass" class="inp" required placeholder="Password">
 
-          <div id="ownSecUnlockWrap" style="display:none">
-            <label for="ownSecAnswerInp">Account Locked (3 Failed Attempts) — Security Question Answer (Required even for Admin) *</label>
-            <input type="text" id="ownSecAnswerInp" class="inp" placeholder="Enter security answer to unlock">
-          </div>
+        <label>Create 4-Digit MPIN *</label>
+        <input type="password" id="suCreateMpin" class="inp" inputmode="numeric" maxlength="4" required placeholder="••••">
 
-          <div id="ownErr" class="msg-err"></div>
-          <button type="submit" id="ownMainSubmitBtn" class="btn-main">Login to Gym Dashboard</button>
-        </form>
-
-        <div class="helper-links">
-          <button type="button" onclick="recoverOwnerCred('password')">Forgot Password</button>
-          <button type="button" onclick="recoverOwnerCred('mpin')">Forgot MPIN</button>
-        </div>
-      </div>
-
-      <div id="ownSignupBox" style="display:none">
-        <form onsubmit="submitOwnerSignup(event)">
-          <label for="suGymCount">Do you want this plan for Single Gym or 2, 3, 4 gyms? *</label>
-          <select id="suGymCount" class="inp" onchange="handleGymCountChange()">
-            <option value="1">Single Gym (1 Gym)</option>
-            <option value="2">2 Gyms (Includes ₹999 Plan Features)</option>
-            <option value="3">3 Gyms (Includes ₹999 Plan Features)</option>
-            <option value="4">4 Gyms (Includes ₹999 Plan Features)</option>
-          </select>
-
-          <label for="suGymName">Gym Name *</label>
-          <input type="text" id="suGymName" class="inp" required placeholder="Enter Gym Name">
-
-          <label for="suOwnerName">Owner Name *</label>
-          <input type="text" id="suOwnerName" class="inp" required placeholder="Enter Owner Name">
-
-          <label for="suPhone">10-Digit Mobile *</label>
-          <input type="tel" id="suPhone" class="inp" required maxlength="10" placeholder="10-digit mobile number">
-
-          <label for="suEmail">Email ID *</label>
-          <input type="email" id="suEmail" class="inp" required placeholder="owner@gym.com">
-
-          <label for="suCreatePass">Create Password *</label>
-          <input type="password" id="suCreatePass" class="inp" required placeholder="Create login password">
-
-          <label for="suCreateMpin">Create 4-Digit MPIN *</label>
-          <input type="password" id="suCreateMpin" class="inp mpin-box" inputmode="numeric" maxlength="4" required placeholder="••••">
-
-          <label for="suSecAns">Security Question Answer (For Lock Recovery) *</label>
-          <input type="text" id="suSecAns" class="inp" required placeholder="e.g. Unnao / My first bike">
-
+        <div style="margin-top:14px;padding-top:10px;border-top:1px dashed rgba(245,166,35,0.4)">
+          <div style="font-size:12px;font-weight:900;color:var(--gold-bright);margin-bottom:8px">📜 Compliance &amp; Licenses (Optional)</div>
           
-          <!-- Business & Verification Documents (Optional) -->
-          <div style="margin-top:14px;padding-top:10px;border-top:1px dashed rgba(245,166,35,0.4)">
-            <div style="font-size:12px;font-weight:900;color:var(--gold-bright);margin-bottom:8px">📜 Business Verification & Licenses (Optional)</div>
+          <label>GST Number (If available)</label>
+          <input type="text" id="suGstNo" class="inp" maxlength="15" placeholder="09AAAAA0000A1Z5">
+          <label style="font-size:11px">Upload GST Doc</label>
+          <input type="file" id="suGstDoc" class="inp" accept="image/*,.pdf">
 
-            <!-- GSTIN -->
-            <label for="suGstNo">GST Number (If available)</label>
-            <input type="text" id="suGstNo" class="inp" maxlength="15" placeholder="e.g. 09AAAAA0000A1Z5" style="text-transform:uppercase">
-            <label for="suGstDoc" style="margin-top:4px;font-size:11px">Upload GST Certificate</label>
-            <input type="file" id="suGstDoc" class="inp" accept="image/*,.pdf" style="padding:6px;font-size:11.5px">
+          <label>Udyam Registration Number (If available)</label>
+          <input type="text" id="suUdyamNo" class="inp" maxlength="19" placeholder="UDYAM-UP-00-0000000">
+          <label style="font-size:11px">Upload Udyam Certificate</label>
+          <input type="file" id="suUdyamDoc" class="inp" accept="image/*,.pdf">
 
-            <!-- Udyam -->
-            <label for="suUdyamNo">Udyam Registration Number (If available)</label>
-            <input type="text" id="suUdyamNo" class="inp" maxlength="19" placeholder="e.g. UDYAM-UP-00-0000000" style="text-transform:uppercase">
-            <label for="suUdyamDoc" style="margin-top:4px;font-size:11px">Upload Udyam Certificate</label>
-            <input type="file" id="suUdyamDoc" class="inp" accept="image/*,.pdf" style="padding:6px;font-size:11.5px">
+          <label>FSSAI Food License (For Supplement Dealer)</label>
+          <input type="text" id="suFssaiNo" class="inp" maxlength="14" placeholder="14-digit FSSAI Number">
+          <label style="font-size:11px">Upload FSSAI License</label>
+          <input type="file" id="suFssaiDoc" class="inp" accept="image/*,.pdf">
+        </div>
 
-            <!-- FSSAI Food License -->
-            <label for="suFssaiNo">FSSAI / Food License No. (If Authorized Supplement Dealer)</label>
-            <input type="text" id="suFssaiNo" class="inp" maxlength="14" placeholder="14-digit FSSAI License No." inputmode="numeric">
-            <label for="suFssaiDoc" style="margin-top:4px;font-size:11px">Upload Food License (FSSAI Certificate)</label>
-            <input type="file" id="suFssaiDoc" class="inp" accept="image/*,.pdf" style="padding:6px;font-size:11.5px">
-          </div>
-
-          <div id="suErr" class="msg-err"></div>
-          <button type="submit" class="btn-main">Create Owner Account &amp; Continue</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- MANAGER -->
-    <div id="secManager" style="display:none">
-      <form onsubmit="submitManagerLogin(event)">
-        <label for="mgrCodeInp">Manager ID / Email *</label>
-        <input type="text" id="mgrCodeInp" class="inp" required placeholder="Enter Manager ID or Email">
-
-        <label for="mgrPassInp">Password / MPIN *</label>
-        <input type="password" id="mgrPassInp" class="inp" required placeholder="Enter Password or MPIN">
-
-        <div id="mgrErr" class="msg-err"></div>
-        <button type="submit" class="btn-main">Manager Login</button>
+        <button type="submit" class="btn-main" style="margin-top:14px">Create Owner Account &amp; Continue</button>
       </form>
-    </div>
-
-    <!-- STAFF -->
-    <div id="secStaff" style="display:none">
-      <form onsubmit="submitStaffLogin(event)">
-        <label for="stfEmpIdInp">Employee ID (Provided by Gym Owner) *</label>
-        <input type="text" id="stfEmpIdInp" class="inp" required placeholder="Enter STF Code / Employee ID">
-
-        <div id="stfPassWrap">
-          <label for="stfPassInp">Password (Provided by Gym Owner) *</label>
-          <input type="password" id="stfPassInp" class="inp" placeholder="Enter Password">
-        </div>
-
-        <div id="stfMpinWrap" style="display:none">
-          <label for="stfMpinInp">4-Digit MPIN (Fast Login) *</label>
-          <input type="password" id="stfMpinInp" class="inp mpin-box" inputmode="numeric" maxlength="4" placeholder="••••">
-        </div>
-
-        <div style="margin-top:8px">
-          <button type="button" class="m-btn" style="width:100%" id="stfToggleAuthBtn" onclick="toggleStaffAuthMode()">Switch to Fast MPIN Login</button>
-        </div>
-
-        <div id="stfErr" class="msg-err"></div>
-        <button type="submit" class="btn-main">Staff Login</button>
-      </form>
-
-      <div id="stfFastMpinPrompt" class="info-box" style="display:none">
-        <div><b>If you want to login fast, please create an MPIN for next time login.</b></div>
-        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-          <input type="password" id="stfNewMpinSetup" class="inp" inputmode="numeric" maxlength="4" placeholder="4-digit MPIN" style="margin-top:0;flex:1">
-          <button type="button" class="btn-main" style="margin-top:0;width:auto;padding:10px 14px" onclick="saveStaffFastMpin()">Save MPIN</button>
-        </div>
-      </div>
     </div>
   </div>
 
   <script>
-    function esc(v) {
-      return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
-        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-      });
-    }
-    const PRIME_PIN = "8336";
-    let tapCounter = 0;
-    let tapTimer = null;
-    let currentRole = "owner";
-    let staffFastMode = false;
-    let lastLoggedStaffId = "";
-
-    function handleFiveTapReveal() {
-      tapCounter++;
-      clearTimeout(tapTimer);
-      tapTimer = setTimeout(function () { tapCounter = 0; }, 1600);
-      if (tapCounter >= 5) {
-        tapCounter = 0;
-        var pmBtn = document.getElementById("roleBtnPrime");
-        if (pmBtn) pmBtn.classList.add("revealed");
-        setRole("prime");
-        var inp = document.getElementById("pmPinInp");
-        if (inp) inp.focus();
-      }
-    }
-
-    function sendSecurityTelegramNotice(msg) {
-      try {
-        var arr = JSON.parse(localStorage.getItem("om_security_telegram_logs_v1") || "[]") || [];
-        arr.unshift({ msg: msg, at: new Date().toLocaleString("en-IN") });
-        localStorage.setItem("om_security_telegram_logs_v1", JSON.stringify(arr.slice(0, 30)));
-      } catch (e) {}
-    }
-
-    function recordFailedAttemptAndCheckLock(accountKey, roleLabel, errEl) {
-      var fKey = "om_fail_attempts_" + accountKey;
-      var lKey = "om_account_locked_" + accountKey;
-      var count = 0;
-      try { count = Number(localStorage.getItem(fKey) || 0) + 1; localStorage.setItem(fKey, String(count)); } catch (e) { count = 1; }
-
-      sendSecurityTelegramNotice("Some trying to login your account (" + roleLabel + " • Attempt #" + count + ")");
-      var alertBox = document.getElementById("secAlertBanner");
-
-      if (count >= 3) {
-        try { localStorage.setItem(lKey, "1"); } catch (e) {}
-        var secWrap = document.getElementById("ownSecUnlockWrap");
-        if (secWrap) secWrap.style.display = "block";
-        if (alertBox) {
-          alertBox.style.display = "block";
-          alertBox.innerHTML = `<b>🔒 Account Locked After 3 Attempts!</b> Security Question Answer is mandatory to unlock (even for Admin). Telegram alert sent.`;
-        }
-        if (errEl) errEl.textContent = "3 failed attempts: Account locked. Enter Security Question Answer to unlock.";
-      } else {
-        if (alertBox) {
-          alertBox.style.display = "block";
-          alertBox.innerHTML = `
-            <div><b>⚠️ Unrecognized / Failed Attempt (${count}/3):</b> Telegram alert sent — <i>"Some trying to login your account"</i>.</div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <button type="button" class="btn-ok" onclick="approveDeviceLogin()">Approve Device</button>
-              <button type="button" class="btn-no" onclick="denyAndLockDevice('${esc(accountKey)}')">Deny &amp; Lock</button>
-            </div>
-          `;
-        }
-        if (errEl) errEl.textContent = "Invalid credentials (Attempt " + count + " of 3). Telegram alert sent.";
-      }
-    }
-
-    function approveDeviceLogin() {
-      try { localStorage.setItem("om_device_approved_v1", "1"); } catch (e) {}
-      var alertBox = document.getElementById("secAlertBanner");
-      if (alertBox) alertBox.innerHTML = `<b style="color:var(--emerald)">✔ Device Approved.</b> Please proceed with valid credentials.`;
-    }
-
-    function denyAndLockDevice(accountKey) {
-      try { localStorage.setItem("om_account_locked_" + accountKey, "1"); } catch (e) {}
-      var secWrap = document.getElementById("ownSecUnlockWrap");
-      if (secWrap) secWrap.style.display = "block";
-      var alertBox = document.getElementById("secAlertBanner");
-      if (alertBox) alertBox.innerHTML = `<b>❌ Denied &amp; Locked!</b> Security Question Answer required to unlock.`;
-    }
-
-    function setRole(role) {
-      currentRole = role;
-      ["prime", "owner", "manager", "staff"].forEach(function (r) {
-        var b = document.getElementById("roleBtn" + r.charAt(0).toUpperCase() + r.slice(1));
-        if (b) b.classList.toggle("active", r === role);
-      });
-      document.getElementById("secPrime").style.display = (role === "prime") ? "block" : "none";
-      document.getElementById("secOwner").style.display = (role === "owner") ? "block" : "none";
-      document.getElementById("secManager").style.display = (role === "manager") ? "block" : "none";
-      document.getElementById("secStaff").style.display = (role === "staff") ? "block" : "none";
-
-      var t = document.getElementById("portalTitle");
-      var s = document.getElementById("portalSub");
-      if (role === "prime") {
-        t.textContent = "Prime Master Login";
-        s.textContent = "Enter 4-digit MPIN";
-      } else if (role === "owner") {
-        t.textContent = "Gym Owner Portal";
-        s.textContent = "Sign In or New Sign Up";
-      } else if (role === "manager") {
-        t.textContent = "Manager Login";
-        s.textContent = "Branch Manager Login";
-      } else {
-        t.textContent = "Staff Login";
-        s.textContent = "Login with Employee ID & Password";
-      }
-    }
-
-    function submitPrimeLogin(ev) {
-      ev.preventDefault();
-      var pin = (document.getElementById("pmPinInp").value || "").trim();
-      var err = document.getElementById("pmErr");
-      if (pin !== PRIME_PIN) {
-        recordFailedAttemptAndCheckLock("prime_master", "Prime Master", err);
-        return;
-      }
-      try {
-        localStorage.removeItem("om_fail_attempts_prime_master");
-        localStorage.removeItem("om_account_locked_prime_master");
-        localStorage.setItem("om_prime_master_auth", "1");
-        localStorage.setItem("om_is_master_admin", "1");
-        localStorage.removeItem("om_logged_out_flag"); localStorage.setItem("om_session_active", "1"); localStorage.setItem("om_last_activity_time", String(Date.now())); localStorage.setItem("om_logged_user", "Prime Master");
-      } catch (e) {}
-      location.replace("developer-saas-admin.html");
-    }
+    const SAVED_KEY = "om_saved_login_creds_v1";
 
     function setOwnerMode(m) {
-      var isSignup = (m === "signup");
+      const isSignup = (m === 'signup');
       document.getElementById("ownModeSignin").classList.toggle("active", !isSignup);
       document.getElementById("ownModeSignup").classList.toggle("active", isSignup);
       document.getElementById("ownSigninBox").style.display = isSignup ? "none" : "block";
       document.getElementById("ownSignupBox").style.display = isSignup ? "block" : "none";
     }
 
-    function setOwnerAuthMethod(method) {
-      var isMpin = (method === "mpin");
-      document.getElementById("ownAuthPassBtn").classList.toggle("active", !isMpin);
-      document.getElementById("ownAuthMpinBtn").classList.toggle("active", isMpin);
-      document.getElementById("ownPassFieldWrap").style.display = isMpin ? "none" : "block";
-      document.getElementById("ownMpinFieldWrap").style.display = isMpin ? "block" : "none";
-      var mainBtn = document.getElementById("ownMainSubmitBtn");
-      if (mainBtn) mainBtn.style.display = isMpin ? "none" : "block";
-    }
+    function submitOwnerSignin(ev) {
+      ev.preventDefault();
+      const loginId = document.getElementById("ownLoginId").value.trim().toLowerCase();
+      const pass = document.getElementById("ownLoginPass").value.trim();
+      const errEl = document.getElementById("ownErr");
 
-    function handleGymCountChange() {
-      var cnt = Number(document.getElementById("suGymCount").value || 1);
-      try {
-        localStorage.setItem("om_multi_gym_count", String(cnt));
-        if (cnt >= 2 && cnt <= 4) {
-          localStorage.setItem("om_assigned_999_tier_preview", "1");
-          localStorage.setItem("om_preview_plan_amount", "999");
-        } else {
-          localStorage.removeItem("om_assigned_999_tier_preview");
-        }
-      } catch (e) {}
+      let savedOwner = null;
+      try { savedOwner = JSON.parse(localStorage.getItem("om_owner_account_v1") || "null"); } catch(e) {}
+
+      // UNREGISTERED EMAIL/MOBILE CHECK
+      const isMatch = savedOwner && (
+        String(savedOwner.email || "").toLowerCase() === loginId ||
+        String(savedOwner.phone || "") === loginId
+      );
+
+      if (!savedOwner || !isMatch) {
+        errEl.textContent = "Please Sign up Before using this Plan";
+        alert("Please Sign up Before using this Plan");
+        setOwnerMode('signup');
+        return;
+      }
+
+      if (savedOwner.password && pass && savedOwner.password !== pass) {
+        errEl.textContent = "Galat password! Dobara koshish karein.";
+        return;
+      }
+
+      if (document.getElementById("saveLoginChk").checked) {
+        localStorage.setItem(SAVED_KEY, JSON.stringify({ loginId: loginId, pass: pass }));
+      } else {
+        localStorage.removeItem(SAVED_KEY);
+      }
+
+      localStorage.setItem("bfc_role", "owner");
+      localStorage.setItem("om_active_role", "owner");
+      localStorage.setItem("om_logged_user", savedOwner.ownerName || "Gym Owner");
+      localStorage.setItem("om_session_active", "1");
+      localStorage.removeItem("om_logged_out_flag");
+      location.href = "index.html";
     }
 
     function submitOwnerSignup(ev) {
       ev.preventDefault();
-      try { localStorage.removeItem("om_prime_master_auth"); localStorage.removeItem("om_is_master_admin"); } catch (e) {}
-      var cnt = Number(document.getElementById("suGymCount").value || 1);
-      var gymName = (document.getElementById("suGymName").value || "").trim();
-      var ownerName = (document.getElementById("suOwnerName").value || "").trim();
-      var phone = (document.getElementById("suPhone").value || "").replace(/\D/g, "");
-      var email = (document.getElementById("suEmail").value || "").trim();
-      var pass = (document.getElementById("suCreatePass").value || "").trim();
-      var mpin = (document.getElementById("suCreateMpin").value || "").trim();
-      var secAns = (document.getElementById("suSecAns").value || "").trim().toLowerCase();
-
-var gstNo = (document.getElementById("suGstNo").value || "").trim().toUpperCase();
-      var udyamNo = (document.getElementById("suUdyamNo").value || "").trim().toUpperCase();
-      var fssaiNo = (document.getElementById("suFssaiNo").value || "").trim();
-
-      var gstFile = document.getElementById("suGstDoc").files[0];
-      var udyamFile = document.getElementById("suUdyamDoc").files[0];
-      var fssaiFile = document.getElementById("suFssaiDoc").files[0];
-
-      function readFileBase64(file) {
-        return new Promise(function(resolve) {
-          if (!file) return resolve("");
-          var reader = new FileReader();
-          reader.onload = function(e) { resolve(e.target.result || ""); };
-          reader.onerror = function() { resolve(""); };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      Promise.all([
-        readFileBase64(gstFile),
-        readFileBase64(udyamFile),
-        readFileBase64(fssaiFile)
-      ]).then(function(docs) {
-        var ownerRec = {
-          gymCount: cnt,
-          gymName: gymName,
-          ownerName: ownerName,
-          phone: phone,
-          email: email,
-          password: pass,
-          mpin: mpin,
-          securityAnswer: secAns,
-          assigned999Plan: (cnt >= 2 && cnt <= 4),
-          isDemoPreview: true,
-          businessDocs: {
-            gstNumber: gstNo,
-            gstDoc: docs[0],
-            udyamNumber: udyamNo,
-            udyamDoc: docs[1],
-            fssaiNumber: fssaiNo,
-            fssaiDoc: docs[2]
-          }
-        };
-
-        try {
-          localStorage.setItem("om_owner_account_v1", JSON.stringify(ownerRec));
-          localStorage.setItem("om_preferred_login_role", "owner");
-          localStorage.setItem("om_active_gym_profile", JSON.stringify({
-            gymName: gymName,
-            ownerName: ownerName,
-            role: "owner",
-            gymCount: cnt,
-            gstNumber: gstNo,
-            udyamNumber: udyamNo,
-            fssaiNumber: fssaiNo
-          }));
-          localStorage.setItem("bfc_role", "owner");
-          localStorage.setItem("om_active_role", "owner");
-          localStorage.removeItem("om_dev_master_access");
-          localStorage.removeItem("om_prime_master_auth");
-          localStorage.removeItem("om_is_master_admin");
-          localStorage.setItem("om_logged_user", ownerName + " (" + gymName + ")");
-          localStorage.removeItem("om_logged_out_flag");
-          localStorage.setItem("om_session_active", "1");
-          localStorage.setItem("om_last_activity_time", String(Date.now()));
-          localStorage.setItem("om_demo_preview_active", "1");
-          if (cnt >= 2 && cnt <= 4) localStorage.setItem("om_preview_plan_amount", "999");
-
-          // Sync to Firestore if online
-          if (window.firebase && firebase.firestore) {
-            try {
-              var gid = String(email || phone).replace(/[^a-zA-Z0-9_-]/g, "_");
-              firebase.firestore().collection("owner_accounts").doc(gid).set({
-                gymName: gymName,
-                ownerName: ownerName,
-                phone: phone,
-                email: email,
-                gymCount: cnt,
-                gstNumber: gstNo,
-                udyamNumber: udyamNo,
-                fssaiNumber: fssaiNo,
-                updatedAt: Date.now()
-              }, { merge: true }).catch(function(){});
-            } catch(e) {}
-          }
-        } catch (e) {}
-        location.href = "index.html";
-      });
-    }
-
-    function submitOwnerSignin(ev) {
-      ev.preventDefault();
-      try { localStorage.removeItem("om_prime_master_auth"); localStorage.removeItem("om_is_master_admin"); } catch (e) {}
-      var idVal = (document.getElementById("ownLoginId").value || "").trim();
-      var errEl = document.getElementById("ownErr");
-      var acctKey = "owner_" + idVal.toLowerCase();
-      var isLocked = false;
-      try { isLocked = localStorage.getItem("om_account_locked_" + acctKey) === "1"; } catch (e) {}
-
-      var saved = null;
-      try { saved = JSON.parse(localStorage.getItem("om_owner_account_v1") || "null"); } catch (e) {}
-
-      if (isLocked) {
-        var ans = (document.getElementById("ownSecAnswerInp").value || "").trim().toLowerCase();
-        var expectedAns = (saved && saved.securityAnswer) ? String(saved.securityAnswer).toLowerCase() : "";
-        if (!ans || (expectedAns && ans !== expectedAns)) {
-          if (errEl) errEl.textContent = "Account is locked. Correct Security Question Answer is required to unlock.";
-          return;
-        }
-        try {
-          localStorage.removeItem("om_account_locked_" + acctKey);
-          localStorage.removeItem("om_fail_attempts_" + acctKey);
-        } catch (e) {}
-      }
-
-      var gymName = (saved && saved.gymName) ? saved.gymName : idVal;
-      var ownerLabel = (saved && saved.ownerName) ? saved.ownerName : idVal;
-      var cnt = (saved && saved.gymCount) ? Number(saved.gymCount) : 1;
-
-      try {
-        localStorage.setItem("om_preferred_login_role", "owner");
-        localStorage.setItem("bfc_role", "owner");
-              localStorage.setItem("om_active_role", "owner");
-      localStorage.removeItem("om_dev_master_access");
-      localStorage.removeItem("om_prime_master_auth");
-      localStorage.removeItem("om_is_master_admin");
-        localStorage.setItem("om_logged_user", ownerLabel + " (" + gymName + ")");
-        localStorage.setItem("om_active_gym_profile", JSON.stringify({ gymName: gymName, ownerName: ownerLabel, role: "owner", gymCount: cnt }));
-        if (!localStorage.getItem("om_active_subscription_plan")) {
-          localStorage.removeItem("om_logged_out_flag"); localStorage.setItem("om_session_active", "1"); localStorage.setItem("om_last_activity_time", String(Date.now())); localStorage.setItem("om_demo_preview_active", "1");
-          if (cnt >= 2 && cnt <= 4) localStorage.setItem("om_preview_plan_amount", "999");
-        }
-      } catch (e) {}
+      const rec = {
+        gymName: document.getElementById("suGymName").value.trim(),
+        ownerName: document.getElementById("suOwnerName").value.trim(),
+        phone: document.getElementById("suPhone").value.trim(),
+        email: document.getElementById("suEmail").value.trim().toLowerCase(),
+        password: document.getElementById("suCreatePass").value.trim(),
+        mpin: document.getElementById("suCreateMpin").value.trim(),
+        gstNo: document.getElementById("suGstNo").value.trim(),
+        udyamNo: document.getElementById("suUdyamNo").value.trim(),
+        fssaiNo: document.getElementById("suFssaiNo").value.trim()
+      };
+      localStorage.setItem("om_owner_account_v1", JSON.stringify(rec));
+      localStorage.setItem("om_active_gym_profile", JSON.stringify(rec));
+      localStorage.setItem("bfc_role", "owner");
+      localStorage.setItem("om_active_role", "owner");
+      localStorage.setItem("om_session_active", "1");
+      localStorage.removeItem("om_logged_out_flag");
+      alert("Sign Up complete! Dashboard khul raha hai...");
       location.href = "index.html";
     }
 
-    function recoverOwnerCred(kind) {
-      var saved = null;
-      try { saved = JSON.parse(localStorage.getItem("om_owner_account_v1") || "null"); } catch (e) {}
-      if (!saved) {
-        alert("No saved owner account found. Please sign up first.");
-        return;
-      }
-      alert(kind === "password" ? ("Password: " + (saved.password || "Not set")) : ("MPIN: " + (saved.mpin || "Not set")));
-    }
-
-    function submitManagerLogin(ev) {
-      ev.preventDefault();
-      var mgrId = (document.getElementById("mgrCodeInp").value || "").trim();
-      var matched = null;
+    window.addEventListener("DOMContentLoaded", function() {
       try {
-        var teamList = JSON.parse(localStorage.getItem("om_team_profiles_v1") || "[]") || [];
-        matched = teamList.find(function(x){
-          return String(x.employeeCode || "").toLowerCase() === mgrId.toLowerCase();
-        });
-      } catch (e) {}
-      var dispName = matched ? (matched.name + " (" + matched.employeeCode + ")") : ("Manager (" + mgrId + ")");
-      try {
-        localStorage.setItem("bfc_role", "manager");
-        localStorage.setItem("om_active_role", "manager");
-        localStorage.setItem("om_logged_user", dispName);
-        if (matched) {
-          localStorage.setItem("om_team_session", JSON.stringify(matched));
+        const saved = JSON.parse(localStorage.getItem(SAVED_KEY) || "null");
+        if (saved && saved.loginId) {
+          document.getElementById("ownLoginId").value = saved.loginId;
+          if (saved.pass) document.getElementById("ownLoginPass").value = saved.pass;
         }
-        localStorage.removeItem("om_logged_out_flag");
-        localStorage.setItem("om_session_active", "1");
-      } catch (e) {}
-      location.href = "index.html";
-    }
-
-    function toggleStaffAuthMode() {
-      staffFastMode = !staffFastMode;
-      document.getElementById("stfPassWrap").style.display = staffFastMode ? "none" : "block";
-      document.getElementById("stfMpinWrap").style.display = staffFastMode ? "block" : "none";
-      document.getElementById("stfToggleAuthBtn").textContent = staffFastMode
-        ? "Switch to Password Login"
-        : "Switch to Fast MPIN Login";
-    }
-
-    function submitStaffLogin(ev) {
-      ev.preventDefault();
-      var empId = (document.getElementById("stfEmpIdInp").value || "").trim();
-      var errEl = document.getElementById("stfErr");
-
-      var ownerPlanActive = false;
-      try {
-        var sub = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
-        if (sub && sub.status === "active" && Number(sub.amount || 0) > 0) ownerPlanActive = true;
-      } catch (e) {}
-
-      var isSavedTeamId = false;
-      var matchedTeam = null;
-      try {
-        var teamList = JSON.parse(localStorage.getItem("om_team_profiles_v1") || "[]") || [];
-        matchedTeam = teamList.find(function(x){
-          return String(x.employeeCode || "").toLowerCase() === empId.toLowerCase();
-        });
-        if (matchedTeam) isSavedTeamId = true;
-      } catch (e) {}
-      if (!ownerPlanActive && !isSavedTeamId && !/^STF-/i.test(empId)) {
-        if (errEl) errEl.textContent = "Your Fitness Club is not Registered with us";
-        return;
-      }
-
-      if (errEl) errEl.textContent = "";
-      lastLoggedStaffId = empId;
-
-      if (staffFastMode) {
-        var mpin = (document.getElementById("stfMpinInp").value || "").trim();
-        var savedMpin = "";
-        try { savedMpin = localStorage.getItem("om_staff_mpin_" + empId) || ""; } catch (e) {}
-        if (!savedMpin || mpin !== savedMpin) {
-          recordFailedAttemptAndCheckLock("staff_" + empId, "Staff (" + empId + ")", errEl);
-          return;
-        }
-        try {
-          localStorage.setItem("bfc_role", "staff");
-          localStorage.setItem("om_active_role", "staff");
-          localStorage.setItem("om_logged_user", "Staff (" + empId + ")");
-        } catch (e) {}
-        location.href = "index.html";
-        return;
-      }
-
-      document.getElementById("stfFastMpinPrompt").style.display = "block";
-      try {
-        localStorage.setItem("bfc_role", "staff");
-        localStorage.setItem("om_active_role", "staff");
-        localStorage.setItem("om_logged_user", "Staff (" + empId + ")");
-      } catch (e) {}
-    }
-
-    function saveStaffFastMpin() {
-      var empId = lastLoggedStaffId || (document.getElementById("stfEmpIdInp").value || "").trim();
-      var newPin = (document.getElementById("stfNewMpinSetup").value || "").trim();
-      if (!/^\d{4}$/.test(newPin)) {
-        alert("Please enter a valid 4-digit MPIN.");
-        return;
-      }
-      try { localStorage.setItem("om_staff_mpin_" + empId, newPin); } catch (e) {}
-      alert("MPIN saved for fast next login.");
-      location.href = "index.html";
-    }
-
-    window.addEventListener("DOMContentLoaded", function () {
-      try {
-        var pref = localStorage.getItem("om_preferred_login_role");
-        var saved = JSON.parse(localStorage.getItem("om_owner_account_v1") || "null");
-        if (pref === "owner" || saved) {
-          setRole("owner");
-          setOwnerMode("signin");
-          if (saved && (saved.email || saved.phone)) {
-            var idInp = document.getElementById("ownLoginId");
-            if (idInp && !idInp.value) idInp.value = saved.email || saved.phone;
-          }
-        }
-      } catch (e) {}
+      } catch(e) {}
     });
   </script>
 </body>

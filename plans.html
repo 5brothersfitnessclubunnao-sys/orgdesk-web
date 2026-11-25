@@ -221,10 +221,7 @@
           <span class="pill">UPI PAYMENT &amp; ACTIVATION</span>
           <h2 id="selectedPlanHeading" style="font-size:19px;font-weight:900;color:#fff">Selected: First Plan — ₹99</h2>
         </div>
-        <label style="display:inline-flex;align-items:center;gap:6px;background:#070d1d;border:1px solid var(--cyan);padding:7px 11px;border-radius:10px;color:var(--cyan);cursor:pointer">
-          <input type="checkbox" id="payOneRupeeTestChk" checked onchange="updateUpiLinks()">
-          <span>₹1 Test Mode (₹1 pay करने पर भी पूरा प्लान ₹99/₹199/₹399/₹499/₹999 एक्टिवेट होगा)</span>
-        </label>
+        
       </div>
 
       <div id="insidePlanFeaturesList" style="margin-bottom:12px"></div>
@@ -238,7 +235,7 @@
           Payee: <b>5 Brother's Fitness Club</b><br>
           Official UPI ID: <b style="color:var(--gold-bright);font-size:15px">9140417259@okbizaxis</b><br>
           Mobile: <b>+91 91404 17259</b><br>
-          Payable Amount Now: <b id="payableNowDisp" style="color:var(--emerald);font-size:16px">₹1 (Test Mode → Activates ₹99 Plan)</b>
+          Payable Amount Now: <b id="payableNowDisp" style="color:var(--emerald);font-size:16px">₹99</b>
         </div>
         <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;align-items:center">
           <a id="upiAppLink" class="btn-upi" href="upi://pay?pa=9140417259@okbizaxis&pn=5%20Brother%27s%20Fitness%20Club&am=1&cu=INR">📲 Pay via UPI App (GPay / PhonePe / Paytm)</a>
@@ -247,18 +244,18 @@
       </div>
 
       <form onsubmit="submitPlanPaymentAndActivate(event)" class="feat-card">
-        <div class="feat-title">📝 Customer Payment &amp; License Activation Form</div>
+        <div class="feat-title">📝 Customer Payment &amp; License Activation Form</div><div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">This is For the payment confirmation after confirmation automatically Licence key will generate</div>
         <div class="grid2">
           <div><label>Customer / Gym Name *</label><input class="inp" id="cpName" required placeholder="Customer / Gym Name"></div>
           <div><label>10-Digit Mobile *</label><input class="inp" id="cpPhone" required maxlength="10" placeholder="10-digit mobile"></div>
         </div>
         <div class="grid2">
-          <div><label>Login Email / ID (for Testing)</label><input class="inp" id="cpEmail" placeholder="customer@example.com"></div>
-          <div><label>Test Password / PIN</label><input class="inp" id="cpPass" placeholder="Test password / PIN"></div>
+          <div><label>Email ID</label><input class="inp" id="cpEmail" placeholder="customer@example.com"></div>
+          
         </div>
         <div class="grid2">
-          <div><label>UTR / Transaction Ref No.</label><input class="inp" id="cpUtr" placeholder="Enter UTR number (optional in ₹1 test)"></div>
-          <div><label>Payment Screenshot (Image)</label><input type="file" accept="image/*" class="inp" id="cpScrFile" onchange="handleScrPick(this)"></div>
+          <div><label>UTR / Transaction Ref No.</label><input class="inp" id="cpUtr" required placeholder="12-digit UTR Number"></div>
+          <div><label>Payment Screenshot (Image)</label><input type="file" accept="image/*" class="inp" id="cpScrFile" required onchange="handleScrPick(this)"></div>
         </div>
         <div id="cpScrPreview" style="margin-top:6px"></div>
         <button type="submit" class="btn-act" style="width:100%;margin-top:12px">✅ Confirm Payment &amp; Activate Plan + Generate License Key</button>
@@ -332,17 +329,14 @@
 
     function updateUpiLinks() {
       var p = PLANS_META[selectedPlanAmt] || PLANS_META[99];
-      var isOneRupee = document.getElementById("payOneRupeeTestChk").checked;
-      var payAmt = isOneRupee ? 1 : p.amount;
+      var payAmt = p.amount;
       var linkEl = document.getElementById("upiAppLink");
       var dispEl = document.getElementById("payableNowDisp");
       if (linkEl) {
         linkEl.href = "upi://pay?pa=" + encodeURIComponent(UPI_ID) + "&pn=" + encodeURIComponent(PAYEE_NAME) + "&am=" + payAmt + "&cu=INR";
       }
       if (dispEl) {
-        dispEl.textContent = isOneRupee
-          ? ("₹1 (Test Payment → Activates Full " + p.name + ")")
-          : ("₹" + p.amount + " (" + p.name + ")");
+        dispEl.textContent = "₹" + p.amount;
       }
     }
 
