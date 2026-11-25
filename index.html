@@ -123,8 +123,9 @@
 
     /* Animated Om Splash */
     #omSplash {
-      display: none; position: fixed; inset: 0; background: radial-gradient(circle at center, #1B2B50 0%, #050813 85%);
-      z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: 34px 18px; text-align: center;
+      display: flex; position: fixed; inset: 0; background: radial-gradient(circle at center, #1B2B50 0%, #050813 85%);
+      z-index: 999999; flex-direction: column; align-items: center; justify-content: center; padding: 34px 18px; text-align: center;
+      transition: opacity 0.5s ease;
     }
     .orbit-box { position: relative; width: 240px; height: 240px; margin: 18px auto; display: flex; align-items: center; justify-content: center; }
     .om-glyph { font-size: 68px; font-weight: 900; color: var(--gold); text-shadow: 0 0 28px rgba(245,166,35,0.8); z-index: 2; }
@@ -159,6 +160,23 @@
 
 </head>
 <body>
+
+  
+<script>
+window.addEventListener("DOMContentLoaded", function() {
+  setTimeout(function() {
+    var s = document.getElementById("omSplash");
+    if (s) {
+      s.style.opacity = "0";
+      setTimeout(function() { s.style.display = "none"; }, 500);
+    }
+  }, 2000);
+});
+function hideSplash() {
+  var s = document.getElementById("omSplash");
+  if (s) { s.style.opacity = "0"; setTimeout(function() { s.style.display = "none"; }, 500); }
+}
+</script>
 
   <div id="omSplash">
     <div>
@@ -202,6 +220,7 @@
 
       </select>
       <button type="button" class="sub-btn" style="background:var(--gold); color:#050813; font-weight:900; padding:7px 14px; border:none; border-radius:8px; cursor:pointer;" onclick="applyBranchFilter()">Submit</button>
+      <button type="button" class="sub-btn" style="background:#111D38; color:var(--cyan); border:1.5px solid var(--cyan); font-weight:800; padding:7px 12px; border-radius:8px; cursor:pointer;" onclick="openMod('modProfile')">👤 Gym Profile</button>
       
       <button type="button" style="background:rgba(239,68,68,0.22); border:1.5px solid #EF4444; color:#FCA5A5; font-size:12px; font-weight:900; padding:7px 16px; border-radius:8px; cursor:pointer; margin-left:6px;" onclick="logoutUser()">🚪 Logout</button>
     </div>
@@ -266,6 +285,13 @@
       <div class="dc-row"><div><div class="dc-num" id="vNetPnl" style="color:var(--emerald)">₹0</div><div class="dc-sub" id="vExpSub">Exp: ₹0 &bull; Net Profit</div></div><span>📉📈</span></div>
     </div>
 
+    
+    <!-- GYM PROFILE & STAMP STUDIO DIRECT ON PAGE 1 -->
+    <div class="d-card" onclick="openMod('modProfile')" style="border-color:var(--gold);background:rgba(245,166,35,0.06)">
+      <div class="dc-top"><span class="dc-lbl" style="color:var(--gold)">🏢 Complete Gym Profile &amp; Stamp Studio</span><span class="dc-pill" style="background:rgba(245,166,35,0.2);color:var(--gold)">Direct Setup</span></div>
+      <div class="dc-row"><div><div class="dc-num" style="color:var(--gold-bright);font-size:18px">Gym Details &amp; Stamp &rarr;</div><div class="dc-sub">Logo, GST, Udyam, Food License &amp; Digital Stamp</div></div><span>🔏</span></div>
+    </div>
+
     <div class="d-card" onclick="openPay('pay')">
       <div class="dc-top"><span class="dc-lbl" style="color:var(--gold)">&#128179; Pay Fees</span><span class="dc-pill">Collect</span></div>
       <div class="dc-row"><div><div class="dc-num" style="color:var(--gold);font-size:18px">Fees lo &rarr;</div><div class="dc-sub">Member fees, receipt &amp; dues</div></div><span>&#128179;</span></div>
@@ -275,7 +301,197 @@
       <div class="dc-row"><div><div class="dc-num" style="color:var(--emerald);font-size:18px">Records &rarr;</div><div class="dc-sub">Kisne kitni fees di, pending &amp; renewal</div></div><span>&#128210;</span></div>
     </div>
 
-    
+    <button type="button" class="big-btn" onclick="switchPage(2)">Next Page &rarr; (Page 2: Trial &amp; Enterprise Control Grid)</button>
+  </section>
+
+  <!-- PAGE 2: 7-DAY TRIAL AT TOP + ENTERPRISE CONTROL GRID -->
+  <section id="page2" class="page-sec">
+    <div class="box-card">
+      <div style="font-size:12px;font-weight:800;color:var(--emerald);">&bull; No Paid Plan Active</div>
+      <div style="font-size:11px;color:var(--muted);margin:3px 0 10px;">Enterprise multi-branch workspace &bull; Cloud sync ready</div>
+      <button type="button" class="big-btn" style="margin-top:0;padding:10px;font-size:12px;" onclick="openMod('modLicense')">Upgrade Plan</button>
+    </div>
+
+    <div class="sec-head">ENTERPRISE CONTROL GRID</div>
+    <div class="grid2">
+      <button type="button" class="tile" onclick="openPay('pay')">&#128179; Pay Fees</button>
+      <button type="button" class="tile om-owner-only" onclick="openPay('records')">&#128210; Fees Records</button>
+      <button type="button" class="tile" onclick="openMod('modMaint')">Maintenance &amp; Bills</button>
+      <button type="button" class="tile" onclick="openMod('modDeptStaff')">Department Staff</button>
+      <button type="button" class="tile" onclick="openMod('modAtt')">Smart Attendance</button>
+      <button type="button" class="tile" onclick="openMod('modRouter')">Unified Data Upload</button>
+      <button type="button" class="tile" onclick="openMod('modSlip')">Salary Slip</button>
+      <button type="button" class="tile" onclick="openMod('modPnl')">5-Point Security &amp; P&amp;L</button>
+      <button type="button" class="tile" onclick="openMod('modEnq')">Audit &amp; Enquiries</button>
+      <button type="button" class="tile" onclick="openMod('modLicense')">Licenses (LIC-OM-OPE2HK)</button>
+      <button type="button" class="tile" onclick="switchPage(1)">&larr; Back to Dashboard</button>
+      <button type="button" class="tile" onclick="openMod('modLicense')">🔑 License</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">🛡️ Code</button>
+      <button type="button" class="tile" onclick="location.href='team-access-admin.html'">👥 Manager / Staff Login &amp; Invite Codes</button>
+      <button type="button" class="tile" onclick="openMod('modPnl')">📁 Branch Collection &amp; Report</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">📁 Staff Codes</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">🆔 View Your Employee Code</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">🪪 View Your Staff Code</button>
+      <button type="button" class="tile" onclick="openMod('modCodes')">🔍 Branch &amp; Staff Codes</button>
+      <button type="button" class="tile" onclick="openMod('modSelfie')">📸 Selfie Gallery</button>
+      <button type="button" class="tile red" onclick="logoutUser()">🚪 Logout</button>
+    </div>
+    <button type="button" class="big-btn sec" onclick="switchPage(3)">Next Page (Page 3: Operations &amp; Maintenance) &rarr;</button>
+  </section>
+
+  <!-- PAGE 3: OPERATIONS, MAINTENANCE, ENQUIRIES, P&L & SALARY -->
+  <section id="page3" class="page-sec">
+    <div class="box-card">
+      <h2 style="font-size:15.5px;color:var(--gold);">Operations &amp; Maintenance Command</h2>
+      <p style="font-size:11.5px;color:var(--muted);margin-top:3px;">Branch light bills, approval/rejection, staff KYC, attendance &amp; P&amp;L</p>
+    </div>
+    <div class="grid2">
+      <button type="button" class="tile" onclick="openMod('modMaint')">⚡ Maintenance &amp; Light Bills<br><span style="font-size:10.5px;color:var(--gold)">Meter, units, PDF &amp; photo</span></button>
+      <button type="button" class="tile" onclick="openMod('modMaint')">✅ Bill Approval / Rejection<br><span style="font-size:10.5px;color:var(--emerald)">Approve/Reject with reason</span></button>
+      <button type="button" class="tile" onclick="openMod('modDeptStaff')">🏢 Department-Wise Staff<br><span style="font-size:10.5px;color:var(--cyan)">Full KYC card &amp; actions</span></button>
+      <button type="button" class="tile" onclick="openMod('modAtt')">📋 Smart Attendance<br><span style="font-size:10.5px;color:var(--purple)">QR, batches &amp; expired fees</span></button>
+      <button type="button" class="tile" onclick="openMod('modEnq')">📞 Walk-In &amp; Lead Enquiries<br><span style="font-size:10.5px;color:var(--cyan)">Call, WhatsApp &amp; age</span></button>
+      <button type="button" class="tile" onclick="openMod('modPnl')">📉📈 P&amp;L Charts &amp; Excel<br><span style="font-size:10.5px;color:var(--gold)">Date filter &amp; chart sheet</span></button>
+      <button type="button" class="tile" onclick="openMod('modSlip')">🧾 Office &amp; HR Salary<br><span style="font-size:10.5px;color:var(--emerald)">Branch/Dept &amp; HR Excel</span></button>
+      <button type="button" class="tile" onclick="openMod('modStaffCheck')">🔎 40-Staff Selfie Check<br><span style="font-size:10.5px;color:var(--rose)">Present / Jao beta Absent</span></button>
+    </div>
+    <button type="button" class="big-btn sec" onclick="switchPage(4)">Next Page (Page 4: Core Modules &amp; Folders) &rarr;</button>
+  </section>
+
+  <!-- PAGE 4: CORE MODULES & FOLDERS (ADMISSION FORM + JOINING FORM + ATTENDANCE & TOOLS) -->
+  <section id="page4" class="page-sec">
+    <div class="sec-head" style="margin-top:0">Page 4: Admission Form, Joining Form &amp; Core Modules</div>
+
+    <div class="grid2" style="margin-bottom:10px">
+      <button type="button" class="sub-btn" id="p4TabAdmBtn" style="background:var(--gold);color:#050813;font-weight:900;padding:10px" onclick="switchP4SubView('adm')">📝 Admission Form (Member)</button>
+      <button type="button" class="sub-btn" id="p4TabJnBtn" style="padding:10px" onclick="switchP4SubView('jn')">🧑‍💼 Joining Form (Staff)</button>
+    </div>
+
+    <!-- SUBVIEW A: ADMISSION FORM (MEMBER) -->
+    <div id="p4SubAdm" class="box-card" style="border-color:var(--gold)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="color:var(--gold);font-size:13.5px">📝 Gym Member Admission Form</b>
+        <button type="button" class="sub-btn" onclick="openMod('modAdmission')">Full Modal</button>
+      </div>
+      <div class="fg">
+        <label>Search Saved Members (Name / Mobile)</label>
+        <input class="fc" id="p4MemSearch" oninput="renderP4Members()" placeholder="Search member name or phone...">
+        <div id="p4MemSearchOut" style="margin-top:6px"></div>
+      </div>
+      <form onsubmit="p4SaveMemberAdmission(event)">
+        <div class="fg"><label>Member Name *</label><input class="fc" id="p4mName" required placeholder="Full Name"></div>
+        <div class="grid2">
+          <div class="fg"><label>Gender *</label><select class="fc" id="p4mGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+          <div class="fg"><label>DOB</label><input type="date" class="fc" id="p4mDob"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Mobile *</label><input type="tel" class="fc" id="p4mPhone" required maxlength="10" placeholder="10-digit mobile"></div>
+          <div class="fg"><label>Plan &amp; Fee (₹) *</label><input class="fc" id="p4mPlan" required value="1 Month - ₹500"></div>
+        </div>
+        <div class="fg"><label>Address</label><input class="fc" id="p4mAddr" placeholder="Member Address"></div>
+        <button type="submit" class="big-btn" style="margin-top:0">Save Member Admission</button>
+      </form>
+    </div>
+
+    <!-- SUBVIEW B: JOINING FORM (STAFF - MANAGER & ADMIN ACCESS) -->
+    <div id="p4SubJn" class="box-card" style="display:none;border-color:var(--cyan)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="color:var(--cyan);font-size:13.5px">🧑‍💼 Staff Joining Form (Manager &amp; Admin Access)</b>
+        <button type="button" class="sub-btn" onclick="openMod('modJoining')">Full Modal</button>
+      </div>
+      <form onsubmit="p4SaveStaffJoining(event)">
+        <div class="grid2">
+          <div class="fg"><label>Staff Name *</label><input class="fc" id="p4jName" required placeholder="Staff Full Name"></div>
+          <div class="fg"><label>Employee ID *</label><input class="fc" id="p4jId" required placeholder="e.g. STF-009"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Branch *</label><select class="fc" id="p4jBr"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
+          <div class="fg"><label>Department *</label><select class="fc" id="p4jDept"><option value="Training">Training</option><option value="Front Desk">Front Desk</option><option value="Cleaning">Cleaning</option><option value="Management">Management</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Role / Post *</label><input class="fc" id="p4jRole" required placeholder="e.g. Trainer / Helper"></div>
+          <div class="fg"><label>Payment Mode *</label><select class="fc" id="p4jMode"><option value="Bank">Bank</option><option value="Cash">Cash</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Salary (₹) *</label><input type="number" class="fc" id="p4jSal" required value="12000"></div>
+          <div class="fg"><label>Mobile *</label><input type="tel" class="fc" id="p4jPhone" required maxlength="10" placeholder="10-digit mobile"></div>
+        </div>
+        <button type="submit" class="big-btn sec" style="margin-top:0">Save Staff Joining Form</button>
+      </form>
+    </div>
+
+    <div class="m-card" onclick="openPay('pay')"><div><div class="m-title">Pay Fees</div><div class="m-sub">Fees lena, receipt &amp; dues</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card om-owner-only" onclick="openPay('records')"><div><div class="m-title">Fees Records</div><div class="m-sub">Manager ne jo fees li uske records</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modAtt')"><div><div class="m-title">Attendance Kiosk</div><div class="m-sub">QR, Morning/Evening batch, Live Staff &amp; Fees Expired list</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modSlip')"><div><div class="m-title">Staff Salary &amp; Payroll</div><div class="m-sub">Branch/Department salary, penalty &amp; HR Excel sheet</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modRouter')"><div><div class="m-title">Upload Gym Data</div><div class="m-sub">Auto-router for CSV / Excel into isolated sections</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <div class="m-card" onclick="openMod('modDeptStaff')"><div><div class="m-title">Admin Portal &amp; Staff Directory</div><div class="m-sub">Staff KYC, share login link &amp; firing reason</div></div><span style="color:var(--gold);font-weight:900">&rarr;</span></div>
+    <button type="button" class="big-btn sec" onclick="switchPage(1)">&larr; Back to Page 1 (Live Dashboard)</button>
+  </section>
+
+  <!-- MODALS -->
+  <div class="modal-ov" id="modExtra">
+    <div class="modal-box" style="max-width:100%;width:100%;height:94vh;padding:0;overflow:hidden">
+      <div class="m-top" style="padding:10px 12px;margin:0"><h3 id="payTitle">&#128179; Pay Fees</h3><button type="button" class="x-btn" onclick="closeMod('modExtra')">&times;</button></div>
+      <iframe id="payFrame" title="Pay Fees" style="width:100%;height:calc(94vh - 52px);border:0;background:#000"></iframe>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="modMaint">
+    <div class="modal-box">
+      <div class="m-top"><h3>🔧 Maintenance, Light Bills &amp; Approval</h3><button type="button" class="x-btn" onclick="closeMod('modMaint')">&times;</button></div>
+      <div class="rec">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <b style="color:var(--gold)">⚡ Branch Light Bill Tracker</b>
+          <button type="button" class="sub-btn" onclick="toggleBillForm()">+ Bill Daalein</button>
+        </div>
+        <select class="fc" id="billBrSel" onchange="renderBillCard()">
+          <option value="001">Branch 001 (₹14,850)</option>
+          <option value="002">Branch 002 (₹50,000)</option>
+          <option value="003">Branch 003 (₹50,000)</option>
+          <option value="004">Branch 004 (₹50,000)</option>
+          <option value="005">Branch 005 (₹12,000)</option>
+        </select>
+        <div id="billCardBox" style="margin-top:8px"></div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+          <button type="button" class="sub-btn" onclick="viewBillCopy('Image')">🖼️ View Image Copy</button>
+          <button type="button" class="sub-btn" onclick="viewBillCopy('PDF')">📄 View / Download PDF</button>
+        </div>
+      </div>
+
+      <div id="newBillForm" class="rec" style="display:none;border-color:var(--gold)">
+        <form onsubmit="submitLightBill(event)">
+          <div class="fg"><label>Current Bill (₹) *</label><input type="number" class="fc" id="nbCur" required value="15000"></div>
+          <div class="fg"><label>Previous Bill (₹) *</label><input type="number" class="fc" id="nbPrev" required value="13200"></div>
+          <div class="fg"><label>Prev Reading (kWh) *</label><input type="number" class="fc" id="nbPR" required value="18420"></div>
+          <div class="fg"><label>Curr Reading (kWh) *</label><input type="number" class="fc" id="nbCR" required value="20185"></div>
+          <div class="fg"><label>Load (kW) *</label><input class="fc" id="nbKw" required value="4 kW"></div>
+          <div class="fg"><label>Bill Photo / Upload *</label><input type="file" class="fc" accept="image/*,.pdf" capture="environment" onchange="showThumb(this,'nbPrevBox')"><div class="preview-row" id="nbPrevBox"></div></div>
+          <button type="submit" class="big-btn" style="margin-top:0">Submit Light Bill (Notify Admin)</button>
+        </form>
+      </div>
+
+      <form class="rec" onsubmit="submitConsumableBill(event)">
+        <b style="color:var(--cyan);display:block;margin-bottom:8px">Consumables / Vendor Bill (Jhadu, Pocha, Colin, Handwash, Sweeper)</b>
+        <div class="fg">
+          <label>Category / Auto-Search *</label>
+          <input list="catOpts" class="fc" id="cCat" required placeholder="Type or select e.g. Handwash, Colin, Sweeper">
+          <datalist id="catOpts">
+            <option value="Handwash">
+            <option value="Colin &amp; Glass Cleaner">
+            <option value="Jhadu &amp; Pocha">
+            <option value="Sweeper / Mali">
+            <option value="Equipment Maintenance">
+          </datalist>
+        </div>
+        <div class="fg"><label>Manual Amount (₹) *</label><input type="number" class="fc" id="cAmt" required value="650"></div>
+        <div class="fg"><label>Bill Photo (Upload or Live Camera) *</label><input type="file" class="fc" accept="image/*,.pdf" capture="environment" onchange="showThumb(this,'cPrevBox')"><div class="preview-row" id="cPrevBox"></div></div>
+        <button type="submit" class="big-btn" style="margin-top:0">Submit Bill for Admin Approval</button>
+      </form>
+
+      <div id="maintApprovalList"></div>
+    </div>
+  </div>
 
   <div class="modal-ov" id="modDeptStaff">
     <div class="modal-box">
@@ -555,9 +771,16 @@
 
   <div class="modal-ov" id="modRouter">
     <div class="modal-box">
-      <div class="m-top"><h3>📥 Auto-Router Upload</h3><button type="button" class="x-btn" onclick="closeMod('modRouter')">&times;</button></div>
-      <input type="file" class="fc" accept=".csv,.xlsx,.xls" onchange="runRouter(event)">
-      <div class="rec" style="margin-top:10px" id="routerOut">Select CSV / Excel file.</div>
+      <div class="m-top"><h3>📥 Upload Gym Data (Auto-Router)</h3><button type="button" class="x-btn" onclick="closeMod('modRouter')">&times;</button></div>
+      <div class="rec" style="font-size:12px;color:var(--muted);margin-bottom:10px">
+        Apna gym data CSV ya Excel file chunein aur <b>Upload Data</b> button par click karein.
+      </div>
+      <div class="fg">
+        <label>Select CSV / Excel File *</label>
+        <input type="file" class="fc" id="routerFileInput" accept=".csv,.xlsx,.xls">
+      </div>
+      <button type="button" class="big-btn" style="margin-top:0" onclick="startDataUpload(event)">📤 Submit &amp; Upload Data</button>
+      <div id="uploadStatusArea" style="margin-top:10px"></div>
     </div>
   </div>
 
@@ -712,23 +935,23 @@
     }
     function closeMod(id) { document.getElementById(id).classList.remove("open"); }
     function logoutUser() {
-  try {
-    localStorage.setItem("om_logged_out_flag", "1");
-    ["om_logged_user","bfc_role","om_active_role","bfc_gid","om_team_session","om_active_subscription_plan",
-     "om_session_active","om_dev_master_access","om_prime_master_auth","om_is_master_admin",
-     "om_org_profile","om_last_org_profile","om_active_gym_profile","om_demo_preview_active"].forEach(function(k){
-      localStorage.removeItem(k);
-    });
-    sessionStorage.clear();
-  } catch(e) {}
-  if (window.firebase && firebase.auth) {
-    firebase.auth().signOut().catch(function(){}).finally(function(){
-      window.location.replace("login.html?logout=1");
-    });
-  } else {
-    window.location.replace("login.html?logout=1");
-  }
-})();
+      try {
+        localStorage.setItem("om_logged_out_flag", "1");
+        ["om_logged_user","bfc_role","om_active_role","bfc_gid","om_team_session","om_active_subscription_plan",
+         "om_session_active","om_dev_master_access","om_prime_master_auth","om_is_master_admin",
+         "om_org_profile","om_last_org_profile","om_active_gym_profile","om_demo_preview_active"].forEach(function(k){
+          localStorage.removeItem(k);
+        });
+        sessionStorage.clear();
+      } catch(e) {}
+      if (window.firebase && firebase.auth) {
+        firebase.auth().signOut().catch(function(){}).finally(function(){
+          location.replace("login.html?logout=1");
+        });
+      } else {
+        location.replace("login.html?logout=1");
+      }
+    }
 </script>
 
 <script>
@@ -824,75 +1047,7 @@
 <script src="plan-bridge.js"></script>
 
 <script src="tenant-access.js"></script>
-<script>
-(function omPreviewAndRoleGuard(){
-  function sess(){ return window.omSecureSession || {}; }
-  function isMaster(){ return !!sess().isMasterAdmin; }
-  function requiredPlan(context){
-    const v=String(context||"").toLowerCase();
-    if(/modrouter|multibranch|centralcommand|cloudbackup/.test(v)) return 999;
-    if(/modmaint|modslip|modpnl|moddeptstaff|staffjoining|salary|payroll|expense|lightbill|vendorbill|kyc/.test(v)) return 399;
-    if(/modenq|modextra|enquir|lead|export|supplement/.test(v)) return 199;
-    if(/modcodes|gps|geofence|audit|security|branchsel/.test(v)) return 499;
-    return 99;
-  }
-  function activePlanTierAmount() {
-    var amt = Number(sess().planAmount || 0);
-    try {
-      var localPlan = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
-      if (localPlan && String(localPlan.status || "active").toLowerCase() === "active") {
-        amt = Math.max(amt, Number(localPlan.amount || 0));
-      }
-    } catch (e) {}
-    return amt;
-  }
-  function hasPaidPlan(required){ return isMaster() || (activePlanTierAmount() >= Number(required||99)); }
-  function showPlanWall(required){
-    const minPlan = Number(required || 99);
-    alert("Please purchase / upgrade to the ₹"+minPlan+" plan before using this feature. Aap feature ka preview dekh sakte hain; final action plan activate hone ke baad chalega.");
-    if (confirm("Plans dekhna chahte hain?")) location.href = "plans.html";
-  }
-  window.omShowPlanWall = showPlanWall;
-  document.addEventListener("submit", function(ev){
-    const form=ev.target;
-    const context=(form && (form.id||"")) + " " + (form && form.closest && form.closest(".modal-ov") ? form.closest(".modal-ov").id : "");
-    const minPlan=requiredPlan(context);
-    if (!hasPaidPlan(minPlan)) { ev.preventDefault(); ev.stopImmediatePropagation(); showPlanWall(minPlan); }
-  }, true);
-  document.addEventListener("click", function(ev){
-    const el = ev.target && ev.target.closest ? ev.target.closest("button,[role=button],input[type=submit]") : null;
-    if (!el || el.disabled) return;
-    const attr = (el.getAttribute("onclick") || "").toLowerCase();
-    const label = (el.innerText || el.value || "").toLowerCase();
-    if (/logout|closemod|switchpage|openmod|plans|back|view|preview|details|language|setlang|toggle|render|search|filter|cancel/.test(attr + " " + label)) return;
-    if (/submit|save|receive|payment|pay\(|markattendance|remove|delete|approve|reject|upload|import|generate|add[a-z]*|create|update|decide|collect|renew|joining|admission|activate|locklic|applyleave|requestleave/.test(attr)) {
-      const context=attr + " " + label + " " + ((el.closest(".modal-ov")||{}).id||"");
-      const minPlan=requiredPlan(context);
-      if (!hasPaidPlan(minPlan)) { ev.preventDefault(); ev.stopImmediatePropagation(); showPlanWall(minPlan); }
-    }
-  }, true);
-  function applyVerifiedRole(){
-    const role = String(sess().role || "").toLowerCase();
-    if (!role) return;
-    const masterBtn=document.getElementById("masterConsoleBtn"); if(masterBtn) masterBtn.style.display=sess().isMasterAdmin?"inline-block":"none";
-    if (role === "staff") {
-      ["tb2","tb3","tb4"].forEach(id => { const e=document.getElementById(id); if(e)e.style.display="none"; });
-      const b=document.getElementById("branchSel"); if(b)b.style.display="none";
-    } else if (role === "manager") {
-      ["tb2","tb3","tb4"].forEach(id => { const e=document.getElementById(id); if(e)e.style.display="none"; });
-      const b=document.getElementById("branchSel"); if(b){b.value=sess().branchId || b.value;b.disabled=true;}
-    }
-    if (!hasPaidPlan() && role === "owner") {
-      const strip=document.querySelector(".live-strip");
-      if(strip) strip.innerHTML='<span class="tag-red">PREVIEW MODE</span><span>Plan purchase ke baad data entry aur operations unlock honge</span><span class="tag-cyan">READ ONLY</span>';
-    }
-    if (typeof syncDashboard === "function") syncDashboard();
-  }
-  document.addEventListener("DOMContentLoaded", applyVerifiedRole);
-  window.addEventListener("om:session-ready", applyVerifiedRole);
-  window.addEventListener("om:stats-ready", function(){ if(typeof syncDashboard==="function") syncDashboard(); });
-})();
-</script>
+
 
 
 <script>
@@ -915,13 +1070,12 @@ window.requestPlanSelection = function(amt, label) {
     // 6. Active plan banner at top when owner has an active plan
     try {
       var planObj = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
-      var pName = String((planObj && (planObj.name || planObj.planName)) || "");
-      if (planObj && planObj.status === "active" && Number(planObj.amount || 0) > 0 && !pName.toLowerCase().includes("master admin") && !document.getElementById("activePlanTopBanner")) {
+      if (planObj && planObj.status === "active" && Number(planObj.amount || 0) > 0 && !document.getElementById("activePlanTopBanner")) {
         var topB = document.createElement("div");
         topB.id = "activePlanTopBanner";
         topB.className = "box-card";
         topB.style.cssText = "border-color:var(--emerald);background:rgba(52,211,153,0.08);margin:8px 14px 0";
-        topB.innerHTML = `<div style="font-size:16px;font-weight:900;color:var(--emerald)">Your Active Plan: ${esc(pName || ("Plan ₹" + planObj.amount))}</div>`;
+        topB.innerHTML = `<div style="font-size:16px;font-weight:900;color:var(--emerald)">Your This Plan: ${esc(planObj.name || ("Plan ₹" + planObj.amount))}</div>`;
         var navEl = document.querySelector("nav.tabs");
         if (navEl && navEl.parentNode) navEl.parentNode.insertBefore(topB, navEl.nextSibling);
       }
@@ -1145,5 +1299,90 @@ window.requestPlanSelection = function(amt, label) {
   });
 })();
 </script>
+
+<script>
+function refreshLiveBoardMembershipStatus() {
+  try {
+    var sub = JSON.parse(localStorage.getItem("om_active_subscription_plan") || "null");
+    var metaEl = document.getElementById("liveBoardMeta");
+    if (!metaEl) return;
+    if (sub && String(sub.status).toLowerCase() === "active" && Number(sub.amount || 0) > 0) {
+      metaEl.innerHTML = '<b style="color:var(--emerald);font-size:12.5px">🟢 Active Membership: ' + (sub.name || ('Plan ₹' + sub.amount)) + '</b> <span style="font-size:11px;color:var(--cyan)">(' + (sub.licenseKey || 'Active') + ')</span>';
+    } else {
+      metaEl.innerHTML = '<b style="color:var(--rose);font-size:12.5px">🔴 No Active Plan</b> &bull; <a href="plans.html" style="color:var(--gold);text-decoration:underline;font-weight:700">Please Upgrade</a>';
+    }
+  } catch(e) {}
+}
+window.addEventListener("DOMContentLoaded", refreshLiveBoardMembershipStatus);
+window.addEventListener("storage", refreshLiveBoardMembershipStatus);
+setInterval(refreshLiveBoardMembershipStatus, 2000);
+</script>
+
+
+<script>
+let uploadTimer = null;
+let lastUploadedHash = localStorage.getItem("om_last_uploaded_data_hash") || "";
+
+function startDataUpload(event) {
+  if (event) event.preventDefault();
+  const fileInput = document.getElementById("routerFileInput");
+  if (!fileInput || !fileInput.files.length) {
+    alert("Kripya CSV/Excel file select karein.");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const fileKey = file.name + "_" + file.size + "_" + file.lastModified;
+
+  // Anti-Duplicate Check
+  if (fileKey === lastUploadedHash) {
+    alert("You are Already Uploaded this File or data");
+    return;
+  }
+
+  const statusEl = document.getElementById("uploadStatusArea");
+  let seconds = 0;
+  statusEl.innerHTML = '<div class="rec" style="border-color:var(--gold)"><span style="color:var(--gold);font-weight:700">⌛ Processing &amp; Uploading: <b id="upSec">00:00</b>... Please wait</span></div>';
+  
+  if (uploadTimer) clearInterval(uploadTimer);
+  uploadTimer = setInterval(() => {
+    seconds++;
+    let s = seconds < 10 ? "0" + seconds : seconds;
+    let m = Math.floor(seconds / 60);
+    let ms = m < 10 ? "0" + m : m;
+    const secEl = document.getElementById("upSec");
+    if (secEl) secEl.innerText = `${ms}:${s}`;
+  }, 1000);
+
+  setTimeout(() => {
+    clearInterval(uploadTimer);
+    localStorage.setItem("om_last_uploaded_data_hash", fileKey);
+    localStorage.setItem("om_last_uploaded_filename", file.name);
+    lastUploadedHash = fileKey;
+    statusEl.innerHTML = `
+      <div class="rec" style="border-color:var(--emerald);background:rgba(52,211,153,0.1)">
+        <b style="color:var(--emerald);font-size:13.5px">✅ Your data has been uploaded</b>
+        <div style="font-size:11.5px;color:var(--muted);margin:4px 0 8px">File: <b>${file.name}</b> (${Math.round(file.size/1024)} KB)</div>
+        <button type="button" class="sub-btn" style="background:#7f1d1d;color:#fee2e2;border:1px solid #ef4444" onclick="deleteLastUploadedData()">
+          🗑️ Del Your Old last data
+        </button>
+      </div>
+    `;
+  }, 3000);
+}
+
+function deleteLastUploadedData() {
+  var lastFile = localStorage.getItem("om_last_uploaded_filename") || "selected file";
+  if (confirm("Kya aap file (" + lastFile + ") ka last data delete karna chahte hain?")) {
+    localStorage.removeItem("om_last_uploaded_data_hash");
+    localStorage.removeItem("om_last_uploaded_filename");
+    lastUploadedHash = "";
+    var fileInput = document.getElementById("routerFileInput");
+    if (fileInput) fileInput.value = "";
+    document.getElementById("uploadStatusArea").innerHTML = '<div class="rec" style="border-color:var(--rose);color:var(--rose)">Last uploaded data successfully removed.</div>';
+  }
+}
+</script>
+
 </body>
 </html>
