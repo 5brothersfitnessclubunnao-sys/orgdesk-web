@@ -202,6 +202,7 @@
 
       </select>
       <button type="button" class="sub-btn" style="background:var(--gold); color:#050813; font-weight:900; padding:7px 14px; border:none; border-radius:8px; cursor:pointer;" onclick="applyBranchFilter()">Submit</button>
+      <button type="button" class="sub-btn" style="background:#111D38; color:var(--cyan); border:1px solid var(--cyan); font-weight:800; padding:7px 11px; border-radius:8px; cursor:pointer;" onclick="openMod('modProfile')">👤 Profile &amp; Stamp</button>
       
       <button type="button" style="background:rgba(239,68,68,0.22); border:1.5px solid #EF4444; color:#FCA5A5; font-size:12px; font-weight:900; padding:7px 16px; border-radius:8px; cursor:pointer; margin-left:6px;" onclick="logoutUser()">🚪 Logout</button>
     </div>
@@ -298,6 +299,7 @@
       <button type="button" class="tile" onclick="openMod('modPnl')">5-Point Security &amp; P&amp;L</button>
       <button type="button" class="tile" onclick="openMod('modEnq')">Audit &amp; Enquiries</button>
       <button type="button" class="tile" onclick="openMod('modLicense')">Licenses (LIC-OM-OPE2HK)</button>
+      <button type="button" class="tile" onclick="openMod('modProfile')">👤 Gym Profile &amp; Stamp Studio</button>
       <button type="button" class="tile" onclick="switchPage(1)">&larr; Back to Dashboard</button>
       <button type="button" class="tile" onclick="openMod('modLicense')">🔑 License</button>
       <button type="button" class="tile" onclick="openMod('modCodes')">🛡️ Code</button>
@@ -797,20 +799,104 @@
   </div>
 
   <div class="modal-ov" id="modAdmission">
-    <div class="modal-box">
-      <div class="m-top"><h3>📝 Admission Form</h3><button type="button" class="x-btn" onclick="closeMod('modAdmission')">&times;</button></div>
+    <div class="modal-box" style="max-width:600px">
+      <div class="m-top"><h3>📝 Admission Form (Plans &amp; Services)</h3><button type="button" class="x-btn" onclick="closeMod('modAdmission')">&times;</button></div>
       <form onsubmit="saveAdmission(event)">
-        <div class="fg"><label>Branch *</label><select class="fc" id="admBr"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
-        <div class="fg"><label>Member Name *</label><input class="fc" id="admNm" required></div>
-        <div class="fg"><label>Base Fee (₹) *</label><input type="number" class="fc" id="admFee" value="1200" oninput="calcAdm()"></div>
-        <div class="rec">
-          <div><label><input type="checkbox" class="s-chk" data-s="Sauna" onchange="calcAdm()"> Sauna</label> <input type="number" class="fc s-p" value="1000" style="width:90px;display:inline" oninput="calcAdm()"></div>
-          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Ice Bath" onchange="calcAdm()"> Ice Bath</label> <input type="number" class="fc s-p" value="1500" style="width:90px;display:inline" oninput="calcAdm()"></div>
-          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Locker" onchange="calcAdm()"> Locker</label> <input type="number" class="fc s-p" value="500" style="width:90px;display:inline" oninput="calcAdm()"></div>
-          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Supplement" onchange="calcAdm()"> Supplement</label> <input type="number" class="fc s-p" value="2500" style="width:90px;display:inline" oninput="calcAdm()"></div>
-          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Cardio/Cycle/Cross" onchange="calcAdm()"> Cardio / Cycle / Cross Trainer</label> <input type="number" class="fc s-p" value="800" style="width:90px;display:inline" oninput="calcAdm()"></div>
-          <div style="margin-top:6px"><label><input type="checkbox" class="s-chk" data-s="Zumba" onchange="calcAdm()"> Zumba</label> <input type="number" class="fc s-p" value="1000" style="width:90px;display:inline" oninput="calcAdm()"></div>
+        <div class="grid2">
+          <div class="fg"><label>Branch *</label><select class="fc" id="admBr"><option value="001">Branch 001</option><option value="002">Branch 002</option><option value="003">Branch 003</option></select></div>
+          <div class="fg"><label>Member Name *</label><input class="fc" id="admNm" required placeholder="Full Name"></div>
         </div>
+        <div class="grid2">
+          <div class="fg"><label>Gender *</label><select class="fc" id="admGender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+          <div class="fg"><label>Mobile *</label><input type="tel" class="fc" id="admPhone" maxlength="10" placeholder="10-digit mobile"></div>
+        </div>
+
+        <!-- Plans with Editable Prices (Owner can customize any time) -->
+        <div class="rec" style="border-color:var(--gold)">
+          <b style="color:var(--gold);display:block;margin-bottom:6px">💳 Select Plan &amp; Customize Price (Kitni baar bhi badal sakte hain)</b>
+          <div style="display:grid;grid-template-columns:1fr 110px;gap:6px;align-items:center;margin-bottom:6px">
+            <label style="margin:0"><input type="radio" name="admPlanOpt" value="1 Month" checked onchange="omSyncPlanPriceInput()"> 1 Month Plan</label>
+            <input type="number" class="fc" id="planPrice_1M" value="1200" oninput="omSyncPlanPriceInput()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 110px;gap:6px;align-items:center;margin-bottom:6px">
+            <label style="margin:0"><input type="radio" name="admPlanOpt" value="3 Months" onchange="omSyncPlanPriceInput()"> 3 Months Plan</label>
+            <input type="number" class="fc" id="planPrice_3M" value="3200" oninput="omSyncPlanPriceInput()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 110px;gap:6px;align-items:center;margin-bottom:6px">
+            <label style="margin:0"><input type="radio" name="admPlanOpt" value="6 Months" onchange="omSyncPlanPriceInput()"> 6 Months Plan</label>
+            <input type="number" class="fc" id="planPrice_6M" value="6000" oninput="omSyncPlanPriceInput()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 110px;gap:6px;align-items:center;margin-bottom:6px">
+            <label style="margin:0"><input type="radio" name="admPlanOpt" value="1 Year" onchange="omSyncPlanPriceInput()"> 1 Year Plan</label>
+            <input type="number" class="fc" id="planPrice_1Y" value="10500" oninput="omSyncPlanPriceInput()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 110px;gap:6px;align-items:center">
+            <label style="margin:0"><input type="radio" name="admPlanOpt" value="Custom" onchange="omSyncPlanPriceInput()"> <input type="text" class="fc" id="customPlanName" value="Custom Plan" style="width:125px;display:inline;padding:4px 7px;font-size:11.5px" oninput="omSyncPlanPriceInput()"></label>
+            <input type="number" class="fc" id="planPrice_Custom" value="1500" oninput="omSyncPlanPriceInput()">
+          </div>
+          <div class="fg" style="margin-top:8px;margin-bottom:0">
+            <label>Active Plan Amount (₹) *</label>
+            <input type="number" class="fc" id="admFee" value="1200" oninput="calcAdm()">
+          </div>
+        </div>
+
+        <!-- All India Gym Services Checkboxes (Only checked services appear on receipt) -->
+        <div class="rec" style="border-color:var(--cyan)">
+          <b style="color:var(--cyan);display:block;margin-bottom:6px">🏋️ All Gym Services (Sirf tick ki gayi services receipt mein aayengi)</b>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Gym / Strength Workout" onchange="calcAdm()"> Gym / Strength Workout</label>
+            <input type="number" class="fc s-p" value="0" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Cardio & Cross Trainer" onchange="calcAdm()"> Cardio &amp; Cross Trainer</label>
+            <input type="number" class="fc s-p" value="800" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Personal Training (PT)" onchange="calcAdm()"> Personal Training (PT)</label>
+            <input type="number" class="fc s-p" value="3000" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Steam Bath" onchange="calcAdm()"> Steam Bath</label>
+            <input type="number" class="fc s-p" value="700" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Sauna" onchange="calcAdm()"> Sauna</label>
+            <input type="number" class="fc s-p" value="1000" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Ice Bath" onchange="calcAdm()"> Ice Bath</label>
+            <input type="number" class="fc s-p" value="1500" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Locker" onchange="calcAdm()"> Locker</label>
+            <input type="number" class="fc s-p" value="500" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Zumba" onchange="calcAdm()"> Zumba</label>
+            <input type="number" class="fc s-p" value="1000" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Yoga & Functional" onchange="calcAdm()"> Yoga &amp; Functional</label>
+            <input type="number" class="fc s-p" value="900" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin-bottom:5px">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Diet & Nutrition" onchange="calcAdm()"> Diet &amp; Nutrition</label>
+            <input type="number" class="fc s-p" value="1200" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center">
+            <label style="margin:0"><input type="checkbox" class="s-chk" data-s="Supplement" onchange="calcAdm()"> Supplement</label>
+            <input type="number" class="fc s-p" value="2500" style="width:85px;padding:5px 8px" oninput="calcAdm()">
+          </div>
+        </div>
+
+        <div class="fg"><label>Payment Mode</label><select class="fc" id="admPay" onchange="document.getElementById('utrWrap').style.display=this.value==='Online'?'block':'none'"><option value="Cash">Cash</option><option value="Online">Online</option></select></div>
+        <div id="utrWrap" style="display:none"><div class="fg"><label>UTR Number *</label><input class="fc" id="admUtr"></div></div>
+        <div class="fg"><label>Photo &amp; Govt ID Upload</label><input type="file" class="fc" multiple accept="image/*,.pdf" onchange="showThumb(this,'admDocsPrev')"><div class="preview-row" id="admDocsPrev"></div></div>
+        <div class="fg"><label>Total Payable (₹)</label><input class="fc" id="admTot" value="1200" readonly style="font-weight:900;color:var(--emerald)"></div>
+        <button type="submit" class="big-btn">Save Admission &amp; Generate Receipt</button>
+      </form>
+    </div>
+  </div>
         <div class="fg"><label>Payment Mode</label><select class="fc" id="admPay" onchange="document.getElementById('utrWrap').style.display=this.value==='Online'?'block':'none'"><option value="Cash">Cash</option><option value="Online">Online</option></select></div>
         <div id="utrWrap" style="display:none"><div class="fg"><label>UTR Number *</label><input class="fc" id="admUtr"></div></div>
         <div class="fg"><label>Photo &amp; Govt ID Upload</label><input type="file" class="fc" multiple accept="image/*,.pdf" onchange="showThumb(this,'admDocsPrev')"><div class="preview-row" id="admDocsPrev"></div></div>
@@ -936,6 +1022,116 @@
       </div>
 
       <div class="rec" style="margin-top:10px" id="licStatusRow">License Status: <b style="color:var(--muted)" id="licDisp">Pending Payment &amp; Approval</b></div>
+    </div>
+  </div>
+
+  
+  <!-- GYM PROFILE & AUTOMATIC STAMP / SIGNATURE STUDIO MODAL -->
+  <div class="modal-ov" id="modProfile">
+    <div class="modal-box" style="max-width:620px">
+      <div class="m-top"><h3>👤 Gym Profile, Logo &amp; Stamp Studio</h3><button type="button" class="x-btn" onclick="closeMod('modProfile')">&times;</button></div>
+
+      <!-- Gym Logo Upload (Supports JPG, PNG, WEBP, etc.) -->
+      <div class="rec" style="border-color:var(--gold)">
+        <b style="color:var(--gold);font-size:13px">🖼️ Gym Logo (JPG, PNG, WEBP &amp; All Formats)</b>
+        <div style="font-size:11px;color:var(--muted);margin:3px 0 8px">Logo upload karein — receipts aur profile par automatic show hoga.</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <img id="profLogoPreview" alt="Gym Logo" style="display:none;width:68px;height:68px;border-radius:10px;object-fit:contain;background:#fff;padding:4px;border:1.5px solid var(--gold)">
+          <input type="file" id="profLogoFile" class="fc" accept="image/*,.svg" style="flex:1" onchange="omHandleLogoUpload(this)">
+        </div>
+      </div>
+
+      <!-- Business & Compliance Details (Optional / Full Profile) -->
+      <div class="rec" style="border-color:var(--cyan)">
+        <b style="color:var(--cyan);font-size:13px">🏢 Gym Business &amp; Compliance Profile (Full Profile)</b>
+        <div class="grid2" style="margin-top:8px">
+          <div class="fg"><label>Gym / Brand Name *</label><input class="fc" id="profGymName" placeholder="Gym Name"></div>
+          <div class="fg"><label>Owner Name *</label><input class="fc" id="profOwnerName" placeholder="Owner Name"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>GST No. (Optional)</label><input class="fc" id="profGstNo" placeholder="e.g. 09AAAAA0000A1Z5"></div>
+          <div class="fg"><label>Upload GST Doc</label><input type="file" class="fc" id="profGstDoc" accept="image/*,.pdf" onchange="omReadDocFile(this,'gst')"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Udyam Certificate No. (Optional)</label><input class="fc" id="profUdyamNo" placeholder="e.g. UDYAM-UP-00-0000000"></div>
+          <div class="fg"><label>Upload Udyam Doc</label><input type="file" class="fc" id="profUdyamDoc" accept="image/*,.pdf" onchange="omReadDocFile(this,'udyam')"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Food License / FSSAI (Supplement Dealer)</label><input class="fc" id="profFssaiNo" placeholder="14-digit FSSAI No."></div>
+          <div class="fg"><label>Upload Food License</label><input type="file" class="fc" id="profFssaiDoc" accept="image/*,.pdf" onchange="omReadDocFile(this,'fssai')"></div>
+        </div>
+        <button type="button" class="big-btn" style="margin-top:4px;padding:10px" onclick="omSaveGymProfile()">Save Gym Profile</button>
+      </div>
+
+      <!-- Automatic Receipt Stamp & Signature Generator -->
+      <div class="rec" style="border-color:var(--emerald)">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <b style="color:var(--emerald);font-size:13.5px">🔏 Automatic Receipt Stamp &amp; Signature Generator</b>
+          <span class="pill-ok" id="stampQuotaBadge">Free Left: 2 / 2</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">
+          Har plan mein <b>2 baar free</b> stamp generate/change kar sakte hain. 3rd time ya usse aage extra pack chahiye toh neeche se ₹30 / ₹50 / ₹100 pack lein.
+        </div>
+
+        <div class="grid2" style="margin-top:10px">
+          <div class="fg">
+            <label>Stamp Shape</label>
+            <select class="fc" id="stampShapeSel" onchange="omRenderStampPreview()">
+              <option value="round">Round Shape (Circular)</option>
+              <option value="square">Square Shape</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Signature Mode</label>
+            <select class="fc" id="sigModeSel" onchange="omToggleSigMode()">
+              <option value="auto">Automatic Generate Your Signature</option>
+              <option value="upload">Please Upload Your Sign</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="sigUploadWrap" class="fg" style="display:none">
+          <label>Upload Your Signature Image</label>
+          <input type="file" class="fc" id="sigUploadFile" accept="image/*" onchange="omHandleSigUpload(this)">
+        </div>
+
+        <!-- Live Preview Area -->
+        <div style="background:#fff;color:#0f172a;border-radius:12px;padding:14px;text-align:center;margin:8px 0">
+          <div style="font-size:10.5px;font-weight:800;color:#475569;margin-bottom:6px">LIVE STAMP PREVIEW</div>
+          <canvas id="stampPreviewCanvas" width="260" height="170" style="max-width:100%;border:1px dashed #cbd5e1;border-radius:8px"></canvas>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+            <button type="button" class="sub-btn" style="background:var(--emerald);color:#050813;font-weight:900" onclick="omFinalizeStamp()">✅ Finalize &amp; Set Default Prompt</button>
+            <button type="button" class="sub-btn" onclick="omDownloadStampPng()">⬇️ Download Stamp</button>
+          </div>
+        </div>
+
+        <div id="stampActiveStatusBox" class="rec" style="margin-top:8px;border-color:var(--gold)">
+          Default Stamp: <b style="color:var(--gold)" id="defaultStampLabel">Not Set Yet</b>
+        </div>
+
+        <!-- Extra Stamp Top-Up Packs (₹30 / ₹50 / ₹100) -->
+        <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)">
+          <b style="color:var(--gold);font-size:12px;display:block;margin-bottom:6px">➕ Extra Stamp Top-Up Packs (3rd Time / Unlimited Changes)</b>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+            <button type="button" class="sub-btn" style="padding:8px 6px;text-align:center" onclick="omOpenStampPackPay(30, 6)">₹30<br><span style="font-size:10px">6 Times</span></button>
+            <button type="button" class="sub-btn" style="padding:8px 6px;text-align:center" onclick="omOpenStampPackPay(50, 10)">₹50<br><span style="font-size:10px">10 Times</span></button>
+            <button type="button" class="sub-btn" style="padding:8px 6px;text-align:center" onclick="omOpenStampPackPay(100, 100)">₹100<br><span style="font-size:10px">100 Times</span></button>
+          </div>
+          <div id="stampPackPayBox" style="display:none;margin-top:10px" class="rec"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIPT VIEWER MODAL (FOR ADMISSION & LOCKED CYCLE FEES RECEIPTS) -->
+  <div class="modal-ov" id="modReceipt">
+    <div class="modal-box" style="max-width:560px">
+      <div class="m-top"><h3>🧾 Official Receipt</h3><button type="button" class="x-btn" onclick="closeMod('modReceipt')">&times;</button></div>
+      <div id="receiptSheetContainer" style="background:#ffffff;color:#0f172a;border-radius:12px;padding:16px;font-size:12px;line-height:1.5"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button type="button" class="big-btn" style="flex:1;margin-top:0" onclick="window.print()">🖨️ Print / Save PDF</button>
+        <button type="button" class="big-btn sec" style="flex:1;margin-top:0" onclick="omShareReceiptWhatsApp()">📲 Share WhatsApp</button>
+      </div>
     </div>
   </div>
 
@@ -1724,6 +1920,583 @@ window.submitInlinePlanPayment = function(ev, planAmt, planLabel) {
       jd.value = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
     }
     p4CalcSalPerDay();
+  });
+})();
+</script>
+
+
+<script>
+(function omCompleteGymStampAdmissionFeesEngine(){
+  const STAMP_STATE_KEY = "om_receipt_stamp_state_v1";
+  const CUSTOM_PLANS_KEY = "om_gym_custom_plan_prices_v1";
+  const CYCLE_LEDGER_KEY = "om_member_billing_cycles_v1";
+
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  function addDaysStr(baseIso, daysToAdd) {
+    var base = baseIso ? new Date(baseIso + "T00:00:00") : new Date();
+    base.setDate(base.getDate() + Number(daysToAdd || 30));
+    return base.getFullYear() + "-" + String(base.getMonth() + 1).padStart(2, "0") + "-" + String(base.getDate()).padStart(2, "0");
+  }
+
+  function getStampState() {
+    try {
+      var def = {
+        freeUsed: 0,
+        freeLimit: 2,
+        extraCredits: 0,
+        shape: "round",
+        sigMode: "auto",
+        customSigData: "",
+        stampDataUrl: "",
+        defaultSet: false,
+        pendingPackReq: null
+      };
+      return Object.assign(def, JSON.parse(localStorage.getItem(STAMP_STATE_KEY) || "{}"));
+    } catch (e) {
+      return { freeUsed: 0, freeLimit: 2, extraCredits: 0, shape: "round", sigMode: "auto", customSigData: "", stampDataUrl: "", defaultSet: false };
+    }
+  }
+
+  function saveStampState(st) {
+    try { localStorage.setItem(STAMP_STATE_KEY, JSON.stringify(st)); } catch (e) {}
+    if (typeof window.omSyncTenantCloud === "function") {
+      window.omSyncTenantCloud(STAMP_STATE_KEY, st);
+    }
+  }
+
+  function getGymProfileData() {
+    try {
+      var act = JSON.parse(localStorage.getItem("om_active_gym_profile") || "{}") || {};
+      var own = JSON.parse(localStorage.getItem("om_owner_account_v1") || "{}") || {};
+      return {
+        gymName: act.gymName || own.gymName || "5 Brother's Fitness Club",
+        ownerName: act.ownerName || own.ownerName || "Gym Owner",
+        logoData: act.logoData || own.logoData || "",
+        gstNumber: act.gstNumber || (own.businessDocs && own.businessDocs.gstNumber) || "",
+        udyamNumber: act.udyamNumber || (own.businessDocs && own.businessDocs.udyamNumber) || "",
+        fssaiNumber: act.fssaiNumber || (own.businessDocs && own.businessDocs.fssaiNumber) || ""
+      };
+    } catch (e) {
+      return { gymName: "5 Brother's Fitness Club", ownerName: "Gym Owner", logoData: "" };
+    }
+  }
+
+  window.omHandleLogoUpload = function(inp) {
+    var f = inp && inp.files && inp.files[0];
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function(ev) {
+      var b64 = ev.target.result || "";
+      var img = document.getElementById("profLogoPreview");
+      if (img && b64) { img.src = b64; img.style.display = "block"; }
+      try {
+        var act = JSON.parse(localStorage.getItem("om_active_gym_profile") || "{}") || {};
+        act.logoData = b64;
+        localStorage.setItem("om_active_gym_profile", JSON.stringify(act));
+        if (typeof window.omSyncTenantCloud === "function") {
+          window.omSyncTenantCloud("om_active_gym_profile", act);
+        }
+      } catch (e) {}
+      omRenderStampPreview();
+    };
+    rd.readAsDataURL(f);
+  };
+
+  window.omReadDocFile = function(inp, tag) {
+    var f = inp && inp.files && inp.files[0];
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function(ev) {
+      try {
+        var own = JSON.parse(localStorage.getItem("om_owner_account_v1") || "{}") || {};
+        own.businessDocs = own.businessDocs || {};
+        own.businessDocs[tag + "Doc"] = ev.target.result || "";
+        localStorage.setItem("om_owner_account_v1", JSON.stringify(own));
+      } catch (e) {}
+    };
+    rd.readAsDataURL(f);
+  };
+
+  window.omSaveGymProfile = function() {
+    var gName = (document.getElementById("profGymName").value || "").trim();
+    var oName = (document.getElementById("profOwnerName").value || "").trim();
+    var gstNo = (document.getElementById("profGstNo").value || "").trim().toUpperCase();
+    var udyamNo = (document.getElementById("profUdyamNo").value || "").trim().toUpperCase();
+    var fssaiNo = (document.getElementById("profFssaiNo").value || "").trim();
+    try {
+      var act = JSON.parse(localStorage.getItem("om_active_gym_profile") || "{}") || {};
+      if (gName) act.gymName = gName;
+      if (oName) act.ownerName = oName;
+      act.gstNumber = gstNo;
+      act.udyamNumber = udyamNo;
+      act.fssaiNumber = fssaiNo;
+      localStorage.setItem("om_active_gym_profile", JSON.stringify(act));
+      if (typeof window.omSyncTenantCloud === "function") {
+        window.omSyncTenantCloud("om_active_gym_profile", act);
+      }
+    } catch (e) {}
+    omRenderStampPreview();
+    alert("Gym Profile save ho gayi hai!");
+  };
+
+  window.omToggleSigMode = function() {
+    var mode = (document.getElementById("sigModeSel") || {}).value || "auto";
+    var wrap = document.getElementById("sigUploadWrap");
+    if (wrap) wrap.style.display = (mode === "upload") ? "block" : "none";
+    var st = getStampState();
+    st.sigMode = mode;
+    saveStampState(st);
+    omRenderStampPreview();
+  };
+
+  window.omHandleSigUpload = function(inp) {
+    var f = inp && inp.files && inp.files[0];
+    if (!f) return;
+    var rd = new FileReader();
+    rd.onload = function(ev) {
+      var st = getStampState();
+      st.customSigData = ev.target.result || "";
+      st.sigMode = "upload";
+      saveStampState(st);
+      omRenderStampPreview();
+    };
+    rd.readAsDataURL(f);
+  };
+
+  window.omRenderStampPreview = function() {
+    var cv = document.getElementById("stampPreviewCanvas");
+    if (!cv) return;
+    var ctx = cv.getContext("2d");
+    var prof = getGymProfileData();
+    var st = getStampState();
+    var shape = (document.getElementById("stampShapeSel") || {}).value || st.shape || "round";
+    var sigMode = (document.getElementById("sigModeSel") || {}).value || st.sigMode || "auto";
+
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.save();
+    ctx.strokeStyle = "#1E3A8A";
+    ctx.fillStyle = "#1E3A8A";
+    ctx.lineWidth = 3;
+
+    var cx = cv.width / 2;
+    var cy = cv.height / 2;
+
+    if (shape === "round") {
+      ctx.beginPath();
+      ctx.arc(cx, cy, 72, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 64, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      ctx.strokeRect(34, 16, cv.width - 68, cv.height - 32);
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(40, 22, cv.width - 80, cv.height - 44);
+    }
+
+    ctx.font = "bold 11px Arial";
+    ctx.textAlign = "center";
+    var gymTxt = String(prof.gymName || "GYM STAMP").toUpperCase().slice(0, 24);
+    ctx.fillText(gymTxt, cx, cy - 22);
+
+    ctx.font = "italic bold 16px 'Brush Script MT', 'Segoe Script', cursive";
+    ctx.fillText(String(prof.ownerName || "Owner Sign").slice(0, 20), cx, cy + 8);
+
+    ctx.font = "bold 9px Arial";
+    ctx.fillStyle = "#0F766E";
+    ctx.fillText("AUTHORIZED • " + (sigMode === "upload" ? "CUSTOM SIGN" : "AUTO SIGN"), cx, cy + 32);
+
+    ctx.restore();
+
+    var badge = document.getElementById("stampQuotaBadge");
+    var freeLeft = Math.max(0, (st.freeLimit || 2) - (st.freeUsed || 0));
+    if (badge) {
+      badge.textContent = "Free Left: " + freeLeft + " / 2" + (st.extraCredits > 0 ? " + Pack: " + st.extraCredits : "");
+    }
+    var defLbl = document.getElementById("defaultStampLabel");
+    if (defLbl) {
+      defLbl.textContent = st.defaultSet ? ("Default Active (" + (st.shape || "round").toUpperCase() + ")") : "Not Set Yet";
+    }
+  };
+
+  window.omFinalizeStamp = function() {
+    var st = getStampState();
+    var freeLeft = Math.max(0, (st.freeLimit || 2) - (st.freeUsed || 0));
+    if (freeLeft > 0) {
+      st.freeUsed = (st.freeUsed || 0) + 1;
+    } else if ((st.extraCredits || 0) > 0) {
+      st.extraCredits = st.extraCredits - 1;
+    } else {
+      alert("Aapki 2 free stamp limit khatam ho chuki hai. Kripya neeche se ₹30 / ₹50 / ₹100 pack select karein.");
+      return;
+    }
+
+    var cv = document.getElementById("stampPreviewCanvas");
+    st.shape = (document.getElementById("stampShapeSel") || {}).value || "round";
+    st.sigMode = (document.getElementById("sigModeSel") || {}).value || "auto";
+    if (cv) {
+      st.stampDataUrl = cv.toDataURL("image/png");
+    }
+
+    var wantDefault = confirm("You want to Default Set this stamp in All your Fees and Admission Receipt?");
+    st.defaultSet = !!wantDefault;
+    saveStampState(st);
+    omRenderStampPreview();
+    alert(wantDefault ? "Stamp finalize ho gaya aur sabhi Fees & Admission Receipts ke liye Default set kar diya gaya hai!" : "Stamp generate ho gaya hai!");
+  };
+
+  window.omDownloadStampPng = function() {
+    var cv = document.getElementById("stampPreviewCanvas");
+    if (!cv) return;
+    var a = document.createElement("a");
+    a.download = "Gym_Receipt_Stamp.png";
+    a.href = cv.toDataURL("image/png");
+    a.click();
+  };
+
+  window.omOpenStampPackPay = function(amt, times) {
+    var box = document.getElementById("stampPackPayBox");
+    if (!box) return;
+    box.style.display = "block";
+    var upiUrl = "upi://pay?pa=9140417259@okbizaxis&pn=" + encodeURIComponent("5 Brother's Fitness Club") + "&am=" + amt + "&cu=INR";
+    box.innerHTML =
+      '<b style="color:var(--gold)">Stamp Pack ₹' + amt + ' (' + times + ' Generations)</b>' +
+      '<div style="font-size:11.5px;margin:4px 0">UPI ID: <b>9140417259@okbizaxis</b></div>' +
+      '<a class="sub-btn" style="display:inline-block;margin-bottom:8px;text-decoration:none;background:var(--emerald);color:#050813;font-weight:900" href="' + upiUrl + '">Pay ₹' + amt + ' via UPI</a>' +
+      '<div class="fg"><label>UTR Number *</label><input class="fc" id="spUtrInp" placeholder="Enter UTR No."></div>' +
+      '<div class="fg"><label>Payment Screenshot</label><input type="file" class="fc" id="spShotInp" accept="image/*"></div>' +
+      '<button type="button" class="big-btn" style="margin-top:0;padding:9px" onclick="omSubmitStampPackReq(' + amt + ',' + times + ')">Submit for Verification</button>' +
+      '<div id="spStatusOut" style="margin-top:6px"></div>';
+  };
+
+  window.omSubmitStampPackReq = function(amt, times) {
+    var utr = (document.getElementById("spUtrInp").value || "").trim() || "Pending UTR";
+    var out = document.getElementById("spStatusOut");
+    var st = getStampState();
+    st.pendingPackReq = { amount: amt, credits: times, utr: utr, status: "PENDING_VERIFICATION", at: new Date().toLocaleString("en-IN") };
+    saveStampState(st);
+
+    try {
+      var list = JSON.parse(localStorage.getItem("om_pending_payment_approvals_v1") || "[]") || [];
+      list.unshift({
+        id: "STAMP-PACK-" + Date.now(),
+        gymName: getGymProfileData().gymName,
+        planName: "Stamp Pack ₹" + amt + " (" + times + " times)",
+        planAmount: amt,
+        paidNow: amt,
+        utr: utr,
+        status: "PENDING_APPROVAL",
+        time: new Date().toLocaleString("en-IN")
+      });
+      localStorage.setItem("om_pending_payment_approvals_v1", JSON.stringify(list));
+    } catch (e) {}
+
+    if (out) {
+      out.innerHTML = '<div style="color:var(--emerald);font-weight:800">Aapki payment verification ke liye sent kar di gayi hai, update hote hi aapko system automatically stamp unlock kar dega.</div>';
+    }
+  };
+
+  // Admission Plan Price Customization & Calculation
+  window.omSyncPlanPriceInput = function() {
+    var selRadio = document.querySelector('input[name="admPlanOpt"]:checked');
+    var pVal = selRadio ? selRadio.value : "1 Month";
+    var priceMap = {
+      "1 Month": Number((document.getElementById("planPrice_1M") || {}).value || 1200),
+      "3 Months": Number((document.getElementById("planPrice_3M") || {}).value || 3200),
+      "6 Months": Number((document.getElementById("planPrice_6M") || {}).value || 6000),
+      "1 Year": Number((document.getElementById("planPrice_1Y") || {}).value || 10500),
+      "Custom": Number((document.getElementById("planPrice_Custom") || {}).value || 1500)
+    };
+    try {
+      localStorage.setItem(CUSTOM_PLANS_KEY, JSON.stringify(priceMap));
+    } catch (e) {}
+    var feeInp = document.getElementById("admFee");
+    if (feeInp) feeInp.value = priceMap[pVal] || 0;
+    calcAdm();
+  };
+
+  window.calcAdm = function() {
+    var base = Number((document.getElementById("admFee") || {}).value || 0);
+    var srvTotal = 0;
+    var chks = document.querySelectorAll("#modAdmission .s-chk");
+    var prices = document.querySelectorAll("#modAdmission .s-p");
+    chks.forEach(function(chk, idx){
+      if (chk.checked) {
+        srvTotal += Number((prices[idx] && prices[idx].value) || 0);
+      }
+    });
+    var totInp = document.getElementById("admTot");
+    if (totInp) totInp.value = String(base + srvTotal);
+  };
+
+  window.saveAdmission = function(ev) {
+    ev.preventDefault();
+    var selRadio = document.querySelector('input[name="admPlanOpt"]:checked');
+    var planKey = selRadio ? selRadio.value : "1 Month";
+    var planTitle = planKey === "Custom" ? ((document.getElementById("customPlanName") || {}).value || "Custom Plan") : planKey;
+    var nm = (document.getElementById("admNm") || {}).value.trim();
+    var br = (document.getElementById("admBr") || {}).value || "001";
+    var gnd = (document.getElementById("admGender") || {}).value || "Male";
+    var ph = (document.getElementById("admPhone") || {}).value.replace(/\D/g, "").slice(-10);
+    var baseFee = Number((document.getElementById("admFee") || {}).value || 0);
+    var payMode = (document.getElementById("admPay") || {}).value || "Cash";
+    var utr = (document.getElementById("admUtr") || {}).value.trim();
+
+    var selectedServices = [];
+    var chks = document.querySelectorAll("#modAdmission .s-chk");
+    var prices = document.querySelectorAll("#modAdmission .s-p");
+    chks.forEach(function(chk, idx){
+      if (chk.checked) {
+        var sp = Number((prices[idx] && prices[idx].value) || 0);
+        selectedServices.push({ name: chk.getAttribute("data-s") || "Service", amount: sp });
+      }
+    });
+
+    var srvSum = selectedServices.reduce(function(acc, s){ return acc + s.amount; }, 0);
+    var totalAmt = baseFee + srvSum;
+
+    var joinDt = todayStr();
+    var daysMap = { "1 Month": 30, "3 Months": 90, "6 Months": 180, "1 Year": 365, "Custom": 30 };
+    var expDt = addDaysStr(joinDt, daysMap[planKey] || 30);
+    var cycleKey = joinDt.slice(0, 7); // YYYY-MM single billing cycle
+
+    var admId = "ADM-" + Date.now().toString().slice(-5);
+    var recNo = "REC-" + joinDt.replace(/-/g, "") + "-" + admId.slice(-4);
+
+    var admRecord = {
+      id: admId,
+      receiptNo: recNo,
+      billingCycle: cycleKey,
+      name: nm,
+      gender: gnd,
+      phone: ph,
+      branch: br,
+      planName: planTitle,
+      baseFee: baseFee,
+      services: selectedServices,
+      totalAmount: totalAmt,
+      payMode: payMode,
+      utr: utr,
+      joiningDate: joinDt,
+      expiryDate: expDt,
+      lastPaymentDate: joinDt
+    };
+
+    var admList = J("om_final_adm_v1", []);
+    admList.unshift(admRecord);
+    W("om_final_adm_v1", admList);
+
+    // Register locked billing cycle record for this member
+    var cycles = [];
+    try { cycles = JSON.parse(localStorage.getItem(CYCLE_LEDGER_KEY) || "[]") || []; } catch (e) {}
+    cycles.unshift({
+      memberName: nm,
+      phone: ph,
+      receiptNo: recNo,
+      billingCycle: cycleKey,
+      joiningDate: joinDt,
+      expiryDate: expDt,
+      lastPaymentDate: joinDt,
+      planName: planTitle,
+      services: selectedServices,
+      amount: totalAmt,
+      paymentCountInCycle: 1,
+      locked: true
+    });
+    try { localStorage.setItem(CYCLE_LEDGER_KEY, JSON.stringify(cycles)); } catch (e) {}
+
+    if (typeof syncDashboard === "function") syncDashboard();
+    closeMod("modAdmission");
+    omOpenReceiptModal(admRecord, "ADMISSION & SERVICES RECEIPT");
+  };
+
+  window.omOpenReceiptModal = function(rec, heading) {
+    var prof = getGymProfileData();
+    var st = getStampState();
+    var box = document.getElementById("receiptSheetContainer");
+    if (!box) return;
+
+    var srvRows = (rec.services && rec.services.length)
+      ? rec.services.map(function(s){ return '<tr><td>' + esc(s.name) + '</td><td style="text-align:right">₹' + Number(s.amount || 0).toLocaleString("en-IN") + '</td></tr>'; }).join("")
+      : '<tr><td colspan="2" style="color:#64748b">No extra add-on services selected</td></tr>';
+
+    var logoHtml = prof.logoData
+      ? '<img src="' + prof.logoData + '" alt="Logo" style="width:52px;height:52px;object-fit:contain;border-radius:8px;border:1px solid #cbd5e1">'
+      : '';
+
+    var stampHtml = (st.defaultSet && st.stampDataUrl)
+      ? '<img src="' + st.stampDataUrl + '" alt="Stamp" style="max-width:130px;max-height:90px;object-fit:contain">'
+      : '<div style="border:1.5px dashed #1e3a8a;color:#1e3a8a;padding:8px 12px;border-radius:8px;font-weight:800;font-size:11px">' + esc(prof.gymName) + '<br><span style="font-style:italic">' + esc(prof.ownerName) + '</span></div>';
+
+    window.__lastGeneratedReceiptText =
+      prof.gymName + " | Receipt: " + (rec.receiptNo || rec.id) +
+      " | Member: " + rec.name +
+      " | Plan: " + (rec.planName || "") + " (₹" + Number(rec.baseFee || rec.totalAmount || 0) + ")" +
+      " | Joining: " + (rec.joiningDate || "-") + " | Expiry: " + (rec.expiryDate || "-") +
+      " | Total Paid: ₹" + Number(rec.totalAmount || rec.amount || 0);
+
+    box.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:10px;margin-bottom:10px">' +
+        '<div style="display:flex;align-items:center;gap:10px">' + logoHtml +
+          '<div><div style="font-size:16px;font-weight:900;color:#0f172a">' + esc(prof.gymName) + '</div>' +
+          '<div style="font-size:11px;color:#475569">' + esc(heading || "OFFICIAL RECEIPT") + ' • <b>PAID</b></div></div>' +
+        '</div>' +
+        '<div style="text-align:right;font-size:11px"><div><b>Receipt No:</b> ' + esc(rec.receiptNo || rec.id) + '</div><div><b>Cycle:</b> ' + esc(rec.billingCycle || "-") + '</div></div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11.5px;margin-bottom:10px">' +
+        '<div><b>Member:</b> ' + esc(rec.name) + '</div>' +
+        '<div><b>Phone:</b> ' + esc(rec.phone || "-") + '</div>' +
+        '<div><b>Joining Date:</b> ' + esc(rec.joiningDate || "-") + '</div>' +
+        '<div><b>Plan Expiry Date:</b> ' + esc(rec.expiryDate || "-") + '</div>' +
+        '<div><b>Last Payment Date:</b> ' + esc(rec.lastPaymentDate || "-") + '</div>' +
+        '<div><b>Mode:</b> ' + esc(rec.payMode || "Cash") + '</div>' +
+      '</div>' +
+      '<table style="width:100%;border-collapse:collapse;margin-bottom:10px;font-size:11.5px">' +
+        '<tr style="background:#f1f5f9"><th style="text-align:left;padding:6px">Plan / Selected Services</th><th style="text-align:right;padding:6px">Amount</th></tr>' +
+        '<tr><td style="padding:6px;border-bottom:1px solid #e2e8f0">Base Plan: <b>' + esc(rec.planName || "Membership") + '</b></td><td style="padding:6px;border-bottom:1px solid #e2e8f0;text-align:right">₹' + Number(rec.baseFee || rec.amount || 0).toLocaleString("en-IN") + '</td></tr>' +
+        srvRows +
+        '<tr style="font-weight:900;background:#ecfdf5"><td style="padding:7px">Total Paid</td><td style="padding:7px;text-align:right">₹' + Number(rec.totalAmount || rec.amount || 0).toLocaleString("en-IN") + '</td></tr>' +
+      '</table>' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:12px;padding-top:8px;border-top:1px dashed #cbd5e1">' +
+        '<div style="font-size:10.5px;color:#475569">Cycle locked until next billing period.</div>' +
+        '<div style="text-align:center">' + stampHtml + '<div style="font-size:10px;font-weight:800;margin-top:3px">Authorized Stamp &amp; Sign</div></div>' +
+      '</div>';
+
+    openMod("modReceipt");
+  };
+
+  window.omShareReceiptWhatsApp = function() {
+    var txt = window.__lastGeneratedReceiptText || "Gym Receipt";
+    window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+  };
+
+  // Locked Monthly Billing Cycle Fees Desk (opens cleanly when clicking Pay Fees or Fees Records)
+  var origOpenPay = window.openPay;
+  window.openPay = function(view) {
+    if (view === "records") {
+      var cycles = [];
+      try { cycles = JSON.parse(localStorage.getItem(CYCLE_LEDGER_KEY) || "[]") || []; } catch (e) {}
+      var recHtml = cycles.length
+        ? cycles.map(function(c, idx){
+            return '<div class="rec" style="border-color:var(--emerald)">' +
+              '<div style="display:flex;justify-content:space-between"><b>' + esc(c.memberName) + '</b><span class="pill-ok">Cycle ' + esc(c.billingCycle) + ' Locked</span></div>' +
+              '<div style="font-size:11px;color:var(--muted);margin-top:3px">Receipt: <b>' + esc(c.receiptNo) + '</b> • Joining: ' + esc(c.joiningDate) + ' • Expiry: ' + esc(c.expiryDate) + '</div>' +
+              '<div style="font-size:11px;color:var(--muted)">Last Payment: ' + esc(c.lastPaymentDate) + ' • Amount: <b>₹' + Number(c.amount || 0) + '</b></div>' +
+              '<div style="margin-top:6px"><button type="button" class="sub-btn" onclick="omViewCycleReceipt(' + idx + ')">View Receipt</button></div>' +
+            '</div>';
+          }).join("")
+        : '<div class="rec">Abhi koi billing cycle record nahi hai.</div>';
+
+      var ov = document.getElementById("modExtra");
+      if (ov) {
+        document.getElementById("payTitle").innerHTML = "&#128210; Fees Records (Locked Billing Cycles)";
+        var box = ov.querySelector(".modal-box");
+        if (box) {
+          box.style.height = "auto";
+          box.style.maxWidth = "560px";
+          box.style.padding = "18px";
+          box.innerHTML =
+            '<div class="m-top"><h3>&#128210; Fees Records (Locked Billing Cycles)</h3><button type="button" class="x-btn" onclick="closeMod('modExtra')">&times;</button></div>' +
+            '<div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">Har member ka billing cycle mahine ke hisaab se lock rehta hai—next cycle aane tak receipt/payment count duplicate nahi hota.</div>' +
+            recHtml;
+        }
+        openMod("modExtra");
+      }
+      return;
+    }
+
+    // For view === "pay": open locked-cycle fees collection modal
+    var ovPay = document.getElementById("modExtra");
+    if (ovPay) {
+      var cyclesList = [];
+      try { cyclesList = JSON.parse(localStorage.getItem(CYCLE_LEDGER_KEY) || "[]") || []; } catch (e) {}
+      var opts = cyclesList.map(function(c, i){
+        return '<option value="' + i + '">' + esc(c.memberName) + ' (' + esc(c.billingCycle) + ' • Exp: ' + esc(c.expiryDate) + ')</option>';
+      }).join("");
+      var boxPay = ovPay.querySelector(".modal-box");
+      if (boxPay) {
+        boxPay.style.height = "auto";
+        boxPay.style.maxWidth = "560px";
+        boxPay.style.padding = "18px";
+        boxPay.innerHTML =
+          '<div class="m-top"><h3>&#128179; Pay Fees (Locked Billing Cycle)</h3><button type="button" class="x-btn" onclick="closeMod('modExtra')">&times;</button></div>' +
+          (opts
+            ? '<form onsubmit="omCollectCycleFees(event)">' +
+                '<div class="fg"><label>Select Member / Active Cycle *</label><select class="fc" id="feeCycleSel" onchange="omShowCycleDetails()">' + opts + '</select></div>' +
+                '<div id="feeCycleLockInfo" class="rec" style="border-color:var(--cyan)"></div>' +
+                '<button type="submit" class="big-btn">Generate / View Cycle Receipt</button>' +
+              '</form>'
+            : '<div class="rec">Pehle Admission Form se member add karein, uske baad uski locked billing cycle yahan dikhegi.</div>');
+      }
+      openMod("modExtra");
+      setTimeout(omShowCycleDetails, 50);
+    }
+  };
+
+  window.omShowCycleDetails = function() {
+    var sel = document.getElementById("feeCycleSel");
+    var info = document.getElementById("feeCycleLockInfo");
+    if (!sel || !info) return;
+    var cyclesList = [];
+    try { cyclesList = JSON.parse(localStorage.getItem(CYCLE_LEDGER_KEY) || "[]") || []; } catch (e) {}
+    var c = cyclesList[Number(sel.value || 0)];
+    if (!c) return;
+    var srvNames = (c.services && c.services.length) ? c.services.map(function(s){ return s.name; }).join(", ") : "Base Plan Only";
+    info.innerHTML =
+      '<div><b>Joining Date (Locked):</b> ' + esc(c.joiningDate) + '</div>' +
+      '<div><b>Plan Expiry Date (Locked):</b> ' + esc(c.expiryDate) + '</div>' +
+      '<div><b>Active Services (Locked):</b> ' + esc(srvNames) + '</div>' +
+      '<div><b>Last Payment Date (Locked):</b> ' + esc(c.lastPaymentDate) + '</div>' +
+      '<div style="margin-top:4px;color:var(--emerald)"><b>Cycle Status:</b> ' + esc(c.billingCycle) + ' • Receipt No. locked until next billing cycle.</div>';
+  };
+
+  window.omCollectCycleFees = function(ev) {
+    ev.preventDefault();
+    var sel = document.getElementById("feeCycleSel");
+    if (!sel) return;
+    omViewCycleReceipt(Number(sel.value || 0));
+  };
+
+  window.omViewCycleReceipt = function(idx) {
+    var cyclesList = [];
+    try { cyclesList = JSON.parse(localStorage.getItem(CYCLE_LEDGER_KEY) || "[]") || []; } catch (e) {}
+    var c = cyclesList[idx];
+    if (!c) return;
+    closeMod("modExtra");
+    omOpenReceiptModal({
+      id: c.receiptNo,
+      receiptNo: c.receiptNo,
+      billingCycle: c.billingCycle,
+      name: c.memberName,
+      phone: c.phone || "-",
+      planName: c.planName,
+      baseFee: c.amount,
+      services: c.services || [],
+      totalAmount: c.amount,
+      joiningDate: c.joiningDate,
+      expiryDate: c.expiryDate,
+      lastPaymentDate: c.lastPaymentDate,
+      payMode: "Cycle Locked"
+    }, "MONTHLY FEES RECEIPT (CYCLE LOCKED)");
+  };
+
+  window.addEventListener("DOMContentLoaded", function(){
+    var prof = getGymProfileData();
+    if (document.getElementById("profGymName")) document.getElementById("profGymName").value = prof.gymName || "";
+    if (document.getElementById("profOwnerName")) document.getElementById("profOwnerName").value = prof.ownerName || "";
+    if (document.getElementById("profGstNo")) document.getElementById("profGstNo").value = prof.gstNumber || "";
+    if (document.getElementById("profUdyamNo")) document.getElementById("profUdyamNo").value = prof.udyamNumber || "";
+    if (document.getElementById("profFssaiNo")) document.getElementById("profFssaiNo").value = prof.fssaiNumber || "";
+    if (prof.logoData && document.getElementById("profLogoPreview")) {
+      document.getElementById("profLogoPreview").src = prof.logoData;
+      document.getElementById("profLogoPreview").style.display = "block";
+    }
+    omRenderStampPreview();
   });
 })();
 </script>

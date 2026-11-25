@@ -161,6 +161,30 @@
           <label for="suSecAns">Security Question Answer (For Lock Recovery) *</label>
           <input type="text" id="suSecAns" class="inp" required placeholder="e.g. Unnao / My first bike">
 
+          
+          <!-- Business & Verification Documents (Optional) -->
+          <div style="margin-top:14px;padding-top:10px;border-top:1px dashed rgba(245,166,35,0.4)">
+            <div style="font-size:12px;font-weight:900;color:var(--gold-bright);margin-bottom:8px">📜 Business Verification & Licenses (Optional)</div>
+
+            <!-- GSTIN -->
+            <label for="suGstNo">GST Number (If available)</label>
+            <input type="text" id="suGstNo" class="inp" maxlength="15" placeholder="e.g. 09AAAAA0000A1Z5" style="text-transform:uppercase">
+            <label for="suGstDoc" style="margin-top:4px;font-size:11px">Upload GST Certificate</label>
+            <input type="file" id="suGstDoc" class="inp" accept="image/*,.pdf" style="padding:6px;font-size:11.5px">
+
+            <!-- Udyam -->
+            <label for="suUdyamNo">Udyam Registration Number (If available)</label>
+            <input type="text" id="suUdyamNo" class="inp" maxlength="19" placeholder="e.g. UDYAM-UP-00-0000000" style="text-transform:uppercase">
+            <label for="suUdyamDoc" style="margin-top:4px;font-size:11px">Upload Udyam Certificate</label>
+            <input type="file" id="suUdyamDoc" class="inp" accept="image/*,.pdf" style="padding:6px;font-size:11.5px">
+
+            <!-- FSSAI Food License -->
+            <label for="suFssaiNo">FSSAI / Food License No. (If Authorized Supplement Dealer)</label>
+            <input type="text" id="suFssaiNo" class="inp" maxlength="14" placeholder="14-digit FSSAI License No." inputmode="numeric">
+            <label for="suFssaiDoc" style="margin-top:4px;font-size:11px">Upload Food License (FSSAI Certificate)</label>
+            <input type="file" id="suFssaiDoc" class="inp" accept="image/*,.pdf" style="padding:6px;font-size:11.5px">
+          </div>
+
           <div id="suErr" class="msg-err"></div>
           <button type="submit" class="btn-main">Create Owner Account &amp; Continue</button>
         </form>
@@ -386,33 +410,94 @@
       var mpin = (document.getElementById("suCreateMpin").value || "").trim();
       var secAns = (document.getElementById("suSecAns").value || "").trim().toLowerCase();
 
-      var ownerRec = {
-        gymCount: cnt,
-        gymName: gymName,
-        ownerName: ownerName,
-        phone: phone,
-        email: email,
-        password: pass,
-        mpin: mpin,
-        securityAnswer: secAns,
-        assigned999Plan: (cnt >= 2 && cnt <= 4),
-        isDemoPreview: true
-      };
+var gstNo = (document.getElementById("suGstNo").value || "").trim().toUpperCase();
+      var udyamNo = (document.getElementById("suUdyamNo").value || "").trim().toUpperCase();
+      var fssaiNo = (document.getElementById("suFssaiNo").value || "").trim();
 
-      try {
-        localStorage.setItem("om_owner_account_v1", JSON.stringify(ownerRec));
-        localStorage.setItem("om_preferred_login_role", "owner");
-        localStorage.setItem("om_active_gym_profile", JSON.stringify({ gymName: gymName, ownerName: ownerName, role: "owner", gymCount: cnt }));
-        localStorage.setItem("bfc_role", "owner");
-              localStorage.setItem("om_active_role", "owner");
-      localStorage.removeItem("om_dev_master_access");
-      localStorage.removeItem("om_prime_master_auth");
-      localStorage.removeItem("om_is_master_admin");
-        localStorage.setItem("om_logged_user", ownerName + " (" + gymName + ")");
-        localStorage.removeItem("om_logged_out_flag"); localStorage.setItem("om_session_active", "1"); localStorage.setItem("om_last_activity_time", String(Date.now())); localStorage.setItem("om_demo_preview_active", "1");
-        if (cnt >= 2 && cnt <= 4) localStorage.setItem("om_preview_plan_amount", "999");
-      } catch (e) {}
-      location.href = "index.html";
+      var gstFile = document.getElementById("suGstDoc").files[0];
+      var udyamFile = document.getElementById("suUdyamDoc").files[0];
+      var fssaiFile = document.getElementById("suFssaiDoc").files[0];
+
+      function readFileBase64(file) {
+        return new Promise(function(resolve) {
+          if (!file) return resolve("");
+          var reader = new FileReader();
+          reader.onload = function(e) { resolve(e.target.result || ""); };
+          reader.onerror = function() { resolve(""); };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      Promise.all([
+        readFileBase64(gstFile),
+        readFileBase64(udyamFile),
+        readFileBase64(fssaiFile)
+      ]).then(function(docs) {
+        var ownerRec = {
+          gymCount: cnt,
+          gymName: gymName,
+          ownerName: ownerName,
+          phone: phone,
+          email: email,
+          password: pass,
+          mpin: mpin,
+          securityAnswer: secAns,
+          assigned999Plan: (cnt >= 2 && cnt <= 4),
+          isDemoPreview: true,
+          businessDocs: {
+            gstNumber: gstNo,
+            gstDoc: docs[0],
+            udyamNumber: udyamNo,
+            udyamDoc: docs[1],
+            fssaiNumber: fssaiNo,
+            fssaiDoc: docs[2]
+          }
+        };
+
+        try {
+          localStorage.setItem("om_owner_account_v1", JSON.stringify(ownerRec));
+          localStorage.setItem("om_preferred_login_role", "owner");
+          localStorage.setItem("om_active_gym_profile", JSON.stringify({
+            gymName: gymName,
+            ownerName: ownerName,
+            role: "owner",
+            gymCount: cnt,
+            gstNumber: gstNo,
+            udyamNumber: udyamNo,
+            fssaiNumber: fssaiNo
+          }));
+          localStorage.setItem("bfc_role", "owner");
+          localStorage.setItem("om_active_role", "owner");
+          localStorage.removeItem("om_dev_master_access");
+          localStorage.removeItem("om_prime_master_auth");
+          localStorage.removeItem("om_is_master_admin");
+          localStorage.setItem("om_logged_user", ownerName + " (" + gymName + ")");
+          localStorage.removeItem("om_logged_out_flag");
+          localStorage.setItem("om_session_active", "1");
+          localStorage.setItem("om_last_activity_time", String(Date.now()));
+          localStorage.setItem("om_demo_preview_active", "1");
+          if (cnt >= 2 && cnt <= 4) localStorage.setItem("om_preview_plan_amount", "999");
+
+          // Sync to Firestore if online
+          if (window.firebase && firebase.firestore) {
+            try {
+              var gid = String(email || phone).replace(/[^a-zA-Z0-9_-]/g, "_");
+              firebase.firestore().collection("owner_accounts").doc(gid).set({
+                gymName: gymName,
+                ownerName: ownerName,
+                phone: phone,
+                email: email,
+                gymCount: cnt,
+                gstNumber: gstNo,
+                udyamNumber: udyamNo,
+                fssaiNumber: fssaiNo,
+                updatedAt: Date.now()
+              }, { merge: true }).catch(function(){});
+            } catch(e) {}
+          }
+        } catch (e) {}
+        location.href = "index.html";
+      });
     }
 
     function submitOwnerSignin(ev) {
