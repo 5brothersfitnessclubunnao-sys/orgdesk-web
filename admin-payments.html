@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Owner / Admin Payment Verification &amp; Total Customers</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
     :root {
@@ -65,17 +66,19 @@
   <script>
     const CFG = {
       apiKey: 'AIzaSyAwuFgPJIUavmRRzkHOz83FUP0EyfZETCU',
-    authDomain: 'orgdesk-fc207.firebaseapp.com',
-    projectId: 'orgdesk-fc207',
-    storageBucket: 'orgdesk-fc207.firebasestorage.app',
-    messagingSenderId: '677150519977',
-    appId: '1:677150519977:web:74de5f488494280d352fb8'
+      authDomain: 'orgdesk-fc207.firebaseapp.com',
+      projectId: 'orgdesk-fc207',
+      storageBucket: 'orgdesk-fc207.firebasestorage.app',
+      messagingSenderId: '677150519977',
+      appId: '1:677150519977:web:74de5f488494280d352fb8'
     };
     let db = null;
+    let auth = null;
     try {
       if (window.firebase) {
         if (!firebase.apps.length) firebase.initializeApp(CFG);
         db = firebase.firestore();
+        auth = firebase.auth();
       }
     } catch (e) {}
 
@@ -93,43 +96,93 @@
       try { localStorage.setItem("om_plan_customers_v1", JSON.stringify(list)); } catch (e) {}
     }
 
+    async function resetCustomerPasswordByEmail(email) {
+      var targetEmail = String(email || "").trim();
+      if (!targetEmail) {
+        alert("Is customer ki Gmail / Email ID darj nahi hai.");
+        return;
+      }
+      if (!auth) {
+        alert("Firebase Auth initialize nahi hai.");
+        return;
+      }
+      try {
+        await auth.sendPasswordResetEmail(targetEmail);
+        alert("Password reset email bhej diya gaya hai: " + targetEmail);
+      } catch (err) {
+        alert("Reset email error: " + ((err && err.message) || err));
+      }
+    }
+
     async function verifyCustomerPayment(idx, approved) {
       var list = getCustList();
       var item = list[idx];
       if (!item) return;
-      item.verifyStatus = approved ? "VERIFIED" : "REJECTED";
+
+      var amt = Number(item.planAmount || 99);
+      var licKey = item.licenseKey || ("LIC-OM-PLAN" + amt + "-" + String(Date.now()).slice(-5));
+      if (licKey.indexOf("PLAN" + amt) === -1) {
+        licKey = "LIC-OM-PLAN" + amt + "-" + licKey.replace(/[^A-Za-z0-9]/g, "").slice(-5);
+      }
+      item.licenseKey = licKey;
+      item.verifyStatus = approved ? "APPROVED" : "REJECTED";
       item.status = approved ? "ACTIVE" : "REJECTED";
       saveCustList(list);
 
       if (approved) {
         var planObj = {
-          name: item.planName,
-          amount: Number(item.planAmount || 99),
+          name: item.planName || ("Plan ₹" + amt),
+          amount: amt,
           paidAmount: Number(item.paidNow || 1),
           status: "active",
-          verifiedByOwner: true,
-          licenseKey: item.licenseKey,
+          verifiedByDeveloper: true,
+          licenseKey: licKey,
           utr: item.utr,
+          customerName: item.name || "",
+          customerEmail: item.email || "",
+          customerPhone: item.phone || "",
           activatedAt: new Date().toISOString()
         };
+
+        var notifObj = {
+          active: true,
+          message: "Your plan has been activated",
+          planName: planObj.name,
+          amount: amt,
+          licenseKey: licKey,
+          customerEmail: item.email || "",
+          activatedAt: new Date().toISOString()
+        };
+
         try {
           localStorage.setItem("om_active_subscription_plan", JSON.stringify(planObj));
-          localStorage.setItem("om_locked_lic", item.licenseKey || "");
+          localStorage.setItem("om_locked_lic", licKey);
+          localStorage.setItem("om_plan_activated_notif_v1", JSON.stringify(notifObj));
         } catch (e) {}
+
         if (db) {
           try {
             var gid = localStorage.getItem("bfc_gid") || "default_gym";
             await db.collection("subscriptions").doc(gid).set(Object.assign({}, planObj, { gymId: gid, updatedAt: Date.now() }), { merge: true });
+            if (item.id) {
+              await db.collection("payment_approvals").doc(item.id).set({
+                verifyStatus: "APPROVED",
+                status: "ACTIVE",
+                licenseKey: licKey,
+                activatedAt: new Date().toISOString()
+              }, { merge: true });
+            }
           } catch (e) {}
         }
+        alert("Your plan has been activated (" + planObj.name + " • Key: " + licKey + ")");
       }
       renderOwnerPayments();
     }
 
     function renderOwnerPayments() {
       var list = getCustList();
-      var verified = list.filter(function (x) { return x.verifyStatus === "VERIFIED"; }).length;
-      var pending = list.filter(function (x) { return x.verifyStatus !== "VERIFIED" && x.verifyStatus !== "REJECTED"; }).length;
+      var verified = list.filter(function (x) { return x.verifyStatus === "APPROVED" || x.verifyStatus === "VERIFIED"; }).length;
+      var pending = list.filter(function (x) { return x.verifyStatus !== "APPROVED" && x.verifyStatus !== "VERIFIED" && x.verifyStatus !== "REJECTED"; }).length;
 
       document.getElementById("stTotalCust").textContent = String(list.length);
       document.getElementById("stVerifiedCust").textContent = String(verified);
@@ -138,9 +191,9 @@
       var alertEl = document.getElementById("ownerAlertText");
       if (list.length > 0) {
         var latest = list[0];
-        alertEl.innerHTML = `<b style="color:var(--gold-bright)">Naya Payment Entry:</b> ${esc(latest.name)} (${esc(latest.phone)}) ne <b>${esc(latest.planName)}</b> ke liye ₹${esc(latest.paidNow)} (UTR: <b>${esc(latest.utr)}</b>) submit kiya hai.`;
+        alertEl.innerHTML = `<b style="color:var(--gold-bright)">Naya Payment Request:</b> ${esc(latest.name)} (${esc(latest.phone)} • ${esc(latest.email || "No Email")}) — <b>${esc(latest.planName)}</b> (UTR: <b>${esc(latest.utr)}</b> • Key: <b>${esc(latest.licenseKey)}</b>)`;
       } else {
-        alertEl.textContent = "Abhi kisi customer ne payment submit nahi kiya hai. Jab customer plans.html se payment karega, yahan turant alert dikhega.";
+        alertEl.textContent = "Abhi kisi customer ne payment submit nahi kiya hai.";
       }
 
       var box = document.getElementById("customerPaymentList");
@@ -150,21 +203,24 @@
       }
 
       box.innerHTML = list.map(function (c, i) {
-        var st = c.verifyStatus || "PENDING";
-        var bCls = st === "VERIFIED" ? "badge-ok" : (st === "REJECTED" ? "badge-no" : "badge-pd");
+        var st = c.verifyStatus || "PENDING_APPROVAL";
+        var isApp = (st === "APPROVED" || st === "VERIFIED");
+        var bCls = isApp ? "badge-ok" : (st === "REJECTED" ? "badge-no" : "badge-pd");
         return `
           <div class="item">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
               <b>${i + 1}. ${esc(c.name)}</b> <span class="${bCls}">${esc(st)}</span>
             </div>
-            <div style="margin-top:6px">📞 Mobile: <b>${esc(c.phone)}</b> • Plan: <b style="color:var(--gold-bright)">${esc(c.planName)}</b> (Paid Now: ₹${esc(c.paidNow)})</div>
-            <div>🔑 License Key: <b>${esc(c.licenseKey)}</b> • Test Login: <b>${esc(c.email)}</b> / Pass: <b>${esc(c.testPass)}</b></div>
+            <div style="margin-top:6px">📞 Mobile: <b>${esc(c.phone)}</b> • ✉️ Gmail: <b>${esc(c.email || "Not provided")}</b></div>
+            <div>💎 Plan: <b style="color:var(--gold-bright)">${esc(c.planName)}</b> (Payable Now: ₹${esc(c.paidNow)})</div>
+            <div>🔑 Plan License Key: <b style="color:var(--cyan)">${esc(c.licenseKey)}</b></div>
             <div>🧾 UTR: <b>${esc(c.utr)}</b> • 📸 Screenshot: <b style="color:${c.hasScreenshot ? "var(--emerald)" : "var(--rose)"}">${c.hasScreenshot ? "Shared (Yes)" : "Not Shared (No)"}</b></div>
             ${c.screenshotData ? `<img src="${c.screenshotData}" alt="Screenshot" style="width:74px;height:74px;border-radius:8px;object-fit:cover;margin-top:8px;border:1px solid var(--emerald)">` : ""}
             <div style="font-size:11px;color:var(--muted);margin-top:4px">${esc(c.time)}</div>
-            <div style="display:flex;gap:8px;margin-top:10px">
-              <button type="button" class="btn btn-ok" onclick="verifyCustomerPayment(${i}, true)">✅ Verify &amp; Approve Payment</button>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <button type="button" class="btn btn-ok" onclick="verifyCustomerPayment(${i}, true)">✅ Approve &amp; Activate Plan</button>
               <button type="button" class="btn btn-no" onclick="verifyCustomerPayment(${i}, false)">✕ Reject</button>
+              <button type="button" class="btn" style="border-color:var(--cyan);color:var(--cyan)" onclick="resetCustomerPasswordByEmail('${esc(c.email || "")}')">🔑 Send Password Reset Email</button>
             </div>
           </div>
         `;
