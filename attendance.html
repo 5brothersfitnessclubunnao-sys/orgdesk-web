@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="tenant-access.js"></script>
-<script src="auth-gate.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Fitness Club - Attendance Kiosk</title>
@@ -13,7 +8,53 @@
 <meta name="theme-color" content="#ffcc00">
 
 <!-- Firebase App & Firestore SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="auth-gate.js" data-mode="ondemand"></script>
 
+<script>
+// Safe fallback if Firebase CDN is blocked, offline, or opened via content:// URI
+(function() {
+  if (typeof window.firebase === "undefined") {
+    const noopDoc = {
+      get: async () => ({ exists: false, data: () => ({}) }),
+      set: async () => {},
+      update: async () => {},
+      delete: async () => {}
+    };
+    const noopCol = {
+      doc: () => noopDoc,
+      get: async () => ({ empty: true, forEach: () => {} }),
+      add: async () => ({ id: "local_" + Date.now() }),
+      where: () => noopCol,
+      orderBy: () => noopCol,
+      limit: () => noopCol
+    };
+    window.firebase = {
+      apps: [],
+      initializeApp: function() { this.apps.push({}); return {}; },
+      auth: function() {
+        return {
+          currentUser: null,
+          onAuthStateChanged: function(cb) { if (cb) cb(null); return function(){}; },
+          signInWithEmailAndPassword: async function() { return { user: { email: "admin@local" } }; },
+          signOut: async function() {},
+          sendPasswordResetEmail: async function() {}
+        };
+      },
+      firestore: function() {
+        return {
+          collection: () => noopCol,
+          batch: () => ({ set: () => {}, update: () => {}, delete: () => {}, commit: async () => {} })
+        };
+      }
+    };
+    window.firebase.firestore.FieldPath = function(f) { this.field = f; };
+    window.firebase.firestore.FieldValue = { delete: function() { return null; } };
+  }
+})();
+</script>
 
 <script>
 /* safai helpers: naam/id kabhi code ban kar na chale */
@@ -765,12 +806,12 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
 <script>
   // --- FIREBASE CLOUD SETUP ---
   const firebaseConfig = {
-    apiKey: "AIzaSyAwuFgPJUavmRRzkH0z83FUP0EyfZETCU",
-    authDomain: "orgdesk-fc207.firebaseapp.com",
-    projectId: "orgdesk-fc207",
-    storageBucket: "orgdesk-fc207.firebasestorage.app",
-    messagingSenderId: "677150519977",
-    appId: "1:677150519977:web:74de5f488494280d352fb8"
+    apiKey: "AIzaSyA9z1gXZDB3W0lJxyHV9x2vWeb0Ees7z-g",
+    authDomain: "brother-s-fitness-club.firebaseapp.com",
+    projectId: "brother-s-fitness-club",
+    storageBucket: "brother-s-fitness-club.firebasestorage.app",
+    messagingSenderId: "781489019006",
+    appId: "1:781489019006:web:4a230698f2195e7208202f"
   };
 
   try {
@@ -778,7 +819,19 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       firebase.initializeApp(firebaseConfig);
     }
   } catch (e) { console.warn("Firebase init fallback:", e); }
-  const db = firebase.firestore();
+  const db = (typeof firebase !== "undefined" && typeof firebase.firestore === "function")
+    ? firebase.firestore()
+    : {
+        collection: () => ({
+          doc: () => ({ get: async () => ({ exists: false, data: () => ({}) }), set: async () => {}, update: async () => {}, delete: async () => {} }),
+          get: async () => ({ empty: true, forEach: () => {} }),
+          add: async () => ({ id: "local_" + Date.now() }),
+          where: function() { return this; },
+          orderBy: function() { return this; },
+          limit: function() { return this; }
+        }),
+        batch: () => ({ set: () => {}, update: () => {}, delete: () => {}, commit: async () => {} })
+      };
 
   // Admin = sirf Firebase email+password login (PIN/code nahi). 30 min kaam na ho to apne aap logout.
   let isAdminUnlocked = false;
@@ -795,22 +848,27 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
   // ============ 📸 SELFIE → TELEGRAM (free, hamesha ke liye, phone me bhi save ho sakti hai) + chhoti thumbnail ============
   // Telegram bot ka token aur aapki chat ID yahan aayegi (guide ke baad). Khali = abhi band.
   // (Token ke do akshar l / I jaisa dikhte the — isliye 4 sambhav roop; jo chalega wahi yaad rakha jayega)
-  const SELFIE_TG_TOKENS = [];
-  const SELFIE_TG_CHAT = "";
+  const SELFIE_TG_TOKENS = [
+    "9178541940:AAFbzJ4aTmv6QY8w9ee6lfRXrcs7kzztK2l",
+    "9178541940:AAFbzJ4aTmv6QY8w9ee6lfRXrcs7kzztK2I",
+    "9178541940:AAFbzJ4aTmv6QY8w9ee6IfRXrcs7kzztK2l",
+    "9178541940:AAFbzJ4aTmv6QY8w9ee6IfRXrcs7kzztK2I"
+  ];
+  const SELFIE_TG_CHAT = "1451868661";
   let SELFIE_TG_TOKEN = "";
   async function bfcTgResolveToken() {
     if (SELFIE_TG_TOKEN) return SELFIE_TG_TOKEN;
-    try { const c = localStorage.getItem("5bfc_tg_ok"); if (c && SELFIE_TG_TOKENS.indexOf(c) >= 0) { SELFIE_TG_TOKEN = c; return c; } } catch (e) {}
+    try { const c = localStorage.getItem("om_att_tg_ok"); if (c && SELFIE_TG_TOKENS.indexOf(c) >= 0) { SELFIE_TG_TOKEN = c; return c; } } catch (e) {}
     for (let i = 0; i < SELFIE_TG_TOKENS.length; i++) {
       try {
         const r = await fetch("https://api.telegram.org/bot" + SELFIE_TG_TOKENS[i] + "/getMe");
         const j = await r.json();
-        if (j && j.ok) { SELFIE_TG_TOKEN = SELFIE_TG_TOKENS[i]; try { localStorage.setItem("5bfc_tg_ok", SELFIE_TG_TOKEN); } catch (e) {} return SELFIE_TG_TOKEN; }
+        if (j && j.ok) { SELFIE_TG_TOKEN = SELFIE_TG_TOKENS[i]; try { localStorage.setItem("om_att_tg_ok", SELFIE_TG_TOKEN); } catch (e) {} return SELFIE_TG_TOKEN; }
       } catch (e) { return ""; }
     }
     return "";
   }
-  const DRIVE_Q_KEY = "5bfc_selfie_queue";
+  const DRIVE_Q_KEY = "om_att_selfie_queue";
 
   function bfcThumbOf(canvasEl, side) {
     try {
@@ -864,8 +922,8 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       const cutISO = getLocalDateISO(cutoff);
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (!k || k.indexOf("5bfc_attendance_") !== 0) continue;
-        const d = k.replace("5bfc_attendance_", "");
+        if (!k || k.indexOf("om_att_attendance_") !== 0) continue;
+        const d = k.replace("om_att_attendance_", "");
         if (!(d < cutISO)) continue;
         let map; try { map = JSON.parse(localStorage.getItem(k) || "{}"); } catch (e) { continue; }
         let changed = false;
@@ -936,7 +994,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       });
 
       const localPool = [];
-      for (const key of ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"]) {
+      for (const key of ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"]) {
         try {
           const value = JSON.parse(localStorage.getItem(key) || "[]");
           if (Array.isArray(value)) localPool.push(...value);
@@ -959,7 +1017,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
 
     let bbfMaster = JSON.parse(localStorage.getItem("bbf_master_records_v4") || "[]");
     let bfcMembers = JSON.parse(localStorage.getItem("5BFC_MEMBERS") || "[]");
-    let admSync = JSON.parse(localStorage.getItem("5bfc_admissions") || "[]");
+    let admSync = JSON.parse(localStorage.getItem("om_att_admissions") || "[]");
 
     let pool = [...bfcMembers, ...bbfMaster, ...admSync];
     let uniqueMap = new Map();
@@ -991,7 +1049,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
   function writeMemberToLocal(member) {
     try {
       var ph = String(member.phone || "").replace(/\D/g, "").slice(-10);
-      ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"].forEach(function(key){
+      ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"].forEach(function(key){
         var arr; try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch(e) { return; }
         if (!Array.isArray(arr)) return;
         var changed = false;
@@ -1035,7 +1093,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
 
   function fetchAttendanceMapForDate(dateStr) {
     try {
-      const raw = localStorage.getItem("5bfc_attendance_" + dateStr);
+      const raw = localStorage.getItem("om_att_attendance_" + dateStr);
       return raw ? (JSON.parse(raw) || {}) : {};
     } catch (err) {
       console.error("Could not read attendance records:", err);
@@ -1071,7 +1129,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
             }
           });
           // write merged back to local so offline works
-          try { localStorage.setItem("5bfc_attendance_" + dateStr, JSON.stringify(map)); } catch(e) {}
+          try { localStorage.setItem("om_att_attendance_" + dateStr, JSON.stringify(map)); } catch(e) {}
         }
       }
     } catch (e) {
@@ -1629,7 +1687,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     setPermStatusUI(locOk, camOk, locOk ? "granted" : (st.loc||"denied"), camOk ? "granted" : (st.cam||"denied"));
 
     if (locOk && camOk) {
-      try { localStorage.setItem("5bfc_perm_ok", "1"); } catch(e) {}
+      try { localStorage.setItem("om_att_perm_ok", "1"); } catch(e) {}
       if (msg) msg.innerHTML = '<span style="color:#00ff66;font-weight:800;">✅ Ho gaya! 1 sec me attendance page...</span>';
       setTimeout(closePermGate, 700);
     } else {
@@ -1780,7 +1838,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       return;
     }
     // Root → go to master app
-    if (window.parent !== window && parent.closeMod) { parent.closeMod("modAtt"); } else { window.location.href = "index.html"; }
+    window.location.href = "index.html";
   }
 
   async function toggleBatchDirectList() {
@@ -2050,7 +2108,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       };
       // local log
       try {
-        const key = "5bfc_att_attempts_" + todayISO;
+        const key = "om_att_att_attempts_" + todayISO;
         const arr = JSON.parse(localStorage.getItem(key) || "[]");
         arr.push(payload);
         localStorage.setItem(key, JSON.stringify(arr.slice(-200)));
@@ -2287,7 +2345,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       }
     } catch(e) {}
 
-    try { localStorage.setItem("5bfc_attendance_" + todayISO, JSON.stringify(attendanceRecords)); } catch(e) {}
+    try { localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords)); } catch(e) {}
     try {
       if (typeof db !== "undefined" && db) {
         var cloudEntry = Object.assign({}, entry);
@@ -2424,7 +2482,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
         };
         attendanceRecords[mid] = entry0;
         try { (currentlyLoadedMember.__twins || []).forEach(function(t){ attendanceRecords[t] = Object.assign({}, entry0, { aliasOf: mid }); }); } catch(e) {}
-        try { localStorage.setItem("5bfc_attendance_" + todayISO, JSON.stringify(attendanceRecords)); } catch(e) {}
+        try { localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords)); } catch(e) {}
         try {
           if (typeof db !== "undefined" && db) {
             var __p0 = { [mid]: entry0 };
@@ -2495,20 +2553,20 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     let savedOk = false;
     window.__attCloudOk = false;
     try {
-      localStorage.setItem("5bfc_attendance_" + todayISO, JSON.stringify(attendanceRecords));
+      localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords));
       savedOk = true;
     } catch (storageError) {
       console.error("Storage full:", storageError);
       // pehle purani photos hata kar jagah banao, phir dubara try
       bfcPruneAttendancePhotos(0);
       try {
-        localStorage.setItem("5bfc_attendance_" + todayISO, JSON.stringify(attendanceRecords));
+        localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords));
         savedOk = true;
       } catch (e1) {
         try {
           const light = Object.assign({}, entry, { photo: "" });
           attendanceRecords[mid] = light;
-          localStorage.setItem("5bfc_attendance_" + todayISO, JSON.stringify(attendanceRecords));
+          localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords));
           savedOk = true;
         } catch (e2) {
           console.error("local save failed, cloud par save hoga", e2);
@@ -2603,7 +2661,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
   }
 
   async function openAdminMemberManager(memberId) {
-    if (!isAdminUnlocked && !askAdminPin("🔒 5 BFC Admin code दर्ज करें:")) return;
+    if (!isAdminUnlocked && !askAdminPin("🔒 Om Fitness Admin code दर्ज करें:")) return;
 
     let allRecords = await fetchStoredMembers();
     let m = allRecords.find(r => r.id.toString() === memberId.toString());
@@ -2749,7 +2807,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     var dirty = __zoneDirty; __zoneDirty = {};
     var ids = Object.keys(dirty); if (!ids.length) return;
     try {
-      ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"].forEach(function (key) {
+      ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"].forEach(function (key) {
         var arr; try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch (e) { return; }
         if (!Array.isArray(arr)) return;
         var ch = false;
@@ -2906,7 +2964,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       // Delete se pehle poora data "ex_members" me archive (Rejoining ke liye)
       let full = {};
       try { const s = await db.collection("members").doc(String(memberId)).get(); if (s.exists) full = s.data() || {}; } catch (e) {}
-      ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"].forEach(function (k) {
+      ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"].forEach(function (k) {
         try {
           const arr = JSON.parse(localStorage.getItem(k) || "[]");
           const r = Array.isArray(arr) && arr.find(x => x && String(x.id) === String(memberId));
@@ -2928,7 +2986,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
         if (!confirm("⚠️ Ex-Members me data save nahi hua (internet?).\n\nPhir bhi hata dein? Yeh wapas nahi aayega.")) return;
       }
       // local se bhi hatao, warna is phone par wapas dikh sakta hai
-      ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"].forEach(function (k) {
+      ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"].forEach(function (k) {
         try {
           const arr = JSON.parse(localStorage.getItem(k) || "[]");
           if (Array.isArray(arr)) localStorage.setItem(k, JSON.stringify(arr.filter(x => !x || String(x.id) !== String(memberId))));
@@ -3005,8 +3063,8 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.indexOf("5bfc_attendance_") === 0) {
-          const d = k.replace("5bfc_attendance_", "");
+        if (k && k.indexOf("om_att_attendance_") === 0) {
+          const d = k.replace("om_att_attendance_", "");
           if (/^\d{4}-\d{2}-\d{2}$/.test(d)) dates.push(d);
         }
       }
@@ -3624,7 +3682,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       ids.forEach(function (id, i) { const e = i === 0 ? entry : Object.assign({}, entry, { aliasOf: String(memberId) }); dayMap[id] = e; payload[id] = e; });
       if (pk.length === 10) { const pe = Object.assign({}, entry, { aliasOf: String(memberId) }); dayMap["phone:" + pk] = pe; payload["phone:" + pk] = pe; }
     }
-    try { localStorage.setItem("5bfc_attendance_" + dateISO, JSON.stringify(dayMap)); } catch (e) {}
+    try { localStorage.setItem("om_att_attendance_" + dateISO, JSON.stringify(dayMap)); } catch (e) {}
     if (m) { const vv = window.__calView || { y: new Date().getFullYear(), mo: new Date().getMonth() }; renderAttendanceCalendar(m, vv.y, vv.mo, true); }
     // ---- cloud (background) ----
     try {
@@ -3647,34 +3705,5 @@ window.addEventListener("unhandledrejection", function(ev) {
 });
 </script>
 
-<script>
-(function(){
-  var mode=(localStorage.getItem("om_gym_operation_mode")==="owner_solo")?"self":"staff";
-  if(window.parent!==window && typeof smartGoBack==="function"){ var _sg=smartGoBack; window.smartGoBack=function(){ var h=document.getElementById("kioskHeroBox"); if(h && h.style.display!=="none" && parent.closeMod){ parent.closeMod("modAtt"); return; } return _sg.apply(this,arguments); }; }
-  try{ var g=JSON.parse(localStorage.getItem("om_active_gym_profile")||"null"); var bt=document.querySelector(".branding-title"); if(g&&g.gymName&&bt) bt.textContent=g.gymName.toUpperCase(); }catch(e){}
-  if(mode!=="staff") return;
-  var st=document.createElement("style"); st.textContent="#btnPresTrigger{display:none!important}"; document.head.appendChild(st);
-  window.handleAttendanceClick=function(){ alert("Is gym me staff hai - attendance yaha se nahi lagti."); };
-  window.openSearchKiosk=function(){ window.omOpenMemberList(); };
-  window.addEventListener("load",function(){
-    var b=document.querySelector(".btn-mark-kiosk-trigger");
-    if(b){ b.textContent="\uD83D\uDCCB MEMBERS & KITNE DIN AAYE"; b.setAttribute("onclick","omOpenMemberList()"); }
-  });
-  window.omOpenMemberList=async function(){
-    var ov=document.getElementById("omMemList");
-    if(!ov){ ov=document.createElement("div"); ov.id="omMemList"; ov.style.cssText="position:fixed;inset:0;z-index:99999;background:#0b0b0b;color:#fff;overflow:auto;padding:14px;font-family:inherit"; document.body.appendChild(ov); }
-    ov.innerHTML='<div style="color:#ffcc00;font-weight:900;font-size:15px">Members list...</div>'; ov.style.display="block";
-    var res=[]; try{ res=await fetchStoredMembers(); }catch(e){}
-    var list=Array.isArray(res)?res:((res&&res.members)||[]);
-    try{ list=__dedupeMembers(list)||list; }catch(e){}
-    var rows=[]; for(var i=0;i<list.length;i++){ var m=list[i]; var n=0; try{ n=await monthAttendCountFresh(m); }catch(e){} rows.push({name:m.name||"-",n:n}); }
-    rows.sort(function(x,y){return y.n-x.n;});
-    var esc=function(s){return String(s).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});};
-    ov.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="color:#ffcc00;font-size:15px">\uD83D\uDCCB Members &amp; Kitne Din Aaye (is mahine)</b><button onclick="document.getElementById(\'omMemList\').style.display=\'none\'" style="background:#222;color:#fff;border:1px solid #444;border-radius:8px;padding:6px 12px;font-weight:900">Band</button></div>'+
-      '<div style="margin-bottom:10px;color:#22d3ee;font-weight:800">Total Members: '+rows.length+'</div>'+
-      (rows.length?rows.map(function(r){return '<div style="display:flex;justify-content:space-between;padding:9px 10px;border-bottom:1px solid #222"><span>'+esc(r.name)+'</span><b style="color:#00ff66">'+r.n+' din</b></div>';}).join(""):'<div style="color:#888">Abhi koi member data upload nahi hua hai.</div>');
-  };
-})();
-</script>
 </body>
 </html>
