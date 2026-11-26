@@ -193,15 +193,6 @@
 
   <!-- PAGE 1: GYM OWNER LIVE OVERVIEW -->
   <section id="page1" class="page-sec active">
-    
-    <!-- QUICK UNIVERSAL DATA UPLOADER BUTTON -->
-    <div style="margin-bottom:10px;">
-      <button type="button" class="big-btn sec" style="margin-top:0;display:flex;align-items:center;justify-content:center;gap:8px;border-color:var(--gold);color:var(--gold);background:#0E1B38;" data-open-modal="modDataUploadRouter">
-        <span style="font-size:16px;">📂</span>
-        <span>Upload Latest / New Data (Universal Excel &amp; CSV Router)</span>
-      </button>
-    </div>
-
     <div class="live-bar">
       <span class="tag-live">&bull; LIVE GYM DESK</span>
       <span id="p1CurrentMonthTxt" style="color:var(--emerald);font-weight:700">Month: November 2026</span>
@@ -479,10 +470,7 @@
         <button type="button" class="big-btn sec" style="margin-top:0;padding:6px;font-size:11px" id="btnFiltAllPresent">✅ All Present List</button>
       </div>
 
-      <div style="display:flex;gap:6px;margin-bottom:10px;">
-        <button type="button" class="big-btn sec" style="margin-top:0;flex:1;" id="btnExportFullAttExcel">Download Attendance Excel</button>
-        <button type="button" class="big-btn" style="margin-top:0;flex:1;padding:8px;font-size:11.5px;" onclick="openModal('modDataUploadRouter')">📂 Upload New Data</button>
-      </div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportFullAttExcel">Download Attendance Excel</button>
       <div id="fullAttRecordsList" style="max-height:44vh;overflow-y:auto"></div>
     </div>
   </div>
@@ -534,10 +522,7 @@
         Filtered Fees Total: <b id="feeFilteredTotal" style="color:var(--gold);font-size:16px">&#8377;0</b><br>
         <span style="font-size:10.5px;color:var(--muted)" id="feeScopeNote">Showing current month records</span>
       </div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;">
-        <button type="button" class="big-btn sec" style="margin-top:0;flex:1;" id="btnExportFeesExcel">Download Fees Excel</button>
-        <button type="button" class="big-btn" style="margin-top:0;flex:1;padding:8px;font-size:11.5px;" onclick="openModal('modDataUploadRouter')">📂 Upload New Data</button>
-      </div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportFeesExcel">Download Fees Excel</button>
       <div id="feesExplorerList"></div>
     </div>
   </div>
@@ -553,10 +538,7 @@
         </div>
         <button type="button" class="big-btn" style="margin-top:6px;padding:7px;font-size:11.5px" id="btnApplyAdmFilter">Filter Admissions</button>
       </div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;">
-        <button type="button" class="big-btn sec" style="margin-top:0;flex:1;" id="btnExportAdmExcel">Download Admissions Excel</button>
-        <button type="button" class="big-btn" style="margin-top:0;flex:1;padding:8px;font-size:11.5px;" onclick="openModal('modDataUploadRouter')">📂 Upload New Data</button>
-      </div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportAdmExcel">Download Admissions Excel</button>
       <div id="admExplorerList"></div>
     </div>
   </div>
@@ -565,10 +547,7 @@
   <div class="modal-ov" id="modStaffDetail">
     <div class="modal-box">
       <div class="m-top"><h3>&#128100; Staff &amp; Trainers Directory</h3><button type="button" class="x-btn" data-close-modal="modStaffDetail">&times;</button></div>
-      <div style="display:flex;gap:6px;margin-bottom:10px;">
-        <button type="button" class="big-btn sec" style="margin-top:0;flex:1;" id="btnExportStaffExcel">Download Staff Excel</button>
-        <button type="button" class="big-btn" style="margin-top:0;flex:1;padding:8px;font-size:11.5px;" onclick="openModal('modDataUploadRouter')">📂 Upload New Data</button>
-      </div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportStaffExcel">Download Staff Excel</button>
       <div id="staffExplorerList"></div>
     </div>
   </div>
@@ -736,61 +715,6 @@
       <div class="m-top"><h3>&#128181; Staff Salary Slip</h3><button type="button" class="x-btn" data-close-modal="modSalarySlip">&times;</button></div>
       <div class="fg"><label>Select Staff</label><select class="fc" id="ssStaffSel"></select></div>
       <div id="salarySlipPreviewCard" class="list-item" style="border-color:var(--gold)">Select a staff member.</div>
-    </div>
-  </div>
-
-  
-  <!-- ================= UNIVERSAL SMART DATA UPLOAD ROUTER MODAL ================= -->
-  <div class="modal-ov" id="modDataUploadRouter">
-    <div class="modal-box" style="max-width:560px;">
-      <div class="m-top">
-        <h3>📂 Universal Smart Data Upload Router</h3>
-        <button type="button" class="x-btn" data-close-modal="modDataUploadRouter">&times;</button>
-      </div>
-
-      <div style="font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:12px;">
-        यहाँ कोई भी Excel (<b style="color:#fff">.xlsx / .xls</b>) या <b style="color:#fff">.csv</b> फाइल डालें। सिस्टम अपने-आप डेटा पहचान कर संबंधित डिपार्टमेंट्स (<span style="color:var(--gold)">Admissions, Staff &amp; Trainers, Attendance, Fees, Expenses</span>) में भेज देगा।
-      </div>
-
-      <!-- Drag & Drop / File Input Box -->
-      <div id="uploadDropZone" style="background:#070E20;border:2px dashed var(--border-hl);border-radius:14px;padding:22px 14px;text-align:center;cursor:pointer;margin-bottom:12px;transition:0.15s;" onclick="document.getElementById('smartExcelFileInput').click()">
-        <div style="font-size:32px;margin-bottom:6px;">📁</div>
-        <b style="color:var(--cyan);font-size:13px;display:block;">यहाँ क्लिक करके Excel / CSV फाइल चुनें</b>
-        <div style="font-size:10.5px;color:var(--muted);margin-top:4px;">Drag and drop or browse from phone / device</div>
-        <input type="file" id="smartExcelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleSmartFileUpload(this)">
-      </div>
-
-      <!-- Action buttons: sample templates -->
-      <div style="display:flex;gap:6px;margin-bottom:12px;">
-        <button type="button" class="big-btn sec" style="margin-top:0;flex:1;padding:7px 8px;font-size:11px;" onclick="downloadSampleMasterExcel()">
-          📥 Download Sample All-in-One Template
-        </button>
-        <button type="button" class="big-btn sec" style="margin-top:0;flex:1;padding:7px 8px;font-size:11px;" onclick="downloadMultiSheetSampleExcel()">
-          📥 Download Multi-Sheet Template
-        </button>
-      </div>
-
-      <!-- Preview Summary Box (shows after parsing) -->
-      <div id="uploadSummaryCard" style="display:none;background:#09142A;border:1.5px solid var(--emerald);border-radius:12px;padding:12px;margin-bottom:12px;">
-        <b style="color:var(--emerald);font-size:12.5px;display:block;margin-bottom:6px;">📊 File Analysis &amp; Auto-Routing Breakdown:</b>
-        <div id="uploadSummaryDetails" style="font-size:11px;color:#eee;line-height:1.6;"></div>
-        
-        <div style="margin-top:10px;display:flex;gap:8px;">
-          <button type="button" class="big-btn" id="btnConfirmSmartUpload" style="margin-top:0;flex:2;background:var(--emerald);color:#000;">
-            ✔ Confirm &amp; Import to Respective Departments
-          </button>
-          <button type="button" class="big-btn sec" style="margin-top:0;flex:1;" onclick="resetSmartUpload()">Cancel</button>
-        </div>
-      </div>
-
-      <!-- How It Works Guide -->
-      <div class="list-item" style="border-color:var(--border-hl);font-size:11px;color:var(--muted);line-height:1.55;">
-        <b style="color:var(--gold);">💡 स्मार्ट ऑटो-रूटिंग कैसे काम करती है?</b><br>
-        1. <b style="color:#fff;">Staff / Trainer:</b> यदि Role/Post में Trainer, Cleaner, Manager, Housekeeping, Electrician या Staff लिखा हो तो वह सीधे <b style="color:var(--cyan)">Staff Directory</b> में वेतन (Salary) सहित दर्ज होगा।<br>
-        2. <b style="color:#fff;">Members / Admissions:</b> यदि Category में General, Student, Cardio, Job Seeker या Member हो तो वह <b style="color:var(--gold)">Admissions</b> में जाएगा।<br>
-        3. <b style="color:#fff;">Attendance:</b> यदि फाइल में Present/Absent या Check-in समय है, तो आज की <b style="color:var(--emerald)">Live Attendance</b> मार्क हो जाएगी।<br>
-        4. <b style="color:#fff;">Fees:</b> यदि Paid/Due या फीस की रकम है, तो <b style="color:var(--purple)">Fees Transactions</b> में जुड़ जाएगी।
-      </div>
     </div>
   </div>
 
@@ -1252,9 +1176,8 @@
         }).join("");
 
         // Page 3 Tools
-        document.getElementById("page3ToolsGrid").innerHTML = page3Tools.map(function (it, idx) {
-          var targetModal = (idx === 6) ? "modDataUploadRouter" : ((idx === 0) ? "modGateFees" : "modGateAdm");
-          return '<button type="button" class="act-tile" data-open-modal="' + targetModal + '">' + it.title + '<span class="hint">' + it.hint + '</span></button>';
+        document.getElementById("page3ToolsGrid").innerHTML = page3Tools.map(function (it) {
+          return '<button type="button" class="act-tile" data-open-modal="modGateAdm">' + it.title + '<span class="hint">' + it.hint + '</span></button>';
         }).join("");
 
         // Page 4 Permission Matrix
@@ -1620,7 +1543,6 @@
           else if (id === 5) openModal("modSalarySlip");
           else if (id === 6 || id === 7) openModal("modGateFees");
           else if (id === 8) openModal("modSuppDetail");
-          else if (id === 12) openModal("modDataUploadRouter");
           else if (id === 14 || id === 15) exportToExcel(loadData().transactions, "Transactions", "om_erp_complete_export");
           else showPageTab(3);
           return;
@@ -1645,387 +1567,6 @@
           saveData(d);
         }
       });
-
-      
-      // ================= UNIVERSAL SMART DATA UPLOADER & ROUTER =================
-      var parsedUploadData = null;
-
-      window.handleSmartFileUpload = function (input) {
-        var file = input.files && input.files[0];
-        if (!file) return;
-        if (typeof XLSX === "undefined") {
-          alert("Excel parsing library is not loaded. Please ensure you are connected or check script.");
-          return;
-        }
-
-        var reader = new FileReader();
-        reader.onload = function (e) {
-          try {
-            var data = new Uint8Array(e.target.result);
-            var workbook = XLSX.read(data, { type: "array" });
-            parseWorkbookAndRoute(workbook, file.name);
-          } catch (err) {
-            console.error(err);
-            alert("Error reading file: " + (err.message || err));
-          }
-        };
-        reader.readAsArrayBuffer(file);
-      };
-
-      function parseWorkbookAndRoute(wb, filename) {
-        var routed = {
-          members: [],
-          staff: [],
-          attendance: [],
-          transactions: [],
-          expenses: [],
-          totalRows: 0
-        };
-
-        var today = new Date().toISOString().slice(0, 10);
-        var timeStr = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-
-        // Check if multi-sheet
-        var sheetNames = wb.SheetNames || [];
-        var isMultiSheet = sheetNames.length > 1;
-
-        sheetNames.forEach(function (sheetName) {
-          var sNameLower = sheetName.toLowerCase().trim();
-          var rawRows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: "" });
-          if (!rawRows || !rawRows.length) return;
-
-          routed.totalRows += rawRows.length;
-
-          // If explicit sheet names
-          if (sNameLower.indexOf("staff") >= 0 || sNameLower.indexOf("employee") >= 0 || sNameLower.indexOf("trainer") >= 0) {
-            rawRows.forEach(function (r) { routeRowAsStaff(r, routed, today); });
-          } else if (sNameLower.indexOf("att") >= 0 || sNameLower.indexOf("present") >= 0) {
-            rawRows.forEach(function (r) { routeRowAsAttendance(r, routed, today, timeStr); });
-          } else if (sNameLower.indexOf("fee") >= 0 || sNameLower.indexOf("pay") >= 0 || sNameLower.indexOf("tx") >= 0) {
-            rawRows.forEach(function (r) { routeRowAsTransaction(r, routed, today, timeStr); });
-          } else if (sNameLower.indexOf("exp") >= 0 || sNameLower.indexOf("bill") >= 0) {
-            rawRows.forEach(function (r) { routeRowAsExpense(r, routed, today); });
-          } else if (sNameLower.indexOf("mem") >= 0 || sNameLower.indexOf("adm") >= 0) {
-            rawRows.forEach(function (r) { routeRowAsMember(r, routed, today); });
-          } else {
-            // Intelligent Single-Sheet / Mixed Sheet Row-by-Row analysis!
-            rawRows.forEach(function (r) {
-              routeRowIntelligently(r, routed, today, timeStr);
-            });
-          }
-        });
-
-        parsedUploadData = routed;
-
-        // Display Summary Card
-        var summaryCard = document.getElementById("uploadSummaryCard");
-        var detailsDiv = document.getElementById("uploadSummaryDetails");
-        if (summaryCard && detailsDiv) {
-          detailsDiv.innerHTML = '📁 <b>File Name:</b> ' + filename + ' (Total ' + routed.totalRows + ' rows found)<br>' +
-            '• 👤 <b style="color:var(--gold)">Members to Add / Update:</b> ' + routed.members.length + '<br>' +
-            '• 🧑‍💼 <b style="color:var(--cyan)">Staff &amp; Trainers to Add / Update:</b> ' + routed.staff.length + '<br>' +
-            '• 📅 <b style="color:var(--emerald)">Attendance Records:</b> ' + routed.attendance.length + '<br>' +
-            '• 💳 <b style="color:var(--purple)">Fees / Transactions:</b> ' + routed.transactions.length + '<br>' +
-            (routed.expenses.length ? ('• 🧾 <b>Expenses Logged:</b> ' + routed.expenses.length + '<br>') : '');
-
-          summaryCard.style.display = "block";
-          document.getElementById("btnConfirmSmartUpload").onclick = confirmSmartImport;
-        }
-      }
-
-      function cleanKeyVal(row, possibleKeys, fallback) {
-        for (var i = 0; i < possibleKeys.length; i++) {
-          var k = possibleKeys[i];
-          if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== "") {
-            return String(row[k]).trim();
-          }
-        }
-        return fallback || "";
-      }
-
-      function routeRowAsStaff(r, routed, today) {
-        var name = cleanKeyVal(r, ["Name", "Staff Name", "Employee Name", "StaffName", "naam", "नाम"]);
-        if (!name) return;
-        var phone = cleanKeyVal(r, ["Phone", "Mobile", "Contact", "phone_number", "Mobile No", "Phone No"], "9876543210");
-        var post = cleanKeyVal(r, ["Post", "Role", "Designation", "Job Role", "पद"], "Staff Member");
-        var dept = cleanKeyVal(r, ["Department", "Dept", "विभाग"], "Operations");
-        var salary = Number(cleanKeyVal(r, ["Salary", "Monthly Salary", "वेतन", "Amount"], "15000")) || 15000;
-        var code = cleanKeyVal(r, ["Code", "Employee Code", "EmpCode", "ID"], "EMP-" + (Math.floor(100 + Math.random() * 900)));
-        var branch = cleanKeyVal(r, ["Branch", "Branch Name", "शाखा"], "Branch 01");
-
-        routed.staff.push({
-          name: name,
-          dept: dept,
-          phone: phone,
-          wa: phone,
-          post: post,
-          code: code,
-          branch: branch,
-          salary: salary
-        });
-      }
-
-      function routeRowAsMember(r, routed, today) {
-        var name = cleanKeyVal(r, ["Name", "Member Name", "Customer Name", "Student Name", "MemberName", "नाम"]);
-        if (!name) return;
-        var phone = cleanKeyVal(r, ["Phone", "Mobile", "Contact", "phone_number", "Mobile No"], "9876543210");
-        var total = Number(cleanKeyVal(r, ["Total", "Total Fee", "Fee", "Plan Fee", "Amount", "कुल फीस"], "1000")) || 1000;
-        var paid = Number(cleanKeyVal(r, ["Paid", "Paid Fee", "Amount Paid", "जमा फीस"], String(total))) || total;
-        var due = Math.max(0, total - paid);
-        var date = cleanKeyVal(r, ["Joining Date", "JoinDate", "Date", "तारीख"], today);
-        var batch = cleanKeyVal(r, ["Batch", "Shift", "बैच"], "Morning");
-
-        routed.members.push({
-          name: name,
-          phone: phone,
-          total: total,
-          paid: paid,
-          due: due,
-          date: date,
-          batch: batch
-        });
-      }
-
-      function routeRowAsAttendance(r, routed, today, timeStr) {
-        var name = cleanKeyVal(r, ["Name", "Member Name", "Person Name", "नाम"]);
-        if (!name) return;
-        var status = cleanKeyVal(r, ["Status", "Attendance", "उपस्थिति"], "Present");
-        var batch = cleanKeyVal(r, ["Batch", "Shift"], "Morning");
-        var time = cleanKeyVal(r, ["Time", "Check-in", "CheckInTime"], timeStr);
-        var date = cleanKeyVal(r, ["Date", "तारीख"], today);
-
-        routed.attendance.push({
-          name: name,
-          type: "Member",
-          status: (status.toLowerCase().indexOf("absent") >= 0 || status.toLowerCase() === "a") ? "Absent" : "Present",
-          date: date,
-          time: time,
-          batch: batch,
-          selfieVerified: true
-        });
-      }
-
-      function routeRowAsTransaction(r, routed, today, timeStr) {
-        var name = cleanKeyVal(r, ["Name", "Member Name", "Customer Name", "नाम"]);
-        if (!name) return;
-        var amt = Number(cleanKeyVal(r, ["Amount", "Paid", "Fee", "रकम"], "1000")) || 1000;
-        var mode = cleanKeyVal(r, ["Mode", "Payment Mode", "Type"], "Cash");
-        var date = cleanKeyVal(r, ["Date", "Payment Date", "तारीख"], today);
-
-        routed.transactions.push({
-          memberName: name,
-          amount: amt,
-          mode: mode.toLowerCase().indexOf("online") >= 0 ? "Online" : "Cash",
-          category: "Payment Fees",
-          date: date,
-          time: timeStr
-        });
-      }
-
-      function routeRowAsExpense(r, routed, today) {
-        var cat = cleanKeyVal(r, ["Category", "Expense", "Item", "खर्च"], "General Maintenance");
-        var amt = Number(cleanKeyVal(r, ["Amount", "Expense Amount", "रकम"], "1000")) || 1000;
-        var date = cleanKeyVal(r, ["Date", "तारीख"], today);
-
-        routed.expenses.push({
-          category: cat,
-          amount: amt,
-          date: date,
-          docProof: ""
-        });
-      }
-
-      function routeRowIntelligently(r, routed, today, timeStr) {
-        var roleOrCat = cleanKeyVal(r, ["Role", "Post", "Designation", "Category", "Type", "पद", "श्रेणी"]).toLowerCase();
-        var staffKeywords = ["trainer", "coach", "cleaner", "housekeeping", "manager", "staff", "technician", "electrician", "helper", "employee"];
-        
-        var isStaff = false;
-        for (var i = 0; i < staffKeywords.length; i++) {
-          if (roleOrCat.indexOf(staffKeywords[i]) >= 0) { isStaff = true; break; }
-        }
-
-        if (isStaff) {
-          routeRowAsStaff(r, routed, today);
-        } else {
-          // Route as Member / Admission
-          routeRowAsMember(r, routed, today);
-        }
-
-        // Also check if attendance column exists in the same row
-        var attVal = cleanKeyVal(r, ["Attendance", "Today Status", "Check-in", "उपस्थिति"]);
-        if (attVal) {
-          routeRowAsAttendance(r, routed, today, timeStr);
-        }
-
-        // Also check if fee payment was recorded in the same row
-        var paidVal = Number(cleanKeyVal(r, ["Paid", "Amount Paid", "Fees Paid", "जमा फीस"]));
-        if (paidVal > 0) {
-          var name = cleanKeyVal(r, ["Name", "Member Name", "नाम"]);
-          var mode = cleanKeyVal(r, ["Payment Mode", "Mode"], "Cash");
-          var date = cleanKeyVal(r, ["Payment Date", "Date"], today);
-          routed.transactions.push({
-            memberName: name,
-            amount: paidVal,
-            mode: mode.toLowerCase().indexOf("online") >= 0 ? "Online" : "Cash",
-            category: isStaff ? "Staff Salary" : "Payment Fees",
-            date: date,
-            time: timeStr
-          });
-        }
-      }
-
-      function confirmSmartImport() {
-        if (!parsedUploadData) return;
-        var d = loadData();
-        var r = parsedUploadData;
-
-        // Append or update members
-        r.members.forEach(function (nm) {
-          var existing = d.admissions.find(function (x) { return x.name.toLowerCase() === nm.name.toLowerCase() || (x.phone && x.phone === nm.phone); });
-          if (existing) {
-            existing.total = nm.total;
-            existing.paid = nm.paid;
-            existing.due = nm.due;
-            existing.batch = nm.batch;
-          } else {
-            d.admissions.unshift(nm);
-          }
-        });
-
-        // Append or update staff
-        r.staff.forEach(function (ns) {
-          var existing = d.staff.find(function (x) { return x.name.toLowerCase() === ns.name.toLowerCase() || (x.phone && x.phone === ns.phone); });
-          if (existing) {
-            existing.post = ns.post;
-            existing.salary = ns.salary;
-            existing.dept = ns.dept;
-          } else {
-            d.staff.unshift(ns);
-          }
-        });
-
-        // Append attendance
-        r.attendance.forEach(function (na) {
-          d.attendance.unshift(na);
-        });
-
-        // Append transactions
-        r.transactions.forEach(function (nt) {
-          d.transactions.unshift(nt);
-        });
-
-        // Append expenses
-        r.expenses.forEach(function (ne) {
-          d.expenses.unshift(ne);
-        });
-
-        saveData(d);
-        closeModal("modDataUploadRouter");
-        resetSmartUpload();
-
-        var totalImported = r.members.length + r.staff.length + r.attendance.length + r.transactions.length;
-        showGreenTick("Upload Successfully! " + totalImported + " records auto-routed to their respective departments.");
-      }
-
-      window.resetSmartUpload = function () {
-        parsedUploadData = null;
-        var inp = document.getElementById("smartExcelFileInput");
-        if (inp) inp.value = "";
-        var card = document.getElementById("uploadSummaryCard");
-        if (card) card.style.display = "none";
-      };
-
-      // Template Downloaders
-      window.downloadSampleMasterExcel = function () {
-        if (typeof XLSX === "undefined") { alert("XLSX library not ready."); return; }
-        var sampleRows = [
-          {
-            "Name": "Rahul Sharma",
-            "Phone": "9876543210",
-            "Role_or_Category": "General Member",
-            "Post_Designation": "Member",
-            "Department": "Gym Fitness",
-            "Monthly_Salary": "",
-            "Joining_Date": "2026-11-01",
-            "Batch": "Morning",
-            "Attendance_Status": "Present",
-            "Fees_Total": 1000,
-            "Fees_Paid": 1000,
-            "Payment_Mode": "Online"
-          },
-          {
-            "Name": "Amit Kumar",
-            "Phone": "9876543211",
-            "Role_or_Category": "Trainer",
-            "Post_Designation": "Senior Fitness Coach",
-            "Department": "Training",
-            "Monthly_Salary": 18000,
-            "Joining_Date": "2026-10-15",
-            "Batch": "Morning",
-            "Attendance_Status": "Present",
-            "Fees_Total": "",
-            "Fees_Paid": "",
-            "Payment_Mode": ""
-          },
-          {
-            "Name": "Vikram Singh",
-            "Phone": "9876543212",
-            "Role_or_Category": "Student Member",
-            "Post_Designation": "Member",
-            "Department": "Cardio",
-            "Monthly_Salary": "",
-            "Joining_Date": "2026-11-05",
-            "Batch": "Evening",
-            "Attendance_Status": "Absent",
-            "Fees_Total": 800,
-            "Fees_Paid": 500,
-            "Payment_Mode": "Cash"
-          },
-          {
-            "Name": "Ramesh Housekeeping",
-            "Phone": "9876543213",
-            "Role_or_Category": "Housekeeping",
-            "Post_Designation": "Cleaner & Helper",
-            "Department": "Cleaning & Maintenance",
-            "Monthly_Salary": 10000,
-            "Joining_Date": "2026-09-01",
-            "Batch": "Evening",
-            "Attendance_Status": "Present",
-            "Fees_Total": "",
-            "Fees_Paid": "",
-            "Payment_Mode": ""
-          }
-        ];
-
-        var wb = XLSX.utils.book_new();
-        var ws = XLSX.utils.json_to_sheet(sampleRows);
-        XLSX.utils.book_append_sheet(wb, ws, "Master_Import_Data");
-        XLSX.writeFile(wb, "universal_sample_all_in_one_gym_data.xlsx");
-      };
-
-      window.downloadMultiSheetSampleExcel = function () {
-        if (typeof XLSX === "undefined") { alert("XLSX library not ready."); return; }
-        var wb = XLSX.utils.book_new();
-
-        var members = [
-          { "Member Name": "Suresh Patel", "Phone": "9123456780", "Category": "General", "Total Fee": 1000, "Paid Fee": 1000, "Joining Date": "2026-11-01", "Batch": "Morning" },
-          { "Member Name": "Pooja Verma", "Phone": "9123456781", "Category": "Student", "Total Fee": 800, "Paid Fee": 500, "Joining Date": "2026-11-10", "Batch": "Evening" }
-        ];
-        var staff = [
-          { "Staff Name": "Deepak Coach", "Post": "Gym Trainer", "Department": "Training", "Phone": "9123456782", "Monthly Salary": 16000, "EmpCode": "EMP-201", "Branch": "Branch 01" },
-          { "Staff Name": "Sunil Kumar", "Post": "Electrician", "Department": "Maintenance", "Phone": "9123456783", "Monthly Salary": 12000, "EmpCode": "EMP-202", "Branch": "Branch 01" }
-        ];
-        var attendance = [
-          { "Person Name": "Suresh Patel", "Status": "Present", "Batch": "Morning", "Time": "07:15 AM", "Date": "2026-11-26" },
-          { "Person Name": "Deepak Coach", "Status": "Present", "Batch": "Morning", "Time": "06:00 AM", "Date": "2026-11-26" }
-        ];
-
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(members), "Members");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(staff), "Staff");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(attendance), "Attendance");
-
-        XLSX.writeFile(wb, "universal_multi_sheet_sample_gym_data.xlsx");
-      };
 
       window.addEventListener("DOMContentLoaded", renderPage1);
       renderPage1();
