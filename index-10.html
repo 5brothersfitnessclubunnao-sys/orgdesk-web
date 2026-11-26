@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Om Software ERP — Universal Gym Business Control</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #050813; --card: #0A1124; --card2: #0E172F; --border: #1B294B; --border-hl: #2A3F70;
+      --gold: #F5A623; --gold-dark: #D97706; --cyan: #22D3EE; --emerald: #34D399;
+      --rose: #FB7185; --purple: #A78BFA; --tx: #FFFFFF; --muted: #94A3B8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--tx); width: 100%; max-width: 580px; margin: 0 auto; padding-bottom: 84px; overflow-x: hidden; }
+
+    /* Header */
+    .hdr {
+      background: var(--card); border-bottom: 1px solid var(--border); padding: 10px 12px;
+      position: sticky; top: 0; z-index: 1000; display: flex; flex-direction: column; gap: 8px;
+    }
+    .hdr-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-width: 0; }
+    .hdr-left { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; }
+    .drawer-btn {
+      width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px;
+      background: #111D38; border: 1.5px solid var(--cyan); color: var(--cyan);
+      font-size: 17px; font-weight: 900; cursor: pointer;
+    }
+    .brand-info { min-width: 0; flex: 1; }
+    .brand-info h1 { font-size: 14px; font-weight: 900; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand-info p { font-size: 10.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .out-btn {
+      background: rgba(239,68,68,0.18); border: 1px solid #EF4444; color: #FCA5A5;
+      border-radius: 8px; padding: 6px 9px; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap;
+    }
+
+    /* 4 Page Tabs */
+    .tabs {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px;
+      padding: 10px 12px 4px; width: 100%;
+    }
+    .tab-btn {
+      min-width: 0; background: var(--card); border: 1px solid var(--border); color: var(--muted);
+      border-radius: 10px; padding: 8px 4px; font-size: 11px; font-weight: 800; cursor: pointer;
+      text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tab-btn.active { background: var(--gold); color: #050813; border-color: var(--gold); }
+
+    .page-sec { display: none; padding: 10px 12px; }
+    .page-sec.active { display: block; }
+
+    /* Live Bar */
+    .live-bar {
+      display: flex; justify-content: space-between; align-items: center; gap: 6px;
+      background: #111A30; border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 10px; margin-bottom: 10px; font-size: 11px;
+    }
+    .tag-live { background: #E11D48; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; }
+    .tag-auto { background: rgba(34,211,238,0.14); color: var(--cyan); font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; }
+
+    /* First Page Cards */
+    .p1-card {
+      background: var(--card); border: 1.5px solid var(--border); border-radius: 14px;
+      padding: 13px 12px; margin-bottom: 10px; cursor: pointer; transition: 0.15s;
+    }
+    .p1-card:hover { border-color: var(--gold); background: var(--card2); }
+    .p1-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .p1-lbl { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .p1-pill { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: rgba(34,211,238,0.12); color: var(--cyan); }
+    .p1-num { font-size: 22px; font-weight: 900; color: var(--gold); }
+    .p1-sub { font-size: 11px; color: var(--muted); margin-top: 3px; display: flex; justify-content: space-between; align-items: center; }
+
+    .switch-wrap { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; }
+    .switch-btn {
+      border: 1px solid var(--border-hl); border-radius: 6px; padding: 3px 8px;
+      background: #080F22; color: #fff; font-size: 10px; font-weight: 800; cursor: pointer;
+    }
+    .switch-btn.on { background: var(--emerald); color: #050813; border-color: var(--emerald); }
+    .switch-btn.off { background: rgba(251,113,133,0.2); color: var(--rose); border-color: var(--rose); }
+
+    /* Left Drawer */
+    .drawer-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 2000; }
+    .drawer-ov.open { display: block; }
+    .left-drawer {
+      position: fixed; top: 0; left: -320px; width: 300px; max-width: 85vw; height: 100vh;
+      background: #080E20; border-right: 1.5px solid var(--border-hl); z-index: 2001;
+      padding: 14px 12px 40px; overflow-y: auto; transition: left 0.22s ease;
+    }
+    .left-drawer.open { left: 0; }
+    .drw-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 9px; margin-bottom: 10px; }
+    .drw-top b { color: var(--gold); font-size: 13.5px; }
+    .drw-close { background: none; border: 0; color: var(--rose); font-size: 20px; font-weight: 900; cursor: pointer; }
+    .drw-item {
+      width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 9px;
+      padding: 8px 10px; color: #fff; font-size: 11.5px; font-weight: 700; text-align: left;
+      cursor: pointer; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .drw-item:hover { border-color: var(--cyan); background: var(--card2); }
+
+    /* Grid & Buttons */
+    .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+    .act-tile {
+      min-width: 0; background: var(--card); border: 1.5px solid var(--border-hl); border-radius: 12px;
+      padding: 12px 10px; color: #fff; font-size: 12px; font-weight: 800; cursor: pointer; text-align: left;
+    }
+    .act-tile:hover { border-color: var(--gold); background: var(--card2); }
+    .act-tile span.hint { display: block; font-size: 10px; color: var(--muted); font-weight: 600; margin-top: 3px; }
+
+    .big-btn {
+      width: 100%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #050813;
+      border: 0; border-radius: 12px; padding: 11px; font-size: 12.5px; font-weight: 900; cursor: pointer; margin-top: 8px;
+    }
+    .big-btn.sec { background: #132142; color: var(--cyan); border: 1px solid var(--border-hl); }
+    .big-btn.ok { background: var(--emerald); color: #050813; }
+    .big-btn.no { background: rgba(251,113,133,0.2); color: var(--rose); border: 1px solid var(--rose); }
+
+    /* Modals */
+    .modal-ov {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.86);
+      z-index: 9999; align-items: center; justify-content: center; padding: 12px;
+    }
+    .modal-ov.open { display: flex; }
+    .modal-box {
+      background: var(--card); border: 1.5px solid var(--border-hl); border-radius: 16px;
+      width: 100%; max-width: 550px; max-height: 88vh; overflow-y: auto; padding: 15px;
+    }
+    .m-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; }
+    .m-top h3 { font-size: 14.5px; color: var(--gold); }
+    .x-btn { background: none; border: 0; color: var(--rose); font-size: 20px; font-weight: 900; cursor: pointer; }
+    .fg { margin-bottom: 9px; }
+    .fg label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; font-weight: 700; }
+    .fc { width: 100%; background: #070D1C; border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; color: #fff; font-size: 12px; }
+    .list-item { background: #080F22; border: 1px solid var(--border); border-radius: 10px; padding: 9px; margin-bottom: 8px; font-size: 11.5px; }
+
+    /* Filter Strip */
+    .filter-box { background: #080F22; border: 1px solid var(--border-hl); border-radius: 10px; padding: 9px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT DRAWER (18 ITEMS) -->
+  <div class="drawer-ov" id="drawerOv"></div>
+  <aside class="left-drawer" id="leftDrawer">
+    <div class="drw-top">
+      <b>Control Menu (18)</b>
+      <button type="button" class="drw-close" id="btnCloseDrawer">&times;</button>
+    </div>
+    <div id="drawer18List"></div>
+  </aside>
+
+  <!-- TOP HEADER -->
+  <header class="hdr">
+    <div class="hdr-top">
+      <div class="hdr-left">
+        <button type="button" class="drawer-btn" id="btnOpenDrawer" aria-label="Menu">&#9776;</button>
+        <div class="brand-info">
+          <h1 id="hdrTitle">Om Software ERP</h1>
+          <p id="hdrSub">Single Gym Owner Control Desk (Branch 01)</p>
+        </div>
+      </div>
+      <button type="button" class="out-btn" id="btnLogout">Logout</button>
+    </div>
+  </header>
+
+  <!-- 4 PAGE TABS -->
+  <nav class="tabs">
+    <button type="button" class="tab-btn active" data-page="1">Page 1: Live</button>
+    <button type="button" class="tab-btn" data-page="2">Page 2: Core</button>
+    <button type="button" class="tab-btn" data-page="3">Page 3: Ops</button>
+    <button type="button" class="tab-btn" data-page="4">Page 4: Admin</button>
+  </nav>
+
+  <!-- PAGE 1: GYM OWNER LIVE OVERVIEW -->
+  <section id="page1" class="page-sec active">
+    <div class="live-bar">
+      <span class="tag-live">&bull; LIVE GYM DESK</span>
+      <span id="p1CurrentMonthTxt" style="color:var(--emerald);font-weight:700">Month: November 2026</span>
+      <span class="tag-auto">AUTO SYNC</span>
+    </div>
+
+    <!-- 1. LIVE GYM MEMBER ATTENDANCE -->
+    <div class="p1-card" data-open-modal="modLiveAtt">
+      <div class="p1-card-top">
+        <span class="p1-lbl">&#9989; Live Member Attendance</span>
+        <span class="p1-pill">Today</span>
+      </div>
+      <div class="p1-num" id="cardValLiveAtt" style="color:var(--cyan)">0</div>
+      <div class="p1-sub"><span>Today's active check-ins</span><span>View &amp; Excel &rarr;</span></div>
+    </div>
+
+    <!-- 2. TOTAL FEES COLLECTION (THIS MONTH ON CARD, ALL-TIME / CALENDAR FILTER INSIDE) -->
+    <div class="p1-card" data-open-modal="modFeesDetail">
+      <div class="p1-card-top">
+        <span class="p1-lbl">&#128179; Total Fees Collection</span>
+        <span class="p1-pill">This Month</span>
+      </div>
+      <div class="p1-num" id="cardValFeesMonth">&#8377;0</div>
+      <div class="p1-sub"><span>Monthly fees received</span><span>Date filter &amp; Till Joining &rarr;</span></div>
+    </div>
+
+    <!-- 3. TOTAL ADMISSIONS (REGISTERED MEMBERS) -->
+    <div class="p1-card" data-open-modal="modAdmDetail">
+      <div class="p1-card-top">
+        <span class="p1-lbl">&#128221; Total Admissions</span>
+        <span class="p1-pill">Registered</span>
+      </div>
+      <div class="p1-num" id="cardValAdmCount" style="color:var(--gold)">0</div>
+      <div class="p1-sub"><span>Total gym members registered</span><span>Date-wise list &amp; Excel &rarr;</span></div>
+    </div>
+
+    <!-- 4. TOTAL STAFF (YES / NO SWITCH) -->
+    <div class="p1-card" id="cardStaffWrap">
+      <div class="p1-card-top">
+        <span class="p1-lbl">&#128100; Total Staff</span>
+        <div class="switch-wrap">
+          <span>Active:</span>
+          <button type="button" class="switch-btn on" id="btnStaffToggle">YES</button>
+        </div>
+      </div>
+      <div id="staffCardActiveArea" data-open-modal="modStaffDetail">
+        <div class="p1-num" id="cardValStaffCount" style="color:var(--emerald)">0</div>
+        <div class="p1-sub"><span>Gym staff &amp; trainers active</span><span>Details &amp; Excel &rarr;</span></div>
+      </div>
+      <div id="staffCardInactiveArea" style="display:none;padding-top:6px;color:var(--muted);font-size:11px">
+        Staff module is switched OFF for this gym.
+      </div>
+    </div>
+
+    <!-- 5. TOTAL SUPPLEMENT COLLECTION -->
+    <div class="p1-card" data-open-modal="modSuppDetail">
+      <div class="p1-card-top">
+        <span class="p1-lbl">&#128138; Total Supplement Collection</span>
+        <span class="p1-pill">This Month</span>
+      </div>
+      <div class="p1-num" id="cardValSuppMonth">&#8377;0</div>
+      <div class="p1-sub"><span>Supplements &amp; protein sales</span><span>Date filter &amp; Excel &rarr;</span></div>
+    </div>
+
+    <!-- 6. TOTAL CASH & ONLINE COLLECTION (SPLIT + CATEGORY SOURCE) -->
+    <div class="p1-card" data-open-modal="modCashOnlineDetail">
+      <div class="p1-card-top">
+        <span class="p1-lbl">&#128181; Cash / Online Collection</span>
+        <span class="p1-pill">Nagad &amp; UPI</span>
+      </div>
+      <div class="p1-num" id="cardValCashOnline">&#8377;0 Cash / &#8377;0 Online</div>
+      <div class="p1-sub"><span>Fees, New Adm, Supplement &amp; Balance</span><span>Category Breakdown &rarr;</span></div>
+    </div>
+
+    <!-- 7. TOTAL EXPENSES (WITH BILL / DOCUMENT PROOFS) -->
+    <div class="p1-card" data-open-modal="modExpensesDetail">
+      <div class="p1-card-top">
+        <span class="p1-lbl">&#129534; Total Expenses</span>
+        <span class="p1-pill" style="color:var(--rose)">Bills Attached</span>
+      </div>
+      <div class="p1-num" id="cardValExpenses" style="color:var(--rose)">&#8377;0</div>
+      <div class="p1-sub"><span>Electricity, Water, Cleaning &amp; Equipment</span><span>Upload &amp; View Bills &rarr;</span></div>
+    </div>
+  </section>
+
+  <!-- PAGE 2: CORE ACTIONS -->
+  <section id="page2" class="page-sec">
+    <div class="grid2">
+      <button type="button" class="act-tile" data-open-modal="modNewAdm">Admission Form<span class="hint">+ Add-on service with price</span></button>
+      <button type="button" class="act-tile" data-open-modal="modMarkAtt">Mark Attendance<span class="hint">Daily check-in</span></button>
+      <button type="button" class="act-tile" data-open-modal="modNewStaff">Staff Joining<span class="hint">Add employee</span></button>
+      <button type="button" class="act-tile" data-open-modal="modLeaveApp">Leave Application<span class="hint">Calendar + reason</span></button>
+      <button type="button" class="act-tile" style="grid-column:span 2" data-open-modal="modSalarySlip">Salary Slip<span class="hint">Staff pay slips</span></button>
+    </div>
+    <button type="button" class="big-btn sec" id="btnExportAllExcelP2">Export Everything to Excel (.xlsx)</button>
+  </section>
+
+  <!-- PAGE 3: 8 OPERATIONS TOOLS -->
+  <section id="page3" class="page-sec">
+    <div class="lbl" style="margin-bottom:8px">Operations &amp; Tools (8)</div>
+    <div class="grid2" id="page3ToolsGrid"></div>
+    <button type="button" class="big-btn sec" id="btnExportAllExcelP3">Download Operations Excel Sheet</button>
+  </section>
+
+  <!-- PAGE 4: ADMIN CONTROLS & PERMISSIONS -->
+  <section id="page4" class="page-sec">
+    <div class="card-box" style="border-color:var(--gold)">
+      <b style="color:var(--gold);font-size:13.5px">Gym Owner — Access Matrix &amp; Permissions</b>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">Configure access rights for staff &amp; managers</div>
+    </div>
+    <div class="card-box" id="permMatrixContainer"></div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button type="button" class="big-btn" style="margin-top:0" data-open-modal="modNewStaff">+ Staff Joining</button>
+      <button type="button" class="big-btn sec" style="margin-top:0" data-open-modal="modSalarySlip">Salary Slip</button>
+    </div>
+    <div id="p4StaffDirectoryList"></div>
+  </section>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL 1: LIVE MEMBER ATTENDANCE -->
+  <div class="modal-ov" id="modLiveAtt">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#9989; Today's Live Attendance</h3><button type="button" class="x-btn" data-close-modal="modLiveAtt">&times;</button></div>
+
+      <!-- Two main action buttons -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <button type="button" class="big-btn" style="margin-top:0;padding:11px;font-size:12px;" id="btnOpenAttCollection">📋 Full Attendance Collection</button>
+        <button type="button" class="big-btn sec" style="margin-top:0;padding:11px;font-size:12px;" id="btnOpenAttDetail">📊 Full Attendance Detail</button>
+      </div>
+
+      <!-- PANEL A: Bulk Collection -->
+      <div id="attCollectionPanel" style="display:none;">
+        <div style="font-size:12px;color:var(--cyan);font-weight:800;margin-bottom:8px;">Sabhi members ki attendance ek saath mark karein</div>
+        <div id="attBulkList" style="max-height:280px;overflow-y:auto;margin-bottom:10px;"></div>
+        <button type="button" class="big-btn ok" style="margin-top:0;" id="btnSubmitBulkAtt">✔ Submit Attendance</button>
+        <div id="attSubmitSuccess" style="display:none;margin-top:12px;background:rgba(52,211,153,0.15);border:1.5px solid var(--emerald);border-radius:12px;padding:14px;text-align:center;">
+          <div style="font-size:28px;margin-bottom:4px;">✅</div>
+          <div style="color:var(--emerald);font-weight:900;font-size:15px;">Submit ho gaya</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Attendance successfully recorded</div>
+        </div>
+        <button type="button" class="big-btn sec" style="margin-top:8px;" id="btnBackFromCollection">← Back</button>
+      </div>
+
+      <!-- PANEL B: Detail / Export view (default visible after choosing Detail) -->
+      <div id="attDetailPanel" style="display:none;">
+        <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportAttExcel">Export Attendance to Excel</button>
+        <div id="liveAttListContainer"></div>
+        <button type="button" class="big-btn sec" style="margin-top:8px;" id="btnBackFromDetail">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PORTAL CHOICE MODAL (Admission / Staff / Fees / Attendance) -->
+  <div class="modal-ov" id="modPortalChoice">
+    <div class="modal-box">
+      <div class="m-top"><h3 id="portalChoiceTitle">Choose Action</h3><button type="button" class="x-btn" data-close-modal="modPortalChoice">&times;</button></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;" id="portalChoiceHint">Select what you want to do</div>
+      <button type="button" class="big-btn" style="margin-top:0;margin-bottom:10px;" id="btnPortalDownload">📥 Download Full Data</button>
+      <button type="button" class="big-btn sec" style="margin-top:0;" id="btnPortalOpenWorking">🚀 Open Working Portal</button>
+    </div>
+  </div>
+
+  <!-- MODAL 2: TOTAL FEES COLLECTION (DATE + BRANCH WISE) -->
+  <div class="modal-ov" id="modFeesDetail">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128179; Fees Collection Explorer</h3><button type="button" class="x-btn" data-close-modal="modFeesDetail">&times;</button></div>
+      <div class="filter-box">
+        <div style="font-size:11.5px;color:var(--cyan);font-weight:800;margin-bottom:6px">Date Range Filter</div>
+        <div class="grid2">
+          <div><label style="font-size:10px;color:var(--muted)">From Date</label><input type="date" class="fc" id="feeFilterFrom"></div>
+          <div><label style="font-size:10px;color:var(--muted)">To Date</label><input type="date" class="fc" id="feeFilterTo"></div>
+        </div>
+        <div style="margin-top:8px">
+          <label style="font-size:10px;color:var(--muted)">Branch</label>
+          <select class="fc" id="feeFilterBranch">
+            <option value="ALL">All Branch</option>
+            <option value="001">Branch 01 (Main)</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          <button type="button" class="big-btn" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnApplyFeeFilter">Apply Filter</button>
+          <button type="button" class="big-btn ok" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnSubmitFeeFilter">✔ Submit</button>
+          <button type="button" class="big-btn sec" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnShowAllTimeFees">Till Joining (All-Time)</button>
+        </div>
+      </div>
+      <div class="list-item" style="border-color:var(--gold)">
+        Filtered Fees Total: <b id="feeFilteredTotal" style="color:var(--gold);font-size:16px">&#8377;0</b><br>
+        <span style="font-size:10.5px;color:var(--muted)" id="feeScopeNote">Showing current month records</span>
+      </div>
+      <div id="feeBranchBreakdown" style="margin-bottom:10px;"></div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportFeesExcel">Download Fees Excel</button>
+      <div id="feesExplorerList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: PENDING DUES -->
+  <div class="modal-ov" id="modPendingDues">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128176; Pending Dues</h3><button type="button" class="x-btn" data-close-modal="modPendingDues">&times;</button></div>
+      <div class="list-item" style="border-color:var(--rose)">Total Pending: <b id="pendingDuesTotal" style="color:var(--rose);font-size:16px">&#8377;0</b></div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportPendingDues">Download Pending Excel</button>
+      <div id="pendingDuesList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: ENQUIRY / WALK-IN -->
+  <div class="modal-ov" id="modEnquiry">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128222; New Admission Enquiry / Walk-in</h3><button type="button" class="x-btn" data-close-modal="modEnquiry">&times;</button></div>
+      <form id="formEnquiry">
+        <div class="fg"><label>Name *</label><input class="fc" id="enqName" required placeholder="Visitor name"></div>
+        <div class="grid2">
+          <div class="fg"><label>Mobile *</label><input type="tel" class="fc" id="enqPhone" required maxlength="10" placeholder="10-digit"></div>
+          <div class="fg"><label>Source</label><select class="fc" id="enqSource"><option>Walk-in</option><option>Phone</option><option>Referral</option><option>Social Media</option></select></div>
+        </div>
+        <div class="fg"><label>Interest / Note</label><textarea class="fc" id="enqNote" rows="2" placeholder="Plan interest, follow-up note..."></textarea></div>
+        <button type="submit" class="big-btn">✔ Submit Enquiry</button>
+      </form>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted);font-weight:800;">Recent Enquiries</div>
+      <div id="enquiryList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: P&L SUMMARY -->
+  <div class="modal-ov" id="modPnL">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128200; Profit &amp; Loss Summary</h3><button type="button" class="x-btn" data-close-modal="modPnL">&times;</button></div>
+      <div class="filter-box">
+        <div class="grid2">
+          <div><label style="font-size:10px;color:var(--muted)">From</label><input type="date" class="fc" id="pnlFrom"></div>
+          <div><label style="font-size:10px;color:var(--muted)">To</label><input type="date" class="fc" id="pnlTo"></div>
+        </div>
+        <div style="margin-top:8px">
+          <label style="font-size:10px;color:var(--muted)">Branch</label>
+          <select class="fc" id="pnlBranch"><option value="ALL">All Branch</option><option value="001">Branch 01 (Main)</option></select>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button type="button" class="big-btn" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnApplyPnL">Apply</button>
+          <button type="button" class="big-btn ok" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnSubmitPnL">✔ Submit</button>
+        </div>
+      </div>
+      <div id="pnlSummaryCards"></div>
+      <div id="pnlBranchTable" style="margin-top:10px;"></div>
+      <button type="button" class="big-btn sec" style="margin-top:10px" id="btnExportPnL">Download P&amp;L Excel</button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: TOTAL ADMISSIONS -->
+  <div class="modal-ov" id="modAdmDetail">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128221; Registered Gym Members</h3><button type="button" class="x-btn" data-close-modal="modAdmDetail">&times;</button></div>
+      <div class="filter-box">
+        <div class="grid2">
+          <div><label style="font-size:10px;color:var(--muted)">From Date</label><input type="date" class="fc" id="admFilterFrom"></div>
+          <div><label style="font-size:10px;color:var(--muted)">To Date</label><input type="date" class="fc" id="admFilterTo"></div>
+        </div>
+        <div style="margin-top:8px"><label style="font-size:10px;color:var(--muted)">Branch</label>
+          <select class="fc" id="admFilterBranch"><option value="ALL">All Branch</option><option value="001">Branch 01 (Main)</option></select>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button type="button" class="big-btn" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnApplyAdmFilter">Apply Filter</button>
+          <button type="button" class="big-btn ok" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnSubmitAdmFilter">✔ Submit</button>
+        </div>
+      </div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportAdmExcel">Download Admissions Excel</button>
+      <div id="admExplorerList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: STAFF DETAILS -->
+  <div class="modal-ov" id="modStaffDetail">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128100; Staff &amp; Trainers Directory</h3><button type="button" class="x-btn" data-close-modal="modStaffDetail">&times;</button></div>
+      <div class="filter-box">
+        <label style="font-size:10px;color:var(--muted)">Branch</label>
+        <select class="fc" id="staffFilterBranch"><option value="ALL">All Branch</option><option value="001">Branch 01 (Main)</option></select>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button type="button" class="big-btn" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnApplyStaffFilter">Apply Filter</button>
+          <button type="button" class="big-btn ok" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnSubmitStaffFilter">✔ Submit</button>
+        </div>
+      </div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportStaffExcel">Download Staff Excel</button>
+      <div id="staffExplorerList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: SUPPLEMENT COLLECTION -->
+  <div class="modal-ov" id="modSuppDetail">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128138; Supplement Sales &amp; Collection</h3><button type="button" class="x-btn" data-close-modal="modSuppDetail">&times;</button></div>
+      <div class="filter-box">
+        <div class="grid2">
+          <div><label style="font-size:10px;color:var(--muted)">From Date</label><input type="date" class="fc" id="suppFilterFrom"></div>
+          <div><label style="font-size:10px;color:var(--muted)">To Date</label><input type="date" class="fc" id="suppFilterTo"></div>
+        </div>
+        <div style="margin-top:8px"><label style="font-size:10px;color:var(--muted)">Branch</label>
+          <select class="fc" id="suppFilterBranch"><option value="ALL">All Branch</option><option value="001">Branch 01 (Main)</option></select>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button type="button" class="big-btn" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnApplySuppFilter">Apply Filter</button>
+          <button type="button" class="big-btn ok" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnSubmitSuppFilter">✔ Submit</button>
+        </div>
+      </div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportSuppExcel">Download Supplement Excel</button>
+      <div id="suppExplorerList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: CASH & ONLINE BREAKDOWN WITH CATEGORIES -->
+  <div class="modal-ov" id="modCashOnlineDetail">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128181; Cash &amp; Online Transactions</h3><button type="button" class="x-btn" data-close-modal="modCashOnlineDetail">&times;</button></div>
+      <div class="filter-box">
+        <label style="font-size:10px;color:var(--muted)">Branch</label>
+        <select class="fc" id="coFilterBranch"><option value="ALL">All Branch</option><option value="001">Branch 01 (Main)</option></select>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button type="button" class="big-btn" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnApplyCoFilter">Apply Filter</button>
+          <button type="button" class="big-btn ok" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnSubmitCoFilter">✔ Submit</button>
+        </div>
+      </div>
+      <div class="list-item" style="border-color:var(--cyan)">
+        Total Cash: <b id="coTotCash" style="color:var(--emerald)">&#8377;0</b> &bull; Total Online: <b id="coTotOnline" style="color:var(--cyan)">&#8377;0</b>
+      </div>
+      <div id="coBranchBreakdown" style="margin-bottom:8px;"></div>
+      <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportCoExcel">Download Cash/Online Excel</button>
+      <div id="cashOnlineExplorerList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: TOTAL EXPENSES WITH BILL PROOFS -->
+  <div class="modal-ov" id="modExpensesDetail">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#129534; Monthly Expenses &amp; Bills</h3><button type="button" class="x-btn" data-close-modal="modExpensesDetail">&times;</button></div>
+      <div class="filter-box" style="margin-bottom:10px">
+        <label style="font-size:10px;color:var(--muted)">Branch Filter</label>
+        <select class="fc" id="expFilterBranch"><option value="ALL">All Branch</option><option value="001">Branch 01 (Main)</option></select>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button type="button" class="big-btn" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnApplyExpFilter">Apply Filter</button>
+          <button type="button" class="big-btn ok" style="margin-top:0;padding:7px;font-size:11.5px;flex:1" id="btnSubmitExpFilter">✔ Submit</button>
+        </div>
+      </div>
+      <form id="formAddExpense" style="margin-bottom:12px;background:#080F22;border:1px solid var(--border-hl);padding:10px;border-radius:10px">
+        <b style="color:var(--gold);font-size:12px;display:block;margin-bottom:6px">+ Record New Expense</b>
+        <div class="grid2">
+          <div class="fg">
+            <label>Category *</label>
+            <select class="fc" id="expCat">
+              <option value="Electricity Bill">Electricity Bill</option>
+              <option value="Water Supply">Water Supply</option>
+              <option value="Gym Equipment">Gym Equipment</option>
+              <option value="Repairing">Repairing</option>
+              <option value="Cleaning & Maintenance">Cleaning &amp; Maintenance</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="fg"><label>Amount (&#8377;) *</label><input type="number" class="fc" id="expAmt" required placeholder="Amount"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Expense Date *</label><input type="date" class="fc" id="expDate" required></div>
+          <div class="fg"><label>Branch *</label>
+            <select class="fc" id="expBranch"><option value="001">Branch 01 (Main)</option></select>
+          </div>
+        </div>
+        <div class="fg"><label>Attach Bill / Proof Document</label><input type="file" class="fc" id="expDocFile" accept="image/*,.pdf"></div>
+        <button type="submit" class="big-btn" style="margin-top:2px">✔ Save Expense with Bill</button>
+      </form>
+      <div id="expenseExplorerList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW ADMISSION FORM -->
+  <div class="modal-ov" id="modNewAdm">
+    <div class="modal-box">
+      <div class="m-top"><h3>📝 New Admission Form</h3><button type="button" class="x-btn" data-close-modal="modNewAdm">&times;</button></div>
+      <form id="formNewAdm">
+        <div class="grid2">
+          <div class="fg"><label>Member Name *</label><input class="fc" id="naName" required placeholder="Full Name"></div>
+          <div class="fg"><label>Mobile *</label><input type="tel" class="fc" id="naPhone" required maxlength="10" placeholder="10-digit mobile"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Base Membership Fee (₹) *</label><input type="number" class="fc" id="naFee" value="1000"></div>
+          <div class="fg"><label>Amount Paid Now (₹) *</label><input type="number" class="fc" id="naPaid" value="1000"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Payment Mode *</label>
+            <select class="fc" id="naPayMode">
+              <option value="Cash">Cash (Nagad)</option>
+              <option value="Online">Online / UPI</option>
+            </select>
+          </div>
+          <div class="fg"><label>Source Category</label>
+            <select class="fc" id="naCustomerType">
+              <option value="New Admission">New Admission</option>
+              <option value="Old Customer Renewal">Old Customer Renewal</option>
+            </select>
+          </div>
+        </div>
+        <div style="background:#080F22;border:1px solid var(--border);border-radius:10px;padding:9px;margin-bottom:10px">
+          <div style="font-size:11.5px;color:var(--cyan);font-weight:800;margin-bottom:6px">Add-On Services (With Price)</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;font-size:12px">
+            <label style="margin:0"><input type="checkbox" class="na-addon-chk"> Personal Guidance</label>
+            <input type="number" class="fc na-addon-val" value="500" style="width:85px;padding:5px">
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px">
+            <label style="margin:0"><input type="checkbox" class="na-addon-chk"> Customized Diet / Workout</label>
+            <input type="number" class="fc na-addon-val" value="400" style="width:85px;padding:5px">
+          </div>
+          <div style="margin-top:6px;font-size:13px;font-weight:900;color:var(--gold)">Total Payable: <span id="naTotalPayable">&#8377;1,000</span></div>
+        </div>
+        <button type="submit" class="big-btn" style="margin-top:0">Save Member Admission</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: MARK ATTENDANCE -->
+  <div class="modal-ov" id="modMarkAtt">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#9989; Mark Attendance</h3><button type="button" class="x-btn" data-close-modal="modMarkAtt">&times;</button></div>
+      <form id="formMarkAtt">
+        <div class="fg"><label>Name / Code *</label><input class="fc" id="mattName" required placeholder="Member or Staff Name"></div>
+        <div class="grid2">
+          <div class="fg"><label>Type</label><select class="fc" id="mattType"><option value="Member">Member</option><option value="Staff">Staff</option></select></div>
+          <div class="fg"><label>Status</label><select class="fc" id="mattStatus"><option value="Present">Present</option><option value="Absent">Absent</option></select></div>
+        </div>
+        <button type="submit" class="big-btn">Record Attendance</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: STAFF JOINING -->
+  <div class="modal-ov" id="modNewStaff">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128100; Staff Joining</h3><button type="button" class="x-btn" data-close-modal="modNewStaff">&times;</button></div>
+      <form id="formNewStaff">
+        <div class="grid2">
+          <div class="fg"><label>Staff Name *</label><input class="fc" id="nsName" required placeholder="Staff Name"></div>
+          <div class="fg"><label>Department *</label><input class="fc" id="nsDept" required placeholder="Floor / Desk / Training"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Contact No. *</label><input type="tel" class="fc" id="nsPhone" required maxlength="10" placeholder="10-digit mobile"></div>
+          <div class="fg"><label>WhatsApp No. *</label><input type="tel" class="fc" id="nsWa" required maxlength="10" placeholder="10-digit mobile"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Post / Designation *</label><input class="fc" id="nsPost" required placeholder="Trainer / Manager"></div>
+          <div class="fg"><label>Employee Code *</label><input class="fc" id="nsCode" required placeholder="EMP-101"></div>
+        </div>
+        <div class="grid2">
+          <div class="fg"><label>Branch No. *</label><input class="fc" id="nsBranch" required value="Branch 01"></div>
+          <div class="fg"><label>Monthly Salary (₹)</label><input type="number" class="fc" id="nsSalary" value="15000"></div>
+        </div>
+        <button type="submit" class="big-btn">Save Staff Joining</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: LEAVE APPLICATION -->
+  <div class="modal-ov" id="modLeaveApp">
+    <div class="modal-box">
+      <div class="m-top"><h3>&#128197; Leave Application</h3><button type="button" class="x-btn" data-close-modal="modLeaveApp">&times;</button></div>
+      <form id="formLeaveApp">
+        <div class="fg"><label>Applicant Name *</label><input class="fc" id="laName" required placeholder="Your Name"></div>
+        <div class="grid2">
+          <div class="fg"><label>From Date (Calendar) *</label><input type="date" class="fc" id="laFrom" required></div>
+          <div class="fg"><label>To Date (Calendar) *</label><input type="date" class="fc" id="laTo" required></div>
+        </div>
+        <div class="fg"><label>Leave Reason &amp; Explanation *</label><textarea class="fc" id="laReason" rows="3" required placeholder="Explain reason..."></textarea></div>
+        <button type="submit" class="big-btn">Submit Leave Application</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SALARY SLIP (Create + Printable Voucher) -->
+  <div class="modal-ov" id="modSalarySlip">
+    <div class="modal-box" style="max-height:92vh">
+      <div class="m-top"><h3>&#128203; Staff Salary Register &amp; Payroll</h3><button type="button" class="x-btn" data-close-modal="modSalarySlip">&times;</button></div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <button type="button" class="big-btn" style="margin:0;padding:7px 10px;font-size:11px;flex:1" id="salTabBranch" data-sal-tab="branch">Branch-Wise Salary</button>
+        <button type="button" class="big-btn sec" style="margin:0;padding:7px 10px;font-size:11px;flex:1" id="salTabCreate" data-sal-tab="create">+ Salary Create</button>
+        <button type="button" class="big-btn sec" style="margin:0;padding:7px 10px;font-size:11px;flex:1" id="salTabAtt" data-sal-tab="att">Staff Attendance Log</button>
+      </div>
+
+      <!-- BRANCH-WISE REGISTER -->
+      <div id="salSecBranch">
+        <div class="filter-box">
+          <div class="grid2">
+            <div><label style="font-size:10px;color:var(--muted)">Branch</label>
+              <select class="fc" id="salRegBranch"><option value="ALL">All Branch</option><option value="001">Branch 001</option></select>
+            </div>
+            <div><label style="font-size:10px;color:var(--muted)">Department</label>
+              <select class="fc" id="salRegDept"><option value="ALL">All Dept</option><option value="Cleaning">Cleaning</option><option value="Training">Training</option><option value="Floor">Floor</option><option value="Reception">Reception</option></select>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+            <button type="button" class="big-btn" style="margin:0;padding:7px;font-size:11.5px;flex:1" id="btnSalRegSubmit">✔ Submit</button>
+            <button type="button" class="big-btn sec" style="margin:0;padding:7px;font-size:11.5px;flex:1" id="btnMasterHrExcel">📊 Master HR Excel</button>
+          </div>
+        </div>
+        <div class="list-item" style="border-color:var(--gold);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:12px">
+          <span>Branch Total Gross: <b id="salRegGross" style="color:var(--gold)">₹0</b></span>
+          <span>Net Payable Payout: <b id="salRegNet" style="color:var(--emerald)">₹0</b></span>
+        </div>
+        <div id="salRegStaffList"></div>
+      </div>
+
+      <!-- CREATE / EDIT ONE SLIP -->
+      <div id="salSecCreate" style="display:none">
+        <div class="fg"><label>Select Existing Staff (optional)</label>
+          <select class="fc" id="ssStaffSel"><option value="">— Manual / New —</option></select>
+        </div>
+        <form id="formSalarySlip">
+          <div class="grid2">
+            <div class="fg"><label>Staff Name *</label><input class="fc" id="salName" required placeholder="Employee name"></div>
+            <div class="fg"><label>Employee Code *</label><input class="fc" id="salCode" required placeholder="STF-001"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Designation *</label><input class="fc" id="salPost" required placeholder="Morning Sweeper"></div>
+            <div class="fg"><label>Department *</label><input class="fc" id="salDept" required placeholder="Cleaning"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Branch *</label>
+              <select class="fc" id="salBranch"><option value="001">Branch 001</option></select>
+            </div>
+            <div class="fg"><label>Period *</label><input class="fc" id="salPeriod" required placeholder="November 2026"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Base Salary (₹)</label><input type="number" class="fc" id="salBase" value="10500" oninput="window.recalcSalaryNet&&recalcSalaryNet()"></div>
+            <div class="fg"><label>HRA / Allowance (₹)</label><input type="number" class="fc" id="salAllow" value="2100" oninput="window.recalcSalaryNet&&recalcSalaryNet()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Special / DA / Bonus (₹)</label><input type="number" class="fc" id="salBonus" value="1050" oninput="window.recalcSalaryNet&&recalcSalaryNet()"></div>
+            <div class="fg"><label>Advance Taken (₹)</label><input type="number" class="fc" id="salAdv" value="800" oninput="window.recalcSalaryNet&&recalcSalaryNet()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>Late Penalty (₹)</label><input type="number" class="fc" id="salPen" value="300" oninput="window.recalcSalaryNet&&recalcSalaryNet()"></div>
+            <div class="fg"><label>Unpaid Leave Cut (₹)</label><input type="number" class="fc" id="salUnpaid" value="350" oninput="window.recalcSalaryNet&&recalcSalaryNet()"></div>
+          </div>
+          <div class="grid2">
+            <div class="fg"><label>PF / ESIC (₹)</label><input type="number" class="fc" id="salPf" value="0" oninput="window.recalcSalaryNet&&recalcSalaryNet()"></div>
+            <div class="fg"><label>Payment Mode</label>
+              <select class="fc" id="salMode"><option>Cash</option><option>Bank Transfer</option><option>UPI</option></select>
+            </div>
+          </div>
+          <div class="list-item" style="border-color:var(--emerald);font-size:12.5px">
+            Gross: <b id="salGrossLbl" style="color:var(--gold)">₹0</b> •
+            Deductions: <b id="salDedLbl" style="color:var(--rose)">₹0</b> •
+            Net: <b id="salNetLbl" style="color:var(--emerald)">₹0</b>
+          </div>
+          <button type="submit" class="big-btn">✔ Create &amp; Generate Pay Slip</button>
+        </form>
+      </div>
+
+      <!-- STAFF MONTHLY ATTENDANCE LOG -->
+      <div id="salSecAtt" style="display:none">
+        <div class="filter-box">
+          <div class="grid2">
+            <div><label style="font-size:10px;color:var(--muted)">Branch</label>
+              <select class="fc" id="salAttBranch"><option value="ALL">All Branch</option><option value="001">Branch 001</option></select>
+            </div>
+            <div><label style="font-size:10px;color:var(--muted)">Month</label>
+              <input type="month" class="fc" id="salAttMonth">
+            </div>
+          </div>
+          <button type="button" class="big-btn" style="margin-top:8px;padding:7px;font-size:11.5px" id="btnSalAttSubmit">✔ Load Attendance Register</button>
+        </div>
+        <div id="salAttRegisterBox" style="overflow-x:auto"></div>
+      </div>
+
+      <!-- FORMAL WHITE PAY SLIP -->
+      <div id="salaryVoucherBox" style="display:none;margin-top:14px;background:#fff;color:#111;border-radius:10px;padding:12px;border:1px solid #cbd5e1;">
+        <div id="salarySlipPrintableContent"></div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px dashed #cbd5e1">
+          <b style="color:#0f172a;font-size:11px;display:block;margin-bottom:6px">You want salary slip in (Choose Download Format)</b>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button type="button" class="big-btn" style="margin:0;flex:1;padding:8px;font-size:11px;background:#111;color:#ffcc00" id="btnDlSalarySlip">📄 Download / Print PDF</button>
+            <button type="button" class="big-btn sec" style="margin:0;flex:1;padding:8px;font-size:11px" id="btnWaSalarySlip">WhatsApp Share</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN SCRIPT -->
+  <script>
+    (function () {
+      var STORE_KEY = "om_erp_universal_owner_desk_v1";
+      var memStore = null;
+      var curFeeScope = "month"; // "month" or "all"
+
+      var drawer18Items = [
+        "1. Live Dashboard", "2. Admission", "3. Attendance", "4. Staff Joining",
+        "5. Leave Application", "6. Salary Slip", "7. Pay Fees", "8. Fees Records",
+        "9. Supplement / Extra", "10. Enquiry", "11. Maintenance & Bills", "12. Department Staff",
+        "13. Data Upload", "14. P&L Summary", "15. Excel Export", "16. Branch Setup",
+        "17. Category Setup", "18. App Share Links"
+      ];
+
+      var page3Tools = [
+        { title: "Fees Collection", hint: "Collect & track fees", modal: "modFeesDetail" },
+        { title: "New Admission Enquiry", hint: "Lead & enquiry tracker", modal: "modEnquiry" },
+        { title: "Pending Dues", hint: "Balance collection list", modal: "modPendingDues" },
+        { title: "Maintenance & Bills", hint: "Bills with proof", modal: "modExpensesDetail" },
+        { title: "Department Staff", hint: "Department roster", modal: "modStaffDetail" },
+        { title: "Salary Slip", hint: "Monthly salary statements", modal: "modSalarySlip" },
+        { title: "P&L Summary", hint: "Profit, loss & growth", modal: "modPnL" },
+        { title: "Excel Export", hint: "Complete data backup", modal: "exportAll" }
+      ];
+
+      var permList = [
+        "Admission & Fees",
+        "Attendance",
+        "Staff Joining & Salary",
+        "Leave Approve / Reject"
+      ];
+
+      function getInitialState() {
+        return {
+          staffEnabled: true,
+          attendance: [],
+          admissions: [],
+          supplementSales: [],
+          transactions: [],
+          expenses: [],
+          staff: [],
+          leaves: [],
+          enquiries: [],
+          branches: [{ id: "001", name: "Branch 01 (Main)" }],
+          activeBranch: "ALL",
+          permissions: {
+            "Admission & Fees": "Full Access",
+            "Attendance": "Edit & Read Only",
+            "Staff Joining & Salary": "Read Only",
+            "Leave Approve / Reject": "Leave Approve / Reject"
+          }
+        };
+      }
+
+      /* Global green success toast — har Submit ke baad */
+      function showSubmitSuccess(msg) {
+        var old = document.getElementById("omSubmitToast");
+        if (old) old.remove();
+        var t = document.createElement("div");
+        t.id = "omSubmitToast";
+        t.style.cssText = "position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);pointer-events:auto;";
+        t.innerHTML = '<div style="background:#0A1124;border:2px solid #34D399;border-radius:16px;padding:22px 28px;text-align:center;max-width:280px;">' +
+          '<div style="font-size:36px;margin-bottom:6px;">✅</div>' +
+          '<div style="color:#34D399;font-weight:900;font-size:16px;">' + (msg || "Submit Successful") + '</div>' +
+          '<div style="color:#94A3B8;font-size:11px;margin-top:4px;">Green tick — record saved</div></div>';
+        document.body.appendChild(t);
+        setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 1800);
+      }
+
+      function loadData() {
+        try {
+          var raw = localStorage.getItem(STORE_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return memStore || getInitialState();
+      }
+
+      function saveData(d) {
+        memStore = d;
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch (e) {}
+        renderPage1();
+      }
+
+      function openModal(id) {
+        var m = document.getElementById(id);
+        if (m) m.classList.add("open");
+        if (id === "modFeesDetail") renderFeesExplorer();
+        if (id === "modAdmDetail") renderAdmExplorer();
+        if (id === "modLiveAtt") { hideAttPanels(); renderAttExplorer(); }
+        if (id === "modStaffDetail") renderStaffExplorer();
+        if (id === "modSuppDetail") renderSuppExplorer();
+        if (id === "modCashOnlineDetail") renderCoExplorer();
+        if (id === "modExpensesDetail") renderExpExplorer();
+        if (id === "modSalarySlip") { switchSalTab("branch"); renderSalRegister(); }
+        if (id === "modNewAdm") calcNaPayable();
+        if (id === "modPendingDues") renderPendingDues();
+        if (id === "modEnquiry") renderEnquiryList();
+        if (id === "modPnL") renderPnL();
+      }
+
+      function closeModal(id) {
+        var m = document.getElementById(id);
+        if (m) m.classList.remove("open");
+      }
+
+      function showPageTab(pNum) {
+        var secs = document.querySelectorAll(".page-sec");
+        var tabs = document.querySelectorAll(".tab-btn");
+        secs.forEach(function (s) { s.classList.remove("active"); });
+        tabs.forEach(function (t) { t.classList.remove("active"); });
+        var sec = document.getElementById("page" + pNum);
+        if (sec) sec.classList.add("active");
+        var tab = document.querySelector('.tab-btn[data-page="' + pNum + '"]');
+        if (tab) tab.classList.add("active");
+        try { window.scrollTo(0, 0); } catch (e) {}
+      }
+
+      function isThisMonth(dateStr) {
+        if (!dateStr) return false;
+        var now = new Date();
+        var y = now.getFullYear();
+        var m = String(now.getMonth() + 1).padStart(2, "0");
+        return String(dateStr).startsWith(y + "-" + m);
+      }
+
+      function calcNaPayable() {
+        var base = Number((document.getElementById("naFee") && document.getElementById("naFee").value) || 0);
+        var chks = document.querySelectorAll(".na-addon-chk");
+        var vals = document.querySelectorAll(".na-addon-val");
+        var add = 0;
+        chks.forEach(function (c, idx) {
+          if (c.checked) add += Number((vals[idx] && vals[idx].value) || 0);
+        });
+        var out = document.getElementById("naTotalPayable");
+        if (out) out.textContent = "₹" + (base + add).toLocaleString("en-IN");
+        return base + add;
+      }
+
+      function exportToExcel(records, sheetName, fileName) {
+        if (typeof XLSX === "undefined") {
+          alert("Excel exporter library is not loaded.");
+          return;
+        }
+        var wb = XLSX.utils.book_new();
+        var ws = XLSX.utils.json_to_sheet(records.length ? records : [{ Status: "No Data Recorded" }]);
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        XLSX.writeFile(wb, fileName + ".xlsx");
+      }
+
+      function renderPage1() {
+        var d = loadData();
+        var now = new Date();
+        var todayStr = now.toISOString().slice(0, 10);
+        var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        document.getElementById("p1CurrentMonthTxt").textContent = "Month: " + monthNames[now.getMonth()] + " " + now.getFullYear();
+
+        // 1. Live Attendance (Today's count)
+        var todayAtt = d.attendance.filter(function (a) { return a.date === todayStr && a.type === "Member" && a.status === "Present"; }).length;
+        document.getElementById("cardValLiveAtt").textContent = String(todayAtt);
+
+        // 2. Fees Collection (Current month total)
+        var monthFees = d.transactions.filter(function (t) { return (t.category === "Payment Fees" || t.category === "New Admission") && isThisMonth(t.date); })
+          .reduce(function (sum, t) { return sum + Number(t.amount || 0); }, 0);
+        document.getElementById("cardValFeesMonth").textContent = "₹" + monthFees.toLocaleString("en-IN");
+
+        // 3. Total Admissions (Current Month / Registered)
+        var totalAdm = d.admissions.length;
+        document.getElementById("cardValAdmCount").textContent = String(totalAdm);
+
+        // 4. Staff Toggle & Count
+        var staffBtn = document.getElementById("btnStaffToggle");
+        var staffActiveArea = document.getElementById("staffCardActiveArea");
+        var staffInactiveArea = document.getElementById("staffCardInactiveArea");
+        if (d.staffEnabled) {
+          staffBtn.className = "switch-btn on";
+          staffBtn.textContent = "YES";
+          staffActiveArea.style.display = "block";
+          staffInactiveArea.style.display = "none";
+          document.getElementById("cardValStaffCount").textContent = String(d.staff.length);
+        } else {
+          staffBtn.className = "switch-btn off";
+          staffBtn.textContent = "NO";
+          staffActiveArea.style.display = "none";
+          staffInactiveArea.style.display = "block";
+        }
+
+        // 5. Total Supplement Collection (This month)
+        var suppMonth = d.transactions.filter(function (t) { return t.category === "Supplement" && isThisMonth(t.date); })
+          .reduce(function (sum, t) { return sum + Number(t.amount || 0); }, 0);
+        document.getElementById("cardValSuppMonth").textContent = "₹" + suppMonth.toLocaleString("en-IN");
+
+        // 6. Cash & Online Breakdown
+        var totCash = d.transactions.filter(function (t) { return t.mode === "Cash" && isThisMonth(t.date); })
+          .reduce(function (sum, t) { return sum + Number(t.amount || 0); }, 0);
+        var totOnline = d.transactions.filter(function (t) { return t.mode === "Online" && isThisMonth(t.date); })
+          .reduce(function (sum, t) { return sum + Number(t.amount || 0); }, 0);
+        document.getElementById("cardValCashOnline").textContent = "₹" + totCash.toLocaleString("en-IN") + " Cash / ₹" + totOnline.toLocaleString("en-IN") + " Online";
+
+        // 7. Expenses (This month)
+        var totExp = d.expenses.filter(function (e) { return isThisMonth(e.date); })
+          .reduce(function (sum, e) { return sum + Number(e.amount || 0); }, 0);
+        document.getElementById("cardValExpenses").textContent = "₹" + totExp.toLocaleString("en-IN");
+
+        // Drawer
+        document.getElementById("drawer18List").innerHTML = drawer18Items.map(function (it, idx) {
+          return '<button type="button" class="drw-item" data-drw-id="' + idx + '"><span>' + it + '</span><span>&rarr;</span></button>';
+        }).join("");
+
+        // Page 3 Tools — each tool opens its own modal (not Admission)
+        document.getElementById("page3ToolsGrid").innerHTML = page3Tools.map(function (it) {
+          if (it.modal === "exportAll") {
+            return '<button type="button" class="act-tile" id="btnP3ExportAll">' + it.title + '<span class="hint">' + it.hint + '</span></button>';
+          }
+          return '<button type="button" class="act-tile" data-open-modal="' + it.modal + '">' + it.title + '<span class="hint">' + it.hint + '</span></button>';
+        }).join("");
+        var p3Exp = document.getElementById("btnP3ExportAll");
+        if (p3Exp) {
+          p3Exp.onclick = function () {
+            exportToExcel(loadData().transactions, "Transactions", "gym_ops_complete_export");
+            showSubmitSuccess("Export Successful");
+          };
+        }
+
+        // Page 4 Permission Matrix
+        document.getElementById("permMatrixContainer").innerHTML = permList.map(function (fn) {
+          var val = (d.permissions && d.permissions[fn]) || "Full Access";
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:11.5px">' +
+            '<span><b>' + fn + '</b></span>' +
+            '<select class="fc" style="width:170px;padding:4px 8px;font-size:11px" data-perm-key="' + fn + '">' +
+              '<option value="Full Access"' + (val === "Full Access" ? " selected" : "") + '>Full Access</option>' +
+              '<option value="Edit & Read Only"' + (val === "Edit & Read Only" ? " selected" : "") + '>Edit &amp; Read Only</option>' +
+              '<option value="Read Only"' + (val === "Read Only" ? " selected" : "") + '>Read Only</option>' +
+              '<option value="Leave Approve / Reject"' + (val === "Leave Approve / Reject" ? " selected" : "") + '>Leave Approve / Reject</option>' +
+            '</select>' +
+          '</div>';
+        }).join("");
+
+        // Page 4 Staff Directory
+        document.getElementById("p4StaffDirectoryList").innerHTML = d.staff.length ? d.staff.map(function (s, idx) {
+          return '<div class="list-item">' +
+            '<div style="display:flex;justify-content:space-between"><b>' + s.name + ' (' + s.code + ')</b><span style="color:var(--gold)">' + s.branch + '</span></div>' +
+            '<div style="font-size:10.5px;color:var(--muted);margin-top:4px">Post: ' + s.post + ' &bull; Dept: ' + s.dept + '<br>Contact: ' + s.phone + ' &bull; WhatsApp: ' + s.wa + ' &bull; Salary: ₹' + Number(s.salary || 0).toLocaleString("en-IN") + '</div>' +
+            '<button type="button" class="big-btn sec" style="margin-top:6px;padding:6px;font-size:11px" data-share-staff-idx="' + idx + '">Share App Download Link</button>' +
+          '</div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No staff added. Click "+ Staff Joining" above.</div>';
+      }
+
+      function renderFeesExplorer() {
+        var d = loadData();
+        var fromVal = (document.getElementById("feeFilterFrom") && document.getElementById("feeFilterFrom").value) || "";
+        var toVal = (document.getElementById("feeFilterTo") && document.getElementById("feeFilterTo").value) || "";
+        var brVal = (document.getElementById("feeFilterBranch") && document.getElementById("feeFilterBranch").value) || "ALL";
+
+        var list = d.transactions.filter(function (t) {
+          if (t.category !== "Payment Fees" && t.category !== "New Admission") return false;
+          if (curFeeScope === "month") {
+            if (!isThisMonth(t.date)) return false;
+          }
+          if (fromVal && t.date < fromVal) return false;
+          if (toVal && t.date > toVal) return false;
+          if (brVal !== "ALL" && String(t.branch || "001") !== brVal) return false;
+          return true;
+        });
+
+        var tot = list.reduce(function (s, r) { return s + Number(r.amount || 0); }, 0);
+        document.getElementById("feeFilteredTotal").textContent = "₹" + tot.toLocaleString("en-IN");
+        document.getElementById("feeScopeNote").textContent =
+          (curFeeScope === "all" ? "All-time fees" : (curFeeScope === "custom" ? "Custom date range" : "Current month")) +
+          " • Branch: " + (brVal === "ALL" ? "All" : brVal);
+
+        // Branch-wise breakdown
+        var byBr = {};
+        list.forEach(function (r) {
+          var b = r.branch || "001";
+          byBr[b] = (byBr[b] || 0) + Number(r.amount || 0);
+        });
+        var brBox = document.getElementById("feeBranchBreakdown");
+        if (brBox) {
+          var keys = Object.keys(byBr);
+          brBox.innerHTML = keys.length
+            ? keys.map(function (b) {
+                return '<div class="list-item" style="display:flex;justify-content:space-between"><span>Branch ' + b + '</span><b style="color:var(--gold)">₹' + byBr[b].toLocaleString("en-IN") + '</b></div>';
+              }).join("")
+            : "";
+        }
+
+        var box = document.getElementById("feesExplorerList");
+        box.innerHTML = list.length ? list.map(function (r) {
+          return '<div class="list-item">' +
+            '<div style="display:flex;justify-content:space-between"><b>' + (r.memberName || "—") + '</b><span style="color:var(--emerald);font-weight:800">&#8377;' + Number(r.amount || 0).toLocaleString("en-IN") + '</span></div>' +
+            '<div style="font-size:10.5px;color:var(--muted);margin-top:3px">' + r.category + ' &bull; ' + r.mode + ' &bull; Br ' + (r.branch || "001") + ' &bull; ' + r.date + ' ' + (r.time || "") + '</div>' +
+          '</div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No fees records found for this selection.</div>';
+      }
+
+      function renderPendingDues() {
+        var d = loadData();
+        var list = (d.admissions || []).filter(function (a) { return Number(a.due || 0) > 0; });
+        var tot = list.reduce(function (s, a) { return s + Number(a.due || 0); }, 0);
+        document.getElementById("pendingDuesTotal").textContent = "₹" + tot.toLocaleString("en-IN");
+        var box = document.getElementById("pendingDuesList");
+        box.innerHTML = list.length ? list.map(function (a) {
+          return '<div class="list-item"><div style="display:flex;justify-content:space-between"><b>' + (a.name || "—") + '</b><span style="color:var(--rose);font-weight:800">₹' + Number(a.due).toLocaleString("en-IN") + '</span></div>' +
+            '<div style="font-size:10.5px;color:var(--muted)">' + (a.phone || "") + ' • Joined ' + (a.date || "") + ' • Paid ₹' + Number(a.paid || 0).toLocaleString("en-IN") + '</div></div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No pending dues.</div>';
+      }
+
+      function renderEnquiryList() {
+        var d = loadData();
+        var box = document.getElementById("enquiryList");
+        var list = d.enquiries || [];
+        box.innerHTML = list.length ? list.map(function (e) {
+          return '<div class="list-item"><b>' + (e.name || "—") + '</b> • ' + (e.phone || "") +
+            '<div style="font-size:10.5px;color:var(--muted)">' + (e.source || "") + ' • ' + (e.date || "") + (e.note ? " • " + e.note : "") + '</div></div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No enquiries yet.</div>';
+      }
+
+      function renderPnL() {
+        var d = loadData();
+        var fromVal = (document.getElementById("pnlFrom") && document.getElementById("pnlFrom").value) || "";
+        var toVal = (document.getElementById("pnlTo") && document.getElementById("pnlTo").value) || "";
+        var brVal = (document.getElementById("pnlBranch") && document.getElementById("pnlBranch").value) || "ALL";
+
+        function inRange(dt) {
+          if (fromVal && dt < fromVal) return false;
+          if (toVal && dt > toVal) return false;
+          return true;
+        }
+
+        var income = 0, expense = 0, admCount = 0;
+        var byBr = {};
+        (d.transactions || []).forEach(function (t) {
+          if (!inRange(t.date || "")) return;
+          var b = t.branch || "001";
+          if (brVal !== "ALL" && b !== brVal) return;
+          if (!byBr[b]) byBr[b] = { income: 0, expense: 0, adm: 0 };
+          income += Number(t.amount || 0);
+          byBr[b].income += Number(t.amount || 0);
+          if (t.category === "New Admission") { admCount++; byBr[b].adm++; }
+        });
+        (d.expenses || []).forEach(function (e) {
+          if (!inRange(e.date || "")) return;
+          var b = e.branch || "001";
+          if (brVal !== "ALL" && b !== brVal) return;
+          if (!byBr[b]) byBr[b] = { income: 0, expense: 0, adm: 0 };
+          expense += Number(e.amount || 0);
+          byBr[b].expense += Number(e.amount || 0);
+        });
+        var profit = income - expense;
+        var growth = income > 0 ? Math.round((profit / income) * 100) : 0;
+
+        document.getElementById("pnlSummaryCards").innerHTML =
+          '<div class="grid2" style="margin-bottom:8px">' +
+            '<div class="list-item" style="border-color:var(--emerald)"><div style="font-size:10px;color:var(--muted)">Income</div><b style="color:var(--emerald);font-size:16px">₹' + income.toLocaleString("en-IN") + '</b></div>' +
+            '<div class="list-item" style="border-color:var(--rose)"><div style="font-size:10px;color:var(--muted)">Expense / Loss</div><b style="color:var(--rose);font-size:16px">₹' + expense.toLocaleString("en-IN") + '</b></div>' +
+            '<div class="list-item" style="border-color:var(--gold)"><div style="font-size:10px;color:var(--muted)">Net Profit</div><b style="color:var(--gold);font-size:16px">₹' + profit.toLocaleString("en-IN") + '</b></div>' +
+            '<div class="list-item"><div style="font-size:10px;color:var(--muted)">Growth %</div><b style="color:var(--cyan);font-size:16px">📈 ' + growth + '%</b></div>' +
+          '</div>' +
+          '<div class="list-item">Admissions in range: <b>' + admCount + '</b></div>';
+
+        var brKeys = Object.keys(byBr);
+        var maxAdm = 0, minAdm = Infinity, maxBr = "—", minBr = "—";
+        brKeys.forEach(function (b) {
+          if (byBr[b].adm > maxAdm) { maxAdm = byBr[b].adm; maxBr = b; }
+          if (byBr[b].adm < minAdm) { minAdm = byBr[b].adm; minBr = b; }
+        });
+        if (!brKeys.length) { minAdm = 0; minBr = "—"; }
+
+        document.getElementById("pnlBranchTable").innerHTML =
+          (brKeys.length ? brKeys.map(function (b) {
+            var row = byBr[b];
+            var p = row.income - row.expense;
+            return '<div class="list-item"><b>Branch ' + b + '</b>' +
+              '<div style="font-size:11px;color:var(--muted);margin-top:3px">Income ₹' + row.income.toLocaleString("en-IN") +
+              ' • Expense ₹' + row.expense.toLocaleString("en-IN") +
+              ' • <span style="color:' + (p >= 0 ? "var(--emerald)" : "var(--rose)") + '">P/L ₹' + p.toLocaleString("en-IN") + '</span>' +
+              ' • Adm ' + row.adm + '</div></div>';
+          }).join("") : '<div class="list-item" style="color:var(--muted)">No branch data in this range.</div>') +
+          '<div class="list-item" style="margin-top:6px;border-color:var(--cyan)">Most admissions: <b>Branch ' + maxBr + '</b> (' + maxAdm + ') • Least: <b>Branch ' + minBr + '</b> (' + (minAdm === Infinity ? 0 : minAdm) + ')</div>';
+      }
+
+      function renderAdmExplorer() {
+        var d = loadData();
+        var fVal = (document.getElementById("admFilterFrom") && document.getElementById("admFilterFrom").value) || "";
+        var tVal = (document.getElementById("admFilterTo") && document.getElementById("admFilterTo").value) || "";
+        var brVal = (document.getElementById("admFilterBranch") && document.getElementById("admFilterBranch").value) || "ALL";
+        var list = d.admissions.filter(function (a) {
+          if (fVal && a.date < fVal) return false;
+          if (tVal && a.date > tVal) return false;
+          if (brVal !== "ALL" && String(a.branch || "001") !== brVal) return false;
+          return true;
+        });
+        var box = document.getElementById("admExplorerList");
+        box.innerHTML = list.length ? list.map(function (a) {
+          return '<div class="list-item">' +
+            '<div style="display:flex;justify-content:space-between"><b>' + a.name + ' (' + a.phone + ')</b><span style="color:var(--gold);font-weight:800">&#8377;' + a.total + '</span></div>' +
+            '<div style="font-size:10.5px;color:var(--muted);margin-top:3px">Paid: &#8377;' + a.paid + ' &bull; Due: &#8377;' + a.due + ' &bull; Br ' + (a.branch || "001") + ' &bull; Joined: ' + a.date + '</div>' +
+          '</div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No admissions found.</div>';
+      }
+
+      function renderAttExplorer() {
+        var d = loadData();
+        var today = new Date().toISOString().slice(0, 10);
+        var list = d.attendance.filter(function (a) { return a.date === today; });
+        var present = list.filter(function (a) { return a.status === "Present"; }).length;
+        var absent = list.filter(function (a) { return a.status === "Absent"; }).length;
+        var box = document.getElementById("liveAttListContainer");
+        var summary = '<div class="list-item" style="border-color:var(--gold);margin-bottom:8px;">' +
+          '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">' +
+            '<span>Total marked: <b style="color:var(--gold)">' + list.length + '</b></span>' +
+            '<span>Present: <b style="color:var(--emerald)">' + present + '</b></span>' +
+            '<span>Absent: <b style="color:var(--rose)">' + absent + '</b></span>' +
+          '</div></div>';
+        box.innerHTML = summary + (list.length ? list.map(function (a) {
+          var stCol = a.status === "Present" ? "var(--emerald)" : "var(--rose)";
+          var byTxt = a.by === "admin-bulk" ? "Admin (Bulk)" : (a.by === "admin" ? "Admin" : (a.by || "Self / Portal"));
+          return '<div class="list-item">' +
+            '<div style="display:flex;justify-content:space-between"><b>' + (a.name || "—") + '</b><span style="color:' + stCol + ';font-weight:800">' + a.status + '</span></div>' +
+            '<div style="font-size:10.5px;color:var(--muted);margin-top:3px;">' +
+              (a.type || "Member") + ' &bull; ' + (a.date || today) + ' &bull; Marked by: ' + byTxt +
+            '</div></div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No attendance recorded today yet.</div>');
+      }
+
+      function renderStaffExplorer() {
+        var d = loadData();
+        var brVal = (document.getElementById("staffFilterBranch") && document.getElementById("staffFilterBranch").value) || "ALL";
+        var list = (d.staff || []).filter(function (s) {
+          if (brVal !== "ALL" && String(s.branch || "001") !== brVal && String(s.branch || "") !== "Branch 01") return false;
+          return true;
+        });
+        var box = document.getElementById("staffExplorerList");
+        box.innerHTML = list.length ? list.map(function (s) {
+          return '<div class="list-item"><b>' + s.name + ' (' + s.code + ')</b> &bull; ' + s.post + '<div style="font-size:10.5px;color:var(--muted)">Dept: ' + s.dept + ' &bull; Phone: ' + s.phone + ' &bull; Branch: ' + (s.branch || "001") + ' &bull; Salary: &#8377;' + s.salary + '</div></div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No staff found.</div>';
+      }
+
+      function renderSuppExplorer() {
+        var d = loadData();
+        var fVal = (document.getElementById("suppFilterFrom") && document.getElementById("suppFilterFrom").value) || "";
+        var tVal = (document.getElementById("suppFilterTo") && document.getElementById("suppFilterTo").value) || "";
+        var brVal = (document.getElementById("suppFilterBranch") && document.getElementById("suppFilterBranch").value) || "ALL";
+        var list = d.transactions.filter(function (t) {
+          if (t.category !== "Supplement") return false;
+          if (fVal && t.date < fVal) return false;
+          if (tVal && t.date > tVal) return false;
+          if (brVal !== "ALL" && String(t.branch || "001") !== brVal) return false;
+          return true;
+        });
+        var box = document.getElementById("suppExplorerList");
+        box.innerHTML = list.length ? list.map(function (t) {
+          return '<div class="list-item"><div style="display:flex;justify-content:space-between"><b>' + t.memberName + '</b><span style="color:var(--gold);font-weight:800">&#8377;' + t.amount + '</span></div><div style="font-size:10.5px;color:var(--muted)">' + t.mode + ' &bull; Br ' + (t.branch || "001") + ' &bull; ' + t.date + '</div></div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No supplement records found.</div>';
+      }
+
+      function renderCoExplorer() {
+        var d = loadData();
+        var brVal = (document.getElementById("coFilterBranch") && document.getElementById("coFilterBranch").value) || "ALL";
+        var list = (d.transactions || []).filter(function (t) {
+          if (brVal !== "ALL" && String(t.branch || "001") !== brVal) return false;
+          return true;
+        });
+        var box = document.getElementById("cashOnlineExplorerList");
+        var cTot = 0, oTot = 0, byBr = {};
+        list.forEach(function (t) {
+          if (t.mode === "Cash") cTot += Number(t.amount || 0);
+          if (t.mode === "Online") oTot += Number(t.amount || 0);
+          var b = t.branch || "001";
+          if (!byBr[b]) byBr[b] = { cash: 0, online: 0 };
+          if (t.mode === "Cash") byBr[b].cash += Number(t.amount || 0);
+          else byBr[b].online += Number(t.amount || 0);
+        });
+        document.getElementById("coTotCash").textContent = "₹" + cTot.toLocaleString("en-IN");
+        document.getElementById("coTotOnline").textContent = "₹" + oTot.toLocaleString("en-IN");
+        var brBox = document.getElementById("coBranchBreakdown");
+        if (brBox) {
+          brBox.innerHTML = Object.keys(byBr).map(function (b) {
+            return '<div class="list-item" style="display:flex;justify-content:space-between;font-size:11.5px"><span>Branch ' + b + '</span><span><b style="color:var(--emerald)">₹' + byBr[b].cash.toLocaleString("en-IN") + ' Cash</b> / <b style="color:var(--cyan)">₹' + byBr[b].online.toLocaleString("en-IN") + ' Online</b></span></div>';
+          }).join("");
+        }
+        box.innerHTML = list.length ? list.map(function (t) {
+          var modeCol = t.mode === "Cash" ? "var(--emerald)" : "var(--cyan)";
+          return '<div class="list-item">' +
+            '<div style="display:flex;justify-content:space-between"><b>' + (t.memberName || "—") + '</b><span style="color:' + modeCol + ';font-weight:800">&#8377;' + t.amount + ' (' + t.mode + ')</span></div>' +
+            '<div style="font-size:10.5px;color:var(--muted);margin-top:3px">Category: <b style="color:#fff">' + t.category + '</b> &bull; Br ' + (t.branch || "001") + ' &bull; ' + t.date + ' ' + (t.time || "") + '</div>' +
+          '</div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No transactions recorded yet.</div>';
+      }
+
+      function renderExpExplorer() {
+        var d = loadData();
+        var brVal = (document.getElementById("expFilterBranch") && document.getElementById("expFilterBranch").value) || "ALL";
+        var list = (d.expenses || []).filter(function (e) {
+          if (brVal !== "ALL" && String(e.branch || "001") !== brVal) return false;
+          return true;
+        });
+        var box = document.getElementById("expenseExplorerList");
+        box.innerHTML = list.length ? list.map(function (e) {
+          return '<div class="list-item">' +
+            '<div style="display:flex;justify-content:space-between"><b>' + e.category + '</b><span style="color:var(--rose);font-weight:900">&#8377;' + e.amount + '</span></div>' +
+            '<div style="font-size:10.5px;color:var(--muted);margin-top:2px">Date: ' + e.date + ' &bull; Branch: ' + (e.branch || "001") + '</div>' +
+            (e.docProof ? '<div style="margin-top:6px"><a href="' + e.docProof + '" target="_blank" style="color:var(--cyan);font-weight:800;font-size:11px">&#128065; View Attached Bill / Document</a></div>' : '<div style="font-size:10px;color:var(--muted);margin-top:4px">No document attached</div>') +
+          '</div>';
+        }).join("") : '<div class="list-item" style="color:var(--muted);text-align:center">No expenses recorded yet. Use the form above to add bills.</div>';
+      }
+
+      function getGymHeader() {
+        try {
+          var p = JSON.parse(localStorage.getItem("om_active_gym_profile") || "{}");
+          if (p && p.name) return { name: p.name, addr: p.address || p.city || "India", tag: "Universal Gym & Business Management ERP System" };
+        } catch (e) {}
+        return { name: "OM SOFTWARE ERP GYM", addr: "Branch Control Desk", tag: "Universal Gym & Business Management ERP System" };
+      }
+
+      function staffPayFields(s) {
+        var base = Number(s.salary || s.base || 0);
+        var hra = Number(s.hra != null ? s.hra : Math.round(base * 0.2));
+        var da = Number(s.da != null ? s.da : Math.round(base * 0.1));
+        var adv = Number(s.advance || 0);
+        var pen = Number(s.latePenalty || 0);
+        var unpaid = Number(s.unpaidCut || 0);
+        var pf = Number(s.pf || 0);
+        var gross = base + hra + da;
+        var ded = adv + pen + unpaid + pf;
+        var net = Math.max(0, gross - ded);
+        return { base: base, hra: hra, da: da, adv: adv, pen: pen, unpaid: unpaid, pf: pf, gross: gross, ded: ded, net: net };
+      }
+
+      function recalcSalaryNet() {
+        var base = Number(document.getElementById("salBase").value || 0);
+        var allow = Number(document.getElementById("salAllow").value || 0);
+        var bonus = Number(document.getElementById("salBonus").value || 0);
+        var pen = Number(document.getElementById("salPen").value || 0);
+        var adv = Number(document.getElementById("salAdv").value || 0);
+        var unpaid = Number((document.getElementById("salUnpaid") || {}).value || 0);
+        var pf = Number(document.getElementById("salPf").value || 0);
+        var gross = base + allow + bonus;
+        var ded = pen + adv + unpaid + pf;
+        var net = Math.max(0, gross - ded);
+        var g = document.getElementById("salGrossLbl");
+        var d = document.getElementById("salDedLbl");
+        var n = document.getElementById("salNetLbl");
+        if (g) g.textContent = "₹" + gross.toLocaleString("en-IN");
+        if (d) d.textContent = "₹" + ded.toLocaleString("en-IN");
+        if (n) n.textContent = "₹" + net.toLocaleString("en-IN");
+        return { gross: gross, ded: ded, net: net, base: base, allow: allow, bonus: bonus, pen: pen, adv: adv, unpaid: unpaid, pf: pf };
+      }
+      window.recalcSalaryNet = recalcSalaryNet;
+
+      function switchSalTab(tab) {
+        document.getElementById("salSecBranch").style.display = tab === "branch" ? "block" : "none";
+        document.getElementById("salSecCreate").style.display = tab === "create" ? "block" : "none";
+        document.getElementById("salSecAtt").style.display = tab === "att" ? "block" : "none";
+        ["salTabBranch", "salTabCreate", "salTabAtt"].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          var on = (id === "salTabBranch" && tab === "branch") || (id === "salTabCreate" && tab === "create") || (id === "salTabAtt" && tab === "att");
+          el.className = on ? "big-btn" : "big-btn sec";
+          el.style.margin = "0";
+          el.style.padding = "7px 10px";
+          el.style.fontSize = "11px";
+          el.style.flex = "1";
+        });
+        if (tab === "branch") renderSalRegister();
+        if (tab === "create") fillSalarySelect();
+        if (tab === "att") renderStaffAttRegister();
+      }
+
+      function fillSalarySelect() {
+        var d = loadData();
+        var sel = document.getElementById("ssStaffSel");
+        if (sel) {
+          sel.innerHTML = '<option value="">— Manual / New —</option>' + (d.staff || []).map(function (s, idx) {
+            return '<option value="' + idx + '">' + s.name + ' (' + (s.code || "") + ')</option>';
+          }).join("");
+        }
+        document.getElementById("salaryVoucherBox").style.display = "none";
+        if (!document.getElementById("salPeriod").value) {
+          var now = new Date();
+          var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+          document.getElementById("salPeriod").value = months[now.getMonth()] + " " + now.getFullYear();
+        }
+        recalcSalaryNet();
+      }
+
+      function renderSalRegister() {
+        var d = loadData();
+        var br = (document.getElementById("salRegBranch") || {}).value || "ALL";
+        var dept = (document.getElementById("salRegDept") || {}).value || "ALL";
+        var list = (d.staff || []).filter(function (s) {
+          if (br !== "ALL" && String(s.branch || "001") !== br && String(s.branch || "") !== "Branch 01") return false;
+          if (dept !== "ALL" && String(s.dept || "") !== dept) return false;
+          return true;
+        });
+        var gTot = 0, nTot = 0;
+        var box = document.getElementById("salRegStaffList");
+        if (!list.length) {
+          box.innerHTML = '<div class="list-item" style="color:var(--muted);text-align:center">No staff in this filter. Add via Staff Joining, or use + Salary Create.</div>';
+          document.getElementById("salRegGross").textContent = "₹0";
+          document.getElementById("salRegNet").textContent = "₹0";
+          return;
+        }
+        box.innerHTML = list.map(function (s, i) {
+          var p = staffPayFields(s);
+          gTot += p.gross; nTot += p.net;
+          return '<div class="list-item" style="border-color:var(--border-hl)">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">' +
+              '<div><b>' + s.name + '</b> <span style="color:var(--muted);font-size:10.5px">(' + (s.code || "—") + ')</span>' +
+              '<div style="font-size:10.5px;color:var(--muted)">Dept: ' + (s.dept || "—") + ' • Role: ' + (s.post || "—") + ' • Mode: Cash</div></div>' +
+              '<button type="button" class="big-btn sec" style="margin:0;padding:5px 10px;font-size:10.5px" data-sal-view="' + i + '">View / Print Slip</button>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:8px;font-size:10.5px">' +
+              '<div>Base: <b>₹' + p.base.toLocaleString("en-IN") + '</b></div>' +
+              '<div>HRA: <b>₹' + p.hra.toLocaleString("en-IN") + '</b></div>' +
+              '<div>Advance: <b>₹' + p.adv.toLocaleString("en-IN") + '</b></div>' +
+              '<div>Late: <b>₹' + p.pen.toLocaleString("en-IN") + '</b></div>' +
+              '<div>Unpaid: <b>₹' + p.unpaid.toLocaleString("en-IN") + '</b></div>' +
+              '<div>PF: <b>₹' + p.pf.toLocaleString("en-IN") + '</b></div>' +
+            '</div>' +
+            '<div style="margin-top:6px;font-size:11.5px">Gross: <b style="color:var(--gold)">₹' + p.gross.toLocaleString("en-IN") + '</b> • Ded: <b style="color:var(--rose)">₹' + p.ded.toLocaleString("en-IN") + '</b> • <b style="color:var(--emerald)">Net: ₹' + p.net.toLocaleString("en-IN") + '</b></div>' +
+          '</div>';
+        }).join("");
+        document.getElementById("salRegGross").textContent = "₹" + gTot.toLocaleString("en-IN");
+        document.getElementById("salRegNet").textContent = "₹" + nTot.toLocaleString("en-IN");
+        box.querySelectorAll("[data-sal-view]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var s = list[Number(btn.getAttribute("data-sal-view"))];
+            if (!s) return;
+            var p = staffPayFields(s);
+            var now = new Date();
+            var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            buildSalaryVoucher({
+              name: s.name, code: s.code || "—", post: s.post || "—", dept: s.dept || "—",
+              branch: s.branch || "001", period: months[now.getMonth()] + " " + now.getFullYear(),
+              base: p.base, allow: p.hra, bonus: p.da, pen: p.pen, adv: p.adv, unpaid: p.unpaid, pf: p.pf,
+              gross: p.gross, ded: p.ded, net: p.net, mode: "Cash",
+              attTotal: 30, attPaid: 28, attUnpaid: 1, attLate: "30m"
+            });
+          });
+        });
+      }
+
+      function renderStaffAttRegister() {
+        var d = loadData();
+        var br = (document.getElementById("salAttBranch") || {}).value || "ALL";
+        var monthEl = document.getElementById("salAttMonth");
+        if (monthEl && !monthEl.value) {
+          var now = new Date();
+          monthEl.value = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+        }
+        var ym = (monthEl && monthEl.value) || "";
+        var list = (d.staff || []).filter(function (s) {
+          if (br !== "ALL" && String(s.branch || "001") !== br) return false;
+          return true;
+        });
+        var box = document.getElementById("salAttRegisterBox");
+        if (!list.length) {
+          box.innerHTML = '<div class="list-item" style="color:var(--muted);text-align:center">No staff found for attendance register.</div>';
+          return;
+        }
+        var days = 31;
+        if (ym) {
+          var parts = ym.split("-");
+          days = new Date(Number(parts[0]), Number(parts[1]), 0).getDate();
+        }
+        var head = '<tr><th style="position:sticky;left:0;background:#0b1220;padding:4px 6px;font-size:10px;text-align:left">Name</th>';
+        for (var day = 1; day <= days; day++) head += '<th style="padding:2px 3px;font-size:9px;min-width:18px">' + day + '</th>';
+        head += '</tr>';
+        var rows = list.map(function (s) {
+          var r = '<tr><td style="position:sticky;left:0;background:#0b1220;padding:4px 6px;font-size:10.5px;white-space:nowrap;font-weight:700">' + s.name + '</td>';
+          for (var day = 1; day <= days; day++) {
+            var mark = (day % 7 === 0) ? "A" : "P";
+            var col = mark === "P" ? "var(--emerald)" : "var(--rose)";
+            r += '<td style="text-align:center;font-size:9px;color:' + col + ';font-weight:800">' + mark + '</td>';
+          }
+          return r + '</tr>';
+        }).join("");
+        box.innerHTML =
+          '<div style="font-size:12px;font-weight:800;margin-bottom:6px;color:var(--gold)">Monthly Employee Attendance Log' + (ym ? ' — ' + ym : '') + '</div>' +
+          '<div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">' +
+          '<table style="border-collapse:collapse;width:100%;min-width:600px"><thead>' + head + '</thead><tbody>' + rows + '</tbody></table></div>' +
+          '<div style="font-size:10px;color:var(--muted);margin-top:6px">P = Present • A = Absent (demo pattern — live marks staff attendance se sync hoga)</div>';
+      }
+
+      function buildSalaryVoucher(data) {
+        var gym = getGymHeader();
+        var gross = data.gross != null ? data.gross : (data.base + data.allow + data.bonus);
+        var ded = data.ded != null ? data.ded : (data.pen + data.adv + (data.unpaid || 0) + data.pf);
+        var net = data.net != null ? data.net : Math.max(0, gross - ded);
+        var html =
+          '<div style="font-family:Segoe UI,Arial,sans-serif;color:#0f172a">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-bottom:2px solid #0f172a;padding-bottom:8px;margin-bottom:10px">' +
+              '<div>' +
+                '<div style="font-size:15px;font-weight:900;letter-spacing:0.3px">' + gym.name + '</div>' +
+                '<div style="font-size:10px;color:#475569">' + gym.addr + '</div>' +
+                '<div style="font-size:9px;color:#64748b">' + gym.tag + '</div>' +
+              '</div>' +
+              '<div style="text-align:right">' +
+                '<div style="font-size:13px;font-weight:900">PAY SLIP</div>' +
+                '<div style="font-size:10px">Period: <b>' + data.period + '</b></div>' +
+                '<div style="font-size:10px">Branch: <b>' + data.branch + '</b></div>' +
+              '</div>' +
+            '</div>' +
+            '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px">' +
+              '<tr><td style="padding:3px 0;width:50%"><b>Emp No / ID:</b> ' + data.code + '</td><td style="padding:3px 0"><b>Bank / Mode:</b> ' + (data.mode || "Cash") + '</td></tr>' +
+              '<tr><td style="padding:3px 0"><b>Employee Name:</b> ' + data.name + '</td><td style="padding:3px 0"><b>Bank Account #:</b> N/A</td></tr>' +
+              '<tr><td style="padding:3px 0"><b>Department:</b> ' + data.dept + '</td><td style="padding:3px 0"><b>Aadhaar / PAN:</b> Verified / N/A</td></tr>' +
+              '<tr><td style="padding:3px 0"><b>Designation:</b> ' + data.post + '</td><td style="padding:3px 0"><b>PF / UAN:</b> N/A</td></tr>' +
+              '<tr><td colspan="2" style="padding:3px 0"><b>Attendance:</b> Total Days: ' + (data.attTotal || 30) + ' • Paid Days: ' + (data.attPaid || 28) + ' • Unpaid Leave: ' + (data.attUnpaid || 0) + ' • Late: ' + (data.attLate || "0m") + '</td></tr>' +
+            '</table>' +
+            '<table style="width:100%;border-collapse:collapse;font-size:11px;border:1px solid #cbd5e1">' +
+              '<tr style="background:#f1f5f9">' +
+                '<th style="text-align:left;padding:6px;border:1px solid #cbd5e1">Earnings Heads</th>' +
+                '<th style="text-align:right;padding:6px;border:1px solid #cbd5e1">Amount (₹)</th>' +
+                '<th style="text-align:left;padding:6px;border:1px solid #cbd5e1">Deductions Heads</th>' +
+                '<th style="text-align:right;padding:6px;border:1px solid #cbd5e1">Amount (₹)</th>' +
+              '</tr>' +
+              '<tr><td style="padding:5px 6px;border:1px solid #e2e8f0">Basic Salary</td><td style="text-align:right;padding:5px 6px;border:1px solid #e2e8f0">' + data.base.toLocaleString("en-IN") + '</td>' +
+                  '<td style="padding:5px 6px;border:1px solid #e2e8f0">Provident Fund (PF)</td><td style="text-align:right;padding:5px 6px;border:1px solid #e2e8f0">' + data.pf.toLocaleString("en-IN") + '</td></tr>' +
+              '<tr><td style="padding:5px 6px;border:1px solid #e2e8f0">House Rent Allowance (HRA)</td><td style="text-align:right;padding:5px 6px;border:1px solid #e2e8f0">' + data.allow.toLocaleString("en-IN") + '</td>' +
+                  '<td style="padding:5px 6px;border:1px solid #e2e8f0">Advance Deductions</td><td style="text-align:right;padding:5px 6px;border:1px solid #e2e8f0">' + data.adv.toLocaleString("en-IN") + '</td></tr>' +
+              '<tr><td style="padding:5px 6px;border:1px solid #e2e8f0">Special Allowance / DA / Bonus</td><td style="text-align:right;padding:5px 6px;border:1px solid #e2e8f0">' + data.bonus.toLocaleString("en-IN") + '</td>' +
+                  '<td style="padding:5px 6px;border:1px solid #e2e8f0">Late Attendance Penalty</td><td style="text-align:right;padding:5px 6px;border:1px solid #e2e8f0">' + data.pen.toLocaleString("en-IN") + '</td></tr>' +
+              '<tr><td style="padding:5px 6px;border:1px solid #e2e8f0">Overtime (OT)</td><td style="text-align:right;padding:5px 6px;border:1px solid #e2e8f0">0</td>' +
+                  '<td style="padding:5px 6px;border:1px solid #e2e8f0">Unpaid Leave Loss of Pay</td><td style="text-align:right;padding:5px 6px;border:1px solid #e2e8f0">' + (data.unpaid || 0).toLocaleString("en-IN") + '</td></tr>' +
+              '<tr style="font-weight:800;background:#f8fafc">' +
+                '<td style="padding:6px;border:1px solid #cbd5e1">Gross Earnings (A)</td><td style="text-align:right;padding:6px;border:1px solid #cbd5e1">₹' + gross.toLocaleString("en-IN") + '</td>' +
+                '<td style="padding:6px;border:1px solid #cbd5e1;color:#b91c1c">Total Deductions (B)</td><td style="text-align:right;padding:6px;border:1px solid #cbd5e1;color:#b91c1c">₹' + ded.toLocaleString("en-IN") + '</td>' +
+              '</tr>' +
+            '</table>' +
+            '<div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
+              '<div><div style="font-size:10px;color:#64748b">NET PAYABLE TRANSFER AMOUNT:</div>' +
+                '<div style="font-size:20px;font-weight:900;color:#15803d">₹' + net.toLocaleString("en-IN") + '</div></div>' +
+              '<div style="text-align:right;font-size:10px;color:#475569">Payment Mode: <b>' + (data.mode || "Cash") + '</b><br>Status: <span style="color:#15803d;font-weight:700">Processed &amp; Approved</span></div>' +
+            '</div>' +
+            '<div style="margin-top:10px;font-size:9px;color:#94a3b8;text-align:center">Please Note: This is system-generated pay slip, does not require physical signature.</div>' +
+          '</div>';
+        document.getElementById("salarySlipPrintableContent").innerHTML = html;
+        document.getElementById("salaryVoucherBox").style.display = "block";
+        window.__lastSalarySlip = data;
+        try { document.getElementById("salaryVoucherBox").scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) {}
+      }
+
+      // Event Bindings
+      document.getElementById("btnOpenDrawer").addEventListener("click", function () {
+        document.getElementById("drawerOv").classList.add("open");
+        document.getElementById("leftDrawer").classList.add("open");
+      });
+      document.getElementById("btnCloseDrawer").addEventListener("click", function () {
+        document.getElementById("drawerOv").classList.remove("open");
+        document.getElementById("leftDrawer").classList.remove("open");
+      });
+      document.getElementById("drawerOv").addEventListener("click", function () {
+        document.getElementById("drawerOv").classList.remove("open");
+        document.getElementById("leftDrawer").classList.remove("open");
+      });
+
+      document.getElementById("btnLogout").addEventListener("click", function () {
+        if (confirm("Are you want to logout?")) location.replace("login.html");
+      });
+
+      document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          showPageTab(Number(btn.getAttribute("data-page")));
+        });
+      });
+
+      // Staff YES / NO Switch
+      document.getElementById("btnStaffToggle").addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        var d = loadData();
+        d.staffEnabled = !d.staffEnabled;
+        saveData(d);
+      });
+
+      // Fees Filter Actions
+      document.getElementById("btnApplyFeeFilter").addEventListener("click", function () {
+        curFeeScope = "custom";
+        renderFeesExplorer();
+      });
+      document.getElementById("btnSubmitFeeFilter").addEventListener("click", function () {
+        curFeeScope = "custom";
+        renderFeesExplorer();
+        showSubmitSuccess("Submit Successful");
+      });
+      document.getElementById("btnShowAllTimeFees").addEventListener("click", function () {
+        curFeeScope = "all";
+        if (document.getElementById("feeFilterFrom")) document.getElementById("feeFilterFrom").value = "";
+        if (document.getElementById("feeFilterTo")) document.getElementById("feeFilterTo").value = "";
+        renderFeesExplorer();
+      });
+
+      document.getElementById("btnApplyAdmFilter").addEventListener("click", renderAdmExplorer);
+      document.getElementById("btnSubmitAdmFilter").addEventListener("click", function () { renderAdmExplorer(); showSubmitSuccess("Submit Successful"); });
+      document.getElementById("btnApplySuppFilter").addEventListener("click", renderSuppExplorer);
+      document.getElementById("btnSubmitSuppFilter").addEventListener("click", function () { renderSuppExplorer(); showSubmitSuccess("Submit Successful"); });
+      document.getElementById("btnApplyStaffFilter").addEventListener("click", renderStaffExplorer);
+      document.getElementById("btnSubmitStaffFilter").addEventListener("click", function () { renderStaffExplorer(); showSubmitSuccess("Submit Successful"); });
+      document.getElementById("btnApplyCoFilter").addEventListener("click", renderCoExplorer);
+      document.getElementById("btnSubmitCoFilter").addEventListener("click", function () { renderCoExplorer(); showSubmitSuccess("Submit Successful"); });
+      document.getElementById("btnApplyExpFilter").addEventListener("click", renderExpExplorer);
+      document.getElementById("btnSubmitExpFilter").addEventListener("click", function () { renderExpExplorer(); showSubmitSuccess("Submit Successful"); });
+
+      // P&L
+      document.getElementById("btnApplyPnL").addEventListener("click", renderPnL);
+      document.getElementById("btnSubmitPnL").addEventListener("click", function () {
+        renderPnL();
+        showSubmitSuccess("Submit Successful");
+      });
+      document.getElementById("btnExportPnL").addEventListener("click", function () {
+        var d = loadData();
+        exportToExcel(d.transactions.concat(d.expenses || []), "PnL", "gym_profit_loss");
+        showSubmitSuccess("Export Successful");
+      });
+      document.getElementById("btnExportPendingDues").addEventListener("click", function () {
+        var d = loadData();
+        var rows = (d.admissions || []).filter(function (a) { return Number(a.due || 0) > 0; });
+        exportToExcel(rows, "PendingDues", "gym_pending_dues");
+        showSubmitSuccess("Export Successful");
+      });
+
+      // Enquiry form
+      document.getElementById("formEnquiry").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var d = loadData();
+        if (!d.enquiries) d.enquiries = [];
+        d.enquiries.unshift({
+          name: document.getElementById("enqName").value.trim(),
+          phone: document.getElementById("enqPhone").value.trim(),
+          source: document.getElementById("enqSource").value,
+          note: document.getElementById("enqNote").value.trim(),
+          date: new Date().toISOString().slice(0, 10)
+        });
+        saveData(d);
+        ev.target.reset();
+        renderEnquiryList();
+        showSubmitSuccess("Submit Successful");
+      });
+
+      // Excel Exports
+      document.getElementById("btnExportAttExcel").addEventListener("click", function () {
+        exportToExcel(loadData().attendance, "Attendance", "gym_member_attendance");
+      });
+      document.getElementById("btnExportFeesExcel").addEventListener("click", function () {
+        exportToExcel(loadData().transactions.filter(function (t) { return t.category === "Payment Fees" || t.category === "New Admission"; }), "Fees", "gym_fees_collection");
+      });
+      document.getElementById("btnExportAdmExcel").addEventListener("click", function () {
+        exportToExcel(loadData().admissions, "Admissions", "gym_registered_admissions");
+      });
+      document.getElementById("btnExportStaffExcel").addEventListener("click", function () {
+        exportToExcel(loadData().staff, "Staff", "gym_staff_directory");
+      });
+      document.getElementById("btnExportSuppExcel").addEventListener("click", function () {
+        exportToExcel(loadData().transactions.filter(function (t) { return t.category === "Supplement"; }), "Supplements", "gym_supplement_sales");
+      });
+      document.getElementById("btnExportCoExcel").addEventListener("click", function () {
+        exportToExcel(loadData().transactions, "Cash_Online", "gym_cash_online_breakdown");
+      });
+      document.getElementById("btnExportAllExcelP2").addEventListener("click", function () {
+        exportToExcel(loadData().admissions, "Admissions", "gym_complete_backup");
+      });
+      document.getElementById("btnExportAllExcelP3").addEventListener("click", function () {
+        exportToExcel(loadData().transactions, "Transactions", "gym_ops_backup");
+      });
+
+      // Form Submissions
+      document.getElementById("formNewAdm").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var d = loadData();
+        var tot = calcNaPayable();
+        var paid = Number(document.getElementById("naPaid").value || 0);
+        var due = Math.max(0, tot - paid);
+        var now = new Date();
+        var dateStr = now.toISOString().slice(0, 10);
+        var timeStr = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+        var nameVal = document.getElementById("naName").value.trim();
+        var phoneVal = document.getElementById("naPhone").value.trim();
+        var modeVal = document.getElementById("naPayMode").value;
+        var srcVal = document.getElementById("naCustomerType").value;
+
+        d.admissions.unshift({
+          name: nameVal, phone: phoneVal, total: tot, paid: paid, due: due, date: dateStr
+        });
+
+        if (paid > 0) {
+          d.transactions.unshift({
+            memberName: nameVal, amount: paid, mode: modeVal, category: srcVal, date: dateStr, time: timeStr
+          });
+        }
+        saveData(d);
+        closeModal("modNewAdm");
+        ev.target.reset();
+        calcNaPayable();
+        showSubmitSuccess("Submit Successful");
+      });
+
+      document.querySelectorAll(".na-addon-chk, .na-addon-val, #naFee").forEach(function (el) {
+        el.addEventListener("input", calcNaPayable);
+        el.addEventListener("change", calcNaPayable);
+      });
+
+      document.getElementById("formMarkAtt").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var d = loadData();
+        d.attendance.unshift({
+          name: document.getElementById("mattName").value.trim(),
+          type: document.getElementById("mattType").value,
+          status: document.getElementById("mattStatus").value,
+          date: new Date().toISOString().slice(0, 10)
+        });
+        saveData(d);
+        closeModal("modMarkAtt");
+        ev.target.reset();
+        showSubmitSuccess("Submit Successful");
+      });
+
+      document.getElementById("formNewStaff").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var d = loadData();
+        d.staff.unshift({
+          name: document.getElementById("nsName").value.trim(),
+          dept: document.getElementById("nsDept").value.trim(),
+          phone: document.getElementById("nsPhone").value.trim(),
+          wa: document.getElementById("nsWa").value.trim(),
+          post: document.getElementById("nsPost").value.trim(),
+          code: document.getElementById("nsCode").value.trim(),
+          branch: document.getElementById("nsBranch").value.trim(),
+          salary: Number(document.getElementById("nsSalary").value || 0)
+        });
+        saveData(d);
+        closeModal("modNewStaff");
+        ev.target.reset();
+        showSubmitSuccess("Submit Successful");
+      });
+
+      document.getElementById("formLeaveApp").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var d = loadData();
+        d.leaves.unshift({
+          id: "L-" + String(Date.now()).slice(-4),
+          applicant: document.getElementById("laName").value.trim(),
+          from: document.getElementById("laFrom").value,
+          to: document.getElementById("laTo").value,
+          reason: document.getElementById("laReason").value.trim(),
+          status: "Pending"
+        });
+        saveData(d);
+        closeModal("modLeaveApp");
+        ev.target.reset();
+        showSubmitSuccess("Submit Successful");
+      });
+
+      document.getElementById("formAddExpense").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var d = loadData();
+        var cat = document.getElementById("expCat").value;
+        var amt = Number(document.getElementById("expAmt").value || 0);
+        var dt = document.getElementById("expDate").value || new Date().toISOString().slice(0, 10);
+        var fileInp = document.getElementById("expDocFile");
+
+        function finishExpense(docDataUrl) {
+          d.expenses.unshift({
+            category: cat, amount: amt, date: dt,
+            branch: (document.getElementById("expBranch") && document.getElementById("expBranch").value) || "001",
+            docProof: docDataUrl || ""
+          });
+          saveData(d);
+          renderExpExplorer();
+          ev.target.reset();
+          showSubmitSuccess("Submit Successful");
+        }
+
+        if (fileInp.files && fileInp.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function (e) { finishExpense(e.target.result); };
+          reader.readAsDataURL(fileInp.files[0]);
+        } else {
+          finishExpense("");
+        }
+      });
+
+      document.getElementById("salTabBranch").addEventListener("click", function () { switchSalTab("branch"); });
+      document.getElementById("salTabCreate").addEventListener("click", function () { switchSalTab("create"); });
+      document.getElementById("salTabAtt").addEventListener("click", function () { switchSalTab("att"); });
+      document.getElementById("btnSalRegSubmit").addEventListener("click", function () { renderSalRegister(); showSubmitSuccess("Submit Successful"); });
+      document.getElementById("btnMasterHrExcel").addEventListener("click", function () {
+        var d = loadData();
+        var rows = (d.staff || []).map(function (s) {
+          var p = staffPayFields(s);
+          return { Name: s.name, Code: s.code, Dept: s.dept, Post: s.post, Branch: s.branch || "001", Base: p.base, HRA: p.hra, DA: p.da, Gross: p.gross, Deductions: p.ded, Net: p.net };
+        });
+        exportToExcel(rows, "HR_Payroll", "master_hr_payroll");
+        showSubmitSuccess("Submit Successful");
+      });
+      document.getElementById("btnSalAttSubmit").addEventListener("click", function () { renderStaffAttRegister(); showSubmitSuccess("Submit Successful"); });
+
+      document.getElementById("ssStaffSel").addEventListener("change", function () {
+        var d = loadData();
+        var idx = this.value;
+        if (idx === "") return;
+        var s = d.staff[Number(idx)];
+        if (!s) return;
+        var p = staffPayFields(s);
+        document.getElementById("salName").value = s.name || "";
+        document.getElementById("salCode").value = s.code || "";
+        document.getElementById("salPost").value = s.post || "";
+        document.getElementById("salDept").value = s.dept || "";
+        document.getElementById("salBase").value = p.base;
+        document.getElementById("salAllow").value = p.hra;
+        document.getElementById("salBonus").value = p.da;
+        document.getElementById("salAdv").value = p.adv;
+        document.getElementById("salPen").value = p.pen;
+        document.getElementById("salUnpaid").value = p.unpaid;
+        document.getElementById("salPf").value = p.pf;
+        if (s.branch) {
+          var br = document.getElementById("salBranch");
+          if ([].some.call(br.options, function (o) { return o.value === s.branch; })) br.value = s.branch;
+        }
+        recalcSalaryNet();
+      });
+
+      document.getElementById("formSalarySlip").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var calc = recalcSalaryNet();
+        var data = {
+          name: document.getElementById("salName").value.trim(),
+          code: document.getElementById("salCode").value.trim(),
+          post: document.getElementById("salPost").value.trim(),
+          dept: document.getElementById("salDept").value.trim(),
+          branch: document.getElementById("salBranch").value,
+          period: document.getElementById("salPeriod").value.trim(),
+          base: calc.base, allow: calc.allow, bonus: calc.bonus,
+          pen: calc.pen, adv: calc.adv, unpaid: calc.unpaid, pf: calc.pf,
+          gross: calc.gross, ded: calc.ded, net: calc.net,
+          mode: (document.getElementById("salMode") || {}).value || "Cash",
+          attTotal: 30, attPaid: 28, attUnpaid: 1, attLate: "0m"
+        };
+        buildSalaryVoucher(data);
+        showSubmitSuccess("Submit Successful");
+      });
+
+      document.getElementById("btnDlSalarySlip").addEventListener("click", function () {
+        var content = document.getElementById("salarySlipPrintableContent").innerHTML;
+        var w = window.open("", "_blank");
+        if (!w) { alert("Popup blocked — allow popups to print."); return; }
+        w.document.write("<html><head><title>Pay Slip</title></head><body style='font-family:Segoe UI,Arial;padding:16px;max-width:720px;margin:0 auto'>" + content + "<script>window.onload=function(){window.print()}<\/script></body></html>");
+        w.document.close();
+      });
+
+      document.getElementById("btnWaSalarySlip").addEventListener("click", function () {
+        var d = window.__lastSalarySlip;
+        if (!d) return;
+        var msg = "Pay Slip — " + d.period + "\n" + d.name + " (" + d.code + ")\nBranch: " + d.branch + "\nNet Payable: ₹" + Number(d.net || 0).toLocaleString("en-IN");
+        window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+      });
+
+      /* ===== PORTAL CHOICE (Admission / Staff / Fees / Attendance) ===== */
+      var currentPortalType = null;
+      var portalMap = {
+        admission: { title: "Admission Form", hint: "Naya member admission form bharne ya data download karne ke liye", working: "admission.html", downloadKey: "admissions", sheet: "Admissions", file: "gym_admissions_full" },
+        staff:     { title: "Staff Joining",   hint: "Staff joining form ya staff directory download", working: "staff-join.html", downloadKey: "staff", sheet: "Staff", file: "gym_staff_directory" },
+        fees:      { title: "Pay Fees",        hint: "Fees portal open karein ya fees records download karein", working: "pay.html", downloadKey: "transactions", sheet: "Fees", file: "gym_fees_collection" },
+        attendance:{ title: "Attendance",      hint: "Attendance kiosk / portal open karein ya records download karein", working: "attendance.html", downloadKey: "attendance", sheet: "Attendance", file: "gym_attendance_records" }
+      };
+
+      function openPortalChoice(type) {
+        currentPortalType = type;
+        var cfg = portalMap[type];
+        if (!cfg) return;
+        document.getElementById("portalChoiceTitle").textContent = cfg.title;
+        document.getElementById("portalChoiceHint").textContent = cfg.hint;
+        openModal("modPortalChoice");
+      }
+
+      document.getElementById("btnPortalDownload").addEventListener("click", function () {
+        if (!currentPortalType) return;
+        var cfg = portalMap[currentPortalType];
+        var d = loadData();
+        var rows = d[cfg.downloadKey] || [];
+        if (currentPortalType === "fees") {
+          rows = (d.transactions || []).filter(function (t) {
+            return t.category === "Payment Fees" || t.category === "New Admission";
+          });
+        }
+        exportToExcel(rows, cfg.sheet, cfg.file);
+        closeModal("modPortalChoice");
+      });
+
+      document.getElementById("btnPortalOpenWorking").addEventListener("click", function () {
+        if (!currentPortalType) return;
+        var cfg = portalMap[currentPortalType];
+        closeModal("modPortalChoice");
+        // Open the real working portal page
+        window.location.href = cfg.working;
+      });
+
+      /* ===== LIVE ATTENDANCE: Collection + Detail ===== */
+      function showAttCollectionPanel() {
+        document.getElementById("attCollectionPanel").style.display = "block";
+        document.getElementById("attDetailPanel").style.display = "none";
+        document.getElementById("attSubmitSuccess").style.display = "none";
+        document.getElementById("btnSubmitBulkAtt").style.display = "block";
+        renderBulkAttList();
+      }
+      function showAttDetailPanel() {
+        document.getElementById("attCollectionPanel").style.display = "none";
+        document.getElementById("attDetailPanel").style.display = "block";
+        renderAttExplorer();
+      }
+      function hideAttPanels() {
+        document.getElementById("attCollectionPanel").style.display = "none";
+        document.getElementById("attDetailPanel").style.display = "none";
+      }
+
+      function renderBulkAttList() {
+        var d = loadData();
+        var box = document.getElementById("attBulkList");
+        // Use registered admissions + any staff as demo list (empty-safe)
+        var people = [];
+        (d.admissions || []).forEach(function (a) {
+          people.push({ name: a.name || "Member", type: "Member", phone: a.phone || "" });
+        });
+        (d.staff || []).forEach(function (s) {
+          people.push({ name: s.name || "Staff", type: "Staff", phone: s.phone || "" });
+        });
+        if (!people.length) {
+          box.innerHTML = '<div class="list-item" style="color:var(--muted);text-align:center;">Abhi koi member / staff register nahi hai.<br>Pehle Admission ya Staff Joining se add karein, phir yahan bulk mark kar sakte hain.</div>';
+          return;
+        }
+        box.innerHTML = people.map(function (p, i) {
+          return '<div class="list-item" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+            '<div style="min-width:0;flex:1;"><b>' + (p.name || "—") + '</b><div style="font-size:10.5px;color:var(--muted);">' + p.type + (p.phone ? " · " + p.phone : "") + '</div></div>' +
+            '<select class="fc bulk-att-status" data-idx="' + i + '" style="width:110px;padding:6px 8px;">' +
+              '<option value="Present">Present</option>' +
+              '<option value="Absent">Absent</option>' +
+            '</select></div>';
+        }).join("");
+        // stash for submit
+        window.__bulkPeople = people;
+      }
+
+      document.getElementById("btnOpenAttCollection").addEventListener("click", showAttCollectionPanel);
+      document.getElementById("btnOpenAttDetail").addEventListener("click", showAttDetailPanel);
+      document.getElementById("btnBackFromCollection").addEventListener("click", hideAttPanels);
+      document.getElementById("btnBackFromDetail").addEventListener("click", hideAttPanels);
+
+      document.getElementById("btnSubmitBulkAtt").addEventListener("click", function () {
+        var people = window.__bulkPeople || [];
+        if (!people.length) {
+          alert("Koi member / staff list nahi mili. Pehle add karein.");
+          return;
+        }
+        var d = loadData();
+        var today = new Date().toISOString().slice(0, 10);
+        var selects = document.querySelectorAll(".bulk-att-status");
+        selects.forEach(function (sel) {
+          var idx = Number(sel.getAttribute("data-idx"));
+          var p = people[idx];
+          if (!p) return;
+          d.attendance.unshift({
+            name: p.name,
+            type: p.type,
+            status: sel.value,
+            date: today,
+            by: "admin-bulk"
+          });
+        });
+        saveData(d);
+        // Green success state
+        document.getElementById("btnSubmitBulkAtt").style.display = "none";
+        document.getElementById("attSubmitSuccess").style.display = "block";
+        // auto hide success after short time & refresh counts
+        setTimeout(function () {
+          document.getElementById("attSubmitSuccess").style.display = "none";
+          document.getElementById("btnSubmitBulkAtt").style.display = "block";
+        }, 2200);
+      });
+
+      // When Live Attendance modal opens, reset panels
+      var _origOpenModal = openModal;
+      openModal = function (id) {
+        _origOpenModal(id);
+        if (id === "modLiveAtt") hideAttPanels();
+      };
+
+      // Global Delegation for modals, drawer and actions
+      document.addEventListener("click", function (ev) {
+        var op = ev.target.closest("[data-open-modal]");
+        if (op) {
+          var mid = op.getAttribute("data-open-modal");
+          // Page 2 tiles: redirect key forms to portal choice
+          if (mid === "modNewAdm") { openPortalChoice("admission"); return; }
+          if (mid === "modNewStaff") { openPortalChoice("staff"); return; }
+          if (mid === "modMarkAtt") { openPortalChoice("attendance"); return; }
+          openModal(mid);
+          return;
+        }
+        var cl = ev.target.closest("[data-close-modal]");
+        if (cl) {
+          closeModal(cl.getAttribute("data-close-modal"));
+          return;
+        }
+        var drw = ev.target.closest("[data-drw-id]");
+        if (drw) {
+          var id = Number(drw.getAttribute("data-drw-id"));
+          document.getElementById("drawerOv").classList.remove("open");
+          document.getElementById("leftDrawer").classList.remove("open");
+          if (id === 0) showPageTab(1);
+          else if (id === 1) openPortalChoice("admission");      // Admission
+          else if (id === 2) openPortalChoice("attendance");     // Attendance
+          else if (id === 3) openPortalChoice("staff");          // Staff Joining
+          else if (id === 4) openModal("modLeaveApp");
+          else if (id === 5) openModal("modSalarySlip");
+          else if (id === 6) openPortalChoice("fees");           // Pay Fees
+          else if (id === 7) openModal("modFeesDetail");         // Fees Records
+          else if (id === 8) openModal("modSuppDetail");
+          else if (id === 14 || id === 15) exportToExcel(loadData().transactions, "Transactions", "om_erp_complete_export");
+          else showPageTab(3);
+          return;
+        }
+        var sh = ev.target.closest("[data-share-staff-idx]");
+        if (sh) {
+          var d = loadData();
+          var s = d.staff[Number(sh.getAttribute("data-share-staff-idx"))];
+          if (s) {
+            var url = (window.location.origin || "") + "/app-download?code=" + encodeURIComponent(s.code);
+            prompt("App Download Link for " + s.name + ":", url);
+          }
+        }
+      });
+
+      document.addEventListener("change", function (ev) {
+        var pk = ev.target.closest("[data-perm-key]");
+        if (pk) {
+          var d = loadData();
+          d.permissions[pk.getAttribute("data-perm-key")] = pk.value;
+          saveData(d);
+        }
+      });
+
+      window.addEventListener("DOMContentLoaded", renderPage1);
+      renderPage1();
+    })();
+  </script>
+</body>
+</html>
