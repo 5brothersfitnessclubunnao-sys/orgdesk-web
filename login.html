@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Om Software ERP — Sign In &amp; Setup</title>
+  <title>Om Software ERP — Sign In &amp; Developer Control</title>
   <style>
     :root {
       --bg: #060A14;
       --card-bg: #0D1424;
       --border: #1E2D4A;
       --gold: #F5A623;
+      --gold-dark: #D97706;
+      --cyan: #22D3EE;
       --emerald: #34D399;
       --rose: #FB7185;
+      --purple: #A78BFA;
       --tx-main: #FFFFFF;
       --tx-muted: #8E9BAE;
       --input-bg: #0A0F1D;
@@ -28,13 +31,14 @@
     }
     .login-card {
       width: 100%;
-      max-width: 410px;
+      max-width: 440px;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 24px;
       padding: 28px 22px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
       text-align: center;
+      position: relative;
     }
     .brand-icon {
       width: 58px;
@@ -48,7 +52,11 @@
       font-size: 21px;
       font-weight: 900;
       color: #0B0F19;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease;
     }
+    .brand-icon:active { transform: scale(0.92); }
     .brand-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
     .brand-sub { font-size: 12px; color: var(--tx-muted); margin-bottom: 18px; }
     .tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
@@ -58,19 +66,67 @@
     .form-label { display: block; font-size: 11.5px; font-weight: 600; color: var(--tx-muted); margin-bottom: 5px; }
     .form-control { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 11px 13px; color: #FFFFFF; font-size: 13.5px; outline: none; }
     .form-control:focus { border-color: var(--gold); }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .btn-submit { width: 100%; background: linear-gradient(135deg, #F5A623, #E09612); color: #0B0F19; font-size: 14px; font-weight: 900; border: none; border-radius: 12px; padding: 12px; margin-top: 6px; cursor: pointer; }
-    .msg-box { display: none; font-size: 11.5px; padding: 9px 12px; border-radius: 10px; margin-bottom: 12px; text-align: left; }
-    .msg-box.err { display: block; background: rgba(251, 113, 133, 0.14); border: 1px solid var(--rose); color: #FECDD3; }
-    .msg-box.ok { display: block; background: rgba(52, 211, 153, 0.14); border: 1px solid var(--emerald); color: #A7F3D0; }
+    .btn-submit:hover { opacity: 0.95; }
+    .msg-box { display: none; font-size: 12px; padding: 10px 12px; border-radius: 10px; margin-bottom: 14px; text-align: left; font-weight: 600; }
+    .msg-box.err { display: block; background: rgba(251, 113, 133, 0.16); border: 1.5px solid var(--rose); color: #FECDD3; }
+    .msg-box.ok { display: block; background: rgba(52, 211, 153, 0.16); border: 1.5px solid var(--emerald); color: #A7F3D0; }
     .helper-link { margin-top: 12px; font-size: 11.5px; color: var(--tx-muted); }
     .helper-link a { color: var(--gold); cursor: pointer; text-decoration: underline; font-weight: 700; }
+    .checkbox-wrap { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--tx-muted); margin-top: 4px; cursor: pointer; user-select: none; }
+    .checkbox-wrap input { width: 16px; height: 16px; accent-color: var(--gold); cursor: pointer; }
+
+    /* Developer Secret Modal */
+    .dev-modal-ov {
+      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88);
+      z-index: 10000; align-items: center; justify-content: center; padding: 12px;
+    }
+    .dev-modal-ov.open { display: flex; }
+    .dev-box {
+      background: #090E1C; border: 2px solid var(--gold); border-radius: 20px;
+      width: 100%; max-width: 780px; max-height: 90vh; overflow-y: auto; padding: 18px; text-align: left;
+    }
+    .dev-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--border); padding-bottom: 10px; margin-bottom: 14px; }
+    .dev-header h2 { font-size: 16px; color: var(--gold); display: flex; align-items: center; gap: 8px; }
+    .dev-close-btn { background: none; border: 0; color: var(--rose); font-size: 24px; font-weight: 900; cursor: pointer; }
+    .dev-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .dev-stat-card { background: #0F172B; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .dev-stat-lbl { font-size: 10.5px; color: var(--tx-muted); text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 4px; }
+    .dev-stat-num { font-size: 22px; font-weight: 900; color: var(--emerald); }
+    .filter-bar { background: #0F172B; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 14px; }
+    .cust-card {
+      background: #0D1527; border: 1px solid var(--border); border-radius: 14px;
+      padding: 13px; margin-bottom: 10px; transition: 0.15s;
+    }
+    .cust-card:hover { border-color: var(--cyan); }
+    .cust-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .cust-name { font-size: 14px; font-weight: 800; color: #fff; }
+    .cust-badge { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: rgba(34,211,238,0.14); color: var(--cyan); }
+    .cust-meta { font-size: 11px; color: var(--tx-muted); line-height: 1.5; margin-bottom: 8px; }
+    .dev-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .dev-btn {
+      background: #15223A; border: 1px solid var(--border); color: #fff;
+      border-radius: 8px; padding: 5px 9px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .dev-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .dev-btn.danger { color: #FCA5A5; border-color: rgba(239,68,68,0.4); }
+    .dev-btn.success { color: #A7F3D0; border-color: rgba(52,211,153,0.4); }
+    .feature-chip {
+      display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 800;
+      padding: 2px 6px; border-radius: 4px; background: rgba(245,166,35,0.15); color: var(--gold);
+      border: 1px solid rgba(245,166,35,0.3); margin-right: 4px; margin-top: 3px; cursor: pointer;
+    }
+    .feature-chip.unlocked { background: rgba(52,211,153,0.2); color: var(--emerald); border-color: var(--emerald); }
   </style>
 </head>
 <body>
+
+  <!-- MAIN LOGIN CARD -->
   <div class="login-card">
-    <div class="brand-icon">OM</div>
+    <div class="brand-icon" id="brandDevTrigger" title="Om Software ERP">OM</div>
     <h1 class="brand-title">Om Software ERP</h1>
-    <p class="brand-sub">Sign in to access your branch management portal</p>
+    <p class="brand-sub">Universal Gym Business &amp; Member Portal</p>
 
     <div class="tabs">
       <button type="button" class="tab-btn active" id="tabSignIn" onclick="setAuthView('signin')">Sign In</button>
@@ -79,38 +135,48 @@
 
     <div id="authMsgBox" class="msg-box"></div>
 
+    <!-- SIGN IN FORM -->
     <form id="signInForm" onsubmit="handleSignInSubmit(event)">
       <div class="form-group">
         <label class="form-label" for="loginRole">Portal Role</label>
         <select id="loginRole" class="form-control">
-          <option value="owner">Admin / Owner (All Branches)</option>
+          <option value="owner">Admin / Gym Owner (All Branches)</option>
           <option value="manager">Branch Manager</option>
-          <option value="staff">Staff Member</option>
+          <option value="staff">Staff Member / Trainer</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="loginIdentity">Email, Username or Staff ID</label>
-        <input type="text" id="loginIdentity" class="form-control" placeholder="Enter email, username or staff ID" autocomplete="username" required>
+        <label class="form-label" for="loginIdentity">Username or Registered Email *</label>
+        <input type="text" id="loginIdentity" class="form-control" placeholder="Enter username or email" autocomplete="username" required>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="loginPassword">Password</label>
+        <label class="form-label" for="loginPassword">Password *</label>
         <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" autocomplete="current-password" required>
       </div>
 
+      <!-- Password Save / Remember Me Checkbox -->
+      <div class="form-group" style="margin-bottom:10px">
+        <label class="checkbox-wrap">
+          <input type="checkbox" id="chkRememberPassword">
+          <span>Remember Me &amp; Save Password for fast login</span>
+        </label>
+      </div>
+
       <div class="form-group">
-        <label class="form-label" for="loginSecQ">Security Question</label>
-        <select id="loginSecQ" class="form-control">
+        <label class="form-label" for="loginSecQ">Security Question *</label>
+        <select id="loginSecQ" class="form-control" required>
           <option value="Favourite Person">Favourite Person</option>
           <option value="Favourite Pet">Favourite Pet</option>
           <option value="Favourite Song">Favourite Song</option>
+          <option value="Birth City">Birth City</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="loginSecA">Security Answer</label>
-        <input type="text" id="loginSecA" class="form-control" placeholder="Enter your security answer" autocomplete="off">
+        <label class="form-label" for="loginSecA">Security Answer *</label>
+        <input type="text" id="loginSecA" class="form-control" placeholder="Enter your secret security answer" autocomplete="off" required>
       </div>
 
       <button type="submit" class="btn-submit">Access Portal</button>
@@ -119,51 +185,144 @@
       </div>
     </form>
 
+    <!-- SIGN UP / FIRST TIME CUSTOMER SETUP -->
     <form id="firstSetupForm" style="display:none" onsubmit="handleFirstTimeCustomerSetup(event)">
       <div class="form-group">
         <label class="form-label" for="ftGymName">Gym / Business Name *</label>
-        <input type="text" id="ftGymName" class="form-control" placeholder="e.g. Royal Fitness Studio" required>
+        <input type="text" id="ftGymName" class="form-control" placeholder="e.g. FitZone Fitness Club" required>
+      </div>
+
+      <div class="grid2">
+        <div class="form-group">
+          <label class="form-label" for="ftCity">City / Location *</label>
+          <input type="text" id="ftCity" class="form-control" placeholder="e.g. Unnao / Kanpur" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ftPhone">Mobile Number *</label>
+          <input type="tel" id="ftPhone" class="form-control" placeholder="10-digit mobile" maxlength="10" required>
+        </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="ftCity">City / Branch Location *</label>
-        <input type="text" id="ftCity" class="form-control" placeholder="e.g. Unnao / Kanpur" required>
+        <label class="form-label" for="ftEmail">Registered Email ID *</label>
+        <input type="email" id="ftEmail" class="form-control" placeholder="customer@example.com" required>
+      </div>
+
+      <div class="grid2">
+        <div class="form-group">
+          <label class="form-label" for="ftUsername">Create Username *</label>
+          <input type="text" id="ftUsername" class="form-control" placeholder="e.g. gymowner123" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ftPassword">Create Password (Min 4 chars) *</label>
+          <input type="password" id="ftPassword" class="form-control" placeholder="Min 4 characters" minlength="4" required>
+        </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="ftEmail">Email or Mobile *</label>
-        <input type="text" id="ftEmail" class="form-control" placeholder="customer@example.com or mobile" required>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="ftUsername">Create Username *</label>
-        <input type="text" id="ftUsername" class="form-control" placeholder="Choose a username" required>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="ftPassword">Create Password (Min 6 chars) *</label>
-        <input type="password" id="ftPassword" class="form-control" placeholder="Create password" minlength="6" required>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="ftSecQ">Security Question *</label>
+        <label class="form-label" for="ftSecQ">Security Question (For Account Recovery) *</label>
         <select id="ftSecQ" class="form-control" required>
           <option value="Favourite Person">Favourite Person</option>
           <option value="Favourite Pet">Favourite Pet</option>
           <option value="Favourite Song">Favourite Song</option>
+          <option value="Birth City">Birth City</option>
         </select>
       </div>
 
       <div class="form-group">
         <label class="form-label" for="ftSecA">Security Answer *</label>
-        <input type="text" id="ftSecA" class="form-control" placeholder="Answer for recovery" required>
+        <input type="text" id="ftSecA" class="form-control" placeholder="Your secret recovery answer" required>
       </div>
 
-      <button type="submit" class="btn-submit">Create Account &amp; Go To Plans</button>
+      <button type="submit" class="btn-submit">Create Account &amp; Proceed</button>
     </form>
   </div>
 
+  <!-- APP DEVELOPER SECRET DASHBOARD MODAL (Opened with 5 clicks on OM icon) -->
+  <div class="dev-modal-ov" id="devModal">
+    <div class="dev-box">
+      <div class="dev-header">
+        <h2>🛠 App Developer Master Control Desk</h2>
+        <button type="button" class="dev-close-btn" id="btnDevClose">&times;</button>
+      </div>
+
+      <!-- Developer Overview Metrics -->
+      <div class="dev-stats-grid">
+        <div class="dev-stat-card">
+          <span class="dev-stat-lbl">Total Registered Customers</span>
+          <div class="dev-stat-num" id="devTotalCust">0</div>
+        </div>
+        <div class="dev-stat-card">
+          <span class="dev-stat-lbl">Active Paid Accounts</span>
+          <div class="dev-stat-num" id="devActivePaid" style="color:var(--gold)">0</div>
+        </div>
+        <div class="dev-stat-card">
+          <span class="dev-stat-lbl">New in Selected Range</span>
+          <div class="dev-stat-num" id="devNewRange" style="color:var(--cyan)">0</div>
+        </div>
+      </div>
+
+      <!-- Date Range Filter (From app start date / launch date to today) -->
+      <div class="filter-bar">
+        <div style="font-size:11px;font-weight:800;color:var(--gold);margin-bottom:6px">📆 Customer Registration Calendar &amp; Range Filter</div>
+        <div class="grid2">
+          <div>
+            <label style="font-size:10px;color:var(--tx-muted)">Start From (App Launch Date)</label>
+            <input type="date" class="form-control" id="devFilterFrom" style="padding:6px 9px;font-size:12px">
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--tx-muted)">Up To (Selected Date)</label>
+            <input type="date" class="form-control" id="devFilterTo" style="padding:6px 9px;font-size:12px">
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button type="button" class="dev-btn success" id="btnApplyDevDateFilter" style="flex:1;padding:7px">Apply Calendar Filter</button>
+          <button type="button" class="dev-btn" id="btnResetDevDateFilter" style="flex:1;padding:7px">View All-Time Customers</button>
+        </div>
+      </div>
+
+      <!-- Customers List -->
+      <div style="font-size:12px;font-weight:800;color:var(--tx-muted);margin-bottom:8px">Customer Database &amp; 1-Click Control:</div>
+      <div id="devCustomersListContainer"></div>
+    </div>
+  </div>
+
   <script>
+    const STORE_CUSTOMERS_KEY = "om_creator_customers_registry_v1";
+    const STORE_SAVED_LOGIN_KEY = "om_saved_login_creds_v1";
+    const APP_LAUNCH_DATE = "2026-11-01"; // Starting anchor date for the developer
+
+    // Secret brand click counter
+    let devClickCount = 0;
+    let devClickTimer = null;
+
+    document.getElementById("brandDevTrigger").addEventListener("click", function() {
+      devClickCount++;
+      clearTimeout(devClickTimer);
+      devClickTimer = setTimeout(() => { devClickCount = 0; }, 1500);
+
+      if (devClickCount >= 5) {
+        devClickCount = 0;
+        openDeveloperModal();
+      }
+    });
+
+    document.getElementById("btnDevClose").addEventListener("click", closeDeveloperModal);
+
+    function openDeveloperModal() {
+      const devModal = document.getElementById("devModal");
+      devModal.classList.add("open");
+      const dFrom = document.getElementById("devFilterFrom");
+      const dTo = document.getElementById("devFilterTo");
+      if (!dFrom.value) dFrom.value = APP_LAUNCH_DATE;
+      if (!dTo.value) dTo.value = new Date().toISOString().slice(0, 10);
+      renderDeveloperCustomerList();
+    }
+
+    function closeDeveloperModal() {
+      document.getElementById("devModal").classList.remove("open");
+    }
+
     function setAuthView(mode) {
       const isSignIn = (mode === "signin");
       document.getElementById("tabSignIn").classList.toggle("active", isSignIn);
@@ -183,7 +342,7 @@
 
     function getSavedCustomersRegistry() {
       try {
-        const raw = localStorage.getItem("om_creator_customers_registry_v1");
+        const raw = localStorage.getItem(STORE_CUSTOMERS_KEY);
         const parsed = raw ? JSON.parse(raw) : [];
         return Array.isArray(parsed) ? parsed : [];
       } catch (e) {
@@ -191,123 +350,349 @@
       }
     }
 
-    function saveCustomerToCreatorRegistry(custObj) {
-      const list = getSavedCustomersRegistry();
-      list.unshift(custObj);
-      localStorage.setItem("om_creator_customers_registry_v1", JSON.stringify(list));
+    function saveCustomersRegistry(list) {
+      try {
+        localStorage.setItem(STORE_CUSTOMERS_KEY, JSON.stringify(list));
+      } catch (e) {}
     }
 
-    function handleForgotSecurityRecovery() {
-      const idVal = String(document.getElementById("loginIdentity").value || "").trim().toLowerCase();
-      const list = getSavedCustomersRegistry();
-      const found = list.find(c =>
-        String(c.username || "").toLowerCase() === idVal ||
-        String(c.email || "").toLowerCase() === idVal
-      );
-      if (found) {
-        const ans = prompt("Security Question: " + found.secQuestion + "\nEnter your answer:");
-        if (ans && ans.trim().toLowerCase() === String(found.secAnswer || "").trim().toLowerCase()) {
-          alert("Verified!\nUsername: " + found.username + "\nEmail: " + found.email + "\nLicense Key: " + found.licenseKey);
-        } else {
-          showAuthMsg("err", "Security answer did not match.");
+    // Auto-fill saved credentials if "Remember Me" was enabled
+    window.addEventListener("DOMContentLoaded", function() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORE_SAVED_LOGIN_KEY) || "null");
+        if (saved && saved.identity) {
+          document.getElementById("loginIdentity").value = saved.identity;
+          if (saved.password) document.getElementById("loginPassword").value = saved.password;
+          document.getElementById("chkRememberPassword").checked = true;
         }
-      } else {
-        showAuthMsg("err", "Enter your registered Username or Email first, then click recovery.");
-      }
-    }
+      } catch (e) {}
+    });
 
     function handleFirstTimeCustomerSetup(e) {
       e.preventDefault();
       const gymName = document.getElementById("ftGymName").value.trim();
       const city = document.getElementById("ftCity").value.trim();
-      const email = document.getElementById("ftEmail").value.trim();
+      const phone = document.getElementById("ftPhone").value.trim();
+      const email = document.getElementById("ftEmail").value.trim().toLowerCase();
       const username = document.getElementById("ftUsername").value.trim();
       const password = document.getElementById("ftPassword").value;
       const secQuestion = document.getElementById("ftSecQ").value;
       const secAnswer = document.getElementById("ftSecA").value.trim();
 
-      if (!gymName || !city || !email || !username || password.length < 6 || !secAnswer) {
-        showAuthMsg("err", "Please complete all required fields including security question and answer.");
+      if (!gymName || !city || !email || !username || password.length < 4 || !secAnswer) {
+        showAuthMsg("err", "Please complete all fields with a valid password (min 4 chars) and security answer.");
+        return;
+      }
+
+      const customers = getSavedCustomersRegistry();
+
+      // Check if email already registered
+      const emailExists = customers.some(c => String(c.email || "").toLowerCase() === email);
+      if (emailExists) {
+        showAuthMsg("err", "Already email id registered. Please Sign In or use another email.");
+        return;
+      }
+
+      // Check if username already registered
+      const userExists = customers.some(c => String(c.username || "").toLowerCase() === username.toLowerCase());
+      if (userExists) {
+        showAuthMsg("err", "Username already registered. Please choose another username.");
         return;
       }
 
       const licKey = "LIC-OM-" + Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
       const customerRecord = {
         id: "CUST-" + Date.now(),
-        gymName, city, email, username, password, secQuestion, secAnswer,
+        gymName,
+        city,
+        phone,
+        email,
+        username,
+        password,
+        secQuestion,
+        secAnswer,
         licenseKey: licKey,
-        planName: "Unpurchased Preview",
-        planAmount: 0,
-        purchased: false,
-        purchasedAt: "",
-        createdAt: new Date().toISOString()
+        planName: "Starter (₹99)",
+        planAmount: 99,
+        purchased: true,
+        purchasedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString().slice(0, 10),
+        customFeatures: [] // Custom unlocked features by app developer
       };
 
-      saveCustomerToCreatorRegistry(customerRecord);
-      localStorage.setItem("om_active_customer_account", JSON.stringify(customerRecord));
-      localStorage.setItem("om_customer_unpurchased_preview", "1");
-      localStorage.setItem("bfc_role", "customer_preview");
+      customers.unshift(customerRecord);
+      saveCustomersRegistry(customers);
 
-      showAuthMsg("ok", "Account created! Redirecting to Purchase Plan portal...");
+      // Auto save login if requested
+      localStorage.setItem("om_active_customer_account", JSON.stringify(customerRecord));
+      localStorage.setItem("bfc_role", "owner");
+      localStorage.setItem("om_logged_user", customerRecord.username);
+
+      showAuthMsg("ok", "Account registered successfully! Redirecting to dashboard...");
       setTimeout(function() {
-        location.replace("index.html?view=purchase_plan");
-      }, 500);
+        location.replace("index.html");
+      }, 700);
     }
 
     function handleSignInSubmit(e) {
       e.preventDefault();
       const role = document.getElementById("loginRole").value;
-      const identity = document.getElementById("loginIdentity").value.trim();
+      const identity = document.getElementById("loginIdentity").value.trim().toLowerCase();
       const password = document.getElementById("loginPassword").value;
       const secQ = document.getElementById("loginSecQ").value;
-      const secA = document.getElementById("loginSecA").value.trim();
+      const secA = document.getElementById("loginSecA").value.trim().toLowerCase();
+      const rememberMe = document.getElementById("chkRememberPassword").checked;
 
       if (!identity || !password) {
-        showAuthMsg("err", "Please enter Username/Email and Password.");
+        showAuthMsg("err", "Please enter your Username/Email and Password.");
         return;
       }
 
       const customers = getSavedCustomersRegistry();
       const matchedCust = customers.find(c =>
-        String(c.username || "").toLowerCase() === identity.toLowerCase() ||
-        String(c.email || "").toLowerCase() === identity.toLowerCase()
+        String(c.username || "").toLowerCase() === identity ||
+        String(c.email || "").toLowerCase() === identity
       );
 
-      if (matchedCust) {
-        if (matchedCust.password !== password) {
-          showAuthMsg("err", "Incorrect password.");
-          return;
-        }
-        if (secA && String(matchedCust.secAnswer || "").toLowerCase() !== secA.toLowerCase()) {
-          showAuthMsg("err", "Incorrect security answer for " + matchedCust.secQuestion + ".");
-          return;
-        }
-        localStorage.setItem("om_active_customer_account", JSON.stringify(matchedCust));
-        localStorage.setItem("om_customer_unpurchased_preview", matchedCust.purchased ? "0" : "1");
-        localStorage.setItem("bfc_role", matchedCust.purchased ? "owner" : "customer_preview");
-        location.replace("index.html" + (matchedCust.purchased ? "" : "?view=purchase_plan"));
+      // If ID is not registered in system -> show strict notice
+      if (!matchedCust) {
+        showAuthMsg("err", "Please sign up before using! This account is not registered.");
         return;
       }
 
-      localStorage.removeItem("om_customer_unpurchased_preview");
+      // Verify Password
+      if (matchedCust.password !== password) {
+        showAuthMsg("err", "Incorrect password. Please try again.");
+        return;
+      }
+
+      // Verify Security Question & Answer strictly
+      if (matchedCust.secQuestion !== secQ || String(matchedCust.secAnswer || "").toLowerCase() !== secA) {
+        showAuthMsg("err", "Security Question or Answer did not match your account record.");
+        return;
+      }
+
+      // Handle "Remember Me / Save Password"
+      if (rememberMe) {
+        localStorage.setItem(STORE_SAVED_LOGIN_KEY, JSON.stringify({
+          identity: matchedCust.username || matchedCust.email,
+          password: matchedCust.password
+        }));
+      } else {
+        localStorage.removeItem(STORE_SAVED_LOGIN_KEY);
+      }
+
+      // Save active session & sync custom features
+      localStorage.setItem("om_active_customer_account", JSON.stringify(matchedCust));
+      localStorage.setItem("om_customer_unlocked_features", JSON.stringify(matchedCust.customFeatures || []));
       localStorage.setItem("bfc_role", role);
-      localStorage.setItem("om_logged_user", identity);
+      localStorage.setItem("om_logged_user", matchedCust.username);
       localStorage.setItem("om_last_active_time", String(Date.now()));
 
-      if (role === "staff" || role === "manager") {
-        const brMatch = identity.match(/(\d{3})/);
-        const brCode = (brMatch && brMatch[1]) || "001";
-        localStorage.setItem("om_staff_session", JSON.stringify({
-          code: identity.toUpperCase(),
-          role: role,
-          branchCode: brCode
-        }));
-        location.replace("index.html?role=" + role + "&branch=" + brCode);
-      } else {
-        localStorage.removeItem("om_staff_session");
+      showAuthMsg("ok", "Verified! Logging in to " + (matchedCust.gymName || "Om Software ERP") + "...");
+      setTimeout(function() {
         location.replace("index.html");
+      }, 600);
+    }
+
+    function handleForgotSecurityRecovery() {
+      const idVal = String(document.getElementById("loginIdentity").value || "").trim().toLowerCase();
+      if (!idVal) {
+        showAuthMsg("err", "Enter your registered Username or Email first in the box above, then click recovery.");
+        return;
+      }
+
+      const list = getSavedCustomersRegistry();
+      const found = list.find(c =>
+        String(c.username || "").toLowerCase() === idVal ||
+        String(c.email || "").toLowerCase() === idVal
+      );
+
+      if (!found) {
+        showAuthMsg("err", "Please sign up before using! No account found with this ID.");
+        return;
+      }
+
+      const ans = prompt("Security Question for " + found.username + ":\n" + found.secQuestion + "\n\nEnter your answer:");
+      if (ans && ans.trim().toLowerCase() === String(found.secAnswer || "").trim().toLowerCase()) {
+        alert("Account Verified!\n\nUsername: " + found.username + "\nPassword: " + found.password + "\nEmail: " + found.email + "\nGym: " + found.gymName);
+        document.getElementById("loginPassword").value = found.password;
+        document.getElementById("loginSecQ").value = found.secQuestion;
+        document.getElementById("loginSecA").value = found.secAnswer;
+      } else {
+        showAuthMsg("err", "Incorrect security answer.");
       }
     }
+
+    /* ==================== APP DEVELOPER MASTER CONTROL LOGIC ==================== */
+    const ALL_AVAILABLE_FEATURES = [
+      { id: "feat_salary", name: "Payroll & Salary Slip", planReq: "₹399" },
+      { id: "feat_bills", name: "Expense Bill Proofs", planReq: "₹399" },
+      { id: "feat_multibranch", name: "Multi-Branch Matrix", planReq: "₹999" },
+      { id: "feat_qr_att", name: "QR / Kiosk Attendance", planReq: "₹199" },
+      { id: "feat_custom_terms", name: "Printable Legal Agreement", planReq: "₹399" },
+      { id: "feat_pnl_growth", name: "Advanced P&L Analytics", planReq: "₹399" }
+    ];
+
+    function renderDeveloperCustomerList() {
+      const customers = getSavedCustomersRegistry();
+      const fromDate = document.getElementById("devFilterFrom").value;
+      const toDate = document.getElementById("devFilterTo").value;
+
+      let filtered = customers.filter(c => {
+        const cDate = (c.createdAt || "").slice(0, 10);
+        if (fromDate && cDate < fromDate) return false;
+        if (toDate && cDate > toDate) return false;
+        return true;
+      });
+
+      // Update counters
+      document.getElementById("devTotalCust").textContent = customers.length;
+      document.getElementById("devActivePaid").textContent = customers.filter(c => c.purchased).length;
+      document.getElementById("devNewRange").textContent = filtered.length;
+
+      const container = document.getElementById("devCustomersListContainer");
+      if (!filtered.length) {
+        container.innerHTML = '<div style="color:var(--tx-muted);text-align:center;padding:20px;background:#0D1527;border-radius:12px;">No customers found in this date range. Adjust the calendar filters above.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map((c, idx) => {
+        const customFeats = c.customFeatures || [];
+        const featChipsHtml = ALL_AVAILABLE_FEATURES.map(f => {
+          const isUnlocked = customFeats.includes(f.id);
+          return `<span class="feature-chip ${isUnlocked ? 'unlocked' : ''}" onclick="toggleFeatureForCustomer('${c.id}', '${f.id}')" title="Click to ${isUnlocked ? 'Block' : 'Unblock'}">
+            ${isUnlocked ? '✔' : '+'} ${f.name}
+          </span>`;
+        }).join("");
+
+        return `
+          <div class="cust-card">
+            <div class="cust-top">
+              <div>
+                <span class="cust-name">${c.gymName || "Gym"}</span>
+                <span style="font-size:11px;color:var(--gold);margin-left:6px">(${c.city || "Branch"})</span>
+              </div>
+              <span class="cust-badge">${c.planName || "Active Plan"}</span>
+            </div>
+
+            <div class="cust-meta">
+              👤 <b>Username:</b> ${c.username} &bull; 🔑 <b>Password:</b> <span style="color:var(--gold);font-weight:800">${c.password}</span><br>
+              📧 <b>Email:</b> ${c.email} &bull; 📞 <b>Phone:</b> ${c.phone || "N/A"}<br>
+              📅 <b>Registered On:</b> ${c.createdAt || "N/A"} &bull; <b>License:</b> ${c.licenseKey || "OM-ERP"}
+            </div>
+
+            <div style="font-size:10.5px;color:var(--tx-muted);margin-bottom:4px">
+              ⚡ <b>1-Click Custom Feature Unblock (Click chip to toggle):</b>
+            </div>
+            <div style="margin-bottom:8px">
+              ${featChipsHtml}
+            </div>
+
+            <div class="dev-actions">
+              <button type="button" class="dev-btn" onclick="devChangePassword('${c.id}')">🔑 Change Password</button>
+              <button type="button" class="dev-btn" onclick="devChangeEmail('${c.id}')">📧 Change Email</button>
+              <button type="button" class="dev-btn" onclick="devChangeMobile('${c.id}')">📞 Change Mobile</button>
+              <button type="button" class="dev-btn success" onclick="devDirectLoginAs('${c.id}')">🚀 Login to this Gym</button>
+              <button type="button" class="dev-btn danger" onclick="devDeleteCustomer('${c.id}')">🗑 Delete</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("btnApplyDevDateFilter").addEventListener("click", renderDeveloperCustomerList);
+    document.getElementById("btnResetDevDateFilter").addEventListener("click", function() {
+      document.getElementById("devFilterFrom").value = APP_LAUNCH_DATE;
+      document.getElementById("devFilterTo").value = new Date().toISOString().slice(0, 10);
+      renderDeveloperCustomerList();
+    });
+
+    // 1-Click Password Change by Developer
+    window.devChangePassword = function(custId) {
+      const list = getSavedCustomersRegistry();
+      const cust = list.find(c => c.id === custId);
+      if (!cust) return;
+      const newPass = prompt("Enter new password for " + cust.username + " (" + cust.gymName + "):", cust.password);
+      if (newPass && newPass.trim().length >= 4) {
+        cust.password = newPass.trim();
+        saveCustomersRegistry(list);
+        renderDeveloperCustomerList();
+        alert("Password updated to: " + cust.password + "\nCustomer ko yeh password bata dijiye!");
+      }
+    };
+
+    // 1-Click Email Change by Developer
+    window.devChangeEmail = function(custId) {
+      const list = getSavedCustomersRegistry();
+      const cust = list.find(c => c.id === custId);
+      if (!cust) return;
+      const newMail = prompt("Enter new Email for " + cust.username + ":", cust.email);
+      if (newMail && newMail.trim().includes("@")) {
+        cust.email = newMail.trim().toLowerCase();
+        saveCustomersRegistry(list);
+        renderDeveloperCustomerList();
+        alert("Email updated to: " + cust.email);
+      }
+    };
+
+    // 1-Click Mobile Change by Developer
+    window.devChangeMobile = function(custId) {
+      const list = getSavedCustomersRegistry();
+      const cust = list.find(c => c.id === custId);
+      if (!cust) return;
+      const newPhone = prompt("Enter new Mobile Number for " + cust.username + ":", cust.phone || "");
+      if (newPhone && newPhone.trim().length >= 10) {
+        cust.phone = newPhone.trim();
+        saveCustomersRegistry(list);
+        renderDeveloperCustomerList();
+        alert("Mobile updated to: " + cust.phone);
+      }
+    };
+
+    // 1-Click Feature Override / Unblock
+    window.toggleFeatureForCustomer = function(custId, featId) {
+      const list = getSavedCustomersRegistry();
+      const cust = list.find(c => c.id === custId);
+      if (!cust) return;
+      if (!cust.customFeatures) cust.customFeatures = [];
+
+      const idx = cust.customFeatures.indexOf(featId);
+      if (idx >= 0) {
+        cust.customFeatures.splice(idx, 1);
+      } else {
+        cust.customFeatures.push(featId);
+      }
+
+      saveCustomersRegistry(list);
+      // If currently active customer, sync in session
+      const active = JSON.parse(localStorage.getItem("om_active_customer_account") || "null");
+      if (active && active.id === custId) {
+        localStorage.setItem("om_customer_unlocked_features", JSON.stringify(cust.customFeatures));
+      }
+      renderDeveloperCustomerList();
+    };
+
+    // 1-Click Developer Direct Login to Customer Gym
+    window.devDirectLoginAs = function(custId) {
+      const list = getSavedCustomersRegistry();
+      const cust = list.find(c => c.id === custId);
+      if (!cust) return;
+      localStorage.setItem("om_active_customer_account", JSON.stringify(cust));
+      localStorage.setItem("om_customer_unlocked_features", JSON.stringify(cust.customFeatures || []));
+      localStorage.setItem("bfc_role", "owner");
+      localStorage.setItem("om_logged_user", cust.username);
+      location.replace("index.html");
+    };
+
+    // Delete customer
+    window.devDeleteCustomer = function(custId) {
+      if (!confirm("Are you sure you want to delete this customer?")) return;
+      let list = getSavedCustomersRegistry();
+      list = list.filter(c => c.id !== custId);
+      saveCustomersRegistry(list);
+      renderDeveloperCustomerList();
+    };
   </script>
 </body>
 </html>
