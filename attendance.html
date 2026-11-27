@@ -12,50 +12,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="auth-gate.js" data-mode="ondemand"></script>
-
-<script>
-// Safe fallback if Firebase CDN is blocked, offline, or opened via content:// URI
-(function() {
-  if (typeof window.firebase === "undefined") {
-    const noopDoc = {
-      get: async () => ({ exists: false, data: () => ({}) }),
-      set: async () => {},
-      update: async () => {},
-      delete: async () => {}
-    };
-    const noopCol = {
-      doc: () => noopDoc,
-      get: async () => ({ empty: true, forEach: () => {} }),
-      add: async () => ({ id: "local_" + Date.now() }),
-      where: () => noopCol,
-      orderBy: () => noopCol,
-      limit: () => noopCol
-    };
-    window.firebase = {
-      apps: [],
-      initializeApp: function() { this.apps.push({}); return {}; },
-      auth: function() {
-        return {
-          currentUser: null,
-          onAuthStateChanged: function(cb) { if (cb) cb(null); return function(){}; },
-          signInWithEmailAndPassword: async function() { return { user: { email: "admin@local" } }; },
-          signOut: async function() {},
-          sendPasswordResetEmail: async function() {}
-        };
-      },
-      firestore: function() {
-        return {
-          collection: () => noopCol,
-          batch: () => ({ set: () => {}, update: () => {}, delete: () => {}, commit: async () => {} })
-        };
-      }
-    };
-    window.firebase.firestore.FieldPath = function(f) { this.field = f; };
-    window.firebase.firestore.FieldValue = { delete: function() { return null; } };
-  }
-})();
-</script>
-
 <script>
 /* safai helpers: naam/id kabhi code ban kar na chale */
 window.__esc=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
@@ -814,24 +770,10 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     appId: "1:781489019006:web:4a230698f2195e7208202f"
   };
 
-  try {
-    if (typeof firebase !== "undefined" && !firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-  } catch (e) { console.warn("Firebase init fallback:", e); }
-  const db = (typeof firebase !== "undefined" && typeof firebase.firestore === "function")
-    ? firebase.firestore()
-    : {
-        collection: () => ({
-          doc: () => ({ get: async () => ({ exists: false, data: () => ({}) }), set: async () => {}, update: async () => {}, delete: async () => {} }),
-          get: async () => ({ empty: true, forEach: () => {} }),
-          add: async () => ({ id: "local_" + Date.now() }),
-          where: function() { return this; },
-          orderBy: function() { return this; },
-          limit: function() { return this; }
-        }),
-        batch: () => ({ set: () => {}, update: () => {}, delete: () => {}, commit: async () => {} })
-      };
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
 
   // Admin = sirf Firebase email+password login (PIN/code nahi). 30 min kaam na ho to apne aap logout.
   let isAdminUnlocked = false;
@@ -858,17 +800,17 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
   let SELFIE_TG_TOKEN = "";
   async function bfcTgResolveToken() {
     if (SELFIE_TG_TOKEN) return SELFIE_TG_TOKEN;
-    try { const c = localStorage.getItem("om_att_tg_ok"); if (c && SELFIE_TG_TOKENS.indexOf(c) >= 0) { SELFIE_TG_TOKEN = c; return c; } } catch (e) {}
+    try { const c = localStorage.getItem("5bfc_tg_ok"); if (c && SELFIE_TG_TOKENS.indexOf(c) >= 0) { SELFIE_TG_TOKEN = c; return c; } } catch (e) {}
     for (let i = 0; i < SELFIE_TG_TOKENS.length; i++) {
       try {
         const r = await fetch("https://api.telegram.org/bot" + SELFIE_TG_TOKENS[i] + "/getMe");
         const j = await r.json();
-        if (j && j.ok) { SELFIE_TG_TOKEN = SELFIE_TG_TOKENS[i]; try { localStorage.setItem("om_att_tg_ok", SELFIE_TG_TOKEN); } catch (e) {} return SELFIE_TG_TOKEN; }
+        if (j && j.ok) { SELFIE_TG_TOKEN = SELFIE_TG_TOKENS[i]; try { localStorage.setItem("5bfc_tg_ok", SELFIE_TG_TOKEN); } catch (e) {} return SELFIE_TG_TOKEN; }
       } catch (e) { return ""; }
     }
     return "";
   }
-  const DRIVE_Q_KEY = "om_att_selfie_queue";
+  const DRIVE_Q_KEY = "5bfc_selfie_queue";
 
   function bfcThumbOf(canvasEl, side) {
     try {
@@ -922,8 +864,8 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       const cutISO = getLocalDateISO(cutoff);
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (!k || k.indexOf("om_att_attendance_") !== 0) continue;
-        const d = k.replace("om_att_attendance_", "");
+        if (!k || k.indexOf("5bfc_attendance_") !== 0) continue;
+        const d = k.replace("5bfc_attendance_", "");
         if (!(d < cutISO)) continue;
         let map; try { map = JSON.parse(localStorage.getItem(k) || "{}"); } catch (e) { continue; }
         let changed = false;
@@ -994,7 +936,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       });
 
       const localPool = [];
-      for (const key of ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"]) {
+      for (const key of ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"]) {
         try {
           const value = JSON.parse(localStorage.getItem(key) || "[]");
           if (Array.isArray(value)) localPool.push(...value);
@@ -1017,7 +959,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
 
     let bbfMaster = JSON.parse(localStorage.getItem("bbf_master_records_v4") || "[]");
     let bfcMembers = JSON.parse(localStorage.getItem("5BFC_MEMBERS") || "[]");
-    let admSync = JSON.parse(localStorage.getItem("om_att_admissions") || "[]");
+    let admSync = JSON.parse(localStorage.getItem("5bfc_admissions") || "[]");
 
     let pool = [...bfcMembers, ...bbfMaster, ...admSync];
     let uniqueMap = new Map();
@@ -1049,7 +991,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
   function writeMemberToLocal(member) {
     try {
       var ph = String(member.phone || "").replace(/\D/g, "").slice(-10);
-      ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"].forEach(function(key){
+      ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"].forEach(function(key){
         var arr; try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch(e) { return; }
         if (!Array.isArray(arr)) return;
         var changed = false;
@@ -1093,7 +1035,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
 
   function fetchAttendanceMapForDate(dateStr) {
     try {
-      const raw = localStorage.getItem("om_att_attendance_" + dateStr);
+      const raw = localStorage.getItem("5bfc_attendance_" + dateStr);
       return raw ? (JSON.parse(raw) || {}) : {};
     } catch (err) {
       console.error("Could not read attendance records:", err);
@@ -1129,7 +1071,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
             }
           });
           // write merged back to local so offline works
-          try { localStorage.setItem("om_att_attendance_" + dateStr, JSON.stringify(map)); } catch(e) {}
+          try { localStorage.setItem("5bfc_attendance_" + dateStr, JSON.stringify(map)); } catch(e) {}
         }
       }
     } catch (e) {
@@ -1687,7 +1629,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     setPermStatusUI(locOk, camOk, locOk ? "granted" : (st.loc||"denied"), camOk ? "granted" : (st.cam||"denied"));
 
     if (locOk && camOk) {
-      try { localStorage.setItem("om_att_perm_ok", "1"); } catch(e) {}
+      try { localStorage.setItem("5bfc_perm_ok", "1"); } catch(e) {}
       if (msg) msg.innerHTML = '<span style="color:#00ff66;font-weight:800;">✅ Ho gaya! 1 sec me attendance page...</span>';
       setTimeout(closePermGate, 700);
     } else {
@@ -1731,9 +1673,38 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
   }
 
   async function maybeShowPermGate() {
+    let locOk = false, camOk = false;
+    const st = await checkPermStates();
+    if (st.loc === "granted") locOk = true;
+    if (st.cam === "granted") camOk = true;
+    const saved = localStorage.getItem("5bfc_perm_ok") === "1";
+    // ek baar allow + not hard-denied = mat pareshan karo
+    if (locOk && camOk) { closePermGate(); return; }
+    if (saved && st.loc !== "denied" && st.cam !== "denied") { closePermGate(); return; }
     const o = document.getElementById("permGateOverlay");
-    if (o) o.style.display = "none";
-    return;
+    if (o) {
+      o.style.display = "block";
+      setPermStatusUI(locOk, camOk, st.loc, st.cam);
+      // in-app browser warning
+      var hint = document.getElementById("inAppBrowserHint");
+      if (isInAppBrowser()) {
+        if (!hint) {
+          hint = document.createElement("div");
+          hint.id = "inAppBrowserHint";
+          hint.style.cssText = "margin:10px 0;padding:12px;background:#2a1500;border:1px solid #ff9900;border-radius:10px;font-size:12px;line-height:1.45;color:#ffe0b2;";
+          hint.innerHTML = "⚠️ Instagram/FB/WhatsApp browser me camera often block hota hai.<br><b>Chrome me kholo</b> — 1 baar Allow, phir roz easy.";
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = "🌐 Chrome me kholo";
+          btn.style.cssText = "margin-top:8px;width:100%;background:#ffcc00;color:#000;border:none;border-radius:8px;padding:12px;font-weight:900;cursor:pointer;";
+          btn.onclick = openInChromeHint;
+          hint.appendChild(btn);
+          var allowBtn = document.getElementById("permAllowBtn");
+          if (allowBtn && allowBtn.parentNode) allowBtn.parentNode.insertBefore(hint, allowBtn);
+          else o.querySelector("div").appendChild(hint);
+        }
+      }
+    }
   }
 
   async function ensurePermissionsEarly() {
@@ -1741,7 +1712,20 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
   }
 
   async function openSearchKiosk() {
-    try { await maybeShowPermGate(); } catch(e) {}
+    await maybeShowPermGate();
+    const st = await checkPermStates();
+    if (st.loc === "denied" || st.cam === "denied") {
+      const o = document.getElementById("permGateOverlay");
+      if (o) o.style.display = "block";
+      document.getElementById("permHelpBox").style.display = "block";
+      alert("Pehle Camera + Location Allow karo — roz attendance ke liye zaroori hai.");
+      return;
+    }
+    // soft request if still prompt
+    if (st.loc === "prompt" || st.cam === "prompt" || st.loc === "unknown") {
+      await requestBothPermissionsNow();
+    }
+
     document.getElementById("kioskHeroBox").style.display = "none";
     document.getElementById("searchAreaWrapper").style.display = "block";
     document.getElementById("singleMemberContainer").style.display = "none";
@@ -1838,7 +1822,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       return;
     }
     // Root → go to master app
-    window.location.href = "index.html";
+    window.location.href = "app.html";
   }
 
   async function toggleBatchDirectList() {
@@ -2108,7 +2092,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       };
       // local log
       try {
-        const key = "om_att_att_attempts_" + todayISO;
+        const key = "5bfc_att_attempts_" + todayISO;
         const arr = JSON.parse(localStorage.getItem(key) || "[]");
         arr.push(payload);
         localStorage.setItem(key, JSON.stringify(arr.slice(-200)));
@@ -2306,108 +2290,12 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     captureLiveSelfieProof();
   }
 
-  
-  function saveAttendanceFromCanvas(canvasEl, candidate) {
-    if (!candidate) return;
-    const now = new Date();
-    const todayISO = getLocalDateISO(now);
-    const attendanceRecords = fetchAttendanceMapForDate(todayISO) || {};
-    const mid = String(candidate.id);
-    const base64Stamp = bfcThumbOf(canvasEl, 96) || canvasEl.toDataURL("image/jpeg", 0.35);
-    const fullSelfie = canvasEl.toDataURL("image/jpeg", 0.7);
-    const dayStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth()+1).padStart(2, '0')}-${now.getFullYear()}`;
-    const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-    const entry = {
-      time: timeStr,
-      fullStamp: "📅 " + dayStr + " | ⏰ " + timeStr,
-      photo: base64Stamp,
-      statusMsg: "VERIFIED SELFIE",
-      by: "member",
-      isReal: true,
-      name: candidate.name,
-      phone: candidate.phone,
-      slot: candidate.slot || "",
-      feesDue: !!window.__attFeesDueFlag,
-      gps: window.__lastGpsMeta || null
-    };
-
-    attendanceRecords[mid] = entry;
-    try {
-      (candidate.__twins || []).forEach(function(t){
-        attendanceRecords[t] = Object.assign({}, entry, { aliasOf: mid, photo: "" });
-      });
-    } catch(e) {}
-    try {
-      var phKey = normPhone(candidate.phone);
-      if (phKey && phKey.length === 10) {
-        attendanceRecords["phone:" + phKey] = Object.assign({}, entry, { aliasOf: mid, photo: "" });
-      }
-    } catch(e) {}
-
-    try { localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords)); } catch(e) {}
-    try {
-      if (typeof db !== "undefined" && db) {
-        var cloudEntry = Object.assign({}, entry);
-        if (cloudEntry.photo && cloudEntry.photo.length > 12000) cloudEntry.photo = "";
-        var cloudPayload = { [mid]: cloudEntry };
-        db.collection("attendance").doc(todayISO).set(cloudPayload, { merge: true }).catch(function(){});
-      }
-    } catch(e) {}
-
-    try {
-      bfcSendSelfie({
-        img: fullSelfie,
-        name: candidate.name || "",
-        phone: String(candidate.phone || ""),
-        date: todayISO,
-        time: timeStr
-      });
-    } catch(e) {}
-
-    try { refreshTodayStats(); } catch(e) {}
-    closeCameraModal();
-    alert(`✅ ${candidate.name} ki attendance (${timeStr}) save ho gayi!`);
-    try { loadSingleMemberKioskCard(candidate.id); } catch(e) {}
-  }
-
-  function triggerNativeSelfieFallback(candidate) {
-    let fileInp = document.getElementById("nativeSelfieInput");
-    if (!fileInp) {
-      fileInp = document.createElement("input");
-      fileInp.type = "file";
-      fileInp.id = "nativeSelfieInput";
-      fileInp.accept = "image/*";
-      fileInp.setAttribute("capture", "user");
-      fileInp.style.display = "none";
-      document.body.appendChild(fileInp);
+  async function initiateCameraVerification(candidate) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("कैमरा उपलब्ध नहीं है। कृपया पेज को HTTPS या localhost पर खोलें।");
+      return;
     }
 
-    fileInp.onchange = function(ev) {
-      const file = ev.target.files && ev.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(loadEv) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.getElementById("offscreenCanvas") || document.createElement("canvas");
-          const maxSide = 320;
-          const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-          canvas.width = Math.max(1, Math.round(img.width * scale));
-          canvas.height = Math.max(1, Math.round(img.height * scale));
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          saveAttendanceFromCanvas(canvas, candidate);
-        };
-        img.src = loadEv.target.result;
-      };
-      reader.readAsDataURL(file);
-    };
-
-    fileInp.click();
-  }
-
-  async function initiateCameraVerification(candidate) {
     clearAutoCapture();
     document.getElementById("modalCandidateName").innerText = candidate.name;
     try {
@@ -2419,30 +2307,42 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       __dw.style.color = __yz ? "#ffe066" : "#ff8080";
       __dw.style.display = __dh ? "block" : "none"; __dw.innerHTML = __dh;
     } catch (e) {}
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      triggerNativeSelfieFallback(candidate);
-      return;
-    }
-
     document.getElementById("cameraBackdropModal").classList.add("show");
     updateSmartBackLabel();
     const videoElem = document.getElementById("videoElement");
-
+    
     try {
       if (!currentVideoStream) {
-        currentVideoStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } },
-          audio: false
+        currentVideoStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } }, 
+          audio: false 
         });
       }
       videoElem.srcObject = currentVideoStream;
       await videoElem.play();
+      // camera ready → auto face capture countdown (no touch needed)
       startAutoCaptureCountdown();
     } catch (err) {
-      console.warn("Live stream fallback to native camera:", err);
-      closeCameraModal();
-      triggerNativeSelfieFallback(candidate);
+      console.error("Camera error:", err);
+      currentVideoStream = null;
+      const retry = confirm("कैमरा/परमिशन बंद है।\n\nOK dabao → browser dubara permission maangega.\nAllow karo fir selfie ho jayegi.");
+      if (retry) {
+        try {
+          currentVideoStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } },
+            audio: false
+          });
+          videoElem.srcObject = currentVideoStream;
+          await videoElem.play();
+          startAutoCaptureCountdown();
+          return;
+        } catch (e2) {
+          alert("Abhi bhi permission nahi mili. Chrome Settings → Site settings → Camera → Allow karke page refresh karo.");
+          closeCameraModal();
+        }
+      } else {
+        closeCameraModal();
+      }
     }
   }
 
@@ -2482,7 +2382,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
         };
         attendanceRecords[mid] = entry0;
         try { (currentlyLoadedMember.__twins || []).forEach(function(t){ attendanceRecords[t] = Object.assign({}, entry0, { aliasOf: mid }); }); } catch(e) {}
-        try { localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords)); } catch(e) {}
+        try { localStorage.setItem("5bfc_attendance_" + todayISO, JSON.stringify(attendanceRecords)); } catch(e) {}
         try {
           if (typeof db !== "undefined" && db) {
             var __p0 = { [mid]: entry0 };
@@ -2553,20 +2453,20 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     let savedOk = false;
     window.__attCloudOk = false;
     try {
-      localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords));
+      localStorage.setItem("5bfc_attendance_" + todayISO, JSON.stringify(attendanceRecords));
       savedOk = true;
     } catch (storageError) {
       console.error("Storage full:", storageError);
       // pehle purani photos hata kar jagah banao, phir dubara try
       bfcPruneAttendancePhotos(0);
       try {
-        localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords));
+        localStorage.setItem("5bfc_attendance_" + todayISO, JSON.stringify(attendanceRecords));
         savedOk = true;
       } catch (e1) {
         try {
           const light = Object.assign({}, entry, { photo: "" });
           attendanceRecords[mid] = light;
-          localStorage.setItem("om_att_attendance_" + todayISO, JSON.stringify(attendanceRecords));
+          localStorage.setItem("5bfc_attendance_" + todayISO, JSON.stringify(attendanceRecords));
           savedOk = true;
         } catch (e2) {
           console.error("local save failed, cloud par save hoga", e2);
@@ -2661,7 +2561,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
   }
 
   async function openAdminMemberManager(memberId) {
-    if (!isAdminUnlocked && !askAdminPin("🔒 Om Fitness Admin code दर्ज करें:")) return;
+    if (!isAdminUnlocked && !askAdminPin("🔒 5 BFC Admin code दर्ज करें:")) return;
 
     let allRecords = await fetchStoredMembers();
     let m = allRecords.find(r => r.id.toString() === memberId.toString());
@@ -2807,7 +2707,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     var dirty = __zoneDirty; __zoneDirty = {};
     var ids = Object.keys(dirty); if (!ids.length) return;
     try {
-      ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"].forEach(function (key) {
+      ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"].forEach(function (key) {
         var arr; try { arr = JSON.parse(localStorage.getItem(key) || "[]"); } catch (e) { return; }
         if (!Array.isArray(arr)) return;
         var ch = false;
@@ -2964,7 +2864,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       // Delete se pehle poora data "ex_members" me archive (Rejoining ke liye)
       let full = {};
       try { const s = await db.collection("members").doc(String(memberId)).get(); if (s.exists) full = s.data() || {}; } catch (e) {}
-      ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"].forEach(function (k) {
+      ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"].forEach(function (k) {
         try {
           const arr = JSON.parse(localStorage.getItem(k) || "[]");
           const r = Array.isArray(arr) && arr.find(x => x && String(x.id) === String(memberId));
@@ -2986,7 +2886,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
         if (!confirm("⚠️ Ex-Members me data save nahi hua (internet?).\n\nPhir bhi hata dein? Yeh wapas nahi aayega.")) return;
       }
       // local se bhi hatao, warna is phone par wapas dikh sakta hai
-      ["5BFC_MEMBERS", "bbf_master_records_v4", "om_att_admissions"].forEach(function (k) {
+      ["5BFC_MEMBERS", "bbf_master_records_v4", "5bfc_admissions"].forEach(function (k) {
         try {
           const arr = JSON.parse(localStorage.getItem(k) || "[]");
           if (Array.isArray(arr)) localStorage.setItem(k, JSON.stringify(arr.filter(x => !x || String(x.id) !== String(memberId))));
@@ -3063,8 +2963,8 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.indexOf("om_att_attendance_") === 0) {
-          const d = k.replace("om_att_attendance_", "");
+        if (k && k.indexOf("5bfc_attendance_") === 0) {
+          const d = k.replace("5bfc_attendance_", "");
           if (/^\d{4}-\d{2}-\d{2}$/.test(d)) dates.push(d);
         }
       }
@@ -3682,7 +3582,7 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
       ids.forEach(function (id, i) { const e = i === 0 ? entry : Object.assign({}, entry, { aliasOf: String(memberId) }); dayMap[id] = e; payload[id] = e; });
       if (pk.length === 10) { const pe = Object.assign({}, entry, { aliasOf: String(memberId) }); dayMap["phone:" + pk] = pe; payload["phone:" + pk] = pe; }
     }
-    try { localStorage.setItem("om_att_attendance_" + dateISO, JSON.stringify(dayMap)); } catch (e) {}
+    try { localStorage.setItem("5bfc_attendance_" + dateISO, JSON.stringify(dayMap)); } catch (e) {}
     if (m) { const vv = window.__calView || { y: new Date().getFullYear(), mo: new Date().getMonth() }; renderAttendanceCalendar(m, vv.y, vv.mo, true); }
     // ---- cloud (background) ----
     try {
@@ -3697,12 +3597,20 @@ window.__csv=function(v){var s=String(v==null?"":v).replace(/"/g,'""');return /^
 </script>
 
 <script>
-window.addEventListener("error", function(ev) {
-  console.warn("Caught runtime error safely:", ev.message || ev);
-});
-window.addEventListener("unhandledrejection", function(ev) {
-  console.warn("Caught promise rejection safely:", ev.reason || ev);
-});
+(function attendanceModeFilter() {
+  window.addEventListener("DOMContentLoaded", function () {
+    var mode = "has_staff";
+    try { mode = localStorage.getItem("om_gym_operation_mode") || "has_staff"; } catch (e) {}
+    if (mode !== "owner_solo") {
+      // Hide selfie trigger & camera modal when staff mode is active for owner view
+      var role = String(localStorage.getItem("bfc_role") || "owner").toLowerCase();
+      if (role === "owner") {
+        var btn = document.getElementById("btnPresTrigger");
+        if (btn) btn.style.display = "none";
+      }
+    }
+  });
+})();
 </script>
 
 </body>

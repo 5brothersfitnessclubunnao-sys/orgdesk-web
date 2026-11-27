@@ -160,6 +160,7 @@
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <button type="button" class="out-btn" id="btnUpgradePlan" style="border-color:var(--gold);color:var(--gold)">⬆ Upgrade Plan</button>
+        <button type="button" class="out-btn" id="btnResetYourData" style="border-color:var(--rose);color:var(--rose)">&#128465; Reset Your Data</button>
         <button type="button" class="out-btn" id="btnLogout">Logout</button>
       </div>
     </div>
@@ -181,14 +182,14 @@
       <span class="tag-auto">AUTO SYNC</span>
     </div>
 
-    <!-- 1. LIVE GYM MEMBER ATTENDANCE -->
+    <!-- 1. LIVE GYM MEMBER ATTENDANCE (ALL BRANCHES + PRESENT / ABSENT) -->
     <div class="p1-card" data-open-modal="modLiveAtt">
       <div class="p1-card-top">
         <span class="p1-lbl">&#9989; Live Member Attendance</span>
-        <span class="p1-pill">Today</span>
+        <span class="p1-pill">All Branches</span>
       </div>
-      <div class="p1-num" id="cardValLiveAtt" style="color:var(--cyan)">0</div>
-      <div class="p1-sub"><span>Today's active check-ins</span><span>View &amp; Excel &rarr;</span></div>
+      <div class="p1-num" id="cardValLiveAtt" style="color:var(--cyan)">0 Present / 0 Absent</div>
+      <div class="p1-sub"><span id="cardSubLiveAtt">Total Members: 0 • Branch-wise filter inside</span><span>View &amp; Excel &rarr;</span></div>
     </div>
 
     <!-- 2. TOTAL FEES COLLECTION (THIS MONTH ON CARD, ALL-TIME / CALENDAR FILTER INSIDE) -->
@@ -301,6 +302,69 @@
 
   <!-- ==================== MODALS ==================== -->
 
+  <!-- ROLE / OWNER VERIFICATION MODAL (Prevents random email from becoming Owner) -->
+  <div class="modal-ov" id="modRoleGate">
+    <div class="modal-box" style="border-color:var(--gold)">
+      <div class="m-top"><h3>&#128272; Workspace Role &amp; Owner Access</h3><button type="button" class="x-btn" data-close-modal="modRoleGate">&times;</button></div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px;line-height:1.45">
+        Har email ko direct Owner nahi mana jayega. Kripya apna Role aur registered Owner/Staff Email verify karein.
+      </div>
+      <form id="formRoleGate">
+        <div class="fg">
+          <label>Select Role *</label>
+          <select class="fc" id="rgRoleSelect">
+            <option value="owner">Gym Owner (Master Access)</option>
+            <option value="manager">Branch Manager</option>
+            <option value="staff">Staff / Trainer</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Email Address *</label>
+          <input type="email" class="fc" id="rgEmailInput" required placeholder="owner@yourgym.com">
+        </div>
+        <div class="fg" id="rgOwnerKeyGroup">
+          <label>Owner Access Key / Passcode *</label>
+          <input type="password" class="fc" id="rgOwnerKeyInput" placeholder="Enter Owner Key (e.g. OWNER2026)">
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">Demo Owner Key: <b>OWNER2026</b> (any non-owner email without key stays in Staff/Restricted view)</div>
+        </div>
+        <button type="submit" class="big-btn">&#10004; Verify &amp; Continue</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- IN-APP UPGRADE PLAN MODAL (No forced auto-logout) -->
+  <div class="modal-ov" id="modUpgradePlanInApp">
+    <div class="modal-box" style="border-color:var(--gold);max-width:560px">
+      <div class="m-top"><h3>&#11014; Upgrade Plan — Om Software ERP</h3><button type="button" class="x-btn" data-close-modal="modUpgradePlanInApp">&times;</button></div>
+      <div id="inAppPlanBanner" class="list-item" style="border-color:var(--emerald);margin-bottom:10px">
+        Current Plan: <b id="inAppCurPlanName" style="color:var(--gold)">Starter / Active Desk</b>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px">
+        <div class="list-item" style="border-color:var(--gold);display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><b>Starter — ₹99</b><div style="font-size:10.5px;color:var(--muted)">Attendance, Fees Slip, Basic Admission</div></div>
+          <button type="button" class="big-btn" style="margin:0;width:auto;padding:8px 12px;font-size:11.5px" onclick="window.omSelectPlanDirect('Starter Plan (₹99)', 99)">Select ₹99</button>
+        </div>
+        <div class="list-item" style="border-color:var(--cyan);display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><b>Growth — ₹199</b><div style="font-size:10.5px;color:var(--muted)">Cash/Online Split, Due Reminders, Enquiry, CSV</div></div>
+          <button type="button" class="big-btn sec" style="margin:0;width:auto;padding:8px 12px;font-size:11.5px" onclick="window.omSelectPlanDirect('Growth Plan (₹199)', 199)">Select ₹199</button>
+        </div>
+        <div class="list-item" style="border-color:var(--emerald);display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><b>Pro Business — ₹399</b><div style="font-size:10.5px;color:var(--muted)">Payroll, Salary Slips, Bills &amp; Net P&amp;L</div></div>
+          <button type="button" class="big-btn" style="margin:0;width:auto;padding:8px 12px;font-size:11.5px" onclick="window.omSelectPlanDirect('Pro Business (₹399)', 399)">Select ₹399</button>
+        </div>
+        <div class="list-item" style="border-color:var(--purple);display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><b>Enterprise Multi-Branch — ₹999</b><div style="font-size:10.5px;color:var(--muted)">Multi-Branch, Auto Data Router, Cloud Sync</div></div>
+          <button type="button" class="big-btn" style="margin:0;width:auto;padding:8px 12px;font-size:11.5px" onclick="window.omSelectPlanDirect('Enterprise ERP (₹999)', 999)">Select ₹999</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="big-btn sec" style="margin:0;flex:1" onclick="window.location.href='plans-2.html'">Open Full Plans Page</button>
+        <button type="button" class="big-btn" style="margin:0;flex:1" data-close-modal="modUpgradePlanInApp">Done</button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- MODAL 1: LIVE MEMBER ATTENDANCE -->
   <div class="modal-ov" id="modLiveAtt">
     <div class="modal-box">
@@ -325,8 +389,19 @@
         <button type="button" class="big-btn sec" style="margin-top:8px;" id="btnBackFromCollection">← Back</button>
       </div>
 
-      <!-- PANEL B: Detail / Export view (default visible after choosing Detail) -->
+      <!-- PANEL B: Detail / Export view with Branch Filter & Present/Absent -->
       <div id="attDetailPanel" style="display:none;">
+        <div class="filter-box" style="margin-bottom:10px;">
+          <label style="font-size:10px;color:var(--muted)">Branch Filter (All / Branch-wise)</label>
+          <select class="fc" id="attFilterBranch" onchange="renderAttExplorer()">
+            <option value="ALL">All Branches Combined</option>
+            <option value="001">Branch 01 (Main)</option>
+          </select>
+          <div style="display:flex;gap:6px;margin-top:8px;">
+            <button type="button" class="big-btn" style="margin:0;padding:7px;font-size:11.5px;flex:1" onclick="renderAttExplorer()">Apply Branch</button>
+            <button type="button" class="big-btn ok" style="margin:0;padding:7px;font-size:11.5px;flex:1" onclick="renderAttExplorer(); showSubmitSuccess('Submit Successful');">✔ Submit</button>
+          </div>
+        </div>
         <button type="button" class="big-btn sec" style="margin-top:0;margin-bottom:10px" id="btnExportAttExcel">Export Attendance to Excel</button>
         <div id="liveAttListContainer"></div>
         <button type="button" class="big-btn sec" style="margin-top:8px;" id="btnBackFromDetail">← Back</button>
@@ -1997,7 +2072,8 @@
         var content = document.getElementById("salarySlipPrintableContent").innerHTML;
         var w = window.open("", "_blank");
         if (!w) { alert("Popup blocked — allow popups to print."); return; }
-        w.document.write("<html><head><title>Pay Slip</title></head><body style='font-family:Segoe UI,Arial;padding:16px;max-width:720px;margin:0 auto'>" + content + "<script>window.onload=function(){window.print()}<\/script></body></html>");
+        w.document.write("<html><head><title>Pay Slip</title></head><body style='font-family:Segoe UI,Arial;padding:16px;max-width:720px;margin:0 auto'>" + content + "<script>window.onload=function(){window.print()}<\/script>
+  </body></html>");
         w.document.close();
       });
 
@@ -2192,10 +2268,369 @@
         }
       });
 
-      window.addEventListener("DOMContentLoaded", renderPage1);
+
+      /* ===== 1. ROLE / OWNER ACCESS CHECK (Prevents random email from becoming Owner) ===== */
+      var OWNER_PASSCODE = "OWNER2026";
+      function getSessionRole() {
+        try {
+          var s = JSON.parse(localStorage.getItem("om_role_session") || "null");
+          if (s && s.role) return s;
+        } catch (e) {}
+        return { role: "owner", email: "default-desk@local", verifiedOwner: true };
+      }
+
+      function applyRoleBadgeToHeader() {
+        var sess = getSessionRole();
+        var sub = document.getElementById("hdrSub");
+        if (sub) {
+          var label = sess.role === "owner" ? "Owner Control Desk" : (sess.role === "manager" ? "Manager Desk (Restricted)" : "Staff Desk (Limited)");
+          sub.textContent = label + (sess.email ? " • " + sess.email : "");
+        }
+      }
+
+      document.getElementById("formRoleGate").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var role = document.getElementById("rgRoleSelect").value;
+        var email = String(document.getElementById("rgEmailInput").value || "").trim().toLowerCase();
+        var key = String(document.getElementById("rgOwnerKeyInput").value || "").trim();
+        if (role === "owner" && key !== OWNER_PASSCODE) {
+          alert("Owner access ke liye valid Owner Key (" + OWNER_PASSCODE + ") zaroori hai. Har email ko Owner nahi mana jayega.");
+          return;
+        }
+        var sess = { role: role, email: email, verifiedOwner: (role === "owner" && key === OWNER_PASSCODE) };
+        try { localStorage.setItem("om_role_session", JSON.stringify(sess)); } catch (e) {}
+        applyRoleBadgeToHeader();
+        closeModal("modRoleGate");
+        showSubmitSuccess("Role Verified (" + role.toUpperCase() + ")");
+      });
+
+      /* ===== 2. UNIFIED MEMBER & STAFF SYNC ACROSS SYSTEM ===== */
+      function syncMemberEverywhere(d, mem) {
+        if (!d || !mem) return;
+        if (!d.admissions) d.admissions = [];
+        if (!d.transactions) d.transactions = [];
+        if (!d.attendance) d.attendance = [];
+        var br = mem.branch || "001";
+        var idx = d.admissions.findIndex(function (x) {
+          return (mem.phone && x.phone === mem.phone) || (mem.name && x.name && x.name.toLowerCase() === mem.name.toLowerCase());
+        });
+        var rec = {
+          id: mem.id || Date.now(),
+          name: mem.name,
+          phone: mem.phone || "",
+          total: Number(mem.total || 500),
+          paid: Number(mem.paid || 0),
+          due: Math.max(0, Number(mem.total || 500) - Number(mem.paid || 0)),
+          date: mem.date || new Date().toISOString().slice(0, 10),
+          batch: mem.batch || "Morning",
+          branch: br
+        };
+        if (idx >= 0) d.admissions[idx] = Object.assign({}, d.admissions[idx], rec);
+        else d.admissions.unshift(rec);
+
+        if (rec.paid > 0) {
+          d.transactions.unshift({
+            memberName: rec.name,
+            amount: rec.paid,
+            mode: mem.mode || "Cash",
+            category: mem.category || "New Admission",
+            date: rec.date,
+            time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+            branch: br
+          });
+        }
+      }
+
+      function syncStaffEverywhere(d, stf) {
+        if (!d || !stf) return;
+        if (!d.staff) d.staff = [];
+        var br = stf.branch || "001";
+        var idx = d.staff.findIndex(function (x) {
+          return (stf.code && x.code && String(x.code).toLowerCase() === String(stf.code).toLowerCase()) ||
+            (stf.name && x.name && x.name.toLowerCase() === stf.name.toLowerCase());
+        });
+        var rec = {
+          name: stf.name,
+          dept: normalizeDept(stf.dept || stf.post || "Floor"),
+          phone: stf.phone || "",
+          wa: stf.wa || stf.phone || "",
+          post: stf.post || "Staff",
+          code: stf.code || ("STF-" + String(Date.now()).slice(-4)),
+          branch: br,
+          salary: Number(stf.salary || 0)
+        };
+        if (idx >= 0) d.staff[idx] = Object.assign({}, d.staff[idx], rec);
+        else d.staff.unshift(rec);
+      }
+
+      // Override renderPage1 to show Total / Present / Absent for All Branches on Live Attendance card
+      var _origRenderPage1 = renderPage1;
+      renderPage1 = function () {
+        _origRenderPage1();
+        applyRoleBadgeToHeader();
+        var d = loadData();
+        var today = new Date().toISOString().slice(0, 10);
+        var members = d.admissions || [];
+        var todayAtt = (d.attendance || []).filter(function (a) { return a.date === today && a.type === "Member"; });
+        var presentNames = {};
+        todayAtt.forEach(function (a) { if (a.status === "Present" && a.name) presentNames[a.name.toLowerCase()] = true; });
+        var presentCount = members.filter(function (m) { return !!presentNames[String(m.name || "").toLowerCase()]; }).length;
+        var absentCount = Math.max(0, members.length - presentCount);
+        var attCardVal = document.getElementById("cardValLiveAtt");
+        var attCardSub = document.getElementById("cardSubLiveAtt");
+        if (attCardVal) attCardVal.textContent = presentCount + " Present / " + absentCount + " Absent";
+        if (attCardSub) attCardSub.textContent = "All Branches Total Members: " + members.length + " • Branch-wise filter inside";
+      };
+
+      // Enhance renderAttExplorer so All Branches Total Members, Present, Absent + Branch filter show clearly
+      var _origRenderAttExplorer = renderAttExplorer;
+      renderAttExplorer = function () {
+        var d = loadData();
+        var today = new Date().toISOString().slice(0, 10);
+        var brSel = (document.getElementById("attFilterBranch") || {}).value || "ALL";
+        var members = (d.admissions || []).filter(function (m) {
+          if (brSel !== "ALL" && String(m.branch || "001") !== brSel) return false;
+          return true;
+        });
+        var todayAtt = (d.attendance || []).filter(function (a) {
+          if (a.date !== today) return false;
+          if (brSel !== "ALL" && String(a.branch || "001") !== brSel) return false;
+          return true;
+        });
+        var presentMap = {};
+        todayAtt.forEach(function (a) {
+          if (a.status === "Present" && a.name) presentMap[String(a.name).toLowerCase()] = a;
+        });
+        var presentList = members.filter(function (m) { return !!presentMap[String(m.name || "").toLowerCase()]; });
+        var absentList = members.filter(function (m) { return !presentMap[String(m.name || "").toLowerCase()]; });
+
+        var box = document.getElementById("liveAttListContainer");
+        if (!box) return;
+        var topBox = '<div class="list-item" style="border-color:var(--gold);margin-bottom:8px;">' +
+          '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;">' +
+            '<span>Total Members: <b style="color:#fff">' + members.length + '</b></span>' +
+            '<span>Present (Aaye): <b style="color:var(--emerald)">' + presentList.length + '</b></span>' +
+            '<span>Absent: <b style="color:var(--rose)">' + absentList.length + '</b></span>' +
+          '</div></div>';
+
+        var rowsHtml = "";
+        if (!members.length) {
+          rowsHtml = '<div class="list-item" style="color:var(--muted);text-align:center">Is branch mein koi member nahi mila.</div>';
+        } else {
+          rowsHtml = members.map(function (m) {
+            var rec = presentMap[String(m.name || "").toLowerCase()];
+            var isP = !!rec;
+            return '<div class="list-item" style="border-color:' + (isP ? "var(--emerald)" : "var(--rose)") + '">' +
+              '<div style="display:flex;justify-content:space-between;align-items:center">' +
+                '<b>' + (m.name || "—") + '</b>' +
+                '<span style="font-weight:900;color:' + (isP ? "var(--emerald)" : "var(--rose)") + '">' + (isP ? "PRESENT" : "ABSENT") + '</span>' +
+              '</div>' +
+              '<div style="font-size:10.5px;color:var(--muted);margin-top:3px">' +
+                (m.phone ? "Ph: " + m.phone + " • " : "") + 'Branch: ' + (m.branch || "001") + ' • Batch: ' + (m.batch || "Morning") +
+              '</div></div>';
+          }).join("");
+        }
+        box.innerHTML = topBox + rowsHtml;
+      };
+
+      // In-app Upgrade Plan (does NOT force auto-logout)
+      window.omSelectPlanDirect = function (planName, amt) {
+        try { localStorage.setItem("om_selected_plan_request", JSON.stringify({ name: planName, amount: amt, date: new Date().toISOString().slice(0, 10) })); } catch (e) {}
+        var lbl = document.getElementById("inAppCurPlanName");
+        if (lbl) lbl.textContent = planName;
+        showSubmitSuccess(planName + " Selected");
+      };
+
+      goUpgradePlan = function () {
+        var sess = getSessionRole();
+        var lbl = document.getElementById("inAppCurPlanName");
+        if (lbl) lbl.textContent = (sess.role === "owner" ? "Owner Desk" : sess.role) + " • Ready to select plan";
+        openModal("modUpgradePlanInApp");
+      };
+      document.getElementById("btnUpgradePlan").onclick = goUpgradePlan;
+      var p4uBtn = document.getElementById("btnUpgradePlanP4");
+      if (p4uBtn) p4uBtn.onclick = goUpgradePlan;
+      var p4pBtn = document.getElementById("btnOpenPlansPage4");
+      if (p4pBtn) p4pBtn.onclick = goUpgradePlan;
+
+            window.addEventListener("DOMContentLoaded", renderPage1);
       renderPage1();
     })();
   </script>
-  <script src="plan-bridge.js"></script>
+  
+
+  <!-- RESET YOUR DATA MODAL -->
+  <div class="modal-ov" id="modResetYourData">
+    <div class="modal-box" style="border-color:var(--rose);max-width:480px">
+      <div class="m-top"><h3>&#128465; Reset Your Data</h3><button type="button" class="x-btn" data-close-modal="modResetYourData">&times;</button></div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px;line-height:1.45">
+        Reset karne se pehle aapka <b>auto-backup file</b> download hoga. Jo data reset karna hai use select karein aur <b>Done</b> dabayein.
+      </div>
+      <div class="list-item" style="margin-bottom:10px">
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer">
+          <input type="checkbox" id="rstSelectAll" checked>
+          <b style="color:var(--gold)">Select All Data</b>
+        </label>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:12px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" class="rst-cat-chk" value="admissions" checked>
+            <span>Admission Form Data</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" class="rst-cat-chk" value="members" checked>
+            <span>Gym Members</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" class="rst-cat-chk" value="staff" checked>
+            <span>Staff</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" class="rst-cat-chk" value="bills" checked>
+            <span>Bills &amp; Expenses</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" class="rst-cat-chk" value="attendance_fees" checked>
+            <span>Attendance, Fees &amp; Other Records</span>
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="big-btn sec" style="margin-top:0;flex:1" data-close-modal="modResetYourData">Cancel</button>
+        <button type="button" class="big-btn no" style="margin-top:0;flex:1;background:var(--rose);color:#050813;font-weight:900" id="btnConfirmResetDone">&#10004; Done (Backup &amp; Reset)</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function setupResetYourDataFlow() {
+  function downloadAutoBackupBeforeReset(selectedCats) {
+    var stamp = new Date().toISOString().slice(0, 10);
+    var snapshot = { exportedAt: new Date().toISOString(), categories: selectedCats, localStorage: {} };
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k) snapshot.localStorage[k] = localStorage.getItem(k);
+      }
+    } catch (e) {}
+
+    try {
+      var blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "Om_Gym_Auto_Backup_" + stamp + ".json";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 2000);
+    } catch (e) {}
+
+    try {
+      if (typeof XLSX !== "undefined") {
+        var wb = XLSX.utils.book_new();
+        var rawDesk = JSON.parse(localStorage.getItem("om_erp_universal_owner_desk_v1") || "{}");
+        ["admissions", "staff", "expenses", "transactions", "attendance"].forEach(function (sec) {
+          var arr = Array.isArray(rawDesk[sec]) && rawDesk[sec].length ? rawDesk[sec] : [{ Info: "Empty" }];
+          var ws = XLSX.utils.json_to_sheet(arr);
+          XLSX.utils.book_append_sheet(wb, ws, sec.slice(0, 30));
+        });
+        XLSX.writeFile(wb, "Om_Gym_Auto_Backup_" + stamp + ".xlsx");
+      }
+    } catch (e) {}
+  }
+
+  function clearSelectedDataEverywhere(selectedCats) {
+    var has = function (c) { return selectedCats.indexOf(c) !== -1; };
+
+    try {
+      var deskKey = "om_erp_universal_owner_desk_v1";
+      var desk = JSON.parse(localStorage.getItem(deskKey) || "null");
+      if (desk) {
+        if (has("admissions") || has("members")) desk.admissions = [];
+        if (has("staff")) desk.staff = [];
+        if (has("bills")) desk.expenses = [];
+        if (has("attendance_fees")) {
+          desk.attendance = [];
+          desk.transactions = [];
+          desk.supplementSales = [];
+          desk.enquiries = [];
+          desk.leaves = [];
+        }
+        localStorage.setItem(deskKey, JSON.stringify(desk));
+      }
+    } catch (e) {}
+
+    var keysToRemove = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k) continue;
+        var lk = k.toLowerCase();
+        if (has("admissions") && (lk.indexOf("adm") !== -1 || lk.indexOf("5bfc_admissions") !== -1)) keysToRemove.push(k);
+        if (has("members") && (lk.indexOf("member") !== -1 || lk.indexOf("5bfc_members") !== -1 || lk.indexOf("bbf_master") !== -1)) keysToRemove.push(k);
+        if (has("staff") && (lk.indexOf("staff") !== -1 || lk.indexOf("leave") !== -1)) keysToRemove.push(k);
+        if (has("bills") && (lk.indexOf("bill") !== -1 || lk.indexOf("vend") !== -1 || lk.indexOf("exp") !== -1)) keysToRemove.push(k);
+        if (has("attendance_fees") && (lk.indexOf("att") !== -1 || lk.indexOf("fee") !== -1 || lk.indexOf("ext") !== -1 || lk.indexOf("enq") !== -1)) keysToRemove.push(k);
+      }
+      keysToRemove.forEach(function (k) { localStorage.removeItem(k); });
+    } catch (e) {}
+
+    try {
+      if (window.db && typeof window.db.collection === "function") {
+        var cols = [];
+        if (has("admissions")) cols.push("admissions");
+        if (has("members")) { cols.push("members"); cols.push("public_members"); }
+        if (has("staff")) cols.push("staff");
+        if (has("bills")) { cols.push("expenses"); cols.push("bills"); }
+        if (has("attendance_fees")) { cols.push("attendance"); cols.push("payment_proofs"); }
+        cols.forEach(function (colName) {
+          window.db.collection(colName).get().then(function (snap) {
+            snap.forEach(function (doc) { doc.ref.delete().catch(function () {}); });
+          }).catch(function () {});
+        });
+      }
+    } catch (e) {}
+  }
+
+  window.addEventListener("DOMContentLoaded", function () {
+    var openBtn = document.getElementById("btnResetYourData");
+    var modal = document.getElementById("modResetYourData");
+    var selAll = document.getElementById("rstSelectAll");
+    var doneBtn = document.getElementById("btnConfirmResetDone");
+
+    if (openBtn && modal) {
+      openBtn.addEventListener("click", function () {
+        modal.classList.add("open");
+      });
+    }
+
+    if (selAll && modal) {
+      selAll.addEventListener("change", function () {
+        modal.querySelectorAll(".rst-cat-chk").forEach(function (c) {
+          c.checked = selAll.checked;
+        });
+      });
+    }
+
+    if (doneBtn && modal) {
+      doneBtn.addEventListener("click", function () {
+        var checked = [];
+        modal.querySelectorAll(".rst-cat-chk:checked").forEach(function (c) {
+          checked.push(c.value);
+        });
+        if (!checked.length) {
+          alert("Kripya kam se kam ek data option select karein.");
+          return;
+        }
+        downloadAutoBackupBeforeReset(checked);
+        clearSelectedDataEverywhere(checked);
+        modal.classList.remove("open");
+        alert("Backup download ho gaya aur selected data reset ho gaya hai.");
+        try { location.reload(); } catch (e) {}
+      });
+    }
+  });
+})();
+</script>
+
 </body>
 </html>

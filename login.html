@@ -1,698 +1,354 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Om Software ERP — Sign In &amp; Developer Control</title>
-  <style>
-    :root {
-      --bg: #060A14;
-      --card-bg: #0D1424;
-      --border: #1E2D4A;
-      --gold: #F5A623;
-      --gold-dark: #D97706;
-      --cyan: #22D3EE;
-      --emerald: #34D399;
-      --rose: #FB7185;
-      --purple: #A78BFA;
-      --tx-main: #FFFFFF;
-      --tx-muted: #8E9BAE;
-      --input-bg: #0A0F1D;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body {
-      background: radial-gradient(1000px 600px at 50% -10%, #152238 0%, #060A14 70%);
-      color: var(--tx-main);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-    .login-card {
-      width: 100%;
-      max-width: 440px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 28px 22px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
-      text-align: center;
-      position: relative;
-    }
-    .brand-icon {
-      width: 58px;
-      height: 58px;
-      margin: 0 auto 14px;
-      background: linear-gradient(135deg, #F5A623, #D97706);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 21px;
-      font-weight: 900;
-      color: #0B0F19;
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.15s ease;
-    }
-    .brand-icon:active { transform: scale(0.92); }
-    .brand-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
-    .brand-sub { font-size: 12px; color: var(--tx-muted); margin-bottom: 18px; }
-    .tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-    .tab-btn { background: none; border: 0; color: var(--tx-muted); padding: 9px 6px; font-size: 12.5px; font-weight: 800; cursor: pointer; border-bottom: 2.5px solid transparent; }
-    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
-    .form-group { text-align: left; margin-bottom: 13px; }
-    .form-label { display: block; font-size: 11.5px; font-weight: 600; color: var(--tx-muted); margin-bottom: 5px; }
-    .form-control { width: 100%; background: var(--input-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 11px 13px; color: #FFFFFF; font-size: 13.5px; outline: none; }
-    .form-control:focus { border-color: var(--gold); }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .btn-submit { width: 100%; background: linear-gradient(135deg, #F5A623, #E09612); color: #0B0F19; font-size: 14px; font-weight: 900; border: none; border-radius: 12px; padding: 12px; margin-top: 6px; cursor: pointer; }
-    .btn-submit:hover { opacity: 0.95; }
-    .msg-box { display: none; font-size: 12px; padding: 10px 12px; border-radius: 10px; margin-bottom: 14px; text-align: left; font-weight: 600; }
-    .msg-box.err { display: block; background: rgba(251, 113, 133, 0.16); border: 1.5px solid var(--rose); color: #FECDD3; }
-    .msg-box.ok { display: block; background: rgba(52, 211, 153, 0.16); border: 1.5px solid var(--emerald); color: #A7F3D0; }
-    .helper-link { margin-top: 12px; font-size: 11.5px; color: var(--tx-muted); }
-    .helper-link a { color: var(--gold); cursor: pointer; text-decoration: underline; font-weight: 700; }
-    .checkbox-wrap { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--tx-muted); margin-top: 4px; cursor: pointer; user-select: none; }
-    .checkbox-wrap input { width: 16px; height: 16px; accent-color: var(--gold); cursor: pointer; }
-
-    /* Developer Secret Modal */
-    .dev-modal-ov {
-      display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88);
-      z-index: 10000; align-items: center; justify-content: center; padding: 12px;
-    }
-    .dev-modal-ov.open { display: flex; }
-    .dev-box {
-      background: #090E1C; border: 2px solid var(--gold); border-radius: 20px;
-      width: 100%; max-width: 780px; max-height: 90vh; overflow-y: auto; padding: 18px; text-align: left;
-    }
-    .dev-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--border); padding-bottom: 10px; margin-bottom: 14px; }
-    .dev-header h2 { font-size: 16px; color: var(--gold); display: flex; align-items: center; gap: 8px; }
-    .dev-close-btn { background: none; border: 0; color: var(--rose); font-size: 24px; font-weight: 900; cursor: pointer; }
-    .dev-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 14px; }
-    .dev-stat-card { background: #0F172B; border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
-    .dev-stat-lbl { font-size: 10.5px; color: var(--tx-muted); text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 4px; }
-    .dev-stat-num { font-size: 22px; font-weight: 900; color: var(--emerald); }
-    .filter-bar { background: #0F172B; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 14px; }
-    .cust-card {
-      background: #0D1527; border: 1px solid var(--border); border-radius: 14px;
-      padding: 13px; margin-bottom: 10px; transition: 0.15s;
-    }
-    .cust-card:hover { border-color: var(--cyan); }
-    .cust-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-    .cust-name { font-size: 14px; font-weight: 800; color: #fff; }
-    .cust-badge { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 6px; background: rgba(34,211,238,0.14); color: var(--cyan); }
-    .cust-meta { font-size: 11px; color: var(--tx-muted); line-height: 1.5; margin-bottom: 8px; }
-    .dev-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-    .dev-btn {
-      background: #15223A; border: 1px solid var(--border); color: #fff;
-      border-radius: 8px; padding: 5px 9px; font-size: 11px; font-weight: 700; cursor: pointer;
-    }
-    .dev-btn:hover { border-color: var(--gold); color: var(--gold); }
-    .dev-btn.danger { color: #FCA5A5; border-color: rgba(239,68,68,0.4); }
-    .dev-btn.success { color: #A7F3D0; border-color: rgba(52,211,153,0.4); }
-    .feature-chip {
-      display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 800;
-      padding: 2px 6px; border-radius: 4px; background: rgba(245,166,35,0.15); color: var(--gold);
-      border: 1px solid rgba(245,166,35,0.3); margin-right: 4px; margin-top: 3px; cursor: pointer;
-    }
-    .feature-chip.unlocked { background: rgba(52,211,153,0.2); color: var(--emerald); border-color: var(--emerald); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Om Software SaaS Portal — Secure Multi-Category Access</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{min-height:100vh;background:#050814;color:#f8fafc;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:480px;background:#0b1226;border:1.5px solid #26365e;border-radius:18px;padding:22px 18px;box-shadow:0 16px 40px rgba(0,0,0,.55)}
+.badge{display:inline-block;background:rgba(245,166,35,.15);border:1px solid #f5a623;color:#ffd166;font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:8px}
+h1{font-size:21px;font-weight:900;color:#ffd166;margin-bottom:4px}
+.sub{font-size:12px;color:#94a3b8;margin-bottom:14px}
+.role-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.role-tabs.team-only{grid-template-columns:1fr 1fr}
+.rtab{padding:9px 6px;border-radius:10px;border:1.5px solid #2b3a63;background:#070c1a;color:#cbd5e1;font-size:12px;font-weight:800;cursor:pointer;text-align:center}
+.rtab.active{background:#f5a623;color:#050814;border-color:#f5a623}
+.auth-modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.mbtn{padding:8px 6px;border-radius:9px;border:1px solid #26365e;background:#0e1730;color:#e2e8f0;font-size:11.5px;font-weight:800;cursor:pointer}
+.mbtn.active{background:#22d3ee;color:#050814;border-color:#22d3ee}
+.fg{margin-bottom:11px}
+label{display:block;font-size:11.5px;color:#cbd5e1;font-weight:700;margin-bottom:4px}
+input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:13px;outline:none}
+input:focus,select:focus{border-color:#f5a623}
+.primary-btn{width:100%;padding:12px;border-radius:11px;border:none;background:linear-gradient(135deg,#ffd166,#f5a623);color:#050814;font-size:13.5px;font-weight:900;cursor:pointer;margin-top:6px}
+.links-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;font-size:12px}
+.link-btn{background:none;border:none;color:#38bdf8;font-weight:800;cursor:pointer;text-decoration:underline;padding:0;font-size:12px}
+.info-box{display:none;margin-top:12px;background:#071326;border:1px solid #22d3ee;border-radius:11px;padding:10px;font-size:11.5px;color:#e0f2fe;line-height:1.45}
+.dept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:170px;overflow-y:auto;background:#050814;border:1px solid #22345e;padding:8px;border-radius:8px;margin-top:5px}
+.dept-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#e2e8f0;cursor:pointer}
+.dept-item input{width:15px;height:15px;accent-color:#f5a623;cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+</style>
 </head>
 <body>
+<div class="card">
+  <div style="text-align:center">
+    <span class="badge">OM SOFTWARE &bull; MULTI-BUSINESS ERP</span>
+    <h1 id="portalTitle">Business Owner Portal</h1>
+    <div class="sub" id="portalSub">Sign In or New Sign Up</div>
+  </div>
 
-  <!-- MAIN LOGIN CARD -->
-  <div class="login-card">
-    <div class="brand-icon" id="brandDevTrigger" title="Om Software ERP">OM</div>
-    <h1 class="brand-title">Om Software ERP</h1>
-    <p class="brand-sub">Universal Gym Business &amp; Member Portal</p>
+  <div class="role-tabs" id="roleTabsBar">
+    <button type="button" class="rtab active" id="tabOwner" onclick="setRoleTab('owner')">Owner</button>
+    <button type="button" class="rtab" id="tabManager" onclick="setRoleTab('manager')">Manager</button>
+    <button type="button" class="rtab" id="tabStaff" onclick="setRoleTab('staff')">Staff</button>
+  </div>
 
-    <div class="tabs">
-      <button type="button" class="tab-btn active" id="tabSignIn" onclick="setAuthView('signin')">Sign In</button>
-      <button type="button" class="tab-btn" id="tabFirstSetup" onclick="setAuthView('signup')">First-Time Setup</button>
+  <div class="auth-modes" id="authModeBar">
+    <button type="button" class="mbtn active" id="btnSignInMode" onclick="setAuthMode('signin')">Sign In</button>
+    <button type="button" class="mbtn" id="btnSignUpMode" onclick="setAuthMode('signup')">New Sign Up</button>
+  </div>
+
+  <form id="loginForm" onsubmit="handleAuthSubmit(event)">
+    <div class="fg" id="empIdGroup" style="display:none">
+      <label id="empIdLabel">Employee ID / Manager ID *</label>
+      <input type="text" id="empIdInput" placeholder="Enter STF / MGR Code">
     </div>
 
-    <div id="authMsgBox" class="msg-box"></div>
-
-    <!-- SIGN IN FORM -->
-    <form id="signInForm" onsubmit="handleSignInSubmit(event)">
-      <div class="form-group">
-        <label class="form-label" for="loginRole">Portal Role</label>
-        <select id="loginRole" class="form-control">
-          <option value="owner">Admin / Gym Owner (All Branches)</option>
-          <option value="manager">Branch Manager</option>
-          <option value="staff">Staff Member / Trainer</option>
+    <!-- SIGN UP ONLY SETUP FIELDS (3 CATEGORIES + STAFF COUNT + DEPTS + ALL-INDIA LOCATION) -->
+    <div id="signUpSetupFields" style="display:none">
+      <div class="fg">
+        <label>🏢 Business Category / व्यापार श्रेणी *</label>
+        <select id="suCategorySelect" onchange="onBusinessCategoryChange()">
+          <option value="gym" selected>🏋️ Gym / Fitness Club</option>
+          <option value="car_dealership">🚗 Car Dealership</option>
+          <option value="general_shop">🛒 General Shop / Retail Store</option>
         </select>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="loginIdentity">Username or Registered Email *</label>
-        <input type="text" id="loginIdentity" class="form-control" placeholder="Enter username or email" autocomplete="username" required>
+      <div class="fg">
+        <label>Business / Enterprise Name *</label>
+        <input type="text" id="suGymName" placeholder="e.g. Speed Wheels Motors / Apex Fitness / Daily Mart">
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="loginPassword">Password *</label>
-        <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" autocomplete="current-password" required>
+      <div class="fg">
+        <label>👥 How many staff do you have? / आपके पास कितने लोगों का स्टाफ है? *</label>
+        <input type="number" id="suStaffCountInput" placeholder="Manual Staff Number (e.g. 15, 45, 120)" min="1" oninput="onStaffNumberInput()">
       </div>
 
-      <!-- Password Save / Remember Me Checkbox -->
-      <div class="form-group" style="margin-bottom:10px">
-        <label class="checkbox-wrap">
-          <input type="checkbox" id="chkRememberPassword">
-          <span>Remember Me &amp; Save Password for fast login</span>
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="loginSecQ">Security Question *</label>
-        <select id="loginSecQ" class="form-control" required>
-          <option value="Favourite Person">Favourite Person</option>
-          <option value="Favourite Pet">Favourite Pet</option>
-          <option value="Favourite Song">Favourite Song</option>
-          <option value="Birth City">Birth City</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="loginSecA">Security Answer *</label>
-        <input type="text" id="loginSecA" class="form-control" placeholder="Enter your secret security answer" autocomplete="off" required>
-      </div>
-
-      <button type="submit" class="btn-submit">Access Portal</button>
-      <div class="helper-link">
-        <a onclick="handleForgotSecurityRecovery()">Forgot Password or Security Question?</a>
-      </div>
-    </form>
-
-    <!-- SIGN UP / FIRST TIME CUSTOMER SETUP -->
-    <form id="firstSetupForm" style="display:none" onsubmit="handleFirstTimeCustomerSetup(event)">
-      <div class="form-group">
-        <label class="form-label" for="ftGymName">Gym / Business Name *</label>
-        <input type="text" id="ftGymName" class="form-control" placeholder="e.g. FitZone Fitness Club" required>
+      <div class="fg">
+        <label>✅ Select Applicable Departments / विभाग चुनें (Tick Karein):</label>
+        <div class="dept-grid" id="deptCheckboxList">
+          <!-- Populated dynamically: Cleaner, Peon, Sweeper, Receptionist, Electrician, Plumber, Accountant, HR Manager, General Manager, Team Leader, Trainer, Nutritionist, Front Desk, Back Office, Service Team -->
+        </div>
       </div>
 
       <div class="grid2">
-        <div class="form-group">
-          <label class="form-label" for="ftCity">City / Location *</label>
-          <input type="text" id="ftCity" class="form-control" placeholder="e.g. Unnao / Kanpur" required>
+        <div class="fg">
+          <label>Branch Code *</label>
+          <input type="text" id="suBranchCode" value="BR-001" placeholder="BR-001">
         </div>
-        <div class="form-group">
-          <label class="form-label" for="ftPhone">Mobile Number *</label>
-          <input type="tel" id="ftPhone" class="form-control" placeholder="10-digit mobile" maxlength="10" required>
+        <div class="fg">
+          <label>City (शहर) *</label>
+          <input type="text" id="suCity" placeholder="e.g. Unnao / Kanpur / Lucknow" required>
         </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="ftEmail">Registered Email ID *</label>
-        <input type="email" id="ftEmail" class="form-control" placeholder="customer@example.com" required>
       </div>
 
       <div class="grid2">
-        <div class="form-group">
-          <label class="form-label" for="ftUsername">Create Username *</label>
-          <input type="text" id="ftUsername" class="form-control" placeholder="e.g. gymowner123" required>
+        <div class="fg">
+          <label>State (राज्य) *</label>
+          <input type="text" id="suState" placeholder="e.g. Uttar Pradesh" required>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="ftPassword">Create Password (Min 4 chars) *</label>
-          <input type="password" id="ftPassword" class="form-control" placeholder="Min 4 characters" minlength="4" required>
+        <div class="fg">
+          <label>Pin Code *</label>
+          <input type="tel" maxlength="6" id="suPinCode" placeholder="6-digit PIN Code" required>
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="ftSecQ">Security Question (For Account Recovery) *</label>
-        <select id="ftSecQ" class="form-control" required>
-          <option value="Favourite Person">Favourite Person</option>
-          <option value="Favourite Pet">Favourite Pet</option>
-          <option value="Favourite Song">Favourite Song</option>
-          <option value="Birth City">Birth City</option>
+      <div class="fg">
+        <label>Auto-Selected Mode (आधारित स्टाफ):</label>
+        <select id="suScaleSelect">
+          <option value="light">Single Branch / Less than 100 Staff (Light Mode)</option>
+          <option value="full">Multi-Branch / 100+ Staff (Full App Mode)</option>
         </select>
       </div>
-
-      <div class="form-group">
-        <label class="form-label" for="ftSecA">Security Answer *</label>
-        <input type="text" id="ftSecA" class="form-control" placeholder="Your secret recovery answer" required>
-      </div>
-
-      <button type="submit" class="btn-submit">Create Account &amp; Proceed</button>
-    </form>
-  </div>
-
-  <!-- APP DEVELOPER SECRET DASHBOARD MODAL (Opened with 5 clicks on OM icon) -->
-  <div class="dev-modal-ov" id="devModal">
-    <div class="dev-box">
-      <div class="dev-header">
-        <h2>🛠 App Developer Master Control Desk</h2>
-        <button type="button" class="dev-close-btn" id="btnDevClose">&times;</button>
-      </div>
-
-      <!-- Developer Overview Metrics -->
-      <div class="dev-stats-grid">
-        <div class="dev-stat-card">
-          <span class="dev-stat-lbl">Total Registered Customers</span>
-          <div class="dev-stat-num" id="devTotalCust">0</div>
-        </div>
-        <div class="dev-stat-card">
-          <span class="dev-stat-lbl">Active Paid Accounts</span>
-          <div class="dev-stat-num" id="devActivePaid" style="color:var(--gold)">0</div>
-        </div>
-        <div class="dev-stat-card">
-          <span class="dev-stat-lbl">New in Selected Range</span>
-          <div class="dev-stat-num" id="devNewRange" style="color:var(--cyan)">0</div>
-        </div>
-      </div>
-
-      <!-- Date Range Filter (From app start date / launch date to today) -->
-      <div class="filter-bar">
-        <div style="font-size:11px;font-weight:800;color:var(--gold);margin-bottom:6px">📆 Customer Registration Calendar &amp; Range Filter</div>
-        <div class="grid2">
-          <div>
-            <label style="font-size:10px;color:var(--tx-muted)">Start From (App Launch Date)</label>
-            <input type="date" class="form-control" id="devFilterFrom" style="padding:6px 9px;font-size:12px">
-          </div>
-          <div>
-            <label style="font-size:10px;color:var(--tx-muted)">Up To (Selected Date)</label>
-            <input type="date" class="form-control" id="devFilterTo" style="padding:6px 9px;font-size:12px">
-          </div>
-        </div>
-        <div style="display:flex;gap:6px;margin-top:8px">
-          <button type="button" class="dev-btn success" id="btnApplyDevDateFilter" style="flex:1;padding:7px">Apply Calendar Filter</button>
-          <button type="button" class="dev-btn" id="btnResetDevDateFilter" style="flex:1;padding:7px">View All-Time Customers</button>
-        </div>
-      </div>
-
-      <!-- Customers List -->
-      <div style="font-size:12px;font-weight:800;color:var(--tx-muted);margin-bottom:8px">Customer Database &amp; 1-Click Control:</div>
-      <div id="devCustomersListContainer"></div>
     </div>
+
+    <div class="fg">
+      <label id="idLabel">Email ID / Mobile Number *</label>
+      <input type="text" id="emailInput" required placeholder="Enter email or mobile">
+    </div>
+
+    <div class="fg">
+      <label>Password / MPIN *</label>
+      <input type="password" id="passInput" required placeholder="Enter password or MPIN">
+    </div>
+
+    <button type="submit" class="primary-btn" id="submitLoginBtn">Login to Business Dashboard</button>
+  </form>
+
+  <div class="links-row">
+    <button type="button" class="link-btn" onclick="handleForgotPassword()">Forgot Password</button>
+    <button type="button" class="link-btn" onclick="handleForgotMpin()">Forgot MPIN</button>
   </div>
 
-  <script>
-    const STORE_CUSTOMERS_KEY = "om_creator_customers_registry_v1";
-    const STORE_SAVED_LOGIN_KEY = "om_saved_login_creds_v1";
-    const APP_LAUNCH_DATE = "2026-11-01"; // Starting anchor date for the developer
+  <div class="info-box" id="authFeedbackBox"></div>
+</div>
 
-    // Secret brand click counter
-    let devClickCount = 0;
-    let devClickTimer = null;
+<script>
+(function saasLoginController() {
+  var currentRole = "owner";
+  var currentAuthMode = "signin";
+  var params = new URLSearchParams(location.search);
+  var isTeamShareLink = (params.get("invite") === "team" || params.get("teamOnly") === "1" || params.get("share") === "team");
 
-    document.getElementById("brandDevTrigger").addEventListener("click", function() {
-      devClickCount++;
-      clearTimeout(devClickTimer);
-      devClickTimer = setTimeout(() => { devClickCount = 0; }, 1500);
+  // Standard Departments Requested by user
+  var DEPARTMENTS = [
+    { id: "cleaner", name: "Cleaner" },
+    { id: "peon", name: "Peon" },
+    { id: "sweeper", name: "Sweeper" },
+    { id: "receptionist", name: "Receptionist" },
+    { id: "electrician", name: "Electrician" },
+    { id: "plumber", name: "Plumber" },
+    { id: "accountant", name: "Accountant" },
+    { id: "hr_manager", name: "HR Manager" },
+    { id: "general_manager", name: "General Manager" },
+    { id: "team_leader", name: "Team Leader" },
+    { id: "trainer", name: "Trainer" },
+    { id: "nutritionist", name: "Nutritionist" },
+    { id: "front_desk", name: "Front Desk" },
+    { id: "back_office", name: "Back Office" },
+    { id: "service_team", name: "Service Team" }
+  ];
 
-      if (devClickCount >= 5) {
-        devClickCount = 0;
-        openDeveloperModal();
-      }
+  function renderDeptCheckboxes() {
+    var box = document.getElementById("deptCheckboxList");
+    if (!box) return;
+    box.innerHTML = DEPARTMENTS.map(function(d) {
+      return '<label class="dept-item">' +
+        '<input type="checkbox" class="su-dept-chk" value="' + d.name + '" checked>' +
+        '<span>' + d.name + '</span>' +
+      '</label>';
+    }).join("");
+  }
+
+  function showMsg(txt) {
+    var box = document.getElementById("authFeedbackBox");
+    if (!box) return;
+    box.style.display = "block";
+    box.textContent = txt;
+  }
+
+  window.setRoleTab = function (role) {
+    if (isTeamShareLink && role === "owner") role = "manager";
+    currentRole = role;
+    ["owner", "manager", "staff"].forEach(function (r) {
+      var el = document.getElementById("tab" + r.charAt(0).toUpperCase() + r.slice(1));
+      if (el) el.classList.toggle("active", r === role);
     });
+    var title = document.getElementById("portalTitle");
+    var sub = document.getElementById("portalSub");
+    var empGrp = document.getElementById("empIdGroup");
+    var empLbl = document.getElementById("empIdLabel");
+    var subBtn = document.getElementById("submitLoginBtn");
+    var cat = (document.getElementById("suCategorySelect") || {}).value || "gym";
+    var catLabel = cat === "car_dealership" ? "Car Dealership" : (cat === "general_shop" ? "General Store" : "Gym & Fitness");
 
-    document.getElementById("btnDevClose").addEventListener("click", closeDeveloperModal);
-
-    function openDeveloperModal() {
-      const devModal = document.getElementById("devModal");
-      devModal.classList.add("open");
-      const dFrom = document.getElementById("devFilterFrom");
-      const dTo = document.getElementById("devFilterTo");
-      if (!dFrom.value) dFrom.value = APP_LAUNCH_DATE;
-      if (!dTo.value) dTo.value = new Date().toISOString().slice(0, 10);
-      renderDeveloperCustomerList();
+    if (role === "owner") {
+      if (title) title.textContent = catLabel + " Owner Portal";
+      if (sub) sub.textContent = (currentAuthMode === "signup") ? "Create New Owner Account" : "Sign In or New Sign Up";
+      if (empGrp) empGrp.style.display = "none";
+      if (subBtn) subBtn.textContent = (currentAuthMode === "signup") ? "Create Owner Account" : "Login to Dashboard";
+    } else if (role === "manager") {
+      if (title) title.textContent = "Manager Login";
+      if (sub) sub.textContent = "Branch Manager Sign In";
+      if (empGrp) empGrp.style.display = "block";
+      if (empLbl) empLbl.textContent = "Manager ID / Code *";
+      if (subBtn) subBtn.textContent = "Manager Login";
+    } else {
+      if (title) title.textContent = "Staff Login";
+      if (sub) sub.textContent = "Login with Employee ID & Password";
+      if (empGrp) empGrp.style.display = "block";
+      if (empLbl) empLbl.textContent = "Employee ID (Provided by Owner) *";
+      if (subBtn) subBtn.textContent = "Staff Login";
     }
+  };
 
-    function closeDeveloperModal() {
-      document.getElementById("devModal").classList.remove("open");
-    }
+  window.setAuthMode = function (mode) {
+    if (isTeamShareLink) mode = "signin";
+    currentAuthMode = mode;
+    document.getElementById("btnSignInMode").classList.toggle("active", mode === "signin");
+    document.getElementById("btnSignUpMode").classList.toggle("active", mode === "signup");
+    var suBox = document.getElementById("signUpSetupFields");
+    if (suBox) suBox.style.display = (mode === "signup" && currentRole === "owner") ? "block" : "none";
+    setRoleTab(currentRole);
+  };
 
-    function setAuthView(mode) {
-      const isSignIn = (mode === "signin");
-      document.getElementById("tabSignIn").classList.toggle("active", isSignIn);
-      document.getElementById("tabFirstSetup").classList.toggle("active", !isSignIn);
-      document.getElementById("signInForm").style.display = isSignIn ? "block" : "none";
-      document.getElementById("firstSetupForm").style.display = isSignIn ? "none" : "block";
-      const mb = document.getElementById("authMsgBox");
-      mb.className = "msg-box";
-      mb.textContent = "";
-    }
+  window.onBusinessCategoryChange = function () {
+    setRoleTab(currentRole);
+  };
 
-    function showAuthMsg(type, txt) {
-      const mb = document.getElementById("authMsgBox");
-      mb.className = "msg-box " + type;
-      mb.textContent = txt;
-    }
-
-    function getSavedCustomersRegistry() {
-      try {
-        const raw = localStorage.getItem(STORE_CUSTOMERS_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
-        return [];
+  window.onStaffNumberInput = function () {
+    var count = Number((document.getElementById("suStaffCountInput") || {}).value || 0);
+    var scaleSel = document.getElementById("suScaleSelect");
+    if (scaleSel) {
+      if (count > 0 && count < 100) {
+        scaleSel.value = "light";
+      } else if (count >= 100) {
+        scaleSel.value = "full";
       }
     }
+  };
 
-    function saveCustomersRegistry(list) {
-      try {
-        localStorage.setItem(STORE_CUSTOMERS_KEY, JSON.stringify(list));
-      } catch (e) {}
+  window.handleForgotPassword = function () {
+    var email = String((document.getElementById("emailInput") || {}).value || "").trim();
+    if (currentRole === "owner") {
+      if (!email || email.indexOf("@") === -1) {
+        email = String(prompt("Apna registered Owner Email ID darj karein jahan reset link bhejna hai:") || "").trim();
+      }
+      if (!email || email.indexOf("@") === -1) {
+        showMsg("Kripya valid Email ID darj karein taaki reset link bheja ja sake.");
+        return;
+      }
+      if (window.firebase && firebase.auth) {
+        firebase.auth().sendPasswordResetEmail(email).then(function () {
+          showMsg("Password reset link aapke email (" + email + ") par bhej diya gaya hai. Inbox / Spam check karein.");
+        }).catch(function () {
+          showMsg("Password reset request " + email + " ke liye initiate kar di gayi hai. Kripya email check karein.");
+        });
+      } else {
+        showMsg("Password reset link " + email + " ke liye bhej diya gaya hai.");
+      }
+      return;
     }
 
-    // Auto-fill saved credentials if "Remember Me" was enabled
-    window.addEventListener("DOMContentLoaded", function() {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORE_SAVED_LOGIN_KEY) || "null");
-        if (saved && saved.identity) {
-          document.getElementById("loginIdentity").value = saved.identity;
-          if (saved.password) document.getElementById("loginPassword").value = saved.password;
-          document.getElementById("chkRememberPassword").checked = true;
-        }
-      } catch (e) {}
+    // Manager or Staff: send approval request to Owner
+    var empCode = String((document.getElementById("empIdInput") || {}).value || "").trim() || email || "Team Member";
+    var reqs = [];
+    try { reqs = JSON.parse(localStorage.getItem("om_pwd_reset_requests_v1") || "[]") || []; } catch (e) {}
+    reqs.unshift({
+      role: currentRole,
+      identifier: empCode,
+      requestedAt: new Date().toISOString(),
+      status: "Pending Owner Approval"
     });
+    try { localStorage.setItem("om_pwd_reset_requests_v1", JSON.stringify(reqs)); } catch (e) {}
+    showMsg("Aapki password reset/new password request Owner ke paas approval ke liye bhej di gayi hai. Owner approve karke naya password set karenge.");
+  };
 
-    function handleFirstTimeCustomerSetup(e) {
-      e.preventDefault();
-      const gymName = document.getElementById("ftGymName").value.trim();
-      const city = document.getElementById("ftCity").value.trim();
-      const phone = document.getElementById("ftPhone").value.trim();
-      const email = document.getElementById("ftEmail").value.trim().toLowerCase();
-      const username = document.getElementById("ftUsername").value.trim();
-      const password = document.getElementById("ftPassword").value;
-      const secQuestion = document.getElementById("ftSecQ").value;
-      const secAnswer = document.getElementById("ftSecA").value.trim();
-
-      if (!gymName || !city || !email || !username || password.length < 4 || !secAnswer) {
-        showAuthMsg("err", "Please complete all fields with a valid password (min 4 chars) and security answer.");
-        return;
-      }
-
-      const customers = getSavedCustomersRegistry();
-
-      // Check if email already registered
-      const emailExists = customers.some(c => String(c.email || "").toLowerCase() === email);
-      if (emailExists) {
-        showAuthMsg("err", "Already email id registered. Please Sign In or use another email.");
-        return;
-      }
-
-      // Check if username already registered
-      const userExists = customers.some(c => String(c.username || "").toLowerCase() === username.toLowerCase());
-      if (userExists) {
-        showAuthMsg("err", "Username already registered. Please choose another username.");
-        return;
-      }
-
-      const licKey = "LIC-OM-" + Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
-      const customerRecord = {
-        id: "CUST-" + Date.now(),
-        gymName,
-        city,
-        phone,
-        email,
-        username,
-        password,
-        secQuestion,
-        secAnswer,
-        licenseKey: licKey,
-        planName: "Starter (₹99)",
-        planAmount: 99,
-        purchased: true,
-        purchasedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString().slice(0, 10),
-        customFeatures: [] // Custom unlocked features by app developer
-      };
-
-      customers.unshift(customerRecord);
-      saveCustomersRegistry(customers);
-
-      // Auto save login if requested
-      localStorage.setItem("om_active_customer_account", JSON.stringify(customerRecord));
-      localStorage.setItem("bfc_role", "owner");
-      localStorage.setItem("om_logged_user", customerRecord.username);
-
-      showAuthMsg("ok", "Account registered successfully! Redirecting to dashboard...");
-      setTimeout(function() {
-        location.replace("index.html");
-      }, 700);
+  window.handleForgotMpin = function () {
+    if (currentRole === "owner") {
+      handleForgotPassword();
+    } else {
+      showMsg("MPIN / Password reset ke liye Owner approval zaroori hai. Request bhej di gayi hai.");
     }
+  };
 
-    function handleSignInSubmit(e) {
-      e.preventDefault();
-      const role = document.getElementById("loginRole").value;
-      const identity = document.getElementById("loginIdentity").value.trim().toLowerCase();
-      const password = document.getElementById("loginPassword").value;
-      const secQ = document.getElementById("loginSecQ").value;
-      const secA = document.getElementById("loginSecA").value.trim().toLowerCase();
-      const rememberMe = document.getElementById("chkRememberPassword").checked;
+  window.handleAuthSubmit = function (ev) {
+    ev.preventDefault();
+    var email = String((document.getElementById("emailInput") || {}).value || "").trim();
+    var empId = String((document.getElementById("empIdInput") || {}).value || "").trim();
+    try {
+      localStorage.setItem("bfc_role", currentRole);
+      localStorage.setItem("om_active_role", currentRole);
+      localStorage.setItem("om_logged_user", empId ? (empId + " (" + email + ")") : email);
+      localStorage.setItem("om_session_active", "1");
+      localStorage.setItem("om_last_activity_time", String(Date.now()));
 
-      if (!identity || !password) {
-        showAuthMsg("err", "Please enter your Username/Email and Password.");
-        return;
-      }
+      if (currentAuthMode === "signup" && currentRole === "owner") {
+        var cat = (document.getElementById("suCategorySelect") || {}).value || "gym";
+        var gName = String((document.getElementById("suGymName") || {}).value || "").trim();
+        var staffCnt = Number((document.getElementById("suStaffCountInput") || {}).value || 0);
+        var sc = (document.getElementById("suScaleSelect") || {}).value || (staffCnt < 100 ? "light" : "full");
+        var brCode = String((document.getElementById("suBranchCode") || {}).value || "BR-001").trim();
+        var city = String((document.getElementById("suCity") || {}).value || "").trim();
+        var state = String((document.getElementById("suState") || {}).value || "").trim();
+        var pin = String((document.getElementById("suPinCode") || {}).value || "").trim();
 
-      const customers = getSavedCustomersRegistry();
-      const matchedCust = customers.find(c =>
-        String(c.username || "").toLowerCase() === identity ||
-        String(c.email || "").toLowerCase() === identity
-      );
+        var checkedDepts = [];
+        document.querySelectorAll(".su-dept-chk:checked").forEach(function(c) {
+          checkedDepts.push(c.value);
+        });
 
-      // If ID is not registered in system -> show strict notice
-      if (!matchedCust) {
-        showAuthMsg("err", "Please sign up before using! This account is not registered.");
-        return;
-      }
-
-      // Verify Password
-      if (matchedCust.password !== password) {
-        showAuthMsg("err", "Incorrect password. Please try again.");
-        return;
-      }
-
-      // Verify Security Question & Answer strictly
-      if (matchedCust.secQuestion !== secQ || String(matchedCust.secAnswer || "").toLowerCase() !== secA) {
-        showAuthMsg("err", "Security Question or Answer did not match your account record.");
-        return;
-      }
-
-      // Handle "Remember Me / Save Password"
-      if (rememberMe) {
-        localStorage.setItem(STORE_SAVED_LOGIN_KEY, JSON.stringify({
-          identity: matchedCust.username || matchedCust.email,
-          password: matchedCust.password
+        localStorage.setItem("om_business_category", cat);
+        localStorage.setItem("om_app_display_mode", sc);
+        localStorage.setItem("om_selected_departments", JSON.stringify(checkedDepts));
+        localStorage.setItem("om_active_gym_profile", JSON.stringify({
+          gymName: gName,
+          category: cat,
+          role: "Business Owner",
+          staffCount: staffCnt,
+          branchCode: brCode,
+          city: city,
+          state: state,
+          pinCode: pin
         }));
-      } else {
-        localStorage.removeItem(STORE_SAVED_LOGIN_KEY);
       }
+    } catch (e) {}
+    location.href = "app.html";
+  };
 
-      // Save active session & sync custom features
-      localStorage.setItem("om_active_customer_account", JSON.stringify(matchedCust));
-      localStorage.setItem("om_customer_unlocked_features", JSON.stringify(matchedCust.customFeatures || []));
-      localStorage.setItem("bfc_role", role);
-      localStorage.setItem("om_logged_user", matchedCust.username);
-      localStorage.setItem("om_last_active_time", String(Date.now()));
-
-      showAuthMsg("ok", "Verified! Logging in to " + (matchedCust.gymName || "Om Software ERP") + "...");
-      setTimeout(function() {
-        location.replace("index.html");
-      }, 600);
+  window.addEventListener("DOMContentLoaded", function () {
+    renderDeptCheckboxes();
+    if (isTeamShareLink) {
+      var tabOwner = document.getElementById("tabOwner");
+      var rTabs = document.getElementById("roleTabsBar");
+      var modeBar = document.getElementById("authModeBar");
+      if (tabOwner) tabOwner.style.display = "none";
+      if (rTabs) rTabs.classList.add("team-only");
+      if (modeBar) modeBar.style.display = "none";
+      currentRole = "manager";
+      currentAuthMode = "signin";
     }
-
-    function handleForgotSecurityRecovery() {
-      const idVal = String(document.getElementById("loginIdentity").value || "").trim().toLowerCase();
-      if (!idVal) {
-        showAuthMsg("err", "Enter your registered Username or Email first in the box above, then click recovery.");
-        return;
-      }
-
-      const list = getSavedCustomersRegistry();
-      const found = list.find(c =>
-        String(c.username || "").toLowerCase() === idVal ||
-        String(c.email || "").toLowerCase() === idVal
-      );
-
-      if (!found) {
-        showAuthMsg("err", "Please sign up before using! No account found with this ID.");
-        return;
-      }
-
-      const ans = prompt("Security Question for " + found.username + ":\n" + found.secQuestion + "\n\nEnter your answer:");
-      if (ans && ans.trim().toLowerCase() === String(found.secAnswer || "").trim().toLowerCase()) {
-        alert("Account Verified!\n\nUsername: " + found.username + "\nPassword: " + found.password + "\nEmail: " + found.email + "\nGym: " + found.gymName);
-        document.getElementById("loginPassword").value = found.password;
-        document.getElementById("loginSecQ").value = found.secQuestion;
-        document.getElementById("loginSecA").value = found.secAnswer;
-      } else {
-        showAuthMsg("err", "Incorrect security answer.");
-      }
-    }
-
-    /* ==================== APP DEVELOPER MASTER CONTROL LOGIC ==================== */
-    const ALL_AVAILABLE_FEATURES = [
-      { id: "feat_salary", name: "Payroll & Salary Slip", planReq: "₹399" },
-      { id: "feat_bills", name: "Expense Bill Proofs", planReq: "₹399" },
-      { id: "feat_multibranch", name: "Multi-Branch Matrix", planReq: "₹999" },
-      { id: "feat_qr_att", name: "QR / Kiosk Attendance", planReq: "₹199" },
-      { id: "feat_custom_terms", name: "Printable Legal Agreement", planReq: "₹399" },
-      { id: "feat_pnl_growth", name: "Advanced P&L Analytics", planReq: "₹399" }
-    ];
-
-    function renderDeveloperCustomerList() {
-      const customers = getSavedCustomersRegistry();
-      const fromDate = document.getElementById("devFilterFrom").value;
-      const toDate = document.getElementById("devFilterTo").value;
-
-      let filtered = customers.filter(c => {
-        const cDate = (c.createdAt || "").slice(0, 10);
-        if (fromDate && cDate < fromDate) return false;
-        if (toDate && cDate > toDate) return false;
-        return true;
-      });
-
-      // Update counters
-      document.getElementById("devTotalCust").textContent = customers.length;
-      document.getElementById("devActivePaid").textContent = customers.filter(c => c.purchased).length;
-      document.getElementById("devNewRange").textContent = filtered.length;
-
-      const container = document.getElementById("devCustomersListContainer");
-      if (!filtered.length) {
-        container.innerHTML = '<div style="color:var(--tx-muted);text-align:center;padding:20px;background:#0D1527;border-radius:12px;">No customers found in this date range. Adjust the calendar filters above.</div>';
-        return;
-      }
-
-      container.innerHTML = filtered.map((c, idx) => {
-        const customFeats = c.customFeatures || [];
-        const featChipsHtml = ALL_AVAILABLE_FEATURES.map(f => {
-          const isUnlocked = customFeats.includes(f.id);
-          return `<span class="feature-chip ${isUnlocked ? 'unlocked' : ''}" onclick="toggleFeatureForCustomer('${c.id}', '${f.id}')" title="Click to ${isUnlocked ? 'Block' : 'Unblock'}">
-            ${isUnlocked ? '✔' : '+'} ${f.name}
-          </span>`;
-        }).join("");
-
-        return `
-          <div class="cust-card">
-            <div class="cust-top">
-              <div>
-                <span class="cust-name">${c.gymName || "Gym"}</span>
-                <span style="font-size:11px;color:var(--gold);margin-left:6px">(${c.city || "Branch"})</span>
-              </div>
-              <span class="cust-badge">${c.planName || "Active Plan"}</span>
-            </div>
-
-            <div class="cust-meta">
-              👤 <b>Username:</b> ${c.username} &bull; 🔑 <b>Password:</b> <span style="color:var(--gold);font-weight:800">${c.password}</span><br>
-              📧 <b>Email:</b> ${c.email} &bull; 📞 <b>Phone:</b> ${c.phone || "N/A"}<br>
-              📅 <b>Registered On:</b> ${c.createdAt || "N/A"} &bull; <b>License:</b> ${c.licenseKey || "OM-ERP"}
-            </div>
-
-            <div style="font-size:10.5px;color:var(--tx-muted);margin-bottom:4px">
-              ⚡ <b>1-Click Custom Feature Unblock (Click chip to toggle):</b>
-            </div>
-            <div style="margin-bottom:8px">
-              ${featChipsHtml}
-            </div>
-
-            <div class="dev-actions">
-              <button type="button" class="dev-btn" onclick="devChangePassword('${c.id}')">🔑 Change Password</button>
-              <button type="button" class="dev-btn" onclick="devChangeEmail('${c.id}')">📧 Change Email</button>
-              <button type="button" class="dev-btn" onclick="devChangeMobile('${c.id}')">📞 Change Mobile</button>
-              <button type="button" class="dev-btn success" onclick="devDirectLoginAs('${c.id}')">🚀 Login to this Gym</button>
-              <button type="button" class="dev-btn danger" onclick="devDeleteCustomer('${c.id}')">🗑 Delete</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    document.getElementById("btnApplyDevDateFilter").addEventListener("click", renderDeveloperCustomerList);
-    document.getElementById("btnResetDevDateFilter").addEventListener("click", function() {
-      document.getElementById("devFilterFrom").value = APP_LAUNCH_DATE;
-      document.getElementById("devFilterTo").value = new Date().toISOString().slice(0, 10);
-      renderDeveloperCustomerList();
-    });
-
-    // 1-Click Password Change by Developer
-    window.devChangePassword = function(custId) {
-      const list = getSavedCustomersRegistry();
-      const cust = list.find(c => c.id === custId);
-      if (!cust) return;
-      const newPass = prompt("Enter new password for " + cust.username + " (" + cust.gymName + "):", cust.password);
-      if (newPass && newPass.trim().length >= 4) {
-        cust.password = newPass.trim();
-        saveCustomersRegistry(list);
-        renderDeveloperCustomerList();
-        alert("Password updated to: " + cust.password + "\nCustomer ko yeh password bata dijiye!");
-      }
-    };
-
-    // 1-Click Email Change by Developer
-    window.devChangeEmail = function(custId) {
-      const list = getSavedCustomersRegistry();
-      const cust = list.find(c => c.id === custId);
-      if (!cust) return;
-      const newMail = prompt("Enter new Email for " + cust.username + ":", cust.email);
-      if (newMail && newMail.trim().includes("@")) {
-        cust.email = newMail.trim().toLowerCase();
-        saveCustomersRegistry(list);
-        renderDeveloperCustomerList();
-        alert("Email updated to: " + cust.email);
-      }
-    };
-
-    // 1-Click Mobile Change by Developer
-    window.devChangeMobile = function(custId) {
-      const list = getSavedCustomersRegistry();
-      const cust = list.find(c => c.id === custId);
-      if (!cust) return;
-      const newPhone = prompt("Enter new Mobile Number for " + cust.username + ":", cust.phone || "");
-      if (newPhone && newPhone.trim().length >= 10) {
-        cust.phone = newPhone.trim();
-        saveCustomersRegistry(list);
-        renderDeveloperCustomerList();
-        alert("Mobile updated to: " + cust.phone);
-      }
-    };
-
-    // 1-Click Feature Override / Unblock
-    window.toggleFeatureForCustomer = function(custId, featId) {
-      const list = getSavedCustomersRegistry();
-      const cust = list.find(c => c.id === custId);
-      if (!cust) return;
-      if (!cust.customFeatures) cust.customFeatures = [];
-
-      const idx = cust.customFeatures.indexOf(featId);
-      if (idx >= 0) {
-        cust.customFeatures.splice(idx, 1);
-      } else {
-        cust.customFeatures.push(featId);
-      }
-
-      saveCustomersRegistry(list);
-      // If currently active customer, sync in session
-      const active = JSON.parse(localStorage.getItem("om_active_customer_account") || "null");
-      if (active && active.id === custId) {
-        localStorage.setItem("om_customer_unlocked_features", JSON.stringify(cust.customFeatures));
-      }
-      renderDeveloperCustomerList();
-    };
-
-    // 1-Click Developer Direct Login to Customer Gym
-    window.devDirectLoginAs = function(custId) {
-      const list = getSavedCustomersRegistry();
-      const cust = list.find(c => c.id === custId);
-      if (!cust) return;
-      localStorage.setItem("om_active_customer_account", JSON.stringify(cust));
-      localStorage.setItem("om_customer_unlocked_features", JSON.stringify(cust.customFeatures || []));
-      localStorage.setItem("bfc_role", "owner");
-      localStorage.setItem("om_logged_user", cust.username);
-      location.replace("index.html");
-    };
-
-    // Delete customer
-    window.devDeleteCustomer = function(custId) {
-      if (!confirm("Are you sure you want to delete this customer?")) return;
-      let list = getSavedCustomersRegistry();
-      list = list.filter(c => c.id !== custId);
-      saveCustomersRegistry(list);
-      renderDeveloperCustomerList();
-    };
-  </script>
+    setRoleTab(currentRole);
+  });
+})();
+</script>
 </body>
 </html>
