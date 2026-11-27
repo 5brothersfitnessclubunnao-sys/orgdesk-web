@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Upgrade Plan — Om Software ERP</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{min-height:100vh;background:#050814;color:#f8fafc;padding:16px}
+.wrap{max-width:520px;margin:0 auto}
+h1{color:#ffd166;font-size:20px;font-weight:900;margin-bottom:6px;text-align:center}
+.sub{color:#94a3b8;font-size:12px;text-align:center;margin-bottom:16px}
+.card{background:#0b1226;border:1.5px solid #26365e;border-radius:14px;padding:14px;margin-bottom:12px}
+.card.hl{border-color:#f5a623}
+.card h3{color:#ffd166;font-size:15px;margin-bottom:4px}
+.price{font-size:22px;font-weight:900;color:#22d3ee;margin:6px 0}
+.feat{font-size:12px;color:#cbd5e1;line-height:1.5;margin-bottom:10px}
+.btn{width:100%;padding:11px;border:none;border-radius:10px;font-weight:900;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#ffd166,#f5a623);color:#050814}
+.btn.sec{background:#132142;color:#22d3ee;border:1px solid #2a3f70}
+.back{display:inline-block;margin-bottom:12px;color:#38bdf8;font-weight:800;text-decoration:none;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="app.html">← Back to Dashboard</a>
+  <h1>⬆ Upgrade Plan</h1>
+  <p class="sub">Choose a plan for your Gym / Dealership / Shop ERP</p>
+
+  <div class="card">
+    <h3>Starter</h3>
+    <div class="price">₹99 / month</div>
+    <div class="feat">Light Mode · Single branch · &lt;100 staff · Admission + Fees + Staff attendance</div>
+    <button type="button" class="btn" onclick="pickPlan('Starter',99)">Select Starter</button>
+  </div>
+
+  <div class="card hl">
+    <h3>Growth ★ Popular</h3>
+    <div class="price">₹299 / month</div>
+    <div class="feat">QR attendance · Payroll sheet · Expense approval · Excel / PDF export</div>
+    <button type="button" class="btn" onclick="pickPlan('Growth',299)">Select Growth</button>
+  </div>
+
+  <div class="card">
+    <h3>Business</h3>
+    <div class="price">₹599 / month</div>
+    <div class="feat">Multi-branch · Manager roles · Full App Mode · Cloud sync ready</div>
+    <button type="button" class="btn" onclick="pickPlan('Business',599)">Select Business</button>
+  </div>
+
+  <div class="card">
+    <h3>Enterprise</h3>
+    <div class="price">₹999 / month</div>
+    <div class="feat">Unlimited staff · Priority support · Custom branding · All modules</div>
+    <button type="button" class="btn" onclick="pickPlan('Enterprise',999)">Select Enterprise</button>
+  </div>
+
+  <button type="button" class="btn sec" style="margin-top:8px" onclick="location.href='app.html'">Back to App</button>
+</div>
+<script>
+function pickPlan(name, price) {
+  try {
+    localStorage.setItem("om_selected_plan", JSON.stringify({ name: name, price: price, at: new Date().toISOString() }));
+    var el = document.getElementById("infoPlanName");
+  } catch (e) {}
+  alert("✅ Plan request: " + name + " (₹" + price + "/mo)\n\nOwner se confirm hone par plan active ho jayega. Dashboard par wapas ja rahe hain.");
+  location.href = "app.html";
+}
+</script>
+</body>
+</html>
