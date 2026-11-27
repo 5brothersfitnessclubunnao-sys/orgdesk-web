@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Upgrade Plan — Payment Gateway</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{min-height:100vh;background:#050814;color:#f8fafc;padding:16px}
+.wrap{max-width:520px;margin:0 auto}
+h1{color:#ffd166;font-size:20px;font-weight:900;margin-bottom:6px;text-align:center}
+.sub{color:#94a3b8;font-size:12px;text-align:center;margin-bottom:16px}
+.card{background:#0b1226;border:1.5px solid #26365e;border-radius:14px;padding:14px;margin-bottom:12px}
+.card.hl{border-color:#f5a623}
+.card.sel{border-color:#22d3ee;box-shadow:0 0 0 1px #22d3ee}
+.card h3{color:#ffd166;font-size:15px;margin-bottom:4px}
+.price{font-size:22px;font-weight:900;color:#22d3ee;margin:6px 0}
+.feat{font-size:12px;color:#cbd5e1;line-height:1.5;margin-bottom:10px}
+.btn{width:100%;padding:11px;border:none;border-radius:10px;font-weight:900;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#ffd166,#f5a623);color:#050814}
+.btn.sec{background:#132142;color:#22d3ee;border:1px solid #2a3f70}
+.btn.ok{background:#059669;color:#fff}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.back{display:inline-block;margin-bottom:12px;color:#38bdf8;font-weight:800;text-decoration:none;font-size:13px}
+.hidden{display:none!important}
+.pay-box{background:#071018;border:1.5px solid #22d3ee;border-radius:14px;padding:14px;margin-top:8px}
+.pay-box h2{color:#22d3ee;font-size:16px;margin-bottom:8px}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:11px;color:#94a3b8;font-weight:700;margin-bottom:3px}
+.fc{width:100%;padding:10px;border-radius:9px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:13px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qr-box{text-align:center;padding:12px;background:#0a1520;border-radius:12px;margin:10px 0;border:1px dashed #22d3ee}
+.qr-box img{width:180px;height:180px;background:#fff;border-radius:8px;padding:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#065f46;color:#ecfdf5;border:1px solid #34d399;padding:12px 18px;border-radius:12px;font-weight:800;font-size:13px;z-index:9999;display:none}
+.toast.show{display:block}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px}
+.tab{padding:8px;border-radius:8px;border:1px solid #334155;background:#0e172f;color:#cbd5e1;font-size:11px;font-weight:800;cursor:pointer;text-align:center}
+.tab.on{background:#22d3ee;color:#000;border-color:#22d3ee}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="app.html">← Back to Dashboard</a>
+  <h1>⬆ Upgrade Plan</h1>
+  <p class="sub">Plan choose karein → Payment gateway par pay karein → Plan active</p>
+
+  <div id="planList">
+    <div class="card" data-plan="Starter" data-price="99">
+      <h3>Starter</h3>
+      <div class="price">₹99 / month</div>
+      <div class="feat">Light Mode · Single branch · &lt;100 staff · Admission + Fees + Staff attendance</div>
+      <button type="button" class="btn" onclick="selectPlan('Starter',99)">Select &amp; Pay ₹99</button>
+    </div>
+    <div class="card hl" data-plan="Growth" data-price="299">
+      <h3>Growth ★ Popular</h3>
+      <div class="price">₹299 / month</div>
+      <div class="feat">QR attendance · Payroll · Expense approval · Excel / PDF</div>
+      <button type="button" class="btn" onclick="selectPlan('Growth',299)">Select &amp; Pay ₹299</button>
+    </div>
+    <div class="card" data-plan="Business" data-price="599">
+      <h3>Business</h3>
+      <div class="price">₹599 / month</div>
+      <div class="feat">Multi-branch · Manager roles · Full App Mode · Cloud sync</div>
+      <button type="button" class="btn" onclick="selectPlan('Business',599)">Select &amp; Pay ₹599</button>
+    </div>
+    <div class="card" data-plan="Enterprise" data-price="999">
+      <h3>Enterprise</h3>
+      <div class="price">₹999 / month</div>
+      <div class="feat">Unlimited staff · Priority support · Custom branding</div>
+      <button type="button" class="btn" onclick="selectPlan('Enterprise',999)">Select &amp; Pay ₹999</button>
+    </div>
+  </div>
+
+  <!-- PAYMENT GATEWAY (stays on page — no auto redirect) -->
+  <div id="payGateway" class="pay-box hidden">
+    <h2>💳 Secure Payment Gateway</h2>
+    <div style="font-size:13px;margin-bottom:10px">
+      Selected: <b id="payPlanName" style="color:#ffd166">—</b> · Amount: <b id="payAmount" style="color:#00ff66">₹0</b>
+    </div>
+
+    <div class="tabs">
+      <button type="button" class="tab on" id="tabUpi" onclick="setPayTab('upi')">UPI / QR</button>
+      <button type="button" class="tab" id="tabCard" onclick="setPayTab('card')">Card</button>
+      <button type="button" class="tab" id="tabNet" onclick="setPayTab('net')">Net Banking</button>
+    </div>
+
+    <div id="panelUpi">
+      <div class="qr-box">
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:6px">Scan UPI QR / pay to merchant</div>
+        <img id="upiQrImg" alt="UPI QR" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi%3A%2F%2Fpay%3Fpa%3Domsoftware%40upi%26pn%3DOm%20Software%20ERP%26am%3D99%26cu%3DINR">
+        <div style="font-size:12px;margin-top:8px;color:#22d3ee;font-weight:800">omsoftware@upi</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:4px">Amount: <span id="upiAmtLabel">₹99</span></div>
+      </div>
+      <div class="fg">
+        <label>UTR / Transaction ID (payment ke baad)</label>
+        <input class="fc" id="upiUtr" placeholder="e.g. 123456789012">
+      </div>
+      <button type="button" class="btn ok" onclick="confirmPayment('UPI')">✔ I Have Paid — Confirm</button>
+    </div>
+
+    <div id="panelCard" class="hidden">
+      <div class="fg"><label>Card Number</label><input class="fc" id="cardNo" maxlength="19" placeholder="XXXX XXXX XXXX XXXX"></div>
+      <div class="row2">
+        <div class="fg"><label>Expiry</label><input class="fc" id="cardExp" placeholder="MM/YY"></div>
+        <div class="fg"><label>CVV</label><input class="fc" id="cardCvv" maxlength="4" placeholder="***" type="password"></div>
+      </div>
+      <div class="fg"><label>Name on Card</label><input class="fc" id="cardName" placeholder="Full name"></div>
+      <button type="button" class="btn ok" onclick="confirmPayment('Card')">Pay Now</button>
+    </div>
+
+    <div id="panelNet" class="hidden">
+      <div class="fg">
+        <label>Select Bank</label>
+        <select class="fc" id="netBank">
+          <option>SBI</option><option>HDFC</option><option>ICICI</option><option>Axis</option><option>PNB</option><option>Other</option>
+        </select>
+      </div>
+      <button type="button" class="btn ok" onclick="confirmPayment('NetBanking')">Continue to Bank</button>
+    </div>
+
+    <button type="button" class="btn sec" style="margin-top:10px" onclick="cancelPay()">← Change Plan</button>
+  </div>
+
+  <div id="paySuccess" class="pay-box hidden" style="border-color:#00ff66;text-align:center">
+    <div style="font-size:42px;margin-bottom:8px">✅</div>
+    <h2 style="color:#00ff66">Successfully Done ✅</h2>
+    <p style="font-size:13px;color:#cbd5e1;margin:8px 0 14px" id="successDetail">Payment received. Plan activated.</p>
+    <button type="button" class="btn" onclick="location.href='app.html'">Go to Dashboard</button>
+    <button type="button" class="btn sec" style="margin-top:8px" onclick="location.reload()">Pay Another Plan</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var selected = { name: "", price: 0 };
+
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); }, 2200);
+}
+
+function selectPlan(name, price) {
+  selected = { name: name, price: price };
+  document.querySelectorAll(".card").forEach(function(c) {
+    c.classList.toggle("sel", c.getAttribute("data-plan") === name);
+  });
+  document.getElementById("planList").classList.add("hidden");
+  document.getElementById("payGateway").classList.remove("hidden");
+  document.getElementById("paySuccess").classList.add("hidden");
+  document.getElementById("payPlanName").textContent = name;
+  document.getElementById("payAmount").textContent = "₹" + price;
+  document.getElementById("upiAmtLabel").textContent = "₹" + price;
+  var upiData = "upi://pay?pa=omsoftware@upi&pn=Om%20Software%20ERP&am=" + price + "&cu=INR&tn=" + encodeURIComponent(name + " Plan");
+  document.getElementById("upiQrImg").src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(upiData);
+  setPayTab("upi");
+  window.scrollTo(0, 0);
+}
+
+function cancelPay() {
+  document.getElementById("payGateway").classList.add("hidden");
+  document.getElementById("planList").classList.remove("hidden");
+  document.getElementById("paySuccess").classList.add("hidden");
+}
+
+function setPayTab(tab) {
+  document.getElementById("tabUpi").classList.toggle("on", tab === "upi");
+  document.getElementById("tabCard").classList.toggle("on", tab === "card");
+  document.getElementById("tabNet").classList.toggle("on", tab === "net");
+  document.getElementById("panelUpi").classList.toggle("hidden", tab !== "upi");
+  document.getElementById("panelCard").classList.toggle("hidden", tab !== "card");
+  document.getElementById("panelNet").classList.toggle("hidden", tab !== "net");
+}
+
+function confirmPayment(mode) {
+  if (!selected.name) return;
+  if (mode === "UPI") {
+    var utr = (document.getElementById("upiUtr").value || "").trim();
+    if (utr && utr.length < 6) {
+      showToast("Valid UTR darj karein (optional but recommended)");
+      return;
+    }
+  }
+  if (mode === "Card") {
+    var no = (document.getElementById("cardNo").value || "").replace(/\s/g, "");
+    if (no.length < 12) { showToast("Card number sahi nahi"); return; }
+  }
+  var rec = {
+    name: selected.name,
+    price: selected.price,
+    mode: mode,
+    at: new Date().toISOString(),
+    utr: (document.getElementById("upiUtr") || {}).value || "",
+    status: "Paid"
+  };
+  try {
+    localStorage.setItem("om_selected_plan", JSON.stringify(rec));
+    localStorage.setItem("om_plan_active", JSON.stringify(rec));
+    var exp = new Date();
+    exp.setMonth(exp.getMonth() + 1);
+    localStorage.setItem("om_plan_expiry", exp.toISOString().slice(0, 10));
+    localStorage.setItem("infoPlanName", selected.name);
+  } catch (e) {}
+  document.getElementById("payGateway").classList.add("hidden");
+  document.getElementById("planList").classList.add("hidden");
+  document.getElementById("paySuccess").classList.remove("hidden");
+  document.getElementById("successDetail").textContent =
+    selected.name + " plan · ₹" + selected.price + " · " + mode + " — Successfully Done ✅. Dashboard par jaakar plan status dekh sakte ho.";
+  showToast("Successfully Done ✅");
+}
+</script>
+</body>
+</html>
