@@ -3,483 +3,335 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Main Menu — Full App &amp; Light Mode</title>
+<title>App Dashboard — Om Software</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="auth-gate.js" data-mode="ondemand"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;min-height:100%;background:#050505;color:#fff;font-family:system-ui,-apple-system,sans-serif}
-body{padding:14px;padding-bottom:40px}
-.wrap{width:100%;max-width:560px;margin:0 auto}
-header{
-  text-align:center;margin-bottom:14px;padding:16px 14px;
-  border:2px solid #ffcc00;border-radius:16px;
-  background:linear-gradient(145deg,#2a2200,#0d0d0d);
-}
-header h1{color:#ffcc00;font-size:20px;font-weight:900;letter-spacing:.3px;line-height:1.3}
-header .addr{color:#aaa;font-size:12px;margin-top:6px}
-header .menu{color:#ffcc00;margin-top:8px;font-weight:800;font-size:13px}
+html,body{width:100%;min-height:100%;background:#050814;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{padding:14px;padding-bottom:60px}
+.wrap{max-width:580px;margin:0 auto}
+header{background:#0b1226;border:2px solid #f5a623;border-radius:16px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.menu-btn{width:38px;height:38px;border-radius:10px;border:1.5px solid #22d3ee;background:#070d1d;color:#22d3ee;font-size:18px;font-weight:900;cursor:pointer}
+header h1{font-size:16px;font-weight:900;color:#ffd166;cursor:pointer}
+header p{font-size:11px;color:#94a3b8}
+.top-btns{display:flex;gap:6px;flex-wrap:wrap}
+.sbtn{padding:7px 10px;border-radius:9px;border:1px solid #334155;background:#111b33;color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;text-decoration:none}
+.sbtn.gold{background:#f5a623;color:#050814;border-color:#f5a623}
+.sbtn.cyan{background:#082f49;color:#38bdf8;border-color:#38bdf8}
+.sbtn.red{background:#450a0a;color:#fca5a5;border-color:#ef4444}
 
-.mode-banner{
-  background:#111;border:1.5px solid #22d3ee;border-radius:14px;padding:12px;margin-bottom:14px;
-}
-.mode-tip{font-size:11.5px;color:#cbd5e1;line-height:1.45;margin-bottom:8px}
-.mode-tip b{color:#ffcc00}
-.mode-switch-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mode-btn{
-  padding:10px 8px;border-radius:10px;border:1.5px solid #444;background:#181818;
-  color:#fff;font-size:12px;font-weight:800;cursor:pointer;text-align:center;
-}
-.mode-btn.active-full{background:#ffcc00;color:#000;border-color:#ffcc00}
-.mode-btn.active-light{background:#22d3ee;color:#000;border-color:#22d3ee}
+.drawer-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:2000}
+.drawer-ov.open{display:block}
+.drawer{position:fixed;top:0;left:-310px;width:290px;max-width:85vw;height:100vh;background:#070c1a;border-right:1.5px solid #26365e;z-index:2001;padding:14px;overflow-y:auto;transition:left .2s}
+.drawer.open{left:0}
+.drw-item{width:100%;display:flex;justify-content:space-between;align-items:center;padding:9px 10px;margin-bottom:6px;border-radius:9px;border:1px solid #1e2d52;background:#0b1226;color:#fff;font-size:12px;font-weight:700;cursor:pointer;text-align:left}
 
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.tile{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:6px;min-height:114px;padding:14px 10px;
-  background:#111;border:2px solid #333;border-radius:16px;
-  text-decoration:none;color:#fff;font-weight:800;font-size:14.5px;
-  text-align:center;line-height:1.25;cursor:pointer;
-}
-.tile:active{transform:scale(.97);opacity:.92}
-.tile .ico{font-size:30px;line-height:1}
-.tile .sub{font-size:11px;color:#cbd5e1;font-weight:500}
-.tile.gold{border-color:#ffcc00;background:#1a1600;color:#ffcc00}
-.tile.blue{border-color:#4db8ff;background:#0a1520;color:#4db8ff}
-.tile.green{border-color:#00ff66;background:#0a1a10;color:#00ff66}
-.tile.orange{border-color:#ff9900;background:#1a1000;color:#ff9900}
-.tile.purple{border-color:#c084fc;background:#150a20;color:#c084fc}
-.tile.pink{border-color:#f472b6;background:#1a0a14;color:#f472b6}
-.tile.red{border-color:#ff5555;background:#1a0808;color:#ff6666}
-.tile.cyan{border-color:#22d3ee;background:#061a1f;color:#22d3ee}
-.tile.full{grid-column:1/-1;min-height:68px;flex-direction:row;gap:10px;font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:108px;padding:12px 10px;background:#0b1226;border:1.5px solid #26365e;border-radius:14px;color:#fff;font-weight:800;font-size:13.5px;text-align:center;cursor:pointer;text-decoration:none}
+.tile .ico{font-size:26px}
+.tile .sub{font-size:10.5px;color:#94a3b8;font-weight:500}
+.tile.gold{border-color:#f5a623;color:#ffd166}
+.tile.green{border-color:#22c55e;color:#4ade80}
+.tile.cyan{border-color:#22d3ee;color:#22d3ee}
+.tile.blue{border-color:#38bdf8;color:#7dd3fc}
+.tile.purple{border-color:#a855f7;color:#d8b4fe}
+.tile.red{border-color:#ef4444;color:#fca5a5}
+.tile.orange{border-color:#f97316;color:#fdba74}
+.tile.full{grid-column:1/-1;min-height:64px;flex-direction:row}
 
-.light-sec{display:none;margin-top:8px}
-.light-sec.show{display:block}
-.full-sec.hide{display:none}
-
-.box{background:#111;border:1.5px solid #333;border-radius:14px;padding:12px;margin-bottom:12px}
-.box h3{font-size:14px;color:#ffcc00;margin-bottom:8px}
+.panel{margin-top:12px;background:#0b1226;border:1.5px solid #26365e;border-radius:14px;padding:14px}
+.panel h3{font-size:14px;color:#ffd166;margin-bottom:8px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .fg{margin-bottom:8px}
-.fg label{display:block;font-size:11px;color:#aaa;margin-bottom:3px;font-weight:700}
-.fc{width:100%;background:#070707;border:1px solid #444;border-radius:8px;padding:8px 10px;color:#fff;font-size:12px}
-.btn{width:100%;padding:10px;border-radius:10px;border:none;font-weight:900;font-size:12.5px;cursor:pointer;margin-top:4px}
-.btn-gold{background:#ffcc00;color:#000}
-.btn-green{background:#00ff66;color:#000}
-.btn-cyan{background:#22d3ee;color:#000}
-.btn-red{background:#ff4444;color:#fff}
-.btn-dark{background:#222;color:#fff;border:1px solid #444}
-.rec{background:#090909;border:1px solid #2b2b2b;border-radius:10px;padding:9px;margin-bottom:8px;font-size:11.5px}
-
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;align-items:center;justify-content:center;padding:12px}
-.modal-ov.open{display:flex}
-.modal-box{background:#111;border:2px solid #ffcc00;border-radius:16px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:15px}
-.m-top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #333;padding-bottom:8px;margin-bottom:12px}
-.x-btn{background:none;border:none;color:#ff5555;font-size:20px;font-weight:900;cursor:pointer}
+.fg label{display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;font-weight:700}
+.fc{width:100%;padding:9px 10px;border-radius:8px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:12.5px}
+.act-btn{width:100%;padding:10px;border-radius:10px;border:none;font-weight:900;font-size:12.5px;cursor:pointer;margin-top:4px}
+.act-btn.gold{background:#f5a623;color:#050814}
+.act-btn.green{background:#22c55e;color:#050814}
+.act-btn.cyan{background:#22d3ee;color:#050814}
+.rec{background:#070c1a;border:1px solid #1e2d52;border-radius:9px;padding:8px 10px;margin-top:6px;font-size:12px}
 </style>
 </head>
 <body>
+
+<script>
+(function () {
+  var MODE_KEY = "om_locked_app_mode_v1";
+  var LOGGED_KEY = "om_session_active_v1";
+
+  function getLockedMode() {
+    try {
+      var m = localStorage.getItem(MODE_KEY);
+      if (m === "light" || m === "full") return m;
+      var legacy = localStorage.getItem("om_app_display_mode");
+      if (legacy === "light" || legacy === "full") {
+        localStorage.setItem(MODE_KEY, legacy);
+        return legacy;
+      }
+    } catch (e) {}
+    return "light";
+  }
+
+  function setLockedMode(mode, explicitSwitch) {
+    if (!explicitSwitch) return;
+    var target = (mode === "full") ? "full" : "light";
+    try {
+      localStorage.setItem(MODE_KEY, target);
+      localStorage.setItem("om_app_display_mode", target);
+      localStorage.setItem(LOGGED_KEY, "1");
+    } catch (e) {}
+    window.dispatchEvent(new CustomEvent("om:mode-changed", { detail: { mode: target } }));
+  }
+
+  function clearSessionOnLogout() {
+    try {
+      localStorage.removeItem(LOGGED_KEY);
+      localStorage.removeItem("om_session_active");
+    } catch (e) {}
+  }
+
+  window.omGetLockedMode = getLockedMode;
+  window.omSetLockedMode = setLockedMode;
+  window.omClearSessionOnLogout = clearSessionOnLogout;
+
+  // Keep mode locked across browser back/forward (pageshow)
+  window.addEventListener("pageshow", function () {
+    var m = getLockedMode();
+    window.dispatchEvent(new CustomEvent("om:mode-changed", { detail: { mode: m } }));
+  });
+})();
+</script>
+
+<div class="drawer-ov" id="drawerOv"></div>
+<aside class="drawer" id="drawer">
+  <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #26365e;padding-bottom:8px;margin-bottom:10px">
+    <b style="color:#ffd166">Menu (18)</b>
+    <button type="button" id="btnCloseDrawer" style="background:none;border:none;color:#fb7185;font-size:20px;cursor:pointer">&times;</button>
+  </div>
+  <div id="drawerList"></div>
+</aside>
+
 <div class="wrap">
   <header>
-    <h1 id="gymMainTitle">GYM &amp; BUSINESS PORTAL</h1>
-    <div class="addr" id="gymMainSub">Full App Mode &amp; Light Mode</div>
-    <div class="menu" id="modeStatusLabel">Mode: Light Mode</div>
+    <div class="hdr-left">
+      <button type="button" class="menu-btn" id="btnOpenDrawer">&#9776;</button>
+      <div>
+        <h1 id="appHdrTitle">OM SOFTWARE</h1>
+        <p id="appModeSub">Mode Locked: Light Mode</p>
+      </div>
+    </div>
+    <div class="top-btns">
+      <button type="button" class="sbtn cyan" id="btnSwitchMode">Switch Mode</button>
+      <a href="plans.html" class="sbtn gold">Plans</a>
+      <button type="button" class="sbtn red" id="btnLogout">Logout</button>
+    </div>
   </header>
 
-  <div class="mode-banner">
-    <div class="mode-tip">
-      <b>Sign Up / Mode Guide:</b> If you have less than 50 people / staff (&lt; 50 or &lt; 100), please use <b>Light Mode</b> (Single Gym Owner / Shopkeeper / Small Team).
-    </div>
-    <div class="mode-switch-row">
-      <button type="button" class="mode-btn active-light" id="btnSwitchLight" onclick="setAppMode('light')">⚡ Light Mode (&lt;50 / &lt;100)</button>
-      <button type="button" class="mode-btn" id="btnSwitchFull" onclick="setAppMode('full')">👑 Full App Mode</button>
+  <div id="lightView">
+    <div class="grid">
+      <button type="button" class="tile gold" data-panel="admission"><span class="ico">📝</span>1. Admission Form<span class="sub">नया सदस्य</span></button>
+      <button type="button" class="tile green" data-panel="attendance"><span class="ico">✅</span>2. Attendance<span class="sub">सदस्य हाजिरी</span></button>
+      <button type="button" class="tile cyan" data-panel="staff_att"><span class="ico">🧑‍💼</span>3. Staff Attendance<span class="sub">Employee ID</span></button>
+      <button type="button" class="tile red" data-panel="pay_fees"><span class="ico">💳</span>Pay Fees<span class="sub">फीस जमा</span></button>
+      <button type="button" class="tile blue" data-panel="new_adm"><span class="ico">🆕</span>4. New Admission<span class="sub">नया एडमिशन</span></button>
+      <button type="button" class="tile purple" data-panel="enquiry"><span class="ico">📞</span>5. Enquiry<span class="sub">इन्क्वायरी</span></button>
+      <button type="button" class="tile orange full" data-panel="collection"><span class="ico">💰</span><span>Total Collection<br><span class="sub">Fees • New Admission • Old Customer</span></span></button>
     </div>
   </div>
 
-  <!-- LIGHT MODE SECTION (Ordered exactly as requested) -->
-  <section id="lightModeSection" class="light-sec show">
+  <div id="fullView" style="display:none">
     <div class="grid">
-      <button type="button" class="tile gold" onclick="openLightPanel('panelAdmission')">
-        <span class="ico">📝</span>
-        1. Admission Form
-        <span class="sub">नया सदस्य / फॉर्म</span>
-      </button>
-      <button type="button" class="tile green" onclick="openLightPanel('panelMemberAtt')">
-        <span class="ico">✅</span>
-        2. Attendance
-        <span class="sub">सदस्य हाजिरी</span>
-      </button>
-      <button type="button" class="tile cyan" onclick="openLightPanel('panelStaffAtt')">
-        <span class="ico">🧑‍💼</span>
-        3. Staff Attendance
-        <span class="sub">स्टाफ हाजिरी</span>
-      </button>
-      <button type="button" class="tile red" onclick="openLightPanel('panelPayFees')">
-        <span class="ico">💳</span>
-        Pay Fees
-        <span class="sub">फीस जमा / रसीद</span>
-      </button>
-      <button type="button" class="tile blue" onclick="openLightPanel('panelNewAdm')">
-        <span class="ico">🆕</span>
-        4. New Admission
-        <span class="sub">नया एडमिशन एंट्री</span>
-      </button>
-      <button type="button" class="tile purple" onclick="openLightPanel('panelEnquiry')">
-        <span class="ico">📞</span>
-        5. Enquiry
-        <span class="sub">इन्क्वायरी / फॉलो-अप</span>
-      </button>
-      <button type="button" class="tile orange full" onclick="openLightPanel('panelCollection')">
-        <span class="ico">💰</span>
-        <span>Total Collection<br><span class="sub">Fees • New Admission • Old Customer</span></span>
-      </button>
+      <a class="tile gold" href="index.html"><span class="ico">📊</span>Master Control<span class="sub">Live Overview</span></a>
+      <a class="tile green" href="fees-pending.html"><span class="ico">📅</span>Fees Pending<span class="sub">1-31 Register</span></a>
+      <a class="tile cyan" href="attendance.html"><span class="ico">✅</span>Attendance Kiosk<span class="sub">Check-in</span></a>
+      <a class="tile blue" href="fees-collection.html"><span class="ico">💳</span>Fees Portal<span class="sub">Receipts</span></a>
+      <a class="tile purple" href="staff-salary.html"><span class="ico">💼</span>Salary &amp; HR<span class="sub">Payroll</span></a>
+      <a class="tile orange" href="manager-portal.html"><span class="ico">👔</span>Manager Portal<span class="sub">Approvals</span></a>
     </div>
-
-    <div class="row2" style="margin-top:12px">
-      <button type="button" class="btn btn-cyan" onclick="openLightPanel('panelUpload')">📥 Upload Data</button>
-      <button type="button" class="btn btn-red" onclick="openMpinResetModal()">🔐 Reset Data (4-Digit MPIN)</button>
-    </div>
-
-    <!-- Dynamic Light Mode Action Panel -->
-    <div id="lightDynamicPanel" style="margin-top:12px"></div>
-  </section>
-
-  <!-- FULL APP MODE SECTION -->
-  <section id="fullModeSection" class="full-sec hide">
-    <div class="grid">
-      <a class="tile gold" href="admission.html"><span class="ico">📝</span>Admission Form<span class="sub">पूरा एडमिशन फॉर्म</span></a>
-      <a class="tile blue" href="members-portal.html"><span class="ico">👥</span>Members Portal<span class="sub">सदस्य रिकॉर्ड</span></a>
-      <a class="tile green" href="attendance.html"><span class="ico">✅</span>Attendance<span class="sub">हाजिरी कियोस्क</span></a>
-      <a class="tile orange" href="master.html"><span class="ico">📊</span>Master<span class="sub">एडमिन डैशबोर्ड</span></a>
-      <a class="tile purple" href="store.html"><span class="ico">🛒</span>Supplement Store<span class="sub">स्टोर / प्रोडक्ट्स</span></a>
-      <a class="tile cyan" href="pay.html?m=fees"><span class="ico">💳</span>Pay / UPI &amp; Fees<span class="sub">फीस व रसीद</span></a>
-    </div>
-  </section>
-</div>
-
-<!-- 4-DIGIT MPIN RESET MODAL -->
-<div class="modal-ov" id="mpinResetModal">
-  <div class="modal-box" style="border-color:#ff4444">
-    <div class="m-top">
-      <h3 style="color:#ff6666">🔐 Reset Data (4-Digit MPIN Required)</h3>
-      <button type="button" class="x-btn" onclick="closeMpinResetModal()">&times;</button>
-    </div>
-    <div class="fg">
-      <label>Enter 4-Digit MPIN *</label>
-      <input type="password" maxlength="4" inputmode="numeric" class="fc" id="mpinInput" placeholder="••••">
-      <div style="font-size:10.5px;color:#94a3b8;margin-top:4px">Default MPIN: <b>1234</b> (Cloud sync hook ready)</div>
-    </div>
-    <div class="fg">
-      <label>Choose What to Reset</label>
-      <select class="fc" id="mpinResetTarget">
-        <option value="all">All Light Mode Data</option>
-        <option value="admissions">Admission Form &amp; New Admission</option>
-        <option value="attendance">Member &amp; Staff Attendance</option>
-        <option value="fees">Fees &amp; Collection</option>
-        <option value="enquiry">Enquiry</option>
-      </select>
-    </div>
-    <button type="button" class="btn btn-red" onclick="verifyMpinAndReset()">✔ Verify MPIN &amp; Reset</button>
   </div>
+
+  <div class="panel" id="activePanel"></div>
 </div>
 
 <script>
-(function lightAndFullAppController() {
-  var STORE_KEY = "om_light_mode_data_v1";
-  var MODE_KEY = "om_app_display_mode";
-  var MPIN_KEY = "om_light_mpin_v1";
+(function () {
+  var DATA_KEY = "om_app_working_data_v1";
+  var MENU_18 = [
+    "1. Dashboard", "2. Admission", "3. Attendance", "4. Staff Attendance",
+    "5. Pay Fees", "6. New Admission", "7. Enquiry", "8. Total Collection",
+    "9. Fees Pending", "10. Salary Register", "11. Manager Portal", "12. Plans",
+    "13. Export Excel", "14. Branch Info", "15. Staff Setup", "16. Reports",
+    "17. Settings", "18. Help"
+  ];
 
-  function getStore() {
-    try {
-      var d = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
-      if (d && typeof d === "object") return d;
-    } catch (e) {}
-    return {
-      admissions: [],
-      memberAtt: [],
-      staffAtt: [],
-      feesPaid: [],
-      newAdmissions: [],
-      oldCustomerPayments: [],
-      enquiries: []
-    };
+  function readData() {
+    try { return JSON.parse(localStorage.getItem(DATA_KEY) || "{}") || {}; } catch (e) { return {}; }
+  }
+  function writeData(d) {
+    try { localStorage.setItem(DATA_KEY, JSON.stringify(d)); } catch (e) {}
   }
 
-  function saveStore(d) {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch (e) {}
-    syncLightDataToCloud(d);
+  function applyLockedModeView() {
+    var m = window.omGetLockedMode();
+    var isFull = (m === "full");
+    document.getElementById("lightView").style.display = isFull ? "none" : "block";
+    document.getElementById("fullView").style.display = isFull ? "block" : "none";
+    document.getElementById("appModeSub").textContent = isFull ? "Mode Locked: Full App Mode" : "Mode Locked: Light Mode";
   }
 
-  // Cloud hook ready for Firebase Firestore sync
-  function syncLightDataToCloud(d) {
-    try {
-      if (window.firebase && firebase.apps && firebase.apps.length && firebase.firestore) {
-        var db = firebase.firestore();
-        var gid = localStorage.getItem("bfc_gid") || "default_gym";
-        db.collection("light_mode_workspaces").doc(String(gid)).set({
-          updatedAt: new Date().toISOString(),
-          summary: {
-            admissions: (d.admissions || []).length,
-            feesPaid: (d.feesPaid || []).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0),
-            newAdmissions: (d.newAdmissions || []).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0),
-            oldCustomerPayments: (d.oldCustomerPayments || []).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0)
-          }
-        }, { merge: true }).catch(function () {});
-      }
-    } catch (e) {}
+  function renderPanel(key) {
+    var d = readData();
+    d.admissions = d.admissions || [];
+    d.attendance = d.attendance || [];
+    d.staffAtt = d.staffAtt || [];
+    d.fees = d.fees || [];
+    d.newAdm = d.newAdm || [];
+    d.oldPay = d.oldPay || [];
+    d.enquiries = d.enquiries || [];
+
+    var box = document.getElementById("activePanel");
+    if (key === "admission") {
+      box.innerHTML = '<h3>1. Admission Form</h3>' +
+        '<div class="row2"><div class="fg"><label>Name *</label><input class="fc" id="pAdmName"></div><div class="fg"><label>Mobile *</label><input class="fc" id="pAdmPhone"></div></div>' +
+        '<button type="button" class="act-btn gold" id="btnSaveAdm">Save Admission</button>' +
+        d.admissions.map(function (x) { return '<div class="rec"><b>' + x.name + '</b> • ' + x.phone + '</div>'; }).join("");
+      document.getElementById("btnSaveAdm").onclick = function () {
+        var n = document.getElementById("pAdmName").value.trim(), p = document.getElementById("pAdmPhone").value.trim();
+        if (!n) return alert("Name darj karein.");
+        d.admissions.unshift({ name: n, phone: p }); writeData(d); renderPanel("admission");
+      };
+    } else if (key === "attendance") {
+      box.innerHTML = '<h3>2. Attendance</h3>' +
+        '<div class="fg"><label>Member Name *</label><input class="fc" id="pAttName"></div>' +
+        '<button type="button" class="act-btn green" id="btnSaveAtt">Mark Present</button>' +
+        d.attendance.map(function (x) { return '<div class="rec"><b>' + x.name + '</b> • ' + x.date + '</div>'; }).join("");
+      document.getElementById("btnSaveAtt").onclick = function () {
+        var n = document.getElementById("pAttName").value.trim();
+        if (!n) return alert("Name darj karein.");
+        d.attendance.unshift({ name: n, date: new Date().toISOString().slice(0, 10) }); writeData(d); renderPanel("attendance");
+      };
+    } else if (key === "staff_att") {
+      box.innerHTML = '<h3>3. Staff Attendance</h3>' +
+        '<div class="fg"><label>Employee ID / Code *</label><input class="fc" id="pStfId" placeholder="e.g. STF-01"></div>' +
+        '<button type="button" class="act-btn cyan" id="btnSaveStfAtt">Mark Staff Attendance</button>' +
+        d.staffAtt.map(function (x) { return '<div class="rec"><b>' + x.code + '</b> • ' + x.date + '</div>'; }).join("");
+      document.getElementById("btnSaveStfAtt").onclick = function () {
+        var c = document.getElementById("pStfId").value.trim();
+        if (!c) return alert("Employee ID zaroori hai.");
+        d.staffAtt.unshift({ code: c, date: new Date().toISOString().slice(0, 10) }); writeData(d); renderPanel("staff_att");
+      };
+    } else if (key === "pay_fees") {
+      box.innerHTML = '<h3>Pay Fees</h3>' +
+        '<div class="row2"><div class="fg"><label>Name *</label><input class="fc" id="pFeeName"></div><div class="fg"><label>Amount (₹) *</label><input type="number" class="fc" id="pFeeAmt" value="500"></div></div>' +
+        '<div class="fg"><label>Type</label><select class="fc" id="pFeeType"><option value="old">Old Customer</option><option value="new">New Admission</option></select></div>' +
+        '<button type="button" class="act-btn green" id="btnSaveFee">Collect Fees</button>';
+      document.getElementById("btnSaveFee").onclick = function () {
+        var n = document.getElementById("pFeeName").value.trim(), a = Number(document.getElementById("pFeeAmt").value || 0), t = document.getElementById("pFeeType").value;
+        if (!n || a <= 0) return alert("Name aur amount darj karein.");
+        d.fees.unshift({ name: n, amount: a });
+        if (t === "new") d.newAdm.unshift({ name: n, amount: a }); else d.oldPay.unshift({ name: n, amount: a });
+        writeData(d); renderPanel("collection");
+      };
+    } else if (key === "new_adm") {
+      box.innerHTML = '<h3>4. New Admission</h3>' +
+        '<div class="row2"><div class="fg"><label>Name *</label><input class="fc" id="pNaName"></div><div class="fg"><label>Amount (₹) *</label><input type="number" class="fc" id="pNaAmt" value="500"></div></div>' +
+        '<button type="button" class="act-btn cyan" id="btnSaveNa">Save New Admission</button>';
+      document.getElementById("btnSaveNa").onclick = function () {
+        var n = document.getElementById("pNaName").value.trim(), a = Number(document.getElementById("pNaAmt").value || 0);
+        if (!n || a <= 0) return alert("Name aur amount darj karein.");
+        d.newAdm.unshift({ name: n, amount: a }); d.fees.unshift({ name: n, amount: a });
+        writeData(d); renderPanel("collection");
+      };
+    } else if (key === "enquiry") {
+      box.innerHTML = '<h3>5. Enquiry</h3>' +
+        '<div class="row2"><div class="fg"><label>Name *</label><input class="fc" id="pEnqName"></div><div class="fg"><label>Mobile *</label><input class="fc" id="pEnqPhone"></div></div>' +
+        '<button type="button" class="act-btn gold" id="btnSaveEnq">Save Enquiry</button>' +
+        d.enquiries.map(function (x) { return '<div class="rec"><b>' + x.name + '</b> • ' + x.phone + '</div>'; }).join("");
+      document.getElementById("btnSaveEnq").onclick = function () {
+        var n = document.getElementById("pEnqName").value.trim(), p = document.getElementById("pEnqPhone").value.trim();
+        if (!n) return alert("Name darj karein.");
+        d.enquiries.unshift({ name: n, phone: p }); writeData(d); renderPanel("enquiry");
+      };
+    } else {
+      var fSum = d.fees.reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
+      var nSum = d.newAdm.reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
+      var oSum = d.oldPay.reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
+      box.innerHTML = '<h3>Total Collection</h3>' +
+        '<div class="rec">Fees Earning: <b>₹' + fSum + '</b></div>' +
+        '<div class="rec">New Admission Payment: <b>₹' + nSum + '</b></div>' +
+        '<div class="rec">Old Customer Payment: <b>₹' + oSum + '</b></div>';
+    }
   }
 
-  function esc(v) {
-    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
-  }
+  document.getElementById("drawerList").innerHTML = MENU_18.map(function (label, i) {
+    return '<button type="button" class="drw-item" data-drw="' + i + '"><span>' + label + '</span><span>&rarr;</span></button>';
+  }).join("");
 
-  window.setAppMode = function (mode) {
-    var m = (mode === "full") ? "full" : "light";
-    try { localStorage.setItem(MODE_KEY, m); } catch (e) {}
-    applyModeUI();
+  document.getElementById("btnOpenDrawer").onclick = function () {
+    document.getElementById("drawerOv").classList.add("open");
+    document.getElementById("drawer").classList.add("open");
+  };
+  document.getElementById("btnCloseDrawer").onclick = document.getElementById("drawerOv").onclick = function () {
+    document.getElementById("drawerOv").classList.remove("open");
+    document.getElementById("drawer").classList.remove("open");
   };
 
-  function applyModeUI() {
-    var m = "light";
-    try { m = localStorage.getItem(MODE_KEY) || "light"; } catch (e) {}
-    var isLight = (m !== "full");
-    document.getElementById("lightModeSection").classList.toggle("show", isLight);
-    document.getElementById("fullModeSection").classList.toggle("hide", isLight);
-    document.getElementById("btnSwitchLight").className = "mode-btn" + (isLight ? " active-light" : "");
-    document.getElementById("btnSwitchFull").className = "mode-btn" + (!isLight ? " active-full" : "");
-    document.getElementById("modeStatusLabel").textContent = isLight ? "Mode: Light Mode (<50 / <100)" : "Mode: Full App Mode";
-  }
-
-  function renderDeleteSectionButtons(sectionKey) {
-    return '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed #333;display:flex;justify-content:space-between;align-items:center;gap:8px">' +
-      '<span style="font-size:11px;color:#94a3b8">Is section ka data delete karna hai?</span>' +
-      '<button type="button" class="btn btn-red" style="width:auto;padding:6px 12px;font-size:11px" onclick="deleteLightSection('' + sectionKey + '')">🗑 Delete Section</button>' +
-    '</div>';
-  }
-
-  window.deleteLightSection = function (sectionKey) {
-    if (!confirm("Kya aap is department/section ka data delete karna chahte hain?")) return;
-    var d = getStore();
-    if (sectionKey === "admissions") d.admissions = [];
-    else if (sectionKey === "memberAtt") d.memberAtt = [];
-    else if (sectionKey === "staffAtt") d.staffAtt = [];
-    else if (sectionKey === "feesPaid") d.feesPaid = [];
-    else if (sectionKey === "newAdmissions") d.newAdmissions = [];
-    else if (sectionKey === "enquiries") d.enquiries = [];
-    saveStore(d);
-    alert("Section data delete ho gaya.");
-    openLightPanel(window.__activeLightPanel || "panelCollection");
-  };
-
-  window.openLightPanel = function (panelId) {
-    window.__activeLightPanel = panelId;
-    var box = document.getElementById("lightDynamicPanel");
-    var d = getStore();
-    if (!box) return;
-
-    if (panelId === "panelAdmission") {
-      box.innerHTML = '<div class="box"><h3>📝 1. Admission Form</h3>' +
-        '<div class="row2"><div class="fg"><label>Member Name *</label><input class="fc" id="lmAdmName" placeholder="Full Name"></div>' +
-        '<div class="fg"><label>Mobile *</label><input class="fc" id="lmAdmPhone" placeholder="10-digit"></div></div>' +
-        '<div class="fg"><label>Plan / Fee (₹)</label><input type="number" class="fc" id="lmAdmFee" value="500"></div>' +
-        '<button type="button" class="btn btn-gold" onclick="saveLightAdmission()">Save Admission</button>' +
-        '<div style="margin-top:8px">' + ((d.admissions || []).map(function (x) {
-          return '<div class="rec"><b>' + esc(x.name) + '</b> • ' + esc(x.phone) + ' • ₹' + esc(x.fee) + '</div>';
-        }).join("") || '<div class="rec" style="color:#888">No admission records yet.</div>') + '</div>' +
-        renderDeleteSectionButtons("admissions") + '</div>';
-    } else if (panelId === "panelMemberAtt") {
-      box.innerHTML = '<div class="box"><h3>✅ 2. Attendance (Member)</h3>' +
-        '<div class="row2"><div class="fg"><label>Member Name *</label><input class="fc" id="lmAttName" placeholder="Name"></div>' +
-        '<div class="fg"><label>Status</label><select class="fc" id="lmAttSt"><option>Present</option><option>Absent</option></select></div></div>' +
-        '<button type="button" class="btn btn-green" onclick="saveLightMemberAtt()">Mark Attendance</button>' +
-        '<div style="margin-top:8px">' + ((d.memberAtt || []).map(function (x) {
-          return '<div class="rec"><b>' + esc(x.name) + '</b> • ' + esc(x.status) + ' • ' + esc(x.date) + '</div>';
-        }).join("") || '<div class="rec" style="color:#888">No attendance marked yet.</div>') + '</div>' +
-        renderDeleteSectionButtons("memberAtt") + '</div>';
-    } else if (panelId === "panelStaffAtt") {
-      box.innerHTML = '<div class="box"><h3>🧑‍💼 3. Staff Attendance</h3>' +
-        '<div class="row2"><div class="fg"><label>Staff Name *</label><input class="fc" id="lmStfName" placeholder="Staff Name"></div>' +
-        '<div class="fg"><label>Status</label><select class="fc" id="lmStfSt"><option>Present</option><option>Absent</option><option>Half Day</option></select></div></div>' +
-        '<button type="button" class="btn btn-cyan" onclick="saveLightStaffAtt()">Mark Staff Attendance</button>' +
-        '<div style="margin-top:8px">' + ((d.staffAtt || []).map(function (x) {
-          return '<div class="rec"><b>' + esc(x.name) + '</b> • ' + esc(x.status) + ' • ' + esc(x.date) + '</div>';
-        }).join("") || '<div class="rec" style="color:#888">No staff attendance yet.</div>') + '</div>' +
-        renderDeleteSectionButtons("staffAtt") + '</div>';
-    } else if (panelId === "panelPayFees") {
-      box.innerHTML = '<div class="box"><h3>💳 Pay Fees</h3>' +
-        '<div class="row2"><div class="fg"><label>Customer Name *</label><input class="fc" id="lmFeeName" placeholder="Name"></div>' +
-        '<div class="fg"><label>Amount (₹) *</label><input type="number" class="fc" id="lmFeeAmt" value="500"></div></div>' +
-        '<div class="fg"><label>Customer Type</label><select class="fc" id="lmFeeCustType"><option value="old">Old Customer</option><option value="new">New Admission</option></select></div>' +
-        '<button type="button" class="btn btn-green" onclick="saveLightPayFees()">Collect Fees</button>' +
-        renderDeleteSectionButtons("feesPaid") + '</div>';
-    } else if (panelId === "panelNewAdm") {
-      box.innerHTML = '<div class="box"><h3>🆕 4. New Admission</h3>' +
-        '<div class="row2"><div class="fg"><label>New Member Name *</label><input class="fc" id="lmNewAdmName" placeholder="Name"></div>' +
-        '<div class="fg"><label>Payment (₹) *</label><input type="number" class="fc" id="lmNewAdmAmt" value="500"></div></div>' +
-        '<button type="button" class="btn btn-cyan" onclick="saveLightNewAdm()">Save New Admission Payment</button>' +
-        renderDeleteSectionButtons("newAdmissions") + '</div>';
-    } else if (panelId === "panelEnquiry") {
-      box.innerHTML = '<div class="box"><h3>📞 5. Enquiry</h3>' +
-        '<div class="row2"><div class="fg"><label>Visitor Name *</label><input class="fc" id="lmEnqName" placeholder="Name"></div>' +
-        '<div class="fg"><label>Mobile *</label><input class="fc" id="lmEnqPhone" placeholder="Phone"></div></div>' +
-        '<button type="button" class="btn btn-gold" onclick="saveLightEnquiry()">Save Enquiry</button>' +
-        '<div style="margin-top:8px">' + ((d.enquiries || []).map(function (x) {
-          return '<div class="rec"><b>' + esc(x.name) + '</b> • ' + esc(x.phone) + '</div>';
-        }).join("") || '<div class="rec" style="color:#888">No enquiries yet.</div>') + '</div>' +
-        renderDeleteSectionButtons("enquiries") + '</div>';
-    } else if (panelId === "panelCollection") {
-      var feesSum = (d.feesPaid || []).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
-      var newAdmSum = (d.newAdmissions || []).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
-      var oldCustSum = (d.oldCustomerPayments || []).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
-      box.innerHTML = '<div class="box"><h3>💰 Total Collection Breakdown</h3>' +
-        '<div class="rec">1. <b>Fees se kitni earning hui:</b> <b style="color:#00ff66">₹' + feesSum.toLocaleString("en-IN") + '</b></div>' +
-        '<div class="rec">2. <b>New Admission se kitna payment mila:</b> <b style="color:#ffcc00">₹' + newAdmSum.toLocaleString("en-IN") + '</b></div>' +
-        '<div class="rec">3. <b>Old Customer ne kitna payment kiya:</b> <b style="color:#22d3ee">₹' + oldCustSum.toLocaleString("en-IN") + '</b></div>' +
-        '</div>';
-    } else if (panelId === "panelUpload") {
-      box.innerHTML = '<div class="box"><h3>📥 Upload Old Data (CSV / Excel)</h3>' +
-        '<input type="file" class="fc" accept=".csv,.xlsx,.xls" onchange="handleLightFileUpload(event)">' +
-        '<div id="lmUploadStatus" style="font-size:11.5px;color:#00ff66;margin-top:8px">Purani file select karein aur data load karein.</div></div>';
+  document.getElementById("drawerList").onclick = function (ev) {
+    var b = ev.target.closest("[data-drw]");
+    if (!b) return;
+    var idx = Number(b.getAttribute("data-drw"));
+    document.getElementById("drawerOv").classList.remove("open");
+    document.getElementById("drawer").classList.remove("open");
+    if (idx === 1) renderPanel("admission");
+    else if (idx === 2) renderPanel("attendance");
+    else if (idx === 3) renderPanel("staff_att");
+    else if (idx === 4) renderPanel("pay_fees");
+    else if (idx === 5) renderPanel("new_adm");
+    else if (idx === 6) renderPanel("enquiry");
+    else if (idx === 7) renderPanel("collection");
+    else if (idx === 8) location.href = "fees-pending.html";
+    else if (idx === 9) location.href = "staff-salary.html";
+    else if (idx === 10) location.href = "manager-portal.html";
+    else if (idx === 11) location.href = "plans.html";
+    else if (idx === 12 && typeof XLSX !== "undefined") {
+      var wb = XLSX.utils.book_new();
+      var ws = XLSX.utils.json_to_sheet(readData().fees || [{ Info: "Empty" }]);
+      XLSX.utils.book_append_sheet(wb, ws, "Export");
+      XLSX.writeFile(wb, "Om_Software_Export.xlsx");
     }
   };
 
-  window.saveLightAdmission = function () {
-    var nm = (document.getElementById("lmAdmName").value || "").trim();
-    var ph = (document.getElementById("lmAdmPhone").value || "").trim();
-    var fee = Number(document.getElementById("lmAdmFee").value || 0);
-    if (!nm) return alert("Name darj karein.");
-    var d = getStore();
-    d.admissions.unshift({ name: nm, phone: ph, fee: fee, date: new Date().toISOString().slice(0, 10) });
-    saveStore(d);
-    openLightPanel("panelAdmission");
-  };
-
-  window.saveLightMemberAtt = function () {
-    var nm = (document.getElementById("lmAttName").value || "").trim();
-    var st = document.getElementById("lmAttSt").value;
-    if (!nm) return alert("Name darj karein.");
-    var d = getStore();
-    d.memberAtt.unshift({ name: nm, status: st, date: new Date().toISOString().slice(0, 10) });
-    saveStore(d);
-    openLightPanel("panelMemberAtt");
-  };
-
-  window.saveLightStaffAtt = function () {
-    var nm = (document.getElementById("lmStfName").value || "").trim();
-    var st = document.getElementById("lmStfSt").value;
-    if (!nm) return alert("Staff name darj karein.");
-    var d = getStore();
-    d.staffAtt.unshift({ name: nm, status: st, date: new Date().toISOString().slice(0, 10) });
-    saveStore(d);
-    openLightPanel("panelStaffAtt");
-  };
-
-  window.saveLightPayFees = function () {
-    var nm = (document.getElementById("lmFeeName").value || "").trim();
-    var amt = Number(document.getElementById("lmFeeAmt").value || 0);
-    var cType = document.getElementById("lmFeeCustType").value;
-    if (!nm || amt <= 0) return alert("Name aur valid amount darj karein.");
-    var d = getStore();
-    d.feesPaid.unshift({ name: nm, amount: amt, type: cType, date: new Date().toISOString().slice(0, 10) });
-    if (cType === "new") d.newAdmissions.unshift({ name: nm, amount: amt, date: new Date().toISOString().slice(0, 10) });
-    else d.oldCustomerPayments.unshift({ name: nm, amount: amt, date: new Date().toISOString().slice(0, 10) });
-    saveStore(d);
-    alert("Fees collect ho gayi!");
-    openLightPanel("panelCollection");
-  };
-
-  window.saveLightNewAdm = function () {
-    var nm = (document.getElementById("lmNewAdmName").value || "").trim();
-    var amt = Number(document.getElementById("lmNewAdmAmt").value || 0);
-    if (!nm || amt <= 0) return alert("Name aur amount darj karein.");
-    var d = getStore();
-    d.newAdmissions.unshift({ name: nm, amount: amt, date: new Date().toISOString().slice(0, 10) });
-    d.feesPaid.unshift({ name: nm, amount: amt, type: "new", date: new Date().toISOString().slice(0, 10) });
-    saveStore(d);
-    alert("New Admission payment save ho gaya!");
-    openLightPanel("panelCollection");
-  };
-
-  window.saveLightEnquiry = function () {
-    var nm = (document.getElementById("lmEnqName").value || "").trim();
-    var ph = (document.getElementById("lmEnqPhone").value || "").trim();
-    if (!nm) return alert("Visitor name darj karein.");
-    var d = getStore();
-    d.enquiries.unshift({ name: nm, phone: ph, date: new Date().toISOString().slice(0, 10) });
-    saveStore(d);
-    openLightPanel("panelEnquiry");
-  };
-
-  window.handleLightFileUpload = function (ev) {
-    var f = ev.target.files && ev.target.files[0];
-    if (!f || typeof XLSX === "undefined") return;
-    var rd = new FileReader();
-    rd.onload = function (e) {
-      var wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
-      var rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: "" });
-      var d = getStore();
-      rows.forEach(function (r) {
-        var nm = String(r.Name || r.name || r.Member || "").trim();
-        var amt = Number(r.Amount || r.amount || r.Fee || 0) || 0;
-        if (nm) {
-          d.admissions.unshift({ name: nm, phone: String(r.Phone || r.Mobile || ""), fee: amt, date: new Date().toISOString().slice(0, 10) });
-          if (amt > 0) d.oldCustomerPayments.unshift({ name: nm, amount: amt, date: new Date().toISOString().slice(0, 10) });
-        }
-      });
-      saveStore(d);
-      var st = document.getElementById("lmUploadStatus");
-      if (st) st.textContent = "Uploaded " + rows.length + " rows successfully.";
-    };
-    rd.readAsArrayBuffer(f);
-  };
-
-  window.openMpinResetModal = function () {
-    var inp = document.getElementById("mpinInput");
-    if (inp) inp.value = "";
-    document.getElementById("mpinResetModal").classList.add("open");
-  };
-
-  window.closeMpinResetModal = function () {
-    document.getElementById("mpinResetModal").classList.remove("open");
-  };
-
-  window.verifyMpinAndReset = function () {
-    var entered = String((document.getElementById("mpinInput") || {}).value || "").trim();
-    var savedPin = "1234";
-    try { savedPin = localStorage.getItem(MPIN_KEY) || "1234"; } catch (e) {}
-    if (entered !== savedPin) {
-      alert("Galat 4-digit MPIN! Reset cancel kiya gaya.");
-      return;
-    }
-    var tgt = (document.getElementById("mpinResetTarget") || {}).value || "all";
-    var d = getStore();
-    if (tgt === "all") {
-      d = { admissions: [], memberAtt: [], staffAtt: [], feesPaid: [], newAdmissions: [], oldCustomerPayments: [], enquiries: [] };
-    } else if (tgt === "admissions") {
-      d.admissions = []; d.newAdmissions = [];
-    } else if (tgt === "attendance") {
-      d.memberAtt = []; d.staffAtt = [];
-    } else if (tgt === "fees") {
-      d.feesPaid = []; d.oldCustomerPayments = [];
-    } else if (tgt === "enquiry") {
-      d.enquiries = [];
-    }
-    saveStore(d);
-    closeMpinResetModal();
-    alert("4-digit MPIN verify ho gaya — selected data reset ho gaya hai.");
-    openLightPanel("panelCollection");
-  };
-
-  window.addEventListener("DOMContentLoaded", function () {
-    applyModeUI();
-    openLightPanel("panelCollection");
+  document.getElementById("lightView").addEventListener("click", function (ev) {
+    var t = ev.target.closest("[data-panel]");
+    if (t) renderPanel(t.getAttribute("data-panel"));
   });
+
+  // Explicit mode switch only when user clicks Switch Mode
+  document.getElementById("btnSwitchMode").onclick = function () {
+    var cur = window.omGetLockedMode();
+    var next = (cur === "light") ? "full" : "light";
+    window.omSetLockedMode(next, true);
+    applyLockedModeView();
+  };
+
+  document.getElementById("btnLogout").onclick = function () {
+    if (!confirm("Logout karna hai?")) return;
+    window.omClearSessionOnLogout();
+    location.href = "login.html";
+  };
+
+  var taps = 0, tmr = null;
+  document.getElementById("appHdrTitle").onclick = function () {
+    taps++;
+    clearTimeout(tmr);
+    tmr = setTimeout(function () { taps = 0; }, 2200);
+    if (taps >= 5) { taps = 0; location.href = "prime-master-login.html"; }
+  };
+
+  window.addEventListener("om:mode-changed", applyLockedModeView);
+  applyLockedModeView();
+  renderPanel("collection");
 })();
 </script>
 </body>
