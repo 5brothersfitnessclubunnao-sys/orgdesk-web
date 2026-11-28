@@ -1,175 +1,231 @@
-<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OM ERP — Employee Access Setup</title>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<style>*{box-sizing:border-box}body{margin:0;background:#070b15;color:#f8fafc;font:14px Arial;padding:14px}.wrap{max-width:720px;margin:auto}.card{background:#101a2d;border:1px solid #2b3e5c;border-radius:14px;padding:16px;margin:10px 0}h2{color:#f5c542;margin:0 0 10px}label{display:block;margin:10px 0 5px;font-weight:800}input,select{width:100%;padding:11px;border:1px solid #42536e;border-radius:8px;background:#081020;color:white}button{padding:11px 14px;border:0;border-radius:8px;background:#f5c542;color:#111;font-weight:900;margin-top:12px;cursor:pointer}.muted{color:#9aa9bf;font-size:12px;line-height:1.5}fieldset{border:1px solid #405174;border-radius:9px;margin-top:12px;padding:10px}fieldset label{font-weight:500;margin:6px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.code{padding:10px;background:#061020;border:1px dashed #f5c542;border-radius:9px;word-break:break-all;color:#f5c542;font-weight:900}#out{white-space:pre-wrap;color:#6ee7b7;margin-top:12px;font-size:12px}.list-item{background:#081020;border:1px solid #2b3e5c;border-radius:9px;padding:10px;margin-top:8px;font-size:12px}</style></head><body><div class="wrap">
-<div style="margin-bottom:8px"><a href="index.html" style="color:#f5c542;text-decoration:none;font-weight:800">← Dashboard</a></div>
-<div class="card"><h2>Manager / Staff Access Setup</h2><p class="muted">Yahan se aap apne Manager ya Staff ke liye Employee ID, Role aur Branch access create kar sakte hain. Data aapke Gym account ke saath sync hota hai taaki kisi bhi mobile se login karne par wahi data dikhe.</p>
-<div class="muted" id="ownerStatus" style="color:#6ee7b7;font-weight:700">Universal Multi-Device Team Access Ready</div>
-<label>Employee Code / ID *</label><input id="code" maxlength="24" placeholder="e.g. MGR001 / STF001">
-<label>Employee Name *</label><input id="name" placeholder="Full name">
-<label>Role *</label><select id="role"><option value="staff">Staff</option><option value="manager">Manager</option></select>
-<label>Branch ID *</label><input id="branch" placeholder="e.g. 001" value="001">
-<label>Login Password / PIN (Optional)</label><input id="pin" type="text" maxlength="20" placeholder="e.g. 1234 or password">
-<label>Generated Login ID Preview</label><div class="code" id="alias">Employee Code aur Role select karein</div>
-<fieldset><legend>Manager Permissions — Owner Controls</legend><div class="muted">Manager ko sirf selected modules milenge. Staff ko apna personal/assigned access milega.</div><div class="grid">
-<label><input type="checkbox" name="mgrperm" value="modAtt"> Attendance</label>
-<label><input type="checkbox" name="mgrperm" value="modAdmission"> Admission</label>
-<label><input type="checkbox" name="mgrperm" value="modJoining"> Joining</label>
-<label><input type="checkbox" name="mgrperm" value="modFees"> Fees / Collection</label>
-<label><input type="checkbox" name="mgrperm" value="modExpired"> Expiry / Dues</label>
-<label><input type="checkbox" name="mgrperm" value="modDeptStaff"> Staff Directory</label>
-<label><input type="checkbox" name="mgrperm" value="modSlip"> Salary Slips</label>
-<label><input type="checkbox" name="mgrperm" value="modMaint"> Maintenance</label>
-<label><input type="checkbox" name="mgrperm" value="modPnl"> P&amp;L Reports</label>
-<label><input type="checkbox" name="mgrperm" value="modEnq"> Enquiries</label>
-<label><input type="checkbox" name="mgrperm" value="modCodes"> Audit / Security</label>
-<label><input type="checkbox" name="mgrperm" value="staffApprovals"> Leave / Advance Approval</label>
-</div></fieldset>
-<button id="saveBtn" type="button">Save Employee Profile</button><div id="out"></div>
-</div>
-<div class="card"><h2>Created Team Profiles</h2><div class="muted">Yahan aapke Gym account ke saved Manager aur Staff profiles ki list dikhti hai (kisi bhi mobile se login karne par sync hoti hai).</div><div id="teamListBox"></div></div>
-</div>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Staff &amp; Manager Access — Auto ID &amp; Login Link</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{min-height:100vh;background:#050814;color:#f8fafc;padding:16px}
+.wrap{max-width:640px;margin:0 auto}
+.card{background:#0b1226;border:1.5px solid #26365e;border-radius:16px;padding:16px;margin-bottom:14px}
+h1,h2{color:#ffd166;font-size:18px;margin-bottom:8px}
+.sub{font-size:12px;color:#94a3b8;margin-bottom:12px}
+.fg{margin-bottom:10px}
+label{display:block;font-size:11.5px;color:#cbd5e1;font-weight:700;margin-bottom:4px}
+input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:13px;outline:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#ffd166,#f5a623);color:#050814;font-weight:900;font-size:12.5px;cursor:pointer}
+.btn.sec{background:#111b33;color:#38bdf8;border:1px solid #2c3e6b}
+.btn.sm{padding:6px 10px;font-size:11px;margin-top:8px}
+.item{background:#070c1a;border:1px solid #1e2d52;border-radius:11px;padding:11px;margin-top:8px;font-size:12px}
+.id-pill{display:inline-block;background:rgba(34,211,238,.14);border:1px solid #22d3ee;color:#22d3ee;padding:2px 8px;border-radius:999px;font-weight:900;font-size:11px}
+</style>
+</head>
+<body>
+
 <script>
-const CFG={apiKey:'AIzaSyAwuFgPJUavmRRzkHOz83FUP0EyfZETCU',authDomain:'orgdesk-fc207.firebaseapp.com',projectId:'orgdesk-fc207',storageBucket:'orgdesk-fc207.firebasestorage.app',messagingSenderId:'677150519977',appId:'1:677150519977:web:74de5f488494280d352fb8'};
-let db=null;
-try{if(window.firebase){if(!firebase.apps.length)firebase.initializeApp(CFG);db=firebase.firestore();}}catch(e){}
+(function () {
+  var MODE_KEY = "om_locked_app_mode_v1";
+  var LOGGED_KEY = "om_session_active_v1";
 
-const $=id=>document.getElementById(id);
-const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const TEAM_KEY='om_team_profiles_v1';
-
-function getGymId(){
-  try{
-    const prof=JSON.parse(localStorage.getItem('om_active_gym_profile')||'{}');
-    const own=JSON.parse(localStorage.getItem('om_owner_account_v1')||'{}');
-    return prof.gymId || own.email || localStorage.getItem('bfc_gid') || 'gym_account';
-  }catch(e){return 'gym_account';}
-}
-
-function loadTeamProfiles(){
-  try{return JSON.parse(localStorage.getItem(TEAM_KEY)||'[]')||[];}catch(e){return [];}
-}
-
-function saveTeamProfiles(list){
-  try{localStorage.setItem(TEAM_KEY,JSON.stringify(list));}catch(e){}
-  if(db){
-    const gid=getGymId();
-    db.collection('team_profiles').doc(String(gid).replace(/[^a-zA-Z0-9_-]/g,'_')).set({gymId:gid,profiles:list,updatedAt:Date.now()},{merge:true}).catch(()=>{});
+  function getLockedMode() {
+    try {
+      var m = localStorage.getItem(MODE_KEY);
+      if (m === "light" || m === "full") return m;
+      var legacy = localStorage.getItem("om_app_display_mode");
+      if (legacy === "light" || legacy === "full") {
+        localStorage.setItem(MODE_KEY, legacy);
+        return legacy;
+      }
+    } catch (e) {}
+    return "light";
   }
-}
 
-async function syncFromCloudIfAvailable(){
-  if(!db)return;
-  try{
-    const gid=getGymId();
-    const docId=String(gid).replace(/[^a-zA-Z0-9_-]/g,'_');
-    const snap=await db.collection('team_profiles').doc(docId).get();
-    if(snap.exists && Array.isArray(snap.data().profiles) && snap.data().profiles.length){
-      localStorage.setItem(TEAM_KEY,JSON.stringify(snap.data().profiles));
-      renderTeamList();
-    }
-  }catch(e){}
-}
-
-function refreshAlias(){
-  const c=$('code').value.trim().toUpperCase();
-  const r=$('role').value;
-  $('alias').textContent=c ? (c + ' (' + r.toUpperCase() + ')') : 'Employee Code aur Role select karein';
-}
-
-$('code').addEventListener('input',refreshAlias);
-$('role').addEventListener('change',refreshAlias);
-
-function renderTeamList(){
-  const list=loadTeamProfiles();
-  const box=$('teamListBox');
-  if(!list.length){
-    box.innerHTML='<div class="muted" style="margin-top:8px">Abhi koi employee profile save nahi hua hai.</div>';
-    return;
+  function setLockedMode(mode, explicitSwitch) {
+    if (!explicitSwitch) return;
+    var target = (mode === "full") ? "full" : "light";
+    try {
+      localStorage.setItem(MODE_KEY, target);
+      localStorage.setItem("om_app_display_mode", target);
+      localStorage.setItem(LOGGED_KEY, "1");
+    } catch (e) {}
+    window.dispatchEvent(new CustomEvent("om:mode-changed", { detail: { mode: target } }));
   }
-  box.innerHTML=list.map((item,idx)=>`
-    <div class="list-item">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <b>${esc(item.name)} (${esc(item.employeeCode)})</b>
-        <span style="color:#f5c542;font-weight:800">${esc(item.role.toUpperCase())}</span>
+
+  function clearSessionOnLogout() {
+    try {
+      localStorage.removeItem(LOGGED_KEY);
+      localStorage.removeItem("om_session_active");
+    } catch (e) {}
+  }
+
+  window.omGetLockedMode = getLockedMode;
+  window.omSetLockedMode = setLockedMode;
+  window.omClearSessionOnLogout = clearSessionOnLogout;
+
+  window.addEventListener("pageshow", function () {
+    var m = getLockedMode();
+    window.dispatchEvent(new CustomEvent("om:mode-changed", { detail: { mode: m } }));
+  });
+})();
+</script>
+
+<div class="wrap">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <a href="app.html" class="btn sec" style="text-decoration:none">← Back to App</a>
+    <a href="login.html" class="btn sec" style="text-decoration:none">Login Page</a>
+  </div>
+
+  <div class="card">
+    <h1>Add Staff / Manager (Auto Employee ID)</h1>
+    <p class="sub">System automatically generates a unique Employee ID on add, and provides a login link to share with the employee.</p>
+
+    <div class="grid2">
+      <div class="fg">
+        <label>Role *</label>
+        <select id="taRole">
+          <option value="staff">Staff</option>
+          <option value="manager">Manager</option>
+        </select>
       </div>
-      <div class="muted">Branch: ${esc(item.branchId)} ${item.pin ? '• PIN/Pass: ' + esc(item.pin) : ''}</div>
-      ${item.permissions && item.permissions.length ? '<div class="muted">Permissions: ' + esc(item.permissions.join(', ')) + '</div>' : ''}
-      <button type="button" onclick="removeTeamMember(${idx})" style="background:#7f1d1d;color:#fecaca;padding:6px 10px;font-size:11px;margin-top:8px">Remove</button>
+      <div class="fg">
+        <label>Auto-Generated Employee ID</label>
+        <input type="text" id="taAutoId" readonly style="color:#22d3ee;font-weight:900">
+      </div>
     </div>
-  `).join('');
-}
 
-window.removeTeamMember=function(idx){
-  const list=loadTeamProfiles();
-  list.splice(idx,1);
-  saveTeamProfiles(list);
-  renderTeamList();
-};
+    <div class="grid2">
+      <div class="fg">
+        <label>Employee Name *</label>
+        <input type="text" id="taName" placeholder="Full Name">
+      </div>
+      <div class="fg">
+        <label>Branch ID *</label>
+        <input type="text" id="taBranch" value="BR-001">
+      </div>
+    </div>
 
-$('saveBtn').onclick=()=>{
-  const code=$('code').value.trim().toUpperCase().replace(/\s+/g,'');
-  const name=$('name').value.trim();
-  const role=$('role').value;
-  const branchId=($('branch').value||'001').trim();
-  const pin=$('pin').value.trim();
-  const permissions=role==='manager'?[...document.querySelectorAll('input[name="mgrperm"]:checked')].map(x=>x.value):[];
+    <div class="grid2">
+      <div class="fg">
+        <label>Initial Password / MPIN *</label>
+        <input type="text" id="taPass" value="123456">
+      </div>
+      <div class="fg">
+        <label>Registered Email (Optional)</label>
+        <input type="email" id="taEmail" placeholder="employee@domain.com">
+      </div>
+    </div>
 
-  if(!code||!name||!branchId){
-    $('out').textContent='Employee Code, Name aur Branch ID bharein.';
-    return;
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="btn" id="btnAddMember">Save &amp; Generate ID</button>
+      <button type="button" class="btn sec" id="btnRegenId">Generate New ID</button>
+    </div>
+    <div id="taStatus" style="margin-top:10px;font-size:12px;color:#34d399;font-weight:700"></div>
+  </div>
+
+  <div class="card">
+    <h2>Added Staff &amp; Managers</h2>
+    <div id="taListBox"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var ACC_KEY = "om_accounts_v3";
+
+  function generateEmpId() {
+    var r = document.getElementById("taRole").value;
+    var prefix = (r === "manager") ? "MGR" : "STF";
+    var num = Math.floor(1000 + Math.random() * 9000);
+    document.getElementById("taAutoId").value = prefix + "-" + num;
   }
 
-  const gymId=getGymId();
-  const profile={
-    employeeCode:code,
-    id:code,
-    name,
-    role,
-    branchId,
-    gymId,
-    pin,
-    permissions,
-    active:true,
-    createdAt:new Date().toISOString()
-  };
+  function readAcc() {
+    try { return JSON.parse(localStorage.getItem(ACC_KEY) || "[]") || []; } catch (e) { return []; }
+  }
+  function writeAcc(a) {
+    try { localStorage.setItem(ACC_KEY, JSON.stringify(a)); } catch (e) {}
+  }
 
-  const list=loadTeamProfiles().filter(x=>String(x.employeeCode).toUpperCase()!==code);
-  list.unshift(profile);
-  saveTeamProfiles(list);
+  function buildShareLink(empId, empRole) {
+    var base = location.href.replace(/[^/]*$/, "");
+    return base + "login.html?role=" + encodeURIComponent(empRole) + "&empId=" + encodeURIComponent(empId);
+  }
 
-  try{
-    const stfList=JSON.parse(localStorage.getItem('bfc_staff_list')||'[]')||[];
-    const filteredStf=stfList.filter(s=>String(s.id||'').toUpperCase()!==code);
-    filteredStf.unshift({
-      id:code,
-      name,
-      role:role==='manager'?'Manager':'Staff',
-      branch:branchId,
-      branchId,
-      status:'Active'
+  function renderList() {
+    var list = readAcc().filter(function (a) { return a.role === "staff" || a.role === "manager"; });
+    var box = document.getElementById("taListBox");
+    if (!list.length) {
+      box.innerHTML = '<div class="sub">No staff or manager added yet.</div>';
+      return;
+    }
+    box.innerHTML = list.map(function (item, idx) {
+      var link = buildShareLink(item.empId, item.role);
+      return '<div class="item">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<b>' + (item.name || "Member") + '</b>' +
+          '<span class="id-pill">' + item.empId + ' (' + item.role.toUpperCase() + ')</span>' +
+        '</div>' +
+        '<div class="sub" style="margin:4px 0">Branch: ' + (item.branchId || "BR-001") + ' • Pass: ' + (item.password || "") + '</div>' +
+        '<div style="font-size:11px;color:#38bdf8;word-break:break-all">' + link + '</div>' +
+        '<button type="button" class="btn sec sm" data-share-idx="' + idx + '">Share Login Link</button>' +
+      '</div>';
+    }).join("");
+  }
+
+  document.getElementById("taRole").addEventListener("change", generateEmpId);
+  document.getElementById("btnRegenId").addEventListener("click", generateEmpId);
+
+  document.getElementById("btnAddMember").addEventListener("click", function () {
+    var r = document.getElementById("taRole").value;
+    var empId = document.getElementById("taAutoId").value.trim();
+    var name = document.getElementById("taName").value.trim();
+    var branchId = document.getElementById("taBranch").value.trim() || "BR-001";
+    var pass = document.getElementById("taPass").value.trim() || "123456";
+    var email = document.getElementById("taEmail").value.trim().toLowerCase();
+
+    if (!name) return alert("Employee Name darj karein.");
+    if (!empId) generateEmpId();
+    empId = document.getElementById("taAutoId").value.trim();
+
+    var accs = readAcc();
+    accs.unshift({
+      role: r,
+      empId: empId,
+      id: empId,
+      name: name,
+      branchId: branchId,
+      password: pass,
+      email: email,
+      mode: window.omGetLockedMode()
     });
-    localStorage.setItem('bfc_staff_list',JSON.stringify(filteredStf));
-    localStorage.setItem('om_staff_master_v2',JSON.stringify(filteredStf));
-  }catch(e){}
+    writeAcc(accs);
 
-  if(pin){
-    try{localStorage.setItem('om_staff_mpin_'+code,pin);}catch(e){}
-  }
+    var shareUrl = buildShareLink(empId, r);
+    document.getElementById("taStatus").textContent = "Saved: " + name + " (" + empId + ") — Login Link ready to share.";
+    document.getElementById("taName").value = "";
+    generateEmpId();
+    renderList();
+    prompt("Share this login link with " + name + ":", shareUrl);
+  });
 
-  $('out').textContent='Employee profile saved successfully.\nEmployee ID: '+code+'\nName: '+name+'\nRole: '+role+'\nBranch: '+branchId+(pin?'\nPIN / Password: '+pin:'')+'\n\nAb is Employee ID se kisi bhi mobile/device par Login page se login kiya ja sakta hai.';
-  $('code').value='';
-  $('name').value='';
-  $('pin').value='';
-  document.querySelectorAll('input[name="mgrperm"]').forEach(x=>x.checked=false);
-  refreshAlias();
-  renderTeamList();
-};
+  document.getElementById("taListBox").addEventListener("click", function (ev) {
+    var btn = ev.target.closest("[data-share-idx]");
+    if (!btn) return;
+    var list = readAcc().filter(function (a) { return a.role === "staff" || a.role === "manager"; });
+    var item = list[Number(btn.getAttribute("data-share-idx"))];
+    if (!item) return;
+    var url = buildShareLink(item.empId, item.role);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).catch(function () {});
+    }
+    prompt("Share Login Link (" + item.name + " - " + item.empId + "):", url);
+  });
 
-window.addEventListener('DOMContentLoaded',()=>{
-  refreshAlias();
-  renderTeamList();
-  syncFromCloudIfAvailable();
-});
-</script></body></html>
+  generateEmpId();
+  renderList();
+})();
+</script>
+</body>
+</html>
