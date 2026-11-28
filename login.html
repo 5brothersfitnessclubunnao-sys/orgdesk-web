@@ -11,7 +11,7 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 body{min-height:100vh;background:#050814;color:#f8fafc;display:flex;align-items:center;justify-content:center;padding:16px}
 .card{width:100%;max-width:480px;background:#0b1226;border:1.5px solid #26365e;border-radius:18px;padding:22px 18px;box-shadow:0 16px 40px rgba(0,0,0,.55)}
-.badge{display:inline-block;background:rgba(245,166,35,.15);border:1px solid #f5a623;color:#ffd166;font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:8px}
+.badge{display:inline-block;background:rgba(245,166,35,.15);border:1px solid #f5a623;color:#ffd166;font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:8px;cursor:pointer;user-select:none}
 h1{font-size:21px;font-weight:900;color:#ffd166;margin-bottom:4px}
 .sub{font-size:12px;color:#94a3b8;margin-bottom:14px}
 .role-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
@@ -25,50 +25,59 @@ h1{font-size:21px;font-weight:900;color:#ffd166;margin-bottom:4px}
 label{display:block;font-size:11.5px;color:#cbd5e1;font-weight:700;margin-bottom:4px}
 input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:13px;outline:none}
 input:focus,select:focus{border-color:#f5a623}
-.primary-btn{width:100%;padding:12px;border-radius:11px;border:none;background:linear-gradient(135deg,#ffd166,#f5a623);color:#050814;font-size:13.5px;font-weight:900;cursor:pointer;margin-top:6px}
+.chk-row{display:flex;align-items:center;gap:8px;margin:8px 0 12px;background:#070c1a;border:1px solid #1e2d52;border-radius:10px;padding:9px 11px;cursor:pointer}
+.chk-row input[type="checkbox"]{width:16px;height:16px;accent-color:#22d3ee;cursor:pointer;flex-shrink:0}
+.chk-row span{font-size:12px;color:#e2e8f0;font-weight:700}
+.primary-btn{width:100%;padding:12px;border-radius:11px;border:none;background:linear-gradient(135deg,#ffd166,#f5a623);color:#050814;font-size:13.5px;font-weight:900;cursor:pointer;margin-top:4px}
 .links-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;font-size:12px}
 .link-btn{background:none;border:none;color:#38bdf8;font-weight:800;cursor:pointer;text-decoration:underline;padding:0;font-size:12px}
 .info-box{display:none;margin-top:12px;background:#071326;border:1px solid #22d3ee;border-radius:11px;padding:10px;font-size:11.5px;color:#e0f2fe;line-height:1.45}
+.error-box{display:none;margin-top:10px;background:rgba(239,68,68,0.14);border:1px solid #ef4444;border-radius:10px;padding:9px 11px;font-size:12px;color:#fca5a5;font-weight:800}
 .dept-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;max-height:170px;overflow-y:auto;background:#050814;border:1px solid #22345e;padding:8px;border-radius:8px;margin-top:5px}
 .dept-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#e2e8f0;cursor:pointer}
 .dept-item input{width:15px;height:15px;accent-color:#f5a623;cursor:pointer}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.saved-quick{display:none;margin-bottom:10px;background:#081426;border:1px dashed #22d3ee;border-radius:10px;padding:8px 10px;font-size:11.5px;color:#bae6fd;justify-content:space-between;align-items:center;gap:8px}
+.saved-quick button{background:#22d3ee;color:#050814;border:none;border-radius:7px;padding:5px 9px;font-size:11px;font-weight:900;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="card">
   <div style="text-align:center">
-    <span class="badge" id="devSecretTapBadge" style="cursor:pointer" title="Developer Mode: 5-Tap">OM SOFTWARE &bull; MULTI-BUSINESS ERP</span>
-    <h1 id="portalTitle">Business Owner Portal</h1>
+    <span class="badge" id="devSecretTapBadge" title="Developer Mode: 5-Tap">OM SOFTWARE &bull; MULTI-BUSINESS ERP</span>
+    <h1 id="portalTitle">Gym &amp; Fitness Owner Portal</h1>
     <div class="sub" id="portalSub">Sign In or New Sign Up</div>
   </div>
 
   <div class="role-tabs" id="roleTabsBar">
-    <button type="button" class="rtab active" id="tabOwner" onclick="setRoleTab('owner')">Owner</button>
-    <button type="button" class="rtab" id="tabManager" onclick="setRoleTab('manager')">Manager</button>
-    <button type="button" class="rtab" id="tabStaff" onclick="setRoleTab('staff')">Staff</button>
+    <button type="button" class="rtab active" id="tabOwner" data-role="owner">Owner</button>
+    <button type="button" class="rtab" id="tabManager" data-role="manager">Manager</button>
+    <button type="button" class="rtab" id="tabStaff" data-role="staff">Staff</button>
   </div>
 
   <div class="auth-modes" id="authModeBar">
-    <button type="button" class="mbtn active" id="btnSignInMode" onclick="setAuthMode('signin')">Sign In</button>
-    <button type="button" class="mbtn" id="btnSignUpMode" onclick="setAuthMode('signup')">New Sign Up</button>
+    <button type="button" class="mbtn active" id="btnSignInMode" data-authmode="signin">Sign In</button>
+    <button type="button" class="mbtn" id="btnSignUpMode" data-authmode="signup">New Sign Up</button>
   </div>
 
-  <form id="loginForm" onsubmit="handleAuthSubmit(event)">
+  <div class="saved-quick" id="savedCredBar">
+    <span id="savedCredSummary">Saved login available</span>
+    <button type="button" id="btnUseSavedCred">Quick Fill</button>
+  </div>
+
+  <form id="loginForm">
     <div class="fg" id="empIdGroup" style="display:none">
       <label id="empIdLabel">Employee ID / Manager ID *</label>
       <input type="text" id="empIdInput" placeholder="Enter STF / MGR Code">
     </div>
 
-    <!-- SIGN UP ONLY SETUP FIELDS (3 CATEGORIES + STAFF COUNT + DEPTS + ALL-INDIA LOCATION) -->
     <div id="signUpSetupFields" style="display:none">
       <div class="fg">
-        <label>🏢 Business Category / व्यापार श्रेणी *</label>
-        <select id="suCategorySelect" onchange="onBusinessCategoryChange()">
-          <option value="gym" selected>🏋️ Gym / Fitness Club</option>
-          <option value="car_dealership">🚗 Car Dealership</option>
-          <option value="general_shop">🛒 General Shop / Retail Store</option>
+        <label>Business Category / व्यापार श्रेणी *</label>
+        <select id="suCategorySelect">
+          <option value="gym" selected>Gym / Fitness Club</option>
+          <option value="car_dealership">Car Dealership</option>
+          <option value="general_shop">General Shop / Retail Store</option>
         </select>
       </div>
 
@@ -78,15 +87,13 @@ input:focus,select:focus{border-color:#f5a623}
       </div>
 
       <div class="fg">
-        <label>👥 How many staff do you have? / आपके पास कितने लोगों का स्टाफ है? *</label>
-        <input type="number" id="suStaffCountInput" placeholder="Manual Staff Number (e.g. 15, 45, 120)" min="1" oninput="onStaffNumberInput()">
+        <label>How many staff do you have? / आपके पास कितने लोगों का स्टाफ है? *</label>
+        <input type="number" id="suStaffCountInput" placeholder="Manual Staff Number (e.g. 15, 45, 120)" min="1">
       </div>
 
       <div class="fg">
-        <label>✅ Select Applicable Departments / विभाग चुनें (Tick Karein):</label>
-        <div class="dept-grid" id="deptCheckboxList">
-          <!-- Populated dynamically: Cleaner, Peon, Sweeper, Receptionist, Electrician, Plumber, Accountant, HR Manager, General Manager, Team Leader, Trainer, Nutritionist, Front Desk, Back Office, Service Team -->
-        </div>
+        <label>Select Applicable Departments / विभाग चुनें (Tick Karein):</label>
+        <div class="dept-grid" id="deptCheckboxList"></div>
       </div>
 
       <div class="grid2">
@@ -96,18 +103,18 @@ input:focus,select:focus{border-color:#f5a623}
         </div>
         <div class="fg">
           <label>City (शहर) *</label>
-          <input type="text" id="suCity" placeholder="e.g. Unnao / Kanpur / Lucknow" required>
+          <input type="text" id="suCity" placeholder="e.g. Unnao / Kanpur / Lucknow">
         </div>
       </div>
 
       <div class="grid2">
         <div class="fg">
           <label>State (राज्य) *</label>
-          <input type="text" id="suState" placeholder="e.g. Uttar Pradesh" required>
+          <input type="text" id="suState" placeholder="e.g. Uttar Pradesh">
         </div>
         <div class="fg">
           <label>Pin Code *</label>
-          <input type="tel" maxlength="6" id="suPinCode" placeholder="6-digit PIN Code" required>
+          <input type="tel" maxlength="6" id="suPinCode" placeholder="6-digit PIN Code">
         </div>
       </div>
 
@@ -130,244 +137,529 @@ input:focus,select:focus{border-color:#f5a623}
       <input type="password" id="passInput" required placeholder="Enter password or MPIN">
     </div>
 
-    <button type="submit" class="primary-btn" id="submitLoginBtn">Login to Business Dashboard</button>
+    <label class="chk-row" for="savePasswordChk">
+      <input type="checkbox" id="savePasswordChk">
+      <span>Save password for faster next login</span>
+    </label>
+
+    <button type="submit" class="primary-btn" id="submitLoginBtn">Login to Dashboard</button>
   </form>
 
+  <div class="error-box" id="authErrorBox"></div>
+
   <div class="links-row">
-    <button type="button" class="link-btn" onclick="handleForgotPassword()">Forgot Password</button>
-    <button type="button" class="link-btn" onclick="handleForgotMpin()">Forgot MPIN</button>
+    <button type="button" class="link-btn" id="btnForgotPassword">Forgot Password</button>
+    <button type="button" class="link-btn" id="btnForgotMpin">Forgot MPIN</button>
   </div>
 
   <div class="info-box" id="authFeedbackBox"></div>
 </div>
 
 <script>
-(function saasLoginController() {
+(function () {
   var currentRole = "owner";
   var currentAuthMode = "signin";
   var params = new URLSearchParams(location.search);
-  var isTeamShareLink = (params.get("invite") === "team" || params.get("teamOnly") === "1" || params.get("share") === "team");
+  var isTeamShareLink = (
+    params.get("invite") === "team" ||
+    params.get("teamOnly") === "1" ||
+    params.get("share") === "team"
+  );
 
-  // Standard Departments Requested by user
+  var USERS_KEY = "om_registered_accounts_v1";
+  var SAVED_CREDS_KEY = "om_saved_login_creds_v1";
+
   var DEPARTMENTS = [
-    { id: "cleaner", name: "Cleaner" },
-    { id: "peon", name: "Peon" },
-    { id: "sweeper", name: "Sweeper" },
-    { id: "receptionist", name: "Receptionist" },
-    { id: "electrician", name: "Electrician" },
-    { id: "plumber", name: "Plumber" },
-    { id: "accountant", name: "Accountant" },
-    { id: "hr_manager", name: "HR Manager" },
-    { id: "general_manager", name: "General Manager" },
-    { id: "team_leader", name: "Team Leader" },
-    { id: "trainer", name: "Trainer" },
-    { id: "nutritionist", name: "Nutritionist" },
-    { id: "front_desk", name: "Front Desk" },
-    { id: "back_office", name: "Back Office" },
-    { id: "service_team", name: "Service Team" }
+    "Cleaner", "Peon", "Sweeper", "Receptionist", "Electrician",
+    "Plumber", "Accountant", "HR Manager", "General Manager",
+    "Team Leader", "Trainer", "Nutritionist", "Front Desk",
+    "Back Office", "Service Team"
   ];
+
+  var authService = null;
+  var dbService = null;
+  try {
+    if (window.firebase && firebase.apps) {
+      if (!firebase.apps.length) {
+        firebase.initializeApp({
+          apiKey: "AIzaSyAHEMISEIDSzZz-m2OQT5EPyhTRF-mXqjQ",
+          authDomain: "bfc-gym-215ae.firebaseapp.com",
+          projectId: "bfc-gym-215ae"
+        });
+      }
+      if (typeof firebase.auth === "function") authService = firebase.auth();
+      if (typeof firebase.firestore === "function") dbService = firebase.firestore();
+    }
+  } catch (e) {}
+
+  function readAccounts() {
+    try {
+      var list = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function writeAccounts(list) {
+    try { localStorage.setItem(USERS_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+
+  function normalizeId(val) {
+    return String(val || "").trim().toLowerCase();
+  }
+
+  function showError(msg) {
+    var errBox = document.getElementById("authErrorBox");
+    var infoBox = document.getElementById("authFeedbackBox");
+    if (infoBox) infoBox.style.display = "none";
+    if (errBox) {
+      errBox.style.display = "block";
+      errBox.textContent = msg;
+    }
+  }
+
+  function showInfo(msg) {
+    var errBox = document.getElementById("authErrorBox");
+    var infoBox = document.getElementById("authFeedbackBox");
+    if (errBox) errBox.style.display = "none";
+    if (infoBox) {
+      infoBox.style.display = "block";
+      infoBox.textContent = msg;
+    }
+  }
+
+  function clearMessages() {
+    var errBox = document.getElementById("authErrorBox");
+    var infoBox = document.getElementById("authFeedbackBox");
+    if (errBox) { errBox.style.display = "none"; errBox.textContent = ""; }
+    if (infoBox) { infoBox.style.display = "none"; infoBox.textContent = ""; }
+  }
 
   function renderDeptCheckboxes() {
     var box = document.getElementById("deptCheckboxList");
     if (!box) return;
-    box.innerHTML = DEPARTMENTS.map(function(d) {
+    box.innerHTML = DEPARTMENTS.map(function (deptName) {
       return '<label class="dept-item">' +
-        '<input type="checkbox" class="su-dept-chk" value="' + d.name + '" checked>' +
-        '<span>' + d.name + '</span>' +
+        '<input type="checkbox" class="su-dept-chk" value="' + deptName + '" checked>' +
+        '<span>' + deptName + '</span>' +
       '</label>';
     }).join("");
   }
 
-  function showMsg(txt) {
-    var box = document.getElementById("authFeedbackBox");
-    if (!box) return;
-    box.style.display = "block";
-    box.textContent = txt;
+  function getSavedCredsMap() {
+    try {
+      var map = JSON.parse(localStorage.getItem(SAVED_CREDS_KEY) || "{}");
+      return (typeof map === "object" && map !== null) ? map : {};
+    } catch (e) {
+      return {};
+    }
   }
 
-  window.setRoleTab = function (role) {
+  function refreshSavedCredBar() {
+    var bar = document.getElementById("savedCredBar");
+    var sum = document.getElementById("savedCredSummary");
+    if (!bar || !sum) return;
+    try {
+      var map = getSavedCredsMap();
+      var saved = map[currentRole];
+      if (saved && saved.identifier) {
+        bar.style.display = "flex";
+        sum.textContent = "Saved (" + currentRole.toUpperCase() + "): " + saved.identifier;
+      } else {
+        bar.style.display = "none";
+      }
+    } catch (e) {
+      bar.style.display = "none";
+    }
+  }
+
+  function applySavedCredentials() {
+    try {
+      var map = getSavedCredsMap();
+      var saved = map[currentRole];
+      if (!saved) return;
+      var idInp = document.getElementById("emailInput");
+      var passInp = document.getElementById("passInput");
+      var empInp = document.getElementById("empIdInput");
+      if (idInp) idInp.value = saved.identifier || "";
+      if (passInp) passInp.value = saved.password || "";
+      if (empInp && saved.empId) empInp.value = saved.empId;
+      showInfo("Saved " + currentRole.toUpperCase() + " credentials filled.");
+    } catch (e) {}
+  }
+
+  function saveCredentialsIfChecked(identifier, password, empId) {
+    var chk = document.getElementById("savePasswordChk");
+    if (!chk || !chk.checked) return;
+    try {
+      var map = getSavedCredsMap();
+      map[currentRole] = {
+        role: currentRole,
+        identifier: identifier,
+        password: password,
+        empId: empId || ""
+      };
+      localStorage.setItem(SAVED_CREDS_KEY, JSON.stringify(map));
+    } catch (e) {}
+    refreshSavedCredBar();
+  }
+
+  function updateSignUpVisibility() {
+    var modeBar = document.getElementById("authModeBar");
+    var signUpBtn = document.getElementById("btnSignUpMode");
+    var signInBtn = document.getElementById("btnSignInMode");
+    var suBox = document.getElementById("signUpSetupFields");
+
+    // Only Gym Owner can sign up; Staff/Manager are Sign In only
+    if (isTeamShareLink) {
+      if (modeBar) modeBar.style.display = "none";
+      if (suBox) suBox.style.display = "none";
+      currentAuthMode = "signin";
+      return;
+    }
+
+    if (modeBar) modeBar.style.display = "grid";
+    if (currentRole !== "owner") {
+      currentAuthMode = "signin";
+      if (signUpBtn) signUpBtn.style.display = "none";
+      if (signInBtn) {
+        signInBtn.style.gridColumn = "1 / -1";
+        signInBtn.classList.add("active");
+      }
+      if (suBox) suBox.style.display = "none";
+    } else {
+      if (signUpBtn) {
+        signUpBtn.style.display = "";
+        signUpBtn.classList.toggle("active", currentAuthMode === "signup");
+      }
+      if (signInBtn) {
+        signInBtn.style.gridColumn = "";
+        signInBtn.classList.toggle("active", currentAuthMode === "signin");
+      }
+      if (suBox) {
+        suBox.style.display = (currentAuthMode === "signup") ? "block" : "none";
+      }
+    }
+  }
+
+  function setRoleTab(role) {
     if (isTeamShareLink && role === "owner") role = "manager";
     currentRole = role;
+    clearMessages();
+
+    // Clear form inputs when switching tabs so credentials do not leak across roles
+    var idInp = document.getElementById("emailInput");
+    var passInp = document.getElementById("passInput");
+    var empInp = document.getElementById("empIdInput");
+    if (idInp) idInp.value = "";
+    if (passInp) passInp.value = "";
+    if (empInp) empInp.value = "";
+
+    // Reset save password checkbox state
+    var chk = document.getElementById("savePasswordChk");
+    if (chk) chk.checked = false;
+
     ["owner", "manager", "staff"].forEach(function (r) {
       var el = document.getElementById("tab" + r.charAt(0).toUpperCase() + r.slice(1));
       if (el) el.classList.toggle("active", r === role);
     });
+
     var title = document.getElementById("portalTitle");
     var sub = document.getElementById("portalSub");
     var empGrp = document.getElementById("empIdGroup");
     var empLbl = document.getElementById("empIdLabel");
     var subBtn = document.getElementById("submitLoginBtn");
     var cat = (document.getElementById("suCategorySelect") || {}).value || "gym";
-    var catLabel = cat === "car_dealership" ? "Car Dealership" : (cat === "general_shop" ? "General Store" : "Gym & Fitness");
+    var catLabel = cat === "car_dealership"
+      ? "Car Dealership"
+      : (cat === "general_shop" ? "General Store" : "Gym & Fitness");
 
     if (role === "owner") {
       if (title) title.textContent = catLabel + " Owner Portal";
-      if (sub) sub.textContent = (currentAuthMode === "signup") ? "Create New Owner Account" : "Sign In or New Sign Up";
+      if (sub) sub.textContent = (currentAuthMode === "signup") ? "Owner New Sign Up" : "Owner Sign In";
       if (empGrp) empGrp.style.display = "none";
       if (subBtn) subBtn.textContent = (currentAuthMode === "signup") ? "Create Owner Account" : "Login to Dashboard";
     } else if (role === "manager") {
-      if (title) title.textContent = "Manager Login";
-      if (sub) sub.textContent = "Branch Manager Sign In";
+      if (title) title.textContent = "Manager Sign In";
+      if (sub) sub.textContent = "Sign In Only (Assigned by Owner)";
       if (empGrp) empGrp.style.display = "block";
       if (empLbl) empLbl.textContent = "Manager ID / Code *";
-      if (subBtn) subBtn.textContent = "Manager Login";
+      if (subBtn) subBtn.textContent = "Manager Sign In";
     } else {
-      if (title) title.textContent = "Staff Login";
-      if (sub) sub.textContent = "Login with Employee ID & Password";
+      if (title) title.textContent = "Staff Sign In";
+      if (sub) sub.textContent = "Sign In Only (Employee ID Required)";
       if (empGrp) empGrp.style.display = "block";
       if (empLbl) empLbl.textContent = "Employee ID (Provided by Owner) *";
-      if (subBtn) subBtn.textContent = "Staff Login";
+      if (subBtn) subBtn.textContent = "Staff Sign In";
     }
-  };
 
-  window.setAuthMode = function (mode) {
-    if (isTeamShareLink) mode = "signin";
-    currentAuthMode = mode;
-    document.getElementById("btnSignInMode").classList.toggle("active", mode === "signin");
-    document.getElementById("btnSignUpMode").classList.toggle("active", mode === "signup");
-    var suBox = document.getElementById("signUpSetupFields");
-    if (suBox) suBox.style.display = (mode === "signup" && currentRole === "owner") ? "block" : "none";
+    updateSignUpVisibility();
+    refreshSavedCredBar();
+  }
+
+  function setAuthMode(mode) {
+    if (currentRole !== "owner" || isTeamShareLink) {
+      currentAuthMode = "signin";
+      updateSignUpVisibility();
+      return;
+    }
+    currentAuthMode = (mode === "signup") ? "signup" : "signin";
+    clearMessages();
     setRoleTab(currentRole);
-  };
+  }
 
-  window.onBusinessCategoryChange = function () {
-    setRoleTab(currentRole);
-  };
-
-  window.onStaffNumberInput = function () {
+  function onStaffNumberInput() {
     var count = Number((document.getElementById("suStaffCountInput") || {}).value || 0);
     var scaleSel = document.getElementById("suScaleSelect");
-    if (scaleSel) {
-      if (count > 0 && count < 100) {
-        scaleSel.value = "light";
-      } else if (count >= 100) {
-        scaleSel.value = "full";
+    if (!scaleSel) return;
+    if (count > 0 && count < 100) scaleSel.value = "light";
+    else if (count >= 100) scaleSel.value = "full";
+  }
+
+  function isAlreadyRegistered(identifier) {
+    var norm = normalizeId(identifier);
+    if (!norm) return { found: false, type: "" };
+    var digitsOnly = norm.replace(/\D/g, "");
+    var accounts = readAccounts();
+
+    for (var i = 0; i < accounts.length; i++) {
+      var acc = accounts[i] || {};
+      var accId = normalizeId(acc.identifier);
+      var accPhone = String(acc.phone || "").replace(/\D/g, "");
+      if (accId && accId === norm) {
+        return { found: true, type: digitsOnly.length >= 10 ? "already Mobile no registered" : "already registered" };
+      }
+      if (digitsOnly.length >= 10 && accPhone && accPhone === digitsOnly.slice(-10)) {
+        return { found: true, type: "already Mobile no registered" };
       }
     }
-  };
+    return { found: false, type: "" };
+  }
 
-  window.handleForgotPassword = function () {
-    var email = String((document.getElementById("emailInput") || {}).value || "").trim();
-    if (currentRole === "owner") {
-      if (!email || email.indexOf("@") === -1) {
-        email = String(prompt("Apna registered Owner Email ID darj karein jahan reset link bhejna hai:") || "").trim();
-      }
-      if (!email || email.indexOf("@") === -1) {
-        showMsg("Kripya valid Email ID darj karein taaki reset link bheja ja sake.");
-        return;
-      }
-      if (window.firebase && firebase.auth) {
-        firebase.auth().sendPasswordResetEmail(email).then(function () {
-          showMsg("Password reset link aapke email (" + email + ") par bhej diya gaya hai. Inbox / Spam check karein.");
-        }).catch(function () {
-          showMsg("Password reset request " + email + " ke liye initiate kar di gayi hai. Kripya email check karein.");
-        });
-      } else {
-        showMsg("Password reset link " + email + " ke liye bhej diya gaya hai.");
+  function handleForgotPassword() {
+    var rawId = String((document.getElementById("emailInput") || {}).value || "").trim();
+    if (!rawId) {
+      rawId = String(prompt("Apna Email ID ya Mobile Number darj karein:") || "").trim();
+    }
+    if (!rawId) {
+      showError("Kripya Email ID ya Mobile Number darj karein.");
+      return;
+    }
+
+    var check = isAlreadyRegistered(rawId);
+    if (check.found) {
+      showInfo(check.type + " (" + rawId + "). Reset process initiated.");
+      if (currentRole === "owner" && rawId.indexOf("@") !== -1 && authService && typeof authService.sendPasswordResetEmail === "function") {
+        authService.sendPasswordResetEmail(rawId).catch(function () {});
       }
       return;
     }
 
-    // Manager or Staff: send approval request to Owner
-    var empCode = String((document.getElementById("empIdInput") || {}).value || "").trim() || email || "Team Member";
-    var reqs = [];
-    try { reqs = JSON.parse(localStorage.getItem("om_pwd_reset_requests_v1") || "[]") || []; } catch (e) {}
-    reqs.unshift({
-      role: currentRole,
-      identifier: empCode,
-      requestedAt: new Date().toISOString(),
-      status: "Pending Owner Approval"
-    });
-    try { localStorage.setItem("om_pwd_reset_requests_v1", JSON.stringify(reqs)); } catch (e) {}
-    showMsg("Aapki password reset/new password request Owner ke paas approval ke liye bhej di gayi hai. Owner approve karke naya password set karenge.");
-  };
-
-  window.handleForgotMpin = function () {
     if (currentRole === "owner") {
-      handleForgotPassword();
-    } else {
-      showMsg("MPIN / Password reset ke liye Owner approval zaroori hai. Request bhej di gayi hai.");
-    }
-  };
-
-  window.handleAuthSubmit = function (ev) {
-    ev.preventDefault();
-    var email = String((document.getElementById("emailInput") || {}).value || "").trim();
-    var empId = String((document.getElementById("empIdInput") || {}).value || "").trim();
-    try {
-      localStorage.setItem("bfc_role", currentRole);
-      localStorage.setItem("om_active_role", currentRole);
-      localStorage.setItem("om_logged_user", empId ? (empId + " (" + email + ")") : email);
-      localStorage.setItem("om_session_active", "1");
-      localStorage.setItem("om_last_activity_time", String(Date.now()));
-
-      if (currentAuthMode === "signup" && currentRole === "owner") {
-        var cat = (document.getElementById("suCategorySelect") || {}).value || "gym";
-        var gName = String((document.getElementById("suGymName") || {}).value || "").trim();
-        var staffCnt = Number((document.getElementById("suStaffCountInput") || {}).value || 0);
-        var sc = (document.getElementById("suScaleSelect") || {}).value || (staffCnt < 100 ? "light" : "full");
-        var brCode = String((document.getElementById("suBranchCode") || {}).value || "BR-001").trim();
-        var city = String((document.getElementById("suCity") || {}).value || "").trim();
-        var state = String((document.getElementById("suState") || {}).value || "").trim();
-        var pin = String((document.getElementById("suPinCode") || {}).value || "").trim();
-
-        var checkedDepts = [];
-        document.querySelectorAll(".su-dept-chk:checked").forEach(function(c) {
-          checkedDepts.push(c.value);
+      if (rawId.indexOf("@") !== -1 && authService && typeof authService.sendPasswordResetEmail === "function") {
+        authService.sendPasswordResetEmail(rawId).then(function () {
+          showInfo("Password reset link sent to " + rawId + ".");
+        }).catch(function () {
+          showInfo("Password reset request initiated for " + rawId + ".");
         });
+      } else {
+        showInfo("Password reset request initiated for " + rawId + ".");
+      }
+    } else {
+      var empCode = String((document.getElementById("empIdInput") || {}).value || "").trim() || rawId;
+      showInfo("Password reset approval request sent to Owner for " + currentRole + " (" + empCode + ").");
+    }
+  }
 
+  function handleForgotMpin() {
+    var rawId = String((document.getElementById("emailInput") || {}).value || "").trim();
+    var check = isAlreadyRegistered(rawId);
+    if (check.found) {
+      showInfo(check.type + " (" + rawId + "). MPIN reset request sent.");
+      return;
+    }
+    showInfo(currentRole === "owner"
+      ? "MPIN reset link/request initiated."
+      : "MPIN reset request sent to Owner for approval.");
+  }
+
+  function handleAuthSubmit(ev) {
+    ev.preventDefault();
+    clearMessages();
+
+    var identifier = String((document.getElementById("emailInput") || {}).value || "").trim();
+    var password = String((document.getElementById("passInput") || {}).value || "").trim();
+    var empId = String((document.getElementById("empIdInput") || {}).value || "").trim();
+
+    if (!identifier || !password) {
+      showError("Wrong pass Please enter correct pass");
+      return;
+    }
+
+    if ((currentRole === "manager" || currentRole === "staff") && !empId) {
+      showError("Employee ID / Manager ID darj karein.");
+      return;
+    }
+
+    var accounts = readAccounts();
+    var normId = normalizeId(identifier);
+    var digitsOnly = normId.replace(/\D/g, "");
+
+    if (currentRole === "owner" && currentAuthMode === "signup") {
+      var dup = isAlreadyRegistered(identifier);
+      if (dup.found) {
+        showError(dup.type);
+        return;
+      }
+
+      var cat = (document.getElementById("suCategorySelect") || {}).value || "gym";
+      var gName = String((document.getElementById("suGymName") || {}).value || "").trim();
+      var staffCnt = Number((document.getElementById("suStaffCountInput") || {}).value || 0);
+      var sc = (document.getElementById("suScaleSelect") || {}).value || (staffCnt < 100 ? "light" : "full");
+      var brCode = String((document.getElementById("suBranchCode") || {}).value || "BR-001").trim();
+      var city = String((document.getElementById("suCity") || {}).value || "").trim();
+      var state = String((document.getElementById("suState") || {}).value || "").trim();
+      var pin = String((document.getElementById("suPinCode") || {}).value || "").trim();
+
+      var checkedDepts = [];
+      document.querySelectorAll(".su-dept-chk:checked").forEach(function (c) {
+        checkedDepts.push(c.value);
+      });
+
+      var newAcc = {
+        role: "owner",
+        identifier: identifier,
+        phone: digitsOnly.length >= 10 ? digitsOnly.slice(-10) : "",
+        password: password,
+        category: cat,
+        gymName: gName,
+        staffCount: staffCnt,
+        mode: sc,
+        branchCode: brCode,
+        city: city,
+        state: state,
+        pinCode: pin,
+        departments: checkedDepts,
+        createdAt: new Date().toISOString()
+      };
+      accounts.push(newAcc);
+      writeAccounts(accounts);
+
+      try {
         localStorage.setItem("om_business_category", cat);
         localStorage.setItem("om_app_display_mode", sc);
         localStorage.setItem("om_selected_departments", JSON.stringify(checkedDepts));
         localStorage.setItem("om_active_gym_profile", JSON.stringify({
           gymName: gName,
           category: cat,
-          role: "Business Owner",
+          role: "Gym Owner",
           staffCount: staffCnt,
           branchCode: brCode,
           city: city,
           state: state,
           pinCode: pin
         }));
+      } catch (e) {}
+    } else {
+      // Sign In flow: check matching account if registered; if password doesn't match a registered account, show exact error
+      var matchedAcc = accounts.find(function (a) {
+        var aId = normalizeId(a.identifier);
+        var aPh = String(a.phone || "").replace(/\D/g, "");
+        return (aId && aId === normId) || (digitsOnly.length >= 10 && aPh && aPh === digitsOnly.slice(-10));
+      });
+
+      if (matchedAcc && matchedAcc.password && matchedAcc.password !== password) {
+        showError("Wrong pass Please enter correct pass");
+        return;
       }
+
+      if (password.length < 4) {
+        showError("Wrong pass Please enter correct pass");
+        return;
+      }
+
+      if (matchedAcc && matchedAcc.mode) {
+        try { localStorage.setItem("om_app_display_mode", matchedAcc.mode); } catch (e) {}
+      }
+    }
+
+    saveCredentialsIfChecked(identifier, password, empId);
+
+    try {
+      localStorage.setItem("bfc_role", currentRole);
+      localStorage.setItem("om_active_role", currentRole);
+      localStorage.setItem("om_logged_user", empId ? (empId + " (" + identifier + ")") : identifier);
+      localStorage.setItem("om_session_active", "1");
+      localStorage.setItem("om_last_activity_time", String(Date.now()));
     } catch (e) {}
+
     location.href = "app.html";
-  };
+  }
+
+  function bindEvents() {
+    document.querySelectorAll("[data-role]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        setRoleTab(btn.getAttribute("data-role"));
+      });
+    });
+
+    var btnSignIn = document.getElementById("btnSignInMode");
+    var btnSignUp = document.getElementById("btnSignUpMode");
+    if (btnSignIn) btnSignIn.addEventListener("click", function () { setAuthMode("signin"); });
+    if (btnSignUp) btnSignUp.addEventListener("click", function () { setAuthMode("signup"); });
+
+    var staffCntInp = document.getElementById("suStaffCountInput");
+    if (staffCntInp) staffCntInp.addEventListener("input", onStaffNumberInput);
+
+    var catSel = document.getElementById("suCategorySelect");
+    if (catSel) catSel.addEventListener("change", function () { setRoleTab(currentRole); });
+
+    var form = document.getElementById("loginForm");
+    if (form) form.addEventListener("submit", handleAuthSubmit);
+
+    var btnFp = document.getElementById("btnForgotPassword");
+    if (btnFp) btnFp.addEventListener("click", handleForgotPassword);
+
+    var btnFm = document.getElementById("btnForgotMpin");
+    if (btnFm) btnFm.addEventListener("click", handleForgotMpin);
+
+    var btnSaved = document.getElementById("btnUseSavedCred");
+    if (btnSaved) btnSaved.addEventListener("click", applySavedCredentials);
+
+    // 5-Tap Secret Entry for App Developer
+    var taps = 0;
+    var tapTimer = null;
+    var badge = document.getElementById("devSecretTapBadge");
+    if (badge) {
+      badge.addEventListener("click", function () {
+        taps++;
+        clearTimeout(tapTimer);
+        tapTimer = setTimeout(function () { taps = 0; }, 2500);
+        if (taps >= 5) {
+          taps = 0;
+          location.href = "prime-master-login.html";
+        }
+      });
+    }
+  }
 
   window.addEventListener("DOMContentLoaded", function () {
     renderDeptCheckboxes();
+    bindEvents();
+    refreshSavedCredBar();
+
     if (isTeamShareLink) {
       var tabOwner = document.getElementById("tabOwner");
       var rTabs = document.getElementById("roleTabsBar");
-      var modeBar = document.getElementById("authModeBar");
       if (tabOwner) tabOwner.style.display = "none";
       if (rTabs) rTabs.classList.add("team-only");
-      if (modeBar) modeBar.style.display = "none";
       currentRole = "manager";
       currentAuthMode = "signin";
     }
     setRoleTab(currentRole);
   });
 })();
-
-  // 5-Tap Secret Entry for App Developer
-  (function initDeveloper5TapTrigger() {
-    var taps = 0;
-    var tapTimer = null;
-    var badge = document.getElementById("devSecretTapBadge");
-    if (!badge) return;
-    badge.addEventListener("click", function () {
-      taps++;
-      clearTimeout(tapTimer);
-      tapTimer = setTimeout(function () { taps = 0; }, 2500);
-      if (taps >= 5) {
-        taps = 0;
-        alert("🔒 Developer Security Trigger Detected! Opening Multi-Factor Authentication Gate...");
-        location.href = "prime-master-login.html";
-      }
-    });
-  })();
-
 </script>
 </body>
 </html>
