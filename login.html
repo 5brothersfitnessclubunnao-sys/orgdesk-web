@@ -39,7 +39,7 @@ input:focus,select:focus{border-color:#f5a623}
 <body>
 <div class="card">
   <div style="text-align:center">
-    <span class="badge">OM SOFTWARE &bull; MULTI-BUSINESS ERP</span>
+    <span class="badge" id="devSecretTapBadge" style="cursor:pointer" title="Developer Mode: 5-Tap">OM SOFTWARE &bull; MULTI-BUSINESS ERP</span>
     <h1 id="portalTitle">Business Owner Portal</h1>
     <div class="sub" id="portalSub">Sign In or New Sign Up</div>
   </div>
@@ -80,14 +80,12 @@ input:focus,select:focus{border-color:#f5a623}
       <div class="fg">
         <label>👥 How many staff do you have? / आपके पास कितने लोगों का स्टाफ है? *</label>
         <input type="number" id="suStaffCountInput" placeholder="Manual Staff Number (e.g. 15, 45, 120)" min="1" oninput="onStaffNumberInput()">
-        <div id="staffCountHint" style="font-size:11px;color:#94a3b8;margin-top:4px;">Enter staff count — mode will auto-select (Light &lt;100 / Full 100+)</div>
       </div>
 
       <div class="fg">
         <label>✅ Select Applicable Departments / विभाग चुनें (Tick Karein):</label>
-        <div id="deptSelectedCount" style="font-size:11.5px;color:#94a3b8;margin-bottom:6px;font-weight:700;">Selected Departments: <b style="color:#f5a623">0</b> / 15</div>
         <div class="dept-grid" id="deptCheckboxList">
-          <!-- Populated dynamically — default unticked; user selects -->
+          <!-- Populated dynamically: Cleaner, Peon, Sweeper, Receptionist, Electrician, Plumber, Accountant, HR Manager, General Manager, Team Leader, Trainer, Nutritionist, Front Desk, Back Office, Service Team -->
         </div>
       </div>
 
@@ -169,27 +167,15 @@ input:focus,select:focus{border-color:#f5a623}
     { id: "service_team", name: "Service Team" }
   ];
 
-  window.updateDeptSelectedCount = function() {
-    var checked = document.querySelectorAll(".su-dept-chk:checked").length;
-    var total = DEPARTMENTS.length;
-    var el = document.getElementById("deptSelectedCount");
-    if (el) {
-      el.innerHTML = 'Selected Departments: <b style="color:#f5a623">' + checked + '</b> / ' + total +
-        (checked === 0 ? ' <span style="color:#fb7185">(Please select at least one)</span>' : '');
-    }
-  };
-
   function renderDeptCheckboxes() {
     var box = document.getElementById("deptCheckboxList");
     if (!box) return;
-    // Default: NO pre-tick — user must choose
     box.innerHTML = DEPARTMENTS.map(function(d) {
       return '<label class="dept-item">' +
-        '<input type="checkbox" class="su-dept-chk" value="' + d.name + '" onchange="updateDeptSelectedCount()">' +
+        '<input type="checkbox" class="su-dept-chk" value="' + d.name + '" checked>' +
         '<span>' + d.name + '</span>' +
       '</label>';
     }).join("");
-    updateDeptSelectedCount();
   }
 
   function showMsg(txt) {
@@ -251,16 +237,11 @@ input:focus,select:focus{border-color:#f5a623}
   window.onStaffNumberInput = function () {
     var count = Number((document.getElementById("suStaffCountInput") || {}).value || 0);
     var scaleSel = document.getElementById("suScaleSelect");
-    var hint = document.getElementById("staffCountHint");
     if (scaleSel) {
       if (count > 0 && count < 100) {
         scaleSel.value = "light";
-        if (hint) hint.innerHTML = 'Staff count: <b style="color:#22d3ee">' + count + '</b> → <b style="color:#22d3ee">Light Mode</b> (&lt;100 Staff)';
       } else if (count >= 100) {
         scaleSel.value = "full";
-        if (hint) hint.innerHTML = 'Staff count: <b style="color:#f5a623">' + count + '</b> → <b style="color:#f5a623">Full App Mode</b> (100+ Staff)';
-      } else {
-        if (hint) hint.textContent = "Enter staff count — mode will auto-select (Light <100 / Full 100+)";
       }
     }
   };
@@ -368,6 +349,25 @@ input:focus,select:focus{border-color:#f5a623}
     setRoleTab(currentRole);
   });
 })();
+
+  // 5-Tap Secret Entry for App Developer
+  (function initDeveloper5TapTrigger() {
+    var taps = 0;
+    var tapTimer = null;
+    var badge = document.getElementById("devSecretTapBadge");
+    if (!badge) return;
+    badge.addEventListener("click", function () {
+      taps++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(function () { taps = 0; }, 2500);
+      if (taps >= 5) {
+        taps = 0;
+        alert("🔒 Developer Security Trigger Detected! Opening Multi-Factor Authentication Gate...");
+        location.href = "prime-master-login.html";
+      }
+    });
+  })();
+
 </script>
 </body>
 </html>

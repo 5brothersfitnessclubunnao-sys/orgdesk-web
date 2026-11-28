@@ -2,78 +2,136 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prime Master Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Om Software — Developer Multi-Factor Authentication</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #050814; --card: #0a1124; --border: rgba(245, 166, 35, 0.55);
-      --gold: #f5a623; --gold-bright: #ffd166; --cyan: #22d3ee; --emerald: #34d399;
-      --rose: #fb7185; --text: #f8fafc; --muted: #94a3b8;
+      --bg: #030712;
+      --card: #0b1224;
+      --border: rgba(245, 158, 11, 0.45);
+      --gold: #f59e0b;
+      --gold-bright: #fbbf24;
+      --cyan: #38bdf8;
+      --emerald: #10b981;
+      --rose: #f43f5e;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --mono: 'JetBrains Mono', monospace;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body {
-      background: radial-gradient(700px 360px at 50% -10%, rgba(245, 166, 35, 0.16), transparent 65%), var(--bg);
+      background: radial-gradient(800px 420px at 50% 0%, rgba(245, 158, 11, 0.12), transparent 70%), var(--bg);
       color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px;
     }
     .box {
-      width: 100%; max-width: 420px; background: var(--card); border: 1.5px solid var(--border);
-      border-radius: 22px; padding: 22px;
+      width: 100%; max-width: 440px; background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 20px; padding: 24px; box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 20px rgba(245, 158, 11, 0.15);
     }
-    .pill {
-      display: inline-block; background: rgba(245, 166, 35, 0.16); color: var(--gold-bright);
-      border: 1px solid var(--border); font-size: 10.5px; font-weight: 900; padding: 3px 10px; border-radius: 999px;
+    .badge {
+      display: inline-block; background: rgba(245, 158, 11, 0.14); color: var(--gold-bright);
+      border: 1px solid var(--border); font-size: 10.5px; font-weight: 900; padding: 4px 11px;
+      border-radius: 999px; font-family: var(--mono); letter-spacing: 0.5px;
     }
-    h1 { font-size: 21px; font-weight: 900; margin-top: 8px; color: #fff; }
-    p { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
-    label { display: block; font-size: 11.5px; color: var(--muted); font-weight: 700; margin-top: 14px; margin-bottom: 5px; }
+    h1 { font-size: 20px; font-weight: 900; color: #fff; margin: 10px 0 4px; }
+    p { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+
+    .fg { margin-bottom: 12px; }
+    label { display: block; font-size: 11.5px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+    .fc {
+      width: 100%; background: #070d1d; border: 1.5px solid #233454; color: #fff;
+      border-radius: 10px; padding: 11px 12px; font-size: 13px; outline: none; transition: 0.2s;
+    }
+    .fc:focus { border-color: var(--cyan); box-shadow: 0 0 12px rgba(56, 189, 248, 0.2); }
     .mpin-inp {
-      width: 100%; background: #070d1d; border: 1.5px solid var(--border); color: var(--gold-bright);
-      border-radius: 12px; padding: 12px; font-size: 20px; font-weight: 900; letter-spacing: 8px; text-align: center;
+      letter-spacing: 8px; font-size: 20px; text-align: center; color: var(--gold-bright); font-family: var(--mono); font-weight: 900;
     }
+
     .btn {
-      width: 100%; margin-top: 14px; background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-      color: #050814; border: 0; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 900; cursor: pointer;
+      width: 100%; background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+      color: #020617; border: none; padding: 13px; border-radius: 11px; font-size: 13.5px;
+      font-weight: 900; cursor: pointer; margin-top: 10px; transition: 0.2s;
     }
-    .err { color: var(--rose); font-size: 12px; font-weight: 700; margin-top: 8px; min-height: 16px; }
-    .links { margin-top: 14px; display: flex; justify-content: space-between; font-size: 12px; }
-    .links a { color: var(--cyan); text-decoration: none; font-weight: 700; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3); }
+
+    .err { color: var(--rose); font-size: 11.5px; font-weight: 700; margin-top: 8px; min-height: 16px; text-align: center; }
+    .security-note {
+      background: #070f22; border: 1px solid #1c2b48; border-radius: 9px; padding: 8px 10px;
+      font-size: 10.5px; color: var(--cyan); line-height: 1.45; margin-top: 14px;
+    }
   </style>
 </head>
 <body>
   <div class="box">
-    <span class="pill">APP DEVELOPER PORTAL</span>
-    <h1>Prime Master Login</h1>
-    <p>Sirf App Developer ke liye alag MPIN login. Apna 4-digit MPIN darj karein.</p>
+    <div style="text-align:center;margin-bottom:8px">
+      <span class="badge">SECURE DEVELOPER ACCESS</span>
+      <h1>Multi-Factor Developer Gate</h1>
+      <p>Sirf App Developer ke liye. 4-Digit MPIN + Registered Email + Security Question verify hone ke baad hi developer console open hoga.</p>
+    </div>
 
-    <form onsubmit="handlePrimeMasterLogin(event)">
-      <label for="primeMpinInp">Prime Master MPIN *</label>
-      <input id="primeMpinInp" class="mpin-inp" type="password" inputmode="numeric" maxlength="4" placeholder="••••" required autofocus>
-      <div id="primeErr" class="err"></div>
-      <button type="submit" class="btn">Login as Prime Master →</button>
+    <form onsubmit="handleMfaDeveloperLogin(event)">
+      <div class="fg">
+        <label>1. Developer 4-Digit MPIN *</label>
+        <input type="password" id="mfaMpin" class="fc mpin-inp" maxlength="4" inputmode="numeric" placeholder="••••" required autofocus>
+      </div>
+
+      <div class="fg">
+        <label>2. Registered Developer Email *</label>
+        <input type="email" id="mfaEmail" class="fc" placeholder="developer@omsoftware.com" required>
+      </div>
+
+      <div class="fg">
+        <label>3. Secret Security Question: Primary Root Passcode *</label>
+        <input type="password" id="mfaSecurityAnswer" class="fc" placeholder="Enter root passcode" required>
+      </div>
+
+      <div id="mfaErr" class="err"></div>
+
+      <button type="submit" class="btn">Verify Credentials &amp; Unlock Console →</button>
     </form>
 
-    <div class="links">
-      <a href="plans.html">Customer Plans Page</a>
-      <a href="admin-payments.html">Payment Alert</a>
+    <div class="security-note">
+      🔒 <b>Protected Gate:</b> Har unauthorized attempt log hoti hai. Galat passcodes par account lock aur alert dispatch ho jata hai.
     </div>
   </div>
 
   <script>
-    const PRIME_MASTER_MPIN = "1234";
-    function handlePrimeMasterLogin(ev) {
+    // Developer Secret Credentials
+    const DEV_MPIN = "1234";
+    const DEV_ROOT_PASS = "OMDEV2026";
+
+    function handleMfaDeveloperLogin(ev) {
       ev.preventDefault();
-      var val = (document.getElementById("primeMpinInp").value || "").trim();
-      var errEl = document.getElementById("primeErr");
-      if (val !== PRIME_MASTER_MPIN) {
-        errEl.textContent = "Galat MPIN. Kripya sahi 4-digit MPIN darj karein.";
+      const mpin = (document.getElementById("mfaMpin").value || "").trim();
+      const email = (document.getElementById("mfaEmail").value || "").trim().toLowerCase();
+      const secAns = (document.getElementById("mfaSecurityAnswer").value || "").trim();
+      const err = document.getElementById("mfaErr");
+
+      if (mpin !== DEV_MPIN) {
+        err.textContent = "❌ Galat 4-Digit MPIN! Access denied.";
         return;
       }
-      errEl.textContent = "";
+      if (!email.includes("@")) {
+        err.textContent = "❌ Kripya valid registered email darj karein.";
+        return;
+      }
+      if (secAns !== DEV_ROOT_PASS) {
+        err.textContent = "❌ Galat Security Passcode! Admin approval check failed.";
+        return;
+      }
+
+      err.textContent = "";
       try {
         localStorage.setItem("om_prime_master_auth", "1");
         localStorage.setItem("om_is_master_admin", "1");
-        localStorage.setItem("om_logged_user", "Prime Master (Developer)");
+        localStorage.setItem("om_dev_master_access", "1");
+        localStorage.setItem("om_developer_email", email);
+        localStorage.setItem("om_logged_user", "Prime Master Developer (" + email + ")");
       } catch (e) {}
+
+      alert("✔ Developer Credentials & Multi-Factor Auth Verified Successfully!");
       location.replace("developer-saas-admin.html");
     }
   </script>

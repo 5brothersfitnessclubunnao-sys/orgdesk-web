@@ -109,7 +109,7 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
 <body>
 <div class="wrap">
   <header>
-    <h1 id="bizMainTitle">BUSINESS &amp; OPERATIONS ERP</h1>
+    <h1 id="bizMainTitle" style="cursor:pointer" title="Developer Mode: 5-Tap">BUSINESS &amp; OPERATIONS ERP</h1>
     <div class="addr" id="bizMainSub">Pan-India Branch Control &bull; Light &amp; Full App Mode</div>
     <div class="menu" id="modeStatusLabel">Active Mode: Light Mode (&lt;100 Staff / Single Setup)</div>
   </header>
@@ -126,7 +126,7 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
       <span>📋 Leave Requests:</span>
       <span class="badge-count" id="badgeLeavePending">0</span>
     </div>
-    <div class="notif-pill" onclick="openExpenseUploadModal()">
+    <div class="notif-pill" onclick="openExpenseApprovalModal()">
       <span>🧾 Expense Approvals:</span>
       <span class="badge-count" id="badgeExpensePending">0</span>
     </div>
@@ -166,25 +166,25 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
   <!-- ==================== LIGHT MODE SECTION ==================== -->
   <section id="lightModeSection" class="light-sec show">
     <div class="grid">
-      <button type="button" class="tile gold" onclick="location.href='admission.html'">
+      <button type="button" class="tile gold" onclick="openLightPanel('panelAdmission')">
         <span class="ico">📝</span>
         1. Admission / Joining
-        <span class="sub">Full Digital Form →</span>
+        <span class="sub">नया सदस्य / फॉर्म</span>
       </button>
       <button type="button" class="tile green" onclick="openLightPanel('panelMemberAtt')">
         <span class="ico">✅</span>
         2. Member Attendance
         <span class="sub">नाम / नंबर से Auto-Fetch</span>
       </button>
-      <button type="button" class="tile cyan" onclick="openAttendanceHub()">
+      <button type="button" class="tile cyan" onclick="openStaffAttendanceKiosk()">
         <span class="ico">🧑‍💼</span>
-        3. Attendance Hub
-        <span class="sub">Self / Staff / Admin view</span>
+        3. Staff Attendance
+        <span class="sub">Employee ID + Selfie</span>
       </button>
-      <button type="button" class="tile red" onclick="location.href='pay.html?m=fees'">
+      <button type="button" class="tile red" onclick="openLightPanel('panelPayFees')">
         <span class="ico">💳</span>
         Pay Fees / Billing
-        <span class="sub">फीस जमा / रसीद →</span>
+        <span class="sub">फीस जमा / रसीद</span>
       </button>
       <button type="button" class="tile blue" onclick="openLightPanel('panelNewAdm')">
         <span class="ico">🆕</span>
@@ -214,16 +214,6 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
         Office / Gym Expense
         <span class="sub">Upload Bill &bull; Hierarchy Approval</span>
       </button>
-      <button type="button" class="tile blue" onclick="openStaffJoiningModal()">
-        <span class="ico">🆕</span>
-        Staff Joining
-        <span class="sub">Auto Employee ID · Instant add</span>
-      </button>
-      <button type="button" class="tile purple" onclick="openRoleAccessModal()">
-        <span class="ico">🔐</span>
-        Role Access
-        <span class="sub">HR · GM · Manager · Branch</span>
-      </button>
     </div>
 
     <div class="row2" style="margin-top:12px">
@@ -238,116 +228,18 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
   <section id="fullModeSection" class="full-sec hide">
     <div class="grid">
       <a class="tile gold" href="admission.html"><span class="ico">📝</span>Admission Form<span class="sub">पूरा एडमिशन फॉर्म</span></a>
-      <a class="tile blue" href="admission.html"><span class="ico">👥</span>Members Portal<span class="sub">सदस्य रिकॉर्ड / Admin Desk</span></a>
-      <button type="button" class="tile green" onclick="openAttendanceHub()"><span class="ico">✅</span>Attendance Hub<span class="sub">Members + Staff + Role view</span></button>
-      <button type="button" class="tile cyan" onclick="openStaffJoiningModal()"><span class="ico">🧑‍💼</span>Staff Joining<span class="sub">Auto Emp ID</span></button>
+      <a class="tile blue" href="members-portal.html"><span class="ico">👥</span>Members Portal<span class="sub">सदस्य रिकॉर्ड</span></a>
+      <a class="tile green" href="attendance.html"><span class="ico">✅</span>Attendance Kiosk<span class="sub">बायोमेट्रिक हाजिरी</span></a>
+      <button type="button" class="tile cyan" onclick="openStaffAttendanceKiosk()"><span class="ico">🧑‍💼</span>Staff Attendance<span class="sub">Employee ID + Selfie</span></button>
       <button type="button" class="tile purple" onclick="openSalarySheetModal()"><span class="ico">📊</span>Salary Sheet<span class="sub">Branch &bull; All Formats</span></button>
       <button type="button" class="tile pink" onclick="openExpenseUploadModal()"><span class="ico">🧾</span>Office Expense<span class="sub">Bill Approval Workflow</span></button>
-      <a class="tile orange full" href="index.html"><span class="ico">📊</span><span>Master Central Command<br><span class="sub">Full Commercial Desk</span></span></a>
+      <a class="tile orange full" href="master.html"><span class="ico">📊</span><span>Master Central Command<br><span class="sub">All Branch Operations</span></span></a>
       <a class="tile cyan full" href="pay.html?m=fees"><span class="ico">💳</span><span>Pay / UPI &amp; Fees<br><span class="sub">फीस व रसीद</span></span></a>
     </div>
   </section>
-
-  <!-- Shared dynamic panel (visible in both Light & Full mode) -->
-  <div id="sharedDynamicPanel" style="margin-top:12px"></div>
 </div>
 
 <!-- ==================== MODALS ==================== -->
-
-<!-- SUCCESS TOAST -->
-<div id="omSuccessToast" style="display:none;position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:100000;background:#065f46;color:#ecfdf5;border:1.5px solid #34d399;padding:12px 18px;border-radius:12px;font-weight:900;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.45)">Successfully Done ✅</div>
-
-<!-- ATTENDANCE HUB (role-based) -->
-<div class="modal-ov" id="attendanceHubModal">
-  <div class="modal-box" style="border-color:#00ff66">
-    <div class="m-top">
-      <h3 style="color:#00ff66">✅ Attendance Hub</h3>
-      <button type="button" class="x-btn" onclick="closeModal('attendanceHubModal')">&times;</button>
-    </div>
-    <div id="attHubRoleLabel" style="font-size:12px;color:#94a3b8;margin-bottom:10px">Role: —</div>
-    <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px" id="attHubOptions">
-      <!-- filled by JS -->
-    </div>
-    <div id="attHubAdminStats" style="display:none;margin-top:12px"></div>
-  </div>
-</div>
-
-<!-- STAFF JOINING (auto Emp ID) -->
-<div class="modal-ov" id="staffJoinModal">
-  <div class="modal-box" style="border-color:#4db8ff">
-    <div class="m-top">
-      <h3 style="color:#4db8ff">🆕 Staff Joining</h3>
-      <button type="button" class="x-btn" onclick="closeModal('staffJoinModal')">&times;</button>
-    </div>
-    <div class="row2">
-      <div class="fg"><label>Full Name *</label><input class="fc" id="sjName" placeholder="Employee name"></div>
-      <div class="fg"><label>Mobile *</label><input class="fc" id="sjPhone" placeholder="10-digit" maxlength="10"></div>
-    </div>
-    <div class="row2">
-      <div class="fg"><label>Post / Role *</label>
-        <select class="fc" id="sjPost">
-          <option>Trainer</option><option>Receptionist</option><option>Cleaner</option>
-          <option>HR</option><option>GM</option><option>Manager</option>
-          <option>Accountant</option><option>Front Desk</option><option>Staff</option>
-        </select>
-      </div>
-      <div class="fg"><label>Department</label>
-        <select class="fc" id="sjDept">
-          <option>Training</option><option>Front Desk</option><option>Management</option>
-          <option>HR</option><option>Accounts</option><option>Service Team</option><option>Floor</option>
-        </select>
-      </div>
-    </div>
-    <div class="row2">
-      <div class="fg"><label>Branch Code *</label><input class="fc" id="sjBranch" value="BR-001"></div>
-      <div class="fg"><label>Base Salary (₹)</label><input type="number" class="fc" id="sjSalary" value="15000"></div>
-    </div>
-    <div class="fg"><label>Email (login helper)</label><input class="fc" id="sjEmail" placeholder="optional@email.com"></div>
-    <div class="rec" style="border-color:#22d3ee;font-size:12px">
-      Employee ID system <b>automatically</b> banayega (e.g. STF-006). Ye ID baad me login ke liye use hogi.
-    </div>
-    <button type="button" class="btn btn-green" onclick="submitStaffJoining()">✔ Save Staff Joining</button>
-  </div>
-</div>
-
-<!-- ROLE ACCESS (Admin assigns branch + modules) -->
-<div class="modal-ov" id="roleAccessModal">
-  <div class="modal-box" style="border-color:#c084fc">
-    <div class="m-top">
-      <h3 style="color:#c084fc">🔐 Role Access Control</h3>
-      <button type="button" class="x-btn" onclick="closeModal('roleAccessModal')">&times;</button>
-    </div>
-    <div class="fg"><label>Staff / Role person *</label>
-      <select class="fc" id="raStaffSelect"></select>
-    </div>
-    <div class="fg"><label>Assign Role</label>
-      <select class="fc" id="raRoleSelect">
-        <option value="staff">Staff (Employee)</option>
-        <option value="manager">Manager</option>
-        <option value="hr">HR</option>
-        <option value="gm">GM</option>
-        <option value="admin">Admin (Owner level)</option>
-      </select>
-    </div>
-    <div class="fg"><label>Allowed Branches (comma)</label>
-      <input class="fc" id="raBranches" placeholder="BR-001, BR-002" value="BR-001">
-    </div>
-    <div class="fg"><label>Module Access</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px">
-        <label><input type="checkbox" class="ra-mod" value="self_attendance" checked> Self Attendance</label>
-        <label><input type="checkbox" class="ra-mod" value="staff_attendance" checked> Staff Attendance</label>
-        <label><input type="checkbox" class="ra-mod" value="member_attendance"> Gym Members Att.</label>
-        <label><input type="checkbox" class="ra-mod" value="leave_approve"> Leave Approve</label>
-        <label><input type="checkbox" class="ra-mod" value="salary_slip"> Salary Slip</label>
-        <label><input type="checkbox" class="ra-mod" value="staff_joining"> Staff Joining</label>
-        <label><input type="checkbox" class="ra-mod" value="advance"> Advance Approve</label>
-        <label><input type="checkbox" class="ra-mod" value="all_branches"> All Branches View</label>
-      </div>
-    </div>
-    <button type="button" class="btn btn-gold" onclick="saveRoleAccess()">✔ Save Role Access</button>
-    <div id="raListBox" style="margin-top:10px"></div>
-  </div>
-</div>
 
 <!-- 1. STAFF ATTENDANCE KIOSK (EMPLOYEE ID MANDATORY + SELFIE + OWNER VIEW) -->
 <div class="modal-ov" id="staffAttModal">
@@ -358,8 +250,8 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     </div>
 
     <div class="fg">
-      <label style="color:#ffcc00;font-size:12px">Employee ID / Mobile / Email / Name *</label>
-      <input class="fc" id="empCodeQueryInp" placeholder="STF-001 ya mobile ya email ya naam" oninput="lookupStaffByCodeOrName()">
+      <label style="color:#ffcc00;font-size:12px">Please Enter Your Employee ID or code *</label>
+      <input class="fc" id="empCodeQueryInp" placeholder="Employee ID ya code zaroori hai (e.g. STF-001)" oninput="lookupStaffByCodeOrName()">
     </div>
 
     <div id="empLookupResultBox" class="rec" style="border-color:#22d3ee;display:none">
@@ -790,37 +682,12 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
   };
 
   window.goToPaymentPage = function() {
-    try {
-      location.href = "plans.html";
-    } catch (e) {
-      alert("Upgrade Plan page open nahi ho paya. plans.html file folder me check karein.");
-    }
+    location.href = "plans.html";
   };
 
   window.shareStaffManagerLink = function() {
-    var base = "./";
-    try {
-      if (location.origin && location.origin !== "null") {
-        base = location.origin + (location.pathname ? location.pathname.replace(/[^/]*$/, "") : "/");
-      } else if (location.pathname) {
-        base = location.pathname.replace(/[^/]*$/, "") || "./";
-      }
-    } catch (e) { base = "./"; }
-    var shareUrl = base + "login.html?invite=team";
-    var text = "Staff / Manager login link (Sign In only — no Owner access):\n" + shareUrl;
-    if (navigator.share) {
-      navigator.share({ title: "Staff / Manager Link", text: text, url: shareUrl }).catch(function() {
-        prompt("Share this link with Staff / Manager:", shareUrl);
-      });
-    } else if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(shareUrl).then(function() {
-        alert("Link copied to clipboard!\n\n" + shareUrl);
-      }).catch(function() {
-        prompt("Share this link with Staff / Manager:", shareUrl);
-      });
-    } else {
-      prompt("Share this link with Staff / Manager (Sign In only — no Owner access):", shareUrl);
-    }
+    var shareUrl = location.origin + location.pathname.replace(/[^/]*$/, "") + "login.html?invite=team";
+    prompt("Share this link with Staff / Manager (Sign In only — no Owner access):", shareUrl);
   };
 
   window.revealLicenseWithMpin = function() {
@@ -857,165 +724,6 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
   }
 
   // --- STAFF ATTENDANCE WITH EMPLOYEE ID LOOKUP + SELFIE ---
-  window.showSuccessDone = function(extra) {
-    var t = document.getElementById("omSuccessToast");
-    if (!t) { alert("Successfully Done ✅" + (extra ? "\n" + extra : "")); return; }
-    t.textContent = "Successfully Done ✅" + (extra ? " — " + extra : "");
-    t.style.display = "block";
-    clearTimeout(window.__omToastTimer);
-    window.__omToastTimer = setTimeout(function() { t.style.display = "none"; }, 2500);
-  };
-
-  window.openAttendanceHub = function() {
-    var role = getActiveRole();
-    var label = document.getElementById("attHubRoleLabel");
-    if (label) label.textContent = "Active Role: " + role.toUpperCase() + " · Access branches: " + getAllowedBranches().join(", ");
-    var box = document.getElementById("attHubOptions");
-    var stats = document.getElementById("attHubAdminStats");
-    if (!box) return;
-    var html = "";
-    // Admin: no "Mark Your Attendance" — show overview stats
-    if (role === "owner" || role === "admin") {
-      html += '<button type="button" class="tile green" style="min-height:90px" onclick="openLightPanel(\'panelMemberAtt\');closeModal(\'attendanceHubModal\')"><span class="ico">🏋️</span>Gym Memberships Attendance<span class="sub">Members only</span></button>';
-      html += '<button type="button" class="tile cyan" style="min-height:90px" onclick="openStaffAttendanceKiosk();closeModal(\'attendanceHubModal\')"><span class="ico">🧑‍💼</span>Staff Attendance Register<span class="sub">All staff</span></button>';
-      if (stats) {
-        stats.style.display = "block";
-        var members = 0, staffN = 0, staffAtt = 0;
-        try {
-          var light = JSON.parse(localStorage.getItem("om_light_mode_data_v1") || "{}");
-          members = (light.admissions || []).length;
-        } catch (e) {}
-        try {
-          var m2 = JSON.parse(localStorage.getItem("5BFC_MEMBERS") || "[]");
-          if (Array.isArray(m2) && m2.length > members) members = m2.length;
-        } catch (e) {}
-        staffN = getStaffList().length;
-        try {
-          var logs = JSON.parse(localStorage.getItem(STAFF_ATT_KEY) || "[]") || [];
-          var today = new Date().toISOString().slice(0, 10);
-          staffAtt = logs.filter(function(r) { return r.date === today; }).length;
-        } catch (e) {}
-        stats.innerHTML = '<div class="box"><h3>Admin Live Snapshot</h3>' +
-          '<div class="rec">Total Gym Members: <b style="color:#ffcc00">' + members + '</b></div>' +
-          '<div class="rec">Total Employees: <b style="color:#22d3ee">' + staffN + '</b></div>' +
-          '<div class="rec">Staff Present Today: <b style="color:#00ff66">' + staffAtt + '</b> · Absent est.: <b style="color:#ff5555">' + Math.max(0, staffN - staffAtt) + '</b></div></div>';
-      }
-    } else {
-      // Manager / HR / GM / Staff: Mark self + Staff attendance (branch scoped)
-      html += '<button type="button" class="tile gold" style="min-height:90px" onclick="openStaffAttendanceKiosk();closeModal(\'attendanceHubModal\')"><span class="ico">✋</span>Mark Your Attendance<span class="sub">Emp ID / Mobile / Email</span></button>';
-      html += '<button type="button" class="tile cyan" style="min-height:90px" onclick="openStaffAttendanceKiosk();closeModal(\'attendanceHubModal\')"><span class="ico">🧑‍💼</span>Staff Attendance<span class="sub">Branch staff only</span></button>';
-      if (role === "hr" || role === "gm" || role === "manager") {
-        html += '<button type="button" class="tile green" style="min-height:90px;grid-column:1/-1" onclick="openLightPanel(\'panelMemberAtt\');closeModal(\'attendanceHubModal\')"><span class="ico">🏋️</span>Gym Memberships Attendance<span class="sub">If access granted</span></button>';
-      }
-      if (stats) stats.style.display = "none";
-    }
-    box.innerHTML = html;
-    document.getElementById("attendanceHubModal").classList.add("open");
-  };
-
-  function getAllowedBranches() {
-    try {
-      var acc = JSON.parse(localStorage.getItem("om_role_access_v1") || "{}");
-      var me = getLoggedIdentifier();
-      var role = getActiveRole();
-      if (role === "owner" || role === "admin") return ["ALL"];
-      if (acc[me] && acc[me].branches && acc[me].branches.length) return acc[me].branches;
-      return ["BR-001"];
-    } catch (e) { return ["BR-001"]; }
-  }
-
-  window.openStaffJoiningModal = function() {
-    document.getElementById("sjName").value = "";
-    document.getElementById("sjPhone").value = "";
-    document.getElementById("sjEmail").value = "";
-    document.getElementById("sjSalary").value = "15000";
-    document.getElementById("staffJoinModal").classList.add("open");
-  };
-
-  window.submitStaffJoining = function() {
-    var name = (document.getElementById("sjName").value || "").trim();
-    var phone = (document.getElementById("sjPhone").value || "").trim();
-    var post = (document.getElementById("sjPost").value || "Staff").trim();
-    var dept = (document.getElementById("sjDept").value || "Floor").trim();
-    var branch = (document.getElementById("sjBranch").value || "BR-001").trim();
-    var salary = Number(document.getElementById("sjSalary").value || 15000);
-    var email = (document.getElementById("sjEmail").value || "").trim();
-    if (!name || phone.length < 10) {
-      alert("Name aur 10-digit mobile zaroori hai.");
-      return;
-    }
-    var list = getStaffList();
-    var maxN = 0;
-    list.forEach(function(s) {
-      var m = String(s.code || "").match(/(\d+)/);
-      if (m) maxN = Math.max(maxN, Number(m[1]));
-    });
-    var code = "STF-" + String(maxN + 1).padStart(3, "0");
-    var rec = {
-      code: code, name: name, phone: phone, wa: phone, email: email,
-      post: post, dept: dept, branch: branch, city: "", salary: salary,
-      manager: "Owner", joinedAt: new Date().toISOString().slice(0, 10)
-    };
-    list.push(rec);
-    try { localStorage.setItem("om_final_staff_v1", JSON.stringify(list)); } catch (e) {}
-    // Also mirror into universal desk
-    try {
-      var desk = JSON.parse(localStorage.getItem("om_erp_universal_owner_desk_v1") || "{}");
-      desk.staff = desk.staff || [];
-      desk.staff.push(rec);
-      localStorage.setItem("om_erp_universal_owner_desk_v1", JSON.stringify(desk));
-    } catch (e2) {}
-    closeModal("staffJoinModal");
-    showSuccessDone("Employee ID: " + code + " · " + name);
-    alert("Successfully Done ✅\n\nStaff add ho gaya.\nEmployee ID: " + code + "\nName: " + name + "\n\nIs ID se baad me login kar sakte hain.");
-  };
-
-  window.openRoleAccessModal = function() {
-    var sel = document.getElementById("raStaffSelect");
-    var staff = getStaffList();
-    sel.innerHTML = staff.map(function(s) {
-      return '<option value="' + esc(s.code) + '">' + esc(s.name) + " (" + esc(s.code) + ") — " + esc(s.post) + "</option>";
-    }).join("") || '<option value="">No staff yet</option>';
-    renderRoleAccessList();
-    document.getElementById("roleAccessModal").classList.add("open");
-  };
-
-  window.saveRoleAccess = function() {
-    var code = (document.getElementById("raStaffSelect").value || "").trim();
-    if (!code) return alert("Staff select karein");
-    var role = document.getElementById("raRoleSelect").value;
-    var branches = (document.getElementById("raBranches").value || "BR-001").split(",").map(function(x){return x.trim();}).filter(Boolean);
-    var mods = [];
-    document.querySelectorAll(".ra-mod:checked").forEach(function(c){ mods.push(c.value); });
-    var map = {};
-    try { map = JSON.parse(localStorage.getItem("om_role_access_v1") || "{}") || {}; } catch (e) {}
-    map[code.toLowerCase()] = { role: role, branches: branches, modules: mods, updatedAt: new Date().toISOString() };
-    // Also key by name for softer match
-    var st = getStaffList().find(function(s){ return String(s.code) === code; });
-    if (st) map[String(st.name || "").toLowerCase()] = map[code.toLowerCase()];
-    try { localStorage.setItem("om_role_access_v1", JSON.stringify(map)); } catch (e) {}
-    renderRoleAccessList();
-    showSuccessDone("Role access saved for " + code);
-  };
-
-  function renderRoleAccessList() {
-    var box = document.getElementById("raListBox");
-    if (!box) return;
-    var map = {};
-    try { map = JSON.parse(localStorage.getItem("om_role_access_v1") || "{}") || {}; } catch (e) {}
-    var keys = Object.keys(map).filter(function(k){ return k.indexOf("stf-") === 0 || /^stf/i.test(k); });
-    if (!keys.length) {
-      box.innerHTML = '<div class="rec" style="color:#888">Abhi koi custom role access set nahi.</div>';
-      return;
-    }
-    box.innerHTML = keys.map(function(k) {
-      var a = map[k];
-      return '<div class="rec"><b>' + esc(k.toUpperCase()) + '</b> → ' + esc(a.role) +
-        ' · Branches: ' + esc((a.branches || []).join(", ")) +
-        ' · Modules: ' + esc((a.modules || []).join(", ")) + '</div>';
-    }).join("");
-  }
-
   window.openStaffAttendanceKiosk = function() {
     __empSelfieData = "";
     var inp = document.getElementById("empCodeQueryInp");
@@ -1030,14 +738,6 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
   window.lookupStaffByCodeOrName = function() {
     var q = String((document.getElementById("empCodeQueryInp") || {}).value || "").trim().toLowerCase();
     var roster = getStaffList();
-    // Branch scope for non-owners
-    var role = getActiveRole();
-    var allowed = getAllowedBranches();
-    if (role !== "owner" && role !== "admin" && allowed[0] !== "ALL") {
-      roster = roster.filter(function(s) {
-        return allowed.indexOf(String(s.branch || "BR-001")) !== -1;
-      });
-    }
     var box = document.getElementById("empLookupResultBox");
     var sel = document.getElementById("empMatchedSelect");
     if (!box || !sel) return;
@@ -1046,16 +746,13 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
       box.style.display = "none";
       return;
     }
-    // Search: Emp ID, Name, Mobile, Email — never gym members
     var hits = roster.filter(function(s) {
       var code = String(s.code || s.id || "").toLowerCase();
       var nm = String(s.name || "").toLowerCase();
-      var ph = String(s.phone || s.wa || "").toLowerCase();
-      var em = String(s.email || "").toLowerCase();
-      return code.indexOf(q) !== -1 || nm.indexOf(q) !== -1 || ph.indexOf(q) !== -1 || em.indexOf(q) !== -1;
+      return code.indexOf(q) !== -1 || nm.indexOf(q) !== -1;
     });
     if (!hits.length) {
-      hits = [{ name: "Staff (" + q.toUpperCase() + ")", code: q.toUpperCase(), branch: allowed[0] || "BR-001", post: "Staff", dept: "Floor" }];
+      hits = [{ name: "Staff (" + q.toUpperCase() + ")", code: q.toUpperCase(), branch: "BR-001", post: "Staff", dept: "Floor" }];
     }
     sel.innerHTML = hits.map(function(h, i) {
       return '<option value="' + i + '">' + esc(h.name) + ' (' + esc(h.code || "ID") + ')' + '</option>';
@@ -1065,7 +762,6 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     onMatchedStaffChanged();
   };
 
-  window.__staffAutoSaveTimer = null;
   window.onMatchedStaffChanged = function() {
     var list = window.__matchedStaffList || [];
     var idx = Number((document.getElementById("empMatchedSelect") || {}).value || 0);
@@ -1074,30 +770,6 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     document.getElementById("empDispName").textContent = s.name || "—";
     document.getElementById("empDispBranch").textContent = s.branch || "BR-001";
     document.getElementById("empDispPost").textContent = s.post || s.role || "Staff";
-    // 3-second automatic mark after staff is selected (user asked: select → 3 sec auto click/save)
-    if (window.__staffAutoSaveTimer) clearTimeout(window.__staffAutoSaveTimer);
-    var hint = document.getElementById("empAutoSaveHint");
-    if (!hint) {
-      hint = document.createElement("div");
-      hint.id = "empAutoSaveHint";
-      hint.style.cssText = "font-size:11px;color:#f5a623;margin-top:6px;font-weight:700;";
-      var box = document.getElementById("empLookupResultBox");
-      if (box) box.appendChild(hint);
-    }
-    var sec = 3;
-    hint.textContent = "Auto-save in " + sec + "s… (Selfie optional — Present mark hoga)";
-    window.__staffAutoSaveTimer = setInterval(function() {
-      sec -= 1;
-      if (sec > 0) {
-        hint.textContent = "Auto-save in " + sec + "s… (Selfie optional — Present mark hoga)";
-      } else {
-        clearInterval(window.__staffAutoSaveTimer);
-        window.__staffAutoSaveTimer = null;
-        hint.textContent = "Saving attendance…";
-        try { markStaffSelfieAttendance(true); } catch (e) {}
-        hint.textContent = "Saved ✓ — " + (document.getElementById("empDispName").textContent || "");
-      }
-    }, 1000);
   };
 
   window.onEmpSelfiePicked = function(inp) {
@@ -1116,10 +788,10 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     rd.readAsDataURL(f);
   };
 
-  window.markStaffSelfieAttendance = function(silent) {
+  window.markStaffSelfieAttendance = function() {
     var q = String((document.getElementById("empCodeQueryInp") || {}).value || "").trim();
     if (!q) {
-      if (!silent) alert("Please Enter Your Employee ID or code — bina Employee ID / code ke Staff Attendance nahi lagegi.");
+      alert("Please Enter Your Employee ID or code — bina Employee ID / code ke Staff Attendance nahi lagegi.");
       return;
     }
     var list = window.__matchedStaffList || [];
@@ -1139,57 +811,22 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     };
     var logs = [];
     try { logs = JSON.parse(localStorage.getItem(STAFF_ATT_KEY) || "[]") || []; } catch (e) {}
-    // Prevent double-mark same person same minute
-    var dup = logs[0] && logs[0].empCode === entry.empCode && logs[0].date === entry.date && logs[0].time === entry.time;
-    if (!dup) {
-      logs.unshift(entry);
-      try { localStorage.setItem(STAFF_ATT_KEY, JSON.stringify(logs)); } catch (e) {}
-    }
+    logs.unshift(entry);
+    try { localStorage.setItem(STAFF_ATT_KEY, JSON.stringify(logs)); } catch (e) {}
     renderStaffOnlyAttendanceList();
-    if (!silent) {
-      showSuccessDone(entry.name + " · " + attType);
-      alert("Successfully Done ✅\n\nStaff Attendance: " + entry.name + " (" + entry.post + ")\n" + attType + " · " + entry.time);
-    } else {
-      showSuccessDone(entry.name + " auto-marked");
-    }
+    alert("Staff Attendance Marked: " + entry.name + " (" + entry.post + ") — " + attType + " at " + entry.time);
   };
-
-  function getActiveRole() {
-    try {
-      return (localStorage.getItem("om_active_role") || localStorage.getItem("bfc_role") || "owner").toLowerCase();
-    } catch (e) { return "owner"; }
-  }
-  function getLoggedIdentifier() {
-    try {
-      return String(localStorage.getItem("om_logged_user") || "").toLowerCase();
-    } catch (e) { return ""; }
-  }
 
   function renderStaffOnlyAttendanceList() {
     var box = document.getElementById("staffOnlyAttendanceList");
     if (!box) return;
     var logs = [];
     try { logs = JSON.parse(localStorage.getItem(STAFF_ATT_KEY) || "[]") || []; } catch (e) {}
-    var role = getActiveRole();
-    var me = getLoggedIdentifier();
-    // Staff: only own records. Manager: branch staff. Owner: all staff (never gym members here).
-    if (role === "staff" && me) {
-      logs = logs.filter(function(r) {
-        var code = String(r.empCode || "").toLowerCase();
-        var nm = String(r.name || "").toLowerCase();
-        return me.indexOf(code) !== -1 || me.indexOf(nm) !== -1 || code && me.indexOf(code) !== -1;
-      });
-    }
     if (!logs.length) {
-      box.innerHTML = '<div class="rec" style="color:#888">Abhi koi staff attendance record nahi hai. (Sirf staff attendance — gym member yahan nahi dikhenge)</div>';
+      box.innerHTML = '<div class="rec" style="color:#888">Abhi koi staff attendance record nahi hai.</div>';
       return;
     }
-    var titleNote = role === "staff"
-      ? '<div style="font-size:11px;color:#94a3b8;margin-bottom:6px">Aap sirf apni attendance dekh / laga sakte ho.</div>'
-      : (role === "manager"
-        ? '<div style="font-size:11px;color:#94a3b8;margin-bottom:6px">Manager: branch staff attendance.</div>'
-        : '<div style="font-size:11px;color:#94a3b8;margin-bottom:6px">Owner: sab staff attendance (gym members alag portal).</div>');
-    box.innerHTML = titleNote + logs.map(function(r) {
+    box.innerHTML = logs.map(function(r) {
       var imgHtml = r.selfie
         ? '<img src="' + r.selfie + '" class="selfie-thumb" alt="Selfie">'
         : '<div class="selfie-thumb" style="display:flex;align-items:center;justify-content:center;background:#1a1a1a;font-size:9px;color:#888">No Photo</div>';
@@ -1220,7 +857,9 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
         var rows = [];
         var fName = (file.name || "").toLowerCase();
         if (fName.endsWith(".csv")) {
-          var lines = String(e.target.result || "").split(/\r?\n/).filter(function(l) { return l.trim(); });
+          var lines = String(e.target.result || "").split(/
+?
+/).filter(function(l) { return l.trim(); });
           if (lines.length > 1) {
             var headers = lines[0].split(",").map(function(h) { return h.trim().toLowerCase().replace(/^"|"$/g, ""); });
             for (var i = 1; i < lines.length; i++) {
@@ -1303,8 +942,8 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
           'Contact: 📞 ' + esc(r.wa) + ' &bull; ✉️ ' + esc(r.email || "-") +
         '</div>' +
         '<div style="display:flex;gap:6px;margin-top:8px">' +
-          '<button type="button" class="btn btn-green" style="margin:0;flex:1;padding:8px" onclick="decideLeave(\'' + r.id + '\', true)">✔ Approve Leave</button>' +
-          '<button type="button" class="btn btn-red" style="margin:0;flex:1;padding:8px" onclick="decideLeave(\'' + r.id + '\', false)">✖ Reject Leave</button>' +
+          '<button type="button" class="btn btn-green" style="margin:0;flex:1;padding:8px" onclick="decideLeave('' + r.id + '', true)">✔ Approve Leave</button>' +
+          '<button type="button" class="btn btn-red" style="margin:0;flex:1;padding:8px" onclick="decideLeave('' + r.id + '', false)">✖ Reject Leave</button>' +
         '</div>' +
       '</div>';
     }).join("");
@@ -1451,8 +1090,8 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
           'By: ' + esc(x.submitterName) + ' (' + esc(x.submitterRole) + ') &bull; Status: <span style="color:#22d3ee">' + esc(x.status) + '</span>' +
         '</div>' +
         (!isApproved && !isRejected ? '<div style="display:flex;gap:6px;margin-top:6px">' +
-          '<button type="button" class="btn btn-green" style="margin:0;flex:1;padding:6px;font-size:11px" onclick="decideExpense(\'' + x.id + '\', true)">✔ Approve Bill</button>' +
-          '<button type="button" class="btn btn-red" style="margin:0;flex:1;padding:6px;font-size:11px" onclick="decideExpense(\'' + x.id + '\', false)">✖ Reject</button>' +
+          '<button type="button" class="btn btn-green" style="margin:0;flex:1;padding:6px;font-size:11px" onclick="decideExpense('' + x.id + '', true)">✔ Approve Bill</button>' +
+          '<button type="button" class="btn btn-red" style="margin:0;flex:1;padding:6px;font-size:11px" onclick="decideExpense('' + x.id + '', false)">✖ Reject</button>' +
         '</div>' : '') +
       '</div>';
     }).join("");
@@ -1505,8 +1144,8 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
         '<div style="display:flex;justify-content:space-between"><b>' + esc(x.empName) + ' (' + esc(x.empCode) + ')</b><b style="color:#00ff66">₹' + x.amount + '</b></div>' +
         '<div style="font-size:11px;color:#cbd5e1;margin:3px 0">Reason: ' + esc(x.reason) + ' &bull; Branch: ' + esc(x.branch) + '</div>' +
         (x.status === "Pending" ? '<div style="display:flex;gap:6px;margin-top:6px">' +
-          '<button type="button" class="btn btn-green" style="margin:0;flex:1;padding:6px;font-size:11px" onclick="decideAdvance(\'' + x.id + '\', true)">✔ Approve Advance</button>' +
-          '<button type="button" class="btn btn-red" style="margin:0;flex:1;padding:6px;font-size:11px" onclick="decideAdvance(\'' + x.id + '\', false)">✖ Reject</button>' +
+          '<button type="button" class="btn btn-green" style="margin:0;flex:1;padding:6px;font-size:11px" onclick="decideAdvance('' + x.id + '', true)">✔ Approve Advance</button>' +
+          '<button type="button" class="btn btn-red" style="margin:0;flex:1;padding:6px;font-size:11px" onclick="decideAdvance('' + x.id + '', false)">✖ Reject</button>' +
         '</div>' : '<div style="color:#00ff66;font-size:11px;font-weight:bold">' + esc(x.status) + '</div>') +
       '</div>';
     }).join("");
@@ -1705,12 +1344,9 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
 
   // Dynamic Panels
   window.openLightPanel = function(panelId) {
-    var box = document.getElementById("sharedDynamicPanel") || document.getElementById("lightDynamicPanel");
+    var box = document.getElementById("lightDynamicPanel");
     var d = getStore();
     if (!box) return;
-    // Clear the other panel to avoid duplicate UI
-    var other = document.getElementById(box.id === "sharedDynamicPanel" ? "lightDynamicPanel" : "sharedDynamicPanel");
-    if (other) other.innerHTML = "";
 
     if (panelId === "panelAdmission") {
       box.innerHTML = '<div class="box"><h3>📝 1. Admission Form</h3>' +
@@ -1763,7 +1399,6 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     var d = getStore();
     d.admissions.unshift({ name: nm, phone: ph, fee: fee, date: new Date().toISOString().slice(0, 10) });
     saveStore(d);
-    showSuccessDone("Admission saved");
     openLightPanel("panelAdmission");
   };
   window.saveLightMemberAtt = function() {
@@ -1773,8 +1408,7 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     var d = getStore();
     d.memberAtt.unshift({ name: nm, status: st, date: new Date().toISOString().slice(0, 10) });
     saveStore(d);
-    showSuccessDone("Member attendance");
-    alert("Successfully Done ✅\n\nMember Attendance Marked!");
+    alert("Member Attendance Marked!");
   };
   window.saveLightPayFees = function() {
     var nm = (document.getElementById("lmFeeName").value || "").trim();
@@ -1786,8 +1420,7 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     if (cType === "new") d.newAdmissions.unshift({ name: nm, amount: amt, date: new Date().toISOString().slice(0, 10) });
     else d.oldCustomerPayments.unshift({ name: nm, amount: amt, date: new Date().toISOString().slice(0, 10) });
     saveStore(d);
-    showSuccessDone("Fees collected ₹" + amt);
-    alert("Successfully Done ✅\n\nPayment received & added to collection!");
+    alert("Payment received & added to collection!");
     openLightPanel("panelCollection");
   };
   window.saveLightNewAdm = function() {
@@ -1798,8 +1431,7 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     d.newAdmissions.unshift({ name: nm, amount: amt, date: new Date().toISOString().slice(0, 10) });
     d.feesPaid.unshift({ name: nm, amount: amt, type: "new", date: new Date().toISOString().slice(0, 10) });
     saveStore(d);
-    showSuccessDone("New admission + fees");
-    alert("Successfully Done ✅\n\nNew Admission registered & payment added!");
+    alert("New Admission registered & payment added!");
     openLightPanel("panelCollection");
   };
   window.saveLightEnquiry = function() {
@@ -1809,67 +1441,48 @@ header .menu{color:#00ff66;margin-top:8px;font-weight:800;font-size:13px}
     var d = getStore();
     d.enquiries.unshift({ name: nm, phone: ph, date: new Date().toISOString().slice(0, 10) });
     saveStore(d);
-    showSuccessDone("Enquiry saved");
-    alert("Successfully Done ✅\n\nEnquiry lead saved!");
+    alert("Enquiry lead saved!");
   };
 
   window.logoutUser = function() {
-    var ok = true;
-    try { ok = confirm("Logout karna hai?"); } catch (e) { ok = true; }
-    if (!ok) return;
+    if (!confirm("Logout karna hai?")) return;
     try {
       localStorage.removeItem("om_logged_user");
       localStorage.removeItem("om_session_active");
-      localStorage.removeItem("om_last_activity_time");
-      localStorage.removeItem("bfc_role");
-      localStorage.removeItem("om_active_role");
       if (window.firebase && firebase.auth) firebase.auth().signOut().catch(function(){});
-    } catch (e) {}
-    try {
-      location.href = "login.html";
-    } catch (e2) {
-      location.replace("login.html");
-    }
+    } catch(e) {}
+    location.href = "login.html";
   };
 
   window.addEventListener("DOMContentLoaded", function() {
-    // Mode: ONLY what user last chose — never auto-flip light ↔ full
     applyModeUI();
     updateNotificationBadges();
-    // Keep session alive while using app (no silent auto-logout)
-    try {
-      if (localStorage.getItem("om_session_active") === "1") {
-        localStorage.setItem("om_last_activity_time", String(Date.now()));
-      }
-    } catch (e) {}
-    document.addEventListener("click", function() {
-      try {
-        if (localStorage.getItem("om_session_active") === "1") {
-          localStorage.setItem("om_last_activity_time", String(Date.now()));
-        }
-      } catch (e2) {}
-    }, true);
     var cat = localStorage.getItem("om_business_category") || "gym";
     var catNames = { gym: "Gym / Fitness Club", car_dealership: "Car Dealership", general_shop: "General Shop / Retail Store" };
     var elCat = document.getElementById("infoCategoryName");
     var elMain = document.getElementById("bizMainTitle");
     if (elCat) elCat.textContent = catNames[cat] || "Multi-Business ERP";
     if (elMain) elMain.textContent = (catNames[cat] || "BUSINESS").toUpperCase() + " ERP";
-    // Reflect active plan on card if paid
-    try {
-      var plan = JSON.parse(localStorage.getItem("om_plan_active") || "null");
-      if (plan && plan.name) {
-        var pn = document.getElementById("infoPlanName");
-        if (pn) pn.textContent = plan.name + " / Active";
-      }
-      var exp = localStorage.getItem("om_plan_expiry");
-      if (exp) {
-        var pe = document.getElementById("infoPlanExpiry");
-        if (pe) pe.textContent = exp;
-      }
-    } catch (e3) {}
   });
 })();
+
+  // 5-Tap Developer Mode Trigger on App Header
+  (function initAppDevTap() {
+    var taps = 0, tapTimer = null;
+    var el = document.getElementById("bizMainTitle");
+    if (!el) return;
+    el.addEventListener("click", function () {
+      taps++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(function () { taps = 0; }, 2500);
+      if (taps >= 5) {
+        taps = 0;
+        alert("🔒 Developer Trigger: Redirecting to Multi-Factor Authentication Gate...");
+        location.href = "prime-master-login.html";
+      }
+    });
+  })();
+
 </script>
 </body>
 </html>
