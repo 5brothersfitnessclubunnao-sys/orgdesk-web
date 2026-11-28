@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>OM SOFTWARE — 18 Grid &amp; Live Cloud Desk</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="realtime-sync.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;min-height:100%;background:#040711;color:#f8fafc;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{padding:14px;padding-bottom:64px}
+.wrap{max-width:640px;margin:0 auto}
+
+.live-strip{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:#091124;border:1.5px solid #22d3ee;border-radius:14px;padding:9px 12px;margin-bottom:12px;font-size:11.5px}
+.live-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.16);color:#34d399;border:1px solid rgba(16,185,129,.45);padding:3px 9px;border-radius:999px;font-weight:900}
+.dot{width:7px;height:7px;border-radius:50%;background:#10b981}
+
+header{background:linear-gradient(145deg,#1d1604,#090f20);border:2px solid #f5a623;border-radius:16px;padding:13px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.om-mark{width:40px;height:40px;border-radius:12px;background:rgba(245,166,35,.15);border:1.5px solid #ffd166;color:#ffd166;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center}
+header h1{font-size:16px;font-weight:900;color:#ffd166;cursor:pointer}
+header p{font-size:11px;color:#94a3b8;margin-top:2px}
+.top-btns{display:flex;gap:6px;flex-wrap:wrap}
+.sbtn{padding:7px 10px;border-radius:9px;border:1px solid #334155;background:#111b33;color:#fff;font-size:11.5px;font-weight:800;cursor:pointer;text-decoration:none}
+.sbtn.gold{background:#f5a623;color:#050814;border-color:#f5a623}
+.sbtn.cyan{background:#082f49;color:#38bdf8;border-color:#38bdf8}
+.sbtn.red{background:#450a0a;color:#fca5a5;border-color:#ef4444}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:#0b1226;border:1.5px solid #26365e;border-radius:12px;padding:10px;text-align:center}
+.kpi b{display:block;font-size:16px;color:#ffd166}
+.kpi span{font-size:10.5px;color:#94a3b8;font-weight:700}
+
+.grid-18{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+@media(max-width:480px){.grid-18{grid-template-columns:repeat(2,1fr)}}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:94px;padding:10px 8px;background:#0b1226;border:1.5px solid #26365e;border-radius:14px;color:#fff;font-weight:800;font-size:12.5px;text-align:center;cursor:pointer;text-decoration:none}
+.tile .num{font-size:10px;color:#94a3b8;font-weight:800}
+.tile .ico{font-size:22px}
+.tile .lbl{line-height:1.2}
+.tile.gold{border-color:#f5a623;color:#ffd166}
+.tile.green{border-color:#22c55e;color:#4ade80}
+.tile.cyan{border-color:#22d3ee;color:#22d3ee}
+.tile.blue{border-color:#38bdf8;color:#7dd3fc}
+.tile.purple{border-color:#a855f7;color:#d8b4fe}
+.tile.red{border-color:#ef4444;color:#fca5a5}
+.tile.orange{border-color:#f97316;color:#fdba74}
+
+.panel{margin-top:14px;background:#0b1226;border:1.5px solid #26365e;border-radius:14px;padding:14px}
+.panel h3{font-size:14.5px;color:#ffd166;margin-bottom:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fg{margin-bottom:9px}
+.fg label{display:block;font-size:11px;color:#94a3b8;margin-bottom:3px;font-weight:700}
+.fc{width:100%;padding:9px 10px;border-radius:8px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:12.5px}
+.act-btn{width:100%;padding:10px;border-radius:10px;border:none;font-weight:900;font-size:12.5px;cursor:pointer;margin-top:4px}
+.act-btn.gold{background:#f5a623;color:#050814}
+.act-btn.green{background:#22c55e;color:#050814}
+.act-btn.cyan{background:#22d3ee;color:#050814}
+.rec{background:#070c1a;border:1px solid #1e2d52;border-radius:9px;padding:9px 10px;margin-top:7px;font-size:12px}
+.addon-box{background:#070c1a;border:1px solid #1e2d52;border-radius:10px;padding:9px;margin-bottom:9px}
+.addon-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;font-size:12px}
+.slip-card{background:#ffffff;color:#111827;border-radius:12px;padding:12px;margin-top:10px;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="live-strip">
+    <span class="live-pill"><span class="dot"></span> OM 18-GRID • LIVE CLOUD</span>
+    <span id="liveSyncStatus" style="color:#bae6fd;font-weight:700">Synced</span>
+  </div>
+
+  <header>
+    <div class="hdr-left">
+      <div class="om-mark">ॐ</div>
+      <div>
+        <h1 id="appHdrTitle">OM SOFTWARE</h1>
+        <p id="appModeSub">Mode Locked: Light Mode • 18 Grid Active</p>
+      </div>
+    </div>
+    <div class="top-btns">
+      <button type="button" class="sbtn cyan" id="btnSwitchMode">Switch to Commercial</button>
+      <a href="plans.html" class="sbtn gold">Upgrade Plan</a>
+      <button type="button" class="sbtn red" id="btnLogout">Logout</button>
+    </div>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi"><b id="kpiColTotal">₹0</b><span>Live Collection</span></div>
+    <div class="kpi"><b id="kpiAdmTotal">0</b><span>Admissions</span></div>
+    <div class="kpi"><b id="kpiAttTotal">0</b><span>Attendance</span></div>
+  </div>
+
+  <div class="grid-18" id="omGrid18">
+    <button type="button" class="tile gold" data-grid="1"><span class="num">01</span><span class="ico">📊</span><span class="lbl">Live Dashboard</span></button>
+    <button type="button" class="tile green" data-grid="2"><span class="num">02</span><span class="ico">📝</span><span class="lbl">Admission Form</span></button>
+    <button type="button" class="tile cyan" data-grid="3"><span class="num">03</span><span class="ico">✅</span><span class="lbl">Member Attendance</span></button>
+    <button type="button" class="tile blue" data-grid="4"><span class="num">04</span><span class="ico">🧑‍💼</span><span class="lbl">Staff Attendance</span></button>
+    <button type="button" class="tile red" data-grid="5"><span class="num">05</span><span class="ico">💳</span><span class="lbl">Pay Fees</span></button>
+    <button type="button" class="tile purple" data-grid="6"><span class="num">06</span><span class="ico">🆕</span><span class="lbl">Staff Joining &amp; ID</span></button>
+    <button type="button" class="tile orange" data-grid="7"><span class="num">07</span><span class="ico">📞</span><span class="lbl">Enquiry Desk</span></button>
+    <button type="button" class="tile gold" data-grid="8"><span class="num">08</span><span class="ico">💰</span><span class="lbl">Total Collection</span></button>
+    <a class="tile red" href="fees-pending.html"><span class="num">09</span><span class="ico">📅</span><span class="lbl">Fees Pending</span></a>
+    <a class="tile cyan" href="fees-collection.html"><span class="num">10</span><span class="ico">🧾</span><span class="lbl">Fee Receipts</span></a>
+    <a class="tile green" href="attendance.html"><span class="num">11</span><span class="ico">⏱️</span><span class="lbl">Attendance Kiosk</span></a>
+    <button type="button" class="tile purple" data-grid="12"><span class="num">12</span><span class="ico">💼</span><span class="lbl">Salary &amp; Pay Slip</span></button>
+    <a class="tile orange" href="manager-portal.html"><span class="num">13</span><span class="ico">👔</span><span class="lbl">Manager Portal</span></a>
+    <a class="tile blue" href="team-access-admin.html"><span class="num">14</span><span class="ico">🔑</span><span class="lbl">Employee IDs &amp; Link</span></a>
+    <a class="tile gold" href="plans.html"><span class="num">15</span><span class="ico">⬆</span><span class="lbl">Upgrade Plan</span></a>
+    <button type="button" class="tile cyan" data-grid="16"><span class="num">16</span><span class="ico">🌐</span><span class="lbl">Holographic HUD</span></button>
+    <button type="button" class="tile green" data-grid="17"><span class="num">17</span><span class="ico">📥</span><span class="lbl">Export Excel</span></button>
+    <a class="tile purple" href="index.html"><span class="num">18</span><span class="ico">🎛️</span><span class="lbl">Master Control</span></a>
+  </div>
+
+  <div class="panel" id="activePanel"></div>
+</div>
+
+<script>
+(function () {
+  var ERP_KEY = "om_erp_universal_owner_desk_v1";
+  var PANEL_KEY = "om_active_grid_panel_v1";
+
+  function defaultErp() {
+    return {
+      staffEnabled: true,
+      attendance: [],
+      admissions: [],
+      transactions: [],
+      expenses: [],
+      staff: [],
+      leaves: [],
+      enquiries: []
+    };
+  }
+
+  function readErp() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(ERP_KEY) || "null");
+      return Object.assign(defaultErp(), (typeof raw === "object" && raw) ? raw : {});
+    } catch (e) {
+      return defaultErp();
+    }
+  }
+
+  function writeErp(d) {
+    try { localStorage.setItem(ERP_KEY, JSON.stringify(d)); } catch (e) {}
+    if (window.omSync && typeof window.omSync.syncWorkspaceStateToCloud === "function") {
+      var fSum = (d.transactions || []).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
+      window.omSync.syncWorkspaceStateToCloud({
+        erpDeskData: d,
+        liveCollection: fSum,
+        admissionsCount: (d.admissions || []).length,
+        attendanceCount: (d.attendance || []).length
+      });
+    }
+    refreshKpis();
+  }
+
+  function refreshKpis() {
+    var d = readErp();
+    var today = new Date().toISOString().slice(0, 10);
+    var fSum = (d.transactions || []).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
+    var admCnt = (d.admissions || []).length;
+    var attCnt = (d.attendance || []).filter(function (a) { return a.date === today; }).length;
+    document.getElementById("kpiColTotal").textContent = "₹" + fSum.toLocaleString("en-IN");
+    document.getElementById("kpiAdmTotal").textContent = String(admCnt);
+    document.getElementById("kpiAttTotal").textContent = String(attCnt);
+    var st = document.getElementById("liveSyncStatus");
+    if (st) st.textContent = "Updated " + new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+
+  function applyLockedModeView() {
+    var m = window.omSync ? window.omSync.getLockedMode() : (window.omGetLockedMode ? window.omGetLockedMode() : "light");
+    var isFull = (m === "full");
+    var swBtn = document.getElementById("btnSwitchMode");
+    if (swBtn) swBtn.textContent = isFull ? "Switch to Light Mode" : "Switch to Commercial";
+    document.getElementById("appModeSub").textContent =
+      (isFull ? "Mode Locked: Commercial / Full Mode" : "Mode Locked: Light Mode") + " • Full Same Tools";
+    try {
+      var prof = JSON.parse(localStorage.getItem("om_active_gym_profile") || "{}");
+      if (prof && prof.gymName) {
+        document.getElementById("appHdrTitle").textContent = String(prof.gymName).toUpperCase();
+      }
+    } catch (e) {}
+  }
+
+  function nextStaffCode(rolePrefix) {
+    var pfx = rolePrefix || "STF";
+    return pfx + "-" + Math.floor(1000 + Math.random() * 9000);
+  }
+
+  function openGridPanel(gNum, persist) {
+    if (persist !== false) {
+      try { localStorage.setItem(PANEL_KEY, String(gNum)); } catch (e) {}
+    }
+    var d = readErp();
+    var box = document.getElementById("activePanel");
+
+    if (gNum === 2) {
+      // Full Admission Form matching Main App
+      box.innerHTML = '<h3>02. Admission Form (Full)</h3>' +
+        '<div class="row2"><div class="fg"><label>Member Name *</label><input class="fc" id="fAdmName" placeholder="Full Name"></div><div class="fg"><label>Mobile (10-digit) *</label><input type="tel" maxlength="10" class="fc" id="fAdmPhone" placeholder="9876543210"></div></div>' +
+        '<div class="row2"><div class="fg"><label>Base Fee (₹) *</label><input type="number" class="fc" id="fAdmBase" value="1000"></div><div class="fg"><label>Paid Now (₹) *</label><input type="number" class="fc" id="fAdmPaid" value="1000"></div></div>' +
+        '<div class="row2"><div class="fg"><label>Payment Mode *</label><select class="fc" id="fAdmMode"><option value="Cash">Cash</option><option value="Online">Online</option></select></div><div class="fg"><label>Category</label><select class="fc" id="fAdmCat"><option value="New Admission">New Admission</option><option value="Payment Fees">Payment Fees</option></select></div></div>' +
+        '<div class="addon-box"><b style="color:#22d3ee;font-size:11.5px">Add-On Services</b>' +
+          '<div class="addon-row"><label><input type="checkbox" id="fAddonPt"> Personal Guidance</label><input type="number" class="fc" id="fAddonPtAmt" value="500" style="width:90px;padding:5px"></div>' +
+          '<div class="addon-row"><label><input type="checkbox" id="fAddonDiet"> Diet / Workout</label><input type="number" class="fc" id="fAddonDietAmt" value="400" style="width:90px;padding:5px"></div>' +
+        '</div>' +
+        '<button type="button" class="act-btn gold" id="btnSaveFullAdm">Save Member Admission</button>' +
+        (d.admissions || []).map(function (a) {
+          return '<div class="rec"><b>' + a.name + '</b> (' + (a.phone || "-") + ') • Total: ₹' + Number(a.total || 0).toLocaleString("en-IN") + ' • Paid: ₹' + Number(a.paid || 0).toLocaleString("en-IN") + ' • Due: ₹' + Number(a.due || 0).toLocaleString("en-IN") + '</div>';
+        }).join("");
+
+      document.getElementById("btnSaveFullAdm").onclick = function () {
+        var name = document.getElementById("fAdmName").value.trim();
+        var phone = document.getElementById("fAdmPhone").value.replace(/\D/g, "").slice(-10);
+        var base = Number(document.getElementById("fAdmBase").value || 0);
+        var paid = Number(document.getElementById("fAdmPaid").value || 0);
+        var mode = document.getElementById("fAdmMode").value;
+        var cat = document.getElementById("fAdmCat").value;
+        var pt = document.getElementById("fAddonPt").checked ? Number(document.getElementById("fAddonPtAmt").value || 0) : 0;
+        var dt = document.getElementById("fAddonDiet").checked ? Number(document.getElementById("fAddonDietAmt").value || 0) : 0;
+        if (!name) return alert("Member Name darj karein.");
+        var total = base + pt + dt;
+        var due = Math.max(0, total - paid);
+        var now = new Date();
+        var dateStr = now.toISOString().slice(0, 10);
+        var timeStr = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+        d.admissions.unshift({ name: name, phone: phone, total: total, paid: paid, due: due, date: dateStr, branch: "001" });
+        if (paid > 0) {
+          d.transactions.unshift({ memberName: name, amount: paid, mode: mode, category: cat, date: dateStr, time: timeStr, branch: "001" });
+        }
+        writeErp(d);
+        openGridPanel(2, true);
+      };
+    } else if (gNum === 3 || gNum === 4) {
+      var isStaffAtt = (gNum === 4);
+      box.innerHTML = '<h3>' + (isStaffAtt ? '04. Staff Attendance (Employee Code)' : '03. Member Attendance') + '</h3>' +
+        '<div class="row2"><div class="fg"><label>' + (isStaffAtt ? 'Staff Name / Employee Code *' : 'Member Name *') + '</label><input class="fc" id="fAttName" placeholder="' + (isStaffAtt ? 'Name or STF-1001' : 'Member Name') + '"></div><div class="fg"><label>Status</label><select class="fc" id="fAttStatus"><option value="Present">Present</option><option value="Absent">Absent</option></select></div></div>' +
+        '<button type="button" class="act-btn green" id="btnSaveFullAtt">Record Attendance</button>' +
+        (d.attendance || []).filter(function (x) { return isStaffAtt ? x.type === "Staff" : x.type !== "Staff"; }).map(function (x) {
+          return '<div class="rec"><b>' + x.name + '</b> • ' + x.status + ' • ' + x.date + '</div>';
+        }).join("");
+
+      document.getElementById("btnSaveFullAtt").onclick = function () {
+        var nm = document.getElementById("fAttName").value.trim();
+        var st = document.getElementById("fAttStatus").value;
+        if (!nm) return alert("Name / Code darj karein.");
+        d.attendance.unshift({ name: nm, type: isStaffAtt ? "Staff" : "Member", status: st, date: new Date().toISOString().slice(0, 10), by: "app-desk" });
+        writeErp(d);
+        openGridPanel(gNum, true);
+      };
+    } else if (gNum === 5) {
+      box.innerHTML = '<h3>05. Pay Fees</h3>' +
+        '<div class="row2"><div class="fg"><label>Member Name *</label><input class="fc" id="fFeeName"></div><div class="fg"><label>Amount (₹) *</label><input type="number" class="fc" id="fFeeAmt" value="500"></div></div>' +
+        '<div class="row2"><div class="fg"><label>Mode</label><select class="fc" id="fFeeMode"><option value="Cash">Cash</option><option value="Online">Online</option></select></div><div class="fg"><label>Type</label><select class="fc" id="fFeeCat"><option value="Payment Fees">Old Customer Fee</option><option value="New Admission">New Admission</option></select></div></div>' +
+        '<button type="button" class="act-btn green" id="btnSaveFullFee">Collect Fees</button>';
+
+      document.getElementById("btnSaveFullFee").onclick = function () {
+        var nm = document.getElementById("fFeeName").value.trim();
+        var amt = Number(document.getElementById("fFeeAmt").value || 0);
+        var md = document.getElementById("fFeeMode").value;
+        var ct = document.getElementById("fFeeCat").value;
+        if (!nm || amt <= 0) return alert("Name aur amount darj karein.");
+        var now = new Date();
+        d.transactions.unshift({ memberName: nm, amount: amt, mode: md, category: ct, date: now.toISOString().slice(0, 10), time: now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }), branch: "001" });
+        writeErp(d);
+        openGridPanel(8, true);
+      };
+    } else if (gNum === 6) {
+      // Staff Joining + Auto Staff Code + Monthly Salary
+      var autoCode = nextStaffCode("STF");
+      box.innerHTML = '<h3>06. Staff Joining, Staff Code &amp; Salary</h3>' +
+        '<div class="row2"><div class="fg"><label>Staff Name *</label><input class="fc" id="fStfName" placeholder="Employee Name"></div><div class="fg"><label>Staff Code (Auto)</label><input class="fc" id="fStfCode" value="' + autoCode + '"></div></div>' +
+        '<div class="row2"><div class="fg"><label>Department *</label><input class="fc" id="fStfDept" value="Training"></div><div class="fg"><label>Post / Role *</label><input class="fc" id="fStfPost" value="Trainer"></div></div>' +
+        '<div class="row2"><div class="fg"><label>Mobile *</label><input type="tel" maxlength="10" class="fc" id="fStfPhone" placeholder="10-digit"></div><div class="fg"><label>Monthly Salary (₹) *</label><input type="number" class="fc" id="fStfSal" value="15000"></div></div>' +
+        '<button type="button" class="act-btn cyan" id="btnSaveFullStaff">Save Staff Joining</button>' +
+        (d.staff || []).map(function (s) {
+          return '<div class="rec"><b>' + s.name + '</b> (' + s.code + ') • ' + s.dept + ' / ' + s.post + ' • Salary: ₹' + Number(s.salary || 0).toLocaleString("en-IN") + '</div>';
+        }).join("");
+
+      document.getElementById("btnSaveFullStaff").onclick = function () {
+        var nm = document.getElementById("fStfName").value.trim();
+        var cd = document.getElementById("fStfCode").value.trim() || nextStaffCode("STF");
+        var dp = document.getElementById("fStfDept").value.trim();
+        var ps = document.getElementById("fStfPost").value.trim();
+        var ph = document.getElementById("fStfPhone").value.trim();
+        var sl = Number(document.getElementById("fStfSal").value || 0);
+        if (!nm) return alert("Staff Name darj karein.");
+        d.staff.unshift({ name: nm, code: cd, dept: dp, post: ps, phone: ph, wa: ph, branch: "001", salary: sl });
+        writeErp(d);
+        openGridPanel(6, true);
+      };
+    } else if (gNum === 7) {
+      box.innerHTML = '<h3>07. Enquiry Desk</h3>' +
+        '<div class="row2"><div class="fg"><label>Visitor Name *</label><input class="fc" id="fEnqName"></div><div class="fg"><label>Mobile *</label><input type="tel" maxlength="10" class="fc" id="fEnqPhone"></div></div>' +
+        '<div class="fg"><label>Note</label><input class="fc" id="fEnqNote" placeholder="Plan / timing note"></div>' +
+        '<button type="button" class="act-btn gold" id="btnSaveFullEnq">Save Enquiry</button>' +
+        (d.enquiries || []).map(function (e) {
+          return '<div class="rec"><b>' + e.name + '</b> • ' + (e.phone || "-") + ' • ' + (e.note || "") + '</div>';
+        }).join("");
+
+      document.getElementById("btnSaveFullEnq").onclick = function () {
+        var nm = document.getElementById("fEnqName").value.trim();
+        var ph = document.getElementById("fEnqPhone").value.trim();
+        var nt = document.getElementById("fEnqNote").value.trim();
+        if (!nm) return alert("Visitor Name darj karein.");
+        d.enquiries.unshift({ name: nm, phone: ph, note: nt, date: new Date().toISOString().slice(0, 10) });
+        writeErp(d);
+        openGridPanel(7, true);
+      };
+    } else if (gNum === 12) {
+      // Full Salary & Pay Slip Calculator matching Main App
+      var staffOpts = '<option value="">— Manual Entry —</option>' + (d.staff || []).map(function (s, idx) {
+        return '<option value="' + idx + '">' + s.name + ' (' + s.code + ')</option>';
+      }).join("");
+      box.innerHTML = '<h3>12. Salary &amp; Pay Slip</h3>' +
+        '<div class="fg"><label>Select Staff</label><select class="fc" id="fSalPick">' + staffOpts + '</select></div>' +
+        '<div class="row2"><div class="fg"><label>Staff Name *</label><input class="fc" id="fSalName"></div><div class="fg"><label>Staff Code *</label><input class="fc" id="fSalCode"></div></div>' +
+        '<div class="row2"><div class="fg"><label>Base Salary (₹)</label><input type="number" class="fc" id="fSalBase" value="15000"></div><div class="fg"><label>Allowance / HRA (₹)</label><input type="number" class="fc" id="fSalAllow" value="2000"></div></div>' +
+        '<div class="row2"><div class="fg"><label>Advance / Deduction (₹)</label><input type="number" class="fc" id="fSalDed" value="500"></div><div class="fg"><label>Period</label><input class="fc" id="fSalPeriod" value="November 2026"></div></div>' +
+        '<button type="button" class="act-btn cyan" id="btnGenFullSlip">Generate Pay Slip</button>' +
+        '<div id="fSalSlipOut"></div>';
+
+      document.getElementById("fSalPick").onchange = function () {
+        var s = (d.staff || [])[Number(this.value)];
+        if (!s) return;
+        document.getElementById("fSalName").value = s.name || "";
+        document.getElementById("fSalCode").value = s.code || "";
+        document.getElementById("fSalBase").value = Number(s.salary || 0);
+      };
+      document.getElementById("btnGenFullSlip").onclick = function () {
+        var nm = document.getElementById("fSalName").value.trim() || "Staff";
+        var cd = document.getElementById("fSalCode").value.trim() || "STF-000";
+        var bs = Number(document.getElementById("fSalBase").value || 0);
+        var al = Number(document.getElementById("fSalAllow").value || 0);
+        var dd = Number(document.getElementById("fSalDed").value || 0);
+        var pr = document.getElementById("fSalPeriod").value.trim();
+        var gross = bs + al;
+        var net = Math.max(0, gross - dd);
+        document.getElementById("fSalSlipOut").innerHTML =
+          '<div class="slip-card"><b>PAY SLIP — ' + pr + '</b><br>Name: ' + nm + ' (' + cd + ')<br>Gross: ₹' + gross.toLocaleString("en-IN") + ' • Deductions: ₹' + dd.toLocaleString("en-IN") + '<br><b style="color:#15803d;font-size:14px">Net Payable: ₹' + net.toLocaleString("en-IN") + '</b></div>';
+      };
+    } else if (gNum === 17) {
+      if (typeof XLSX !== "undefined") {
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((d.admissions && d.admissions.length) ? d.admissions : [{ Info: "Empty" }]), "Admissions");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((d.transactions && d.transactions.length) ? d.transactions : [{ Info: "Empty" }]), "Transactions");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((d.staff && d.staff.length) ? d.staff : [{ Info: "Empty" }]), "Staff");
+        XLSX.writeFile(wb, "OM_Software_Complete_Data.xlsx");
+      }
+      box.innerHTML = '<h3>17. Export Excel</h3><div class="rec">Complete workbook exported.</div>';
+    } else {
+      var tx = d.transactions || [];
+      var feesTotal = tx.filter(function (t) { return t.category === "Payment Fees" || t.category === "New Admission"; }).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
+      var cashTotal = tx.filter(function (t) { return t.mode === "Cash"; }).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
+      var onlineTotal = tx.filter(function (t) { return t.mode === "Online"; }).reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
+      box.innerHTML = '<h3>01 / 08. Live Collection &amp; Summary</h3>' +
+        '<div class="rec">Fees &amp; Admissions Collection: <b>₹' + feesTotal.toLocaleString("en-IN") + '</b></div>' +
+        '<div class="rec">Cash Collection: <b>₹' + cashTotal.toLocaleString("en-IN") + '</b></div>' +
+        '<div class="rec">Online Collection: <b>₹' + onlineTotal.toLocaleString("en-IN") + '</b></div>';
+    }
+  }
+
+  document.getElementById("omGrid18").addEventListener("click", function (ev) {
+    var btn = ev.target.closest("[data-grid]");
+    if (!btn) return;
+    openGridPanel(Number(btn.getAttribute("data-grid")), true);
+  });
+
+  document.getElementById("btnSwitchMode").onclick = function () {
+    var cur = window.omSync ? window.omSync.getLockedMode() : "light";
+    var next = (cur === "light") ? "full" : "light";
+    if (window.omSync && window.omSync.setLockedMode) window.omSync.setLockedMode(next, true);
+    applyLockedModeView();
+  };
+
+  document.getElementById("btnLogout").onclick = function () {
+    if (!confirm("Logout karna hai?")) return;
+    if (window.omSync && window.omSync.clearSessionOnLogout) window.omSync.clearSessionOnLogout();
+    location.href = "login.html";
+  };
+
+  var taps = 0, tmr = null;
+  document.getElementById("appHdrTitle").onclick = function () {
+    taps++;
+    clearTimeout(tmr);
+    tmr = setTimeout(function () { taps = 0; }, 2200);
+    if (taps >= 5) { taps = 0; location.href = "prime-master-login.html"; }
+  };
+
+  window.addEventListener("om:mode-changed", applyLockedModeView);
+  window.addEventListener("om:workspace-realtime", function (ev) {
+    var det = ev.detail || {};
+    if (det.erpDeskData && typeof det.erpDeskData === "object") {
+      try { localStorage.setItem(ERP_KEY, JSON.stringify(det.erpDeskData)); } catch (e) {}
+    }
+    refreshKpis();
+  });
+
+  applyLockedModeView();
+  refreshKpis();
+  var savedPanel = 8;
+  try { savedPanel = Number(localStorage.getItem(PANEL_KEY) || "8") || 8; } catch (e) {}
+  openGridPanel(savedPanel, false);
+})();
+</script>
+</body>
+</html>
