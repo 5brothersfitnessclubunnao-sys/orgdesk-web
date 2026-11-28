@@ -106,7 +106,7 @@ header p{font-size:11px;color:#94a3b8;margin-top:2px}
     <a class="tile orange" href="manager-portal.html"><span class="num">13</span><span class="ico">👔</span><span class="lbl">Manager Portal</span></a>
     <a class="tile blue" href="team-access-admin.html"><span class="num">14</span><span class="ico">🔑</span><span class="lbl">Employee IDs</span></a>
     <a class="tile gold" href="plans.html"><span class="num">15</span><span class="ico">⬆</span><span class="lbl">Plans &amp; Billing</span></a>
-    <a class="tile cyan" href="om-enterprise-suite.html"><span class="num">16</span><span class="ico">🌐</span><span class="lbl">Enterprise Suite</span></a>
+    <button type="button" class="tile cyan" data-grid="16"><span class="num">16</span><span class="ico">🌐</span><span class="lbl">Holographic HUD</span></button>
     <button type="button" class="tile green" data-grid="17"><span class="num">17</span><span class="ico">📥</span><span class="lbl">Export Excel</span></button>
     <a class="tile purple" href="index.html"><span class="num">18</span><span class="ico">🎛️</span><span class="lbl">Master Control</span></a>
   </div>
@@ -236,6 +236,12 @@ header p{font-size:11px;color:#94a3b8;margin-top:2px}
         if (!n) return alert("Name darj karein.");
         d.enquiries.unshift({ name: n, phone: p }); writeData(d); openGridPanel(7);
       };
+    } else if (gNum === 16) {
+      var fSum16 = d.fees.reduce(function (s, x) { return s + Number(x.amount || 0); }, 0);
+      box.innerHTML = '<h3>16. Holographic HUD &amp; Analytics</h3>' +
+        '<div class="rec">Active Admissions: <b>' + ((d.admissions || []).length + (d.newAdm || []).length) + '</b></div>' +
+        '<div class="rec">Attendance Logs: <b>' + ((d.attendance || []).length + (d.staffAtt || []).length) + '</b></div>' +
+        '<div class="rec">Gross Collection: <b>₹' + fSum16.toLocaleString("en-IN") + '</b></div>';
     } else if (gNum === 17) {
       if (typeof XLSX !== "undefined") {
         var wb = XLSX.utils.book_new();
