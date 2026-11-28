@@ -155,7 +155,16 @@ header p{font-size:11px;color:#94a3b8;margin-top:2px}
         attendanceCount: (d.attendance || []).length
       });
     }
+    
+  window.addEventListener("om:erp-synced", function (ev) {
+    var det = ev.detail || {};
+    if (det.erp && typeof det.erp === "object") {
+      try { localStorage.setItem(ERP_KEY, JSON.stringify(det.erp)); } catch (e) {}
+    }
     refreshKpis();
+  });
+
+  refreshKpis();
   }
 
   function refreshKpis() {
