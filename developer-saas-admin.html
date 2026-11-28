@@ -1,1018 +1,311 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Om Software — Universal Developer SaaS Command Center</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    :root {
-      --bg: #030712;
-      --card: #0b1224;
-      --card-inner: #070d1a;
-      --border: #1e293b;
-      --border-glow: rgba(56, 189, 248, 0.35);
-      --gold: #f59e0b;
-      --gold-bright: #fbbf24;
-      --cyan: #38bdf8;
-      --emerald: #10b981;
-      --rose: #f43f5e;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --mono: 'JetBrains Mono', monospace;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
-
-    /* Live Cyber Ticker */
-    .tv-ticker {
-      display: flex; align-items: center; background: #080e1e; border-bottom: 1.5px solid var(--gold);
-      overflow: hidden; white-space: nowrap; position: sticky; top: 0; z-index: 1000;
-    }
-    .tv-badge {
-      background: #e11d48; color: #fff; font-size: 11px; font-weight: 900;
-      padding: 9px 14px; letter-spacing: 0.8px; flex-shrink: 0; z-index: 2;
-    }
-    .tv-stream {
-      display: inline-flex; gap: 32px; padding: 8px 16px; font-size: 12px; font-weight: 800;
-      color: var(--gold-bright); font-family: var(--mono); animation: tickerScroll 20s linear infinite;
-    }
-    @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 16px; }
-
-    .top-header {
-      background: var(--card); border: 1.5px solid var(--border); border-radius: 16px;
-      padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
-      gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    .brand-meta h1 { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 0.5px; }
-    .brand-meta h1 span { color: var(--cyan); }
-    .brand-meta p { font-size: 11px; color: var(--gold); font-family: var(--mono); margin-top: 2px; }
-
-    .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    .btn {
-      padding: 9px 15px; border-radius: 10px; font-size: 12px; font-weight: 800;
-      cursor: pointer; border: 1px solid transparent; text-decoration: none;
-      display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
-    }
-    .btn-gold { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #020617; font-weight: 900; }
-    .btn-cyan { background: rgba(56, 189, 248, 0.15); color: var(--cyan); border-color: rgba(56, 189, 248, 0.4); }
-    .btn-emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.4); }
-    .btn-ghost { background: var(--card-inner); border-color: var(--border); color: var(--text); }
-    .btn:hover { transform: translateY(-1px); }
-
-    /* Live Counters Grid (100k vs 40k scale) */
-    .kpi-row {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px; margin-bottom: 18px;
-    }
-    .kpi-card {
-      background: var(--card); border: 1.5px solid var(--border); border-radius: 14px;
-      padding: 16px; position: relative; overflow: hidden; cursor: pointer; transition: 0.2s;
-    }
-    .kpi-card:hover { border-color: var(--cyan); transform: translateY(-2px); }
-    .kpi-tag { font-size: 10.5px; font-weight: 800; color: var(--muted); text-transform: uppercase; font-family: var(--mono); }
-    .kpi-num { font-size: 26px; font-weight: 900; color: #fff; margin: 6px 0 2px; font-family: var(--mono); }
-    .kpi-sub { font-size: 11px; color: var(--muted); }
-
-    /* Section Boxes */
-    .dash-box {
-      background: var(--card); border: 1.5px solid var(--border); border-radius: 16px;
-      padding: 18px; margin-bottom: 18px;
-    }
-    .box-head {
-      display: flex; justify-content: space-between; align-items: center; gap: 10px;
-      border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 14px; flex-wrap: wrap;
-    }
-    .box-head h2 { font-size: 15px; font-weight: 900; color: var(--gold); display: flex; align-items: center; gap: 8px; }
-
-    /* Charts Layout */
-    .charts-grid {
-      display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 18px;
-    }
-    @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
-    .chart-panel {
-      background: var(--card-inner); border: 1px solid var(--border); border-radius: 14px; padding: 16px;
-    }
-    .chart-panel h3 { font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 10px; }
-
-    /* Search & Filters */
-    .filter-bar {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 8px; margin-bottom: 14px;
-    }
-    .fc {
-      width: 100%; background: var(--card-inner); border: 1px solid var(--border); color: #fff;
-      padding: 10px 12px; border-radius: 9px; font-size: 12px; outline: none;
-    }
-    .fc:focus { border-color: var(--cyan); }
-
-    /* Tables */
-    .tbl-wrap { width: 100%; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 11.5px; text-align: left; }
-    th, td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    th { color: var(--gold); font-weight: 800; background: #070d1d; }
-    tr:hover { background: rgba(56, 189, 248, 0.04); }
-
-    .badge-pill {
-      font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 999px;
-      font-family: var(--mono); display: inline-block;
-    }
-    .bp-active { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-    .bp-pending { background: rgba(245, 158, 11, 0.15); color: var(--gold-bright); border: 1px solid rgba(245, 158, 11, 0.4); }
-    .bp-expired { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.4); }
-
-    /* Modal */
-    .modal-ov {
-      display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.92);
-      backdrop-filter: blur(10px); z-index: 99999; align-items: center; justify-content: center; padding: 14px;
-    }
-    .modal-ov.show { display: flex; }
-    .modal-box {
-      background: var(--card); border: 1.5px solid var(--gold); border-radius: 18px;
-      padding: 22px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 0 50px rgba(245, 158, 11, 0.25);
-    }
-    .m-top {
-      display: flex; justify-content: space-between; align-items: center;
-      border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 14px;
-    }
-    .m-top h3 { font-size: 15px; color: var(--gold); font-weight: 900; }
-    .x-btn { background: none; border: none; color: var(--rose); font-size: 20px; font-weight: 900; cursor: pointer; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Developer SaaS Console — Om Software</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="realtime-sync.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{min-height:100vh;background:#050814;color:#f8fafc;padding:14px;padding-bottom:60px}
+.wrap{max-width:780px;margin:0 auto}
+header{background:#0b1226;border:1.5px solid #f5a623;border-radius:16px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h1{font-size:17px;color:#ffd166;font-weight:900}
+.btn{padding:7px 11px;border-radius:9px;border:none;background:#f5a623;color:#050814;font-size:11.5px;font-weight:900;cursor:pointer;text-decoration:none}
+.btn.sec{background:#111b33;color:#38bdf8;border:1px solid #2c3e6b}
+.btn.ok{background:#22c55e;color:#050814}
+.btn.no{background:#ef4444;color:#fff}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+@media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#0b1226;border:1.5px solid #26365e;border-radius:12px;padding:10px}
+.kpi span{font-size:10.5px;color:#94a3b8;display:block}
+.kpi b{font-size:16px;color:#ffd166;margin-top:2px;display:block}
+.card{background:#0b1226;border:1.5px solid #26365e;border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:14px;color:#22d3ee;margin-bottom:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fg{margin-bottom:8px}
+label{display:block;font-size:11px;color:#cbd5e1;font-weight:700;margin-bottom:3px}
+input,select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:12px}
+.item{background:#070c1a;border:1px solid #1e2d52;border-radius:10px;padding:10px;margin-top:8px;font-size:12px}
+.msg-notice{margin-top:8px;padding:9px;border-radius:9px;background:rgba(34,197,94,.14);border:1px solid #22c55e;color:#86efac;font-size:11.5px;font-weight:700}
+</style>
 </head>
 <body>
-
-  <!-- Live Cyber News Ticker -->
-  <div class="tv-ticker">
-    <div class="tv-badge">● DEVELOPER LIVE STREAM</div>
-    <div style="flex:1;overflow:hidden">
-      <div class="tv-stream" id="devNewsStream">
-        <span>001 • LIVE CUSTOMER ENGINES SYNCD</span>
-        <span>002 • 12-DIGIT UTR PAYMENT VERIFICATION ACTIVE</span>
-        <span>003 • ONE-CLICK DISASTER RECOVERY READY</span>
-        <span>004 • REAL-TIME CITY / PIN CODE COLLECTION DRILLDOWN</span>
-      </div>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>DEVELOPER MASTER CONSOLE</h1>
+      <p style="font-size:11px;color:#94a3b8">Licences, UTR Approvals, Extra Features (₹10–₹80) &amp; Udhar Due</p>
     </div>
-  </div>
+    <div style="display:flex;gap:6px">
+      <a href="login.html" class="btn sec">Login Page</a>
+      <a href="plans.html" class="btn">Plans &amp; UTR</a>
+    </div>
+  </header>
 
-  <div class="wrap">
-    <!-- Top Developer Header -->
-    <header class="top-header">
-      <div class="brand-meta">
-        <h1>OM SOFTWARE <span>&bull; DEVELOPER MASTER CONTROL</span></h1>
-        <p id="devVerifiedTag">Multi-Business SaaS Engine &bull; Gyms, Dealerships, Shops, Schools &amp; Enterprises</p>
-      </div>
-      <div class="top-actions">
-        <button type="button" class="btn btn-emerald" onclick="openLicenseVaultModal()">🔑 License Key Vault (20k+)</button>
-        <button type="button" class="btn btn-cyan" onclick="exportFullDossierExcel()">📁 Full Customer Folder (.xlsx)</button>
-        <button type="button" class="btn btn-gold" onclick="openAddEditCustomerModal()">➕ Add / Edit Customer</button>
-        <a href="index.html" class="btn btn-ghost">← Client App</a>
-      </div>
-    </header>
+  <div class="kpis" id="devKpis"></div>
 
-    <!-- 4 Core Real-Time KPI Cards (1Lakh vs 40k Scale) -->
-    <section class="kpi-row">
-      <div class="kpi-card" style="border-color:var(--cyan)" onclick="filterTableByStatus('all')">
-        <div class="kpi-tag" style="color:var(--cyan)">🌐 Total Registered Signups</div>
-        <div class="kpi-num" id="kpiTotalSignups" style="color:var(--cyan)">1,00,000</div>
-        <div class="kpi-sub">Total app downloads &amp; signups count</div>
-      </div>
-      <div class="kpi-card" style="border-color:var(--emerald)" onclick="filterTableByStatus('active')">
-        <div class="kpi-tag" style="color:var(--emerald)">⚡ Active Paid Subscriptions</div>
-        <div class="kpi-num" id="kpiActiveSubs" style="color:var(--emerald)">40,000</div>
-        <div class="kpi-sub">Customers with verified live plans</div>
-      </div>
-      <div class="kpi-card" style="border-color:var(--gold)" onclick="filterTableByStatus('renewal')">
-        <div class="kpi-tag" style="color:var(--gold)">🔄 Renewal / Due Subscriptions</div>
-        <div class="kpi-num" id="kpiRenewals" style="color:var(--gold)">14,250</div>
-        <div class="kpi-sub">Expiring within 7 days / Due renewals</div>
-      </div>
-      <div class="kpi-card" style="border-color:#f43f5e" onclick="filterTableByStatus('expired')">
-        <div class="kpi-tag" style="color:#f43f5e">📁 Expired / Unpaid Accounts</div>
-        <div class="kpi-num" id="kpiExpired" style="color:#f43f5e">45,750</div>
-        <div class="kpi-sub">Unpaid or trial expired businesses</div>
-      </div>
-    </section>
-
-    <!-- Financial Analytics & Best Selling Plan Charts (📈 📉) -->
-    <section class="charts-grid">
-      <div class="chart-panel">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap">
-          <h3>📈 Revenue &amp; City-Wise Collection Trajectory (Date Filter)</h3>
-          <span style="font-size:12px;font-weight:900;color:var(--emerald)" id="chartTotalRevenueLbl">Total Realized: ₹ 39,60,000</span>
-        </div>
-        <div style="height:230px">
-          <canvas id="revSalesLineChart"></canvas>
-        </div>
-      </div>
-      <div class="chart-panel">
-        <h3>📉 Most Selling Plans Breakdown (Volume)</h3>
-        <div style="height:230px">
-          <canvas id="planDonutChart"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <!-- Real-Time Customer Master Table with Search & Actions -->
-    <section class="dash-box">
-      <div class="box-head">
-        <h2>👥 Customer Master Directory &amp; Support Console (<span id="custCountFiltered">0</span>)</h2>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button type="button" class="btn btn-emerald" onclick="triggerOneClickDisasterRestore()">🛡️ 1-Click Disaster Restore</button>
-          <button type="button" class="btn btn-cyan" onclick="downloadFinancialCollectionReport()">📑 Date-wise Collection CSV</button>
-        </div>
-      </div>
-
-      <!-- Live Search Filters -->
-      <div class="filter-bar">
-        <input type="text" class="fc" id="searchAnyInp" placeholder="🔍 Search Name, Phone, License Key, City, PIN..." oninput="filterCustomerTable()">
-        <select class="fc" id="filterCategorySel" onchange="filterCustomerTable()">
-          <option value="ALL">All Categories</option>
-          <option value="Gym / Fitness">Gym / Fitness</option>
-          <option value="Car Dealership">Car Dealership</option>
-          <option value="General Shop">General Shop</option>
-          <option value="School / College">School / College</option>
-          <option value="Enterprise / Office">Enterprise / Office</option>
+  <div class="card">
+    <h2>Add / Manage Customer &amp; Licence</h2>
+    <div class="row2">
+      <div class="fg"><label>Gym / Business Name *</label><input id="dcGymName" placeholder="Customer Gym Name"></div>
+      <div class="fg"><label>City *</label><input id="dcCity" placeholder="City"></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Owner Email / ID *</label><input id="dcEmail" placeholder="owner@gym.com"></div>
+      <div class="fg"><label>Plan *</label>
+        <select id="dcPlan">
+          <option value="Starter (₹99)">Starter (₹99)</option>
+          <option value="Growth (₹299)">Growth (₹299)</option>
+          <option value="Commercial Pro (₹999)">Commercial Pro (₹999)</option>
         </select>
-        <select class="fc" id="filterStatusSel" onchange="filterCustomerTable()">
-          <option value="ALL">All Statuses</option>
-          <option value="ACTIVE">Active (Paid)</option>
-          <option value="PENDING">Pending Approval</option>
-          <option value="EXPIRED">Expired</option>
-          <option value="RENEWAL">Due for Renewal</option>
-        </select>
-        <input type="date" class="fc" id="filterFromDate" onchange="filterCustomerTable()" title="From Date">
-        <input type="date" class="fc" id="filterToDate" onchange="filterCustomerTable()" title="To Date">
       </div>
-
-      <div class="tbl-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID &amp; License Key</th>
-              <th>Business &amp; Owner</th>
-              <th>Category</th>
-              <th>Contact Details</th>
-              <th>Location (City, PIN)</th>
-              <th>Plan (₹)</th>
-              <th>Status</th>
-              <th>Developer Actions</th>
-            </tr>
-          </thead>
-          <tbody id="customerTableBody"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Payment Verification Queue (12-Digit UTR + Screenshot Uploads) -->
-    <section class="dash-box" style="border-color:var(--gold)">
-      <div class="box-head">
-        <h2>🧾 Incoming Payment Approvals &amp; License Allocation Queue (<span id="pendingQueueCount">0</span>)</h2>
-        <span style="font-size:11px;color:var(--muted)">12-digit UTR checks with auto Telegram &amp; Email alerts</span>
-      </div>
-      <div id="pendingPaymentCardsList"></div>
-    </section>
-  </div>
-
-  <!-- MODAL 1: ADD / EDIT CUSTOMER & PASSWORD RESET -->
-  <div class="modal-ov" id="addEditCustModal">
-    <div class="modal-box">
-      <div class="m-top">
-        <h3 id="modalTitle">➕ Add / Edit Customer Record &amp; Password Reset</h3>
-        <button type="button" class="x-btn" onclick="closeModal('addEditCustModal')">&times;</button>
-      </div>
-      <form onsubmit="saveCustomerRecord(event)">
-        <input type="hidden" id="editCustIdx" value="-1">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--muted)">Business Name *</label>
-            <input type="text" id="mCustBiz" class="fc" required placeholder="e.g. 5 Brother's Fitness Club">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--muted)">Owner Name *</label>
-            <input type="text" id="mCustOwner" class="fc" required placeholder="e.g. Saurabh Singh Chandel">
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--muted)">Category *</label>
-            <select id="mCustCat" class="fc">
-              <option value="Gym / Fitness">Gym / Fitness</option>
-              <option value="Car Dealership">Car Dealership</option>
-              <option value="General Shop">General Shop</option>
-              <option value="School / College">School / College</option>
-              <option value="Enterprise / Office">Enterprise / Office</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--muted)">Mobile Number *</label>
-            <input type="tel" id="mCustPhone" class="fc" required maxlength="10" placeholder="10-digit mobile">
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--muted)">Email Address *</label>
-            <input type="email" id="mCustEmail" class="fc" required placeholder="owner@business.com">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--muted)">Account Password / Reset *</label>
-            <input type="text" id="mCustPass" class="fc" required placeholder="Password / PIN">
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
-          <div>
-            <label style="font-size:11px;color:var(--muted)">City *</label>
-            <input type="text" id="mCustCity" class="fc" required placeholder="Unnao">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--muted)">State *</label>
-            <input type="text" id="mCustState" class="fc" required placeholder="Uttar Pradesh">
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--muted)">PIN Code *</label>
-            <input type="tel" id="mCustPin" class="fc" required maxlength="6" placeholder="209801">
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-          <div>
-            <label style="font-size:11px;color:var(--muted)">Assigned Plan *</label>
-            <select id="mCustPlan" class="fc">
-              <option value="99">Starter Light Mode (₹99)</option>
-              <option value="199">Growth Plan (₹199)</option>
-              <option value="399">Pro Business (₹399)</option>
-              <option value="499">Advanced Audit (₹499)</option>
-              <option value="999">Complete Enterprise ERP (₹999)</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--muted)">Status *</label>
-            <select id="mCustStatus" class="fc">
-              <option value="ACTIVE">ACTIVE (Paid)</option>
-              <option value="PENDING">PENDING</option>
-              <option value="RENEWAL">RENEWAL DUE</option>
-              <option value="EXPIRED">EXPIRED</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:8px">
-          <button type="submit" class="btn btn-gold" style="flex:1">💾 Save Customer &amp; Lock License</button>
-          <button type="button" class="btn btn-ghost" onclick="closeModal('addEditCustModal')">Cancel</button>
-        </div>
-      </form>
     </div>
-  </div>
-
-  <!-- MODAL 2: 20k+ PRE-GENERATED LICENSE KEYS VAULT -->
-  <div class="modal-ov" id="licenseVaultModal">
-    <div class="modal-box" style="border-color:var(--cyan);max-width:700px">
-      <div class="m-top">
-        <h3 style="color:var(--cyan)">🔑 Pre-Generated License Key Vault (Pool of 20,000+ Keys)</h3>
-        <button type="button" class="x-btn" onclick="closeModal('licenseVaultModal')">&times;</button>
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
-        Ye pre-generated encrypted license keys hain. Jaise hi customer payment karta hai aur approve hota hai, ek key assign hokar permanently lock ho jati hai.
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <input type="text" class="fc" id="vaultSearchInp" placeholder="Search Vault by Key or Status..." oninput="renderVaultKeys()">
-        <button type="button" class="btn btn-cyan" onclick="generateMoreVaultKeys(100)">+ Generate 100 Keys</button>
-      </div>
-      <div style="max-height:300px;overflow-y:auto;background:var(--card-inner);border:1px solid var(--border);border-radius:10px;padding:10px" id="vaultKeysGrid"></div>
+    <div class="row2">
+      <div class="fg"><label>Validity Days *</label><input type="number" id="dcDays" value="30" min="1"></div>
+      <div class="fg"><label>Reset / Set Password</label><input id="dcPass" placeholder="New password if resetting"></div>
     </div>
+    <button type="button" class="btn" id="btnAddCustomer">Save &amp; Generate Licence Key</button>
+    <div id="devActionBanner"></div>
   </div>
 
-  <script>
-    const K_CUSTOMERS = "om_saas_dev_customers_v3";
-    const K_VAULT = "om_saas_license_vault_v1";
+  <div class="card">
+    <h2>Pending UTR Plan Requests</h2>
+    <div id="pendingUtrList"></div>
+  </div>
 
-    // Standard baseline sample customer seed if empty
-    function getStoredCustomers() {
-      try {
-        const c = JSON.parse(localStorage.getItem(K_CUSTOMERS) || "null");
-        if (Array.isArray(c) && c.length) return c;
-      } catch (e) {}
+  <div class="card">
+    <h2>Extra Feature Requests (₹10 – ₹80) &amp; Manual Payment Request</h2>
+    <div class="row2">
+      <div class="fg"><label>Customer Email / Gym *</label><input id="mpCustRef" placeholder="owner@gym.com"></div>
+      <div class="fg"><label>Manual Payment Note *</label><input id="mpReason" value="please pay before this feature add"></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Extra Amount (₹10 – ₹80) *</label><input type="number" id="mpAmt" value="40" min="10" max="80"></div>
+      <div class="fg"><label>Feature Name</label><input id="mpFeat" value="Custom Report &amp; SMS"></div>
+    </div>
+    <button type="button" class="btn sec" id="btnSendManualPayReq">Send Manual Payment Request</button>
+    <div id="extraFeatReqList"></div>
+  </div>
 
-      const sample = [
-        {
-          id: "CUST-101",
-          bizName: "5 Brother's Fitness Club",
-          ownerName: "Saurabh Singh Chandel",
-          category: "Gym / Fitness",
-          phone: "9140417259",
-          email: "saurabhsingh912581@gmail.com",
-          pass: "Om@5BFC2026",
-          city: "Unnao",
-          state: "Uttar Pradesh",
-          pin: "209801",
-          planAmount: 499,
-          planName: "Advanced Audit",
-          licenseKey: "OM-LITE-2026-8841",
-          status: "ACTIVE",
-          activeDate: "2026-11-01",
-          expiryDate: "2026-12-01",
-          utr: "123456789012"
-        },
-        {
-          id: "CUST-102",
-          bizName: "Speed Wheels Motors",
-          ownerName: "Rajesh Malhotra",
-          category: "Car Dealership",
-          phone: "9839001122",
-          email: "rajesh@speedwheels.com",
-          pass: "CarDealer#99",
-          city: "Kanpur",
-          state: "Uttar Pradesh",
-          pin: "208001",
-          planAmount: 999,
-          planName: "Enterprise ERP",
-          licenseKey: "OM-ENT-2026-4412",
-          status: "ACTIVE",
-          activeDate: "2026-10-15",
-          expiryDate: "2026-11-15",
-          utr: "987654321098"
-        },
-        {
-          id: "CUST-103",
-          bizName: "Daily Grocery Mart",
-          ownerName: "Vipin Agrawal",
-          category: "General Shop",
-          phone: "9450003344",
-          email: "vipin@dailymart.in",
-          pass: "Shop@123",
-          city: "Lucknow",
-          state: "Uttar Pradesh",
-          pin: "226001",
-          planAmount: 99,
-          planName: "Starter Light Mode",
-          licenseKey: "OM-LITE-99-7718",
-          status: "RENEWAL",
-          activeDate: "2026-10-28",
-          expiryDate: "2026-11-28",
-          utr: "456123789012"
-        },
-        {
-          id: "CUST-104",
-          bizName: "Apex Public Academy",
-          ownerName: "Dr. K. N. Mishra",
-          category: "School / College",
-          phone: "9792005566",
-          email: "principal@apexacademy.edu",
-          pass: "Apex#2026",
-          city: "Kanpur",
-          state: "Uttar Pradesh",
-          pin: "208002",
-          planAmount: 999,
-          planName: "Enterprise ERP",
-          licenseKey: "OM-ENT-2026-9921",
-          status: "ACTIVE",
-          activeDate: "2026-11-10",
-          expiryDate: "2026-12-10",
-          utr: "789123456012"
-        }
-      ];
-      localStorage.setItem(K_CUSTOMERS, JSON.stringify(sample));
-      return sample;
-    }
+  <div class="card">
+    <h2>Customers, Licence Keys, Active Features &amp; Udhar Due</h2>
+    <div id="customersList"></div>
+  </div>
+</div>
 
-    function saveCustomers(list) {
-      localStorage.setItem(K_CUSTOMERS, JSON.stringify(list));
-      syncDeveloperMetrics();
-    }
+<script>
+(function () {
+  function genKey() {
+    var r = function () { return Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4).padEnd(4, "X"); };
+    return "OM-" + r() + "-" + r() + "-" + r();
+  }
 
-    // Vault logic: Generate or retrieve pre-generated keys pool
-    function getVaultKeys() {
-      try {
-        const v = JSON.parse(localStorage.getItem(K_VAULT) || "null");
-        if (Array.isArray(v) && v.length) return v;
-      } catch (e) {}
+  function addDaysIso(days) {
+    var d = new Date(Date.now() + Number(days || 30) * 86400000);
+    return d.toISOString().slice(0, 10);
+  }
 
-      const initial = [];
-      const plans = [99, 199, 399, 499, 999];
-      for (let i = 1; i <= 250; i++) {
-        const p = plans[i % plans.length];
-        const hex = Math.random().toString(36).substring(2, 7).toUpperCase();
-        initial.push({
-          key: `OM-PLAN${p}-${hex}-${1000 + i}`,
-          plan: p,
-          status: (i <= 4) ? "LOCKED" : "AVAILABLE",
-          assignedTo: (i <= 4) ? `CUST-10${i}` : "-"
-        });
+  function planFeatures(plan) {
+    if (String(plan).indexOf("999") !== -1) return ["18-Grid Full", "Multi-Branch", "Payroll & HR", "Live Cloud Sync", "Excel Import/Export"];
+    if (String(plan).indexOf("299") !== -1) return ["18-Grid Core", "Attendance & Fees", "Staff IDs", "Excel Import/Export"];
+    return ["18-Grid Light", "Admission & Fees", "Attendance"];
+  }
+
+  function renderAll() {
+    var s = window.omSync ? window.omSync.readSaas() : {};
+    s.customers = s.customers || [];
+    s.pendingRequests = s.pendingRequests || [];
+    s.extraFeatureRequests = s.extraFeatureRequests || [];
+    s.cityStats = s.cityStats || {};
+
+    var udharTotal = Object.keys(s.udharDueByCustomer || {}).reduce(function (acc, k) {
+      return acc + Number((s.udharDueByCustomer || {})[k] || 0);
+    }, 0);
+
+    var topCity = "None (0)";
+    var topCnt = 0;
+    Object.keys(s.cityStats).forEach(function (c) {
+      if (Number(s.cityStats[c] || 0) > topCnt) {
+        topCnt = Number(s.cityStats[c] || 0);
+        topCity = c + " (" + topCnt + ")";
       }
-      localStorage.setItem(K_VAULT, JSON.stringify(initial));
-      return initial;
-    }
-
-    function generateMoreVaultKeys(count) {
-      const v = getVaultKeys();
-      const plans = [99, 199, 399, 499, 999];
-      for (let i = 0; i < count; i++) {
-        const p = plans[Math.floor(Math.random() * plans.length)];
-        const hex = Math.random().toString(36).substring(2, 7).toUpperCase();
-        v.push({
-          key: `OM-PLAN${p}-${hex}-${Date.now().toString().slice(-4)}${i}`,
-          plan: p,
-          status: "AVAILABLE",
-          assignedTo: "-"
-        });
-      }
-      localStorage.setItem(K_VAULT, JSON.stringify(v));
-      renderVaultKeys();
-      alert(`✅ ${count} Nayi Unique License Keys Vault me generate ho gayi!`);
-    }
-
-    function allocateAndLockLicenseKey(planAmt, custId) {
-      const v = getVaultKeys();
-      let match = v.find(k => k.status === "AVAILABLE" && Number(k.plan) === Number(planAmt));
-      if (!match) {
-        match = v.find(k => k.status === "AVAILABLE") || {
-          key: `OM-PLAN${planAmt}-${Math.random().toString(36).substring(2, 7).toUpperCase()}-LOCK`,
-          plan: planAmt, status: "AVAILABLE", assignedTo: "-"
-        };
-        v.push(match);
-      }
-      match.status = "LOCKED";
-      match.assignedTo = custId;
-      match.lockedAt = new Date().toISOString();
-      localStorage.setItem(K_VAULT, JSON.stringify(v));
-      return match.key;
-    }
-
-    function esc(s) {
-      return String(s == null ? "" : s).replace(/[&<>"']/g, function(c) {
-        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-      });
-    }
-
-    // Modal helpers
-    function openModal(id) { document.getElementById(id).classList.add("show"); }
-    function closeModal(id) { document.getElementById(id).classList.remove("show"); }
-
-    // Chart instances
-    let salesChart = null;
-    let donutChart = null;
-
-    function syncDeveloperMetrics() {
-      const list = getStoredCustomers();
-
-      // Realistic scale projection based on user brief (1Lakh downloads / signups vs 40k active)
-      const activeCount = list.filter(c => c.status === "ACTIVE").length;
-      const renewalCount = list.filter(c => c.status === "RENEWAL").length;
-      const expiredCount = list.filter(c => c.status === "EXPIRED").length;
-      const pendingCount = list.filter(c => c.status === "PENDING").length;
-
-      document.getElementById("kpiTotalSignups").textContent = (100000 + list.length - 4).toLocaleString("en-IN");
-      document.getElementById("kpiActiveSubs").textContent = (40000 + activeCount - 3).toLocaleString("en-IN");
-      document.getElementById("kpiRenewals").textContent = (14250 + renewalCount - 1).toLocaleString("en-IN");
-      document.getElementById("kpiExpired").textContent = (45750 + expiredCount).toLocaleString("en-IN");
-
-      // Filter and render table
-      filterCustomerTable();
-      renderPendingApprovalsQueue();
-      renderCharts();
-    }
-
-    function renderCharts() {
-      const list = getStoredCustomers();
-      const ctxLine = document.getElementById("revSalesLineChart");
-      const ctxDonut = document.getElementById("planDonutChart");
-      if (!ctxLine || !ctxDonut) return;
-
-      if (salesChart) salesChart.destroy();
-      if (donutChart) donutChart.destroy();
-
-      // Trend Line Chart
-      salesChart = new Chart(ctxLine, {
-        type: 'line',
-        data: {
-          labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
-          datasets: [{
-            label: 'Total Plan Revenue (₹)',
-            data: [1800000, 2200000, 2750000, 3100000, 3450000, 3800000, 3960000],
-            borderColor: '#38bdf8',
-            backgroundColor: 'rgba(56, 189, 248, 0.12)',
-            fill: true,
-            tension: 0.35,
-            borderWidth: 3,
-            pointBackgroundColor: '#38bdf8',
-            pointRadius: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { labels: { color: '#cbd5e1', font: { family: 'JetBrains Mono' } } } },
-          scales: {
-            x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#94a3b8' } },
-            y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#94a3b8' } }
-          }
-        }
-      });
-
-      // Donut Chart for Plan Popularity
-      donutChart = new Chart(ctxDonut, {
-        type: 'doughnut',
-        data: {
-          labels: ['₹99 Starter Light', '₹199 Growth', '₹399 Pro', '₹499 Audit', '₹999 Enterprise'],
-          datasets: [{
-            data: [38, 22, 16, 14, 10],
-            backgroundColor: ['#38bdf8', '#34d399', '#f59e0b', '#a855f7', '#fb7185'],
-            borderWidth: 2,
-            borderColor: '#0b1224'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '68%',
-          plugins: {
-            legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 10 } } }
-          }
-        }
-      });
-    }
-
-    function filterCustomerTable() {
-      const list = getStoredCustomers();
-      const q = (document.getElementById("searchAnyInp").value || "").trim().toLowerCase();
-      const cat = document.getElementById("filterCategorySel").value;
-      const st = document.getElementById("filterStatusSel").value;
-      const fDt = document.getElementById("filterFromDate").value;
-      const tDt = document.getElementById("filterToDate").value;
-
-      const filtered = list.filter(c => {
-        if (cat !== "ALL" && c.category !== cat) return false;
-        if (st !== "ALL" && c.status !== st) return false;
-        if (fDt && c.activeDate && c.activeDate < fDt) return false;
-        if (tDt && c.activeDate && c.activeDate > tDt) return false;
-        if (q) {
-          const hay = [c.id, c.bizName, c.ownerName, c.phone, c.email, c.city, c.state, c.pin, c.licenseKey].join(" ").toLowerCase();
-          if (!hay.includes(q)) return false;
-        }
-        return true;
-      });
-
-      document.getElementById("custCountFiltered").textContent = filtered.length;
-      const tbody = document.getElementById("customerTableBody");
-      if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:18px">Koi customer record nahi mila.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = filtered.map((c, i) => {
-        let badgeCls = c.status === "ACTIVE" ? "bp-active" : (c.status === "PENDING" ? "bp-pending" : "bp-expired");
-        return `
-          <tr>
-            <td>
-              <b>#${esc(c.id)}</b><br>
-              <span style="color:var(--gold);font-family:var(--mono);font-size:11px">${esc(c.licenseKey)}</span>
-            </td>
-            <td>
-              <b style="color:#fff">${esc(c.bizName)}</b><br>
-              <small style="color:var(--muted)">Owner: ${esc(c.ownerName)}</small>
-            </td>
-            <td><span class="badge-pill bp-active" style="background:#13203f;color:var(--cyan);border-color:#203a70">${esc(c.category)}</span></td>
-            <td>
-              📞 ${esc(c.phone)}<br>
-              ✉️ ${esc(c.email)}
-            </td>
-            <td>
-              <b>${esc(c.city)}</b>, ${esc(c.state)}<br>
-              <span style="font-family:var(--mono);color:var(--muted)">PIN: ${esc(c.pin)}</span>
-            </td>
-            <td><b style="color:var(--gold-bright)">₹${esc(c.planAmount)}</b><br><small style="color:var(--muted)">${esc(c.planName || "")}</small></td>
-            <td><span class="badge-pill ${badgeCls}">${esc(c.status)}</span></td>
-            <td>
-              <div style="display:flex;gap:4px;flex-wrap:wrap">
-                <button type="button" class="btn btn-cyan" style="padding:4px 8px;font-size:10.5px" onclick="editCustomerModalById('${esc(c.id)}')">✏️ Edit / Pass</button>
-                <button type="button" class="btn btn-gold" style="padding:4px 8px;font-size:10.5px" onclick="downloadSingleCustomerDossier('${esc(c.id)}')">📥 Dossier</button>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    }
-
-    function filterTableByStatus(status) {
-      const sel = document.getElementById("filterStatusSel");
-      if (status === "all") sel.value = "ALL";
-      else if (status === "active") sel.value = "ACTIVE";
-      else if (status === "renewal") sel.value = "RENEWAL";
-      else if (status === "expired") sel.value = "EXPIRED";
-      filterCustomerTable();
-    }
-
-    // Pending Payments Queue with 12-Digit UTR
-    function renderPendingApprovalsQueue() {
-      const box = document.getElementById("pendingPaymentCardsList");
-      let queue = [];
-      try {
-        queue = JSON.parse(localStorage.getItem("om_plan_customers_v1") || "[]") || [];
-      } catch (e) {}
-
-      // Add default mock pending if none
-      if (!queue.length) {
-        queue = [
-          {
-            id: "PAY-901",
-            name: "Lala Verma (Fitness Club)",
-            phone: "6386232805",
-            email: "lalaverma@gym.com",
-            planName: "Pro Business (₹399)",
-            planAmount: 399,
-            utr: "914041725912",
-            city: "Unnao",
-            hasScreenshot: true,
-            status: "PENDING_APPROVAL"
-          }
-        ];
-        localStorage.setItem("om_plan_customers_v1", JSON.stringify(queue));
-      }
-
-      const pending = queue.filter(q => q.status !== "APPROVED" && q.status !== "REJECTED");
-      document.getElementById("pendingQueueCount").textContent = pending.length;
-
-      if (!pending.length) {
-        box.innerHTML = `<div style="text-align:center;color:var(--emerald);padding:14px;font-size:12px;font-weight:700">✅ Sabhi payment requests verified hain! Koi pending UTR nahi hai.</div>`;
-        return;
-      }
-
-      box.innerHTML = pending.map((p, idx) => `
-        <div style="background:var(--card-inner);border:1.5px solid var(--gold);border-radius:12px;padding:14px;margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-            <div>
-              <b style="font-size:13.5px;color:#fff">${esc(p.name)}</b> &bull; City: <b>${esc(p.city || "Unnao")}</b> &bull; Ph: <b>${esc(p.phone)}</b><br>
-              <span style="font-size:12px;color:var(--cyan)">Plan: ${esc(p.planName)} (₹${esc(p.planAmount)})</span>
-            </div>
-            <div style="text-align:right">
-              <span style="font-family:var(--mono);font-size:12px;color:var(--gold-bright);background:#1a1400;padding:4px 8px;border-radius:6px;border:1px dashed var(--gold)">12-Digit UTR: <b>${esc(p.utr)}</b></span>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-            <button type="button" class="btn btn-emerald" onclick="approveAndAssignLicenseKey(${idx})">✔ Verify Payment &amp; Assign Permanent License Key</button>
-            <button type="button" class="btn btn-ghost" style="color:var(--rose)" onclick="rejectIncomingPayment(${idx})">✖ Reject</button>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function approveAndAssignLicenseKey(idx) {
-      let queue = JSON.parse(localStorage.getItem("om_plan_customers_v1") || "[]");
-      const req = queue[idx];
-      if (!req) return;
-
-      const custId = "CUST-" + Date.now().toString().slice(-4);
-      const allocatedKey = allocateAndLockLicenseKey(req.planAmount || 399, custId);
-
-      // Add to master customers directory
-      const list = getStoredCustomers();
-      list.unshift({
-        id: custId,
-        bizName: req.name,
-        ownerName: req.name.split("(")[0].trim(),
-        category: "Gym / Fitness",
-        phone: req.phone,
-        email: req.email || `${req.phone}@business.com`,
-        pass: "Om#" + req.phone.slice(-4),
-        city: req.city || "Unnao",
-        state: "Uttar Pradesh",
-        pin: "209801",
-        planAmount: req.planAmount || 399,
-        planName: req.planName,
-        licenseKey: allocatedKey,
-        status: "ACTIVE",
-        activeDate: new Date().toISOString().slice(0, 10),
-        expiryDate: new Date(Date.now() + 30*24*3600*1000).toISOString().slice(0, 10),
-        utr: req.utr
-      });
-      saveCustomers(list);
-
-      req.status = "APPROVED";
-      req.licenseKey = allocatedKey;
-      localStorage.setItem("om_plan_customers_v1", JSON.stringify(queue));
-
-      // Notification sent trigger (Telegram / Email / Live Dashboard)
-      alert(`🎉 Payment Verified Successfully!
-
-1. Telegram & Email Notification Dispatched.
-2. Permanent License Key Generated & Locked:
-👉 ${allocatedKey}
-
-Ab ye key is business ke liye permanent lock ho chuki hai.`);
-      syncDeveloperMetrics();
-    }
-
-    function rejectIncomingPayment(idx) {
-      let queue = JSON.parse(localStorage.getItem("om_plan_customers_v1") || "[]");
-      if (queue[idx]) queue[idx].status = "REJECTED";
-      localStorage.setItem("om_plan_customers_v1", JSON.stringify(queue));
-      syncDeveloperMetrics();
-    }
-
-    // Modal Customer Operations
-    function openAddEditCustomerModal() {
-      document.getElementById("editCustIdx").value = "-1";
-      document.getElementById("modalTitle").textContent = "➕ Add New Business Customer";
-      document.getElementById("mCustBiz").value = "";
-      document.getElementById("mCustOwner").value = "";
-      document.getElementById("mCustPhone").value = "";
-      document.getElementById("mCustEmail").value = "";
-      document.getElementById("mCustPass").value = "Om@2026";
-      document.getElementById("mCustCity").value = "Unnao";
-      document.getElementById("mCustState").value = "Uttar Pradesh";
-      document.getElementById("mCustPin").value = "209801";
-      openModal("addEditCustModal");
-    }
-
-    function editCustomerModalById(id) {
-      const list = getStoredCustomers();
-      const idx = list.findIndex(c => c.id === id);
-      if (idx === -1) return;
-      const c = list[idx];
-      document.getElementById("editCustIdx").value = idx;
-      document.getElementById("modalTitle").textContent = `✏️ Edit Customer & Reset Password (#${c.id})`;
-      document.getElementById("mCustBiz").value = c.bizName;
-      document.getElementById("mCustOwner").value = c.ownerName;
-      document.getElementById("mCustCat").value = c.category;
-      document.getElementById("mCustPhone").value = c.phone;
-      document.getElementById("mCustEmail").value = c.email;
-      document.getElementById("mCustPass").value = c.pass || "Om@2026";
-      document.getElementById("mCustCity").value = c.city;
-      document.getElementById("mCustState").value = c.state;
-      document.getElementById("mCustPin").value = c.pin;
-      document.getElementById("mCustPlan").value = String(c.planAmount);
-      document.getElementById("mCustStatus").value = c.status;
-      openModal("addEditCustModal");
-    }
-
-    function saveCustomerRecord(ev) {
-      ev.preventDefault();
-      const list = getStoredCustomers();
-      const idx = Number(document.getElementById("editCustIdx").value);
-      const biz = document.getElementById("mCustBiz").value.trim();
-      const owner = document.getElementById("mCustOwner").value.trim();
-      const cat = document.getElementById("mCustCat").value;
-      const phone = document.getElementById("mCustPhone").value.trim();
-      const email = document.getElementById("mCustEmail").value.trim();
-      const pass = document.getElementById("mCustPass").value.trim();
-      const city = document.getElementById("mCustCity").value.trim();
-      const state = document.getElementById("mCustState").value.trim();
-      const pin = document.getElementById("mCustPin").value.trim();
-      const planAmt = Number(document.getElementById("mCustPlan").value);
-      const st = document.getElementById("mCustStatus").value;
-
-      if (idx >= 0 && list[idx]) {
-        list[idx].bizName = biz;
-        list[idx].ownerName = owner;
-        list[idx].category = cat;
-        list[idx].phone = phone;
-        list[idx].email = email;
-        list[idx].pass = pass;
-        list[idx].city = city;
-        list[idx].state = state;
-        list[idx].pin = pin;
-        list[idx].planAmount = planAmt;
-        list[idx].status = st;
-      } else {
-        const newId = "CUST-" + (100 + list.length + 1);
-        const lic = allocateAndLockLicenseKey(planAmt, newId);
-        list.unshift({
-          id: newId,
-          bizName: biz,
-          ownerName: owner,
-          category: cat,
-          phone: phone,
-          email: email,
-          pass: pass,
-          city: city,
-          state: state,
-          pin: pin,
-          planAmount: planAmt,
-          licenseKey: lic,
-          status: st,
-          activeDate: new Date().toISOString().slice(0, 10),
-          expiryDate: new Date(Date.now() + 30*24*3600*1000).toISOString().slice(0, 10)
-        });
-      }
-
-      saveCustomers(list);
-      closeModal("addEditCustModal");
-      alert("✅ Customer Record and Credentials Updated Live!");
-    }
-
-    // 1-Click Disaster Recovery Restore
-    function triggerOneClickDisasterRestore() {
-      if (!confirm("⚠️ क्या आप 1-Click Disaster Recovery Restore रन करना चाहते हैं?
-यह सभी क्लाइंट्स का सुरक्षित क्लाउड बैकअप री-स्टोर कर देगा।")) return;
-      getStoredCustomers();
-      alert("🛡️ 1-Click Disaster Restore Complete!
-Sabhi customers ka encrypted data aur subscription keys successfully restore ho gayi hain.");
-      syncDeveloperMetrics();
-    }
-
-    // Exports
-    function exportFullDossierExcel() {
-      const list = getStoredCustomers();
-      const rows = list.map(c => ({
-        "Customer ID": c.id,
-        "Business Name": c.bizName,
-        "Owner Name": c.ownerName,
-        "Category": c.category,
-        "Mobile": c.phone,
-        "Email": c.email,
-        "Password / PIN": c.pass,
-        "City": c.city,
-        "State": c.state,
-        "PIN Code": c.pin,
-        "Plan (INR)": c.planAmount,
-        "License Key": c.licenseKey,
-        "Status": c.status,
-        "Active Date": c.activeDate,
-        "Expiry Date": c.expiryDate
-      }));
-      const ws = XLSX.utils.json_to_sheet(rows);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Master_Customers");
-      XLSX.writeFile(wb, `Om_Software_Master_Customers_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    }
-
-    function downloadSingleCustomerDossier(id) {
-      const c = getStoredCustomers().find(x => x.id === id);
-      if (!c) return;
-      const text = `
-======================================================
-OM SOFTWARE — CLIENT ENTERPRISE DOSSIER
-======================================================
-Client ID       : ${c.id}
-Business Name   : ${c.bizName}
-Owner Name      : ${c.ownerName}
-Category        : ${c.category}
-Contact Phone   : ${c.phone}
-Contact Email   : ${c.email}
-Account Pass/PIN: ${c.pass}
-Location        : ${c.city}, ${c.state} - ${c.pin}
-Active Plan     : Rs. ${c.planAmount} (${c.planName || "Active"})
-License Key     : ${c.licenseKey} (PERMANENT LOCKED)
-Account Status  : ${c.status}
-Active Period   : ${c.activeDate} to ${c.expiryDate}
-======================================================
-Status: Verified in SaaS Developer Console
-`;
-      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-      const a = document.createElement("a");
-      a.download = `Dossier_${c.id}_${c.bizName.replace(/\s+/g, '_')}.txt`;
-      a.href = URL.createObjectURL(blob);
-      a.click();
-    }
-
-    function downloadFinancialCollectionReport() {
-      const list = getStoredCustomers();
-      let csv = "Customer ID,Business,Category,City,PIN,Plan Amount,Date,License Key
-";
-      list.forEach(c => {
-        csv += `"${c.id}","${c.bizName}","${c.category}","${c.city}","${c.pin}","${c.planAmount}","${c.activeDate}","${c.licenseKey}"
-`;
-      });
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-      const a = document.createElement("a");
-      a.download = `Financial_Collection_Report_${new Date().toISOString().slice(0, 10)}.csv`;
-      a.href = URL.createObjectURL(blob);
-      a.click();
-    }
-
-    // Vault Render
-    function openLicenseVaultModal() {
-      renderVaultKeys();
-      openModal("licenseVaultModal");
-    }
-
-    function renderVaultKeys() {
-      const v = getVaultKeys();
-      const q = (document.getElementById("vaultSearchInp").value || "").trim().toLowerCase();
-      const box = document.getElementById("vaultKeysGrid");
-      const filtered = v.filter(k => !q || k.key.toLowerCase().includes(q) || k.status.toLowerCase().includes(q));
-
-      box.innerHTML = filtered.slice(0, 80).map(k => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:11px;font-family:var(--mono)">
-          <span>🔑 <b>${esc(k.key)}</b> (₹${k.plan})</span>
-          <span class="badge-pill ${k.status === 'LOCKED' ? 'bp-expired' : 'bp-active'}">${k.status} ${k.assignedTo !== '-' ? '(' + k.assignedTo + ')' : ''}</span>
-        </div>
-      `).join("");
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      syncDeveloperMetrics();
     });
-  </script>
+
+    document.getElementById("devKpis").innerHTML =
+      '<div class="kpi"><span>App Downloads</span><b>' + Number(s.downloadsCount || 0) + '</b></div>' +
+      '<div class="kpi"><span>Plans Purchased</span><b>' + Number(s.purchasedCount || 0) + '</b></div>' +
+      '<div class="kpi"><span>Purchase Income</span><b>₹' + Number(s.appPurchaseIncome || 0).toLocaleString("en-IN") + '</b></div>' +
+      '<div class="kpi"><span>Renewals</span><b>' + Number(s.renewalCount || 0) + '</b></div>' +
+      '<div class="kpi"><span>Pending Requests</span><b>' + Number(s.pendingRequests.length || 0) + '</b></div>' +
+      '<div class="kpi"><span>Top City</span><b>' + topCity + '</b></div>' +
+      '<div class="kpi"><span>Customer Udhar Due</span><b>₹' + udharTotal.toLocaleString("en-IN") + '</b></div>' +
+      '<div class="kpi"><span>Active Licences</span><b>' + Number(s.customers.length || 0) + '</b></div>';
+
+    // Pending UTR requests
+    var utrBox = document.getElementById("pendingUtrList");
+    utrBox.innerHTML = s.pendingRequests.length ? s.pendingRequests.map(function (req, idx) {
+      return '<div class="item">' +
+        '<b>' + (req.gymName || "Gym") + '</b> (' + (req.email || "-") + ') • City: ' + (req.city || "-") + '<br>' +
+        'Plan: <b>' + req.plan + '</b> • Amount: <b>₹' + Number(req.amount || 0) + '</b> • UTR: <b>' + (req.utr || "-") + '</b>' +
+        (req.utrProofName ? ' • Proof: ' + req.utrProofName : '') +
+        '<div style="margin-top:8px;display:flex;gap:6px">' +
+          '<button type="button" class="btn ok" data-accept-utr="' + idx + '">Accept &amp; Activate</button>' +
+          '<button type="button" class="btn no" data-reject-utr="' + idx + '">Reject</button>' +
+        '</div>' +
+      '</div>';
+    }).join("") : '<div class="item" style="color:#94a3b8">No pending UTR requests (0).</div>';
+
+    // Extra feature requests
+    var efBox = document.getElementById("extraFeatReqList");
+    efBox.innerHTML = s.extraFeatureRequests.length ? s.extraFeatureRequests.map(function (er, idx) {
+      return '<div class="item">' +
+        '<b>' + (er.customerRef || "Customer") + '</b> • Feature: <b>' + er.featureName + '</b> • Price: <b>₹' + Number(er.price || 0) + '</b> • Status: <b>' + er.status + '</b>' +
+        (er.manualNote ? '<div style="color:#ffd166;margin-top:3px">Note: ' + er.manualNote + '</div>' : '') +
+        (er.status === "Pending" ? '<div style="margin-top:6px"><button type="button" class="btn ok" data-approve-ef="' + idx + '">Approve &amp; Add to Udhar</button></div>' : '') +
+      '</div>';
+    }).join("") : '<div class="item" style="color:#94a3b8">No extra feature requests (0).</div>';
+
+    // Customers list
+    var cBox = document.getElementById("customersList");
+    cBox.innerHTML = s.customers.length ? s.customers.map(function (c) {
+      var due = Number((s.udharDueByCustomer || {})[c.email] || 0);
+      return '<div class="item">' +
+        '<div style="display:flex;justify-content:space-between"><b>' + c.gymName + '</b><span style="color:#22d3ee">' + c.licenceKey + '</span></div>' +
+        '<div style="color:#94a3b8;margin-top:3px">Email: ' + c.email + ' • City: ' + (c.city || "-") + ' • Plan: <b>' + c.plan + '</b></div>' +
+        '<div style="margin-top:3px">Validity: <b>' + c.startDate + '</b> to <b>' + c.endDate + '</b> • Features: ' + (c.features || []).join(", ") + '</div>' +
+        '<div style="margin-top:4px;color:#fca5a5"><b>Udhar / Pending to Pay: ₹' + due.toLocaleString("en-IN") + '</b></div>' +
+      '</div>';
+    }).join("") : '<div class="item" style="color:#94a3b8">No customers yet (0).</div>';
+  }
+
+  document.getElementById("btnAddCustomer").addEventListener("click", function () {
+    var gymName = document.getElementById("dcGymName").value.trim();
+    var city = document.getElementById("dcCity").value.trim() || "General";
+    var email = document.getElementById("dcEmail").value.trim().toLowerCase();
+    var plan = document.getElementById("dcPlan").value;
+    var days = Number(document.getElementById("dcDays").value || 30);
+    var newPass = document.getElementById("dcPass").value.trim();
+    if (!gymName || !email) return alert("Gym Name aur Email zaroori hai.");
+
+    var s = window.omSync.readSaas();
+    var key = genKey();
+    var startDate = new Date().toISOString().slice(0, 10);
+    var endDate = addDaysIso(days);
+    var feats = planFeatures(plan);
+
+    var rec = {
+      gymName: gymName,
+      city: city,
+      email: email,
+      plan: plan,
+      licenceKey: key,
+      startDate: startDate,
+      endDate: endDate,
+      features: feats,
+      passwordReset: newPass || undefined
+    };
+    s.customers.unshift(rec);
+    s.purchasedCount = Number(s.purchasedCount || 0) + 1;
+    s.cityStats[city] = Number(s.cityStats[city] || 0) + 1;
+    window.omSync.writeSaas(s);
+
+    document.getElementById("devActionBanner").innerHTML =
+      '<div class="msg-notice">Your plan has been activated — Licence Key: ' + key + ' • Valid: ' + startDate + ' to ' + endDate + ' • Plan: ' + plan + '</div>';
+    renderAll();
+  });
+
+  document.getElementById("pendingUtrList").addEventListener("click", function (ev) {
+    var accBtn = ev.target.closest("[data-accept-utr]");
+    var rejBtn = ev.target.closest("[data-reject-utr]");
+    var s = window.omSync.readSaas();
+    if (accBtn) {
+      var idx = Number(accBtn.getAttribute("data-accept-utr"));
+      var req = s.pendingRequests[idx];
+      if (!req) return;
+      var key = genKey();
+      var startDate = new Date().toISOString().slice(0, 10);
+      var endDate = addDaysIso(req.days || 30);
+      var feats = planFeatures(req.plan);
+      s.customers.unshift({
+        gymName: req.gymName || "Gym",
+        city: req.city || "General",
+        email: req.email || "owner@gym.com",
+        plan: req.plan,
+        licenceKey: key,
+        startDate: startDate,
+        endDate: endDate,
+        features: feats
+      });
+      s.purchasedCount = Number(s.purchasedCount || 0) + 1;
+      s.appPurchaseIncome = Number(s.appPurchaseIncome || 0) + Number(req.amount || 0);
+      if (req.isRenewal) s.renewalCount = Number(s.renewalCount || 0) + 1;
+      var cCity = req.city || "General";
+      s.cityStats[cCity] = Number(s.cityStats[cCity] || 0) + 1;
+      s.pendingRequests.splice(idx, 1);
+      window.omSync.writeSaas(s);
+
+      document.getElementById("devActionBanner").innerHTML =
+        '<div class="msg-notice">Your plan has been activated! Licence Key: <b>' + key + '</b> • Valid: <b>' + startDate + '</b> to <b>' + endDate + '</b> • Plan: <b>' + req.plan + '</b></div>';
+      renderAll();
+    } else if (rejBtn) {
+      var rIdx = Number(rejBtn.getAttribute("data-reject-utr"));
+      s.pendingRequests.splice(rIdx, 1);
+      window.omSync.writeSaas(s);
+      renderAll();
+    }
+  });
+
+  document.getElementById("btnSendManualPayReq").addEventListener("click", function () {
+    var ref = document.getElementById("mpCustRef").value.trim();
+    var note = document.getElementById("mpReason").value.trim() || "please pay before this feature add";
+    var amt = Math.min(80, Math.max(10, Number(document.getElementById("mpAmt").value || 20)));
+    var feat = document.getElementById("mpFeat").value.trim() || "Extra Add-On Feature";
+    if (!ref) return alert("Customer Email / Gym darj karein.");
+
+    var s = window.omSync.readSaas();
+    s.extraFeatureRequests.unshift({
+      customerRef: ref,
+      featureName: feat,
+      price: amt,
+      manualNote: note,
+      status: "Pending"
+    });
+    window.omSync.writeSaas(s);
+    renderAll();
+  });
+
+  document.getElementById("extraFeatReqList").addEventListener("click", function (ev) {
+    var btn = ev.target.closest("[data-approve-ef]");
+    if (!btn) return;
+    var idx = Number(btn.getAttribute("data-approve-ef"));
+    var s = window.omSync.readSaas();
+    var item = s.extraFeatureRequests[idx];
+    if (!item) return;
+    item.status = "Approved";
+    var price = Math.min(80, Math.max(10, Number(item.price || 10)));
+    s.udharDueByCustomer = s.udharDueByCustomer || {};
+    var k = String(item.customerRef || "customer").toLowerCase();
+    s.udharDueByCustomer[k] = Number(s.udharDueByCustomer[k] || 0) + price;
+
+    // Also attach feature to matching customer if found
+    s.customers.forEach(function (c) {
+      if (String(c.email || "").toLowerCase() === k || String(c.gymName || "").toLowerCase() === k) {
+        c.features = c.features || [];
+        if (c.features.indexOf(item.featureName) === -1) c.features.push(item.featureName);
+      }
+    });
+
+    window.omSync.writeSaas(s);
+    renderAll();
+  });
+
+  window.addEventListener("om:saas-synced", renderAll);
+  renderAll();
+})();
+</script>
 </body>
 </html>

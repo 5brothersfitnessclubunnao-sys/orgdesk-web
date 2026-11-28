@@ -291,6 +291,7 @@
       <button type="button" class="big-btn" style="margin-top:0" data-open-modal="modNewStaff">+ Staff Joining</button>
       <button type="button" class="big-btn sec" style="margin-top:0" data-open-modal="modSalarySlip">Salary Slip</button>
       <button type="button" class="big-btn" style="margin-top:0;background:linear-gradient(135deg,#ffd166,#f5a623);color:#050814" id="btnUpgradePlanP4">⬆ Upgrade Plan</button>
+      <button type="button" class="big-btn sec" style="margin-top:0" id="btnPage4SwitchMode">⇄ Switch to Light Mode</button>
     </div>
     <div class="card-box" style="border-color:rgba(245,166,35,0.45);margin-bottom:12px">
       <b style="color:var(--gold);font-size:13px">Subscription / Plan</b>
@@ -890,7 +891,27 @@
         if (det.erpDeskData && typeof det.erpDeskData === "object") {
           memStore = det.erpDeskData;
           try { localStorage.setItem(STORE_KEY, JSON.stringify(det.erpDeskData)); } catch (e) {}
-          renderPage1();
+          
+      (function () {
+        var p4Sw = document.getElementById("btnPage4SwitchMode");
+        function syncP4Btn() {
+          if (!p4Sw) return;
+          var m = (window.omSync && window.omSync.getLockedMode) ? window.omSync.getLockedMode() : "full";
+          p4Sw.textContent = (m === "full") ? "⇄ Switch to Light Mode" : "⇄ Switch to Commercial";
+        }
+        if (p4Sw) {
+          p4Sw.addEventListener("click", function () {
+            var cur = (window.omSync && window.omSync.getLockedMode) ? window.omSync.getLockedMode() : "full";
+            var next = (cur === "full") ? "light" : "full";
+            if (window.omSync && window.omSync.setLockedMode) window.omSync.setLockedMode(next, true);
+            syncP4Btn();
+          });
+        }
+        window.addEventListener("om:mode-changed", syncP4Btn);
+        syncP4Btn();
+      })();
+
+      renderPage1();
         }
       });
 

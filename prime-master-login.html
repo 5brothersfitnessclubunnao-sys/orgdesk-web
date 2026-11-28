@@ -1,139 +1,48 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Om Software — Developer Multi-Factor Authentication</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #030712;
-      --card: #0b1224;
-      --border: rgba(245, 158, 11, 0.45);
-      --gold: #f59e0b;
-      --gold-bright: #fbbf24;
-      --cyan: #38bdf8;
-      --emerald: #10b981;
-      --rose: #f43f5e;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --mono: 'JetBrains Mono', monospace;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body {
-      background: radial-gradient(800px 420px at 50% 0%, rgba(245, 158, 11, 0.12), transparent 70%), var(--bg);
-      color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px;
-    }
-    .box {
-      width: 100%; max-width: 440px; background: var(--card); border: 1.5px solid var(--border);
-      border-radius: 20px; padding: 24px; box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 20px rgba(245, 158, 11, 0.15);
-    }
-    .badge {
-      display: inline-block; background: rgba(245, 158, 11, 0.14); color: var(--gold-bright);
-      border: 1px solid var(--border); font-size: 10.5px; font-weight: 900; padding: 4px 11px;
-      border-radius: 999px; font-family: var(--mono); letter-spacing: 0.5px;
-    }
-    h1 { font-size: 20px; font-weight: 900; color: #fff; margin: 10px 0 4px; }
-    p { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
-
-    .fg { margin-bottom: 12px; }
-    label { display: block; font-size: 11.5px; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
-    .fc {
-      width: 100%; background: #070d1d; border: 1.5px solid #233454; color: #fff;
-      border-radius: 10px; padding: 11px 12px; font-size: 13px; outline: none; transition: 0.2s;
-    }
-    .fc:focus { border-color: var(--cyan); box-shadow: 0 0 12px rgba(56, 189, 248, 0.2); }
-    .mpin-inp {
-      letter-spacing: 8px; font-size: 20px; text-align: center; color: var(--gold-bright); font-family: var(--mono); font-weight: 900;
-    }
-
-    .btn {
-      width: 100%; background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-      color: #020617; border: none; padding: 13px; border-radius: 11px; font-size: 13.5px;
-      font-weight: 900; cursor: pointer; margin-top: 10px; transition: 0.2s;
-    }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3); }
-
-    .err { color: var(--rose); font-size: 11.5px; font-weight: 700; margin-top: 8px; min-height: 16px; text-align: center; }
-    .security-note {
-      background: #070f22; border: 1px solid #1c2b48; border-radius: 9px; padding: 8px 10px;
-      font-size: 10.5px; color: var(--cyan); line-height: 1.45; margin-top: 14px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Developer Access — Om Software</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{min-height:100vh;background:#050814;color:#f8fafc;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{width:100%;max-width:420px;background:#0b1226;border:1.5px solid #26365e;border-radius:18px;padding:22px 18px}
+h1{font-size:19px;font-weight:900;color:#ffd166;margin-bottom:6px;text-align:center}
+p{font-size:12px;color:#94a3b8;text-align:center;margin-bottom:14px}
+.fg{margin-bottom:12px}
+label{display:block;font-size:11.5px;color:#cbd5e1;font-weight:700;margin-bottom:4px}
+input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:13px;outline:none}
+.btn{width:100%;padding:12px;border-radius:11px;border:none;background:linear-gradient(135deg,#ffd166,#f5a623);color:#050814;font-size:13.5px;font-weight:900;cursor:pointer}
+.err{display:none;margin-top:10px;padding:9px;border-radius:10px;background:rgba(239,68,68,.15);border:1px solid #ef4444;color:#fca5a5;font-size:12px;font-weight:700}
+</style>
 </head>
 <body>
-  <div class="box">
-    <div style="text-align:center;margin-bottom:8px">
-      <span class="badge">SECURE DEVELOPER ACCESS</span>
-      <h1>Multi-Factor Developer Gate</h1>
-      <p>Sirf App Developer ke liye. 4-Digit MPIN + Registered Email + Security Question verify hone ke baad hi developer console open hoga.</p>
+<div class="card">
+  <h1>DEVELOPER PORTAL</h1>
+  <p>Enter Developer Password to Open Console</p>
+  <form id="devForm">
+    <div class="fg">
+      <label>Developer Password *</label>
+      <input type="password" id="devPass" required placeholder="Enter developer password">
     </div>
-
-    <form onsubmit="handleMfaDeveloperLogin(event)">
-      <div class="fg">
-        <label>1. Developer 4-Digit MPIN *</label>
-        <input type="password" id="mfaMpin" class="fc mpin-inp" maxlength="4" inputmode="numeric" placeholder="••••" required autofocus>
-      </div>
-
-      <div class="fg">
-        <label>2. Registered Developer Email *</label>
-        <input type="email" id="mfaEmail" class="fc" placeholder="developer@omsoftware.com" required>
-      </div>
-
-      <div class="fg">
-        <label>3. Secret Security Question: Primary Root Passcode *</label>
-        <input type="password" id="mfaSecurityAnswer" class="fc" placeholder="Enter root passcode" required>
-      </div>
-
-      <div id="mfaErr" class="err"></div>
-
-      <button type="submit" class="btn">Verify Credentials &amp; Unlock Console →</button>
-    </form>
-
-    <div class="security-note">
-      🔒 <b>Protected Gate:</b> Har unauthorized attempt log hoti hai. Galat passcodes par account lock aur alert dispatch ho jata hai.
-    </div>
-  </div>
-
-  <script>
-    // Developer Secret Credentials
-    const DEV_MPIN = "1234";
-    const DEV_ROOT_PASS = "OMDEV2026";
-
-    function handleMfaDeveloperLogin(ev) {
-      ev.preventDefault();
-      const mpin = (document.getElementById("mfaMpin").value || "").trim();
-      const email = (document.getElementById("mfaEmail").value || "").trim().toLowerCase();
-      const secAns = (document.getElementById("mfaSecurityAnswer").value || "").trim();
-      const err = document.getElementById("mfaErr");
-
-      if (mpin !== DEV_MPIN) {
-        err.textContent = "❌ Galat 4-Digit MPIN! Access denied.";
-        return;
-      }
-      if (!email.includes("@")) {
-        err.textContent = "❌ Kripya valid registered email darj karein.";
-        return;
-      }
-      if (secAns !== DEV_ROOT_PASS) {
-        err.textContent = "❌ Galat Security Passcode! Admin approval check failed.";
-        return;
-      }
-
-      err.textContent = "";
-      try {
-        localStorage.setItem("om_prime_master_auth", "1");
-        localStorage.setItem("om_is_master_admin", "1");
-        localStorage.setItem("om_dev_master_access", "1");
-        localStorage.setItem("om_developer_email", email);
-        localStorage.setItem("om_logged_user", "Prime Master Developer (" + email + ")");
-      } catch (e) {}
-
-      alert("✔ Developer Credentials & Multi-Factor Auth Verified Successfully!");
-      location.replace("developer-saas-admin.html");
+    <button type="submit" class="btn">Unlock Developer Console</button>
+    <div class="err" id="devErr">Invalid password. Please enter 8336.</div>
+  </form>
+</div>
+<script>
+(function () {
+  document.getElementById("devForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var p = document.getElementById("devPass").value.trim();
+    if (p === "8336") {
+      try { sessionStorage.setItem("om_dev_authed_8336", "1"); } catch (e) {}
+      location.href = "developer-saas-admin.html";
+    } else {
+      document.getElementById("devErr").style.display = "block";
     }
-  </script>
+  });
+})();
+</script>
 </body>
 </html>

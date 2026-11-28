@@ -3,210 +3,179 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Upgrade Plan — Payment Gateway</title>
+<title>Plans, UTR &amp; Extra Features — Om Software</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="realtime-sync.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-body{min-height:100vh;background:#050814;color:#f8fafc;padding:16px}
-.wrap{max-width:520px;margin:0 auto}
-h1{color:#ffd166;font-size:20px;font-weight:900;margin-bottom:6px;text-align:center}
-.sub{color:#94a3b8;font-size:12px;text-align:center;margin-bottom:16px}
+body{min-height:100vh;background:#050814;color:#f8fafc;padding:14px;padding-bottom:60px}
+.wrap{max-width:640px;margin:0 auto}
+header{background:#0b1226;border:1.5px solid #f5a623;border-radius:16px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+h1{font-size:17px;color:#ffd166;font-weight:900}
+.btn{padding:7px 11px;border-radius:9px;border:none;background:#f5a623;color:#050814;font-size:11.5px;font-weight:900;cursor:pointer;text-decoration:none}
+.btn.sec{background:#111b33;color:#38bdf8;border:1px solid #2c3e6b}
+.btn.cyan{background:#22d3ee;color:#050814}
 .card{background:#0b1226;border:1.5px solid #26365e;border-radius:14px;padding:14px;margin-bottom:12px}
-.card.hl{border-color:#f5a623}
-.card.sel{border-color:#22d3ee;box-shadow:0 0 0 1px #22d3ee}
-.card h3{color:#ffd166;font-size:15px;margin-bottom:4px}
-.price{font-size:22px;font-weight:900;color:#22d3ee;margin:6px 0}
-.feat{font-size:12px;color:#cbd5e1;line-height:1.5;margin-bottom:10px}
-.btn{width:100%;padding:11px;border:none;border-radius:10px;font-weight:900;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#ffd166,#f5a623);color:#050814}
-.btn.sec{background:#132142;color:#22d3ee;border:1px solid #2a3f70}
-.btn.ok{background:#059669;color:#fff}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-.back{display:inline-block;margin-bottom:12px;color:#38bdf8;font-weight:800;text-decoration:none;font-size:13px}
-.hidden{display:none!important}
-.pay-box{background:#071018;border:1.5px solid #22d3ee;border-radius:14px;padding:14px;margin-top:8px}
-.pay-box h2{color:#22d3ee;font-size:16px;margin-bottom:8px}
-.fg{margin-bottom:10px}
-.fg label{display:block;font-size:11px;color:#94a3b8;font-weight:700;margin-bottom:3px}
-.fc{width:100%;padding:10px;border-radius:9px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:13px}
+.card h2{font-size:14px;color:#ffd166;margin-bottom:10px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.qr-box{text-align:center;padding:12px;background:#0a1520;border-radius:12px;margin:10px 0;border:1px dashed #22d3ee}
-.qr-box img{width:180px;height:180px;background:#fff;border-radius:8px;padding:6px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#065f46;color:#ecfdf5;border:1px solid #34d399;padding:12px 18px;border-radius:12px;font-weight:800;font-size:13px;z-index:9999;display:none}
-.toast.show{display:block}
-.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px}
-.tab{padding:8px;border-radius:8px;border:1px solid #334155;background:#0e172f;color:#cbd5e1;font-size:11px;font-weight:800;cursor:pointer;text-align:center}
-.tab.on{background:#22d3ee;color:#000;border-color:#22d3ee}
+.fg{margin-bottom:8px}
+label{display:block;font-size:11px;color:#cbd5e1;font-weight:700;margin-bottom:3px}
+input,select{width:100%;padding:9px 10px;border-radius:8px;border:1px solid #2c3e6b;background:#070c1a;color:#fff;font-size:12.5px}
+.feat-item{display:flex;justify-content:space-between;align-items:center;background:#070c1a;border:1px solid #1e2d52;border-radius:9px;padding:9px 10px;margin-top:6px;font-size:12px}
+.status-box{margin-top:10px;padding:10px;border-radius:10px;background:#070c1a;border:1px solid #22d3ee;font-size:12px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="app.html">← Back to Dashboard</a>
-  <h1>⬆ Upgrade Plan</h1>
-  <p class="sub">Plan choose karein → Payment gateway par pay karein → Plan active</p>
+  <header>
+    <div>
+      <h1>PLANS &amp; UPGRADE</h1>
+      <p style="font-size:11px;color:#94a3b8">UTR Verification, Licence Key &amp; Extra Features (₹10–₹80)</p>
+    </div>
+    <div style="display:flex;gap:6px">
+      <a href="app.html" class="btn sec">Back to App</a>
+      <button type="button" class="btn cyan" id="btnOpenExtraWindow">Extra Features Window</button>
+    </div>
+  </header>
 
-  <div id="planList">
-    <div class="card" data-plan="Starter" data-price="99">
-      <h3>Starter</h3>
-      <div class="price">₹99 / month</div>
-      <div class="feat">Light Mode · Single branch · &lt;100 staff · Admission + Fees + Staff attendance</div>
-      <button type="button" class="btn" onclick="selectPlan('Starter',99)">Select &amp; Pay ₹99</button>
+  <div class="card">
+    <h2>Submit Plan Payment (UTR / Screenshot)</h2>
+    <div class="row2">
+      <div class="fg"><label>Gym / Business Name *</label><input id="plGym" placeholder="Your Gym Name"></div>
+      <div class="fg"><label>City *</label><input id="plCity" placeholder="Your City"></div>
     </div>
-    <div class="card hl" data-plan="Growth" data-price="299">
-      <h3>Growth ★ Popular</h3>
-      <div class="price">₹299 / month</div>
-      <div class="feat">QR attendance · Payroll · Expense approval · Excel / PDF</div>
-      <button type="button" class="btn" onclick="selectPlan('Growth',299)">Select &amp; Pay ₹299</button>
-    </div>
-    <div class="card" data-plan="Business" data-price="599">
-      <h3>Business</h3>
-      <div class="price">₹599 / month</div>
-      <div class="feat">Multi-branch · Manager roles · Full App Mode · Cloud sync</div>
-      <button type="button" class="btn" onclick="selectPlan('Business',599)">Select &amp; Pay ₹599</button>
-    </div>
-    <div class="card" data-plan="Enterprise" data-price="999">
-      <h3>Enterprise</h3>
-      <div class="price">₹999 / month</div>
-      <div class="feat">Unlimited staff · Priority support · Custom branding</div>
-      <button type="button" class="btn" onclick="selectPlan('Enterprise',999)">Select &amp; Pay ₹999</button>
-    </div>
-  </div>
-
-  <!-- PAYMENT GATEWAY (stays on page — no auto redirect) -->
-  <div id="payGateway" class="pay-box hidden">
-    <h2>💳 Secure Payment Gateway</h2>
-    <div style="font-size:13px;margin-bottom:10px">
-      Selected: <b id="payPlanName" style="color:#ffd166">—</b> · Amount: <b id="payAmount" style="color:#00ff66">₹0</b>
-    </div>
-
-    <div class="tabs">
-      <button type="button" class="tab on" id="tabUpi" onclick="setPayTab('upi')">UPI / QR</button>
-      <button type="button" class="tab" id="tabCard" onclick="setPayTab('card')">Card</button>
-      <button type="button" class="tab" id="tabNet" onclick="setPayTab('net')">Net Banking</button>
-    </div>
-
-    <div id="panelUpi">
-      <div class="qr-box">
-        <div style="font-size:11px;color:#94a3b8;margin-bottom:6px">Scan UPI QR / pay to merchant</div>
-        <img id="upiQrImg" alt="UPI QR" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi%3A%2F%2Fpay%3Fpa%3Domsoftware%40upi%26pn%3DOm%20Software%20ERP%26am%3D99%26cu%3DINR">
-        <div style="font-size:12px;margin-top:8px;color:#22d3ee;font-weight:800">omsoftware@upi</div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:4px">Amount: <span id="upiAmtLabel">₹99</span></div>
-      </div>
-      <div class="fg">
-        <label>UTR / Transaction ID (payment ke baad)</label>
-        <input class="fc" id="upiUtr" placeholder="e.g. 123456789012">
-      </div>
-      <button type="button" class="btn ok" onclick="confirmPayment('UPI')">✔ I Have Paid — Confirm</button>
-    </div>
-
-    <div id="panelCard" class="hidden">
-      <div class="fg"><label>Card Number</label><input class="fc" id="cardNo" maxlength="19" placeholder="XXXX XXXX XXXX XXXX"></div>
-      <div class="row2">
-        <div class="fg"><label>Expiry</label><input class="fc" id="cardExp" placeholder="MM/YY"></div>
-        <div class="fg"><label>CVV</label><input class="fc" id="cardCvv" maxlength="4" placeholder="***" type="password"></div>
-      </div>
-      <div class="fg"><label>Name on Card</label><input class="fc" id="cardName" placeholder="Full name"></div>
-      <button type="button" class="btn ok" onclick="confirmPayment('Card')">Pay Now</button>
-    </div>
-
-    <div id="panelNet" class="hidden">
-      <div class="fg">
-        <label>Select Bank</label>
-        <select class="fc" id="netBank">
-          <option>SBI</option><option>HDFC</option><option>ICICI</option><option>Axis</option><option>PNB</option><option>Other</option>
+    <div class="row2">
+      <div class="fg"><label>Owner Email ID *</label><input type="email" id="plEmail" placeholder="owner@gym.com"></div>
+      <div class="fg"><label>Select Plan *</label>
+        <select id="plSelect">
+          <option value="Starter (₹99)|99|30">Starter Plan — ₹99 (30 Days)</option>
+          <option value="Growth (₹299)|299|30">Growth Plan — ₹299 (30 Days)</option>
+          <option value="Commercial Pro (₹999)|999|365">Commercial Pro — ₹999 (365 Days)</option>
         </select>
       </div>
-      <button type="button" class="btn ok" onclick="confirmPayment('NetBanking')">Continue to Bank</button>
     </div>
-
-    <button type="button" class="btn sec" style="margin-top:10px" onclick="cancelPay()">← Change Plan</button>
+    <div class="row2">
+      <div class="fg"><label>UTR Number *</label><input id="plUtr" placeholder="12-digit UTR / Ref No"></div>
+      <div class="fg"><label>Upload UTR Payment Photo</label><input type="file" id="plUtrPhoto" accept="image/*"></div>
+    </div>
+    <button type="button" class="btn" id="btnSubmitUtrReq">Send Payment Request to Developer</button>
+    <div class="status-box" id="planActivationStatus">Awaiting request or developer approval.</div>
   </div>
 
-  <div id="paySuccess" class="pay-box hidden" style="border-color:#00ff66;text-align:center">
-    <div style="font-size:42px;margin-bottom:8px">✅</div>
-    <h2 style="color:#00ff66">Successfully Done ✅</h2>
-    <p style="font-size:13px;color:#cbd5e1;margin:8px 0 14px" id="successDetail">Payment received. Plan activated.</p>
-    <button type="button" class="btn" onclick="location.href='app.html'">Go to Dashboard</button>
-    <button type="button" class="btn sec" style="margin-top:8px" onclick="location.reload()">Pay Another Plan</button>
+  <!-- Dedicated Extra Feature Selection Window (₹10 to ₹80) -->
+  <div class="card" id="extraFeatureWindow">
+    <h2>Extra Features Selection (₹10 – ₹80)</h2>
+    <div class="fg"><label>Your Email / Gym Name *</label><input id="efCustId" placeholder="owner@gym.com or Gym Name"></div>
+    <div id="extraFeaturesCatalog">
+      <label class="feat-item"><span><input type="checkbox" class="ef-chk" data-name="WhatsApp Fee Reminder" data-price="15"> WhatsApp Fee Reminder</span><b>₹15</b></label>
+      <label class="feat-item"><span><input type="checkbox" class="ef-chk" data-name="PDF Receipt Branding" data-price="25"> PDF Receipt Branding</span><b>₹25</b></label>
+      <label class="feat-item"><span><input type="checkbox" class="ef-chk" data-name="Multi-Staff Role Filter" data-price="45"> Multi-Staff Role Filter</span><b>₹45</b></label>
+      <label class="feat-item"><span><input type="checkbox" class="ef-chk" data-name="Advance Analytics &amp; Export Pack" data-price="80"> Advance Analytics &amp; Export Pack</span><b>₹80</b></label>
+    </div>
+    <div style="margin-top:8px;font-size:12.5px;font-weight:800;color:#ffd166">Selected Extra Total: <span id="efSelectedSum">₹0</span></div>
+    <button type="button" class="btn cyan" style="margin-top:8px" id="btnSendExtraFeatReq">Send Extra Feature Request</button>
+    <div class="status-box" id="efStatusBox">Select features (₹10–₹80) to request approval.</div>
   </div>
 </div>
-<div class="toast" id="toast"></div>
+
 <script>
-var selected = { name: "", price: 0 };
+(function () {
+  function calcEfSum() {
+    var sum = 0;
+    document.querySelectorAll(".ef-chk:checked").forEach(function (c) {
+      var p = Math.min(80, Math.max(10, Number(c.getAttribute("data-price") || 0)));
+      sum += p;
+    });
+    document.getElementById("efSelectedSum").textContent = "₹" + sum;
+    return sum;
+  }
 
-function showToast(msg) {
-  var t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(function(){ t.classList.remove("show"); }, 2200);
-}
-
-function selectPlan(name, price) {
-  selected = { name: name, price: price };
-  document.querySelectorAll(".card").forEach(function(c) {
-    c.classList.toggle("sel", c.getAttribute("data-plan") === name);
+  document.querySelectorAll(".ef-chk").forEach(function (c) {
+    c.addEventListener("change", calcEfSum);
   });
-  document.getElementById("planList").classList.add("hidden");
-  document.getElementById("payGateway").classList.remove("hidden");
-  document.getElementById("paySuccess").classList.add("hidden");
-  document.getElementById("payPlanName").textContent = name;
-  document.getElementById("payAmount").textContent = "₹" + price;
-  document.getElementById("upiAmtLabel").textContent = "₹" + price;
-  var upiData = "upi://pay?pa=omsoftware@upi&pn=Om%20Software%20ERP&am=" + price + "&cu=INR&tn=" + encodeURIComponent(name + " Plan");
-  document.getElementById("upiQrImg").src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(upiData);
-  setPayTab("upi");
-  window.scrollTo(0, 0);
-}
 
-function cancelPay() {
-  document.getElementById("payGateway").classList.add("hidden");
-  document.getElementById("planList").classList.remove("hidden");
-  document.getElementById("paySuccess").classList.add("hidden");
-}
+  document.getElementById("btnOpenExtraWindow").addEventListener("click", function () {
+    document.getElementById("extraFeatureWindow").scrollIntoView({ behavior: "smooth" });
+  });
 
-function setPayTab(tab) {
-  document.getElementById("tabUpi").classList.toggle("on", tab === "upi");
-  document.getElementById("tabCard").classList.toggle("on", tab === "card");
-  document.getElementById("tabNet").classList.toggle("on", tab === "net");
-  document.getElementById("panelUpi").classList.toggle("hidden", tab !== "upi");
-  document.getElementById("panelCard").classList.toggle("hidden", tab !== "card");
-  document.getElementById("panelNet").classList.toggle("hidden", tab !== "net");
-}
+  document.getElementById("btnSubmitUtrReq").addEventListener("click", function () {
+    var gym = document.getElementById("plGym").value.trim() || "Gym Workspace";
+    var city = document.getElementById("plCity").value.trim() || "General";
+    var email = document.getElementById("plEmail").value.trim().toLowerCase() || "owner@gym.com";
+    var parts = String(document.getElementById("plSelect").value || "Starter (₹99)|99|30").split("|");
+    var plan = parts[0], amt = Number(parts[1] || 99), days = Number(parts[2] || 30);
+    var utr = document.getElementById("plUtr").value.trim();
+    var file = document.getElementById("plUtrPhoto").files && document.getElementById("plUtrPhoto").files[0];
 
-function confirmPayment(mode) {
-  if (!selected.name) return;
-  if (mode === "UPI") {
-    var utr = (document.getElementById("upiUtr").value || "").trim();
-    if (utr && utr.length < 6) {
-      showToast("Valid UTR darj karein (optional but recommended)");
-      return;
+    if (!utr && !file) return alert("UTR Number ya UTR ki photo upload karein.");
+
+    var s = window.omSync.readSaas();
+    s.pendingRequests.unshift({
+      gymName: gym,
+      city: city,
+      email: email,
+      plan: plan,
+      amount: amt,
+      days: days,
+      utr: utr || "Photo Uploaded",
+      utrProofName: file ? file.name : ""
+    });
+    window.omSync.writeSaas(s);
+    document.getElementById("planActivationStatus").innerHTML =
+      "Request sent to Developer for <b>" + plan + "</b> (UTR: <b>" + (utr || file.name) + "</b>). Once accepted, your plan activation message, Licence Key, and validity dates will appear here.";
+  });
+
+  document.getElementById("btnSendExtraFeatReq").addEventListener("click", function () {
+    var ref = document.getElementById("efCustId").value.trim().toLowerCase() || "owner@gym.com";
+    var chosen = [];
+    document.querySelectorAll(".ef-chk:checked").forEach(function (c) {
+      chosen.push({
+        name: c.getAttribute("data-name"),
+        price: Math.min(80, Math.max(10, Number(c.getAttribute("data-price") || 10)))
+      });
+    });
+    if (!chosen.length) return alert("Kam se kam ek extra feature chunein.");
+
+    var s = window.omSync.readSaas();
+    chosen.forEach(function (ch) {
+      s.extraFeatureRequests.unshift({
+        customerRef: ref,
+        featureName: ch.name,
+        price: ch.price,
+        status: "Pending"
+      });
+    });
+    window.omSync.writeSaas(s);
+    renderCustomerSaasStatus(ref);
+  });
+
+  function renderCustomerSaasStatus(matchRef) {
+    var s = window.omSync.readSaas();
+    var ref = (matchRef || document.getElementById("efCustId").value || "").trim().toLowerCase();
+    var cust = (s.customers || []).find(function (c) {
+      return !ref || String(c.email || "").toLowerCase() === ref || String(c.gymName || "").toLowerCase() === ref;
+    });
+    if (cust) {
+      document.getElementById("planActivationStatus").innerHTML =
+        "<b style='color:#34d399'>Your plan has been activated</b><br>" +
+        "Plan: <b>" + cust.plan + "</b> • Licence Key: <b>" + cust.licenceKey + "</b><br>" +
+        "Validity: <b>" + cust.startDate + "</b> to <b>" + cust.endDate + "</b><br>" +
+        "Active Services: " + (cust.features || []).join(", ");
+    }
+    var due = Number((s.udharDueByCustomer || {})[ref] || 0);
+    var myReqs = (s.extraFeatureRequests || []).filter(function (r) { return !ref || String(r.customerRef || "").toLowerCase() === ref; });
+    if (myReqs.length || due > 0) {
+      document.getElementById("efStatusBox").innerHTML =
+        "Extra Requests: " + myReqs.map(function (r) { return r.featureName + " (₹" + r.price + " - " + r.status + ")"; }).join(", ") +
+        "<br><b style='color:#fca5a5'>Pending / Udhar Amount to Pay: ₹" + due.toLocaleString("en-IN") + "</b>";
     }
   }
-  if (mode === "Card") {
-    var no = (document.getElementById("cardNo").value || "").replace(/\s/g, "");
-    if (no.length < 12) { showToast("Card number sahi nahi"); return; }
-  }
-  var rec = {
-    name: selected.name,
-    price: selected.price,
-    mode: mode,
-    at: new Date().toISOString(),
-    utr: (document.getElementById("upiUtr") || {}).value || "",
-    status: "Paid"
-  };
-  try {
-    localStorage.setItem("om_selected_plan", JSON.stringify(rec));
-    localStorage.setItem("om_plan_active", JSON.stringify(rec));
-    var exp = new Date();
-    exp.setMonth(exp.getMonth() + 1);
-    localStorage.setItem("om_plan_expiry", exp.toISOString().slice(0, 10));
-    localStorage.setItem("infoPlanName", selected.name);
-  } catch (e) {}
-  document.getElementById("payGateway").classList.add("hidden");
-  document.getElementById("planList").classList.add("hidden");
-  document.getElementById("paySuccess").classList.remove("hidden");
-  document.getElementById("successDetail").textContent =
-    selected.name + " plan · ₹" + selected.price + " · " + mode + " — Successfully Done ✅. Dashboard par jaakar plan status dekh sakte ho.";
-  showToast("Successfully Done ✅");
-}
+
+  window.addEventListener("om:saas-synced", function () { renderCustomerSaasStatus(); });
+  renderCustomerSaasStatus();
+})();
 </script>
 </body>
 </html>
